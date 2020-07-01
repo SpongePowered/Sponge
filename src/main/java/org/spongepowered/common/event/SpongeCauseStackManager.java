@@ -36,8 +36,8 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
@@ -72,14 +72,14 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         try {
             initialPoolSize = Integer.parseInt(System.getProperty(INITIAL_POOL_SIZE_PROPERTY, "50"));
         } catch (NumberFormatException ex) {
-            SpongeImpl.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 50.",
+            SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 50.",
                     INITIAL_POOL_SIZE_PROPERTY,
                     System.getProperty(INITIAL_POOL_SIZE_PROPERTY));
         }
         try {
             maxPoolSize = Integer.parseInt(System.getProperty(MAX_POOL_SIZE_PROPERTY, "100"));
         } catch (NumberFormatException ex) {
-            SpongeImpl.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 100.",
+            SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 100.",
                     MAX_POOL_SIZE_PROPERTY,
                     System.getProperty(MAX_POOL_SIZE_PROPERTY));
         }
@@ -121,7 +121,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             throw new IllegalStateException(String.format(
                     "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                     ThreadUtil.getDescription(Thread.currentThread()),
-                    ThreadUtil.getDescription(((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getServerThread())
+                    ThreadUtil.getDescription(((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$getServerThread())
             ));
         }
         this.checkProviders();
@@ -136,7 +136,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         this.enforceMainThread();
         if (this.cached_cause == null || this.cached_ctx == null) {
             if (this.cause.isEmpty()) {
-                this.cached_cause = Cause.of(this.getCurrentContext(), SpongeImpl.getGame());
+                this.cached_cause = Cause.of(this.getCurrentContext(), SpongeCommon.getGame());
             } else {
                 this.cached_cause = Cause.of(this.getCurrentContext(), this.cause);
             }
@@ -301,7 +301,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             if (!DEBUG_CAUSE_FRAMES) {
                 printer.add()
                     .add("Please add -Dsponge.debugcauseframes=true to your startup flags to enable further debugging output.");
-                SpongeImpl.getLogger().warn("  Add -Dsponge.debugcauseframes to your startup flags to enable further debugging output.");
+                SpongeCommon.getLogger().warn("  Add -Dsponge.debugcauseframes to your startup flags to enable further debugging output.");
             } else {
                 printer.add()
                     .add("Attempting to pop frame:")
@@ -320,7 +320,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
                 this.popCauseFrame(f);
                 offset--;
             }
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+            printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
             if (offset == -1) {
                 // Popping a frame that was not on the stack is not recoverable
                 // so we throw an exception.

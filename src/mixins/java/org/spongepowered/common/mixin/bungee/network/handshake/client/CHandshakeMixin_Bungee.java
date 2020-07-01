@@ -29,7 +29,7 @@ import net.minecraft.network.handshake.client.CHandshakePacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 @Mixin(CHandshakePacket.class)
 public abstract class CHandshakeMixin_Bungee {
@@ -37,8 +37,8 @@ public abstract class CHandshakeMixin_Bungee {
     @Redirect(method = "readPacketData",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;readString(I)Ljava/lang/String;"))
     private String bungee$patchReadStringForPortForwarding(final PacketBuffer buf, final int value) {
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().usePluginBungeeCord()
-                || !SpongeImpl.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding()) {
+        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginBungeeCord()
+                || !SpongeCommon.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding()) {
             return buf.readString(255);
         }
         return buf.readString(Short.MAX_VALUE);

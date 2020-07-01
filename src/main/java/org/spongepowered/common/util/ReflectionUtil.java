@@ -27,7 +27,7 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -73,7 +73,7 @@ public final class ReflectionUtil {
         try {
             return ctor.newInstance(args);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            SpongeImpl.getLogger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
+            SpongeCommon.getLogger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
                                          + "with the args: " + Arrays.toString(args), e);
         }
         throw new IllegalArgumentException("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()

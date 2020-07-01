@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class AdvancementManagerMixin_Vanilla {
             "Lnet/minecraft/advancements/AdvancementList;loadAdvancements(Ljava/util/Map;)V"))
     private void vanilla$LoadUpAdvancements(AdvancementList advancementList,
             Map<ResourceLocation, Advancement.Builder> advancements) {
-        if (!SpongeImpl.isInitialized()) {
+        if (!SpongeCommon.isInitialized()) {
             return;
         }
         for (PluginContainer pluginContainer : Sponge.getPluginManager().getPlugins()) {
@@ -78,7 +78,7 @@ public class AdvancementManagerMixin_Vanilla {
                         final FileSystem fileSystem = FileSystems.newFileSystem(source, null);
                         root = fileSystem.getPath("/" + base);
                     } catch (IOException e) {
-                        SpongeImpl.getLogger().error("Error loading FileSystem from jar: ", e);
+                        SpongeCommon.getLogger().error("Error loading FileSystem from jar: ", e);
                         continue;
                     }
                 }
@@ -101,13 +101,13 @@ public class AdvancementManagerMixin_Vanilla {
                                         JSONUtils.fromJson(GSON, reader, Advancement.Builder.class);
                                 advancements.put(resourceLocation, advancementBuilder);
                             } catch (IOException e) {
-                                SpongeImpl.getLogger().error("Failed to read advancement "
+                                SpongeCommon.getLogger().error("Failed to read advancement "
                                         + resourceLocation + " from path " + path, e);
                             }
                         }
                     });
                 } catch (IOException e) {
-                    SpongeImpl.getLogger().error("Failed to walk path: " + root, e);
+                    SpongeCommon.getLogger().error("Failed to walk path: " + root, e);
                 }
             }
         }

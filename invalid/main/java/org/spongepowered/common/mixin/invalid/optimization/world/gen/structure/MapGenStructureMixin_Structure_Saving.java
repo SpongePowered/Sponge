@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.category.StructureModCategory;
 import org.spongepowered.common.config.category.StructureSaveCategory;
@@ -59,7 +59,7 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void structureSaving$InitializeState(final CallbackInfo ci) {
-        final StructureSaveCategory structureSaveCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().getStructureSaveCategory();
+        final StructureSaveCategory structureSaveCategory = SpongeCommon.getGlobalConfigAdapter().getConfig().getOptimizations().getStructureSaveCategory();
         if (structureSaveCategory.isEnabled()) {
             final String modId = SpongeImplHooks.getModIdFromClass(this.getClass());
             final String structureName = this.getStructureName().toLowerCase(Locale.ENGLISH);
@@ -72,7 +72,7 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
                     if (preDefined != null) {
                         this.structureSaving$canSaveStructures = preDefined;
                     }
-                    SpongeImpl.getGlobalConfigAdapter().save();
+                    SpongeCommon.getGlobalConfigAdapter().save();
                 }
                 return;
             }
@@ -81,7 +81,7 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
                 if (structureSaveCategory.autoPopulateData()) {
                     structureMod.getStructureList().putIfAbsent(structureName, false);
                 }
-                SpongeImpl.getGlobalConfigAdapter().save();
+                SpongeCommon.getGlobalConfigAdapter().save();
                 return;
             }
             final Boolean canSave = structureMod.getStructureList().get(structureName);
@@ -89,7 +89,7 @@ public abstract class MapGenStructureMixin_Structure_Saving extends MapGenBase {
                 this.structureSaving$canSaveStructures = canSave;
             } else if (structureSaveCategory.autoPopulateData()) {
                 structureMod.getStructureList().put(structureName, true);
-                SpongeImpl.getGlobalConfigAdapter().save();
+                SpongeCommon.getGlobalConfigAdapter().save();
             }
         }
     }

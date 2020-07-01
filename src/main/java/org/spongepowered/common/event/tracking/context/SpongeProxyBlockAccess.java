@@ -38,7 +38,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -131,7 +131,7 @@ public final class SpongeProxyBlockAccess implements IBlockReader, AutoCloseable
             if (!SpongeProxyBlockAccess.DEBUG_PROXY) {
                 printer.add()
                     .add("Please add -Dsponge.debugProxyChanges=true to your startup flags to enable further debugging output.");
-                SpongeImpl.getLogger().warn("  Add -Dsponge.debugProxyChanges to your startup flags to enable further debugging output.");
+                SpongeCommon.getLogger().warn("  Add -Dsponge.debugProxyChanges to your startup flags to enable further debugging output.");
             } else {
                 printer.add()
                     .add("Attempting to pop proxy:")
@@ -149,7 +149,7 @@ public final class SpongeProxyBlockAccess implements IBlockReader, AutoCloseable
                 this.popProxy(f);
                 offset--;
             }
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+            printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
             if (offset == -1) {
                 // Popping a proxy that was not on the stack is not recoverable
                 // so we throw an exception.

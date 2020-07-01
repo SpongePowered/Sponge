@@ -22,28 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.plugin;
+package org.spongepowered.vanilla;
 
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.plugin.meta.PluginMetadata;
-import org.spongepowered.vanilla.launch.plugin.PluginSource;
+import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import org.spongepowered.api.Server;
+import org.spongepowered.common.SpongeGame;
+import org.spongepowered.common.util.LocaleCache;
 
-public final class MinecraftPluginContainer {
+import java.util.Locale;
 
-    private MinecraftPluginContainer() {
+@Singleton
+public final class VanillaGame extends SpongeGame {
+
+    private final Server server;
+
+    @Inject
+    public VanillaGame(Server server) {
+        this.server = server;
     }
 
-    public static void register() {
-        SpongeImpl.setMinecraftPlugin(create());
+    @Override
+    public boolean isServerAvailable() {
+        return true;
     }
 
-    private static PluginContainer create() {
-        MetadataContainer metadata = MetadataContainer.load("/net/minecraft");
-        PluginMetadata meta = metadata.get(SpongeImpl.GAME_ID, SpongeImpl.GAME_NAME);
-        meta.setVersion(SpongeImpl.MINECRAFT_VERSION.getName());
-        return new MetaPluginContainer(meta, PluginSource.find(MinecraftServer.class));
+    @Override
+    public Server getServer() {
+        return this.server;
     }
 
+    @Override
+    public Locale getLocale(String locale) {
+        return LocaleCache.getLocale(Preconditions.checkNotNull(locale));
+    }
 }

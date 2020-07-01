@@ -62,7 +62,7 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
@@ -72,7 +72,6 @@ import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +94,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     // you can access this data once per minute, lets cache for 2 minutes
     private static final LoadingCache<UUID, PropertyMap> PROPERTIES_CACHE = Caffeine.newBuilder()
             .expireAfterWrite(2, TimeUnit.MINUTES)
-            .build((uuid) -> SpongeImpl.getServer().getMinecraftSessionService()
+            .build((uuid) -> SpongeCommon.getServer().getMinecraftSessionService()
                     .fillProfileProperties(new GameProfile(uuid, ""), true)
                     .getProperties());
 
@@ -338,7 +337,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     public void removeFromTabListDelayed(@Nullable final ServerPlayerEntity player, final SPlayerListItemPacket removePacket) {
-        final int delay = SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getHumanPlayerListRemoveDelay();
+        final int delay = SpongeCommon.getGlobalConfigAdapter().getConfig().getEntity().getHumanPlayerListRemoveDelay();
         final Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
             removeTask.run();
@@ -346,13 +345,13 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
             Sponge.getServer().getScheduler().submit(Task.builder()
                     .execute(removeTask)
                     .delayTicks(delay)
-                    .plugin(SpongeImpl.getPlugin())
+                    .plugin(SpongeCommon.getPlugin())
                     .build());
         }
     }
 
     public boolean setSkinUuid(final UUID skin) {
-        if (!SpongeImpl.getServer().isServerInOnlineMode()) {
+        if (!SpongeCommon.getServer().isServerInOnlineMode()) {
             // Skins only work when online-mode = true
             return false;
         }

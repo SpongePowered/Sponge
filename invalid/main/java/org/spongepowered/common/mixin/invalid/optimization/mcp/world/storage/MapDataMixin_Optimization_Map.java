@@ -49,7 +49,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 import org.spongepowered.common.bridge.optimization.OptimizedMapInfoBridge;
@@ -200,7 +200,7 @@ public abstract class MapDataMixin_Optimization_Map extends WorldSavedData imple
             }
 
         } catch (final Exception e) {
-            SpongeImpl.getLogger().error("Exception ticking map data!", e);
+            SpongeCommon.getLogger().error("Exception ticking map data!", e);
         }
     }
 

@@ -76,7 +76,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -223,7 +223,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             playerinteractionmanager = new PlayerInteractionManager(this.shadow$getServer().getWorld(targetDimension));
         }
 
-        final ServerPlayerEntity newPlayer = new ServerPlayerEntity(SpongeImpl.getServer(), toWorld, player.getGameProfile(), playerinteractionmanager);
+        final ServerPlayerEntity newPlayer = new ServerPlayerEntity(SpongeCommon.getServer(), toWorld, player.getGameProfile(), playerinteractionmanager);
         ((EntityBridge) newPlayer).bridge$setLocationAndAngles(toTransform);
         ((ServerPlayerEntityBridge) player).bridge$setDelegateAfterRespawn(newPlayer);
 
@@ -259,7 +259,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         Sponge.getCauseStackManager().pushCause(newPlayer);
         final RespawnPlayerEvent event = SpongeEventFactory.createRespawnPlayerEvent(Sponge.getCauseStackManager().getCurrentCause(), (Player) player,
             (Player) newPlayer, fromTransform, toTransform,  (World) fromWorld, (World) toWorld, tempIsBedSpawn, !conqueredEnd);
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         ((EntityBridge) newPlayer).bridge$setLocationAndAngles(event.getToTransform());
         toLocation = ServerLocation.of(event.getToWorld(), event.getToTransform().getPosition());

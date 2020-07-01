@@ -53,7 +53,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.PlayerContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
@@ -547,7 +547,7 @@ public abstract class ContainerMixin implements TrackedContainerBridge, Inventor
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
-                SpongeImpl.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
+                SpongeCommon.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
             }
         }
     }

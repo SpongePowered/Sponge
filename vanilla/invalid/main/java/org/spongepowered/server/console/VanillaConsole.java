@@ -28,7 +28,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 public final class VanillaConsole extends SimpleTerminalConsole {
 
@@ -41,7 +41,7 @@ public final class VanillaConsole extends SimpleTerminalConsole {
     @Override
     protected LineReader buildReader(LineReaderBuilder builder) {
         return super.buildReader(builder
-                .appName(SpongeImpl.getPlugin().getName())
+                .appName(SpongeCommon.getPlugin().getName())
                 .completer(new ConsoleCommandCompleter(this.server)));
     }
 

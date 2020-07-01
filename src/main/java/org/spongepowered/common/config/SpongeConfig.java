@@ -32,12 +32,11 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.commented.SimpleCommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMapper;
-import ninja.leaping.configurate.objectmapping.ObjectMapper.BoundInstance;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import ninja.leaping.configurate.util.ConfigurationNodeWalker;
 import org.spongepowered.api.util.Functional;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.config.type.ConfigBase;
 import org.spongepowered.common.config.type.CustomDataConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
@@ -134,7 +133,7 @@ public class SpongeConfig<T extends ConfigBase> {
         try {
             this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
         } catch (Exception e) {
-            SpongeImpl.getLogger().error("Failed to initialize dummy configuration", e);
+            SpongeCommon.getLogger().error("Failed to initialize dummy configuration", e);
         }
     }
 
@@ -168,7 +167,7 @@ public class SpongeConfig<T extends ConfigBase> {
                 this.saveNow();
             }
         } catch (Exception e) {
-            SpongeImpl.getLogger().error("Failed to initialize configuration", e);
+            SpongeCommon.getLogger().error("Failed to initialize configuration", e);
         }
     }
 
@@ -180,7 +179,7 @@ public class SpongeConfig<T extends ConfigBase> {
         if (this.isDummy) {
             return;
         }
-        SpongeImpl.getConfigSaveManager().save(this);
+        SpongeCommon.getConfigSaveManager().save(this);
     }
 
     boolean saveNow() {
@@ -210,7 +209,7 @@ public class SpongeConfig<T extends ConfigBase> {
             }
             return true;
         } catch (IOException | ObjectMappingException e) {
-            SpongeImpl.getLogger().error("Failed to save configuration", e);
+            SpongeCommon.getLogger().error("Failed to save configuration", e);
             return false;
         }
     }
@@ -219,9 +218,9 @@ public class SpongeConfig<T extends ConfigBase> {
         if (this.isDummy) {
             return true;
         }
-        if (!SpongeImpl.getConfigSaveManager().flush(this)) {
+        if (!SpongeCommon.getConfigSaveManager().flush(this)) {
             // Can't reload
-            SpongeImpl.getLogger().error("Failed to load configuration due to error in flushing config");
+            SpongeCommon.getLogger().error("Failed to load configuration due to error in flushing config");
             return false;
         }
 
@@ -252,7 +251,7 @@ public class SpongeConfig<T extends ConfigBase> {
             this.populateInstance();
             return true;
         } catch (Exception e) {
-            SpongeImpl.getLogger().error("Failed to load configuration", e);
+            SpongeCommon.getLogger().error("Failed to load configuration", e);
             return false;
         }
     }

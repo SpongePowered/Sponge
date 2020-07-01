@@ -35,7 +35,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 
 import java.util.Random;
@@ -52,7 +52,7 @@ public abstract class ParrotEntityMixin extends AgeableEntityMixin {
             stack.setCount(stack.getCount() + 1);
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
-                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Parrot) this))) {
+                if (!SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Parrot) this))) {
                     stack.setCount(stack.getCount() - 1);
                     return random;
                 }

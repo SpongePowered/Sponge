@@ -36,8 +36,8 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -117,7 +117,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
                 printer.addWrapped(60, "%s : %s", "Items captured", items);
                 printer.add("Stacktrace:");
                 printer.add(new Exception("Stack trace"));
-                printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                printer.trace(System.err, SpongeCommon.getLogger(), Level.TRACE);
             });
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
@@ -147,7 +147,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
 
                         final DropItemEvent.Destruct destruct =
                             SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), itemEntities);
-                        SpongeImpl.postEvent(destruct);
+                        SpongeCommon.postEvent(destruct);
                         if (!destruct.isCancelled()) {
                             processSpawnedEntities(player, destruct);
                         }
@@ -169,7 +169,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
 
                     final DropItemEvent.Destruct destruct =
                         SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), items);
-                    SpongeImpl.postEvent(destruct);
+                    SpongeCommon.postEvent(destruct);
                     if (!destruct.isCancelled()) {
                         processSpawnedEntities(player, destruct);
                     }

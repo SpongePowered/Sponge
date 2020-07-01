@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.advancement.SpongeAndCriterion;
@@ -227,7 +227,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             criterionProgress.obtain();
             return true;
         }
-        final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
+        final Cause cause = SpongeCommon.getCauseStackManager().getCurrentCause();
         final Player player = ((PlayerAdvancementsBridge) this.impl$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();
@@ -253,7 +253,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             event = SpongeEventFactory.createCriterionEventGrant(
                     cause, this.bridge$getAdvancement(), criterion, player, Instant.now());
         }
-        if (SpongeImpl.postEvent(event)) {
+        if (SpongeCommon.postEvent(event)) {
             return false;
         }
         criterionProgress.obtain();
@@ -282,7 +282,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             criterionProgress.reset();
             return true;
         }
-        final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
+        final Cause cause = SpongeCommon.getCauseStackManager().getCurrentCause();
         final Player player = ((PlayerAdvancementsBridge) this.impl$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();
@@ -311,7 +311,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             event = SpongeEventFactory.createCriterionEventRevoke(
                     cause, ((org.spongepowered.api.advancement.AdvancementProgress) this).getAdvancement(), criterion, player);
         }
-        if (SpongeImpl.postEvent(event)) {
+        if (SpongeCommon.postEvent(event)) {
             return false;
         }
         criterionProgress.reset();

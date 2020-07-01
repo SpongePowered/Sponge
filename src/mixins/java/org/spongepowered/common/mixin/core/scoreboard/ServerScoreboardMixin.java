@@ -51,7 +51,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.scoreboard.ScorePlayerTeamAccessor;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
@@ -103,7 +103,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Overwrite
     public void setObjectiveInDisplaySlot(final int slot, @Nullable final ScoreObjective objective) {
         final Objective apiObjective = objective == null ? null : ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
-        final MappedRegistry<DisplaySlot, Integer> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(DisplaySlot.class);
+        final MappedRegistry<DisplaySlot, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(DisplaySlot.class);
         final DisplaySlot displaySlot = registry.getReverseMapping(slot);
         ((org.spongepowered.api.scoreboard.Scoreboard) this).updateDisplaySlot(apiObjective, displaySlot);
     }
@@ -133,7 +133,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             if (score.isPresent()) {
                 spongeObjective.removeScore(score.get());
             } else {
-                SpongeImpl.getLogger().warn("Objective " + objective + " did have have the score " + name);
+                SpongeCommon.getLogger().warn("Objective " + objective + " did have have the score " + name);
             }
         } else {
             final Text textName = SpongeTexts.fromLegacy(name);

@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.CatalogKeyBridge;
 import org.spongepowered.common.bridge.TimingBridge;
@@ -135,7 +135,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
             final ConstructEntityEvent.Pre
                     eventPre =
                     SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM.get(), position, (World<?>) worldIn);
-            SpongeImpl.postEvent(eventPre);
+            SpongeCommon.postEvent(eventPre);
             if (eventPre.isCancelled()) {
                 ci.cancel();
             }
@@ -208,7 +208,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @SuppressWarnings("ConstantConditions")
     @Override
     public void bridge$initializeTrackerState() {
-        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeImpl.getTrackerConfigAdapter();
+        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeCommon.getTrackerConfigAdapter();
         final BlockTrackerCategory blockTrackerCat = trackerConfigAdapter.getConfig().getBlockTracker();
         final ResourceLocation key = Registry.BLOCK.getKey((Block) (Object) this);
         final String modId = key.getNamespace();

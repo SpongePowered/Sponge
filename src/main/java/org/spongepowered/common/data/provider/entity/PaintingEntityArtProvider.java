@@ -33,7 +33,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.accessor.entity.item.HangingEntityAccessor;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
@@ -79,9 +79,9 @@ public class PaintingEntityArtProvider extends GenericMutableDataProvider<Painti
                 players.add(player);
             }
             for (final ServerPlayerEntity player : players) {
-                SpongeImpl.getServerScheduler().submit(Task.builder()
-                        .plugin(SpongeImpl.getPlugin())
-                        .delayTicks(SpongeImpl.getGlobalConfigAdapter().getConfig().getEntity().getPaintingRespawnDelay())
+                SpongeCommon.getServerScheduler().submit(Task.builder()
+                        .plugin(SpongeCommon.getPlugin())
+                        .delayTicks(SpongeCommon.getGlobalConfigAdapter().getConfig().getEntity().getPaintingRespawnDelay())
                         .execute(() -> {
                             final SSpawnPaintingPacket packet = new SSpawnPaintingPacket(entity);
                             player.connection.sendPacket(packet);

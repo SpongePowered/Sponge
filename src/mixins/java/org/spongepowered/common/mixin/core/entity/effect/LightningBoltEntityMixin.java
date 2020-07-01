@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -126,7 +126,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
                 for (final Entity e : strike.getEntities()) {
                     ((net.minecraft.entity.Entity) e).onStruckByLightning((LightningBoltEntity) (Object) this);
                 }
-                SpongeImpl.postEvent(SpongeEventFactory.createLightningEventPost(frame.getCurrentCause()));
+                SpongeCommon.postEvent(SpongeEventFactory.createLightningEventPost(frame.getCurrentCause()));
             }
         }
     }

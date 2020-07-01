@@ -30,8 +30,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.CompoundNBT;
-import org.spongepowered.api.data.DataManipulator.Immutable;
-import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
@@ -43,7 +41,7 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
@@ -251,7 +249,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.rotation = DataUtil.getPosition3d(container, Constants.Entity.ROTATION);
         this.scale = DataUtil.getPosition3d(container, Constants.Entity.SCALE);
         final String entityTypeId = container.getString(Constants.Entity.TYPE).get();
-        this.entityType = SpongeImpl.getRegistry().getType(EntityType.class, entityTypeId).get();
+        this.entityType = SpongeCommon.getRegistry().getType(EntityType.class, entityTypeId).get();
 
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
             this.manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get());

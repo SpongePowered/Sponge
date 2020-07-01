@@ -31,7 +31,7 @@ import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.plugin.PluginContainerExtension;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -43,12 +43,13 @@ public final class SpongeConfigManager implements ConfigManager {
 
     @Override
     public ConfigRoot getSharedConfig(PluginContainer container) {
-        return new SpongeConfigRoot(getMapperFactory(container), container.getMetadata().getId().toLowerCase(), SpongeImpl.getPluginConfigDir());
+        return new SpongeConfigRoot(getMapperFactory(container), container.getMetadata().getId().toLowerCase(), SpongeCommon.getPluginConfigDir());
     }
 
     @Override
     public ConfigRoot getPluginConfig(PluginContainer container) {
-        return new SpongeConfigRoot(getMapperFactory(container), container.getMetadata().getId().toLowerCase(), SpongeImpl.getPluginConfigDir().resolve(container.getMetadata().getId().toLowerCase()));
+        return new SpongeConfigRoot(getMapperFactory(container), container.getMetadata().getId().toLowerCase(), SpongeCommon
+            .getPluginConfigDir().resolve(container.getMetadata().getId().toLowerCase()));
     }
 
     private static ObjectMapperFactory getMapperFactory(PluginContainer container) {

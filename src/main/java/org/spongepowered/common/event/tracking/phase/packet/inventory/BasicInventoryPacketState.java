@@ -41,7 +41,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
@@ -225,7 +225,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     // We are currently unable to detect changes in this case.
                     if (!containersFailedCapture.contains(trackedInventory.getClass())) {
                         containersFailedCapture.add(trackedInventory.getClass());
-                        SpongeImpl.getLogger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
+                        SpongeCommon
+                            .getLogger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
                     }
                     return;
                 }
@@ -249,7 +250,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, inventoryEvent.getTransactions());
                 }
 
-                SpongeImpl.postEvent(inventoryEvent);
+                SpongeCommon.postEvent(inventoryEvent);
 
                 // Handle cursor
                 if (inventoryEvent.isCancelled() || !inventoryEvent.getCursorTransaction().isValid()) {

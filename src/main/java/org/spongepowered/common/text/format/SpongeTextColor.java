@@ -32,13 +32,13 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.registry.MappedRegistry;
 
 public final class SpongeTextColor implements TextColor {
 
     public static SpongeTextColor of(TextFormatting formatting) {
-        final MappedRegistry<TextColor, TextFormatting> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
+        final MappedRegistry<TextColor, TextFormatting> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
         TextColor color = registry.getReverseMapping(formatting);
         if (color == null) {
             color = TextColors.NONE.get();
@@ -48,7 +48,7 @@ public final class SpongeTextColor implements TextColor {
     }
 
     public static TextFormatting of(TextColor color) {
-        final MappedRegistry<TextColor, TextFormatting> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
+        final MappedRegistry<TextColor, TextFormatting> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(TextColor.class);
         TextFormatting formatting = registry.getMapping(color);
         if (formatting == null) {
             formatting = TextFormatting.WHITE;

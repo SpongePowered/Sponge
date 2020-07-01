@@ -26,7 +26,7 @@ package org.spongepowered.common.util;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.LocaleUtils;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Locale;
 import java.util.Map;
@@ -46,7 +46,7 @@ public final class LocaleCache {
                 try {
                     return LocaleUtils.toLocale(fixedKey);
                 } catch (final IllegalArgumentException e) {
-                    SpongeImpl.getLogger().error("Could not transform '{}' or '{}' into a Locale", key, fixedKey);
+                    SpongeCommon.getLogger().error("Could not transform '{}' or '{}' into a Locale", key, fixedKey);
                     throw e;
                 }
             }

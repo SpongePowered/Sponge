@@ -45,7 +45,7 @@ import org.spongepowered.api.network.Message;
 import org.spongepowered.api.network.MessageHandler;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.network.SpongeNetworkManager;
 import org.spongepowered.vanilla.bridge.network.NetHandlerPlayServerBridge_Vanilla;
 
@@ -164,7 +164,7 @@ public final class VanillaIndexedMessageChannel extends VanillaChannelBinding im
         validate();
         final String name = getName();
         SPacketCustomPayload packet = null;
-        for (EntityPlayerMP player : SpongeImpl.getServer().getPlayerList().getPlayers()) {
+        for (EntityPlayerMP player : SpongeCommon.getServer().getPlayerList().getPlayers()) {
             if (((NetHandlerPlayServerBridge_Vanilla) player.connection).vanillaBridge$supportsChannel(name)) {
                 if (packet == null) {
                     packet = createPacket(message);

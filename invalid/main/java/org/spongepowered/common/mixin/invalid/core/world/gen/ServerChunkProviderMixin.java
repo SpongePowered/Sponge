@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
@@ -217,7 +217,7 @@ public abstract class ServerChunkProviderMixin implements ServerChunkProviderBri
     }
 
     private boolean impl$canDenyChunkRequest() {
-        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+        if (!SpongeCommon.getServer().isCallingFromMinecraftThread()) {
             return true;
         }
 

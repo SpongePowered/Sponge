@@ -35,7 +35,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.network.RemoteConnection;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 
@@ -53,7 +53,7 @@ public final class SpongeMessageHandler {
     }
 
     public static void init() {
-        channel = Sponge.getChannelRegistrar().createChannel(SpongeImpl.getPlugin(), CatalogKey.sponge("Sponge"));
+        channel = Sponge.getChannelRegistrar().createChannel(SpongeCommon.getPlugin(), CatalogKey.sponge("Sponge"));
         channel.registerMessage(MessageTrackerDataRequest.class, 0, Platform.Type.SERVER, SpongeMessageHandler::handleRequest);
         channel.registerMessage(MessageTrackerDataResponse.class, 1);
     }

@@ -35,7 +35,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.math.GenericMath;
 import org.spongepowered.math.vector.Vector3i;
@@ -60,7 +60,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
         final Set<TeleportHelperFilter> filters = Sets.newHashSet(additionalFilters);
         filters.add(filter);
 
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getTeleportHelper().isForceBlacklistOn()) {
+        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getTeleportHelper().isForceBlacklistOn()) {
             // Always force this into the set if the user has requested it.
             filters.add(TeleportHelperFilters.CONFIG.get());
         }

@@ -36,7 +36,7 @@ import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -78,7 +78,7 @@ public class SpongeContextCalculator implements ContextCalculator<Subject> {
                     return builder.build();
                 }
                 builder.add(new Context(contextKey, addr.getHostAddress()));
-                for (String set : Maps.filterValues(SpongeImpl.getGlobalConfigAdapter().getConfig().getIpSets(), input -> input.apply(addr)).keySet()) {
+                for (String set : Maps.filterValues(SpongeCommon.getGlobalConfigAdapter().getConfig().getIpSets(), input -> input.apply(addr)).keySet()) {
                     builder.add(new Context(contextKey, set));
                 }
                 return builder.build();

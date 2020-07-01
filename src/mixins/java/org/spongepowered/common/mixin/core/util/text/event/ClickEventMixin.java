@@ -32,7 +32,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.util.text.event.ClickEventBridge;
 import org.spongepowered.common.text.action.SpongeCallbackHolder;
 
@@ -58,7 +58,7 @@ public abstract class ClickEventMixin implements ClickEventBridge {
                         try {
                             this.bridge$setHandle(TextActions.openUrl(new URL(this.value)));
                         } catch (MalformedURLException e) {
-                            SpongeImpl.getLogger().debug("Tried to parse invalid URL \"{}\": {}", this.value, e.getMessage());
+                            SpongeCommon.getLogger().debug("Tried to parse invalid URL \"{}\": {}", this.value, e.getMessage());
                         }
                         break;
                     case RUN_COMMAND:

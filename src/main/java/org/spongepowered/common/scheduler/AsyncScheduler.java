@@ -26,7 +26,7 @@ package org.spongepowered.common.scheduler;
 
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.util.Functional;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -136,7 +136,7 @@ public final class AsyncScheduler extends SpongeScheduler {
             // The taskMap has been modified; there is work to do.
             // Continue on without handling the Exception.
         } catch (IllegalMonitorStateException e) {
-            SpongeImpl.getLogger().error("The scheduler internal state machine suffered a catastrophic error", e);
+            SpongeCommon.getLogger().error("The scheduler internal state machine suffered a catastrophic error", e);
         }
     }
 

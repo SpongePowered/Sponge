@@ -60,7 +60,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
@@ -137,10 +137,10 @@ public final class SpongeDataManager implements DataManager {
         Preconditions.checkNotNull(builder);
         DataBuilder<?> previousBuilder = this.builders.putIfAbsent(clazz, builder);
         if (previousBuilder != null) {
-            SpongeImpl.getLogger().warn("A DataBuilder has already been registered for {}. Attempted to register {} instead.", clazz,
+            SpongeCommon.getLogger().warn("A DataBuilder has already been registered for {}. Attempted to register {} instead.", clazz,
                     builder.getClass());
         } else if (!(builder instanceof AbstractDataBuilder)) {
-            SpongeImpl.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
+            SpongeCommon.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
                     + "the custom data builder does extend it to gain automated content versioning updates and maintain "
                     + "simplicity. The offending builder's class is: {}", builder.getClass());
         }
@@ -258,7 +258,7 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     @Override
     public <T> Optional<DataTranslator<T>> getTranslator(Class<T> objectClass) {
-        final Registry<DataTranslator> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(DataTranslator.class);
+        final Registry<DataTranslator> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(DataTranslator.class);
         final DataTranslator reverseMapping = ((MappedRegistry<DataTranslator, Class>) registry).getReverseMapping(objectClass);
         return Optional.ofNullable(reverseMapping);
     }
@@ -381,7 +381,7 @@ public final class SpongeDataManager implements DataManager {
                     final ImmutableList.Builder<DataView> failed = ImmutableList.builder();
                     for (INBT inbt : list) {
                         final DataView dataContainer = this.updateDataViewForDataManipulator(NbtTranslator.getInstance().translate((CompoundNBT) inbt));
-                        final SpongeCatalogRegistry catalogRegistry = SpongeImpl.getRegistry().getCatalogRegistry();
+                        final SpongeCatalogRegistry catalogRegistry = SpongeCommon.getRegistry().getCatalogRegistry();
                         // Then find the registration for deserialization
                         final Optional<DataRegistration> registration = dataContainer.getString(Constants.Sponge.DATA_ID)
                                 .flatMap(registrationId -> catalogRegistry.get(DataRegistration.class, CatalogKey.resolve(registrationId)));

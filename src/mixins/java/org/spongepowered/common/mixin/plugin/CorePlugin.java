@@ -35,7 +35,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,7 +151,7 @@ public class CorePlugin implements IMixinConfigPlugin {
                         + "for your consideration, and have a nice day!")
             .add()
             .add(new IncompatibleClassChangeError("FoamFix Incompatibility Detected"))
-            .log(SpongeImpl.getLogger(), Level.FATAL);
+            .log(SpongeCommon.getLogger(), Level.FATAL);
         SpongeLaunch.forceEarlyExit("net.minecraftforge.fml", 1);
     }
 

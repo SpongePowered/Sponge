@@ -50,7 +50,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.math.vector.Vector3d;
@@ -96,7 +96,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
             final Transform targetTransform = Transform.of(targetPosition);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 EntityTypes.EYE_OF_ENDER.get(), targetTransform, (org.spongepowered.api.world.World) worldIn);
-            if (SpongeImpl.postEvent(event)) {
+            if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }
         }
@@ -121,7 +121,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
             final Transform targetTransform = Transform.of(targetPosition);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 EntityTypes.EYE_OF_ENDER.get(), targetTransform, (org.spongepowered.api.world.World) worldIn);
-            if (SpongeImpl.postEvent(event)) {
+            if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }
         }

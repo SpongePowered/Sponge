@@ -372,7 +372,7 @@ public class SpongeImplHooks {
     }
 
     public static boolean shouldKeepSpawnLoaded(final DimensionType dimensionType) {
-        final ServerWorld world = SpongeImpl.getWorldManager().getWorld(dimensionType);
+        final ServerWorld world = SpongeCommon.getWorldManager().getWorld(dimensionType);
         return world != null && ((WorldInfoBridge) world.getWorldInfo()).bridge$doesKeepSpawnLoaded();
 
     }
@@ -391,12 +391,12 @@ public class SpongeImplHooks {
     }
 
     public static Inventory toInventory(final Object inventory, @Nullable final Object forgeItemHandler) {
-        SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
+        SpongeCommon.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         return null;
     }
 
     public static InventoryAdapter findInventoryAdapter(final Object inventory) {
-        SpongeImpl.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
+        SpongeCommon.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         throw new IllegalArgumentException("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
     }
 
@@ -476,7 +476,7 @@ public class SpongeImplHooks {
     }
 
     public static BlockEntityType getTileEntityType(final Class<? extends TileEntity> tileEntityClass) {
-        return SpongeImpl.getRegistry().getTranslated(tileEntityClass, BlockEntityType.class);
+        return SpongeCommon.getRegistry().getTranslated(tileEntityClass, BlockEntityType.class);
     }
 
     /**
@@ -484,7 +484,7 @@ public class SpongeImplHooks {
      */
     @Nullable
     public static Object postForgeEventDataCompatForSponge(final InteractBlockEvent.Secondary spongeEvent) {
-        SpongeImpl.postEvent(spongeEvent);
+        SpongeCommon.postEvent(spongeEvent);
         return null;
     }
 

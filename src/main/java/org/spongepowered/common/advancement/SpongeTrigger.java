@@ -42,7 +42,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.advancements.ICriterionTrigger_ListenerAccessor;
 import org.spongepowered.common.bridge.advancements.TriggerBridge;
 
@@ -120,7 +120,7 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
                     continue;
                 }
             }
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             if (event.getResult()) {
                 listener.grantCriterion(playerAdvancements);
             }

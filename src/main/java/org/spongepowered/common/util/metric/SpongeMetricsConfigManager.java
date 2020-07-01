@@ -27,7 +27,7 @@ package org.spongepowered.common.util.metric;
 import com.google.inject.Singleton;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -37,13 +37,13 @@ public class SpongeMetricsConfigManager implements MetricsConfigManager {
 
     @Override
     public Tristate getGlobalCollectionState() {
-        final MetricsCategory metricsCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getMetricsCategory();
+        final MetricsCategory metricsCategory = SpongeCommon.getGlobalConfigAdapter().getConfig().getMetricsCategory();
         return metricsCategory.getGlobalCollectionState();
     }
 
     @Override
     public Tristate getCollectionState(final PluginContainer container) {
-        final MetricsCategory metricsCategory = SpongeImpl.getGlobalConfigAdapter().getConfig().getMetricsCategory();
+        final MetricsCategory metricsCategory = SpongeCommon.getGlobalConfigAdapter().getConfig().getMetricsCategory();
         return metricsCategory.getCollectionState(container);
     }
 }

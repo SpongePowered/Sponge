@@ -36,13 +36,11 @@ import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -122,7 +120,7 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
             frame.pushCause(this);
             frame.pushCause(source);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), (Minecart) this, new ArrayList<>(), 0, amount);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
             }

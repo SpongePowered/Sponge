@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.management.BanUserListEntryBridge;
 import org.spongepowered.common.mixin.core.server.management.UserListEntryMixin;
 import org.spongepowered.common.text.SpongeTexts;
@@ -61,7 +61,7 @@ public abstract class BanEntryMixin<T> extends UserListEntryMixin<T> implements 
         final Optional<Player> user;
 
         if ("Server".equals(this.bannedBy)) { // There could be a user called Server, but of course Mojang doesn't care...
-            this.bridge$commandSrc = SpongeImpl.getGame().getServer().getConsole();
+            this.bridge$commandSrc = SpongeCommon.getGame().getServer().getConsole();
         } else if ((user = Sponge.getGame().getServer().getPlayer(this.bannedBy)).isPresent()) {
             this.bridge$commandSrc = user.get();
         }

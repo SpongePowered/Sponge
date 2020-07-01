@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity.horse;
 import net.minecraft.entity.passive.horse.HorseEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HorseColor;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.data.type.SpongeHorseColor;
 import org.spongepowered.common.registry.MappedRegistry;
@@ -42,7 +42,7 @@ public class HorseEntityHorseColorProvider extends GenericMutableDataProvider<Ho
 
     @Override
     protected Optional<HorseColor> getFrom(HorseEntity dataHolder) {
-        final MappedRegistry<HorseColor, Integer> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(HorseColor.class);
+        final MappedRegistry<HorseColor, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(HorseColor.class);
         return Optional.of(registry.getReverseMapping(getHorseColor(dataHolder)));
     }
 

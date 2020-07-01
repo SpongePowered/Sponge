@@ -30,7 +30,7 @@ import org.spongepowered.api.CatalogKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.CatalogKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
@@ -67,7 +67,7 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
 
         final TrackableBridge trackableBridge = (TrackableBridge) tileEntityType;
 
-        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeImpl.getTrackerConfigAdapter();
+        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeCommon.getTrackerConfigAdapter();
         final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.getConfig().getBlockEntityTracker();
 
         BlockEntityTrackerModCategory modCapturing = blockEntityTracker.getModMappings().get(container.getId());

@@ -25,7 +25,6 @@
 package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 import static org.spongepowered.common.config.SpongeConfig.Type.CUSTOM_DATA;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 import static org.spongepowered.common.config.SpongeConfig.Type.TRACKER;
@@ -35,7 +34,6 @@ import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.Direction;
@@ -52,40 +50,26 @@ import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 @Singleton
-public final class SpongeImpl {
+public final class SpongeCommon {
 
     public static final String GAME_ID = "minecraft";
-    public static final String GAME_NAME = "Minecraft";
+    public static final String ECOSYSTEM_ID = "sponge";
 
-    public static final String API_NAME = "SpongeAPI";
-
-    public static final String ECOSYSTEM_ID = "sponge"; // This is different from the id used by the actual implementation
-    public static final String ECOSYSTEM_NAME = "Sponge";
-
-    // TODO: Keep up to date
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.12.2", 340);
-
-    private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME);
-    public static final Random random = new Random();
 
     // Can't @Inject these because they are referenced before everything is initialized
     @Nullable private static SpongeConfig<GlobalConfig> globalConfigAdapter;
     @Nullable private static SpongeConfig<TrackerConfig> trackerConfigAdapter;
     @Nullable private static SpongeConfig<CustomDataConfig> customDataConfigAdapter;
     @Nullable private static SpongeConfigSaveManager configSaveManager;
-    @Nullable private static PluginContainer minecraftPlugin;
-    @Nullable private static PluginContainer spongecommon;
 
     @Inject @Nullable private static SpongeGame game;
     @Inject @Nullable private static SpongeGameRegistry registry;
@@ -93,25 +77,7 @@ public final class SpongeImpl {
     @Inject @Nullable private static SpongeCauseStackManager causeStackManager;
     @Inject @Nullable private static SpongeWorldManager worldManager;
 
-    private static final List<PluginContainer> internalPlugins = new ArrayList<>();
-
-    private SpongeImpl() {
-    }
-
-    @Inject
-    private static void initialize(Platform platform) {
-        if (minecraftPlugin == null) {
-            minecraftPlugin = platform.getContainer(Platform.Component.GAME);
-        }
-
-
-        for (Platform.Component component : Platform.Component.values()) {
-            internalPlugins.add(platform.getContainer(component));
-            if (component == Platform.Component.API && platform instanceof SpongePlatform) {
-                // We want to set up the common version after the api.
-                internalPlugins.add(((SpongePlatform) platform).getCommon());
-            }
-        }
+    private SpongeCommon() {
     }
 
     private static <T> T check(@Nullable T instance) {
@@ -120,7 +86,7 @@ public final class SpongeImpl {
     }
 
     public static Logger getLogger() {
-        return logger;
+        return Launcher.getInstance().getLogger();
     }
 
     public static boolean isInitialized() {
@@ -155,32 +121,8 @@ public final class SpongeImpl {
         return check(worldManager);
     }
 
-    public static PluginContainer getPlugin() {
-        return Sponge.getPlatform().getContainer(IMPLEMENTATION);
-    }
-
-    public static PluginContainer getMinecraftPlugin() {
-        checkState(minecraftPlugin != null, "Minecraft plugin container is not initialized");
-        return minecraftPlugin;
-    }
-
-    public static void setMinecraftPlugin(PluginContainer minecraft) {
-        checkState(minecraftPlugin == null, "Minecraft plugin container is already initialized");
-        minecraftPlugin = minecraft;
-    }
-
-    public static void setSpongePlugin(PluginContainer common) {
-        checkState(spongecommon == null);
-        spongecommon = common;
-    }
-
-    public static PluginContainer getSpongePlugin() {
-        checkState(spongecommon != null, "SpongeCommon plugin container is not initialized");
-        return spongecommon;
-    }
-
     public static Path getGameDir() {
-        return Launcher.INSTANCE.getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
+        return Launcher.getInstance().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
             .orElseThrow(() -> new IllegalStateException("Somehow we do not have a Game Directory set"));
     }
 
@@ -190,8 +132,7 @@ public final class SpongeImpl {
     }
 
     public static List<Path> getPluginsDir() {
-        return Launcher.INSTANCE.getPluginEnvironment().getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES)
-            .orElseGet(Collections::emptyList);
+        return Launcher.getInstance().getPluginEnvironment().getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElseGet(Collections::emptyList);
     }
 
     public static Path getSpongeConfigDir() {
@@ -226,10 +167,6 @@ public final class SpongeImpl {
             trackerConfigAdapter = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID, null, true);
         }
         return trackerConfigAdapter;
-    }
-
-    public static List<PluginContainer> getInternalPlugins() {
-        return internalPlugins;
     }
 
     /**

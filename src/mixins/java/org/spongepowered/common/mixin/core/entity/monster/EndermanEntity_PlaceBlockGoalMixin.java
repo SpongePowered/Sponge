@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.util.VecHelper;
@@ -103,7 +103,7 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
                 list.add(location);
                 final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
                 final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list);
-                return !SpongeImpl.postEvent(event);
+                return !SpongeCommon.postEvent(event);
             }
             // Sponge end
             return true;

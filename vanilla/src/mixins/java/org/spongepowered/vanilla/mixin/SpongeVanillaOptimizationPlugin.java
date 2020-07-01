@@ -27,7 +27,7 @@ package org.spongepowered.vanilla.mixin;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.List;
 import java.util.Set;
@@ -46,7 +46,7 @@ public class SpongeVanillaOptimizationPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().useFastThreadChecks();
+        return SpongeCommon.getGlobalConfigAdapter().getConfig().getOptimizations().useFastThreadChecks();
     }
 
     @Override

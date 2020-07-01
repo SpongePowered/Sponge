@@ -24,7 +24,7 @@
  */
 package org.spongepowered.vanilla.plugin;
 
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.graph.CyclicGraphException;
 import org.spongepowered.common.util.graph.DirectedGraph;
 import org.spongepowered.common.util.graph.TopologicalOrder;
@@ -61,7 +61,7 @@ final class PluginSorter {
                 }
                 msg.append("]\n");
             }
-            SpongeImpl.getLogger().fatal(msg.toString());
+            SpongeCommon.getLogger().fatal(msg.toString());
             throw new RuntimeException("Plugin dependencies error.");
         }
     }

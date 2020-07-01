@@ -77,7 +77,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.accessor.world.server.EntityTrackerAccessor;
 import org.spongepowered.common.bridge.TimingBridge;
@@ -202,7 +202,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         // post the removal event here, basically.
         if (!tracked && this.impl$destructCause != null) {
             final MessageChannel originalChannel = MessageChannel.toNone();
-            SpongeImpl.postEvent(SpongeEventFactory.createDestructEntityEvent(
+            SpongeCommon.postEvent(SpongeEventFactory.createDestructEntityEvent(
                 this.impl$destructCause, originalChannel, Optional.of(originalChannel),
                 (org.spongepowered.api.entity.Entity) this, new MessageEvent.MessageFormatter(), true
             ));
@@ -223,7 +223,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         final CallbackInfoReturnable<Boolean> ci) {
         if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_MOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
             Sponge.getCauseStackManager().pushCause(this);
-            if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
+            if (SpongeCommon.postEvent(SpongeEventFactory.createRideEntityEventMount(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
                 ci.cancel();
             }
             Sponge.getCauseStackManager().popCause();
@@ -251,7 +251,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
-                if (SpongeImpl.postEvent(SpongeEventFactory.
+                if (SpongeCommon.postEvent(SpongeEventFactory.
                     createRideEntityEventDismount(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this.getRidingEntity()))) {
                     return false;
                 }
@@ -365,7 +365,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
                 } else {
                     this.vanish$visibilityTicks = 1;
                     this.vanish$pendingVisibilityUpdate = false;
-                    for (final ServerPlayerEntity entityPlayerMP : SpongeImpl.getServer().getPlayerList().getPlayers()) {
+                    for (final ServerPlayerEntity entityPlayerMP : SpongeCommon.getServer().getPlayerList().getPlayers()) {
                         if ((Entity) (Object) this == entityPlayerMP) {
                             continue;
                         }
@@ -763,7 +763,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
                 final IgniteEntityEvent event = SpongeEventFactory.
                     createIgniteEntityEvent(frame.getCurrentCause(), ticks, ticks, (org.spongepowered.api.entity.Entity) this);
 
-                if (SpongeImpl.postEvent(event)) {
+                if (SpongeCommon.postEvent(event)) {
                     this.fire = 0;
                     return; // set fire ticks to 0
                 }

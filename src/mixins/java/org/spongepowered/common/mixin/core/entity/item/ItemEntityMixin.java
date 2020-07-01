@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -192,7 +192,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             final ExpireEntityEvent event = SpongeEventFactory.createExpireEntityEvent(frame.getCurrentCause(), (Item) this);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
         }
     }
 

@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 
 @Mixin(AdvancementManager.class)
@@ -37,6 +37,6 @@ public abstract class AdvancementManagerMixin {
 
     @Inject(method = "apply", at = @At("RETURN"))
     private void impl$reloadAdvancementProgressforPlayerList(CallbackInfo ci) {
-        ((PlayerListBridge) SpongeImpl.getServer().getPlayerList()).bridge$reloadAdvancementProgress();
+        ((PlayerListBridge) SpongeCommon.getServer().getPlayerList()).bridge$reloadAdvancementProgress();
     }
 }

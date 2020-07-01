@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
@@ -135,7 +135,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
                     new SpongeConfig<>(SpongeConfig.Type.WORLD, ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType().getConfigPath()
                             .resolve(this.levelName)
                             .resolve("world.conf"),
-                            SpongeImpl.ECOSYSTEM_ID,
+                            SpongeCommon.ECOSYSTEM_ID,
                             ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType().getConfigAdapter(),
                             false);
         } else {
@@ -178,7 +178,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
                 .addWrapped(60, " %s : %s", "WorldInfo", this)
                 .add()
                 .add(new Exception("Stacktrace"))
-                .log(SpongeImpl.getLogger(), Level.ERROR);
+                .log(SpongeCommon.getLogger(), Level.ERROR);
             ci.cancel(); // We cannot let the null set the field.
             return;
         }
@@ -203,7 +203,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
     @Override
     public void bridge$updatePlayersForDifficulty() {
-        SpongeImpl.getWorldManager().getWorlds()
+        SpongeCommon.getWorldManager().getWorlds()
             .stream()
             .map(world -> (ServerWorld) world)
             .filter(world -> world.getWorldInfo() == (WorldInfo) (Object) this)

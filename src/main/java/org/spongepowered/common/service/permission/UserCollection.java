@@ -28,7 +28,7 @@ import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -59,7 +59,7 @@ public class UserCollection extends SpongeSubjectCollection {
         try {
             return (GameProfile) Sponge.getServer().getGameProfileManager().get(uniqueId, true).get();
         } catch (Exception e) {
-            SpongeImpl.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
+            SpongeCommon.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
             return null;
         }
     }
@@ -85,7 +85,7 @@ public class UserCollection extends SpongeSubjectCollection {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Subject> getLoadedSubjects() {
-        return (Collection) SpongeImpl.getGame().getServer().getOnlinePlayers();
+        return (Collection) SpongeCommon.getGame().getServer().getOnlinePlayers();
         /*return ImmutableSet.copyOf(Iterables.concat(
                 Iterables.<Object, Subject>transform(SpongePermissionService.getOps().getValues().values(),
                         new Function<Object, Subject>() {

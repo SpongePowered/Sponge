@@ -26,18 +26,12 @@ package org.spongepowered.common.mixin.core.world.chunk;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.BitArray;
 import net.minecraft.world.chunk.BlockStateContainer;
-import net.minecraft.world.chunk.IBlockStatePalette;
 import net.minecraft.world.chunk.NibbleArray;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.world.chunk.BlockStateContainerBridge;
 
 import javax.annotation.Nullable;
 

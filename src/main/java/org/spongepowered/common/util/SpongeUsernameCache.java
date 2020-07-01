@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -226,7 +226,7 @@ public final class SpongeUsernameCache {
             Files.write(gson.toJson(map), saveFile, charset);
             dirty = false;
         } catch (IOException e) {
-            SpongeImpl.getLogger().error("Failed to save username cache to file!", e);
+            SpongeCommon.getLogger().error("Failed to save username cache to file!", e);
         }
     }
 
@@ -244,10 +244,10 @@ public final class SpongeUsernameCache {
 
             map = gson.fromJson(json, type);
         } catch (JsonSyntaxException e) {
-            SpongeImpl.getLogger().error("Could not parse username cache file as valid json, deleting file", e);
+            SpongeCommon.getLogger().error("Could not parse username cache file as valid json, deleting file", e);
             saveFile.delete();
         } catch (IOException e) {
-            SpongeImpl.getLogger().error("Failed to read username cache file from disk, deleting file", e);
+            SpongeCommon.getLogger().error("Failed to read username cache file from disk, deleting file", e);
             saveFile.delete();
         } finally {
             // Can sometimes occur when the json file is malformed

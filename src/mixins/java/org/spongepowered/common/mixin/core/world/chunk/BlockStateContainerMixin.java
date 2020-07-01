@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.chunk.BlockStateContainerBridge;
 
 @Mixin(BlockStateContainer.class)
@@ -147,7 +147,7 @@ public abstract class BlockStateContainerMixin<T> implements BlockStateContainer
                             .trace();
                         throw new ArrayIndexOutOfBoundsException("Unable to resize packet buffer to fit more data. Current ");
                     case 2: // Buffer has enough and capacity increased to a new maximum
-                        SpongeImpl.getLogger().warn("Sponge is attempting to prevent a crash for sending chunk data to clients. Managed to increase the buffer size. Refer to SpongeForge Issue #2405");
+                        SpongeCommon.getLogger().warn("Sponge is attempting to prevent a crash for sending chunk data to clients. Managed to increase the buffer size. Refer to SpongeForge Issue #2405");
                         break;
                         // cool, nothing happens
                     case 3: // Buffer does not have enough space, but capacity increased.
@@ -161,7 +161,7 @@ public abstract class BlockStateContainerMixin<T> implements BlockStateContainer
                             .add()
                             .add("Please refer to the SpongeForge issue if this warning has been printed on yoru server, or the side effects of this warning.")
                             .trace();
-                        SpongeImpl.getLogger().error("Unable to increase the size of the buffer to fit enough data.");
+                        SpongeCommon.getLogger().error("Unable to increase the size of the buffer to fit enough data.");
                         // We can't fit any more data.
                         return buffer;
                 }

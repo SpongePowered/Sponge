@@ -30,7 +30,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementList;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.advancements.AdvancementListAccessor;
 
@@ -69,7 +69,7 @@ public class AdvancementTreeRegistryModule extends AbstractPrefixCheckCatalogReg
         if (optTree.isPresent()) {
             super.register(optTree.get());
         } else {
-            SpongeImpl.getLogger().warn("Attempted to register a root advancement {} without a advancement tree?", rootAdvancement.getId());
+            SpongeCommon.getLogger().warn("Attempted to register a root advancement {} without a advancement tree?", rootAdvancement.getId());
         }
     }
 

@@ -34,7 +34,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Optional;
 import java.util.Set;
@@ -94,7 +94,7 @@ public class UserSubject extends SpongeSubject {
         OpEntry entry = SpongePermissionService.getOps().getEntry(this.player);
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
-            return SpongeImpl.getServer().getPlayerList().canSendCommands(this.player) ? SpongeImpl.getServer().getOpPermissionLevel() : 0;
+            return SpongeCommon.getServer().getPlayerList().canSendCommands(this.player) ? SpongeCommon.getServer().getOpPermissionLevel() : 0;
         } else {
             return entry.getPermissionLevel();
         }

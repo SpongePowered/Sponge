@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.plugin.entitycollision;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class EntityCollisionPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().usePluginEntityCollisions();
+        return SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginEntityCollisions();
     }
 
     @Override

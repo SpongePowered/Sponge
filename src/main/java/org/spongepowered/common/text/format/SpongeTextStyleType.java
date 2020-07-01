@@ -31,13 +31,13 @@ import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.registry.MappedRegistry;
 
 public final class SpongeTextStyleType extends SpongeTextStyle implements TextStyle.Type {
 
     public static SpongeTextStyleType of(TextFormatting formatting) {
-        final MappedRegistry<TextStyle.Type, TextFormatting> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(TextStyle.Type.class);
+        final MappedRegistry<TextStyle.Type, TextFormatting> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(TextStyle.Type.class);
         TextStyle.Type style = registry.getReverseMapping(formatting);
         if (style == null) {
             style = TextStyles.RESET.get();

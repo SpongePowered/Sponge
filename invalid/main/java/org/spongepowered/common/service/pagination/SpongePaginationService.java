@@ -48,7 +48,7 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.util.StartsWithPredicate;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -100,8 +100,8 @@ public class SpongePaginationService implements PaginationService {
 
     void registerCommandOnce() {
         if (this.commandRegistered.compareAndSet(false, true)) {
-            SpongeImpl.getGame().getCommandManager().register(
-                    SpongeImpl.getPlugin(),
+            SpongeCommon.getGame().getCommandManager().register(
+                    SpongeCommon.getPlugin(),
                     this.buildPaginationCommand(),
                     "pagination", "page"
             );

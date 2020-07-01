@@ -32,7 +32,7 @@ import net.minecraft.nbt.NBTUtil;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.util.Constants;
 
@@ -82,7 +82,7 @@ public class ItemStackGameProfileProvider extends ItemStackDataProvider<GameProf
         try {
             return future.get();
         } catch (InterruptedException | ExecutionException e) {
-            SpongeImpl.getLogger().debug("Exception while trying to fill skull GameProfile for '" + profile + "'", e);
+            SpongeCommon.getLogger().debug("Exception while trying to fill skull GameProfile for '" + profile + "'", e);
             return profile;
         }
     }

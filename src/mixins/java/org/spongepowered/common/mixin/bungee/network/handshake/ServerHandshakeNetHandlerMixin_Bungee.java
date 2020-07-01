@@ -31,7 +31,6 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.ProtocolType;
 import net.minecraft.network.handshake.ServerHandshakeNetHandler;
 import net.minecraft.network.handshake.client.CHandshakePacket;
-import net.minecraft.network.login.server.SDisconnectLoginPacket;
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
 import org.spongepowered.common.accessor.network.NetworkManagerAccessor;
 import org.spongepowered.common.accessor.network.handshake.client.CHandshakePacketAccessor;
@@ -55,7 +54,7 @@ public abstract class ServerHandshakeNetHandlerMixin_Bungee {
 
     @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
     private void bungee$patchHandshake(CHandshakePacket packet, CallbackInfo ci) {
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding() && packet.getRequestedState().equals(ProtocolType.LOGIN)) {
+        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding() && packet.getRequestedState().equals(ProtocolType.LOGIN)) {
             final String ip = ((CHandshakePacketAccessor) packet).accessor$getIp();
             final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 

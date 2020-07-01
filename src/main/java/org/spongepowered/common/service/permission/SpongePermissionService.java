@@ -37,7 +37,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectReference;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -92,11 +92,11 @@ public class SpongePermissionService implements PermissionService {
     }
 
     static OpList getOps() {
-        return SpongeImpl.getServer().getPlayerList().getOppedPlayers();
+        return SpongeCommon.getServer().getPlayerList().getOppedPlayers();
     }
 
     static int getServerOpLevel() {
-        return SpongeImpl.getServer().getOpPermissionLevel();
+        return SpongeCommon.getServer().getOpPermissionLevel();
     }
 
     public Subject getGroupForOpLevel(int level) {

@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeInternalListeners;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
@@ -57,7 +57,7 @@ public abstract class SubjectMixin implements SubjectBridge {
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void subjectConstructor(final CallbackInfo ci) {
-        if (SpongeImpl.isInitialized()) {
+        if (SpongeCommon.isInitialized()) {
             SpongeInternalListeners.getInstance().registerExpirableServiceCallback(PermissionService.class, new SubjectSettingCallback(this));
         }
     }
@@ -70,7 +70,7 @@ public abstract class SubjectMixin implements SubjectBridge {
     @Override
     public Optional<SubjectReference> bridge$resolveReferenceOptional() {
         if (this.impl$subjectReference == null) {
-            final Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
+            final Optional<PermissionService> serv = SpongeCommon.getGame().getServiceManager().provide(PermissionService.class);
             serv.ifPresent(permissionService -> new SubjectSettingCallback(this).test(permissionService));
         }
         return Optional.ofNullable(this.impl$subjectReference);

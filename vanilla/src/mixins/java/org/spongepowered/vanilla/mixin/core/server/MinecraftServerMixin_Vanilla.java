@@ -49,7 +49,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge_AsyncLighting;
@@ -159,8 +159,8 @@ public abstract class MinecraftServerMixin_Vanilla implements MinecraftServerBri
             for (WorldServer worldserver1 : this.worlds) {
                 if (worldserver1 != null) {
                     // Turn off Async Lighting
-                    if (SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().useOptimizations() &&
-                        SpongeImpl.getGlobalConfigAdapter().getConfig().getOptimizations().useAsyncLighting()) {
+                    if (SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().useOptimizations() &&
+                        SpongeCommon.getGlobalConfigAdapter().getConfig().getOptimizations().useAsyncLighting()) {
                         final ExecutorService lightingExecutor =
                             ((WorldServerBridge_AsyncLighting) worldserver1).asyncLightingBridge$getLightingExecutor();
                         lightingExecutor.shutdown();

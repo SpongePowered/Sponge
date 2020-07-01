@@ -76,7 +76,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
@@ -250,7 +250,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     + " stacktrace to the most appropriate mod/plugin available.")
                 .add()
                 .add(new IllegalArgumentException("Null DamageSource"))
-                .log(SpongeImpl.getLogger(), Level.WARN);
+                .log(SpongeCommon.getLogger(), Level.WARN);
             return false;
         }
         // Sponge - This hook is for forge use mainly
@@ -750,7 +750,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 stack.getUseDuration(), stack.getUseDuration(), snapshot);
         }
 
-        if (SpongeImpl.postEvent(event)) {
+        if (SpongeCommon.postEvent(event)) {
             ci.cancel();
         } else {
             this.activeItemStackUseCount = event.getRemainingDuration();
@@ -801,7 +801,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             this.impl$addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventTick(Sponge.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
         }
         // Because the item usage will only finish if activeItemStackUseCount == 0 and decrements it first, it should be >= 1
         this.activeItemStackUseCount = Math.max(event.getRemainingDuration(), 1);
@@ -837,7 +837,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             event = SpongeEventFactory.createUseItemStackEventFinish(Sponge.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
         }
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         if (event.getRemainingDuration() > 0) {
             this.activeItemStackUseCount = event.getRemainingDuration();
             ci.cancel();
@@ -878,7 +878,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 new Transaction<>(ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy), snapshot));
         }
 
-        if (SpongeImpl.postEvent(event)) {
+        if (SpongeCommon.postEvent(event)) {
             this.shadow$setHeldItem(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
@@ -905,7 +905,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            if (!SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventStop(Sponge.getCauseStackManager().getCurrentCause(),
+            if (!SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventStop(Sponge.getCauseStackManager().getCurrentCause(),
                 duration, duration, snapshot))) {
                 stack.onPlayerStoppedUsing(world, self, duration);
             }
@@ -925,7 +925,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             this.impl$addSelfToFrame(frame, snapshot);
-            SpongeImpl.postEvent(SpongeEventFactory.createUseItemStackEventReset(Sponge.getCauseStackManager().getCurrentCause(),
+            SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventReset(Sponge.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));
         }
         this.impl$activeItemStackCopy = null;

@@ -40,7 +40,7 @@ import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.GenericMath;
@@ -356,7 +356,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
         try {
             return ret.get();
         } catch (InterruptedException | ExecutionException e) {
-            SpongeImpl.getLogger().error(
+            SpongeCommon.getLogger().error(
                     "Could not determine chunk's existence on world {}: {} {}. Assuming false.",
                 this.world.getName(), v.getX(), v.getZ());
             return false;

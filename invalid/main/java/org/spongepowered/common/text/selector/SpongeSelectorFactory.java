@@ -42,7 +42,7 @@ import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.mixin.core.command.EntitySelectorAccessor;
 
 import java.lang.reflect.InvocationTargetException;
@@ -86,10 +86,10 @@ public class SpongeSelectorFactory implements SelectorFactory {
                 try {
                     return (V) m.invoke(null, input);
                 } catch (IllegalAccessException e) {
-                    SpongeImpl.getLogger().debug(m + " wasn't public", e);
+                    SpongeCommon.getLogger().debug(m + " wasn't public", e);
                     return null;
                 } catch (IllegalArgumentException e) {
-                    SpongeImpl.getLogger()
+                    SpongeCommon.getLogger()
                             .debug(m + " failed with paramter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {
@@ -101,10 +101,10 @@ public class SpongeSelectorFactory implements SelectorFactory {
             try {
                 return (V) m.invoke(input);
             } catch (IllegalAccessException e) {
-                SpongeImpl.getLogger().debug(m + " wasn't public", e);
+                SpongeCommon.getLogger().debug(m + " wasn't public", e);
                 return null;
             } catch (IllegalArgumentException e) {
-                SpongeImpl.getLogger()
+                SpongeCommon.getLogger()
                         .debug(m + " failed with paramter " + input, e);
                 return null;
             } catch (InvocationTargetException e) {

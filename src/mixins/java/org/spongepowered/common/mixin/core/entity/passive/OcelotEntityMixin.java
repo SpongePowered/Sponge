@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 
 import java.util.Random;
@@ -53,7 +53,7 @@ public abstract class OcelotEntityMixin extends AgeableEntityMixin {
             stack.setCount(stack.getCount() + 1);
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
-                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Ocelot) this))) {
+                if (!SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (Ocelot) this))) {
                     stack.setCount(stack.getCount() - 1);
                     return random;
                 }

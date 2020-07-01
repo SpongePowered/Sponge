@@ -37,7 +37,7 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.util.NbtCollectors;
 import org.spongepowered.common.data.util.NbtStreams;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
@@ -71,7 +71,7 @@ public class FireworkUtils {
         }
         if (compound.contains(Constants.Item.Fireworks.SHAPE_TYPE)) {
             final byte type = compound.getByte(Constants.Item.Fireworks.SHAPE_TYPE);
-            final MappedRegistry<FireworkShape, Byte> registry = SpongeImpl.getRegistry().getCatalogRegistry()
+            final MappedRegistry<FireworkShape, Byte> registry = SpongeCommon.getRegistry().getCatalogRegistry()
                     .requireRegistry(FireworkShape.class);
             @Nullable final FireworkShape shape = registry.getReverseMapping(type);
             if (shape != null) {
@@ -99,7 +99,7 @@ public class FireworkUtils {
     }
 
     public static CompoundNBT toCompound(final FireworkEffect effect) {
-        final MappedRegistry<FireworkShape, Byte> registry = SpongeImpl.getRegistry().getCatalogRegistry()
+        final MappedRegistry<FireworkShape, Byte> registry = SpongeCommon.getRegistry().getCatalogRegistry()
                 .requireRegistry(FireworkShape.class);
 
         final CompoundNBT tag = new CompoundNBT();

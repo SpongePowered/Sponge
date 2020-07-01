@@ -98,7 +98,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -231,7 +231,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         final ChangeSignEvent event =
                 SpongeEventFactory.createChangeSignEvent(Sponge.getCauseStackManager().getCurrentCause(),
                     changedSignData.asImmutable(), changedSignData, (Sign) tileentitysign);
-        if (!SpongeImpl.postEvent(event)) {
+        if (!SpongeCommon.postEvent(event)) {
             ((Sign) tileentitysign).offer(event.getText());
         } else {
             // If cancelled, I set the data back that was fetched from the sign. This means that if its a new sign, the sign will be empty else
@@ -353,7 +353,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
                     } else {
                         event = SpongeEventFactory.createMoveEntityEventPosition(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
                     }
-                    if (SpongeImpl.postEvent(event)) {
+                    if (SpongeCommon.postEvent(event)) {
                         ((EntityBridge) mixinPlayer).bridge$setLocationAndAngles(fromTransform);
                         this.impl$lastMoveLocation = fromLocation;
                         mixinPlayer.bridge$setVelocityOverride(null);
@@ -485,7 +485,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         final Transform fromTransform = spongeEntity.getTransform().withPosition(from.getPosition()).withRotation(fromrot);
         final Transform toTransform = spongeEntity.getTransform().withPosition(to.getPosition()).withRotation(torot);
         final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, (Player) this.player);
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
             // There is no need to change the current riding entity position as it hasn't changed yet.
             // Send packet to client in order to update rider position.
@@ -513,7 +513,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
                 Sponge.getCauseStackManager().getCurrentCause(), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(message),
                 player, false
         );
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         if (!event.isMessageCancelled()) {
             event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
@@ -554,7 +554,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
 
     @Inject(method = "processTryUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(I)Lnet/minecraft/world/WorldServer;"), cancellable = true)
     private void onProcessTryUseItem(final CPlayerTryUseItemPacket packetIn, final CallbackInfo ci) {
-        SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
+        SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeCommon.getServer().getTickCounter();
         final long packetDiff = System.currentTimeMillis() - this.impl$lastTryBlockPacketTimeStamp;
         // If the time between packets is small enough, use the last result.
         if (packetDiff < 100) {
@@ -570,7 +570,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
         // InteractItemEvent on block must be handled in PlayerInteractionManager to support item/block results.
         // Only track the timestamps to support our block animation events
         this.impl$lastTryBlockPacketTimeStamp = System.currentTimeMillis();
-        SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
+        SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeCommon.getServer().getTickCounter();
 
     }
 
@@ -587,7 +587,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
     public void processUseEntity(final CUseEntityPacket packetIn) {
         // Sponge start
         // All packets received by server are handled first on the Netty Thread
-        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+        if (!SpongeCommon.getServer().isCallingFromMinecraftThread()) {
             if (packetIn.getAction() == CUseEntityPacket.Action.INTERACT) {
                 // This packet is only sent by client when CPacketUseEntity.Action.INTERACT_AT is
                 // not successful. We can safely ignore this packet as we handle the INTERACT logic

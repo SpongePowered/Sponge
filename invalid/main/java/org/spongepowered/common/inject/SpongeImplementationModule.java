@@ -49,8 +49,8 @@ import org.spongepowered.api.service.SimpleServiceManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.SpongeBootstrap;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.asset.SpongeAssetManager;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.command.SpongeCommandManager;
@@ -71,7 +71,7 @@ public class SpongeImplementationModule extends PrivateModule {
     protected void configure() {
         //noinspection UninstantiableBinding
         this.bindAndExpose(Game.class).to(SpongeGame.class);
-        this.bindAndExpose(MinecraftVersion.class).toInstance(SpongeImpl.MINECRAFT_VERSION);
+        this.bindAndExpose(MinecraftVersion.class).toInstance(SpongeCommon.MINECRAFT_VERSION);
         this.bindAndExpose(ServiceManager.class).to(SimpleServiceManager.class);
         this.bindAndExpose(AssetManager.class).to(SpongeAssetManager.class);
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
@@ -89,10 +89,10 @@ public class SpongeImplementationModule extends PrivateModule {
         this.expose(EventManager.class);
         this.expose(ChannelRegistrar.class);
 
-        this.bind(Logger.class).toInstance(SpongeImpl.getLogger());
-        this.bind(org.slf4j.Logger.class).toInstance(LoggerFactory.getLogger(SpongeImpl.getLogger().getName()));
+        this.bind(Logger.class).toInstance(SpongeCommon.getLogger());
+        this.bind(org.slf4j.Logger.class).toInstance(LoggerFactory.getLogger(SpongeCommon.getLogger().getName()));
 
-        this.requestStaticInjection(SpongeImpl.class);
+        this.requestStaticInjection(SpongeCommon.class);
         this.requestStaticInjection(Sponge.class);
         this.requestStaticInjection(SpongeBootstrap.class);
     }

@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -67,7 +67,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.SpawnerSpawnType;
 import org.spongepowered.math.vector.Vector3d;
-import java.util.ArrayList;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -247,7 +247,7 @@ public abstract class WorldEntitySpawnerMixin {
                                                 SpongeEventFactory
                                                     .createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType,
                                                         transform, (org.spongepowered.api.world.World) world);
-                                            if (SpongeImpl.postEvent(event)) {
+                                            if (SpongeCommon.postEvent(event)) {
                                                 continue;
                                             }
                                         }
@@ -396,7 +396,7 @@ public abstract class WorldEntitySpawnerMixin {
         final Transform transform = Transform.of(vector3d);
         Sponge.getCauseStackManager().pushCause(world);
         final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), entityType, transform, (org.spongepowered.api.world.World) world);
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         return !event.isCancelled();
     }

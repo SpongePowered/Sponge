@@ -61,7 +61,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeInternalListeners;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
@@ -134,7 +134,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     public SpongeUser(final GameProfile profile) {
         this.profile = profile;
-        if (SpongeImpl.isInitialized()) {
+        if (SpongeCommon.isInitialized()) {
             SpongeInternalListeners.getInstance().registerExpirableServiceCallback(PermissionService.class, new SubjectSettingCallback(this));
         }
     }
@@ -170,7 +170,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     public void initialize() {
         this.nbt = new CompoundNBT();
-        final ServerWorld world = SpongeImpl.getWorldManager().getDefaultWorld();
+        final ServerWorld world = SpongeCommon.getWorldManager().getDefaultWorld();
         if (world == null) {
             return;
         }
@@ -188,7 +188,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
                 this.readFromNbt(CompressedStreamTools.readCompressed(in));
             }
         } catch (IOException e) {
-            SpongeImpl.getLogger().warn("Corrupt user file {}", file, e);
+            SpongeCommon.getLogger().warn("Corrupt user file {}", file, e);
         }
     }
 
@@ -670,7 +670,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     public void save() {
         Preconditions.checkState(this.isInitialized(), "User {} is not initialized", this.profile.getId());
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) SpongeImpl.getWorldManager().getDefaultWorld();
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) SpongeCommon.getWorldManager().getDefaultWorld();
         final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), this.getUniqueId() + ".dat");
         CompoundNBT compound;
         try {
@@ -685,7 +685,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
             dirtyUsers.remove(this);
             this.invalidate();
         } catch (IOException e) {
-            SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
+            SpongeCommon.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
     }
 
@@ -743,7 +743,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public Optional<ServerPlayer> getPlayer() {
-        return Optional.ofNullable((ServerPlayer) SpongeImpl.getServer().getPlayerList().getPlayerByUUID(this.profile.getId()));
+        return Optional.ofNullable((ServerPlayer) SpongeCommon.getServer().getPlayerList().getPlayerByUUID(this.profile.getId()));
     }
 
     @Override
@@ -764,18 +764,18 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
             return Optional.empty();
         }
 
-        return Optional.ofNullable(SpongeImpl.getWorldManager().getDimensionTypeUniqueId(dimensionType));
+        return Optional.ofNullable(SpongeCommon.getWorldManager().getDimensionTypeUniqueId(dimensionType));
     }
 
     @Override
     public boolean setLocation(Vector3d position, UUID worldUniqueId) {
         final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
-            Optional<org.spongepowered.api.world.server.ServerWorld> world = SpongeImpl.getWorldManager().getWorld(worldUniqueId);
+            Optional<org.spongepowered.api.world.server.ServerWorld> world = SpongeCommon.getWorldManager().getWorld(worldUniqueId);
             return world.filter(serverWorld -> playerOpt.get().setLocation(ServerLocation.of(serverWorld, position))).isPresent();
         }
         final WorldProperties properties =
-                SpongeImpl.getWorldManager().getProperties(worldUniqueId).orElseThrow(() -> new IllegalArgumentException(String.format("Unknown "
+                SpongeCommon.getWorldManager().getProperties(worldUniqueId).orElseThrow(() -> new IllegalArgumentException(String.format("Unknown "
                         + "World UUID '%s' given when setting location of user!", worldUniqueId)));
         final Integer dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionType().getId();
         this.dimension = dimensionId;
@@ -832,7 +832,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     @Override
     public Optional<SubjectReference> bridge$resolveReferenceOptional() {
         if (this.impl$subjectReference == null) {
-            final Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
+            final Optional<PermissionService> serv = SpongeCommon.getGame().getServiceManager().provide(PermissionService.class);
             serv.ifPresent(permissionService -> new SubjectSettingCallback(this).test(permissionService));
         }
         return Optional.ofNullable(this.impl$subjectReference);

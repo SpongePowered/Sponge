@@ -34,7 +34,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.entity.BlockEntityType;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -150,7 +150,7 @@ public class TileEntityActivation {
      */
     private static void activateChunkTileEntities(final PlayerEntity player, final Chunk chunk) {
         final Vector3i playerPos = VecHelper.toVector3i(player.getPosition());
-        final long currentTick = SpongeImpl.getServer().getTickCounter();
+        final long currentTick = SpongeCommon.getServer().getTickCounter();
         for (final Map.Entry<BlockPos, TileEntity> mapEntry : chunk.getTileEntityMap().entrySet()) {
             final TileEntity tileEntity = mapEntry.getValue();
             final ActivationCapabilityBridge spongeTileEntity = (ActivationCapabilityBridge) tileEntity;
@@ -207,7 +207,7 @@ public class TileEntityActivation {
             return false;
         }
 
-        final long currentTick = SpongeImpl.getServer().getTickCounter();
+        final long currentTick = SpongeCommon.getServer().getTickCounter();
         final ActivationCapabilityBridge spongeTileEntity = (ActivationCapabilityBridge) tileEntity;
         boolean isActive = activeChunk.bridge$isPersistedChunk() || spongeTileEntity.activation$getActivatedTick() >= currentTick || spongeTileEntity.activation$getDefaultActivationState();
 
@@ -229,7 +229,7 @@ public class TileEntityActivation {
 
     public static void addTileEntityToConfig(final World world, final SpongeTileEntityType type) {
         final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
+        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeCommon.getGlobalConfigAdapter();
         if (!worldConfigAdapter.getConfig().getTileEntityActivationRange().autoPopulateData()) {
             return;
         }

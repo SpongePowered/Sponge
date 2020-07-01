@@ -44,12 +44,11 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -183,7 +182,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                             final List<Entity> items = entry.getValue().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                             final DropItemEvent.Destruct event =
                                 SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
-                            SpongeImpl.postEvent(event);
+                            SpongeCommon.postEvent(event);
                             if (!event.isCancelled()) {
                                 processSpawnedEntities(player, event);
                             }
@@ -207,7 +206,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                     }
                     final DropItemEvent.Dispense dispense =
                         SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeImpl.postEvent(dispense);
+                    SpongeCommon.postEvent(dispense);
                     if (!dispense.isCancelled()) {
                         processSpawnedEntities(player, dispense);
                     }
@@ -302,7 +301,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
                 final DropItemEvent.Dispense dispense = SpongeEventFactory
                     .createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), items);
-                if (!SpongeImpl.postEvent(dispense)) {
+                if (!SpongeCommon.postEvent(dispense)) {
                     processSpawnedEntities(player, dispense);
                 }
             } else {

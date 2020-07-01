@@ -31,7 +31,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.play.client.CResourcePackStatusPacketAccessor;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -71,7 +71,7 @@ public final class ResourcePackState extends BasicPacketState {
         if (pack == null) {
             return;
         }
-        SpongeImpl.postEvent(
+        SpongeCommon.postEvent(
             SpongeEventFactory.createResourcePackStatusEvent(Sponge.getCauseStackManager().getCurrentCause(), pack, (ServerPlayer) player, status));
     }
 }

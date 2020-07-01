@@ -31,7 +31,7 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetManager;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.net.URL;
@@ -58,6 +58,6 @@ public final class SpongeAssetManager implements AssetManager {
 
     @Override
     public Optional<Asset> getAsset(String name) {
-        return this.getAsset(SpongeImpl.getPlugin(), name);
+        return this.getAsset(SpongeCommon.getPlugin(), name);
     }
 }

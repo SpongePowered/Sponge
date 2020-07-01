@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.function.Supplier;
 
@@ -48,7 +48,7 @@ public abstract class RegistryMixin {
         final Object potentialCatalog = supplier.get();
         if (potentialCatalog instanceof CatalogType && registry instanceof SimpleRegistry) {
             // We don't care about non-catalog types and custom implementations of Registry
-            SpongeImpl.getRegistry().getCatalogRegistry().registerRegistry((Class<CatalogType>) potentialCatalog.getClass(),
+            SpongeCommon.getRegistry().getCatalogRegistry().registerRegistry((Class<CatalogType>) potentialCatalog.getClass(),
                 (CatalogKey) (Object) location, (Registry<CatalogType>) (Object) registry);
         }
     }

@@ -28,7 +28,7 @@ import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.command.manager.CommandMapping;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -89,7 +89,7 @@ public final class TimingsManager {
                 handler.processTick(violated);
             }
 
-            TimingHistory.playerTicks += SpongeImpl.getGame().getServer().getOnlinePlayers().size();
+            TimingHistory.playerTicks += SpongeCommon.getGame().getServer().getOnlinePlayers().size();
             TimingHistory.timedTicks++;
             // Generate TPS/Ping/Tick reports every minute
         }
@@ -119,7 +119,7 @@ public final class TimingsManager {
                 }
             }
             if (timingStart != 0) {
-                SpongeImpl.getLogger().info("Timings reset");
+                SpongeCommon.getLogger().info("Timings reset");
             }
             HISTORY.clear();
             needsFullReset = false;
@@ -150,7 +150,7 @@ public final class TimingsManager {
         if (!("minecraft".equals(pluginName)
                 || "bukkit".equals(pluginName)
                 || "Spigot".equals(pluginName))) {
-            plugin = SpongeImpl.getGame().getPluginManager().getPlugin(pluginName);
+            plugin = SpongeCommon.getGame().getPluginManager().getPlugin(pluginName);
         }
         if (!plugin.isPresent()) {
             return SpongeTimingsFactory.ofSafe("Command: " + pluginName + ":" + command.getPrimaryAlias());

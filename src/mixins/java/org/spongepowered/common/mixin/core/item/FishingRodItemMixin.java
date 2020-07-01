@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import javax.annotation.Nullable;
 
@@ -72,7 +72,7 @@ public abstract class FishingRodItemMixin {
         int j = EnchantmentHelper.getFishingLuckBonus(itemstack);
         FishingBobberEntity fishHook = new FishingBobberEntity(player, world, j, k);
         Sponge.getCauseStackManager().pushCause(player);
-        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishingBobber) fishHook))) {
+        if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishingBobber) fishHook))) {
             fishHook.remove(); // Bye
             cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand)));
         } else {

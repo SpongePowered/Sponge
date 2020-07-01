@@ -59,7 +59,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
@@ -163,7 +163,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.spawnPos;
                 final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) this.world).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
-                SpongeImpl.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (Humanoid) this));
+                SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (Humanoid) this));
                 csm.popCause();
             }
             return true;

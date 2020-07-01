@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
@@ -71,12 +71,12 @@ public abstract class AdvancementListMixin {
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 
-            SpongeImpl.getCauseStackManager().pushCause(SpongeImpl.getRegistry());
+            SpongeCommon.getCauseStackManager().pushCause(SpongeCommon.getRegistry());
             final SpongeGameRegistryRegisterEvent<org.spongepowered.api.advancement.Advancement> event =
-                    new SpongeGameRegistryRegisterEvent<>(SpongeImpl.getCauseStackManager().getCurrentCause(),
+                    new SpongeGameRegistryRegisterEvent<>(SpongeCommon.getCauseStackManager().getCurrentCause(),
                             org.spongepowered.api.advancement.Advancement.class, AdvancementRegistryModule.getInstance());
             context.event(event);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
         }
     }
 
@@ -90,12 +90,12 @@ public abstract class AdvancementListMixin {
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 
-            SpongeImpl.getCauseStackManager().pushCause(SpongeImpl.getRegistry());
+            SpongeCommon.getCauseStackManager().pushCause(SpongeCommon.getRegistry());
             final SpongeGameRegistryRegisterEvent<AdvancementTree> event =
-                    new SpongeGameRegistryRegisterEvent<>(SpongeImpl.getCauseStackManager().getCurrentCause(),
+                    new SpongeGameRegistryRegisterEvent<>(SpongeCommon.getCauseStackManager().getCurrentCause(),
                             AdvancementTree.class, AdvancementTreeRegistryModule.getInstance());
             context.event(event);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
         }
         LOGGER.info("Loaded " + this.roots.size() + " advancement trees");
     }

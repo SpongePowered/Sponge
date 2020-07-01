@@ -25,29 +25,19 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.google.gson.JsonElement;
-import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Unit;
-import net.minecraft.util.Util;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.ForcedChunksSaveData;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.server.TicketType;
 import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -67,7 +57,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
@@ -118,7 +108,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      */
     @Overwrite
     public void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions) {
-        SpongeImpl.getWorldManager().loadAllWorlds((MinecraftServer) (Object) this, directoryName, levelName, seed, type, generatorOptions);
+        SpongeCommon.getWorldManager().loadAllWorlds((MinecraftServer) (Object) this, directoryName, levelName, seed, type, generatorOptions);
     }
 
     @Inject(method = "loadInitialChunks", at = @At("HEAD"), cancellable = true)
@@ -200,7 +190,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             return this.tickCounter + 1;
         }
 
-        final int autoPlayerSaveInterval = SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getAutoPlayerSaveInterval();
+        final int autoPlayerSaveInterval = SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getAutoPlayerSaveInterval();
         if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
             this.shadow$getPlayerList().saveAllPlayerData();
         }

@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
@@ -73,7 +73,7 @@ public abstract class NoteBlockMixin extends BlockMixin {
             final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
                     frame.getCurrentCause(), (org.spongepowered.api.world.World) worldIn, pos,
                     NoteBlockInstrument.byState(state).getSound(), instrumentType,
-                    SpongeImpl.getRegistry().getCatalogRegistry().requireRegistry(NotePitch.class).getByValue(param), pitch);
+                    SpongeCommon.getRegistry().getCatalogRegistry().requireRegistry(NotePitch.class).getByValue(param), pitch);
             if (event.isCancelled()) {
                 callbackInfo.setReturnValue(true);
             }

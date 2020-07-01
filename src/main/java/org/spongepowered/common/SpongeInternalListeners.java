@@ -74,7 +74,7 @@ public class SpongeInternalListeners {
             if (event.getWorld().getProperties().getUniqueId().equals(Sponge.getServer().getWorldManager().getDefaultProperties().get()
                     .getUniqueId())) {
                 SpongeUsernameCache.save();
-                final MinecraftServer server = SpongeImpl.getServer();
+                final MinecraftServer server = SpongeCommon.getServer();
                 ((PlayerProfileCacheBridge) server.getPlayerProfileCache()).bridge$setCanSave(true);
                 server.getPlayerProfileCache().save();
                 ((PlayerProfileCacheBridge) server.getPlayerProfileCache()).bridge$setCanSave(false);

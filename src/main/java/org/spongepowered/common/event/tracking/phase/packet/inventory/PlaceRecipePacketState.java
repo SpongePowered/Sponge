@@ -44,7 +44,7 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
@@ -75,7 +75,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
 
         final Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
-            SpongeImpl.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
+            SpongeCommon.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return;
         }
 
@@ -106,7 +106,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
                 event = SpongeEventFactory.createClickContainerEventRecipeSingle(frame.getCurrentCause(), ((Container) player.openContainer),
                         cursorTransaction, (Recipe) recipe, Optional.empty(), transactions);
             }
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             if (event.isCancelled() || !event.getCursorTransaction().isValid()) {
                 PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
             } else {

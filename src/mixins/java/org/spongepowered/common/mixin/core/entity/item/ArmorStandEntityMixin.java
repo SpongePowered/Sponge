@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
 
@@ -60,7 +60,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
                 (Entity) this, new ArrayList<>(), Math.max(1000, this.shadow$getHealth()));
-            if (SpongeImpl.postEvent(event)) {
+            if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(false);
             }
             if (event.getFinalDamage() < this.shadow$getHealth()) {
@@ -95,7 +95,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
                 (Entity) this, new ArrayList<>(), amount);
-            if (!SpongeImpl.postEvent(event)) {
+            if (!SpongeCommon.postEvent(event)) {
                 this.shadow$func_213817_e(source, (float) event.getFinalDamage());
             }
         }
@@ -119,7 +119,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
                 (Entity) this, new ArrayList<>(), 0);
-            if (SpongeImpl.postEvent(event)) {
+            if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(false);
             }
         }

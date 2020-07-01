@@ -50,7 +50,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.LoggingCategory;
@@ -78,22 +78,22 @@ public final class SpongeHooks {
     private static Object2LongMap<CollisionWarning> recentWarnings = new Object2LongOpenHashMap<>();
 
     public static void logInfo(final String msg, final Object... args) {
-        SpongeImpl.getLogger().info(MessageFormat.format(msg, args));
+        SpongeCommon.getLogger().info(MessageFormat.format(msg, args));
     }
 
     public static void logWarning(final String msg, final Object... args) {
-        SpongeImpl.getLogger().warn(MessageFormat.format(msg, args));
+        SpongeCommon.getLogger().warn(MessageFormat.format(msg, args));
     }
 
     public static void logSevere(final String msg, final Object... args) {
-        SpongeImpl.getLogger().fatal(MessageFormat.format(msg, args));
+        SpongeCommon.getLogger().fatal(MessageFormat.format(msg, args));
     }
 
     public static void logStack(final SpongeConfig<? extends GeneralConfigBase> config) {
         if (config.getConfig().getLogging().logWithStackTraces()) {
             final Throwable ex = new Throwable();
             ex.fillInStackTrace();
-            SpongeImpl.getLogger().catching(Level.INFO, ex);
+            SpongeCommon.getLogger().catching(Level.INFO, ex);
         }
     }
 
@@ -407,7 +407,7 @@ public final class SpongeHooks {
     }
 
     public static void enableThreadContentionMonitoring() {
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getDebug().isEnableThreadContentionMonitoring()) {
+        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getDebug().isEnableThreadContentionMonitoring()) {
             return;
         }
         final ThreadMXBean mbean = ManagementFactory.getThreadMXBean();
@@ -417,7 +417,7 @@ public final class SpongeHooks {
     public static SpongeConfig<? extends GeneralConfigBase> getOrLoadConfigAdapter(@Nullable final Path dimensionPath, @Nullable
     final String worldDirectory) {
         if (worldDirectory != null) {
-            final org.spongepowered.api.world.server.ServerWorld apiWorld = SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldDirectory)
+            final org.spongepowered.api.world.server.ServerWorld apiWorld = SpongeCommon.getGame().getServer().getWorldManager().getWorld(worldDirectory)
                     .orElse(null);
             if (apiWorld != null) {
                 return ((WorldInfoBridge) apiWorld.getProperties()).bridge$getConfigAdapter();
@@ -426,15 +426,15 @@ public final class SpongeHooks {
 
         if (dimensionPath == null) {
             // If no dimension type, go global
-            return SpongeImpl.getGlobalConfigAdapter();
+            return SpongeCommon.getGlobalConfigAdapter();
         }
 
         // No in-memory config objects, lookup from disk.
         final SpongeConfig<DimensionConfig> dimensionConfigAdapter = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimensionPath
-            .resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfigAdapter(), false);
+            .resolve("dimension.conf"), SpongeCommon.ECOSYSTEM_ID, SpongeCommon.getGlobalConfigAdapter(), false);
 
         if (worldDirectory != null) {
-            return new SpongeConfig<>(SpongeConfig.Type.WORLD, dimensionPath.resolve(worldDirectory).resolve("world.conf"), SpongeImpl.ECOSYSTEM_ID,
+            return new SpongeConfig<>(SpongeConfig.Type.WORLD, dimensionPath.resolve(worldDirectory).resolve("world.conf"), SpongeCommon.ECOSYSTEM_ID,
                 dimensionConfigAdapter, false);
         }
 
@@ -442,7 +442,7 @@ public final class SpongeHooks {
     }
 
     public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(final Map<String, Tristate> entries) {
-        return SpongeImpl.getGlobalConfigAdapter()
+        return SpongeCommon.getGlobalConfigAdapter()
             .updateSetting("metrics.plugin-states", entries, new TypeToken<Map<String, Tristate>>() {
                 private static final long serialVersionUID = 190617916448550012L;
             });

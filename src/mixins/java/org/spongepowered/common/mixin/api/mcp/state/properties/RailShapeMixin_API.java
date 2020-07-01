@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -57,7 +57,7 @@ public abstract class RailShapeMixin_API implements RailDirection {
 
     @Override
     public RailDirection cycleNext() {
-        final SimpleRegistry<RailDirection> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(RailDirection.class);
+        final SimpleRegistry<RailDirection> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(RailDirection.class);
         final int meta = this.meta;
         RailDirection next = registry.getByValue(meta + 1);
         if (next == null) {

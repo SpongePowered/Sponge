@@ -41,10 +41,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
-
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -78,7 +76,7 @@ public abstract class BreedGoalMixin {
                 final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
                     SpongeEventFactory.createBreedingEventFindMate(Sponge.getCauseStackManager().getCurrentCause(), TristateResult.Result.DEFAULT,
                         TristateResult.Result.DEFAULT, (Animal) nearbyMate, true);
-                if (SpongeImpl.postEvent(event) || event.getResult() == TristateResult.Result.DENY) {
+                if (SpongeCommon.postEvent(event) || event.getResult() == TristateResult.Result.DENY) {
                     nearbyMate = null;
                 }
             }
@@ -113,7 +111,7 @@ public abstract class BreedGoalMixin {
                 frame.pushCause(this.field_75391_e);
                 final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
                     SpongeEventFactory.createBreedingEventBreed(Sponge.getCauseStackManager().getCurrentCause(), (Ageable) baby);
-                this.impl$spawnEntityResult = !SpongeImpl.postEvent(event) && world.addEntity(baby);
+                this.impl$spawnEntityResult = !SpongeCommon.postEvent(event) && world.addEntity(baby);
             }
         } else {
             this.impl$spawnEntityResult = world.addEntity(baby);

@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 @Mixin(MapStorage.class)
 public abstract class MapStorageMixin {
@@ -46,15 +46,15 @@ public abstract class MapStorageMixin {
 
     @Inject(method = "getOrLoadData", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false))
     private void impl$ValidateCallingOnMainThread(CallbackInfoReturnable<WorldSavedData> ci) {
-        if (this.saveHandler != null && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            SpongeImpl.getLogger().error("Attempted to call MapStorage#getOrLoadData from off the main thread!", new Exception("Dummy exception"));
+        if (this.saveHandler != null && !SpongeCommon.getServer().isCallingFromMinecraftThread()) {
+            SpongeCommon.getLogger().error("Attempted to call MapStorage#getOrLoadData from off the main thread!", new Exception("Dummy exception"));
         }
     }
 
     @Inject(method = "setData", at = @At(value = "HEAD"))
     private void impl$ValidateCallingOnMainThread(CallbackInfo ci) {
-        if (this.saveHandler != null && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            SpongeImpl.getLogger().error("Attempted to call MapStorage#setData from off the main thread!", new Exception("Dummy exception"));
+        if (this.saveHandler != null && !SpongeCommon.getServer().isCallingFromMinecraftThread()) {
+            SpongeCommon.getLogger().error("Attempted to call MapStorage#setData from off the main thread!", new Exception("Dummy exception"));
         }
     }
 

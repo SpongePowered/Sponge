@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -58,7 +58,7 @@ public abstract class EntityMixin_Vanilla implements DataCompoundHolder {
     @Inject(method = "<init>(Lnet/minecraft/world/World;)V", at = @At("RETURN"), remap = false)
     private void vanillaImpl$pushConstructPost(World world, CallbackInfo ci) {
         Sponge.getCauseStackManager().pushCause(world);
-        SpongeImpl.postEvent(SpongeEventFactory.createConstructEntityEventPost(Sponge.getCauseStackManager().getCurrentCause(),
+        SpongeCommon.postEvent(SpongeEventFactory.createConstructEntityEventPost(Sponge.getCauseStackManager().getCurrentCause(),
             ((org.spongepowered.api.entity.Entity) this), ((org.spongepowered.api.entity.Entity) this).getType(), ((org.spongepowered.api.entity.Entity) this).getTransform()));
         Sponge.getCauseStackManager().popCause();
     }

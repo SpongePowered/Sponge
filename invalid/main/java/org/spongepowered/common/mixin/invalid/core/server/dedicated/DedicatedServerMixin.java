@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
 import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 
@@ -60,7 +60,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Inject(method = "systemExitNow", at = @At("HEAD"))
     private void postGameStoppingEvent(final CallbackInfo ci) {
-        SpongeImpl.postShutdownEvents();
+        SpongeCommon.postShutdownEvents();
     }
 
     @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/PropertyManager;getIntProperty(Ljava/lang/String;I)I"))

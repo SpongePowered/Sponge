@@ -58,7 +58,7 @@ import net.minecraft.network.play.client.CUseEntityPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryAddSlotState;
@@ -242,7 +242,7 @@ public final class PacketPhase {
 
         final BasicInventoryPacketState inventory = fromState(clickType(windowPacket.getSlotId()) | mode | unpacked);
         if (inventory == PacketPhase.Inventory.INVENTORY) {
-            SpongeImpl.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
+            SpongeCommon.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
         }
         return inventory;
     }
@@ -311,7 +311,7 @@ public final class PacketPhase {
             final CPlayerTryUseItemOnBlockPacket blockPlace = (CPlayerTryUseItemOnBlockPacket) packet;
             final BlockPos blockPos = blockPlace.func_218794_c().getPos();
             final Direction front = blockPlace.func_218794_c().getFace();
-            final MinecraftServer server = SpongeImpl.getServer();
+            final MinecraftServer server = SpongeCommon.getServer();
             if (blockPos.getY() < server.getBuildLimit() - 1 || front != Direction.UP && blockPos.getY() < server.getBuildLimit()) {
                 return PacketPhase.General.PLACE_BLOCK;
             }

@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeTrigger;
@@ -81,27 +81,27 @@ public abstract class ICriterionTrigger_ListenerMixin {
                 final TypeToken typeToken = TypeToken.of(filteredTrigger.getType().getConfigurationType());
                 final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause,
                         advancement, advancementCriterion, typeToken, player, filteredTrigger, true);
-                SpongeImpl.postEvent(event);
+                SpongeCommon.postEvent(event);
                 if (!event.getResult()) {
                     ci.cancel();
                     return;
                 }
             }
         }
-        SpongeImpl.getCauseStackManager().pushCause(this.criterionInstance);
+        SpongeCommon.getCauseStackManager().pushCause(this.criterionInstance);
         // Handle the score criteria ourselves, with each trigger will
         // the score be increased by one.
         if (advancementCriterion instanceof ScoreAdvancementCriterion) {
             ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer().getProgress(advancement)
                     .get((ScoreAdvancementCriterion) advancementCriterion).get().add(1);
             ci.cancel();
-            SpongeImpl.getCauseStackManager().popCause();
+            SpongeCommon.getCauseStackManager().popCause();
         }
     }
 
     @Inject(method = "grantCriterion", at = @At("RETURN"))
     private void impl$popCauseAtEndOfEvent(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
-        SpongeImpl.getCauseStackManager().popCause();
+        SpongeCommon.getCauseStackManager().popCause();
     }
 
 }

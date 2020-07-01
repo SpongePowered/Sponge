@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
@@ -170,7 +170,7 @@ public abstract class PlayerEntityMixin_Vanilla extends LivingEntityMixin implem
         Sponge.getCauseStackManager().pushCause(this);
         SleepingEvent.Pre event = SpongeEventFactory.createSleepingEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 ((org.spongepowered.api.world.World) this.world).createSnapshot(bedPos.getX(), bedPos.getY(), bedPos.getZ()), (Player) this);
-        if (SpongeImpl.postEvent(event)) {
+        if (SpongeCommon.postEvent(event)) {
             ci.setReturnValue(PlayerEntity.SleepResult.OTHER_PROBLEM);
         }
         Sponge.getCauseStackManager().popCause();
@@ -213,7 +213,7 @@ public abstract class PlayerEntityMixin_Vanilla extends LivingEntityMixin implem
             SleepingEvent.Post event = SpongeEventFactory.createSleepingEventPost(frame.getCurrentCause(), bed,
                     Optional.ofNullable(newLocation), (Player) this, setSpawn);
 
-            if (SpongeImpl.postEvent(event)) {
+            if (SpongeCommon.postEvent(event)) {
                 return;
             }
 
@@ -239,7 +239,7 @@ public abstract class PlayerEntityMixin_Vanilla extends LivingEntityMixin implem
                 }
 
                 // Sponge start
-                SpongeImpl.postEvent(SpongeEventFactory.createSleepingEventFinish(frame.getCurrentCause(), bed, (Player) this));
+                SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventFinish(frame.getCurrentCause(), bed, (Player) this));
             }
             // Sponge end
         }

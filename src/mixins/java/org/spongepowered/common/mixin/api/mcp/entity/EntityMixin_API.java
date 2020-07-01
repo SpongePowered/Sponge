@@ -66,7 +66,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
@@ -159,7 +159,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             return false;
         }
 
-        if (!SpongeImpl.getWorldManager().isDimensionTypeRegistered(((ServerWorld) location.getWorld()).getDimension().getType())) {
+        if (!SpongeCommon.getWorldManager().isDimensionTypeRegistered(((ServerWorld) location.getWorld()).getDimension().getType())) {
             return false;
         }
 
@@ -429,7 +429,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public boolean damage(final double damage, final org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource) {
         if (!(damageSource instanceof DamageSource)) {
-            SpongeImpl.getLogger().error("An illegal DamageSource was provided in the cause! The damage source must extend AbstractDamageSource!");
+            SpongeCommon.getLogger().error("An illegal DamageSource was provided in the cause! The damage source must extend AbstractDamageSource!");
             return false;
         }
         // Causes at this point should already be pushed from plugins before this point with the cause system.

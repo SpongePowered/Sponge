@@ -51,7 +51,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -135,7 +135,7 @@ public abstract class ItemFireworkMixin {
                 frame.pushCause(player);
                 ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                     EntityTypes.FIREWORK_ROCKET.get(), targetTransform, (org.spongepowered.api.world.World) world);
-                return SpongeImpl.postEvent(event);
+                return SpongeCommon.postEvent(event);
             }
         }
         return false;

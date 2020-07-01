@@ -37,7 +37,7 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -73,7 +73,7 @@ public class BlockStaticLiquidMixin {
             final ServerLocation<org.spongepowered.api.world.World> location = ServerLocation.of((org.spongepowered.api.world.World) world, target);
             final List<ServerLocation<org.spongepowered.api.world.World>> locations = Collections.singletonList(location);
             final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations);
-            if (!SpongeImpl.postEvent(event)) {
+            if (!SpongeCommon.postEvent(event)) {
                 return PhaseTracker.getInstance().setBlockState((ServerWorldBridge) world, pos, blockState, BlockChangeFlags.ALL);
             }
             return false;

@@ -58,7 +58,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
@@ -200,24 +200,24 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public Optional<WorldProperties> createProperties(String directoryName, WorldArchetype archetype) throws IOException {
-        return Optional.empty();
+    public CompletableFuture<Optional<WorldProperties>> createProperties(String directoryName, WorldArchetype archetype) {
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 
     @Override
-    public Optional<org.spongepowered.api.world.server.ServerWorld> loadWorld(String directoryName) {
-        return Optional.empty();
+    public CompletableFuture<Optional<org.spongepowered.api.world.server.ServerWorld>> loadWorld(String directoryName) {
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 
     @Override
-    public Optional<org.spongepowered.api.world.server.ServerWorld> loadWorld(WorldProperties properties) {
-        return Optional.empty();
+    public CompletableFuture<Optional<org.spongepowered.api.world.server.ServerWorld>> loadWorld(WorldProperties properties) {
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 
     @Override
-    public boolean unloadWorld(org.spongepowered.api.world.server.ServerWorld world) {
+    public CompletableFuture<Boolean> unloadWorld(org.spongepowered.api.world.server.ServerWorld world) {
         checkNotNull(world);
-        return false;
+        return CompletableFuture.completedFuture(false);
     }
 
     @Override
@@ -243,9 +243,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public boolean saveProperties(WorldProperties properties) {
+    public CompletableFuture<Boolean> saveProperties(WorldProperties properties) {
         checkNotNull(properties);
-        return false;
+        return CompletableFuture.completedFuture(false);
     }
 
     @Override
@@ -256,16 +256,16 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public Optional<WorldProperties> renameWorld(String oldDirectoryName, String newDirectoryName) {
+    public CompletableFuture<Optional<WorldProperties>> renameWorld(String oldDirectoryName, String newDirectoryName) {
         checkNotNull(oldDirectoryName);
         checkNotNull(newDirectoryName);
-        return Optional.empty();
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 
     @Override
     public CompletableFuture<Boolean> deleteWorld(String directoryName) {
         checkNotNull(directoryName);
-        return null;
+        return CompletableFuture.completedFuture(false);
     }
 
     @Override
@@ -361,7 +361,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     ((WorldInfoBridge) worldInfo).bridge$setGenerateSpawnOnLoad(true);
                 }
 
-                SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(SpongeImpl.getCauseStackManager().getCurrentCause(),
+                SpongeCommon.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(SpongeCommon.getCauseStackManager().getCurrentCause(),
                     (WorldArchetype) (Object) defaultSettings, (WorldProperties) worldInfo));
             } else {
                 worldInfo.setWorldName(directoryName);
@@ -438,7 +438,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             this.server.setDifficultyForAllWorlds(this.server.getDifficulty(), true);
 
-            SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(SpongeImpl.getCauseStackManager().getCurrentCause(), (World) serverWorld));
+            SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(SpongeCommon.getCauseStackManager().getCurrentCause(),
+                (org.spongepowered.api.world.server.ServerWorld) serverWorld));
 
             if (infoBridge.bridge$doesGenerateSpawnOnLoad()) {
                 this.loadSpawnChunks(serverWorld, chunkStatusListener);
@@ -514,7 +515,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             final String rawLogicType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
 
-            final SpongeDimensionType logicType = (SpongeDimensionType) SpongeImpl.getRegistry().getCatalogRegistry().get(org.spongepowered
+            final SpongeDimensionType logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.spongepowered
                 .api.world.dimension.DimensionType.class, CatalogKey.resolve(rawLogicType)).orElse(null);
 
             if (logicType == null) {

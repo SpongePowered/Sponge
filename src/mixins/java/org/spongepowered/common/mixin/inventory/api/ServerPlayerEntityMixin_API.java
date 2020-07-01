@@ -38,7 +38,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
@@ -68,7 +68,7 @@ public abstract class ServerPlayerEntityMixin_API implements ServerPlayer {
         ContainerBridge openContainer = (ContainerBridge) ((PlayerEntity) (Object) this).openContainer;
         if (openContainer.bridge$isInUse()) {
             final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delayTicks(0).execute(() -> {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
@@ -76,7 +76,7 @@ public abstract class ServerPlayerEntityMixin_API implements ServerPlayer {
                     this.closeInventory(); // Cause close event first. So cursor item is not lost.
                     this.openInventory(inventory); // Then open the inventory
                 }
-            }).plugin(SpongeImpl.getPlugin()).build();
+            }).plugin(SpongeCommon.getPlugin()).build();
             return this.getOpenInventory();
         }
         return Optional.ofNullable((Container) InventoryEventFactory.displayContainer((ServerPlayerEntity) (Object) this, inventory, displayName));
@@ -88,14 +88,14 @@ public abstract class ServerPlayerEntityMixin_API implements ServerPlayer {
         net.minecraft.inventory.container.Container openContainer = ((PlayerEntity) (Object) this).openContainer;
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
             final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
-            SpongeImpl.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delayTicks(0).delayTicks(0).execute(() -> {
                 try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
                     cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
                     this.closeInventory();
                 }
-            }).plugin(SpongeImpl.getPlugin()).build();
+            }).plugin(SpongeCommon.getPlugin()).build();
             return false;
         }
         // Create Close_Window to capture item drops

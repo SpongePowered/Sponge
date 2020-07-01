@@ -32,7 +32,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.profile.property.ProfileProperty;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.profile.query.GameProfileQuery;
 import org.spongepowered.common.profile.query.NameQuery;
 import org.spongepowered.common.profile.query.UniqueIdQuery;
@@ -50,8 +50,8 @@ import javax.annotation.Nullable;
 
 public final class SpongeProfileManager implements GameProfileManager {
 
-    private static final int LOOKUP_INTERVAL = SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getGameProfileQueryTaskInterval();
-    private final GameProfileCache defaultCache = (GameProfileCache) SpongeImpl.getServer().getPlayerProfileCache();
+    private static final int LOOKUP_INTERVAL = SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getGameProfileQueryTaskInterval();
+    private final GameProfileCache defaultCache = (GameProfileCache) SpongeCommon.getServer().getPlayerProfileCache();
     private GameProfileCache cache = this.defaultCache;
     private ExecutorService gameLookupExecutorService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Sponge - Async User Lookup Thread").build());
 
@@ -132,7 +132,7 @@ public final class SpongeProfileManager implements GameProfileManager {
     }
 
     private <T> CompletableFuture<T> submitTask(Callable<T> callable) {
-        return SpongeImpl.getAsyncScheduler().submit(callable);
+        return SpongeCommon.getAsyncScheduler().submit(callable);
     }
 
 }

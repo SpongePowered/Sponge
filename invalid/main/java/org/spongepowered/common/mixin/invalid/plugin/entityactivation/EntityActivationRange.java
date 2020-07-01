@@ -59,7 +59,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -234,7 +234,7 @@ public class EntityActivationRange {
             }
 
             maxRange = Math.min((((org.spongepowered.api.world.World) world).getViewDistance() << 4) - 8, maxRange);
-            ((ActivationCapabilityBridge) player).activation$setActivatedTick(SpongeImpl.getServer().getTickCounter());
+            ((ActivationCapabilityBridge) player).activation$setActivatedTick(SpongeCommon.getServer().getTickCounter());
             growBb(maxBB, player.getBoundingBox(), maxRange, 256, maxRange);
 
             final int i = MathHelper.floor(maxBB.minX / 16.0D);
@@ -266,7 +266,7 @@ public class EntityActivationRange {
                 final Entity entity = (Entity) o;
                 final EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
                 final ActivationCapabilityBridge spongeEntity = (ActivationCapabilityBridge) entity;
-                final long currentTick = SpongeImpl.getServer().getTickCounter();
+                final long currentTick = SpongeCommon.getServer().getTickCounter();
                 if (!((EntityBridge) entity).bridge$shouldTick()) {
                     continue;
                 }
@@ -407,7 +407,7 @@ public class EntityActivationRange {
             return true;
         }
 
-        final long currentTick = SpongeImpl.getServer().getTickCounter();
+        final long currentTick = SpongeCommon.getServer().getTickCounter();
         final ActivationCapabilityBridge spongeEntity = (ActivationCapabilityBridge) entity;
         boolean isActive = spongeEntity.activation$getActivatedTick() >= currentTick || spongeEntity.activation$getDefaultActivationState();
 
@@ -438,7 +438,7 @@ public class EntityActivationRange {
         checkNotNull(type, "type");
 
         final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeImpl.getGlobalConfigAdapter();
+        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeCommon.getGlobalConfigAdapter();
 
         final boolean autoPopulate = worldConfigAdapter.getConfig().getEntityActivationRange().autoPopulateData();
         boolean requiresSave = false;

@@ -69,7 +69,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.teleport.PortalAgent;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
@@ -170,7 +170,7 @@ public final class EntityUtil {
                 event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform.getPosition(), context.getExitTransform().getPosition(),
                         (org.spongepowered.api.world.server.ServerWorld) fromWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld, sEntity, context.getTeleporter(), true, true);
 
-                if (SpongeImpl.postEvent(event)) {
+                if (SpongeCommon.postEvent(event)) {
                     // Mods may cancel this event in order to run custom transfer logic
                     // We need to make sure to only rollback if they completely changed the world
                     if (event.getFromWorld() != sEntity.getWorld()) {
@@ -308,7 +308,7 @@ public final class EntityUtil {
             return null;
         }
 
-        final PlayerList playerList = SpongeImpl.getServer().getPlayerList();
+        final PlayerList playerList = SpongeCommon.getServer().getPlayerList();
         final Player sPlayer = (Player) player;
         final Transform fromTransform = sPlayer.getTransform();
         final ServerWorld fromWorld = (ServerWorld) sPlayer.getWorld();
@@ -341,7 +341,7 @@ public final class EntityUtil {
                 event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform.getPosition(), context.getExitTransform().getPosition(),
                         (org.spongepowered.api.world.server.ServerWorld) fromWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld, sPlayer, context.getTeleporter(), true, true);
 
-                if (SpongeImpl.postEvent(event)) {
+                if (SpongeCommon.postEvent(event)) {
                     // Mods may cancel this event in order to run custom transfer logic
                     // We need to make sure to only rollback if they completely changed the world
                     if (event.getFromWorld() != sPlayer.getWorld()) {
@@ -510,7 +510,7 @@ public final class EntityUtil {
     private static InvokingTeleporterContext createInvokingTeleporterPhase(final Entity entity, ServerWorld toWorld, ForgeITeleporterBridge teleporter) {
         SpongeImplHooks.registerPortalAgentType(teleporter);
 
-        final MinecraftServer mcServer = SpongeImpl.getServer();
+        final MinecraftServer mcServer = SpongeCommon.getServer();
         final org.spongepowered.api.entity.Entity sEntity = (org.spongepowered.api.entity.Entity) entity;
         final Transform fromTransform = sEntity.getTransform();
         final ServerWorld fromWorld = ((ServerWorld) entity.world);
@@ -534,7 +534,7 @@ public final class EntityUtil {
                     try {
                         spongeWorld = Sponge.getServer().getWorldManager().loadWorld(properties).join();
                     } catch (IOException e) {
-                        SpongeImpl.getLogger().error("Error while loading target world " + worldName, e);
+                        SpongeCommon.getLogger().error("Error while loading target world " + worldName, e);
                         spongeWorld = Optional.empty();
                     }
                     if (spongeWorld.isPresent()) {
@@ -675,7 +675,7 @@ public final class EntityUtil {
 
             final MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(),
                 fromTransform.getPosition(), toTransform.getPosition(), fromWorld, toWorld, (org.spongepowered.api.entity.Entity) entityIn, false);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             return event;
         }
     }

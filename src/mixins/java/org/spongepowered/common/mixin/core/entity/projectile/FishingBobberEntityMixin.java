@@ -54,7 +54,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
@@ -80,7 +80,8 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
 
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(CallbackInfo ci) {
-        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventHookEntity(Sponge.getCauseStackManager().getCurrentCause(), (Entity) this.caughtEntity, (FishingBobber) this))) {
+        if (SpongeCommon
+            .postEvent(SpongeEventFactory.createFishingEventHookEntity(Sponge.getCauseStackManager().getCurrentCause(), (Entity) this.caughtEntity, (FishingBobber) this))) {
             this.caughtEntity = null;
             ci.cancel();
         }
@@ -116,7 +117,7 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
             }
             Sponge.getCauseStackManager().pushCause(this.angler);
 
-            if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStop(Sponge.getCauseStackManager().getCurrentCause(), ((FishingBobber) this), transactions))) {
+            if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStop(Sponge.getCauseStackManager().getCurrentCause(), ((FishingBobber) this), transactions))) {
                 // Event is cancelled
                 return -1;
             }

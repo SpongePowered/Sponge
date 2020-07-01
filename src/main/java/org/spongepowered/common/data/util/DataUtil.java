@@ -31,7 +31,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -54,9 +54,9 @@ public final class DataUtil {
         final double y = view.getDouble(Queries.POSITION_Y).orElseThrow(dataNotFound());
         final double z = view.getDouble(Queries.POSITION_Z).orElseThrow(dataNotFound());
         if (castToInt) {
-            return ServerLocation.of(SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), (int) x, (int) y, (int) z);
+            return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), (int) x, (int) y, (int) z);
         }
-        return ServerLocation.of(SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), x, y, z);
+        return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), x, y, z);
     }
 
     public static Vector3i getPosition3i(final DataView view) {

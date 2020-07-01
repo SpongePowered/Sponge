@@ -49,7 +49,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
@@ -195,7 +195,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
                 formatter, (ServerPlayer) this.player, instant, false
 
         );
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         if (!event.isMessageCancelled() && !event.getMessage().isEmpty()) {
             event.getChannel().ifPresent(eventChannel -> eventChannel.send(this.player, event.getMessage()));
         }

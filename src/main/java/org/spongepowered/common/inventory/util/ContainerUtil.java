@@ -47,7 +47,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.inventory.container.AbstractFurnaceContainerAccessor;
 import org.spongepowered.common.accessor.inventory.container.BeaconContainerAccessor;
 import org.spongepowered.common.accessor.inventory.container.BrewingStandContainerAccessor;
@@ -206,7 +206,8 @@ public final class ContainerUtil {
                 additional.add(new GridInventoryLens(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
             }
         } catch (Exception e) {
-            SpongeImpl.getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);
+            SpongeCommon
+                .getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);
         }
 
 

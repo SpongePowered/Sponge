@@ -64,7 +64,7 @@ import org.spongepowered.api.world.volume.block.worker.MutableBlockVolumeStream;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.util.Constants;
@@ -609,13 +609,13 @@ public abstract class ChunkMixin_API implements Chunk {
             return Optional.of(this);
         }
 
-        final int index = SpongeImpl.directionToIndex(direction);
-        final Direction secondary = SpongeImpl.getSecondaryDirection(direction);
+        final int index = SpongeCommon.directionToIndex(direction);
+        final Direction secondary = SpongeCommon.getSecondaryDirection(direction);
         Chunk neighbor = null;
         neighbor = (Chunk) ((ChunkBridge) this).bridge$getNeighborArray()[index];
 
         if (neighbor == null && shouldLoad) {
-            final Vector3i neighborPosition = this.getPosition().add(SpongeImpl.getCardinalDirection(direction).asBlockOffset());
+            final Vector3i neighborPosition = this.getPosition().add(SpongeCommon.getCardinalDirection(direction).asBlockOffset());
             final Optional<Chunk> cardinal = this.getWorld().loadChunk(neighborPosition, true);
             if (cardinal.isPresent()) {
                 neighbor = cardinal.get();

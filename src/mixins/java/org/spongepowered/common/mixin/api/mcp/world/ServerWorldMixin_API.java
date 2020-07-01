@@ -63,7 +63,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -140,7 +140,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
                     .add("%s : %s", "World Name", ((SaveHandlerAccessor) this.shadow$getSaveHandler()).accessor$getName())
                     .add("%s : %s", "Dimension", this.getProperties().getDimensionType())
                     .add("Please report this to sponge developers so they may potentially fix this")
-                    .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+                    .trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
             return null;
         }
         return worldDirectory.toPath();
@@ -179,7 +179,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
                 event =
                 SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                         explosion, this);
-        if (SpongeImpl.postEvent(event)) {
+        if (SpongeCommon.postEvent(event)) {
             this.impl$processingExplosion = false;
             return;
         }

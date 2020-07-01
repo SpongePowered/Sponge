@@ -47,7 +47,7 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -142,7 +142,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<ServerLocation> getLocation() {
-        Optional<ServerWorld> optional = SpongeImpl.getGame().getServer().getWorldManager().getWorld(this.worldUuid);
+        Optional<ServerWorld> optional = SpongeCommon.getGame().getServer().getWorldManager().getWorld(this.worldUuid);
         if (optional.isPresent()) {
             final ServerLocation location = ServerLocation.of(optional.get(), this.position);
             return Optional.of(location);
@@ -402,7 +402,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return Optional.of(entity);
             }
         }
-        Optional<World> world = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
+        Optional<World> world = SpongeCommon.getGame().getServer().getWorld(this.worldUuid);
         if (!world.isPresent()) {
             return Optional.empty();
         }

@@ -42,7 +42,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -99,7 +99,7 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
                 .createChangeInventoryEventHeld(frame.getCurrentCause(), slotNew, (Inventory) inventoryContainer,
                     slotPrev, transactions);
             final net.minecraft.inventory.container.Container openContainer = player.openContainer;
-            SpongeImpl.postEvent(changeInventoryEventHeld);
+            SpongeCommon.postEvent(changeInventoryEventHeld);
             if (changeInventoryEventHeld.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
                 changeInventoryEventHeld.getTransactions())) {
                 player.connection.sendPacket(new SHeldItemChangePacket(previousSlot));

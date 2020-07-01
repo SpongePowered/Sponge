@@ -36,7 +36,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -123,7 +123,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
             this.tracker$profileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
         }
         if (this.tracker$userService == null) {
-            this.tracker$userService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
+            this.tracker$userService = SpongeCommon.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
 
         // check username cache

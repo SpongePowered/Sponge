@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -173,7 +173,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
             frame.pushCause(source);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(),
                 (TNTMinecart) this, new ArrayList<>(), 0, amount);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
             }

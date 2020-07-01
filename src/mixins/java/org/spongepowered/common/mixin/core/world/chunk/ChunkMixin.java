@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -237,7 +237,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
 
     @Override
     public void bridge$setNeighbor(final Direction direction, @Nullable final net.minecraft.world.chunk.Chunk neighbor) {
-        this.impl$neighbors[SpongeImpl.directionToIndex(direction)] = neighbor;
+        this.impl$neighbors[SpongeCommon.directionToIndex(direction)] = neighbor;
     }
 
     @Override

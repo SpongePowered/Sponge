@@ -38,7 +38,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.util.text.event.HoverEventBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -72,7 +72,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                         String name = nbt.getString("name");
                         EntityType type = null;
                         if (nbt.contains("type", Constants.NBT.TAG_STRING)) {
-                            type = SpongeImpl.getGame().getRegistry().getCatalogRegistry().get(EntityType.class,
+                            type = SpongeCommon.getGame().getRegistry().getCatalogRegistry().get(EntityType.class,
                                 CatalogKey.resolve(name)).orElse(null);
                         }
 

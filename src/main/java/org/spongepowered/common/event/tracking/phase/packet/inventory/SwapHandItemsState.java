@@ -31,7 +31,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
@@ -59,7 +59,7 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
             final TrackedInventoryBridge mixinInventory = ((TrackedInventoryBridge) player.inventory);
             final List<SlotTransaction> trans = mixinInventory.bridge$getCapturedSlotTransactions();
             final ChangeInventoryEvent.SwapHand swapItemEvent = this.createInventoryEvent(((Inventory) player.inventory), trans);
-            SpongeImpl.postEvent(swapItemEvent);
+            SpongeCommon.postEvent(swapItemEvent);
             PacketPhaseUtil.handleSlotRestore(player, null, swapItemEvent.getTransactions(), swapItemEvent.isCancelled());
             mixinInventory.bridge$setCaptureInventory(false);
             mixinInventory.bridge$getCapturedSlotTransactions().clear();

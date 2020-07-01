@@ -30,7 +30,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Optional;
 
@@ -41,7 +41,7 @@ public final class CatalogTypeTypeSerializer implements TypeSerializer<CatalogTy
 
     @Override
     public CatalogType deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        Optional<? extends CatalogType> ret = SpongeImpl.getRegistry().getCatalogRegistry().get(type.getRawType().asSubclass(CatalogType.class),
+        Optional<? extends CatalogType> ret = SpongeCommon.getRegistry().getCatalogRegistry().get(type.getRawType().asSubclass(CatalogType.class),
             CatalogKey.resolve(value.getString()));
         if (!ret.isPresent()) {
             throw new ObjectMappingException("Input '" + value.getValue() + "' was not a valid value for type " + type);

@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Map;
 
@@ -83,7 +83,7 @@ public abstract class CompoundNBTMixin {
                 }
             }
             printer.add();
-            printer.log(SpongeImpl.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.getLogger(), Level.ERROR);
             return null;
         }
     }
@@ -92,7 +92,7 @@ public abstract class CompoundNBTMixin {
     private INBT impl$checkForNullNBTValuesDuringCopy(CompoundNBT compound, String key, INBT value) {
         if (value == null) {
             final IllegalStateException exception = new IllegalStateException("There is a null NBT component in the compound for key: " + key);
-            SpongeImpl.getLogger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"
+            SpongeCommon.getLogger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"
                                          + "If you are seeing this, then Sponge is preventing an exception from being thrown due to unforseen\n"
                                          + "possible bugs in any mods present. Please report this to SpongePowered and/or the relative mod\n"
                                          + "authors for the offending compound data!", exception);

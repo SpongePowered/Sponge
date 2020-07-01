@@ -34,7 +34,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -171,7 +171,7 @@ public abstract class BlockTransaction {
                     .add("Original State", this.addedSnapshot.getState())
                     .add("Tile Entity", this.added)
                     .toString();
-                SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured Tile Entity adding! Skipping change: " + transactionForLogging);
+                SpongeCommon.getLogger().warn("Unloaded/Missing World for a captured Tile Entity adding! Skipping change: " + transactionForLogging);
                 //noinspection ConstantConditions
                 this.added.setWorld(null);
                 this.added.remove();
@@ -250,7 +250,7 @@ public abstract class BlockTransaction {
                     .add("Original State", this.tileSnapshot.getState())
                     .add("Tile Entity", this.removed)
                     .toString();
-                SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured Tile Entity removal! Skipping change: " + transactionForLogging);
+                SpongeCommon.getLogger().warn("Unloaded/Missing World for a captured Tile Entity removal! Skipping change: " + transactionForLogging);
                 //noinspection ConstantConditions
                 this.removed.setWorld(null);
                 this.removed.remove();
@@ -427,7 +427,7 @@ public abstract class BlockTransaction {
                     .add("Original State", this.original.getState())
                     .add("Changed State", this.newState)
                     .toString();
-                SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured block change! Skipping change: " + transactionForLogging);
+                SpongeCommon.getLogger().warn("Unloaded/Missing World for a captured block change! Skipping change: " + transactionForLogging);
                 return;
             }
             final ServerWorld serverWorld = maybeWorld.get();

@@ -24,31 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai.goal;
 
-import com.google.common.base.MoreObjects;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.ai.goal.GoalExecutor;
-import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
-import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.ai.goal.GoalEvent;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.ai.GoalBridge;
-import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
-import org.spongepowered.common.event.ShouldFire;
-
-import javax.annotation.Nullable;
-import java.util.Set;
 
 @Mixin(GoalSelector.class)
 public abstract class GoalSelectorMixin_Invalid {

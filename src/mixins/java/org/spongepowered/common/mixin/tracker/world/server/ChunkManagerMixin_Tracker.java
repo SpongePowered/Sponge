@@ -39,10 +39,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhasePrinter;
@@ -60,7 +59,7 @@ public class ChunkManagerMixin_Tracker {
         at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
     private IllegalStateException impl$reportEntityAlreadyTrackedWithWorld(final String string, final Entity entityIn) {
         final IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, this.world.getWorldInfo().getWorldName()));
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors()) {
+        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors()) {
             PhasePrinter.printMessageWithCaughtException(PhaseTracker.getInstance(), "Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
         }
         return exception;
@@ -81,7 +80,7 @@ public class ChunkManagerMixin_Tracker {
                             .add(" %s : %s", "Chunk Pos", chunk.getPos().toString())
                             .add()
                             .add(new Exception("Async Chunk Load Detected"))
-                            .log(SpongeImpl.getLogger(), Level.ERROR)
+                            .log(SpongeCommon.getLogger(), Level.ERROR)
                             ;
                     return;
                 }

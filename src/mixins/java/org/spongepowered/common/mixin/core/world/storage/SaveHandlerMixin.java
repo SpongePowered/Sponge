@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
 import org.spongepowered.common.util.Constants;
@@ -182,7 +182,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
             if (this.impl$loadSpongeLevelData(info, spongeOldFile, false)) {
                 if (exceptionRaised) {
                     // Tell the user we successfully loaded a backup
-                    SpongeImpl.getLogger().warn("Successfully loaded backup data file {} for world '{}'.", spongeFile.getName(), info.getWorldName());
+                    SpongeCommon.getLogger().warn("Successfully loaded backup data file {} for world '{}'.", spongeFile.getName(), info.getWorldName());
 
                     // Delete the "current" file so we don't accidentally make it the backup file.
                     spongeFile.delete();

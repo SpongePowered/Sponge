@@ -31,7 +31,7 @@ import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -71,7 +71,7 @@ final class ConsoleCommandCompleter implements Completer {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
-            SpongeImpl.getLogger().error("Failed to tab complete", e);
+            SpongeCommon.getLogger().error("Failed to tab complete", e);
         }
     }
 

@@ -49,7 +49,7 @@ import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.volume.biome.MutableBiomeVolume;
 import org.spongepowered.api.world.volume.block.MutableBlockVolume;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.schematic.SchematicUpdater1_to_2;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
@@ -106,7 +106,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     @Override
     public Schematic translate(DataView unprocessed) throws InvalidDataException {
         if (VANILLA_FIXER == null) {
-            VANILLA_FIXER = ((MinecraftServerAccessor) SpongeImpl.getServer()).accessor$getDataFixer();
+            VANILLA_FIXER = ((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$getDataFixer();
         }
         final int version = unprocessed.getInt(Constants.Sponge.Schematic.VERSION).get();
         // TODO version conversions
@@ -147,7 +147,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 for (final String modId : mods) {
                     if (!Sponge.getPluginManager().getPlugin(modId).isPresent()) {
                         if (MISSING_MOD_IDS.add(modId)) {
-                            SpongeImpl.getLogger().warn("When attempting to load the Schematic: " + schematicName + " there is a missing modid: " + modId + " some blocks/tiles/entities may not load correctly.");
+                            SpongeCommon
+                                .getLogger().warn("When attempting to load the Schematic: " + schematicName + " there is a missing modid: " + modId + " some blocks/tiles/entities may not load correctly.");
                         }
                     }
                 }

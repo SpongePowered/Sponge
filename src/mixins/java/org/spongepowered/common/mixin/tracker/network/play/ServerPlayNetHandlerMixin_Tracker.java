@@ -34,7 +34,6 @@ import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.Humanoid;
@@ -48,7 +47,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -121,7 +120,7 @@ public class ServerPlayNetHandlerMixin_Tracker {
         if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
             return;
         }
-        SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
+        SpongeCommonEventFactory.lastAnimationPacketTick = SpongeCommon.getServer().getTickCounter();
         SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
         if (ShouldFire.ANIMATE_HAND_EVENT) {
             final HandType handType = (HandType) (Object) packetIn.getHand();
@@ -131,7 +130,7 @@ public class ServerPlayNetHandlerMixin_Tracker {
             causeStackManager.addContext(EventContextKeys.USED_HAND, handType);
             final AnimateHandEvent event =
                     SpongeEventFactory.createAnimateHandEvent(causeStackManager.getCurrentCause(), handType, (Humanoid) this.player);
-            if (SpongeImpl.postEvent(event)) {
+            if (SpongeCommon.postEvent(event)) {
                 ci.cancel();
             }
         }
@@ -155,6 +154,6 @@ public class ServerPlayNetHandlerMixin_Tracker {
         if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
             return;
         }
-        SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
+        SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeCommon.getServer().getTickCounter();
     }
 }

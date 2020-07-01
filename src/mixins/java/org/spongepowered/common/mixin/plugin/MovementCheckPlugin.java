@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.plugin;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.List;
 import java.util.Set;
@@ -46,7 +46,7 @@ public class MovementCheckPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeImpl.getGlobalConfigAdapter().getConfig().getModules().useMovementChecks();
+        return SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().useMovementChecks();
     }
 
     @Override

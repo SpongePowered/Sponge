@@ -50,7 +50,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -90,7 +90,7 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
                                           final ITickList<Fluid> fluidTickList, final long inhabitedTime, final ChunkSection[] sections, final Consumer<Chunk> chunkConsumer, final CallbackInfo ci) {
         this.tracker$userStorageService = world != null && !((WorldBridge) world).bridge$isFake()
                                   ? null
-                                  : SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+                                  : SpongeCommon.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
     }
 
     @Override
@@ -281,7 +281,7 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
         final UUID uuid = (((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getUniqueIdForIndex(ownerIndex)).orElse(null);
         if (uuid != null) {
             // Verify id is valid and not invalid
-            if (SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+            if (SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
                 this.tracker$trackedIntBlockPositions.remove(key);
                 return Optional.empty();
             }
@@ -389,7 +389,7 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
                     .add(" %s : %d, %d", "Chunk Pos", this.shadow$getPos().x, this.shadow$getPos().z)
                     .add()
                     .add(new Exception("Async Chunk Load Detected"))
-                    .log(SpongeImpl.getLogger(), Level.ERROR)
+                    .log(SpongeCommon.getLogger(), Level.ERROR)
                     ;
                 return;
             }

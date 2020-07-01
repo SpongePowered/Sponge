@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.lang.reflect.Type;
 import java.util.Iterator;
@@ -60,7 +60,7 @@ public abstract class ProfileSearchResultsResponseSerializerMixin {
                 this.uuidPattern = Pattern.compile("[0-9a-fA-F-]+");
             }
             if (!this.uuidPattern.matcher(id).matches()) {
-                SpongeImpl.getLogger().debug("Received invalid profile from Mojang for username " + element.get("name") + ", skipping");
+                SpongeCommon.getLogger().debug("Received invalid profile from Mojang for username " + element.get("name") + ", skipping");
                 iterator.remove();
             }
         }

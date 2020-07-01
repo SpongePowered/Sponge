@@ -31,7 +31,7 @@ import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.tileentity.SkullTileEntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.data.processor.common.SkullUtils;
@@ -84,7 +84,7 @@ public abstract class SkullTileEntityMixin extends org.spongepowered.common.mixi
                         ((SkullTileEntityBridge) this).bridge$setPlayerProfile((GameProfile) newProfile, false);
                         ((TileEntityBridge) this).bridge$markDirty();
                     } else {
-                        SpongeImpl.getLogger().warn("Could not update player GameProfile for Skull: ",
+                        SpongeCommon.getLogger().warn("Could not update player GameProfile for Skull: ",
                                 thrown.getMessage());
                     }
                     return newProfile;

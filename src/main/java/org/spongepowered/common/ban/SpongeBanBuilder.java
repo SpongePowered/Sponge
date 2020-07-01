@@ -35,7 +35,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.IPBanListAccessor;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -124,7 +124,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
         checkState(this.address != null, "Address cannot be null!");
 
         // This *should* be a static method, but apparently not...
-        final IPBanList ipBans = SpongeImpl.getServer().getPlayerList().getBannedIPs();
+        final IPBanList ipBans = SpongeCommon.getServer().getPlayerList().getBannedIPs();
         return (Ban) new IPBanEntry(((IPBanListAccessor) ipBans).accessor$addressToString(
             new InetSocketAddress(this.address, 0)),
             Date.from(this.start),

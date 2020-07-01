@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
@@ -63,8 +63,8 @@ public abstract class SaveHandlerMixin_Vanilla implements SaveHandlerBridge {
         final NBTTagCompound nbttagcompound1, final NBTTagCompound nbttagcompound2) {
         // Only save dimension data to root world
         if (this.worldDirectory.getParentFile() == null
-            || (SpongeImpl.getGame().getPlatform().getType().isClient()
-                && this.worldDirectory.getParentFile().toPath().equals(SpongeImpl.getGame().getSavesDirectory()))) {
+            || (SpongeCommon.getGame().getPlatform().getType().isClient()
+                && this.worldDirectory.getParentFile().toPath().equals(SpongeCommon.getGame().getSavesDirectory()))) {
             if (!nbttagcompound2.hasKey(VanillaConstants.Forge.FORGE_DIMENSION_DATA_TAG, Constants.NBT.TAG_COMPOUND)) {
                 nbttagcompound2.setTag(VanillaConstants.Forge.FORGE_DIMENSION_DATA_TAG, new NBTTagCompound());
             }
@@ -93,13 +93,13 @@ public abstract class SaveHandlerMixin_Vanilla implements SaveHandlerBridge {
             try {
                 this.bridge$loadSpongeDatData(info);
             } catch (Exception ex) {
-                SpongeImpl.getLogger().error("Exception reading Sponge level data", ex);
+                SpongeCommon.getLogger().error("Exception reading Sponge level data", ex);
                 return null;
             }
 
             return info;
         } catch (Exception exception) {
-            SpongeImpl.getLogger().error("Exception reading " + file, exception);
+            SpongeCommon.getLogger().error("Exception reading " + file, exception);
             return null;
         }
     }

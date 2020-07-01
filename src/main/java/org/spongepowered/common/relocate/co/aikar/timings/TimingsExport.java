@@ -43,7 +43,7 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
 
@@ -81,7 +81,7 @@ class TimingsExport extends Thread {
     }
 
     private static String getServerName() {
-        return SpongeImpl.getPlugin().getMetadata().getName() + " " + SpongeImpl.getPlugin().getMetadata().getVersion();
+        return SpongeCommon.getPlugin().getMetadata().getName() + " " + SpongeCommon.getPlugin().getMetadata().getVersion();
     }
 
     /**
@@ -110,11 +110,11 @@ class TimingsExport extends Thread {
         listeners.send(Text.of(TextColors.GREEN, "Preparing Timings Report..."));
         lastReport = now;
 
-        Platform platform = SpongeImpl.getGame().getPlatform();
+        Platform platform = SpongeCommon.getGame().getPlatform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
                 .add("version", platform.getContainer(IMPLEMENTATION).getMetadata().getVersion())
-                .add("maxplayers", SpongeImpl.getGame().getServer().getMaxPlayers())
+                .add("maxplayers", SpongeCommon.getGame().getServer().getMaxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
@@ -122,7 +122,7 @@ class TimingsExport extends Thread {
             builder.add("server", getServerName())
                     .add("motd", Sponge.getServer().getMotd().toPlain())
                     .add("online-mode", Sponge.getServer().getOnlineMode())
-                    .add("icon", SpongeImpl.getServer().getServerStatusResponse().getFavicon());
+                    .add("icon", SpongeCommon.getServer().getServerStatusResponse().getFavicon());
         }
 
         final Runtime runtime = Runtime.getRuntime();
@@ -182,7 +182,7 @@ class TimingsExport extends Thread {
 
         // Information about loaded plugins
 
-        builder.add("plugins", JSONUtil.mapArrayToObject(SpongeImpl.getGame().getPluginManager().getPlugins(), (plugin) -> {
+        builder.add("plugins", JSONUtil.mapArrayToObject(SpongeCommon.getGame().getPluginManager().getPlugins(), (plugin) -> {
             return JSONUtil.objectBuilder().add(plugin.getMetadata().getId(), JSONUtil.objectBuilder()
                     .add("version", plugin.getMetadata().getVersion())
                     .add("description", plugin.getMetadata().getDescription().orElse(""))
@@ -194,7 +194,7 @@ class TimingsExport extends Thread {
         // Information on the users Config
 
         builder.add("config", JSONUtil.objectBuilder()
-                .add("sponge", serializeConfigNode(SpongeImpl.getGlobalConfigAdapter().getRootNode())));
+                .add("sponge", serializeConfigNode(SpongeCommon.getGlobalConfigAdapter().getRootNode())));
 
         new TimingsExport(listeners, builder.build(), history).start();
     }
@@ -287,7 +287,7 @@ class TimingsExport extends Thread {
                 try {
                     hostname = InetAddress.getLocalHost().getHostName();
                 } catch (IOException e) {
-                    SpongeImpl.getLogger().warn("Could not get own server hostname when uploading timings - falling back to 'localhost'", e);
+                    SpongeCommon.getLogger().warn("Could not get own server hostname when uploading timings - falling back to 'localhost'", e);
                 }
             }
             HttpURLConnection con = (HttpURLConnection) new URL("https://timings.aikar.co/post").openConnection();
@@ -314,7 +314,7 @@ class TimingsExport extends Thread {
                         TextColors.RED, "Upload Error: " + con.getResponseCode() + ": " + con.getResponseMessage()));
                 this.listeners.send(Text.of(TextColors.RED, "Check your logs for more information"));
                 if (response != null) {
-                    SpongeImpl.getLogger().fatal(response);
+                    SpongeCommon.getLogger().fatal(response);
                 }
                 return;
             }
@@ -323,14 +323,14 @@ class TimingsExport extends Thread {
             this.listeners.send(Text.of(TextColors.GREEN, "View Timings Report: ", TextActions.openUrl(new URL(timingsURL)), timingsURL));
 
             if (response != null && !response.isEmpty()) {
-                SpongeImpl.getLogger().info("Timing Response: " + response);
+                SpongeCommon.getLogger().info("Timing Response: " + response);
             }
         } catch (IOException ex) {
             this.listeners.send(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
             if (response != null) {
-                SpongeImpl.getLogger().fatal(response);
+                SpongeCommon.getLogger().fatal(response);
             }
-            SpongeImpl.getLogger().fatal("Could not paste timings", ex);
+            SpongeCommon.getLogger().fatal("Could not paste timings", ex);
         } finally {
             this.listeners.done(timingsURL);
         }
@@ -351,7 +351,7 @@ class TimingsExport extends Thread {
 
         } catch (IOException ex) {
             this.listeners.send(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
-            SpongeImpl.getLogger().warn(con.getResponseMessage(), ex);
+            SpongeCommon.getLogger().warn(con.getResponseMessage(), ex);
             return null;
         } finally {
             if (is != null) {

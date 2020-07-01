@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeScore;
@@ -62,7 +62,7 @@ public abstract class ScoreMixin implements ScoreBridge {
             return; // Let the normal logic take over.
         }
         if (this.impl$spongeScore == null) {
-            SpongeImpl.getLogger().warn("Returning score because null score!");
+            SpongeCommon.getLogger().warn("Returning score because null score!");
             ci.cancel();
             return;
         }

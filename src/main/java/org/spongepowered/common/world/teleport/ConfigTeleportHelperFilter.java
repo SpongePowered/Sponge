@@ -29,7 +29,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.config.category.TeleportHelperCategory;
 
 import java.util.List;
@@ -57,7 +57,7 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
 
     private static void updateCacheIfNecessary() {
         if (floorBlockTypes == null) {
-            TeleportHelperCategory teleportHelperCat = SpongeImpl.getGlobalConfigAdapter().getConfig().getTeleportHelper();
+            TeleportHelperCategory teleportHelperCat = SpongeCommon.getGlobalConfigAdapter().getConfig().getTeleportHelper();
             floorBlockTypes = teleportHelperCat.getUnsafeFloorBlockIds().stream()
                     .map(x -> CatalogKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockType.class, x).orElse(null))

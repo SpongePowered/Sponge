@@ -45,14 +45,17 @@ import org.spongepowered.api.world.gen.GeneratorTypes;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.api.world.teleport.PortalAgentTypes;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.util.Functional;
 
 import javax.annotation.Nullable;
+
+import java.util.Random;
 import java.util.function.Supplier;
 
 public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
+
+    private static final Random RANDOM = new Random();
 
     private CatalogKey key;
     private Supplier<? extends DimensionType> dimensionType = Functional.throwNull();
@@ -93,7 +96,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     @Override
     public SpongeWorldArchetypeBuilder randomSeed() {
-        this.seed = SpongeImpl.random.nextLong();
+        this.seed = SpongeWorldArchetypeBuilder.RANDOM.nextLong();
         this.randomizedSeed = true;
         return this;
     }
@@ -255,7 +258,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.gameMode = GameModes.SURVIVAL;
         this.difficulty = Difficulties.NORMAL;
         this.serializationBehavior = SerializationBehaviors.AUTOMATIC;
-        this.seed = SpongeImpl.random.nextLong();
+        this.seed = SpongeWorldArchetypeBuilder.RANDOM.nextLong();
         this.randomizedSeed = true;
         this.areStructuresEnabled = true;
         this.hardcore = false;

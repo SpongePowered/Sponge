@@ -77,7 +77,7 @@ import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -143,7 +143,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
 
     @Override
     public boolean isLoaded() {
-        return SpongeImpl.getWorldManager().getWorld(this.shadow$getDimension().getType()) == (Object) this;
+        return SpongeCommon.getWorldManager().getWorld(this.shadow$getDimension().getType()) == (Object) this;
     }
 
     @Override

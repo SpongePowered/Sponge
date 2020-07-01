@@ -39,7 +39,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -113,7 +113,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                     final List<Entity> itemEntities = items.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                     final DropItemEvent.Destruct event =
                         SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
-                    SpongeImpl.postEvent(event);
+                    SpongeCommon.postEvent(event);
                     if (!event.isCancelled()) {
                         EntityUtil.processEntitySpawnsFromEvent(context, event);
                     }

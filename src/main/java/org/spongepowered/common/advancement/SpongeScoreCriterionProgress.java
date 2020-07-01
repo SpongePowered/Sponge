@@ -32,12 +32,11 @@ import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 
@@ -83,7 +82,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
             return this.get();
         }
         final CriterionEvent.Score.Change event;
-        final Cause cause = SpongeImpl.getCauseStackManager().getCurrentCause();
+        final Cause cause = SpongeCommon.getCauseStackManager().getCurrentCause();
         final Advancement advancement = this.progress.getAdvancement();
         final ServerPlayer player = ((PlayerAdvancementsBridge) ((AdvancementProgressBridge) this.progress).bridge$getPlayerAdvancements()).bridge$getPlayer();
         if (lastScore == this.getGoal()) {
@@ -96,7 +95,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
             event = SpongeEventFactory.createCriterionEventScoreChange(
                     cause, advancement, this.getCriterion(), player, lastScore, score);
         }
-        if (SpongeImpl.postEvent(event)) {
+        if (SpongeCommon.postEvent(event)) {
             return this.get();
         }
         SpongeScoreCriterion.BYPASS_EVENT = true;

@@ -66,9 +66,9 @@ public class SpongePlatform implements Platform {
     // For SpongeForge (implementation container isn't registered when SpongePlatform is initialized)
     protected SpongePlatform(PluginManager manager,  PluginContainer impl, MinecraftVersion minecraftVersion) {
         this.api = manager.getPlugin(Platform.API_ID).get();
-        this.common = manager.getPlugin(SpongeImpl.ECOSYSTEM_ID).get();
+        this.common = manager.getPlugin(SpongeCommon.ECOSYSTEM_ID).get();
         this.impl = checkNotNull(impl, "impl");
-        this.minecraft = manager.getPlugin(SpongeImpl.GAME_ID).get();
+        this.minecraft = manager.getPlugin(SpongeCommon.GAME_ID).get();
         this.minecraftVersion = checkNotNull(minecraftVersion, "minecraftVersion");
 
         this.platformMap.put("Type", this.getType());

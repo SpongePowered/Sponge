@@ -45,9 +45,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -116,7 +115,7 @@ public class DispenserBlockMixin_Tracker {
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(dispenserTileEntity);
             final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), ImmutableList.of(snapshot), original);
-            SpongeImpl.postEvent(dropEvent);
+            SpongeCommon.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
                 dispenserTileEntity.setInventorySlotContents(index, this.tracker$originalItem);
                 context.getCapturedItems().clear();

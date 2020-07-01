@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.world;
 
-import net.minecraft.util.registry.SimpleRegistry;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.api.world.teleport.PortalAgentType;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 
@@ -61,7 +60,8 @@ public final class VirtualPortalAgent implements PortalAgent {
         return TYPES.computeIfAbsent(teleporterClass, klass -> {
             final String modId = SpongeImplHooks.getModIdFromClass(teleporterClass);
             final String name = teleporterClass.getSimpleName().toLowerCase(Locale.ENGLISH);
-            return SpongeImpl.getRegistry().getCatalogRegistry().registerCatalog(new SpongePortalAgentType(CatalogKey.of(modId, name), teleporterClass));
+            return SpongeCommon
+                .getRegistry().getCatalogRegistry().registerCatalog(new SpongePortalAgentType(CatalogKey.of(modId, name), teleporterClass));
         });
     }
 

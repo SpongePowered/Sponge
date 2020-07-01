@@ -31,7 +31,7 @@ import com.google.common.collect.Sets;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.plugin.PluginContainer;
@@ -259,7 +259,7 @@ public abstract class SpongeScheduler implements Scheduler {
                 try {
                     task.task.getConsumer().accept(task);
                 } catch (Throwable t) {
-                    SpongeImpl.getLogger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
+                    SpongeCommon.getLogger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
                             task.getName(), task.getOwner(), t);
                 }
             } finally {
@@ -291,7 +291,7 @@ public abstract class SpongeScheduler implements Scheduler {
 
     public <V> Future<V> execute(Callable<V> callable) {
         final FutureTask<V> runnable = new FutureTask<>(callable);
-        submit(new SpongeTaskBuilder().execute(runnable).plugin(SpongeImpl.getPlugin()).build());
+        submit(new SpongeTaskBuilder().execute(runnable).plugin(SpongeCommon.getPlugin()).build());
         return runnable;
     }
 

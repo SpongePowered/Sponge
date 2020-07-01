@@ -39,7 +39,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
@@ -252,7 +252,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public P buildAndSwitch() {
         this.isCompleted = true;
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
+        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
             this.stackTrace = new Exception("Debug Trace").getStackTrace();
         }
         PhaseTracker.getInstance().switchToPhase(this.state, this);
@@ -624,7 +624,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             // So, this part is interesting... Since the used frame is null, that means
             // the cause stack manager still has the refernce of this context/phase, we have
             // to "pop off" the list.
-            SpongeImpl.getCauseStackManager().popFrameMutator(this);
+            SpongeCommon.getCauseStackManager().popFrameMutator(this);
         }
         if (this.usedFrame != null) {
             this.usedFrame.iterator().forEachRemaining(Sponge.getCauseStackManager()::popCauseFrame);
@@ -694,7 +694,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public void printTrace(final PrettyPrinter printer) {
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
+        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
             printer.add("Entrypoint:")
                 .add(this.stackTrace);
         }

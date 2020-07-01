@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -55,7 +55,7 @@ public abstract class DoorHingeSideMixin_API implements Hinge {
 
     @Override
     public Hinge cycleNext() {
-        final SimpleRegistry<Hinge> registry = SpongeImpl.getRegistry().getCatalogRegistry().getRegistry(Hinge.class);
+        final SimpleRegistry<Hinge> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(Hinge.class);
         final int index = registry.getId(this);
         Hinge next = registry.getByValue(index + 1);
         if (next == null) {

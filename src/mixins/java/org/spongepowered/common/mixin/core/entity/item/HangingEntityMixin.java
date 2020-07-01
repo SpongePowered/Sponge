@@ -42,14 +42,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
 import java.util.ArrayList;
-
-import javax.annotation.Nullable;
 
 @Mixin(HangingEntity.class)
 public abstract class HangingEntityMixin extends EntityMixin {
@@ -95,7 +93,7 @@ public abstract class HangingEntityMixin extends EntityMixin {
             frame.pushCause(source);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(),
                 (Entity) this, new ArrayList<>(), 0, amount);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
             }

@@ -32,7 +32,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -112,7 +112,7 @@ public final class UnknownPacketState extends BasicPacketState {
                             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
                             DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
                                 entities);
-                            SpongeImpl.postEvent(event);
+                            SpongeCommon.postEvent(event);
                             if (!event.isCancelled()) {
                                 processSpawnedEntities(player, event);
 
@@ -135,7 +135,7 @@ public final class UnknownPacketState extends BasicPacketState {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
                     DropItemEvent.Custom event =
                         SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
-                    SpongeImpl.postEvent(event);
+                    SpongeCommon.postEvent(event);
                     if (!event.isCancelled()) {
                         processSpawnedEntities(player, event);
 

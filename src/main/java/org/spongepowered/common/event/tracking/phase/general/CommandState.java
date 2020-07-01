@@ -44,7 +44,7 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -123,7 +123,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
             if (!list.isEmpty()) {
                 final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.getCurrentCause(),
                         ((Inventory) playerSource.get().inventory), list);
-                SpongeImpl.postEvent(event);
+                SpongeCommon.postEvent(event);
                 PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());
                 list.clear();
             }
@@ -150,7 +150,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                     final UUID key = entry.getKey();
                     @Nullable
                     net.minecraft.entity.Entity foundEntity = null;
-                    for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeImpl.getWorldManager().getWorlds())
+                    for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds())
                     {
                         final ServerWorld world = (ServerWorld) apiWorld;
                         final net.minecraft.entity.Entity entityFromUuid = world.getEntityByUuid(key);
@@ -186,7 +186,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                         csm.pushCause(affectedEntity.get());
                         final DropItemEvent.Destruct destruct =
                             SpongeEventFactory.createDropItemEventDestruct(csm.getCurrentCause(), itemEntities);
-                        SpongeImpl.postEvent(destruct);
+                        SpongeCommon.postEvent(destruct);
                         csm.popCause();
                         if (!destruct.isCancelled())
                         {

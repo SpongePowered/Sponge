@@ -29,7 +29,7 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.lang.reflect.TypeVariable;
 import java.util.Optional;
@@ -143,7 +143,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
             }
             return DataTransactionResult.failResult(replacementValue);
         } catch (Exception e) {
-            SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
+            SpongeCommon.getLogger().debug("An exception occurred when setting data: ", e);
             return DataTransactionResult.errorResult(replacementValue);
         }
     }
@@ -227,7 +227,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
             }
             return DataTransactionResult.failResult(replacementValue);
         } catch (Exception e) {
-            SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
+            SpongeCommon.getLogger().debug("An exception occurred when setting data: ", e);
             return DataTransactionResult.errorResult(replacementValue);
         }
     }

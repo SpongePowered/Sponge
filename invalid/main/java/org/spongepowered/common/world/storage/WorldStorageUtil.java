@@ -33,7 +33,7 @@ import net.minecraft.world.chunk.storage.RegionFileCache;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.util.Functional;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
@@ -53,7 +53,7 @@ import java.util.function.Function;
 public class WorldStorageUtil {
 
     public static CompletableFuture<Boolean> doesChunkExist(ServerWorld world, ChunkLoader chunkLoader, Vector3i chunkCoords) {
-        return doesChunkExist(world, chunkLoader, chunkCoords, SpongeImpl.getAsyncScheduler()::submit);
+        return doesChunkExist(world, chunkLoader, chunkCoords, SpongeCommon.getAsyncScheduler()::submit);
     }
 
     public static CompletableFuture<Boolean> doesChunkExistSync(ServerWorld world, ChunkLoader chunkLoader, Vector3i chunkCoords) {
@@ -78,7 +78,7 @@ public class WorldStorageUtil {
             return CompletableFuture.completedFuture(Optional.empty());
         }
         File worldDir = ((AnvilChunkLoaderBridge) chunkLoader).bridge$getWorldDir().toFile();
-        return SpongeImpl.getAsyncScheduler().submit(() -> {
+        return SpongeCommon.getAsyncScheduler().submit(() -> {
             DataInputStream stream = RegionFileCache.getChunkInputStream(worldDir, x, z);
             return Optional.ofNullable(readDataFromRegion(stream));
         });

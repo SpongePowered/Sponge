@@ -75,7 +75,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
@@ -183,7 +183,7 @@ public class ProjectileLauncher {
 
     static <P extends Projectile> Optional<P> doLaunch(World extent, P projectile) {
         final SpawnEntityEvent spawnEvent = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), Collections.singletonList(projectile));
-        SpongeImpl.getGame().getEventManager().post(spawnEvent);
+        SpongeCommon.getGame().getEventManager().post(spawnEvent);
         if (!spawnEvent.isCancelled() && extent.spawnEntity(projectile)) {
             return Optional.of(projectile);
         }

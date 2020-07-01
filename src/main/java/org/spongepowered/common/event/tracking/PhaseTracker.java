@@ -68,7 +68,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -145,7 +145,7 @@ public final class PhaseTracker {
                     }
 
                 })
-                .plugin(SpongeImpl.getPlugin())
+                .plugin(SpongeCommon.getPlugin())
                 .build();
     }
 
@@ -219,14 +219,14 @@ public final class PhaseTracker {
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
                 .add()
                 .add(new Exception("Async Block Change Detected"))
-                .log(SpongeImpl.getLogger(), Level.ERROR);
+                .log(SpongeCommon.getLogger(), Level.ERROR);
             // Maybe? I don't think this is wise.
             return;
         }
         checkNotNull(state, "State cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
             if (this.stack.size() > 6) {
                 if (this.stack.checkForRunaways(state, phaseContext)) {
                     PhasePrinter.printRunawayPhase(this.stack, state, phaseContext);
@@ -236,7 +236,7 @@ public final class PhaseTracker {
         }
 
         if (Sponge.isServerAvailable() && ((IPhaseState) state).shouldProvideModifiers(phaseContext)) {
-            SpongeImpl.getCauseStackManager().registerPhaseContextProvider(phaseContext);
+            SpongeCommon.getCauseStackManager().registerPhaseContextProvider(phaseContext);
         }
         this.stack.push(state, phaseContext);
     }
@@ -249,7 +249,7 @@ public final class PhaseTracker {
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
                 .add()
                 .add(new Exception("Async Block Change Detected"))
-                .log(SpongeImpl.getLogger(), Level.ERROR);
+                .log(SpongeCommon.getLogger(), Level.ERROR);
             return;
         }
         final PhaseContext<?> currentContext = this.stack.peek();
@@ -272,7 +272,7 @@ public final class PhaseTracker {
             return;
         }
 
-        if (SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() ) {
+        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() ) {
             if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING, null)) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
@@ -305,7 +305,7 @@ public final class PhaseTracker {
         this.stack.pop();
 
         if (this.stack.isEmpty()) {
-            for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeImpl.getWorldManager().getWorlds()) {
+            for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds()) {
                 final TrackedWorldBridge trackedWorld = (TrackedWorldBridge) apiWorld;
                 if (trackedWorld.bridge$getProxyAccess().hasProxy()) {
                     new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
@@ -323,7 +323,7 @@ public final class PhaseTracker {
 
 
     private void checkPhaseContextProcessed(final IPhaseState<?> state, final PhaseContext<?> context) {
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && PhasePrinter.printedExceptionsForUnprocessedState.contains(state)) {
+        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && PhasePrinter.printedExceptionsForUnprocessedState.contains(state)) {
             return;
         }
 
@@ -340,7 +340,7 @@ public final class PhaseTracker {
         if (blockIn == null) {
             // If the block is null, check with the PhaseState to see if it can perform a safe way
             final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
-            final PhaseTrackerCategory trackerConfig = SpongeImpl.getGlobalConfigAdapter().getConfig().getPhaseTracker();
+            final PhaseTrackerCategory trackerConfig = SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker();
 
             if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
                 // Try to save ourselves
@@ -450,7 +450,7 @@ public final class PhaseTracker {
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
                 .add()
                 .add(new Exception("Async Block Notifcation Detected"))
-                .log(SpongeImpl.getLogger(), Level.ERROR);
+                .log(SpongeCommon.getLogger(), Level.ERROR);
             // Maybe? I don't think this is wise to try and sync back a notification on the main thread.
             return;
         }
@@ -627,7 +627,7 @@ public final class PhaseTracker {
                 final ChangeBlockEvent normalEvent =
                         originalBlockSnapshot.blockChange.createEvent(currentCause, transactions);
                 try (@SuppressWarnings("try") final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    SpongeImpl.postEvent(normalEvent);
+                    SpongeCommon.postEvent(normalEvent);
                     // We put the normal event at the end of the cause, still keeping in line with the
                     // API contract that the ChangeBlockEvnets are pushed to the cause for Post, but they
                     // will not replace the root causes. Likewise, this does not leak into the cause stack
@@ -645,7 +645,7 @@ public final class PhaseTracker {
                     }
                     final ChangeBlockEvent.Post post = ((IPhaseState) phaseState).createChangeBlockPostEvent(context, transactions, normalizedEvent);
                     if (ShouldFire.CHANGE_BLOCK_EVENT_POST) {
-                        SpongeImpl.postEvent(post);
+                        SpongeCommon.postEvent(post);
                     }
                     if (post.isCancelled()) {
                         // And finally, if the post event is cancelled, mark the transaction as invalid.
@@ -893,7 +893,7 @@ public final class PhaseTracker {
         final SpawnEntityEvent.Custom
             event =
             SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         if (entity instanceof PlayerEntity || !event.isCancelled()) {
             EntityUtil.processEntitySpawn(entity, Optional::empty);
         }
@@ -913,7 +913,7 @@ public final class PhaseTracker {
      * @return True if the entity spawn is on the main thread.
      */
     public static boolean isEntitySpawnInvalid(final Entity entity) {
-        if (Sponge.isServerAvailable() && (Sponge.getServer().onMainThread() || SpongeImpl.getServer().isServerStopped())) {
+        if (Sponge.isServerAvailable() && (Sponge.getServer().onMainThread() || SpongeCommon.getServer().isServerStopped())) {
             return false;
         }
         PhasePrinter.printAsyncEntitySpawn(entity);

@@ -36,8 +36,8 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -144,7 +144,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
                             DropItemEvent.Custom event =
                                 SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
                                     entities);
-                            SpongeImpl.postEvent(event);
+                            SpongeCommon.postEvent(event);
                             if (!event.isCancelled()) {
                                 processSpawnedEntities(player, event);
                             }
@@ -162,7 +162,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
                 if (!entities.isEmpty()) {
                     DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
                         entities);
-                    SpongeImpl.postEvent(event);
+                    SpongeCommon.postEvent(event);
                     if (!event.isCancelled()) {
                         processSpawnedEntities(player, event);
                     }

@@ -45,7 +45,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhasePrinter;
@@ -105,7 +105,7 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
                 .add("%s : %s", "Entity Name", entityTypeString)
                 .add();
             PhasePrinter.generateVersionInfo(printer);
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.WARN);
+            printer.trace(System.err, SpongeCommon.getLogger(), Level.WARN);
             return null;
         }
         if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
@@ -113,7 +113,7 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.MOB_SPAWNER);
                 final Transform transform = Transform.of(new Vector3d(x, y, z));
                 final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), (EntityType) type.get(), transform, (org.spongepowered.api.world.World) world);
-                SpongeImpl.postEvent(event);
+                SpongeCommon.postEvent(event);
                 if (event.isCancelled()) {
                     return null;
                 }

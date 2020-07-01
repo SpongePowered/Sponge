@@ -36,7 +36,7 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.api.network.status.StatusClient;
 import org.spongepowered.api.network.status.StatusResponse;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.NetworkUtil;
@@ -69,7 +69,7 @@ public final class SpongeStatusResponse {
 
     @Nullable
     private static ServerStatusResponse call(ServerStatusResponse response, StatusClient client) {
-        if (!SpongeImpl.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.getServer()), client,
+        if (!SpongeCommon.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.getServer()), client,
             (ClientPingServerEvent.Response) response))) {
             return response;
         }

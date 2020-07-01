@@ -32,7 +32,7 @@ import net.minecraft.nbt.CompressedStreamTools;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 
 import java.io.InputStream;
@@ -68,7 +68,7 @@ public final class SpongePlayerDataHandler {
             return;
         }
         handlerInstance.playerDataMap = new ConcurrentHashMap<>();
-        final Path filePath = SpongeImpl.getWorldManager().getSavesDirectory().resolve("data").resolve
+        final Path filePath = SpongeCommon.getWorldManager().getSavesDirectory().resolve("data").resolve
                 (SPONGE_DATA);
 
         try {
@@ -81,7 +81,7 @@ public final class SpongePlayerDataHandler {
                     playerFiles.add(entry);
                 }
             } catch (DirectoryIteratorException e) {
-                SpongeImpl.getLogger().error("Something happened when trying to gather all player files", e);
+                SpongeCommon.getLogger().error("Something happened when trying to gather all player files", e);
             }
             for (final Path playerFile : playerFiles) {
                 if (Files.isReadable(playerFile)) {
@@ -106,7 +106,7 @@ public final class SpongePlayerDataHandler {
             playerFiles.clear();
 
         } catch (FileAlreadyExistsException e) {
-            SpongeImpl.getLogger().error("Someone went and created a file for the desired path: {}", filePath);
+            SpongeCommon.getLogger().error("Someone went and created a file for the desired path: {}", filePath);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -121,7 +121,7 @@ public final class SpongePlayerDataHandler {
         if (data != null) {
             saveFile(id.toString(), createCompoundFor(data));
         } else {
-            SpongeImpl.getLogger().error("Couldn't find a player data for the uuid: " + id.toString());
+            SpongeCommon.getLogger().error("Couldn't find a player data for the uuid: " + id.toString());
         }
     }
 
@@ -143,7 +143,7 @@ public final class SpongePlayerDataHandler {
             }
             Files.move(newDatPath, finalDatPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
-            SpongeImpl.getLogger().error("Failed to save player data for [{}]!", id, e);
+            SpongeCommon.getLogger().error("Failed to save player data for [{}]!", id, e);
         }
     }
 

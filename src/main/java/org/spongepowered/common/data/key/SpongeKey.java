@@ -33,7 +33,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.EmptyDataProvider;
 import org.spongepowered.common.data.value.ValueConstructor;
@@ -101,7 +101,7 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
 
     @Override
     public <E extends DataHolder> void registerEvent(Class<E> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
-        final PluginContainer currentContainer = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).orElse(SpongeImpl.getMinecraftPlugin());
+        final PluginContainer currentContainer = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).orElse(SpongeCommon.getMinecraftPlugin());
         SpongeDataManager.getInstance().registerKeyListener(new KeyBasedDataListener<>(holderFilter, this, listener, currentContainer));
     }
 

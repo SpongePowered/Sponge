@@ -73,7 +73,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
@@ -148,7 +148,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
             new ImmutableSpongeExperienceHolderData(this.experienceLevel, this.experienceTotal, this.bridge$getExperienceSinceLevel());
         final ChangeEntityExperienceEvent event = SpongeEventFactory.createChangeEntityExperienceEvent(
                 Sponge.getCauseStackManager().getCurrentCause(), immutable, data, (Player) this);
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
             return;
         }
@@ -156,7 +156,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         if (finalLevel != this.experienceLevel) {
             @SuppressWarnings("deprecation") final ChangeLevelEvent levelEvent = SpongeEventFactory.createChangeLevelEventTargetPlayer(
                     Sponge.getCauseStackManager().getCurrentCause(), this.experienceLevel, finalLevel, (Player) this);
-            SpongeImpl.postEvent(levelEvent);
+            SpongeCommon.postEvent(levelEvent);
             if (levelEvent.isCancelled()) {
                 return;
             }
@@ -339,7 +339,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                     final Cause currentCause = isMainthread ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), damageSource);
                     final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) targetEntity,
                         originalFunctions, knockbackModifier, originalBaseDamage);
-                    SpongeImpl.postEvent(event);
+                    SpongeCommon.postEvent(event);
                     if (isMainthread) {
                         Sponge.getCauseStackManager().popCause();
                     }
@@ -410,7 +410,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                                         final AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(
                                             currentCause, (org.spongepowered.api.entity.Entity) livingEntity,
                                             sweapingFunctions, 1, 1.0D);
-                                        SpongeImpl.postEvent(sweepingAttackEvent);
+                                        SpongeCommon.postEvent(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
                                             livingEntity
                                                 .knockBack((PlayerEntity) (Object) this, sweepingAttackEvent.getKnockbackModifier() * 0.4F,

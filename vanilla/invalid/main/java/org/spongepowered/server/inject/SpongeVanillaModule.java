@@ -37,8 +37,6 @@ import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.inject.SpongeImplementationModule;
 import org.spongepowered.vanilla.VanillaGame;
 import org.spongepowered.vanilla.network.VanillaChannelRegistrar;
-import org.spongepowered.vanilla.plugin.MetadataContainer;
-import org.spongepowered.vanilla.plugin.VanillaPluginManager;
 
 public class SpongeVanillaModule extends SpongeImplementationModule {
 

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
@@ -49,7 +49,7 @@ final class EventListenerPhaseState extends ListenerPhaseState<EventListenerPhas
         // TODO - determine if entities are needed to be captured.
         phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
             if (!this.hasPrintedEntities) {
-                SpongeImpl.getLogger()
+                SpongeCommon.getLogger()
                     .warn("Unexpected entities captured during a plugin listener. If this message pops up, please let sponge developers know");
                 this.hasPrintedEntities = true;
             }

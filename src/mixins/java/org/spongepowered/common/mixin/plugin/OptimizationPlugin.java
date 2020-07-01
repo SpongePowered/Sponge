@@ -29,7 +29,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.config.category.OptimizationCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
 
@@ -51,7 +51,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        final GlobalConfig globalConfig = SpongeImpl.getGlobalConfigAdapter().getConfig();
+        final GlobalConfig globalConfig = SpongeCommon.getGlobalConfigAdapter().getConfig();
         if (globalConfig.getModules().useOptimizations()) {
             final Function<OptimizationCategory, Boolean> optimizationCategoryBooleanFunction = mixinEnabledMappings.get(mixinClassName);
             if (optimizationCategoryBooleanFunction == null) {
@@ -91,7 +91,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     };
     public static final Function<OptimizationCategory, Boolean> PANDA_ONLY = (optimization) -> {
         if (optimization.usePandaRedstone() && optimization.useEigenRedstone()) {
-            SpongeImpl.getLogger().warn("Cannot enable both Panda Redstone and Eigen Redstone, use one or the other! Change optimizations.panda=true");
+            SpongeCommon.getLogger().warn("Cannot enable both Panda Redstone and Eigen Redstone, use one or the other! Change optimizations.panda=true");
             optimization.setPandaRedstone(false);
         }
         return optimization.usePandaRedstone() && !optimization.useEigenRedstone();

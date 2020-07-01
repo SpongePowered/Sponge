@@ -100,7 +100,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
@@ -208,7 +208,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Override
     public User bridge$getUserObject() {
-        final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        final UserStorageService service = SpongeCommon.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         if (this.impl$isFake) { // Fake players are recogizeable through the field set up with bridge$isFake.
             return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
         }
@@ -216,7 +216,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     private User impl$getUserObjectOnConstruction() {
-        final UserStorageService service = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        final UserStorageService service = SpongeCommon.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
         if (this.impl$isFake || !(service instanceof SpongeUserStorageService)) {
             return bridge$getUserObject();
         }
@@ -246,7 +246,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 final ChatVisibility visibility = (ChatVisibility) (Object) packet.getChatVisibility();
                 final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(cause, visibility, skinParts,
                     locale, (Player) this, packet.isColorsEnabled(), ((CClientSettingsPacketAccessor) packet).accessor$getView());
-                SpongeImpl.postEvent(event);
+                SpongeCommon.postEvent(event);
             } finally {
                 csm.popCause();
             }
@@ -431,7 +431,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 final ChangeGameModeEvent event =
                     SpongeEventFactory.createChangeGameModeEvent(frame.getCurrentCause(),
                         (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, (Player) this);
-                SpongeImpl.postEvent(event);
+                SpongeCommon.postEvent(event);
                 if (event.isCancelled()) {
                     ci.cancel();
                 }
@@ -541,7 +541,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             shift = At.Shift.AFTER))
     private void onSetContainer(final IInventory chestInventory, final CallbackInfo ci) {
         if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ChestContainer && this.shadow$isSpectator()) {
-            SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
+            SpongeCommon.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
             ((InventoryAdapter) this.openContainer).inventoryAdapter$setSpectatorChest(true);
         }
     }

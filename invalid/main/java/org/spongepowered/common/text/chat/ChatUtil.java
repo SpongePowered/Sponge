@@ -36,7 +36,7 @@ import org.spongepowered.api.event.message.MessageEvent.MessageFormatter;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -57,7 +57,7 @@ public final class ChatUtil {
         } else {
             event = SpongeEventFactory.createMessageChannelEvent(cause, channel, Optional.of(channel), formatter, false);
         }
-        if (!SpongeImpl.postEvent(event) && !event.isMessageCancelled() && event.getChannel().isPresent()) {
+        if (!SpongeCommon.postEvent(event) && !event.isMessageCancelled() && event.getChannel().isPresent()) {
             event.getChannel().get().send(source, event.getMessage(), isChat ? ChatTypes.CHAT : ChatTypes.SYSTEM);
         }
     }

@@ -58,7 +58,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
@@ -117,7 +117,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
                 csm.pushCause(entity);
             }
             final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.getCurrentCause(), (Living) this);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             csm.popCause();
             if (event.isCancelled()) {
                 ci.cancel();
@@ -221,7 +221,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         Sponge.getCauseStackManager().pushCause(damageSource);
         final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
             originalFunctions, knockbackModifier, originalBaseDamage);
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             return false;

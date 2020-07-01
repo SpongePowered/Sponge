@@ -49,7 +49,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.scheduler.SpongeScheduler;
@@ -120,7 +120,7 @@ public abstract class MinecraftServerMixin_API implements Server {
 
     @Override
     public WorldManager getWorldManager() {
-        return SpongeImpl.getWorldManager();
+        return SpongeCommon.getWorldManager();
     }
 
     @Override
@@ -203,7 +203,7 @@ public abstract class MinecraftServerMixin_API implements Server {
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
         if (this.api$scoreboard == null) {
-            final ServerWorld world = SpongeImpl.getWorldManager().getDefaultWorld();
+            final ServerWorld world = SpongeCommon.getWorldManager().getDefaultWorld();
             if (world == null) {
                 return Optional.empty();
             }

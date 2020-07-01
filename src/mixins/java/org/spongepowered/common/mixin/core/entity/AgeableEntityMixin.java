@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 
@@ -47,7 +47,7 @@ public abstract class AgeableEntityMixin extends EntityMixin {
         if (age == 0) {
             if (!((WorldBridge) this.world).bridge$isFake() && ShouldFire.BREED_ENTITY_EVENT_READY_TO_MATE && ((AgeableEntity) (Object) this) instanceof AnimalEntity) {
                 final BreedingEvent.ReadyToMate event = SpongeEventFactory.createBreedingEventReadyToMate(Sponge.getCauseStackManager().getCurrentCause(), (Animal) this);
-                SpongeImpl.postEvent(event);
+                SpongeCommon.postEvent(event);
             }
         }
     }

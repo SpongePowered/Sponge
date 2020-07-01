@@ -45,7 +45,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
@@ -100,7 +100,7 @@ public abstract class WorkbenchContainerMixin {
             // TODO can we just check the craftingInventory variable?
             final Inventory inv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
             if (!(inv instanceof CraftingInventory)) {
-                SpongeImpl.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.openContainer.getClass().getName());
+                SpongeCommon.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.openContainer.getClass().getName());
                 return;
             }
             final SlotTransaction previewTransaction = craftPreviewTransactions.get(craftPreviewTransactions.size() - 1);

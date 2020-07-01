@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public abstract class ThreadedFileIOBaseMixin {
 
     @Redirect(method = "processQueue", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;sleep(J)V", ordinal = 0))
     public void onProcessQueueThreadSleep(long millis) {
-        if (!SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().getFileIOThreadSleep()) {
+        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getGeneral().getFileIOThreadSleep()) {
             return;
         }
 

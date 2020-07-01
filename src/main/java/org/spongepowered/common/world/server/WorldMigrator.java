@@ -29,7 +29,7 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import org.apache.commons.io.FileUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.util.file.CopyFileVisitor;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -65,12 +65,12 @@ public final class WorldMigrator {
                     try {
                         worldContainer = Paths.get(worldContainer.toString()).resolve(containerCandidate);
                     } catch (InvalidPathException ipe) {
-                        SpongeImpl.getLogger().warn("Cannot use path [{}] specified under [world-container] in bukkit"
+                        SpongeCommon.getLogger().warn("Cannot use path [{}] specified under [world-container] in bukkit"
                                 + ".yml. Will use [{}] instead.", containerCandidate, worldContainer, ipe);
                     }
                 }
             } catch (IOException ioe) {
-                SpongeImpl.getLogger().warn("Cannot load bukkit.yml. Will use [{}] instead.", worldContainer, ioe);
+                SpongeCommon.getLogger().warn("Cannot load bukkit.yml. Will use [{}] instead.", worldContainer, ioe);
             }
         }
 
@@ -83,7 +83,7 @@ public final class WorldMigrator {
      * @param worldContainer The container to move worlds to
      */
     public static void migrateWorldsTo(Path worldContainer) {
-        SpongeImpl.getLogger().info("Checking for worlds that need to be migrated...");
+        SpongeCommon.getLogger().info("Checking for worlds that need to be migrated...");
 
         final Path oldWorldContainer = getOldWorldContainer();
         final List<Path> migrated = new ArrayList<>();
@@ -98,7 +98,7 @@ public final class WorldMigrator {
 
                     // Only copy over the old world files if we don't have it already.
                     if (Files.notExists(worldPath)) {
-                        SpongeImpl.getLogger().info("Migrating [{}] from [{}].", oldWorldPath.getFileName(), oldWorldContainer);
+                        SpongeCommon.getLogger().info("Migrating [{}] from [{}].", oldWorldPath.getFileName(), oldWorldContainer);
                         try {
                             worldPath = renameToVanillaNetherOrEnd(worldContainer, oldWorldPath, worldPath);
                             Files.walkFileTree(oldWorldPath, new CopyFileVisitor(worldPath));
@@ -106,11 +106,11 @@ public final class WorldMigrator {
                             removeInnerNameFolder(worldPath);
                             migrated.add(worldPath);
                         } catch (IOException ioe) {
-                            SpongeImpl.getLogger().warn("Failed to migrate [{}] from [{}] to [{}]", oldWorldPath.getFileName(), oldWorldContainer,
+                            SpongeCommon.getLogger().warn("Failed to migrate [{}] from [{}] to [{}]", oldWorldPath.getFileName(), oldWorldContainer,
                                     worldPath, ioe);
                         }
 
-                        SpongeImpl.getLogger()
+                        SpongeCommon.getLogger()
                                 .info("Migrated world [{}] from [{}] to [{}]", oldWorldPath.getFileName(), oldWorldContainer, worldPath);
                     }
                 }
@@ -118,9 +118,9 @@ public final class WorldMigrator {
             }
 
             if (!migrated.isEmpty()) {
-                SpongeImpl.getLogger().info("[{}] worlds have been migrated back to Vanilla's format.", migrated.size());
+                SpongeCommon.getLogger().info("[{}] worlds have been migrated back to Vanilla's format.", migrated.size());
             } else {
-                SpongeImpl.getLogger().info("No worlds were found in need of migration.");
+                SpongeCommon.getLogger().info("No worlds were found in need of migration.");
             }
         }
 

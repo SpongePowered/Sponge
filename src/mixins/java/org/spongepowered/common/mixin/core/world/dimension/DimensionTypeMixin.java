@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 
 import net.minecraft.world.dimension.DimensionType;
@@ -55,7 +55,7 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
     @Inject(method = "register", at = @At("RETURN"))
     private static void impl$setupBridgeFields(String id, final DimensionType dimensionType, CallbackInfoReturnable<DimensionType> cir) {
         // Commence hackery to get the dimension class this type is meant to make
-        final MinecraftServer server = SpongeImpl.getServer();
+        final MinecraftServer server = SpongeCommon.getServer();
         final WorldSettings worldSettings = new WorldSettings(0L, GameType.ADVENTURE, false, false, WorldType.DEFAULT);
         final IChunkStatusListener iChunkStatusListener = ((MinecraftServerAccessor) server).accessor$getChunkStatusListenerFactory().create(11);
         final ServerWorld fakeWorld = new ServerWorld(server, server.getBackgroundExecutor(),
@@ -68,7 +68,7 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
         if (logicType == null) {
             logicType = new SpongeDimensionType(id, ((DimensionTypeAccessor) dimensionType)::accessor$getFactory, dimensionType::hasSkyLight);
-            DimensionToTypeRegistry.getInstance().registerTypeMapping(dimensionClass, SpongeImpl.getRegistry().getCatalogRegistry().registerCatalog(logicType));
+            DimensionToTypeRegistry.getInstance().registerTypeMapping(dimensionClass, SpongeCommon.getRegistry().getCatalogRegistry().registerCatalog(logicType));
         }
     }
 

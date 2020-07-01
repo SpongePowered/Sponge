@@ -47,7 +47,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -101,7 +101,7 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
                 Cause.of(EventContext.empty(), this.loginGameProfile), (RemoteConnection) this.networkManager,
                 new MessageEvent.MessageFormatter(disconnectMessage), (GameProfile) this.loginGameProfile, false
         );
-        SpongeImpl.postEvent(event);
+        SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
             this.impl$disconnectClient(event.isMessageCancelled() ? Optional.empty() : Optional.of(event.getMessage()));
         }

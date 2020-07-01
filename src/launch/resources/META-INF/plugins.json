@@ -37,7 +37,7 @@
             "id": "sponge",
             "name": "Sponge",
             "version": "1.14.4-8.0.0",
-            "main-class": "org.spongepowered.common.launch.Launcher",
+            "main-class": "org.spongepowered.common.SpongeCommon",
             "description": "The common Sponge implementation",
             "links": {
                 "homepage": "https://www.spongepowered.org",

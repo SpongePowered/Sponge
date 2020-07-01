@@ -31,7 +31,7 @@ import net.minecraft.world.dimension.Dimension;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
@@ -59,9 +59,9 @@ public final class SpongeDimensionType implements DimensionType {
         final String dimName = id.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
 
         this.key = CatalogKey.of(modId, dimName);
-        this.configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(modId).resolve(dimName);
+        this.configPath = SpongeCommon.getSpongeConfigDir().resolve("worlds").resolve(modId).resolve(dimName);
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"),
-            SpongeImpl.ECOSYSTEM_ID, SpongeImpl.getGlobalConfigAdapter(), false);
+            SpongeCommon.ECOSYSTEM_ID, SpongeCommon.getGlobalConfigAdapter(), false);
         this.context = new Context(Context.DIMENSION_KEY, modId + "." + dimName);
         this.dimensionFactory = dimensionFactory;
         this.hasSkyLight = hasSkyLight;

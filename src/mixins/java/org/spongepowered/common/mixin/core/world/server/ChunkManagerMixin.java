@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 @Mixin(ChunkManager.class)
 public abstract class ChunkManagerMixin {
@@ -43,9 +43,9 @@ public abstract class ChunkManagerMixin {
 
     @Inject(method = "track(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
     private void onAddEntityToTracker(final Entity entityIn, final CallbackInfo ci) {
-        if (!SpongeImpl.getServer().isServerStopped() && !SpongeImpl.getServer().isOnExecutionThread() ) {
+        if (!SpongeCommon.getServer().isServerStopped() && !SpongeCommon.getServer().isOnExecutionThread() ) {
             Thread.dumpStack();
-            SpongeImpl.getLogger().error("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
+            SpongeCommon.getLogger().error("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
                     + " Skipping...");
             ci.cancel();
@@ -54,9 +54,9 @@ public abstract class ChunkManagerMixin {
 
     @Inject(method = "untrack", at = @At("HEAD"), cancellable = true)
     private void impl$onUntrackEntity(final Entity entityIn, final CallbackInfo ci) {
-        if (!SpongeImpl.getServer().isServerStopped() && !SpongeImpl.getServer().isOnExecutionThread() ) {
+        if (!SpongeCommon.getServer().isServerStopped() && !SpongeCommon.getServer().isOnExecutionThread() ) {
             Thread.dumpStack();
-            SpongeImpl.getLogger().error("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
+            SpongeCommon.getLogger().error("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
                     + "This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
                     + " Skipping...");
             ci.cancel();

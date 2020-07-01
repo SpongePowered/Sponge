@@ -58,7 +58,7 @@ public final class SpongeBootstrap {
     public static void initializeServices() {
         registerService(SqlService.class, new SqlServiceImpl());
         registerService(PaginationService.class, new SpongePaginationService());
-        if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
+        if (SpongeCommon.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             registerService(RconService.class, new MinecraftRconService((DedicatedServer) Sponge.getServer()));
         }
         registerService(UserStorageService.class, new SpongeUserStorageService());
@@ -73,12 +73,12 @@ public final class SpongeBootstrap {
     }
 
     public static void initializeCommands() {
-        commandManager.register(SpongeImpl.getSpongePlugin(), SpongeCommandFactory.createSpongeCommand(), "sponge", "sp");
-        commandManager.register(SpongeImpl.getSpongePlugin(), SpongeCommandFactory.createHelpCommand(), "help", "?");
-        commandManager.register(SpongeImpl.getSpongePlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
+        commandManager.register(SpongeCommon.getSpongePlugin(), SpongeCommandFactory.createSpongeCommand(), "sponge", "sp");
+        commandManager.register(SpongeCommon.getSpongePlugin(), SpongeCommandFactory.createHelpCommand(), "help", "?");
+        commandManager.register(SpongeCommon.getSpongePlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
     }
 
     private static <T> void registerService(Class<T> serviceClass, T serviceImpl) {
-        serviceManager.setProvider(SpongeImpl.getPlugin(), serviceClass, serviceImpl);
+        serviceManager.setProvider(SpongeCommon.getPlugin(), serviceClass, serviceImpl);
     }
 }

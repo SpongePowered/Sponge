@@ -28,7 +28,7 @@ import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.relocate.co.aikar.util.LoadingIntMap;
 
@@ -87,18 +87,18 @@ class TimingHandler implements Timing {
 
     @Override
     public void startTimingIfSync() {
-        if (!this.enabled || SpongeImpl.getGame().getPlatform().getExecutionType().isClient()) {
+        if (!this.enabled || SpongeCommon.getGame().getPlatform().getExecutionType().isClient()) {
             return;
         }
 
-        if (Sponge.isServerAvailable() && SpongeImpl.getServer().isOnExecutionThread()) {
+        if (Sponge.isServerAvailable() && SpongeCommon.getServer().isOnExecutionThread()) {
             this.startTiming();
         }
     }
 
     @Override
     public void stopTimingIfSync() {
-        if (!this.enabled || SpongeImpl.getGame().getPlatform().getExecutionType().isClient()) {
+        if (!this.enabled || SpongeCommon.getGame().getPlatform().getExecutionType().isClient()) {
             return;
         }
 
@@ -109,7 +109,7 @@ class TimingHandler implements Timing {
 
     @Override
     public TimingHandler startTiming() {
-        if (!this.enabled || SpongeImpl.getGame().getPlatform().getExecutionType().isClient()) {
+        if (!this.enabled || SpongeCommon.getGame().getPlatform().getExecutionType().isClient()) {
             return this;
         }
 
@@ -123,13 +123,13 @@ class TimingHandler implements Timing {
 
     @Override
     public void stopTiming() {
-        if (!this.enabled || SpongeImpl.getGame().getPlatform().getExecutionType().isClient()) {
+        if (!this.enabled || SpongeCommon.getGame().getPlatform().getExecutionType().isClient()) {
             return;
         }
 
         if (--this.timingDepth == 0 && this.start != 0) {
             if (!SpongeImplHooks.onServerThread()) {
-                SpongeImpl.getLogger().fatal("stopTiming called async for " + this.name);
+                SpongeCommon.getLogger().fatal("stopTiming called async for " + this.name);
                 new Throwable().printStackTrace();
                 this.start = 0;
                 return;

@@ -24,33 +24,25 @@
  */
 package org.spongepowered.common;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.GameState;
-import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.SystemSubject;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 
 import java.nio.file.Path;
 
 public abstract class SpongeGame implements Game {
 
-    private GameState state = GameState.CONSTRUCTION;
-    private AsyncScheduler asyncScheduler = new AsyncScheduler();
-
-    @Override
-    public GameState getState() {
-        return this.state;
-    }
-
-    public void setState(GameState state) {
-        this.state = checkNotNull(state);
-    }
+    private final AsyncScheduler asyncScheduler = new AsyncScheduler();
 
     @Override
     public Path getGameDirectory() {
-        return SpongeImpl.getGameDir();
+        return SpongeCommon.getGameDir();
+    }
+
+    @Override
+    public SystemSubject getSystemSubject() {
+        return (SystemSubject) SpongeCommon.getServer();
     }
 
     @Override

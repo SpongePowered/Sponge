@@ -31,7 +31,7 @@ import net.minecraft.world.storage.WorldSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import javax.annotation.Nullable;
 
@@ -44,7 +44,7 @@ public abstract class FilledMapItemMixin extends AbstractMapItem {
         if (world.isRemote()) {
             return world.getUniqueDataId(key);
         }
-        return SpongeImpl.getWorldManager().getDefaultWorld().getUniqueDataId(key);
+        return SpongeCommon.getWorldManager().getDefaultWorld().getUniqueDataId(key);
     }
 
     @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
@@ -53,7 +53,7 @@ public abstract class FilledMapItemMixin extends AbstractMapItem {
         if (world.isRemote()) {
             world.setData(dataId, data);
         } else {
-            SpongeImpl.getWorldManager().getDefaultWorld().setData(dataId, data);
+            SpongeCommon.getWorldManager().getDefaultWorld().setData(dataId, data);
         }
     }
 
@@ -64,20 +64,20 @@ public abstract class FilledMapItemMixin extends AbstractMapItem {
         if (world.isRemote()) {
             return world.loadData(clazz, dataId);
         }
-        return SpongeImpl.getWorldManager().getDefaultWorld().loadData(clazz, dataId);
+        return SpongeCommon.getWorldManager().getDefaultWorld().loadData(clazz, dataId);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private int getOverworldUniqueDataId(World world, String key) {
         // The caller already has remote check
-        return SpongeImpl.getWorldManager().getDefaultWorld().getUniqueDataId(key);
+        return SpongeCommon.getWorldManager().getDefaultWorld().getUniqueDataId(key);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
         + "setData(Ljava/lang/String;Lnet/minecraft/world/storage/WorldSavedData;)V"))
     private void setOverworldMapData(World world, String dataId, WorldSavedData data) {
         // The caller already has remote check
-        SpongeImpl.getWorldManager().getDefaultWorld().setData(dataId, data);
+        SpongeCommon.getWorldManager().getDefaultWorld().setData(dataId, data);
     }
 
     @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
@@ -85,7 +85,7 @@ public abstract class FilledMapItemMixin extends AbstractMapItem {
         if (world.isRemote()) {
             return world.getUniqueDataId(key);
         }
-        return SpongeImpl.getWorldManager().getDefaultWorld().getUniqueDataId(key);
+        return SpongeCommon.getWorldManager().getDefaultWorld().getUniqueDataId(key);
     }
 
     @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
@@ -94,7 +94,7 @@ public abstract class FilledMapItemMixin extends AbstractMapItem {
         if (world.isRemote()) {
             world.setData(dataId, data);
         } else {
-            SpongeImpl.getWorldManager().getDefaultWorld().setData(dataId, data);
+            SpongeCommon.getWorldManager().getDefaultWorld().setData(dataId, data);
         }
     }
 
@@ -103,7 +103,7 @@ public abstract class FilledMapItemMixin extends AbstractMapItem {
         if (world.isRemote()) {
             return world.getUniqueDataId(key);
         }
-        return SpongeImpl.getWorldManager().getDefaultWorld().getUniqueDataId(key);
+        return SpongeCommon.getWorldManager().getDefaultWorld().getUniqueDataId(key);
     }
 
     @Redirect(method = "enableMapTracking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
@@ -112,7 +112,7 @@ public abstract class FilledMapItemMixin extends AbstractMapItem {
         if (world.isRemote()) {
             world.setData(dataId, data);
         } else {
-            SpongeImpl.getWorldManager().getDefaultWorld().setData(dataId, data);
+            SpongeCommon.getWorldManager().getDefaultWorld().setData(dataId, data);
         }
     }
 }

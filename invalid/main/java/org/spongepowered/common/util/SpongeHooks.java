@@ -31,7 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
@@ -63,7 +63,7 @@ public class SpongeHooks {
             ((SpongeEntityType) entityType).initializeTrackerState();
         }
 
-        for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeImpl.getWorldManager().getWorlds()) {
+        for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds()) {
             final ServerWorld world = (ServerWorld) apiWorld;
             final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
             // Reload before updating world config cache

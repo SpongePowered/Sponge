@@ -87,7 +87,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.border.WorldBorderAccessor;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
@@ -419,7 +419,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
                 cause, originalChannel, Optional.of(originalChannel),
                 new MessageEvent.MessageFormatter(messages[0], messages[1]), message, false
         );
-        if (!SpongeImpl.postEvent(event) && !event.isMessageCancelled()) {
+        if (!SpongeCommon.postEvent(event) && !event.isMessageCancelled()) {
             event.getChannel().ifPresent(channel -> channel.send(this, event.getMessage(), ChatTypes.CHAT));
         }
         return event;
@@ -454,7 +454,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         if (this.api$worldBorder == border) {
             return; //do not fire an event since nothing would have changed
         }
-        if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause,
+        if (!SpongeCommon.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause,
                 Optional.ofNullable(this.api$worldBorder), this, Optional.ofNullable(border)))) {
             if (this.api$worldBorder != null) { //is the world border about to be unset?
                 ((WorldBorderAccessor) this.api$worldBorder).accessor$getListeners().remove(

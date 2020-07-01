@@ -42,7 +42,7 @@ import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelRegistrationException;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.network.SpongeNetworkManager;
 
 import java.nio.charset.StandardCharsets;
@@ -83,7 +83,7 @@ public class VanillaChannelRegistrar extends SpongeNetworkManager {
         final String name = channel.getName();
         this.channels.put(name, channel);
 
-        PlayerList playerList = SpongeImpl.getServer().getPlayerList();
+        PlayerList playerList = SpongeCommon.getServer().getPlayerList();
         if (playerList != null) {
             playerList.sendPacketToAllPlayers(getRegPacket(name));
         }
@@ -122,7 +122,7 @@ public class VanillaChannelRegistrar extends SpongeNetworkManager {
         checkState(binding != null, "Channel is already unbound");
         binding.invalidate();
 
-        PlayerList playerList = SpongeImpl.getServer().getPlayerList();
+        PlayerList playerList = SpongeCommon.getServer().getPlayerList();
         if (playerList != null) {
             playerList.sendPacketToAllPlayers(getUnregPacket(name));
         }

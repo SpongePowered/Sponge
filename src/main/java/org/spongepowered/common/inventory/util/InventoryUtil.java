@@ -39,7 +39,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
@@ -166,15 +166,15 @@ public final class InventoryUtil {
             CatalogKey key = ((Entity) base).getType().getKey();
             final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
-                SpongeImpl.getLogger().debug("Unknown plugin for [{}]", base);
-                return SpongeImpl.getMinecraftPlugin(); 
+                SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
+                return SpongeCommon.getMinecraftPlugin();
             });
         } else if (base instanceof SpongeUser) {
-            container = SpongeImpl.getMinecraftPlugin();
+            container = SpongeCommon.getMinecraftPlugin();
         } else {
             container = Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(base.getClass())).orElseGet(() -> {
-                SpongeImpl.getLogger().debug("Unknown plugin for [{}]", base);
-                return SpongeImpl.getMinecraftPlugin();
+                SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
+                return SpongeCommon.getMinecraftPlugin();
             });
         }
         return container;

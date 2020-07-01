@@ -37,7 +37,7 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanTypes;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.UserListAccessor;
 import org.spongepowered.common.util.UserListUtils;
 
@@ -196,11 +196,11 @@ public class SpongeBanService implements BanService {
     }
 
     private BanList getUserBanList() {
-        return SpongeImpl.getServer().getPlayerList().getBannedPlayers();
+        return SpongeCommon.getServer().getPlayerList().getBannedPlayers();
     }
 
     private IPBanList getIPBanList() {
-        return SpongeImpl.getServer().getPlayerList().getBannedIPs();
+        return SpongeCommon.getServer().getPlayerList().getBannedIPs();
     }
 
 }

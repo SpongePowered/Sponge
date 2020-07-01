@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.advancement.SpongeAdvancementTree;
 import org.spongepowered.common.advancement.SpongeTreeLayout;
 
@@ -45,7 +45,7 @@ public abstract class AdvancementTreeNodeMixin {
     private static void onLayout(Advancement root, CallbackInfo ci) {
         final AdvancementTree advancementTree = ((org.spongepowered.api.advancement.Advancement) root).getTree().get();
         final TreeLayout layout = new SpongeTreeLayout((SpongeAdvancementTree) advancementTree);
-        SpongeImpl.postEvent(SpongeEventFactory.createAdvancementTreeEventGenerateLayout(Sponge.getCauseStackManager().getCurrentCause(), layout,
+        SpongeCommon.postEvent(SpongeEventFactory.createAdvancementTreeEventGenerateLayout(Sponge.getCauseStackManager().getCurrentCause(), layout,
                 advancementTree));
     }
 }

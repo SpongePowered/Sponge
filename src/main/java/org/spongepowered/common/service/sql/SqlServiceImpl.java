@@ -35,7 +35,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.sql.SqlService;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -269,7 +269,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
 
     @Override
     public Optional<String> getConnectionUrlFromAlias(String alias) {
-        return Optional.ofNullable(SpongeImpl.getGlobalConfigAdapter().getConfig().getSql().getAliases().get(alias));
+        return Optional.ofNullable(SpongeCommon.getGlobalConfigAdapter().getConfig().getSql().getAliases().get(alias));
     }
 
 }

@@ -28,7 +28,7 @@ import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.Method;
@@ -61,7 +61,7 @@ public class TimedEventListener<T extends Event> implements EventListener<T> {
 
     @Override
     public void handle(T event) throws Exception {
-        if (!Timings.isTimingsEnabled() || !SpongeImpl.getServer().isOnExecutionThread()) {
+        if (!Timings.isTimingsEnabled() || !SpongeCommon.getServer().isOnExecutionThread()) {
             this.listener.handle(event);
             return;
         }

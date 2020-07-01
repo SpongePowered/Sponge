@@ -25,16 +25,13 @@
 package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
 import net.minecraft.entity.LivingEntity;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
 
-import javax.annotation.Nullable;
 import net.minecraft.entity.ai.goal.Goal;
 
 @SuppressWarnings({"unchecked", "rawtypes"})

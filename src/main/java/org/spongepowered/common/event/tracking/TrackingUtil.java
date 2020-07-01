@@ -69,7 +69,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -283,7 +283,7 @@ public final class TrackingUtil {
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(block, pos, BlockChangeFlags.NONE);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Sponge.getCauseStackManager().getCurrentCause(), snapshot);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 return;
             }
@@ -320,7 +320,7 @@ public final class TrackingUtil {
             final TickBlockEvent
                 event =
                 SpongeEventFactory.createTickBlockEventRandom(Sponge.getCauseStackManager().getCurrentCause(), currentTickBlock);
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 return;
             }
@@ -412,7 +412,7 @@ public final class TrackingUtil {
             printer.add("Stacktrace:");
             final IllegalStateException exception = new IllegalStateException(s + " Please analyze the current phase context. ");
             printer.add(exception);
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+            printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
             return exception;
         };
     }
@@ -593,14 +593,14 @@ public final class TrackingUtil {
             if (!transactionArrays[blockChange.ordinal()].isEmpty()) {
                 final ChangeBlockEvent event = blockChange.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactionArrays[blockChange.ordinal()]);
                 mainEvents[blockChange.ordinal()] = event;
-                SpongeImpl.postEvent(event);
+                SpongeCommon.postEvent(event);
                 blockEvents.add(event);
             }
         }
         if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) { // Needs to be placed into iterateChangeBlockEvents
             final ChangeBlockEvent event = BlockChange.DECAY.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactionArrays[BlockChange.DECAY.ordinal()]);
             mainEvents[BlockChange.DECAY.ordinal()] = event;
-            SpongeImpl.postEvent(event);
+            SpongeCommon.postEvent(event);
             blockEvents.add(event);
         }
     }
@@ -668,7 +668,7 @@ public final class TrackingUtil {
                 .add("Original State", oldBlockSnapshot.getState())
                 .add("Changed State", newBlockSnapshot.getState())
                 .toString();
-            SpongeImpl.getLogger().warn("Unloaded/Missing World for a captured block change! Skipping change: " + transactionForLogging);
+            SpongeCommon.getLogger().warn("Unloaded/Missing World for a captured block change! Skipping change: " + transactionForLogging);
             return;
         }
         final ServerWorldBridge mixinWorld = (ServerWorldBridge) worldServer.get();
@@ -812,7 +812,7 @@ public final class TrackingUtil {
             final DropItemEvent.Pre
                 dropItemEventPre =
                 SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), originalSnapshots, itemSnapshots);
-            SpongeImpl.postEvent(dropItemEventPre);
+            SpongeCommon.postEvent(dropItemEventPre);
             if (dropItemEventPre.isCancelled()) {
                 return;
             }
@@ -882,7 +882,7 @@ public final class TrackingUtil {
                 causeToUse = currentCause;
             }
             final ChangeBlockEvent.Post post = ((IPhaseState) context.state).createChangeBlockPostEvent(context, transactions, causeToUse);
-            SpongeImpl.postEvent(post);
+            SpongeCommon.postEvent(post);
             return post;
         }
         return null;

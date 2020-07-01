@@ -51,7 +51,7 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -102,7 +102,7 @@ public class SelectorResolver {
     }
 
     public SelectorResolver(Selector selector, CommandSource origin) {
-        this(selector, SpongeImpl.getGame().getServer().getWorlds(), origin, positionFromSource(origin));
+        this(selector, SpongeCommon.getGame().getServer().getWorlds(), origin, positionFromSource(origin));
     }
 
     private SelectorResolver(Selector selector, Collection<? extends Extent> extents, @Nullable CommandSource origin, @Nullable Vector3d position) {

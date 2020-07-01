@@ -26,19 +26,15 @@ package org.spongepowered.common.event;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ListenerChecker {
@@ -179,7 +175,7 @@ public class ListenerChecker {
                 this.listenerCount--;
             }
             if (this.listenerCount < 0) {
-                SpongeImpl.getLogger().error(String.format("Decremented listener count to %s for field %s", this.listenerCount, this.field), new Exception("Dummy exception"));
+                SpongeCommon.getLogger().error(String.format("Decremented listener count to %s for field %s", this.listenerCount, this.field), new Exception("Dummy exception"));
             }
             boolean val = this.listenerCount > 0;
 
@@ -190,7 +186,7 @@ public class ListenerChecker {
             try {
                 this.field.set(null, val);
             } catch (IllegalAccessException e) {
-                SpongeImpl.getLogger().error(String.format("Error setting field %s to %s", this.field, val), e);
+                SpongeCommon.getLogger().error(String.format("Error setting field %s to %s", this.field, val), e);
             }
         }
     }

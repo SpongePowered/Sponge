@@ -61,7 +61,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -201,7 +201,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             final ExplosionEvent.Detonate detonate =
                 SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities, (Explosion) this, (World) this.world);
-            SpongeImpl.postEvent(detonate);
+            SpongeCommon.postEvent(detonate);
             // Clear the positions so that they can be pulled from the event
             this.affectedBlockPositions.clear();
             if (detonate.isCancelled()) {

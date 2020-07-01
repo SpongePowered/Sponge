@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.tracking.world;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -38,7 +37,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.UpgradeData;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
@@ -50,8 +48,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -61,7 +58,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
@@ -94,7 +90,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             CallbackInfo ci) {
         this.trackerImpl$userStorageService = worldIn != null && ((WorldBridge) worldIn).bridge$isFake()
                                   ? null
-                                  : SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+                                  : SpongeCommon.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
 
     }
 
@@ -286,7 +282,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         final UUID uuid = (((WorldInfoBridge) this.world.getWorldInfo()).bridge$getUniqueIdForIndex(ownerIndex)).orElse(null);
         if (uuid != null) {
             // Verify id is valid and not invalid
-            if (SpongeImpl.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+            if (SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
                 this.trackerImpl$trackedIntBlockPositions.remove(key);
                 return Optional.empty();
             }
