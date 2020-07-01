@@ -537,11 +537,13 @@ project("SpongeVanilla") {
             exclude(group = "net.minecraft", module = "server")
         }
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
+        add(vanillaLaunch.implementationConfigurationName, vanillaLaunchConfig)
 
         vanillaLaunchConfig("org.spongepowered:mixin:0.8")
         vanillaLaunchConfig("org.ow2.asm:asm-util:6.2")
         vanillaLaunchConfig("org.ow2.asm:asm-tree:6.2")
         vanillaLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+        vanillaLaunchConfig("org.apache.logging.log4j:log4j-api:2.8.1")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
