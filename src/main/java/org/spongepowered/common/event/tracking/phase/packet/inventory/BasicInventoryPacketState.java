@@ -31,7 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -55,11 +55,12 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 public class BasicInventoryPacketState extends PacketState<InventoryPacketContext> {
 
@@ -185,7 +186,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             if (ShouldFire.SPAWN_ENTITY_EVENT && !capturedItems.isEmpty()) {
                 for (final Entity entiy: capturedItems) {
                     if (entiy instanceof OwnershipTrackedBridge) {
-                        ((OwnershipTrackedBridge) entiy).tracked$setOwnerReference((Player) player);
+                        ((OwnershipTrackedBridge) entiy).tracked$setOwnerReference(((ServerPlayer) player).getUser());
                     } else {
                         entiy.offer(Keys.CREATOR, player.getUniqueID());
                     }

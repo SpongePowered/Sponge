@@ -33,6 +33,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
@@ -75,7 +76,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     protected static void processEntities(final ServerPlayerEntity player, final Collection<Entity> entities) {
         for (final Entity entity : entities) {
-            EntityUtil.processEntitySpawn(entity, () -> Optional.of((Player) player));
+            EntityUtil.processEntitySpawn(entity, () -> Optional.of(((ServerPlayer)player).getUser()));
         }
     }
 
@@ -185,8 +186,8 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SPAWN_TYPE, this.getEntitySpawnType(context));
-            frame.addContext(EventContextKeys.NOTIFIER, player);
-            frame.addContext(EventContextKeys.OWNER, player);
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayer)player).getUser());
+            frame.addContext(EventContextKeys.OWNER, ((ServerPlayer)player).getUser());
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
     }

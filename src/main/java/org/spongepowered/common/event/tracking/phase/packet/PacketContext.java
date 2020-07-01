@@ -27,12 +27,12 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
 
@@ -77,8 +77,8 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     }
 
     @SuppressWarnings("ConstantConditions")
-    public Player getSpongePlayer() {
-        return (Player) this.packetPlayer;
+    public ServerPlayer getSpongePlayer() {
+        return (ServerPlayer) this.packetPlayer;
     }
 
     public <K extends IPacket<?>> K getPacket() {

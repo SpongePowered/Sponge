@@ -52,12 +52,18 @@ import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.Hand;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.PigEntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.SheepEntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.WolfEntityAccessor;
 import org.spongepowered.common.accessor.inventory.container.SlotAccessor;
+import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -66,15 +72,10 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.PigEntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.SheepEntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.WolfEntityAccessor;
-import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
-import java.util.List;
 
 public final class PacketPhaseUtil {
 
@@ -218,8 +219,8 @@ public final class PacketPhaseUtil {
                             .cursor(cursor);
 
                         PacketPhase.getInstance().populateContext(packetIn, packetPlayer, packetState, context);
-                        context.owner((Player) packetPlayer);
-                        context.notifier((Player) packetPlayer);
+                        context.owner(((ServerPlayer) packetPlayer).getUser());
+                        context.notifier(((ServerPlayer) packetPlayer).getUser());
                     }
                     try (final PhaseContext<?> packetContext = context) {
                         packetContext.buildAndSwitch();

@@ -27,15 +27,15 @@ package org.spongepowered.common.event.tracking.phase.packet.player;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.accessor.network.play.client.CResourcePackStatusPacketAccessor;
+import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
-import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
-import org.spongepowered.common.accessor.network.play.client.CResourcePackStatusPacketAccessor;
 
 public final class ResourcePackState extends BasicPacketState {
 
@@ -72,6 +72,6 @@ public final class ResourcePackState extends BasicPacketState {
             return;
         }
         SpongeImpl.postEvent(
-            SpongeEventFactory.createResourcePackStatusEvent(Sponge.getCauseStackManager().getCurrentCause(), pack, (Player) player, status));
+            SpongeEventFactory.createResourcePackStatusEvent(Sponge.getCauseStackManager().getCurrentCause(), pack, (ServerPlayer) player, status));
     }
 }

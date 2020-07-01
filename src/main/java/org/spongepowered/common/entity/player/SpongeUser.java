@@ -47,6 +47,7 @@ import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
@@ -630,7 +631,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public Map<UUID, RespawnLocation> bridge$getBedlocations() {
-        final Optional<Player> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.getPlayer();
         return player
             .map(value -> ((BedLocationHolderBridge) value).bridge$getBedlocations())
             .orElse(this.spawnLocations);
@@ -638,7 +639,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public boolean bridge$setBedLocations(final Map<UUID, RespawnLocation> value) {
-        final Optional<Player> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.getPlayer();
         if (player.isPresent()) {
             return ((BedLocationHolderBridge) player.get()).bridge$setBedLocations(value);
         }
@@ -650,7 +651,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public ImmutableMap<UUID, RespawnLocation> bridge$removeAllBeds() {
-        final Optional<Player> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.getPlayer();
         if (player.isPresent()) {
             return ((BedLocationHolderBridge) player.get()).bridge$removeAllBeds();
         }
@@ -741,8 +742,8 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     }
 
     @Override
-    public Optional<Player> getPlayer() {
-        return Optional.ofNullable((Player) SpongeImpl.getServer().getPlayerList().getPlayerByUUID(this.profile.getId()));
+    public Optional<ServerPlayer> getPlayer() {
+        return Optional.ofNullable((ServerPlayer) SpongeImpl.getServer().getPlayerList().getPlayerByUUID(this.profile.getId()));
     }
 
     @Override
@@ -754,7 +755,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public Optional<UUID> getWorldUniqueId() {
-        final Optional<Player> playerOpt = this.getPlayer();
+        final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             return playerOpt.map(Player::getWorld).map(World::getUniqueId);
         }
@@ -768,7 +769,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public boolean setLocation(Vector3d position, UUID worldUniqueId) {
-        final Optional<Player> playerOpt = this.getPlayer();
+        final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             Optional<org.spongepowered.api.world.server.ServerWorld> world = SpongeImpl.getWorldManager().getWorld(worldUniqueId);
             return world.filter(serverWorld -> playerOpt.get().setLocation(ServerLocation.of(serverWorld, position))).isPresent();
@@ -795,7 +796,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     @Override
     public void setRotation(final Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
-        final Optional<Player> playerOpt = this.getPlayer();
+        final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             playerOpt.get().setRotation(rotation);
             return;
@@ -812,7 +813,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public Inventory getEnderChestInventory() {
-        final Optional<Player> playerOpt = this.getPlayer();
+        final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             return playerOpt.get().getEnderChestInventory();
         }
@@ -881,7 +882,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public void bridge$setInvulnerable(final boolean value) {
-        final Optional<Player> playerOpt = ((User) this).getPlayer();
+        final Optional<ServerPlayer> playerOpt = ((User) this).getPlayer();
         if (playerOpt.isPresent()) {
             ((InvulnerableTrackedBridge) playerOpt.get()).bridge$setInvulnerable(value);
             return;
@@ -897,7 +898,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public void bridge$setVanished(final boolean vanished) {
-        final Optional<Player> playerOpt = ((User) this).getPlayer();
+        final Optional<ServerPlayer> playerOpt = ((User) this).getPlayer();
         if (playerOpt.isPresent()) {
             ((VanishableBridge) playerOpt.get()).bridge$setVanished(vanished);
             return;
@@ -918,7 +919,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public void bridge$setInvisible(final boolean invisible) {
-        final Optional<Player> player = ((User) this).getPlayer();
+        final Optional<ServerPlayer> player = ((User) this).getPlayer();
         if (player.isPresent()) {
             ((VanishableBridge) player.get()).bridge$setInvisible(invisible);
             return;
@@ -933,7 +934,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public void bridge$setUncollideable(final boolean uncollideable) {
-        final Optional<Player> player = ((User) this).getPlayer();
+        final Optional<ServerPlayer> player = ((User) this).getPlayer();
         if (player.isPresent()) {
             ((VanishableBridge) player.get()).bridge$setUncollideable(uncollideable);
             return;
@@ -948,7 +949,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public void bridge$setUntargetable(final boolean untargetable) {
-        final Optional<Player> player = ((User) this).getPlayer();
+        final Optional<ServerPlayer> player = ((User) this).getPlayer();
         if (player.isPresent()) {
             ((VanishableBridge) player.get()).bridge$setUntargetable(untargetable);
             return;

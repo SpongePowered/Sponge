@@ -38,23 +38,24 @@ import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 public class SpongeLocatableBlock implements LocatableBlock {
 
     private final BlockState blockState;
     private final Vector3i position;
     private final UUID worldId;
-    private final WeakReference<World> worldReference;
+    private final WeakReference<ServerWorld> worldReference;
     @Nullable private ServerLocation location;
 
     SpongeLocatableBlock(SpongeLocatableBlockBuilder builder) {

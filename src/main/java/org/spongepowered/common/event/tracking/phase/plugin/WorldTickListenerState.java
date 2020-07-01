@@ -30,7 +30,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -64,7 +64,7 @@ final class WorldTickListenerState extends ListenerPhaseState<WorldTickListenerC
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     final LocatableBlock
                         block =
-                        new SpongeLocatableBlockBuilder().world((World) phaseContext.getWorld()).position(key.getX(), key.getY(),
+                        new SpongeLocatableBlockBuilder().world((ServerWorld) phaseContext.getWorld()).position(key.getX(), key.getY(),
                             key.getZ()).build();
                     frame.pushCause(container);
                     frame.pushCause(block);

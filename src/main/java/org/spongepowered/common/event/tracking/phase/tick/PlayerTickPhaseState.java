@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.entity.item.ItemEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -37,7 +39,6 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.entity.item.ItemEntity;
 
 class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
 
@@ -78,8 +79,8 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final PlayerTickContext context) {
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
-        explosionContext.owner(player);
-        explosionContext.notifier(player);
+        explosionContext.owner(((ServerPlayer) player).getUser());
+        explosionContext.notifier(((ServerPlayer) player).getUser());
         explosionContext.source(player);
     }
 

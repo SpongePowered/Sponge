@@ -33,7 +33,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialRecipe;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
@@ -44,20 +44,20 @@ import java.util.function.Function;
 public final class SpongeSpecialCraftingRecipeBuilder extends SpongeCatalogBuilder<SpecialCraftingRecipe, SpecialCraftingRecipe.Builder> implements
         SpecialCraftingRecipe.Builder, SpecialCraftingRecipe.Builder.ResultStep, SpecialCraftingRecipe.Builder.EndStep {
 
-    private BiPredicate<CraftingInventory, World> biPredicate;
+    private BiPredicate<CraftingInventory, ServerWorld> biPredicate;
     private CraftingRecipe exemplaryShape;
     private Function<CraftingInventory, List<ItemStack>> remainingItemsFunction;
     private Function<CraftingInventory, ItemStack> resultFunction;
     private ItemStack exemplaryResult;
 
     @Override
-    public ResultStep matching(BiPredicate<CraftingInventory, World> biPredicate) {
+    public ResultStep matching(BiPredicate<CraftingInventory, ServerWorld> biPredicate) {
         this.biPredicate = biPredicate;
         return this;
     }
 
     @Override
-    public ResultStep matching(BiPredicate<CraftingInventory, World> biPredicate, CraftingRecipe exemplaryShape) {
+    public ResultStep matching(BiPredicate<CraftingInventory, ServerWorld> biPredicate, CraftingRecipe exemplaryShape) {
         this.biPredicate = biPredicate;
         this.exemplaryShape = exemplaryShape;
         return this;

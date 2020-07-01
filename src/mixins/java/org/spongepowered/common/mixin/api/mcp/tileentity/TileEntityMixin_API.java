@@ -38,7 +38,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,9 +47,10 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
 public abstract class TileEntityMixin_API implements BlockEntity {
@@ -68,7 +69,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
 
     @Override
     public ServerLocation getLocation() {
-        return ServerLocation.of((World) this.world, VecHelper.toVector3i(this.shadow$getPos()));
+        return ServerLocation.of((ServerWorld) this.world, VecHelper.toVector3i(this.shadow$getPos()));
     }
 
     @Override
@@ -80,7 +81,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Queries.WORLD_ID, ((World) this.world).getProperties().getUniqueId().toString())
+            .set(Queries.WORLD_ID, ((ServerWorld) this.world).getProperties().getUniqueId().toString())
             .set(Queries.POSITION_X, this.shadow$getPos().getX())
             .set(Queries.POSITION_Y, this.shadow$getPos().getY())
             .set(Queries.POSITION_Z, this.shadow$getPos().getZ())
@@ -143,7 +144,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
         if (this.api$LocatableBlock == null) {
             final BlockState blockState = this.getBlock();
             this.api$LocatableBlock = new SpongeLocatableBlockBuilder()
-                .world((World) this.world)
+                .world((ServerWorld) this.world)
                 .position(this.pos.getX(), this.pos.getY(), this.pos.getZ())
                 .state(blockState)
                 .build();

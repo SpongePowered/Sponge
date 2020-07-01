@@ -90,10 +90,11 @@ import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerato
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(value = LivingEntity.class, priority = 999)
 public abstract class LivingEntityMixin extends EntityMixin implements LivingEntityBridge {
@@ -608,7 +609,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 if (!world.isRemote) {
                     final Transform fromTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(initialX, initialY, initialZ));
                     final Transform toTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(this.posX, this.posY, this.posZ));
-                    org.spongepowered.api.world.World spongeWorld = ((org.spongepowered.api.entity.Entity) this).getWorld();
+                    org.spongepowered.api.world.server.ServerWorld spongeWorld = (org.spongepowered.api.world.server.ServerWorld) world;
                     final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, spongeWorld, spongeWorld);
                     if (event.isCancelled()) {
                         this.posX = initialX;
@@ -616,9 +617,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                         this.posZ = initialZ;
                         return false;
                     }
-                    final Vector3d position = event.getToTransform().getPosition();
-                    this.rotationYaw = (float) event.getToTransform().getYaw();
-                    this.rotationPitch = (float) event.getToTransform().getPitch();
+                    final Vector3d position = event.getToPosition();
+//                    this.rotationYaw = (float) event.getToTransform().getYaw();
+//                    this.rotationPitch = (float) event.getToTransform().getPitch();
                     this.shadow$setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
                 } else {
                     this.shadow$setPositionAndUpdate(this.posX, this.posY, this.posZ);
@@ -636,14 +637,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
             if (!world.isRemote) {
                 final Transform transform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(initialX, initialY, initialZ));
-                final org.spongepowered.api.world.World<?> spongeWorld = ((org.spongepowered.api.entity.Entity) this).getWorld();
+                org.spongepowered.api.world.server.ServerWorld spongeWorld = (org.spongepowered.api.world.server.ServerWorld) world;
                 final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, spongeWorld, spongeWorld);
                 if (event.isCancelled()) {
                     return false;
                 }
-                final Vector3d position = event.getToTransform().getPosition();
-                this.rotationYaw = (float) event.getToTransform().getYaw();
-                this.rotationPitch = (float) event.getToTransform().getPitch();
+                final Vector3d position = event.getToPosition();
+//                this.rotationYaw = (float) event.getToTransform().getYaw();
+//                this.rotationPitch = (float) event.getToTransform().getPitch();
                 this.shadow$setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
             } else {
                 this.shadow$setPositionAndUpdate(initialX, initialY, initialZ);

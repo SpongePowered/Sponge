@@ -32,6 +32,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
 import org.spongepowered.common.SpongeImpl;
@@ -55,7 +56,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
     @Override
     public Optional<ServerLocation> getSafeLocation(ServerLocation location, int height, int width, int distanceToDrop,
             TeleportHelperFilter filter, TeleportHelperFilter... additionalFilters) {
-        final World world = location.getWorld();
+        final ServerWorld world = location.getWorld();
         final Set<TeleportHelperFilter> filters = Sets.newHashSet(additionalFilters);
         filters.add(filter);
 
@@ -125,7 +126,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
         return vectors.stream().sorted(c);
     }
 
-    private Optional<Vector3i> getSafeLocation(World world, Stream<Vector3i> positionsToCheck, int floorDistanceCheck,
+    private Optional<Vector3i> getSafeLocation(ServerWorld world, Stream<Vector3i> positionsToCheck, int floorDistanceCheck,
             Collection<TeleportHelperFilter> filters) {
         // We cache the various block lookup results so we don't check a block twice.
         final Map<Vector3i, BlockData> blockCache = new HashMap<>();

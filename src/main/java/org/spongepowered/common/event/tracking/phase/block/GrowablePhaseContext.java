@@ -32,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -82,7 +83,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         checkState(this.priorContext != null, "Prior context is null");
         checkState(this.world != null, "World is null");
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
-            .worldId(((org.spongepowered.api.world.World<?>) this.world).getProperties().getUniqueId())
+            .worldId(((ServerWorld) this.world).getProperties().getUniqueId())
             .position(VecHelper.toVector3i(this.pos))
             .blockState(this.blockState)
             .flag(BlockChangeFlags.PHYSICS_OBSERVER);

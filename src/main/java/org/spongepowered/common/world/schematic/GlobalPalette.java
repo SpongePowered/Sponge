@@ -37,13 +37,13 @@ import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntFunction;
-import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 public class GlobalPalette<T extends CatalogType> implements Palette<T> {
 
@@ -60,7 +60,7 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
 
     private GlobalPalette(final PaletteType<T> paletteType, final Function<T, Integer> map, final IntFunction<T> identity, final Class<T> catalogType) {
         int highest = 0;
-        for (final T type : Sponge.getRegistry().getCatalogRegistry().getAllOf(catalogType).collect(Collectors.toList())) {
+        for (final T type : Sponge.getRegistry().getCatalogRegistry().getAllOf(catalogType)) {
             final int id = map.apply(type);
             if (id > highest) {
                 highest = id;
@@ -128,7 +128,7 @@ public class GlobalPalette<T extends CatalogType> implements Palette<T> {
 
     @Override
     public Collection<T> getEntries() {
-        return Sponge.getRegistry().getCatalogRegistry().getAllOf(this.catalogType).collect(Collectors.toList());
+        return Sponge.getRegistry().getCatalogRegistry().getAllOf(this.catalogType);
     }
 
     @Override

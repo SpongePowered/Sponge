@@ -35,6 +35,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -55,7 +56,6 @@ import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.world.BlockChange;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -64,6 +64,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 final class CommandState extends GeneralState<CommandPhaseContext> {
 
@@ -107,7 +109,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         final BlockPos notifyPos, final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
             .ifPresent(player -> ((ChunkBridge) minecraftWorld.getChunkAt(notifyPos))
-                .bridge$addTrackedBlockPosition(block, notifyPos, player, PlayerTracker.Type.NOTIFIER));
+                .bridge$addTrackedBlockPosition(block, notifyPos, ((ServerPlayer) player).getUser(), PlayerTracker.Type.NOTIFIER));
     }
 
     @Override
@@ -188,9 +190,9 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                         csm.popCause();
                         if (!destruct.isCancelled())
                         {
-                            final boolean isPlayer = sender instanceof Player;
-                            final Player player = isPlayer ? (Player) sender : null;
-                            EntityUtil.processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(isPlayer ? player : null));
+                            final boolean isPlayer = sender instanceof ServerPlayer;
+                            final ServerPlayer player = isPlayer ? (ServerPlayer) sender : null;
+                            EntityUtil.processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(isPlayer ? player.getUser() : null));
                         }
 
                     }

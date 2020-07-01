@@ -30,7 +30,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -43,9 +43,10 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public final class DropItemOutsideWindowState extends BasicInventoryPacketState {
 
@@ -74,7 +75,7 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
 
             for (final Entity currentEntity : capturedEntities) {
                 if (currentEntity instanceof OwnershipTrackedBridge) {
-                    ((OwnershipTrackedBridge) currentEntity).tracked$setOwnerReference((Player) playerMP);
+                    ((OwnershipTrackedBridge) currentEntity).tracked$setOwnerReference(((ServerPlayer) playerMP).getUser());
                 } else {
                     currentEntity.offer(Keys.CREATOR, playerMP.getUniqueID());
                 }

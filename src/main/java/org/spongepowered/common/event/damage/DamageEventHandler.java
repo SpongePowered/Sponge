@@ -64,7 +64,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.item.ArmorItemAccessor;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
@@ -354,14 +354,14 @@ public class DamageEventHandler {
                         continue;
                     }
                     if (predicate.test(chunk.getBlockState(blockPos))) {
-                        return ServerLocation.of((World) entity.world, k1, l1, i2);
+                        return ServerLocation.of((ServerWorld) entity.world, k1, l1, i2);
                     }
                 }
             }
         }
 
         // Entity is source of fire
-        return ((org.spongepowered.api.entity.Entity) entity).getLocation();
+        return ((org.spongepowered.api.entity.Entity) entity).getServerLocation();
     }
 
     /**

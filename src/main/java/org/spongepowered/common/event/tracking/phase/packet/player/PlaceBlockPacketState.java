@@ -37,6 +37,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
@@ -45,6 +46,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -99,18 +101,19 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
         final BasicPacketContext context) {
-        TrackingUtil.associateTrackerToTarget(blockChange, transaction, (Player) context.getPacketPlayer());
+        TrackingUtil.associateTrackerToTarget(blockChange, transaction, ((ServerPlayer) context.getPacketPlayer()).getUser());
     }
 
     @Override
     public void appendNotifierToBlockEvent(final BasicPacketContext context, final PhaseContext<?> currentContext,
                                            final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
         final Player player = Sponge.getCauseStackManager().getCurrentCause().first(Player.class).get();
-        final BlockState state = ((World) mixinWorldServer).getBlock(pos.getX(), pos.getY(), pos.getZ());
-        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((World) mixinWorldServer).position(pos.getX(), pos.getY(), pos.getZ()).state(state).build();
+        final BlockState state = ((ServerWorld) mixinWorldServer).getBlock(pos.getX(), pos.getY(), pos.getZ());
+        final LocatableBlock locatable =
+                new SpongeLocatableBlockBuilder().world((ServerWorld) mixinWorldServer).position(pos.getX(), pos.getY(), pos.getZ()).state(state).build();
 
         blockEvent.bridge$setTickingLocatable(locatable);
-        blockEvent.bridge$setSourceUser(player);
+        blockEvent.bridge$setSourceUser(((ServerPlayer)player).getUser());
     }
 
     @SuppressWarnings("ConstantConditions")

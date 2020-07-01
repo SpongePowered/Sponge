@@ -90,7 +90,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.border.WorldBorderAccessor;
-import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.api.text.title.TitleBridge;
@@ -115,8 +114,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -258,7 +257,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public void setScoreboard(final Scoreboard scoreboard) {
         if (((ServerPlayerEntityBridge) this).bridge$hasDelegate()) {
-            ((Player) ((ServerPlayerEntityBridge) this).bridge$getDelegate()).setScoreboard(scoreboard);
+            ((ServerPlayer) ((ServerPlayerEntityBridge) this).bridge$getDelegate()).setScoreboard(scoreboard);
         }
         ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$removePlayer((ServerPlayerEntity) (Object) this, true);
         ((ServerPlayerEntityBridge) this).bridge$replaceScoreboard(scoreboard);

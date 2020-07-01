@@ -74,7 +74,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     public void unwind(final GeneralizedContext context) {
         final LocatableBlock locatable = context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
-        final ServerLocation worldLocation = locatable.getLocation();
+        final ServerLocation worldLocation = locatable.getServerLocation();
         final ServerWorldBridge mixinWorld = (ServerWorldBridge) worldLocation.getWorld();
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.

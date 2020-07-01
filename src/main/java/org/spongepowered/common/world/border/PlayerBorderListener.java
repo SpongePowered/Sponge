@@ -30,7 +30,7 @@ import net.minecraft.network.play.server.SWorldBorderPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
 public final class PlayerBorderListener implements IBorderListener {
 
@@ -77,7 +77,7 @@ public final class PlayerBorderListener implements IBorderListener {
 
     private void sendBorderPacket(final IPacket<?> packet) {
         for (final ServerPlayerEntity player : this.server.getPlayerList().getPlayers()) {
-            if (player.dimension.getId() == this.dimensionId && !((Player) player).getWorldBorder().isPresent()) {
+            if (player.dimension.getId() == this.dimensionId && !((ServerPlayer) player).getWorldBorder().isPresent()) {
                 player.connection.sendPacket(packet);
             }
         }

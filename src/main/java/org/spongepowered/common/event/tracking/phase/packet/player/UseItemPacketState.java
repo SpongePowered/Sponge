@@ -37,6 +37,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -95,14 +96,14 @@ public final class UseItemPacketState extends BasicPacketState {
     @Override
     public void postBlockTransactionApplication(BlockChange blockChange, Transaction<? extends BlockSnapshot> transaction,
         BasicPacketContext context) {
-        Player player = context.getSpongePlayer();
+        ServerPlayer player = context.getSpongePlayer();
         BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getLocation().get());
         ChunkBridge spongeChunk = (ChunkBridge) ((ServerWorld) player.getWorld()).getChunkAt(pos);
         if (blockChange == BlockChange.PLACE) {
-            spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);
+            spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player.getUser(), PlayerTracker.Type.OWNER);
         }
 
-        spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.NOTIFIER);
+        spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player.getUser(), PlayerTracker.Type.NOTIFIER);
     }
 
     @SuppressWarnings("ConstantConditions")

@@ -37,8 +37,8 @@ import net.minecraft.network.play.server.SPlayerListItemPacket;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameType;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.text.Text;
@@ -67,8 +67,8 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public Player getPlayer() {
-        return (Player) this.player;
+    public ServerPlayer getPlayer() {
+        return (ServerPlayer) this.player;
     }
 
     @Override

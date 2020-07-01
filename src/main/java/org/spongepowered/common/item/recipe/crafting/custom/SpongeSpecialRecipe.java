@@ -33,6 +33,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
@@ -41,7 +42,7 @@ import java.util.function.Function;
 
 public class SpongeSpecialRecipe extends SpecialRecipe {
 
-    private final BiPredicate<org.spongepowered.api.item.inventory.crafting.CraftingInventory, org.spongepowered.api.world.World> biPredicate;
+    private final BiPredicate<org.spongepowered.api.item.inventory.crafting.CraftingInventory, ServerWorld> biPredicate;
     private final Function<org.spongepowered.api.item.inventory.crafting.CraftingInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction;
     private final Function<org.spongepowered.api.item.inventory.crafting.CraftingInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction;
 
@@ -50,7 +51,7 @@ public class SpongeSpecialRecipe extends SpecialRecipe {
     }
 
     public SpongeSpecialRecipe(ResourceLocation idIn,
-            BiPredicate<org.spongepowered.api.item.inventory.crafting.CraftingInventory, org.spongepowered.api.world.World> biPredicate,
+            BiPredicate<org.spongepowered.api.item.inventory.crafting.CraftingInventory, ServerWorld> biPredicate,
             Function<org.spongepowered.api.item.inventory.crafting.CraftingInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction,
             Function<org.spongepowered.api.item.inventory.crafting.CraftingInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction) {
         super(idIn);
@@ -63,7 +64,7 @@ public class SpongeSpecialRecipe extends SpecialRecipe {
     public boolean matches(CraftingInventory inv, World worldIn) {
         return this.biPredicate.test(
                 (org.spongepowered.api.item.inventory.crafting.CraftingInventory) inv,
-                (org.spongepowered.api.world.World) worldIn);
+                (ServerWorld) worldIn);
     }
 
     @Override

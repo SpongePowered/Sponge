@@ -60,7 +60,6 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.management.MBeanServer;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -71,6 +70,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+
+import javax.management.MBeanServer;
 
 public final class SpongeHooks {
 
@@ -416,7 +417,7 @@ public final class SpongeHooks {
     public static SpongeConfig<? extends GeneralConfigBase> getOrLoadConfigAdapter(@Nullable final Path dimensionPath, @Nullable
     final String worldDirectory) {
         if (worldDirectory != null) {
-            final org.spongepowered.api.world.World apiWorld = SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldDirectory)
+            final org.spongepowered.api.world.server.ServerWorld apiWorld = SpongeImpl.getGame().getServer().getWorldManager().getWorld(worldDirectory)
                     .orElse(null);
             if (apiWorld != null) {
                 return ((WorldInfoBridge) apiWorld.getProperties()).bridge$getConfigAdapter();

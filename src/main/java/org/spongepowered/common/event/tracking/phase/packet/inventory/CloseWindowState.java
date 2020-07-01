@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.network.IPacket;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -37,13 +41,10 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.network.IPacket;
 
 public final class CloseWindowState extends BasicPacketState {
 
@@ -83,7 +84,7 @@ public final class CloseWindowState extends BasicPacketState {
                     .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of((Player) player));
+                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
                 }
             });
             // Pre-merged items
@@ -96,7 +97,7 @@ public final class CloseWindowState extends BasicPacketState {
                     .map(entity -> (Entity) entity)
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of((Player) player));
+                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
                 }
             });
         }

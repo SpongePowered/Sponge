@@ -34,7 +34,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -48,7 +48,7 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
     Supplier<? extends BlockState> blockState;
     Supplier<? extends Vector3i> position;
     Supplier<? extends UUID> worldId;
-    Supplier<? extends WeakReference<World>> worldReference;
+    Supplier<? extends WeakReference<ServerWorld>> worldReference;
 
 
     public SpongeLocatableBlockBuilder() {
@@ -87,9 +87,9 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
     }
 
     @Override
-    public SpongeLocatableBlockBuilder world(final World world) {
+    public SpongeLocatableBlockBuilder world(final ServerWorld world) {
         checkNotNull(world, "World cannot be null!");
-        final WeakReference<World> reference = new WeakReference<>(world);
+        final WeakReference<ServerWorld> reference = new WeakReference<>(world);
         this.worldReference = () -> reference;
         this.worldId = () -> this.worldReference.get().get().getProperties().getUniqueId();
         return this;
@@ -99,8 +99,8 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
     public SpongeLocatableBlockBuilder from(final LocatableBlock value) {
         checkNotNull(value, "LocatableBlock cannot be null!");
         this.position = value::getBlockPosition;
-        this.worldId = () -> value.getLocation().getWorld().getProperties().getUniqueId();
-        this.worldReference = () -> new WeakReference<>(value.getLocation().getWorld());
+        this.worldId = () -> value.getServerLocation().getWorld().getProperties().getUniqueId();
+        this.worldReference = () -> new WeakReference<>(value.getServerLocation().getWorld());
         return this;
     }
 

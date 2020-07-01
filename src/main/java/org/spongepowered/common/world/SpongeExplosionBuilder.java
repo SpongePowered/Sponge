@@ -113,7 +113,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
     @Override
     public Explosion.Builder from(Explosion value) {
-        this.location = value.getLocation();
+        this.location = value.getServerLocation();
         this.sourceExplosive = value.getSourceExplosive().orElse(null);
         this.radius = value.getRadius();
         this.canCauseFire = value.canCauseFire();

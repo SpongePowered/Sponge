@@ -67,7 +67,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.common.SpongeImpl;
@@ -97,7 +96,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,6 +107,8 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 public final class EntityUtil {
 
@@ -167,15 +167,15 @@ public final class EntityUtil {
                 // TODO determine what it truly is for API 8
                 frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
-                event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, context.getExitTransform(),
-                        (World) fromWorld, (World) toWorld, sEntity, context.getTeleporter(), true, true);
+                event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform.getPosition(), context.getExitTransform().getPosition(),
+                        (org.spongepowered.api.world.server.ServerWorld) fromWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld, sEntity, context.getTeleporter(), true, true);
 
                 if (SpongeImpl.postEvent(event)) {
                     // Mods may cancel this event in order to run custom transfer logic
                     // We need to make sure to only rollback if they completely changed the world
                     if (event.getFromWorld() != sEntity.getWorld()) {
                         if (teleporter instanceof TeleporterBridge) {
-                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -187,7 +187,7 @@ public final class EntityUtil {
 
                     return null;
                 } else {
-                    toTransform = event.getToTransform();
+                    toTransform = Transform.of(event.getToPosition());
                     toWorld = (ServerWorld) event.getToWorld();
 
                     // Handle plugins setting changing to a different world than the teleporter said so. This is considered a cancellation
@@ -196,7 +196,7 @@ public final class EntityUtil {
 
                         if (teleporter instanceof TeleporterBridge) {
 
-                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -210,7 +210,7 @@ public final class EntityUtil {
                     // If we don't use the portal agent clear out the portal blocks that were created
                     if (!((MoveEntityEvent.Teleport.Portal) event).getUsePortalAgent()) {
                         if (teleporter instanceof TeleporterBridge) {
-                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -221,7 +221,7 @@ public final class EntityUtil {
                         if (teleporter instanceof TeleporterBridge && !context.getCapturedBlockSupplier().isEmpty() && !TrackingUtil
                             .processBlockCaptures(context)) {
                             // Transactions were rolled back, the portal wasn't made. We need to bomb the dimension change and clear portal cache
-                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 
@@ -237,7 +237,7 @@ public final class EntityUtil {
         } else if (event.isCancelled()) {
             return null;
         } else {
-            toTransform = event.getToTransform();
+            toTransform = Transform.of(event.getToPosition());
             toWorld = (ServerWorld) event.getToWorld();
         }
 
@@ -261,7 +261,7 @@ public final class EntityUtil {
         }
 
         if (loadChunks) {
-            final Vector3i toChunkPosition = ServerLocation.of((World) toWorld, toTransform.getPosition()).getChunkPosition();
+            final Vector3i toChunkPosition = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) toWorld, toTransform.getPosition()).getChunkPosition();
             // TODO - Figure out how to do chunk tickets
             throw new UnsupportedOperationException("Need to figure out how to load chunks");
 //            toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
@@ -338,15 +338,15 @@ public final class EntityUtil {
                 // TODO determine what it truly is for API 8
                 frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PORTAL);
 
-                event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform, context.getExitTransform(),
-                        (World) fromWorld, (World) toWorld, sPlayer, context.getTeleporter(), true, true);
+                event = SpongeEventFactory.createMoveEntityEventTeleportPortal(frame.getCurrentCause(), fromTransform.getPosition(), context.getExitTransform().getPosition(),
+                        (org.spongepowered.api.world.server.ServerWorld) fromWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld, sPlayer, context.getTeleporter(), true, true);
 
                 if (SpongeImpl.postEvent(event)) {
                     // Mods may cancel this event in order to run custom transfer logic
                     // We need to make sure to only rollback if they completely changed the world
                     if (event.getFromWorld() != sPlayer.getWorld()) {
                         if (teleporter instanceof TeleporterBridge) {
-                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -358,7 +358,7 @@ public final class EntityUtil {
 
                     return null;
                 } else {
-                    toTransform = event.getToTransform();
+                    toTransform = Transform.of(event.getToPosition());
                     toWorld = (ServerWorld) event.getToWorld();
 
                     // Handle plugins setting changing to a different world than the teleporter said so. This is considered a cancellation
@@ -366,7 +366,7 @@ public final class EntityUtil {
                         event.setCancelled(true);
 
                         if (teleporter instanceof TeleporterBridge) {
-                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter).bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
 
@@ -378,7 +378,7 @@ public final class EntityUtil {
 
                     // If we don't use the portal agent clear out the portal blocks that
                     if (!((MoveEntityEvent.Teleport.Portal) event).getUsePortalAgent()) {
-                        final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                        final Vector3i chunkPosition = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                         if (teleporter instanceof TeleporterBridge) {
                             ((TeleporterBridge) teleporter).bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                         }
@@ -389,7 +389,7 @@ public final class EntityUtil {
                         if (teleporter instanceof TeleporterBridge && !context.getCapturedBlockSupplier().isEmpty() && !TrackingUtil
                             .processBlockCaptures(context)) {
                             // Transactions were rolled back, the portal wasn't made. We need to bomb the dimension change and clear portal cache
-                            final Vector3i chunkPosition = ServerLocation.of((World) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
+                            final Vector3i chunkPosition = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) context.getTargetWorld(), context.getExitTransform().getPosition()).getChunkPosition();
                             ((TeleporterBridge) teleporter)
                                 .bridge$removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 
@@ -402,7 +402,7 @@ public final class EntityUtil {
         } else if (event.isCancelled()) {
             return null;
         } else {
-            toTransform = event.getToTransform();
+            toTransform = Transform.of(event.getToPosition());
             toWorld = (ServerWorld) event.getToWorld();
         }
 
@@ -655,25 +655,26 @@ public final class EntityUtil {
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final ServerLocation location) {
         final Transform fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
         final Transform toTransform = fromTransform.withPosition(location.getPosition()).withRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
-        return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, ((org.spongepowered.api.entity.Entity) entityIn).getWorld(), location.getWorld());
+
+        return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, (org.spongepowered.api.world.server.ServerWorld) entityIn.world, location.getWorld());
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(final Entity entityIn, final double posX, final double posY, final double posZ, final float yaw, final float pitch) {
-        final World world = ((org.spongepowered.api.entity.Entity) entityIn).getWorld();
+        final org.spongepowered.api.world.server.ServerWorld world = (org.spongepowered.api.world.server.ServerWorld) entityIn.world;
         final Transform fromTransform = ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
         final Transform toTransform = fromTransform.withPosition(new Vector3d(posX, posY, posZ)).withRotation(new Vector3d(pitch, yaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, world, world);
     }
 
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(
-        final Entity entityIn, final Transform fromTransform, final Transform toTransform, World fromWorld, World toWorld) {
+        final Entity entityIn, final Transform fromTransform, final Transform toTransform, org.spongepowered.api.world.server.ServerWorld fromWorld, org.spongepowered.api.world.server.ServerWorld toWorld) {
 
         // Use origin world to get correct cause
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entityIn);
 
             final MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(),
-                fromTransform, toTransform, fromWorld, toWorld, (org.spongepowered.api.entity.Entity) entityIn, false);
+                fromTransform.getPosition(), toTransform.getPosition(), fromWorld, toWorld, (org.spongepowered.api.entity.Entity) entityIn, false);
             SpongeImpl.postEvent(event);
             return event;
         }

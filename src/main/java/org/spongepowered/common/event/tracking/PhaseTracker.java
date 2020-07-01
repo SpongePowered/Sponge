@@ -68,9 +68,9 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
@@ -84,13 +84,12 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
-import javax.annotation.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.ref.WeakReference;
@@ -101,6 +100,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.annotation.Nullable;
 
 /**
  * The core state machine of Sponge. Acts a as proxy between various engine objects by processing actions through
@@ -471,7 +472,7 @@ public final class PhaseTracker {
             }
             state.associateNeighborStateNotifier(peek, sourcePos, notifyState.getBlock(), notifyPos, ((ServerWorld) mixinWorld), PlayerTracker.Type.NOTIFIER);
             final LocatableBlock block = new SpongeLocatableBlockBuilder()
-                .world(((World) mixinWorld))
+                .world(((org.spongepowered.api.world.server.ServerWorld) mixinWorld))
                 .position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
                 .state((BlockState) sourceBlock.getDefaultState()).build();
             try (final NeighborNotificationContext context = TickPhase.Tick.NEIGHBOR_NOTIFY.createPhaseContext(PhaseTracker.SERVER)

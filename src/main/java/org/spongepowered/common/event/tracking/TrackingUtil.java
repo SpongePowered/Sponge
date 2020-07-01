@@ -102,7 +102,6 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -113,6 +112,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 /**
  * A simple utility for aiding in tracking, either with resolving notifiers
@@ -277,7 +278,7 @@ public final class TrackingUtil {
     public static void updateTickBlock(
             final TrackedWorldBridge mixinWorld, final net.minecraft.block.BlockState block, final BlockPos pos, final Random random) {
         final ServerWorld world = (ServerWorld) mixinWorld;
-        final World apiWorld = (World) world;
+        final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(block, pos, BlockChangeFlags.NONE);
@@ -312,7 +313,7 @@ public final class TrackingUtil {
     public static void randomTickBlock(final TrackedWorldBridge mixinWorld,
                                        final net.minecraft.block.BlockState state, final BlockPos pos, final Random random) {
         final ServerWorld world = (ServerWorld) mixinWorld;
-        final World apiWorld = (World) world;
+        final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot currentTickBlock = mixinWorld.bridge$createSnapshot(state, pos, BlockChangeFlags.NONE);

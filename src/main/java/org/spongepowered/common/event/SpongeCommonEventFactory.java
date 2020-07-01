@@ -330,12 +330,12 @@ public class SpongeCommonEventFactory {
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos) {
 
         return callChangeBlockEventPre(worldIn, ImmutableList.of(
-            ServerLocation.of((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
+            ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos, final Object source) {
         return callChangeBlockEventPre(worldIn, ImmutableList.of(
-            ServerLocation.of((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
+            ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
     }
 
     /**
@@ -392,15 +392,15 @@ public class SpongeCommonEventFactory {
         if (source == null) {
             // If source is null the source is the block itself
             pushSource = true;
-            source = new SpongeLocatableBlockBuilder().state(fromState).world((World) worldIn).position(pos.getX(), pos.getY(), pos.getZ()).build();
+            source = new SpongeLocatableBlockBuilder().state(fromState).world((org.spongepowered.api.world.server.ServerWorld) worldIn).position(pos.getX(), pos.getY(), pos.getZ()).build();
         }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             if (!pushSource) {
                 frame.pushCause(source);
             }
-            frame.addContext(EventContextKeys.LIQUID_MIX, (World) worldIn);
+            frame.addContext(EventContextKeys.LIQUID_MIX, (org.spongepowered.api.world.server.ServerWorld) worldIn);
 
-            final WorldProperties world = ((World) worldIn).getProperties();
+            final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).getProperties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
             final Transaction<BlockSnapshot> transaction = new Transaction<>(BlockSnapshot.builder().blockState(fromState).world(world).position(position).build(),
@@ -427,9 +427,9 @@ public class SpongeCommonEventFactory {
         }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            frame.addContext(EventContextKeys.LIQUID_BREAK, (World) worldIn);
+            frame.addContext(EventContextKeys.LIQUID_BREAK, (org.spongepowered.api.world.server.ServerWorld) worldIn);
 
-            final WorldProperties world = ((World) worldIn).getProperties();
+            final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).getProperties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
             final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world(world).position(position).build();
@@ -453,7 +453,8 @@ public class SpongeCommonEventFactory {
         }
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             final BlockState blockstate = (BlockState) ((net.minecraft.world.World) world).getBlockState(sourcePos);
-            final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(world).position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
+            final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((org.spongepowered.api.world.server.ServerWorld) world).position(sourcePos.getX(), sourcePos.getY(),
+                    sourcePos.getZ())
                     .state(blockstate)
                     .build();
             if (context.getNotifier().isPresent()) {
@@ -499,7 +500,7 @@ public class SpongeCommonEventFactory {
                 event = SpongeEventFactory.createInteractEntityEventPrimaryOffHand(
                         frame.getCurrentCause(), (Entity) entity, HandTypes.OFF_HAND.get(), Optional.ofNullable(hitVec));
             }
-            if (entity instanceof Player && !((World) player.world).getProperties().isPVPEnabled()) {
+            if (entity instanceof Player && !((org.spongepowered.api.world.server.ServerWorld) player.world).getProperties().isPVPEnabled()) {
                 event.setCancelled(true); // if PvP is disabled for world, cancel
             }
             SpongeImpl.postEvent(event);
@@ -702,48 +703,42 @@ public class SpongeCommonEventFactory {
                 final double currentPosY = entity.posY;
                 final double currentPosZ = entity.posZ;
 
-                final Vector3d oldPositionVector = new Vector3d(context.prevX, context.prevY, context.prevZ);
-                final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
+                final Vector3d oldPosition = new Vector3d(context.prevX, context.prevY, context.prevZ);
+                final Vector3d currentPosition = new Vector3d(currentPosX, currentPosY, currentPosZ);
 
                 final Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
                 final Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
 
-                final World world = spongeEntity.getWorld();
-
-                final Transform oldTransform = Transform.of(oldPositionVector, oldRotationVector, spongeEntity.getScale());
-                final Transform newTransform = Transform.of(currentPositionVector, currentRotationVector, spongeEntity.getScale());
                 Event event  = null;
-                Transform eventToTransform = null;
-                if (!oldPositionVector.equals(currentPositionVector) && ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
-                    event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldTransform, newTransform, spongeEntity);
-                    eventToTransform = ((MoveEntityEvent) event).getToTransform();
+                if (!oldPosition.equals(currentPosition) && ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
+                    event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldPosition, currentPosition, spongeEntity);
+                    if (SpongeImpl.postEvent(event)) { // Cancelled event, reset position to previous position.
+                        entity.posX = context.prevX;
+                        entity.posY = context.prevY;
+                        entity.posZ = context.prevZ;
+                    } else {
+                        Vector3d newPosition = ((MoveEntityEvent) event).getToPosition();
+                        if (!newPosition.equals(currentPosition)) {
+                            entity.posX = newPosition.getX();
+                            entity.posY = newPosition.getY();
+                            entity.posZ = newPosition.getZ();
+                        }
+                    }
+
                 } else if (ShouldFire.ROTATE_ENTITY_EVENT) {
-                    event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldTransform.getRotation(), newTransform.getRotation(), spongeEntity);
-                    eventToTransform = eventToTransform.withRotation(((RotateEntityEvent) event).getToRotation());
-                }
-
-                if (event == null) {
-                    return null;
-                }
-
-                if (SpongeImpl.postEvent(event)) { // Cancelled event, reset positions to previous position.
-                    entity.posX = context.prevX;
-                    entity.posY = context.prevY;
-                    entity.posZ = context.prevZ;
-                    entity.rotationPitch = entity.prevRotationPitch;
-                    entity.rotationYaw = entity.prevRotationYaw;
-                } else {
-                    final Vector3d newPosition = eventToTransform.getPosition();
-                    if (!newPosition.equals(currentPositionVector)) {
-                        entity.posX = newPosition.getX();
-                        entity.posY = newPosition.getY();
-                        entity.posZ = newPosition.getZ();
-                    }
-                    if (!eventToTransform.getRotation().equals(currentRotationVector)) {
-                        entity.rotationPitch = (float) currentRotationVector.getX();
-                        entity.rotationYaw = (float) currentRotationVector.getY();
+                    event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldRotationVector, currentRotationVector, spongeEntity);
+                    if (SpongeImpl.postEvent(event)) { // Cancelled event, reset rotation to previous rotation.
+                        entity.rotationPitch = entity.prevRotationPitch;
+                        entity.rotationYaw = entity.prevRotationYaw;
+                    } else {
+                        Vector3d newRotation = ((RotateEntityEvent) event).getToRotation();
+                        if (!newRotation.equals(currentRotationVector)) {
+                            entity.rotationPitch = (float) currentRotationVector.getX();
+                            entity.rotationYaw = (float) currentRotationVector.getY();
+                        }
                     }
                 }
+
                 return event;
             }
         }
@@ -817,7 +812,7 @@ public class SpongeCommonEventFactory {
 
             // TODO: Add target side support
             final CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(frame.getCurrentCause(), (BlockState) state,
-                    ServerLocation.of((World) world, VecHelper.toVector3d(pos)), direction);
+                    ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, VecHelper.toVector3d(pos)), direction);
             final boolean cancelled = SpongeImpl.postEvent(event);
             if (!cancelled) {
                 final EntityBridge spongeEntity = (EntityBridge) entity;
@@ -848,7 +843,7 @@ public class SpongeCommonEventFactory {
             final Optional<User> owner = PhaseTracker.getInstance().getCurrentContext().getOwner();
             owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
 
-            final ServerLocation impactPoint = ServerLocation.of((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.getHitVec()));
+            final ServerLocation impactPoint = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) projectile.world, VecHelper.toVector3d(movingObjectPosition.getHitVec()));
             boolean cancelled = false;
 
             if (movingObjectType == RayTraceResult.Type.BLOCK) {
@@ -1024,7 +1019,8 @@ public class SpongeCommonEventFactory {
         // SECOND throw the ConstructEntityEvent
         final Transform suggested = Transform.of(new Vector3d(posX, posY, posZ));
         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM.get(), suggested, ((World) entity.world));
+        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM.get(),
+                suggested, ((org.spongepowered.api.world.server.ServerWorld) entity.world));
         frame.removeContext(EventContextKeys.SPAWN_TYPE);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
@@ -1063,7 +1059,7 @@ public class SpongeCommonEventFactory {
         } else {
             return null;
         }
-        final ServerLocation location = ServerLocation.of((World) bridge, pos.getX(), pos.getY(), pos.getZ());
+        final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) bridge, pos.getX(), pos.getY(), pos.getZ());
         final PlaySoundEvent.Broadcast event = SpongeEventFactory.createPlaySoundEventBroadcast(frame.getCurrentCause(), location,
             SoundCategories.HOSTILE.get(), soundType.get(), 1.0F, volume);
         SpongeImpl.postEvent(event);
@@ -1073,7 +1069,7 @@ public class SpongeCommonEventFactory {
     public static PlaySoundEvent.Record callPlaySoundRecordEvent(final Cause cause, final JukeboxTileEntity jukebox,
         final MusicDisc recordType, final int data) {
         final Jukebox apiJuke = (Jukebox) jukebox;
-        final ServerLocation location = apiJuke.getLocation();
+        final ServerLocation location = (ServerLocation) apiJuke.getLocation();
         final PlaySoundEvent.Record
             event =
             data == 0 ? SpongeEventFactory
@@ -1088,7 +1084,7 @@ public class SpongeCommonEventFactory {
     public static PlaySoundEvent.AtEntity callPlaySoundAtEntityEvent(final Cause cause, @Nullable final PlayerEntity entity,
         final WorldBridge worldMixin, final double x, final double y, final double z, final net.minecraft.util.SoundCategory category,
         final SoundEvent name, final float pitch, final float volume) {
-        final ServerLocation location = ServerLocation.of((World) worldMixin, x, y, z);
+        final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldMixin, x, y, z);
         final PlaySoundEvent.AtEntity event = SpongeEventFactory.createPlaySoundEventAtEntity(cause, location, Optional.ofNullable(entity),
             (SoundCategory) (Object) category, (SoundType) name, pitch, volume);
         SpongeImpl.postEvent(event);
@@ -1096,7 +1092,7 @@ public class SpongeCommonEventFactory {
     }
 
     public static PlaySoundEvent.NoteBlock callPlaySoundNoteBlockEvent(final Cause cause, final World world, final BlockPos pos, final SoundEvent soundEvent, final InstrumentType instrument, final NotePitch notePitch, final Float pitch) {
-        final ServerLocation location = ServerLocation.of(world, pos.getX(), pos.getY(), pos.getZ());
+        final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
         final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, notePitch, SoundCategories.RECORD.get(), (SoundType)soundEvent, pitch, 3.0F);
         SpongeImpl.postEvent(event);
         return event;
