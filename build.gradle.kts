@@ -72,7 +72,7 @@ val mixinsConfig by configurations.register("mixins") {
     extendsFrom(launchConfig)
     extendsFrom(minecraftConfig)
 }
-val modlauncherConfig by configurations.register("modLauncher") {
+val modlauncherConfig by configurations.register("modlauncher") {
     extendsFrom(launchConfig)
     extendsFrom(minecraftConfig)
 }
@@ -322,7 +322,7 @@ project("SpongeVanilla") {
     description = "The SpongeAPI implementation for Vanilla Minecraft"
 
     val vanillaMinecraftConfig by configurations.named("minecraft")
-    val vanillaLaunchConfig by configurations.register("modLauncher") {
+    val vanillaLaunchConfig by configurations.register("modlauncher") {
         extendsFrom(launchConfig)
         extendsFrom(vanillaMinecraftConfig)
     }
@@ -431,7 +431,7 @@ project("SpongeVanilla") {
         )
 
     }
-    val vanillaModLauncher by sourceSets.register("modLauncher") {
+    val vanillaModLauncher by sourceSets.register("modlauncher") {
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = launch.get(),

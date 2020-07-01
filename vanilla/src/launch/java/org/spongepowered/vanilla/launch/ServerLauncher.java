@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.modlauncher;
+package org.spongepowered.vanilla.launch;
 
 import net.minecraft.server.MinecraftServer;
 
