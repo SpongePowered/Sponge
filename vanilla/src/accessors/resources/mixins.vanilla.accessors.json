@@ -1,0 +1,20 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "org.spongepowered.vanilla.accessor",
+    "refmap": "mixins.vanilla.refmap.json",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixinPriority": 901,
+    "priority": 1111,
+    "server": [
+    ],
+    "mixins": [
+        "server.MinecraftServerAccessor_Vanilla",
+        "world.chunk.storage.AnvilChunkLoaderAccessor_Vanilla",
+        "world.storage.SaveFormatAccessor_Vanilla"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

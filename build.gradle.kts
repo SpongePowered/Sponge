@@ -327,7 +327,7 @@ project("SpongeVanilla") {
         extendsFrom(vanillaMinecraftConfig)
     }
 
-    val vanillaMain by vanillaProject.sourceSets.named("main") {
+    val vanillaMain by sourceSets.named("main") {
         val thisMain = this
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
@@ -340,6 +340,15 @@ project("SpongeVanilla") {
                 originProject = commonProject,
                 sourceAdding = launch.get(),
                 targetSource = thisMain,
+                implProject = vanillaProject,
+                dependencyConfigName = this.implementationConfigurationName
+        )
+    }
+    val vanillaLaunch by sourceSets.register("launch") {
+        applyNamedDependencyOnOutput(
+                originProject = commonProject,
+                sourceAdding = launch.get(),
+                targetSource = this,
                 implProject = vanillaProject,
                 dependencyConfigName = this.implementationConfigurationName
         )
@@ -366,6 +375,13 @@ project("SpongeVanilla") {
                 targetSource = vanillaMain,
                 implProject = vanillaProject,
                 dependencyConfigName = vanillaMain.implementationConfigurationName
+        )
+        applyNamedDependencyOnOutput(
+                originProject = vanillaProject,
+                sourceAdding = vanillaLaunch,
+                targetSource = this,
+                implProject = vanillaProject,
+                dependencyConfigName = this.implementationConfigurationName
         )
     }
     val vanillaMixins by sourceSets.register("mixins") {
@@ -406,12 +422,26 @@ project("SpongeVanilla") {
                 implProject = vanillaProject,
                 dependencyConfigName = thisMixin.implementationConfigurationName
         )
+        applyNamedDependencyOnOutput(
+                originProject = vanillaProject,
+                sourceAdding = vanillaLaunch,
+                targetSource = this,
+                implProject = vanillaProject,
+                dependencyConfigName = this.implementationConfigurationName
+        )
 
     }
     val vanillaModLauncher by sourceSets.register("modLauncher") {
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = launch.get(),
+                targetSource = this,
+                implProject = vanillaProject,
+                dependencyConfigName = this.implementationConfigurationName
+        )
+        applyNamedDependencyOnOutput(
+                originProject = vanillaProject,
+                sourceAdding = vanillaLaunch,
                 targetSource = this,
                 implProject = vanillaProject,
                 dependencyConfigName = this.implementationConfigurationName
@@ -495,7 +525,7 @@ project("SpongeVanilla") {
     dependencies {
         minecraft("net.minecraft:joined:$minecraftVersion")
 
-        implementation(launch.get().output)
+        api(launch.get().output)
         implementation(accessors.get().output)
         implementation(project(commonProject.path)) {
             exclude(group = "net.minecraft", module = "server")
@@ -506,6 +536,7 @@ project("SpongeVanilla") {
         vanillaMixinsImplementation(project(commonProject.path)) {
             exclude(group = "net.minecraft", module = "server")
         }
+        add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
 
         vanillaLaunchConfig("org.spongepowered:mixin:0.8")
         vanillaLaunchConfig("org.ow2.asm:asm-util:6.2")
