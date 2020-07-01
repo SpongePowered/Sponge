@@ -237,7 +237,7 @@ public final class EntityUtil {
         } else if (event.isCancelled()) {
             return null;
         } else {
-            toTransform = Transform.of(event.getToPosition());
+            toTransform = Transform.of(event.getToPosition(), sEntity.getRotation(), sEntity.getScale());
             toWorld = (ServerWorld) event.getToWorld();
         }
 
