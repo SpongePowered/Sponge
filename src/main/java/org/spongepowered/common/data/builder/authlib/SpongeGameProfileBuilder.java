@@ -44,7 +44,7 @@ public class SpongeGameProfileBuilder extends AbstractDataBuilder<GameProfile> {
         if (!container.contains(Constants.Entity.Player.UUID)) {
             return Optional.empty();
         }
-        UUID uuid = getUUIDByString(container.getString(Constants.Entity.Player.UUID).get());
+        UUID uuid = SpongeGameProfileBuilder.getUUIDByString(container.getString(Constants.Entity.Player.UUID).get());
         if (!container.contains(Constants.Entity.Player.NAME)) {
             return Optional.of(GameProfile.of(uuid));
         }
