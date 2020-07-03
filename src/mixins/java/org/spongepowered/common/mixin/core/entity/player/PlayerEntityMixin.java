@@ -301,4 +301,9 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         return this.shadow$isSpectator() || this.shadow$isCreative();
     }
 
+    @Inject(method = "func_213828_b", at = @At("RETURN"), cancellable = true)
+    private void onFunc_213828_b(BlockPos blockPos, Direction direction, final CallbackInfoReturnable<Boolean> ci ) {
+        ci.setReturnValue(ci.getReturnValue() && this.world.getWorldBorder().contains(blockPos));
+    }
+
 }
