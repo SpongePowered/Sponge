@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.player;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.ServerPlayNetHandler;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -48,6 +49,17 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow public ServerPlayNetHandler connection;
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
+    private @Nullable GameProfile impl$previousGameProfile;
+
+    @Override
+    public @Nullable GameProfile bridge$getPreviousGameProfile() {
+        return this.impl$previousGameProfile;
+    }
+
+    @Override
+    public void bridge$setPreviousGameProfile(final @Nullable GameProfile gameProfile) {
+        this.impl$previousGameProfile = gameProfile;
+    }
 
     @Override
     public String bridge$getSubjectCollectionIdentifier() {

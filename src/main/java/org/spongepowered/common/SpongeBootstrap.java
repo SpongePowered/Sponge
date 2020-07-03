@@ -60,6 +60,7 @@ public final class SpongeBootstrap {
         SpongeBootstrap.lifecycle.callConstructEvent();
         SpongeBootstrap.lifecycle.callRegisterFactoryEvent();
         SpongeBootstrap.lifecycle.callRegisterBuilderEvent();
+        SpongeBootstrap.lifecycle.callRegisterChannelEvent();
         SpongeBootstrap.lifecycle.establishServices();
 
         Launcher.getInstance().getLogger().info("Loading Minecraft '{}', please wait...", engineName);

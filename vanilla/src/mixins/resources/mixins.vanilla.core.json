@@ -8,6 +8,8 @@
     "priority": 1301,
     "client": [
         "client.gui.screen.MainMenuScreenMixin_Vanilla",
+        "client.network.login.ClientLoginNetHandlerMixin_Vanilla",
+        "client.network.play.ClientPlayNetHandlerMixin_Vanilla",
         "client.ClientBrandRetrieverMixin_Vanilla",
         "client.MinecraftMixin_Vanilla",
         "server.integrated.IntegratedServerMixin_Vanilla"
@@ -17,6 +19,9 @@
     ],
     "mixins": [
         "crash.CrashReportMixin_Vanilla",
+        "network.login.ServerLoginNetHandler_2Mixin_Vanilla",
+        "network.login.ServerLoginNetHandlerMixin_Vanilla",
+        "network.play.ServerPlayNetHandlerMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
         "util.registry.BootstrapMixin_Vanilla",
         "world.server.ServerChunkProviderMixin_Vanilla"

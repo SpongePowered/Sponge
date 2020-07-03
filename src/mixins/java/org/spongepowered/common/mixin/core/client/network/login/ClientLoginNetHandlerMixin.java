@@ -22,12 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.bridge.network;
+package org.spongepowered.common.mixin.core.client.network.login;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.network.login.ClientLoginNetHandler;
+import net.minecraft.network.NetworkManager;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 
-public interface NetHandlerPlayServerBridge_Vanilla {
+@Mixin(ClientLoginNetHandler.class)
+public abstract class ClientLoginNetHandlerMixin implements NetworkManagerHolderBridge {
 
-    boolean vanillaBridge$supportsChannel(ResourceLocation name);
+    @Shadow @Final private NetworkManager networkManager;
 
+    @Override
+    public NetworkManager bridge$getNetworkManager() {
+        return this.networkManager;
+    }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import org.spongepowered.api.Game;
@@ -33,6 +34,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.client.LocalServer;
 import org.spongepowered.api.entity.living.player.client.LocalPlayer;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.world.client.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,7 +54,7 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
 
     @Shadow public net.minecraft.client.world.ClientWorld world;
     @Shadow public ClientPlayerEntity player;
-
+    @Shadow @Nullable private NetworkManager networkManager;
     @Shadow @Nullable public abstract IntegratedServer shadow$getIntegratedServer();
 
     private final SpongeScheduler api$scheduler = new ClientScheduler();
@@ -80,6 +82,14 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
     @Override
     public Optional<ClientWorld> getWorld() {
         return Optional.ofNullable((ClientWorld) this.world);
+    }
+
+    @Override
+    public Optional<ClientSideConnection> getConnection() {
+        if (this.networkManager == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable((ClientSideConnection) this.networkManager.getNetHandler());
     }
 
     @Override

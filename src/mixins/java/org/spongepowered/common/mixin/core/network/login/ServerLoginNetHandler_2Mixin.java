@@ -43,10 +43,9 @@ public abstract class ServerLoginNetHandler_2Mixin extends Thread {
 
     @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
             remap = false, cancellable = true)
-    private void fireAuthEvent(final CallbackInfo ci) {
+    private void impl$fireAuthEvent(final CallbackInfo ci) {
         if (((ServerLoginNetHandlerBridge) this.handler).bridge$fireAuthEvent()) {
             ci.cancel();
         }
     }
-
 }

@@ -47,6 +47,27 @@
                 "version": "8.0.0"
             }],
             "extra": {}
+        },
+        {
+            "id": "channeltest",
+            "name": "ChannelTest",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.channeltest.ChannelTest",
+            "description": "Testing network channel changes",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }],
+            "extra": {}
         }
     ]
 }

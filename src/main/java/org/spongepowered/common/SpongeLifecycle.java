@@ -41,6 +41,7 @@ import org.spongepowered.common.event.lifecycle.StartingEngineEventImpl;
 import org.spongepowered.common.event.lifecycle.StoppingEngineEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
+import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeBuilderRegistry;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.registry.SpongeFactoryRegistry;
@@ -84,6 +85,10 @@ public final class SpongeLifecycle {
         this.game.getEventManager().post(new RegisterCatalogRegistryEventImpl(Cause.of(EventContext.empty(), this.game), this.game));
 
         ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+    }
+
+    public void callRegisterChannelEvent() {
+        ((SpongeChannelRegistry) this.game.getChannelRegistry()).postRegistryEvent();
     }
 
     public void initTimings() {

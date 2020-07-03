@@ -22,52 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.network;
+package org.spongepowered.common.mixin.api.mcp.client.network;
 
-import io.netty.channel.SimpleChannelInboundHandler;
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.ServerPlayNetHandler;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.network.PlayerConnection;
-import org.spongepowered.api.network.ServerPlayerConnection;
+import net.kyori.adventure.text.Component;
+import net.minecraft.client.network.login.ClientLoginNetHandler;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
+import net.minecraft.util.text.TranslationTextComponent;
+import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 
 import java.net.InetSocketAddress;
 
-@SuppressWarnings("rawtypes")
-@Mixin(NetworkManager.class)
-public abstract class NetworkManagerMixin_API extends SimpleChannelInboundHandler implements ServerPlayerConnection {
-
-    @Shadow private INetHandler packetListener;
+@Mixin({ ClientLoginNetHandler.class, ClientPlayNetHandler.class })
+public abstract class ClientNetHandlerMixin_API implements ClientSideConnection {
 
     @Override
-    public ServerPlayer getPlayer() {
-        if(this.packetListener instanceof ServerPlayNetHandler) {
-            return (ServerPlayer) ((ServerPlayNetHandler) this.packetListener).player;
-        }
-        throw new IllegalStateException("Player is not currently available");
+    public void close() {
+        ((NetworkManagerHolderBridge) this).bridge$getNetworkManager().closeChannel(
+                new TranslationTextComponent("disconnect.disconnected"));
     }
 
     @Override
-    public int getLatency() {
-        if(this.packetListener instanceof ServerPlayNetHandler) {
-            return ((ServerPlayNetHandler) this.packetListener).player.ping;
-        }
-        throw new IllegalStateException("Latency is not currently available");
+    public void close(final Component reason) {
+        ((NetworkManagerHolderBridge) this).bridge$getNetworkManager().closeChannel(SpongeAdventure.asVanilla(reason));
     }
-
 
     @Override
     public InetSocketAddress getAddress() {
-        return ((NetworkManagerBridge) this).bridge$getAddress();
+        return ((NetworkManagerBridge) ((NetworkManagerHolderBridge) this).bridge$getNetworkManager()).bridge$getAddress();
     }
 
     @Override
     public InetSocketAddress getVirtualHost() {
-        return ((NetworkManagerBridge) this).bridge$getVirtualHost();
+        return ((NetworkManagerBridge) ((NetworkManagerHolderBridge) this).bridge$getNetworkManager()).bridge$getVirtualHost();
     }
 }

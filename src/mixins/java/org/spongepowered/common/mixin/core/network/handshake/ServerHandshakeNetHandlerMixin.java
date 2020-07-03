@@ -35,10 +35,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 import org.spongepowered.common.accessor.network.handshake.client.CHandshakePacketAccessor;
+import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 import org.spongepowered.common.util.NetworkUtil;
 
 @Mixin(ServerHandshakeNetHandler.class)
-public abstract class ServerHandshakeNetHandlerMixin {
+public abstract class ServerHandshakeNetHandlerMixin implements NetworkManagerHolderBridge {
 
     @Shadow @Final private NetworkManager networkManager;
 
@@ -46,7 +47,12 @@ public abstract class ServerHandshakeNetHandlerMixin {
     private void impl$updateVersionAndHost(final CHandshakePacket packetIn, final CallbackInfo ci) {
         final NetworkManagerBridge info = (NetworkManagerBridge) this.networkManager;
         info.bridge$setVersion(packetIn.getProtocolVersion());
-        info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(((CHandshakePacketAccessor) packetIn).accessor$getIp()), ((CHandshakePacketAccessor) packetIn).accessor$getPort());
+        info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(
+                ((CHandshakePacketAccessor) packetIn).accessor$getIp()), ((CHandshakePacketAccessor) packetIn).accessor$getPort());
     }
 
+    @Override
+    public NetworkManager bridge$getNetworkManager() {
+        return this.networkManager;
+    }
 }

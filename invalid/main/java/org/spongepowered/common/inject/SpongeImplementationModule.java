@@ -42,7 +42,7 @@ import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.network.ChannelRegistrar;
+import org.spongepowered.api.network.channel.ChannelRegistry;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.SimpleServiceManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
@@ -84,7 +84,7 @@ public class SpongeImplementationModule extends PrivateModule {
         this.expose(Platform.class);
         this.expose(PluginManager.class);
         this.expose(EventManager.class);
-        this.expose(ChannelRegistrar.class);
+        this.expose(ChannelRegistry.class);
 
         this.bind(Logger.class).toInstance(SpongeCommon.getLogger());
         this.bind(org.slf4j.Logger.class).toInstance(LoggerFactory.getLogger(SpongeCommon.getLogger().getName()));

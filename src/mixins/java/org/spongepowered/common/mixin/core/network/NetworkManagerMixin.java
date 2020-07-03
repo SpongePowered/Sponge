@@ -24,33 +24,53 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
+import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
+import net.minecraft.network.INetHandler;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeMinecraftVersion;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.util.Constants;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
 @Mixin(NetworkManager.class)
-public abstract class NetworkManagerMixin extends SimpleChannelInboundHandler implements NetworkManagerBridge {
+public abstract class NetworkManagerMixin extends SimpleChannelInboundHandler<IPacket<?>> implements NetworkManagerBridge {
 
+    @Shadow private INetHandler packetListener;
     @Shadow private Channel channel;
-
     @Shadow public abstract SocketAddress getRemoteAddress();
+
+    private final TransactionStore impl$transactionStore = new TransactionStore(() -> (EngineConnection) this.packetListener);
+    private final Set<ResourceKey> impl$registeredChannels = Sets.newConcurrentHashSet();
 
     @Nullable private InetSocketAddress impl$virtualHost;
     @Nullable private MinecraftVersion impl$version;
+
+    @Override
+    public TransactionStore bridge$getTransactionStore() {
+        return this.impl$transactionStore;
+    }
+
+    @Override
+    public Set<ResourceKey> bridge$getRegisteredChannels() {
+        return this.impl$registeredChannels;
+    }
 
     @Override
     public InetSocketAddress bridge$getAddress() {

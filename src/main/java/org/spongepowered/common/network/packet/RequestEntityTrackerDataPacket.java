@@ -22,42 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.provider;
+package org.spongepowered.common.network.packet;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.spongepowered.api.network.ChannelBinding;
-import org.spongepowered.api.network.ChannelId;
-import org.spongepowered.api.network.ChannelRegistrar;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.inject.SpongeInjectionPoint;
+import org.spongepowered.api.network.channel.ChannelBuf;
+import org.spongepowered.api.network.channel.packet.RequestPacket;
 
-public abstract class ChannelBindingProvider<B extends ChannelBinding> implements Provider<B> {
+public final class RequestEntityTrackerDataPacket implements RequestPacket<TrackerDataResponsePacket> {
 
-    @Inject ChannelRegistrar registrar;
-    @Inject PluginContainer container;
-    @Inject private Provider<SpongeInjectionPoint> point;
+    public int entityId;
 
-    final String getChannel() {
-        return this.point.get().getAnnotation(ChannelId.class).value();
+    public RequestEntityTrackerDataPacket() {
     }
 
-    public static class Indexed extends ChannelBindingProvider<ChannelBinding.IndexedMessageChannel> {
-
-        @Override
-        public ChannelBinding.IndexedMessageChannel get() {
-            return this.registrar.getOrCreate(this.container, this.getChannel());
-        }
-
+    public RequestEntityTrackerDataPacket(final int entityId) {
+        this.entityId = entityId;
     }
 
-    public static class Raw extends ChannelBindingProvider<ChannelBinding.RawDataChannel> {
-
-        @Override
-        public ChannelBinding.RawDataChannel get() {
-            return this.registrar.getOrCreateRaw(this.container, this.getChannel());
-        }
-
+    @Override
+    public void read(final ChannelBuf buf) {
+        this.entityId = buf.readInt();
     }
 
+    @Override
+    public void write(ChannelBuf buf) {
+        buf.writeInt(this.entityId);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("TrackerDataRequestPacket - entity %d", this.entityId);
+    }
 }

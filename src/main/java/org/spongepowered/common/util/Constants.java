@@ -1455,4 +1455,37 @@ public final class Constants {
             }
         }
     }
+
+    public static final class Channels {
+
+        /**
+         * The transaction id of a "normal" payload packet during the login phase.
+         */
+        public static final int LOGIN_PAYLOAD_TRANSACTION_ID = Integer.MAX_VALUE;
+
+        /**
+         * The transaction id of a "normal" payload packet response during the login phase. Can always be ignored.
+         */
+        public static final int LOGIN_PAYLOAD_IGNORED_TRANSACTION_ID = Integer.MAX_VALUE - 1;
+
+        /**
+         * A channel Forge uses to wrap custom login packets in.
+         */
+        public static final ResourceKey FML_LOGIN_WRAPPER_CHANNEL = ResourceKey.of("fml", "loginwrapper");
+
+        /**
+         * A sponge channel used to sync channel registry information.
+         */
+        public static final ResourceKey SPONGE_CHANNEL_REGISTRY = ResourceKey.sponge("channel_registry");
+
+        /**
+         * A minecraft channel used to register channels keys.
+         */
+        public static final ResourceKey REGISTER_KEY = ResourceKey.minecraft("register");
+
+        /**
+         * A minecraft channel used to unregister channels keys.
+         */
+        public static final ResourceKey UNREGISTER_KEY = ResourceKey.minecraft("unregister");
+    }
 }

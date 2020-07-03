@@ -25,10 +25,15 @@
 package org.spongepowered.common.bridge.network;
 
 import org.spongepowered.api.MinecraftVersion;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.common.network.channel.TransactionStore;
 
 import java.net.InetSocketAddress;
+import java.util.Set;
 
 public interface NetworkManagerBridge {
+
+    TransactionStore bridge$getTransactionStore();
 
     InetSocketAddress bridge$getAddress();
 
@@ -39,4 +44,6 @@ public interface NetworkManagerBridge {
     MinecraftVersion bridge$getVersion();
 
     void bridge$setVersion(int version);
+
+    Set<ResourceKey> bridge$getRegisteredChannels();
 }

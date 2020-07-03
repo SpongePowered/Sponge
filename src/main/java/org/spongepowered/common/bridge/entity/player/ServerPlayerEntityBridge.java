@@ -34,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.math.vector.Vector3d;
@@ -105,4 +106,8 @@ public interface ServerPlayerEntityBridge {
 
     @Nullable
     Vector3d bridge$getVelocityOverride();
+
+    @Nullable GameProfile bridge$getPreviousGameProfile();
+
+    void bridge$setPreviousGameProfile(@Nullable GameProfile gameProfile);
 }

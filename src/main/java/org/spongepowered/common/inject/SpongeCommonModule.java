@@ -51,6 +51,7 @@ import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.network.channel.ChannelBufferAllocator;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.SpongeServiceProvider;
@@ -69,7 +70,7 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(Platform.class).to(SpongePlatform.class);
         this.bindAndExpose(MinecraftVersion.class).toInstance(SpongeCommon.MINECRAFT_VERSION);
         this.bindAndExpose(AssetManager.class).to(SpongeAssetManager.class);
-        this.bindAndExpose(ChannelRegistry.class).to(SpongeChannelRegistry.class);
+        this.bindAndExpose(ChannelRegistry.class).toInstance(new SpongeChannelRegistry(ChannelBufferAllocator.POOLED));
         this.bindAndExpose(EventManager.class).to(SpongeEventManager.class);
         this.bindAndExpose(PluginManager.class).toInstance(Launcher.getInstance().getPluginManager());
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);

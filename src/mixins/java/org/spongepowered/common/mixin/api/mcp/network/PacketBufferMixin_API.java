@@ -40,10 +40,10 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.network.channel.ChannelBuffers;
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
-import java.nio.ByteOrder;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -55,6 +55,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     // mojang methods, fluent in target
     @Shadow public abstract PacketBuffer shadow$writeByteArray(byte[] array);
     @Shadow public abstract PacketBuffer shadow$writeVarInt(int input);
+    @Shadow public abstract PacketBuffer shadow$writeVarLong(long input);
     @Shadow public abstract PacketBuffer shadow$writeString(String string);
     @Shadow public abstract PacketBuffer shadow$writeCompoundTag(@Nullable CompoundNBT nbt);
     @Shadow public abstract PacketBuffer shadow$writeUniqueId(UUID uniqueId);
@@ -63,11 +64,13 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     @Shadow public abstract byte[] shadow$readByteArray();
     @Shadow public abstract byte[] shadow$readByteArray(int limit);
     @Shadow public abstract int shadow$readVarInt();
+    @Shadow public abstract long shadow$readVarLong();
     @Shadow public abstract String shadow$readString(int maxLength);
     @Shadow public abstract CompoundNBT shadow$readCompoundTag() throws IOException;
     @Shadow public abstract UUID shadow$readUniqueId();
 
-    public int cbuf$getCapacity() {
+    @Intrinsic
+    public int cbuf$capacity() {
         return this.capacity();
     }
 
@@ -75,23 +78,12 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return this.writerIndex() - this.readerIndex();
     }
 
-    @SuppressWarnings("deprecation")
-    public ChannelBuf cbuf$order(ByteOrder order) {
-        this.order(order);
-        return (ChannelBuf) this;
-    }
-
-    @SuppressWarnings("deprecation")
-    public ByteOrder cbuf$getByteOrder() {
-        return this.order();
-    }
-
     @Intrinsic
     public int cbuf$readerIndex() {
         return this.readerIndex();
     }
 
-    public ChannelBuf cbuf$setReadIndex(int index) {
+    public ChannelBuf cbuf$readerIndex(final int index) {
         this.readerIndex(index);
         return (ChannelBuf) this;
     }
@@ -101,12 +93,12 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return this.writerIndex();
     }
 
-    public ChannelBuf cbuf$setWriteIndex(int index) {
+    public ChannelBuf cbuf$writerIndex(final int index) {
         this.writerIndex(index);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setIndex(int readIndex, int writeIndex) {
+    public ChannelBuf cbuf$setIndex(final int readIndex, final int writeIndex) {
         this.setIndex(readIndex, writeIndex);
         return (ChannelBuf) this;
     }
@@ -116,32 +108,16 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$markRead() {
-        this.markReaderIndex();
-        return (ChannelBuf) this;
-    }
-
-    public ChannelBuf cbuf$markWrite() {
-        this.markWriterIndex();
-        return (ChannelBuf) this;
-    }
-
-    public ChannelBuf cbuf$resetRead() {
-        this.resetReaderIndex();
-        return (ChannelBuf) this;
-    }
-
-    public ChannelBuf cbuf$resetWrite() {
-        this.resetWriterIndex();
-        return (ChannelBuf) this;
-    }
-
     public ChannelBuf cbuf$slice() {
-        return SpongeNetworkManager.toChannelBuf(this.slice());
+        return ChannelBuffers.wrap(this.slice());
     }
 
-    public ChannelBuf cbuf$slice(int index, int length) {
-        return SpongeNetworkManager.toChannelBuf(this.slice(index, length));
+    public ChannelBuf cbuf$slice(final int index, final int length) {
+        return ChannelBuffers.wrap(this.slice(index, length));
+    }
+
+    public ChannelBuf cbuf$readSlice(final int length) {
+        return ChannelBuffers.wrap(this.readSlice(length));
     }
 
     @Intrinsic
@@ -154,12 +130,12 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return this.array();
     }
 
-    public ChannelBuf cbuf$writeBoolean(boolean data) {
+    public ChannelBuf cbuf$writeBoolean(final boolean data) {
         this.writeBoolean(data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setBoolean(int index, boolean data) {
+    public ChannelBuf cbuf$setBoolean(final int index, final boolean data) {
         this.setBoolean(index, data);
         return (ChannelBuf) this;
     }
@@ -170,16 +146,16 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     @Intrinsic
-    public boolean cbuf$getBoolean(int index) {
+    public boolean cbuf$getBoolean(final int index) {
         return this.getBoolean(index);
     }
 
-    public ChannelBuf cbuf$writeByte(byte data) {
+    public ChannelBuf cbuf$writeByte(final byte data) {
         this.writeByte(data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setByte(int index, byte data) {
+    public ChannelBuf cbuf$setByte(final int index, final byte data) {
         this.setByte(index, data);
         return (ChannelBuf) this;
     }
@@ -190,25 +166,25 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     @Intrinsic
-    public byte cbuf$getByte(int index) {
+    public byte cbuf$getByte(final int index) {
         return this.getByte(index);
     }
 
-    public ChannelBuf cbuf$writeByteArray(byte[] data) {
+    public ChannelBuf cbuf$writeByteArray(final byte[] data) {
         return (ChannelBuf) this.shadow$writeByteArray(data); // fluent in target
     }
 
-    public ChannelBuf cbuf$writeByteArray(byte[] data, int start, int length) {
+    public ChannelBuf cbuf$writeByteArray(final byte[] data, final int start, final int length) {
         this.writeBytes(data, start, length);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setByteArray(int index, byte[] data) {
+    public ChannelBuf cbuf$setByteArray(final int index, final byte[] data) {
         this.setBytes(index, data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setByteArray(int index, byte[] data, int start, int length) {
+    public ChannelBuf cbuf$setByteArray(final int index, final byte[] data, final int start, final int length) {
         this.setBytes(index, data, start, length);
         return (ChannelBuf) this;
     }
@@ -219,50 +195,80 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     @Intrinsic
-    public byte[] cbuf$readByteArray(int index) {
-        return this.shadow$readByteArray(index);
+    public byte[] cbuf$readByteArray(final int limit) {
+        return this.shadow$readByteArray(limit);
     }
 
-    public ChannelBuf cbuf$writeBytes(byte[] data) {
+    public byte[] cbuf$getByteArray(final int index) {
+        final int readerIndex = this.readerIndex();
+        try {
+            this.readerIndex(index);
+            return this.shadow$readByteArray();
+        } finally {
+            this.readerIndex(readerIndex);
+        }
+    }
+
+    public byte[] cbuf$getByteArray(final int index, final int limit) {
+        final int readerIndex = this.readerIndex();
+        try {
+            this.readerIndex(index);
+            return this.shadow$readByteArray(limit);
+        } finally {
+            this.readerIndex(readerIndex);
+        }
+    }
+
+    public ChannelBuf cbuf$writeBytes(final byte[] data) {
         this.writeBytes(data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$writeBytes(byte[] data, int start, int length) {
+    public ChannelBuf cbuf$writeBytes(final byte[] data, final int start, final int length) {
         this.writeBytes(data, start, length);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setBytes(int index, byte[] data) {
+    public ChannelBuf cbuf$setBytes(final int index, final byte[] data) {
         this.setBytes(index, data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setBytes(int index, byte[] data, int start, int length) {
+    public ChannelBuf cbuf$setBytes(final int index, final byte[] data, final int start, final int length) {
         this.setBytes(index, data, start, length);
         return (ChannelBuf) this;
     }
 
     @Intrinsic
-    public byte[] cbuf$readBytes(int length) {
+    public byte[] cbuf$readBytes(final int length) {
         final byte[] bytes = new byte[length];
         this.readBytes(bytes);
         return bytes;
     }
 
-    public byte[] cbuf$readBytes(int index, int length) {
+    public byte[] cbuf$readBytes(final int index, final int length) {
         final byte[] dest = new byte[length];
         this.readBytes(dest, index, length);
         return dest;
     }
 
-    public ChannelBuf cbuf$writeShort(short data) {
+    public ChannelBuf cbuf$writeShort(final short data) {
         this.writeShort(data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setShort(int index, short data) {
+    public ChannelBuf cbuf$writeShortLE(final short data) {
+        this.writeShortLE(data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setShort(final int index, final short data) {
         this.setShort(index, data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setShortLE(final int index, final short data) {
+        this.setShortLE(index, data);
         return (ChannelBuf) this;
     }
 
@@ -272,16 +278,26 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     @Intrinsic
-    public short cbuf$getShort(int index) {
+    public short cbuf$readShortLE() {
+        return this.readShortLE();
+    }
+
+    @Intrinsic
+    public short cbuf$getShort(final int index) {
         return this.getShort(index);
     }
 
-    public ChannelBuf cbuf$writeChar(char data) {
+    @Intrinsic
+    public short cbuf$getShortLE(final int index) {
+        return this.getShortLE(index);
+    }
+
+    public ChannelBuf cbuf$writeChar(final char data) {
         this.writeChar(data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setChar(int index, char data) {
+    public ChannelBuf cbuf$setChar(final int index, final char data) {
         this.setChar(index, data);
         return (ChannelBuf) this;
     }
@@ -292,35 +308,67 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     @Intrinsic
-    public char cbuf$getChar(int index) {
+    public char cbuf$getChar(final int index) {
         return this.getChar(index);
     }
 
-    public ChannelBuf cbuf$writeInteger(int data) {
+    public ChannelBuf cbuf$writeInt(final int data) {
         this.writeInt(data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setInteger(int index, int data) {
+    public ChannelBuf cbuf$writeIntLE(final int data) {
+        this.writeIntLE(data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setInt(final int index, final int data) {
         this.setInt(index, data);
         return (ChannelBuf) this;
     }
 
-    public int cbuf$readInteger() {
+    public ChannelBuf cbuf$setIntLE(final int index, final int data) {
+        this.setIntLE(index, data);
+        return (ChannelBuf) this;
+    }
+
+    @Intrinsic
+    public int cbuf$readInt() {
         return this.readInt();
     }
 
-    public int getInteger(int index) {
+    @Intrinsic
+    public int cbuf$readIntLE() {
+        return this.readIntLE();
+    }
+
+    @Intrinsic
+    public int cbuf$getInt(final int index) {
         return this.getInt(index);
     }
 
-    public ChannelBuf cbuf$writeLong(long data) {
+    @Intrinsic
+    public int cbuf$getIntLE(final int index) {
+        return this.getIntLE(index);
+    }
+
+    public ChannelBuf cbuf$writeLong(final long data) {
         this.writeLong(data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setLong(int index, long data) {
+    public ChannelBuf cbuf$writeLongLE(final long data) {
+        this.writeLongLE(data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setLong(final int index, final long data) {
         this.setLong(index, data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setLongLE(final int index, final long data) {
+        this.setLongLE(index, data);
         return (ChannelBuf) this;
     }
 
@@ -330,17 +378,37 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     @Intrinsic
-    public long cbuf$getLong(int index) {
+    public long cbuf$readLongLE() {
+        return this.readLongLE();
+    }
+
+    @Intrinsic
+    public long cbuf$getLong(final int index) {
         return this.getLong(index);
     }
 
-    public ChannelBuf cbuf$writeFloat(float data) {
+    @Intrinsic
+    public long cbuf$getLongLE(final int index) {
+        return this.getLongLE(index);
+    }
+
+    public ChannelBuf cbuf$writeFloat(final float data) {
         this.writeFloat(data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setFloat(int index, float data) {
+    public ChannelBuf cbuf$writeFloatLE(final float data) {
+        this.writeFloatLE(data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setFloat(final int index, final float data) {
         this.setFloat(index, data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setFloatLE(final int index, final float data) {
+        this.setFloatLE(index, data);
         return (ChannelBuf) this;
     }
 
@@ -350,17 +418,37 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     @Intrinsic
-    public float cbuf$getFloat(int index) {
+    public float cbuf$readFloatLE() {
+        return this.readFloatLE();
+    }
+
+    @Intrinsic
+    public float cbuf$getFloat(final int index) {
         return this.getFloat(index);
     }
 
-    public ChannelBuf cbuf$writeDouble(double data) {
+    @Intrinsic
+    public float cbuf$getFloatLE(final int index) {
+        return this.getFloatLE(index);
+    }
+
+    public ChannelBuf cbuf$writeDouble(final double data) {
         this.writeDouble(data);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setDouble(int index, double data) {
+    public ChannelBuf cbuf$writeDoubleLE(final double data) {
+        this.writeDoubleLE(data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setDouble(final int index, final double data) {
         this.setDouble(index, data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setDoubleLE(final int index, final double data) {
+        this.setDoubleLE(index, data);
         return (ChannelBuf) this;
     }
 
@@ -370,15 +458,25 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
     }
 
     @Intrinsic
-    public double cbuf$getDouble(int index) {
+    public double cbuf$readDoubleLE() {
+        return this.readDoubleLE();
+    }
+
+    @Intrinsic
+    public double cbuf$getDouble(final int index) {
         return this.getDouble(index);
     }
 
-    public ChannelBuf cbuf$writeVarInt(int value) {
+    @Intrinsic
+    public double cbuf$getDoubleLE(final int index) {
+        return this.getDoubleLE(index);
+    }
+
+    public ChannelBuf cbuf$writeVarInt(final int value) {
         return (ChannelBuf) this.shadow$writeVarInt(value); // fluent in target
     }
 
-    public ChannelBuf cbuf$setVarInt(int index, int value) {
+    public ChannelBuf cbuf$setVarInt(final int index, final int value) {
         final int oldIndex = this.writerIndex();
         this.writerIndex(index);
         this.shadow$writeVarInt(value);
@@ -391,7 +489,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return this.shadow$readVarInt();
     }
 
-    public int cbuf$getVarInt(int index) {
+    public int cbuf$getVarInt(final int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
         final int value = this.shadow$readVarInt();
@@ -399,7 +497,32 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return value;
     }
 
-    public ChannelBuf cbuf$writeString(String data) {
+    public ChannelBuf cbuf$writeVarLong(final long value) {
+        return (ChannelBuf) this.shadow$writeVarLong(value); // fluent in target
+    }
+
+    public ChannelBuf cbuf$setVarLong(final int index, final long value) {
+        final int oldIndex = this.writerIndex();
+        this.writerIndex(index);
+        this.shadow$writeVarLong(value);
+        this.writerIndex(oldIndex);
+        return (ChannelBuf) this;
+    }
+
+    @Intrinsic
+    public long cbuf$readVarLong() {
+        return this.shadow$readVarLong();
+    }
+
+    public long cbuf$getVarLong(final int index) {
+        final int oldIndex = this.readerIndex();
+        this.readerIndex(index);
+        final long value = this.shadow$readVarLong();
+        this.readerIndex(oldIndex);
+        return value;
+    }
+
+    public ChannelBuf cbuf$writeString(final String data) {
         return (ChannelBuf) this.shadow$writeString(checkNotNull(data)); // fluent in target
     }
 
@@ -416,7 +539,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return this.shadow$readString(Constants.Networking.MAX_STRING_LENGTH);
     }
 
-    public String cbuf$getString(int index) {
+    public String cbuf$getString(final int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
         final String value = this.shadow$readString(Constants.Networking.MAX_STRING_LENGTH);
@@ -424,7 +547,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return value;
     }
 
-    public ChannelBuf cbuf$writeUTF(String data) {
+    public ChannelBuf cbuf$writeUTF(final String data) {
         byte[] bytes = data.getBytes(Charsets.UTF_8);
         if (bytes.length > Constants.Networking.MAX_STRING_LENGTH_BYTES) {
             throw new EncoderException("String too big (was " + data.length() + " bytes encoded, max "
@@ -435,7 +558,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setUTF(int index, String data) {
+    public ChannelBuf cbuf$setUTF(final int index, final String data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
         this.writerIndex(index);
@@ -451,7 +574,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return new String(bytes, Charsets.UTF_8);
     }
 
-    public String cbuf$getUTF(int index) {
+    public String cbuf$getUTF(final int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
         final short length = this.readShort();
@@ -462,12 +585,12 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return data;
     }
 
-    public ChannelBuf cbuf$writeUniqueId(UUID data) {
+    public ChannelBuf cbuf$writeUniqueId(final UUID data) {
         checkNotNull(data, "data");
         return (ChannelBuf) this.shadow$writeUniqueId(data); // fluent in target
     }
 
-    public ChannelBuf cbuf$setUniqueId(int index, UUID data) {
+    public ChannelBuf cbuf$setUniqueId(final int index, final UUID data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
         this.writerIndex(index);
@@ -481,7 +604,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return this.shadow$readUniqueId();
     }
 
-    public UUID getUniqueId(int index) {
+    public UUID getUniqueId(final int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
         final UUID data = this.shadow$readUniqueId();
@@ -489,13 +612,13 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         return data;
     }
 
-    public ChannelBuf cbuf$writeDataView(DataView data) {
+    public ChannelBuf cbuf$writeDataView(final DataView data) {
         final CompoundNBT compound = NbtTranslator.getInstance().translateData(checkNotNull(data, "data"));
         this.shadow$writeCompoundTag(compound);
         return (ChannelBuf) this;
     }
 
-    public ChannelBuf cbuf$setDataView(int index, DataView data) {
+    public ChannelBuf cbuf$setDataView(final int index, final DataView data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
         this.writerIndex(index);
@@ -512,7 +635,7 @@ public abstract class PacketBufferMixin_API extends ByteBuf {
         }
     }
 
-    public DataView cbuf$getDataView(int index) {
+    public DataView cbuf$getDataView(final int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
         final DataView data = this.cbuf$readDataView();

@@ -48,13 +48,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
 
 import java.net.SocketAddress;
 import java.util.Optional;
 
 @Mixin(ServerLoginNetHandler.class)
-public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandlerBridge {
+public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandlerBridge, NetworkManagerHolderBridge {
 
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public NetworkManager networkManager;
@@ -62,6 +63,11 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
 
     @Shadow public abstract String getConnectionInfo();
     @Shadow protected abstract com.mojang.authlib.GameProfile getOfflineProfile(com.mojang.authlib.GameProfile profile);
+
+    @Override
+    public NetworkManager bridge$getNetworkManager() {
+        return this.networkManager;
+    }
 
     @Redirect(method = "tryAcceptPlayer",
         at = @At(
@@ -82,7 +88,7 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
     }
 
     private void impl$disconnectClient(final Optional<Component> disconnectMessage) {
-        ITextComponent reason;
+        final ITextComponent reason;
         if (disconnectMessage.isPresent()) {
             reason = SpongeAdventure.asVanilla(disconnectMessage.get());
         } else {
@@ -94,12 +100,10 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
     @Override
     public boolean bridge$fireAuthEvent() {
         final Component disconnectMessage = TextComponent.of("You are not allowed to log in to this server.");
-        // Cause is created directly as we can't access the cause stack manager
-        // from off the main thread
+        // Cause is created directly as we can't access the cause stack manager from off the main thread
+        final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
-                Cause.of(EventContext.empty(), this.loginGameProfile), disconnectMessage, disconnectMessage, (ServerSideConnection) this.networkManager,
-                false
-        );
+                cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this, false);
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
             this.impl$disconnectClient(event.isMessageCancelled() ? Optional.empty() : Optional.of(event.getMessage()));
