@@ -38,13 +38,27 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class CorePlugin implements IMixinConfigPlugin {
+
+
+    private static final Map<String, BiConsumer<ClassNode, IMixinInfo>> SUPERCLASS_TRANSFORMATIONS;
+    private static final Map<String, Consumer<ClassNode>> INCOMPATIBILITY_DETECTION_ERRORS;
+
+    static {
+        final Map<String, BiConsumer<ClassNode, IMixinInfo>> transformers = new ConcurrentHashMap<>();
+        transformers.put()
+        SUPERCLASS_TRANSFORMATIONS = Collections.unmodifiableMap(transformers);
+        INCOMPATIBILITY_DETECTION_ERRORS = new ConcurrentHashMap<>();
+    }
 
 
     private static final List<String> MUTABLE_BLOCK_POS_FIELDS = ImmutableList.<String>builder()
@@ -82,6 +96,10 @@ public class CorePlugin implements IMixinConfigPlugin {
         if (classNodeConsumer != null) {
             classNodeConsumer.accept(targetClass);
         }
+        final BiConsumer<ClassNode, IMixinInfo> superTransformer = SUPERCLASS_TRANSFORMATIONS.get(targetClassName);
+        if (superTransformer != null) {
+            superTransformer.accept(targetClass, mixinInfo);
+        }
     }
 
     @Override
@@ -89,50 +107,6 @@ public class CorePlugin implements IMixinConfigPlugin {
     }
 
 
-    private static final Map<String, Consumer<ClassNode>> INCOMPATIBILITY_DETECTION_ERRORS = ImmutableMap.<String, Consumer<ClassNode>>builder()
-        .put("org.spongepowered.common.mixin.core.util.math.BlockPos_MutableBlockPosMixin_Optional", targetClass -> {
-            final ArrayList<String> foundFields = new ArrayList<>();
-
-            for (final FieldNode field : targetClass.fields) {
-                dance:
-                for (final String fieldName : MUTABLE_BLOCK_POS_FIELDS) {
-                    for (final String option : fieldName.split(":")) {
-                        if (field.name.equals(option)) {
-                            foundFields.add(field.name);
-                            break dance;
-                        }
-                    }
-                }
-            }
-            if (foundFields.size() != MUTABLE_BLOCK_POS_FIELDS.size()) {
-                printFoamFixAndShutDown();
-            }
-        })
-        .put("org.spongepowered.common.mixin.core.world.chunk.BlockStateContainerMixin", targetClass -> {
-            boolean foundSize = false;
-            dance:
-            for (MethodNode method : targetClass.methods) {
-                // Find the getSerializedSize and look at the instructions.
-                if ("func_186018_a".equals(method.name) || "getSerializedSize".equals(method.name)) {
-                    for (final ListIterator<AbstractInsnNode> iterator = method.instructions.iterator(); iterator.hasNext(); ) {
-                        final AbstractInsnNode insnNode = iterator.next();
-                        if (insnNode.getType() == AbstractInsnNode.METHOD_INSN) {
-                            final MethodInsnNode methodInvoke = (MethodInsnNode) insnNode;
-                            if ("net/minecraft/util/BitArray".equals(methodInvoke.owner)) {
-                                if ("func_188144_b".equals(methodInvoke.name) || "size".equals(methodInvoke.name)) {
-                                    foundSize = true;
-                                    break dance;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (!foundSize) {
-                printFoamFixAndShutDown();
-            }
-        })
-        .build();
 
     private static void printFoamFixAndShutDown() {
         new PrettyPrinter(60).add("!!! FoamFix Incompatibility !!!").centre().hr()

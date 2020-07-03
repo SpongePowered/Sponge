@@ -18,6 +18,7 @@ plugins {
     `java-library`
     idea
     eclipse
+    id("net.minecrell.licenser") version "0.4.1"
 }
 
 
@@ -244,6 +245,20 @@ fun applyNamedDependencyOnOutput(originProject: Project, sourceAdding: SourceSet
     debug(implProject.logger, "[${implProject.name}] Adding ${originProject.path}(${sourceAdding.name}) to ${implProject.path}(${targetSource.name}).$dependencyConfigName")
     implProject.dependencies.add(dependencyConfigName, sourceAdding.output)
 }
+val organization: String by project
+val projectUrl: String by project
+license {
+    (this as ExtensionAware).extra.apply {
+        this["name"] = "Sponge"
+        this["organization"] = organization
+        this["url"] = projectUrl
+    }
+    header = apiProject.file("HEADER.txt")
+
+    include("**/*.java")
+    newLine = false
+}
+
 allprojects {
 
     apply(plugin = "maven-publish")
@@ -317,6 +332,7 @@ project("SpongeVanilla") {
         plugin("maven-publish")
         plugin("idea")
         plugin("eclipse")
+        plugin("net.minecrell.licenser")
     }
 
     description = "The SpongeAPI implementation for Vanilla Minecraft"
@@ -565,5 +581,17 @@ project("SpongeVanilla") {
         vanillaMixinsAnnotationProcessor(vanillaModLauncherImplementation)
         vanillaAccessorsAnnotationProcessor("org.spongepowered:mixin:0.8")
         vanillaMixinsAnnotationProcessor("org.spongepowered:mixin:0.8")
+    }
+
+    license {
+        (this as ExtensionAware).extra.apply {
+            this["name"] = "Sponge"
+            this["organization"] = organization
+            this["url"] = projectUrl
+        }
+        header = apiProject.file("HEADER.txt")
+
+        include("**/*.java")
+        newLine = false
     }
 }
