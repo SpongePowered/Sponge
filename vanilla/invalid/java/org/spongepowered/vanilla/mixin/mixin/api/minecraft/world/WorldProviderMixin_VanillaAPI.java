@@ -22,18 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.server;
+package org.spongepowered.vanilla.mixin.mixin.api.minecraft.world;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldProvider;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Vanilla {
+@Mixin(WorldProvider.class)
+public abstract class WorldProviderMixin_VanillaAPI implements Dimension {
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;startServerThread()V"))
-    private static void vanilla$prepareGameAndLoadPlugins(final MinecraftServer minecraftServer) {
-        Thread.dumpStack();
+    @Shadow public abstract boolean isNether();
+
+    @Override
+    public int getHeight() {
+        return this.isNether() ? 128 : 256;
     }
+
+    @Override
+    public int getBuildHeight() {
+        return 256;
+    }
+
 }

@@ -22,18 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.server;
+package org.spongepowered.vanilla.mixin.mixin.chunkio;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.common.chunkio.ChunkIOExecutor;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Vanilla {
+@Mixin(value = MinecraftServer.class, priority = 1112)
+public abstract class MinecraftServerMixin_ChunkIO implements ChunkLoaderTickBridge {
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;startServerThread()V"))
-    private static void vanilla$prepareGameAndLoadPlugins(final MinecraftServer minecraftServer) {
-        Thread.dumpStack();
+    /**
+     * @author Minecrell - May 28th, 2016
+     * @reason Replaced to finish loading the asynchronously loaded chunks
+     */
+    @Override
+    public void chunkIO$tickChunkLoader() {
+        ChunkIOExecutor.tick();
     }
+
 }

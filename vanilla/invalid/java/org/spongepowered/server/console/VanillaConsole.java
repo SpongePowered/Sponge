@@ -22,18 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.server;
+package org.spongepowered.server.console;
 
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecrell.terminalconsole.SimpleTerminalConsole;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.spongepowered.common.SpongeCommon;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Vanilla {
+public final class VanillaConsole extends SimpleTerminalConsole {
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;startServerThread()V"))
-    private static void vanilla$prepareGameAndLoadPlugins(final MinecraftServer minecraftServer) {
-        Thread.dumpStack();
+    private final DedicatedServer server;
+
+    public VanillaConsole(DedicatedServer server) {
+        this.server = server;
     }
+
+    @Override
+    protected LineReader buildReader(LineReaderBuilder builder) {
+        return super.buildReader(builder
+                .appName(SpongeCommon.getPlugin().getName())
+                .completer(new ConsoleCommandCompleter(this.server)));
+    }
+
+    @Override
+    protected boolean isRunning() {
+        return !this.server.isServerStopped() && this.server.isServerRunning();
+    }
+
+    @Override
+    protected void runCommand(String command) {
+        this.server.addPendingCommand(command, this.server);
+    }
+
+    @Override
+    protected void shutdown() {
+        this.server.initiateShutdown();
+    }
+
 }

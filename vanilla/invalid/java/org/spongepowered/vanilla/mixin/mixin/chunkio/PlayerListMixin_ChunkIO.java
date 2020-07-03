@@ -22,18 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.server;
+package org.spongepowered.vanilla.mixin.mixin.chunkio;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
+import net.minecraftforge.common.chunkio.ChunkIOExecutor;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Vanilla {
+@Mixin(PlayerList.class)
+public abstract class PlayerListMixin_ChunkIO {
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;startServerThread()V"))
-    private static void vanilla$prepareGameAndLoadPlugins(final MinecraftServer minecraftServer) {
-        Thread.dumpStack();
+    @Shadow public abstract int getCurrentPlayerCount();
+
+    @Inject(method = "playerLoggedIn", at = @At("HEAD"))
+    private void chunkIO$adjustChunkLoadingPoolJoin(CallbackInfo ci) {
+        ChunkIOExecutor.adjustPoolSize(getCurrentPlayerCount() + 1); // Called before the player is added
     }
+
+    @Inject(method = "playerLoggedOut", at = @At("RETURN"))
+    private void chunkIO$adjustChunkLoadingPoolQuit(CallbackInfo ci) {
+        ChunkIOExecutor.adjustPoolSize(getCurrentPlayerCount());
+    }
+
 }

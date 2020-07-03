@@ -29,9 +29,9 @@ import com.google.common.collect.Maps;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
-import org.spongepowered.common.launch.plugin.PluginLoader;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
+import org.spongepowered.vanilla.launch.plugin.PluginLoader;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

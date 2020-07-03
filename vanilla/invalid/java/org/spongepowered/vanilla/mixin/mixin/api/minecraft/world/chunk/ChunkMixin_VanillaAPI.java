@@ -22,18 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.server;
+package org.spongepowered.vanilla.mixin.mixin.api.minecraft.world.chunk;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Vanilla {
+@Mixin(Chunk.class)
+public abstract class ChunkMixin_VanillaAPI implements org.spongepowered.api.world.Chunk {
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;startServerThread()V"))
-    private static void vanilla$prepareGameAndLoadPlugins(final MinecraftServer minecraftServer) {
-        Thread.dumpStack();
+    @Shadow @Final private World world;
+    @Shadow @Final public int x;
+    @Shadow @Final public int z;
+
+    @Override
+    public boolean unloadChunk() {
+        if (this.world.provider.canRespawnHere()
+//                && DimensionManager.shouldLoadSpawn(this.worldObj.provider.getDimensionType().getId())
+                && this.world.isSpawnChunk(this.x, this.z)) {
+            return false;
+        }
+
+        ((WorldServer) this.world).getChunkProvider().queueUnload((Chunk) (Object) this);
+        return true;
     }
 }

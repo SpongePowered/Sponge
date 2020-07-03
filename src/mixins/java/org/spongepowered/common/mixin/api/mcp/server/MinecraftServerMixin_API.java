@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -34,7 +35,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scheduler.Scheduler;
@@ -52,6 +53,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -77,8 +79,7 @@ public abstract class MinecraftServerMixin_API implements Server {
     @Shadow public abstract int shadow$getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
 
-    // TODO 1.14 - Scheduler
-    private SpongeScheduler api$scheduler;
+    private final SpongeScheduler api$scheduler = new ServerScheduler();
     @Nullable private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
     private MessageChannel api$broadcastChannel = MessageChannel.toPlayersAndServer();
@@ -125,7 +126,7 @@ public abstract class MinecraftServerMixin_API implements Server {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public Collection<Player> getOnlinePlayers() {
+    public Collection<ServerPlayer> getOnlinePlayers() {
         if (this.shadow$getPlayerList() == null || this.shadow$getPlayerList().getPlayers() == null) {
             return ImmutableList.of();
         }
@@ -133,19 +134,20 @@ public abstract class MinecraftServerMixin_API implements Server {
     }
 
     @Override
-    public Optional<Player> getPlayer(UUID uniqueId) {
+    public Optional<ServerPlayer> getPlayer(UUID uniqueId) {
+        Preconditions.checkNotNull(uniqueId);
         if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) this.shadow$getPlayerList().getPlayerByUUID(uniqueId));
+        return Optional.ofNullable((ServerPlayer) this.shadow$getPlayerList().getPlayerByUUID(uniqueId));
     }
 
     @Override
-    public Optional<Player> getPlayer(String name) {
+    public Optional<ServerPlayer> getPlayer(String name) {
         if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) this.shadow$getPlayerList().getPlayerByUsername(name));
+        return Optional.ofNullable((ServerPlayer) this.shadow$getPlayerList().getPlayerByUsername(name));
     }
 
     @Override
@@ -180,7 +182,8 @@ public abstract class MinecraftServerMixin_API implements Server {
 
     @Override
     public void shutdown(final Text kickMessage) {
-        for (final Player player : this.getOnlinePlayers()) {
+        Preconditions.checkNotNull(kickMessage);
+        for (final ServerPlayer player : this.getOnlinePlayers()) {
             player.kick(kickMessage);
         }
 
@@ -210,12 +213,7 @@ public abstract class MinecraftServerMixin_API implements Server {
             this.api$scoreboard = world.getScoreboard();
         }
 
-        return Optional.ofNullable((Scoreboard) this.api$scoreboard);
-    }
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName();
+        return Optional.of((Scoreboard) this.api$scoreboard);
     }
 
     @Override
@@ -236,5 +234,10 @@ public abstract class MinecraftServerMixin_API implements Server {
     @Override
     public boolean onMainThread() {
         return this.serverThread == Thread.currentThread();
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
     }
 }

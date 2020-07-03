@@ -22,18 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.server;
+package org.spongepowered.vanilla.mixin.mixin.chunkio;
 
-import net.minecraft.server.MinecraftServer;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.IChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Vanilla {
+@Mixin(ChunkProviderServer.class)
+public interface ChunkProviderServerAccessor_Vanilla {
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;startServerThread()V"))
-    private static void vanilla$prepareGameAndLoadPlugins(final MinecraftServer minecraftServer) {
-        Thread.dumpStack();
-    }
+    @Accessor("chunkGenerator") IChunkGenerator chunkIOAccessor$getChunkGenerator();
+
+    /** map of chunk Id's to Chunk instances */
+    @Accessor("loadedChunks") Long2ObjectMap<Chunk> chunkIOAccessor$getLoadedChunks();
+
+    @Accessor("world") WorldServer chunkIOAccessor$getWorld();
+
 }

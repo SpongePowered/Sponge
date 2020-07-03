@@ -28,6 +28,7 @@ import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
+import org.spongepowered.vanilla.launch.plugin.PluginLoader;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
@@ -39,6 +40,15 @@ public abstract class VanillaLauncher extends Launcher {
     // TODO Minecraft 1.14 - DI
     protected VanillaLauncher() {
         super(new VanillaPluginManager());
+    }
+
+    public void loadPlugins() {
+        final PluginLoader pluginLoader = new PluginLoader(this.getPluginEnvironment(), this.getPluginManager());
+        pluginLoader.discoverLanguageServices();
+        pluginLoader.initialize();
+        pluginLoader.discoverPluginResources();
+        pluginLoader.createPluginCandidates();
+        pluginLoader.createPlugins();
     }
 
     @Override

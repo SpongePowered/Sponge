@@ -22,18 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.server;
+package org.spongepowered.vanilla.mixin.core.util.registry;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.registry.Bootstrap;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Vanilla {
+@Mixin(Bootstrap.class)
+public abstract class BootstrapMixin_Vanilla {
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;startServerThread()V"))
-    private static void vanilla$prepareGameAndLoadPlugins(final MinecraftServer minecraftServer) {
-        Thread.dumpStack();
+    /**
+     * @author Minecrell
+     * @reason Remove STDOUT to logger redirection, already handled by SpongeVanilla.
+     */
+    @Overwrite
+    private static void redirectOutputToLog() {
+        // Handled by TerminalConsoleAppender
     }
 }

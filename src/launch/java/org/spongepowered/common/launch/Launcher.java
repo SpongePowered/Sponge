@@ -25,11 +25,9 @@
 package org.spongepowered.common.launch;
 
 import com.google.common.base.Preconditions;
-import com.google.inject.Guice;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
-import org.spongepowered.common.launch.plugin.PluginLoader;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;
@@ -84,7 +82,6 @@ public abstract class Launcher {
     protected void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
         this.populateBlackboard(pluginSpiVersion, baseDirectory, pluginDirectories);
         this.createInternalPlugins();
-        this.loadPlugins();
     }
 
     protected void populateBlackboard(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories) {
@@ -92,16 +89,6 @@ public abstract class Launcher {
         blackboard.getOrCreate(PluginKeys.VERSION, () -> pluginSpiVersion);
         blackboard.getOrCreate(PluginKeys.BASE_DIRECTORY, () -> baseDirectory);
         blackboard.getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
-        blackboard.getOrCreate(PluginKeys.PARENT_INJECTOR, () -> Guice.createInjector(new LauncherModule()));
-    }
-
-    protected void loadPlugins() {
-        final PluginLoader pluginLoader = new PluginLoader(this.pluginEnvironment, this.pluginManager);
-        pluginLoader.discoverLanguageServices();
-        pluginLoader.initialize();
-        pluginLoader.discoverPluginResources();
-        pluginLoader.createPluginCandidates();
-        pluginLoader.createPlugins();
     }
 
     private void createInternalPlugins() {
