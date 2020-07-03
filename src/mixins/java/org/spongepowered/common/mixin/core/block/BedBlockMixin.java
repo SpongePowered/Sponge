@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.core.block;
+package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.block.BedBlock;
 import net.minecraft.util.math.BlockPos;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BedBlock.class)
-public abstract class BedBlockMixin extends HorizontalBlockMixin {
+public abstract class BedBlockMixin extends BlockMixin {
 
     @Inject(method = "hasRoomForPlayer", at = @At(value = "RETURN"), cancellable = true)
     private static void onHasRoomForPlayer(final World world, final BlockPos pos, final CallbackInfoReturnable<Boolean> ci ) {
