@@ -97,11 +97,11 @@ public abstract class Launcher {
 
     protected void loadPlugins() {
         final PluginLoader pluginLoader = new PluginLoader(this.pluginEnvironment, this.pluginManager);
-        pluginLoader.discoverServices();
+        pluginLoader.discoverLanguageServices();
         pluginLoader.initialize();
-        pluginLoader.discoverResources();
-        pluginLoader.determineCandidates();
-        pluginLoader.createContainers();
+        pluginLoader.discoverPluginResources();
+        pluginLoader.createPluginCandidates();
+        pluginLoader.createPlugins();
     }
 
     private void createInternalPlugins() {

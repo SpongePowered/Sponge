@@ -72,7 +72,7 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
-        this.pluginLoader.discoverResources();
+        this.pluginLoader.discoverPluginResources();
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
@@ -93,7 +93,7 @@ public final class PluginDiscovererService implements ITransformationService {
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
         this.pluginEnvironment.getLogger().info("SpongePowered PLUGIN Subsystem Version={} Service=ModLauncher", this.pluginEnvironment.getBlackboard().get(PluginKeys.VERSION).get());
         this.pluginLoader = new PluginLoader(this.pluginEnvironment, null);
-        this.pluginLoader.discoverServices();
+        this.pluginLoader.discoverLanguageServices();
         this.pluginLoader.getServices().forEach((k, v) -> this.pluginLoader.getEnvironment().getLogger().info("Plugin language loader '{}' found.", k));
     }
 

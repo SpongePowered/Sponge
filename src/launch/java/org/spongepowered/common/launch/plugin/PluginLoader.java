@@ -75,7 +75,7 @@ public final class PluginLoader {
         }
     }
 
-    public void discoverServices() {
+    public void discoverLanguageServices() {
         final ServiceLoader<PluginLanguageService> serviceLoader = ServiceLoader.load(PluginLanguageService.class, PluginLoader.class.getClassLoader());
 
         for (final Iterator<PluginLanguageService> iter = serviceLoader.iterator(); iter.hasNext(); ) {
@@ -92,7 +92,7 @@ public final class PluginLoader {
         }
     }
 
-    public void discoverResources() {
+    public void discoverPluginResources() {
         for (final Map.Entry<String, PluginLanguageService> languageEntry : this.languageServices.entrySet()) {
             final PluginLanguageService languageService = languageEntry.getValue();
             final List<Path> pluginFiles = languageService.discoverResources(this.pluginEnvironment);
@@ -102,7 +102,7 @@ public final class PluginLoader {
         }
     }
 
-    public void determineCandidates() {
+    public void createPluginCandidates() {
         for (final Map.Entry<String, PluginLanguageService> languageEntry : this.languageServices.entrySet()) {
             final PluginLanguageService languageService = languageEntry.getValue();
             final List<PluginCandidate> pluginCandidates = languageService.determineCandidates(this.pluginEnvironment);
@@ -112,7 +112,7 @@ public final class PluginLoader {
         }
     }
 
-    public void createContainers() {
+    public void createPlugins() {
         Preconditions.checkNotNull(this.pluginManager, "Attempt made to create containers outside the game classloader!");
 
         for (final Map.Entry<PluginLanguageService, List<PluginCandidate>> languageCandidates : this.pluginCandidates.entrySet()) {
