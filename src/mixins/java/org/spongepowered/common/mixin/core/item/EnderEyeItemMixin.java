@@ -43,6 +43,8 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -92,10 +94,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
     private void impl$ThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, final RayTraceResult rayTraceResult, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
-            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ);
-            final Transform targetTransform = Transform.of(targetPosition);
-            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                EntityTypes.EYE_OF_ENDER.get(), targetTransform, (org.spongepowered.api.world.World) worldIn);
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), ServerLocation.of((ServerWorld) worldIn, playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }

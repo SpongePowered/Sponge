@@ -190,7 +190,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             final List<ServerLocation> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
             final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(list.size());
             for (final BlockPos pos : this.affectedBlockPositions) {
-                blockPositions.add(ServerLocation.of((World) this.world, pos.getX(), pos.getY(), pos.getZ()));
+                blockPositions.add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.world, pos.getX(), pos.getY(), pos.getZ()));
             }
             for (final Entity entity : list) {
                 // Make sure to check the entity is immune first.
@@ -200,7 +200,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             }
             final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
             final ExplosionEvent.Detonate detonate =
-                SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities, (Explosion) this, (World) this.world);
+                SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities, (Explosion) this, (org.spongepowered.api.world.server.ServerWorld) this.world);
             SpongeCommon.postEvent(detonate);
             // Clear the positions so that they can be pulled from the event
             this.affectedBlockPositions.clear();

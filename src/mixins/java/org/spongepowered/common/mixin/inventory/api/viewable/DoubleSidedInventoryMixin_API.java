@@ -28,6 +28,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,17 +39,17 @@ import java.util.Collections;
 import java.util.Set;
 
 @Mixin(value = DoubleSidedInventory.class, priority = 999)
-public interface DoubleSidedInventoryMixin_API extends ViewableInventory {
+public abstract class DoubleSidedInventoryMixin_API implements ViewableInventory {
 
     @Override
-    default Set<Player> getViewers() {
+    public Set<ServerPlayer> getViewers() {
         if (this instanceof ViewableInventoryBridge) {
             return ((ViewableInventoryBridge) this).viewableBridge$getViewers();
         }
         return Collections.emptySet();
     }
     @Override
-    default boolean hasViewers() {
+    public boolean hasViewers() {
         if (this instanceof ViewableInventoryBridge) {
             return ((ViewableInventoryBridge) this).viewableBridge$hasViewers();
         }
@@ -56,7 +57,7 @@ public interface DoubleSidedInventoryMixin_API extends ViewableInventory {
     }
 
     @Override
-    default boolean canInteractWith(Player player) {
+    public boolean canInteractWith(ServerPlayer player) {
         if (this instanceof IInventory) {
             return ((IInventory) this).isUsableByPlayer((PlayerEntity) player);
         }
@@ -65,7 +66,7 @@ public interface DoubleSidedInventoryMixin_API extends ViewableInventory {
     }
 
     @Override
-    default InventoryMenu asMenu() {
+    public InventoryMenu asMenu() {
         return new SpongeInventoryMenu(this);
     }
 }

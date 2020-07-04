@@ -35,6 +35,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -98,7 +99,7 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
         if (blockState.func_224756_o(world, pos)) {
             // Sponge start
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-                final ServerLocation location = ServerLocation.of((World<?>) world, VecHelper.toVector3i(pos));
+                final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
                 final List<ServerLocation> list = new ArrayList<>(1);
                 list.add(location);
                 final Cause cause = Sponge.getCauseStackManager().getCurrentCause();

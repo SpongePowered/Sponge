@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.modlauncher.bootstrap;
 
-import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
@@ -34,10 +33,7 @@ import org.spongepowered.vanilla.modlauncher.Main;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -56,14 +52,6 @@ public final class ServerDevLaunchHandler implements ILaunchHandlerService {
 
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        // Allow the entire classpath to be transformed...for now
-        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
-            try {
-                builder.addTransformationPath(Paths.get(url.toURI()));
-            } catch (URISyntaxException ex) {
-                ex.printStackTrace();
-            }
-        }
     }
 
     @Override

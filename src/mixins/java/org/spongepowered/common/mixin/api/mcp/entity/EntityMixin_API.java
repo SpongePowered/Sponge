@@ -148,7 +148,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public ServerLocation getLocation() {
-        return ServerLocation.of((World) this.world, this.getPosition());
+        return ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.world, this.getPosition());
     }
 
     @SuppressWarnings({"ConstantConditions", "RedundantCast"})

@@ -45,7 +45,9 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -129,12 +131,9 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         final double yPos = (double) pos.getY() + yOffset;
         final double zPos = (double) pos.getZ() + zOffset;
         // Go ahead and throw the construction event
-        final Transform position = Transform.of(new Vector3d(xPos, yPos, zPos));
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(worldIn.getBlockState(pos));
-            final ConstructEntityEvent.Pre
-                    eventPre =
-                    SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM.get(), position, (World<?>) worldIn);
+            final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), ServerLocation.of((ServerWorld) worldIn, xPos, yPos, zPos), new Vector3d(0, 0, 0), EntityTypes.ITEM.get());
             SpongeCommon.postEvent(eventPre);
             if (eventPre.isCancelled()) {
                 ci.cancel();

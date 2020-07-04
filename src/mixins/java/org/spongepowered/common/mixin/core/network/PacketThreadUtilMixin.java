@@ -44,5 +44,4 @@ public abstract class PacketThreadUtilMixin {
     private void impl$redirectToPhaseTracker(final IPacket<?> packetIn, final INetHandler netHandler) {
         PacketPhaseUtil.onProcessPacket(packetIn, netHandler);
     }
-
 }

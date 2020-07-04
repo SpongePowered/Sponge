@@ -40,6 +40,12 @@ public final class MixinServiceVanillaModLauncher extends MixinServiceModLaunche
         public ContainerHandleVanillaModLauncher(String name) {
             super(name);
 
+            try {
+                Class.forName("org.spongepowered.vanilla.launch.VanillaLaunchMixinConnector", true, this.getClass().getClassLoader());
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+
             this.setAttribute(Constants.ManifestAttributes.MIXINCONNECTOR, "org.spongepowered.vanilla.launch.VanillaLaunchMixinConnector");
         }
     }

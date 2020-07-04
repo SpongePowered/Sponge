@@ -46,6 +46,8 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -127,14 +129,11 @@ public abstract class ItemFireworkMixin {
      */
     private boolean spongeImpl$ThrowConstructPreEvent(World world, PlayerEntity player, ItemStack usedItem) {
         if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).bridge$isFake()) {
-            final Vector3d targetPosition = new Vector3d(player.posX, player.posY , player.posZ);
-            final Transform targetTransform = Transform.of(targetPosition);
             try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);
-                ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                    EntityTypes.FIREWORK_ROCKET.get(), targetTransform, (org.spongepowered.api.world.World) world);
+                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), ServerLocation.of((ServerWorld) world, player.posX, player.posY, player.posZ), new Vector3d(0, 0, 0), EntityTypes.FIREWORK_ROCKET.get());
                 return SpongeCommon.postEvent(event);
             }
         }

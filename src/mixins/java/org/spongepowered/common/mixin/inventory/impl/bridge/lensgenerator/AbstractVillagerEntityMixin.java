@@ -33,9 +33,7 @@ import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
-@NonnullByDefault
 @Mixin(value = AbstractVillagerEntity.class)
 public abstract class AbstractVillagerEntityMixin implements LensGeneratorBridge {
 

@@ -30,6 +30,7 @@ import net.minecraft.util.ServerCooldownTracker;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.CooldownEvent;
 import org.spongepowered.api.item.ItemType;
@@ -53,7 +54,7 @@ public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
         }
         final OptionalInt beforeCooldown = ((CooldownTracker) this).getCooldown(type);
         final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(Sponge.getCauseStackManager().getCurrentCause(),
-                ticks, ticks, type, (Player) this.player, beforeCooldown);
+                ticks, ticks, type, (ServerPlayer) this.player, beforeCooldown);
 
         if (Sponge.getEventManager().post(event)) {
             this.notifyOnSet((Item) type, beforeCooldown.orElse(0));
@@ -66,7 +67,7 @@ public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
     @Override
     protected void impl$throwEndCooldownEvent(final ItemType type) {
         final CooldownEvent.End event = SpongeEventFactory.createCooldownEventEnd(Sponge.getCauseStackManager().getCurrentCause(),
-                type, (Player) this.player);
+                type, (ServerPlayer) this.player);
         Sponge.getEventManager().post(event);
     }
 

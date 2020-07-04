@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.LockableTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.plugin.meta.util.NonnullByDefault;
 
 @Mixin(LockableTileEntity.class)
 public abstract class LockableTileEntityMixin extends TileEntityMixin {

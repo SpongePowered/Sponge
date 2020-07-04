@@ -124,9 +124,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     }
 
     @Override
-    public ItemStack.Builder attributeModifier(
-        AttributeType attributeType, AttributeModifier modifier, EquipmentType equipmentType
-    ) {
+    public ItemStack.Builder attributeModifier(AttributeType attributeType, AttributeModifier modifier, EquipmentType equipmentType) {
         throw new MissingImplementationException("SpongeItemStackBuilder", "attributeModifier");
     }
 

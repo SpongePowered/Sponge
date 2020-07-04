@@ -127,7 +127,6 @@ public class CorePlugin implements IMixinConfigPlugin {
             .add(new IncompatibleClassChangeError("FoamFix Incompatibility Detected"))
             .log(SpongeCommon.getLogger(), Level.FATAL);
         throw new MissingImplementationException("SpongeCommon", "forceEarlyExit");
-//        SpongeLaunch.forceEarlyExit("net.minecraftforge.fml", 1);
     }
 
 }
