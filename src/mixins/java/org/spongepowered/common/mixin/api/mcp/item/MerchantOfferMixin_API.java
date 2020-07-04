@@ -52,6 +52,9 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
     @Shadow public abstract int shadow$func_222214_i();
     @Shadow public abstract boolean shadow$hasNoUsesLeft();
     @Shadow public abstract boolean shadow$getDoesRewardExp();
+    @Shadow public abstract int shadow$getGivenExp();
+    @Shadow public abstract float shadow$getPriceMultiplier();
+    @Shadow public abstract int shadow$func_225482_k(); // demand
 
     @Override
     public ItemStackSnapshot getFirstBuyingItem() {
@@ -97,6 +100,21 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
     }
 
     @Override
+    public int getExperienceGrantedToMerchant() {
+        return this.shadow$getGivenExp();
+    }
+
+    @Override
+    public double getPriceGrowthMultiplier() {
+        return this.shadow$getPriceMultiplier();
+    }
+
+    @Override
+    public int getDemandBonus() {
+        return this.shadow$func_225482_k();
+    }
+
+    @Override
     public int getContentVersion() {
         return 1;
     }
@@ -110,7 +128,10 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
             .set(Constants.Item.TradeOffer.BUYING_QUERY, this.shadow$getBuyingStackFirst())
             .set(Constants.Item.TradeOffer.EXPERIENCE_QUERY, this.doesGrantExperience())
             .set(Constants.Item.TradeOffer.MAX_QUERY, this.shadow$func_222214_i())
-            .set(Constants.Item.TradeOffer.USES_QUERY, this.getUses());
+            .set(Constants.Item.TradeOffer.USES_QUERY, this.getUses())
+            .set(Constants.Item.TradeOffer.EXPERIENCE_GRANTED_TO_MERCHANT_QUERY, this.shadow$getGivenExp())
+            .set(Constants.Item.TradeOffer.PRICE_GROWTH_MULTIPLIER_QUERY, this.shadow$getPriceMultiplier())
+            .set(Constants.Item.TradeOffer.DEMAND_BONUS_QUERY, this.shadow$func_225482_k());
     }
 
 }

@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
@@ -53,6 +54,9 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     private int useCount;
     private int maxUses;
     private boolean allowsExperience;
+    private int merchantExperienceGranted;
+    private double priceGrowthMultiplier;
+    private int demandBonus;
 
     public SpongeTradeOfferBuilder() {
         super(TradeOffer.class, 1);
@@ -66,15 +70,15 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         return this;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public TradeOffer.Builder secondBuyingItem(final ItemStack item) {
-        this.secondItem = item.createSnapshot();
+        this.secondItem = item != null ? item.createSnapshot() : ItemStackSnapshot.empty();
         return this;
     }
 
     @Override
     public TradeOffer.Builder sellingItem(final ItemStack item) {
-        checkNotNull(item, "Selling item cannot be null");
         this.sellingItem = item.createSnapshot();
         return this;
     }
@@ -100,18 +104,21 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     }
 
     @Override
-    public TradeOffer.Builder merchantExperienceGranted(int experience) {
-        throw new MissingImplementationException("SpongeTradeOfferBuilder", "merchantExperienceGranted");
+    public TradeOffer.Builder merchantExperienceGranted(final int experience) {
+        this.merchantExperienceGranted = experience;
+        return this;
     }
 
     @Override
-    public TradeOffer.Builder priceGrowthMultiplier(double priceGrowthMultiplier) {
-        throw new MissingImplementationException("SpongeTradeOfferBuilder", "priceGrowthMultiplier");
+    public TradeOffer.Builder priceGrowthMultiplier(final double priceGrowthMultiplier) {
+        this.priceGrowthMultiplier = priceGrowthMultiplier;
+        return this;
     }
 
     @Override
-    public TradeOffer.Builder demandBonus(int bonus) {
-        throw new MissingImplementationException("SpongeTradeOfferBuilder", "demandBonus");
+    public TradeOffer.Builder demandBonus(final int bonus) {
+        this.demandBonus = bonus;
+        return this;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -124,8 +131,9 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         final ItemStack second = this.secondItem == null ? null : this.secondItem.createStack();
         final ItemStack selling = this.sellingItem.createStack();
         final MerchantOffer merchantOffer = new MerchantOffer(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
-                        this.useCount, this.maxUses, 0f); // Todo - figure out if this multiplieri is needed
+                        this.useCount, this.maxUses, this.merchantExperienceGranted, (float) this.priceGrowthMultiplier);
         ((MerchantOfferAccessor) merchantOffer).accessor$setRewardsExp(this.allowsExperience);
+        ((MerchantOfferAccessor) merchantOffer).accessor$setDemand(this.demandBonus);
         return (TradeOffer) merchantOffer;
     }
 
@@ -139,6 +147,9 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         this.useCount = offer.getUses();
         this.maxUses = offer.getMaxUses();
         this.allowsExperience = offer.doesGrantExperience();
+        this.merchantExperienceGranted = offer.getExperienceGrantedToMerchant();
+        this.priceGrowthMultiplier = offer.getPriceGrowthMultiplier();
+        this.demandBonus = offer.getDemandBonus();
         return this;
     }
 
@@ -150,6 +161,9 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         this.useCount = Constants.Item.TradeOffer.DEFAULT_USE_COUNT;
         this.maxUses = Constants.Item.TradeOffer.DEFAULT_MAX_USES;
         this.allowsExperience = true;
+        this.merchantExperienceGranted = 0;
+        this.priceGrowthMultiplier = 0.0D;
+        this.demandBonus = 0;
         return this;
     }
 
@@ -164,10 +178,12 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
             Constants.Item.TradeOffer.BUYING_QUERY)) {
             return Optional.empty();
         }
+
         final ItemStack firstItem = container.getSerializable(Constants.Item.TradeOffer.FIRST_QUERY, ItemStack.class).get();
         final ItemStack buyingItem = container.getSerializable(Constants.Item.TradeOffer.BUYING_QUERY, ItemStack.class).get();
         final ItemStack secondItem;
         final boolean secondPresent;
+
         if (container.getString(Constants.Item.TradeOffer.SECOND_QUERY).isPresent() && container.getString(Constants.Item.TradeOffer.SECOND_QUERY).get().equals("none")) {
             secondPresent = false;
             secondItem = null;
@@ -175,15 +191,21 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
             secondPresent = true;
             secondItem = container.getSerializable(Constants.Item.TradeOffer.SECOND_QUERY, ItemStack.class).get();
         }
+
         final TradeOffer.Builder builder = new SpongeTradeOfferBuilder();
         builder.firstBuyingItem(firstItem);
+
         if (secondPresent) {
             builder.secondBuyingItem(secondItem);
         }
+
         builder.sellingItem(buyingItem)
                 .maxUses(container.getInt(Constants.Item.TradeOffer.MAX_QUERY).get())
                 .uses(container.getInt(Constants.Item.TradeOffer.USES_QUERY).get())
-                .canGrantExperience(container.getBoolean(Constants.Item.TradeOffer.EXPERIENCE_QUERY).get());
+                .canGrantExperience(container.getBoolean(Constants.Item.TradeOffer.EXPERIENCE_QUERY).get())
+                .merchantExperienceGranted(container.getInt(Constants.Item.TradeOffer.EXPERIENCE_GRANTED_TO_MERCHANT_QUERY).orElse(0))
+                .priceGrowthMultiplier(container.getDouble(Constants.Item.TradeOffer.PRICE_GROWTH_MULTIPLIER_QUERY).orElse(0.0D))
+                .demandBonus(container.getInt(Constants.Item.TradeOffer.DEMAND_BONUS_QUERY).orElse(0));
         return Optional.of(builder.build());
     }
 }
