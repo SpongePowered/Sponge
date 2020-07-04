@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.asm.mixin.Mixin;
@@ -114,7 +115,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
             return Optional.empty();
         }
         // get player if online
-        final Player player = Sponge.getServer().getPlayer(uuid).orElse(null);
+        final User player = Sponge.getServer().getPlayer(uuid).orElse(null);
         if (player != null) {
             return Optional.of(player);
         }

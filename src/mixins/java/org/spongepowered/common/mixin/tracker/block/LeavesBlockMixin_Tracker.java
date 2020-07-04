@@ -30,6 +30,7 @@ import net.minecraft.state.IntegerProperty;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -61,7 +62,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
         final IPhaseState<?> currentState = currentContext.state;
         try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(instance)
                                            .source(new SpongeLocatableBlockBuilder()
-                                               .world((World) worldIn)
+                                               .world((ServerWorld) worldIn)
                                                .position(pos.getX(), pos.getY(), pos.getZ())
                                                .state((BlockState) state)
                                                .build())) {

@@ -39,6 +39,7 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.accessor.item.MerchantOfferAccessor;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Optional;
 
@@ -96,6 +97,21 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     public TradeOffer.Builder canGrantExperience(final boolean experience) {
         this.allowsExperience = experience;
         return this;
+    }
+
+    @Override
+    public TradeOffer.Builder merchantExperienceGranted(int experience) {
+        throw new MissingImplementationException("SpongeTradeOfferBuilder", "merchantExperienceGranted");
+    }
+
+    @Override
+    public TradeOffer.Builder priceGrowthMultiplier(double priceGrowthMultiplier) {
+        throw new MissingImplementationException("SpongeTradeOfferBuilder", "priceGrowthMultiplier");
+    }
+
+    @Override
+    public TradeOffer.Builder demandBonus(int bonus) {
+        throw new MissingImplementationException("SpongeTradeOfferBuilder", "demandBonus");
     }
 
     @SuppressWarnings("ConstantConditions")

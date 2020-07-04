@@ -32,6 +32,7 @@ import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
@@ -40,6 +41,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,14 +106,19 @@ public abstract class ContainerMixin_API implements org.spongepowered.api.item.i
     }
 
     @Override
-    public Player getViewer() {
-        return this.listeners().stream().filter(Player.class::isInstance).map(Player.class::cast).findFirst().orElseThrow(() -> new IllegalStateException("Container without viewer"));
+    public ServerPlayer getViewer() {
+        return this.listeners().stream()
+            .filter(ServerPlayer.class::isInstance)
+            .map(ServerPlayer.class::cast)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("Container without viewer"));
     }
 
     @Override
     public boolean isOpen() {
         org.spongepowered.api.item.inventory.Container thisContainer = this;
-        return this.getViewer().getOpenInventory().map(c -> c == thisContainer).orElse(false);
+        throw new MissingImplementationException("Viewer", "getOpenInventory");
+//        return this.getViewer().getOpenInventory().map(c -> c == thisContainer).orElse(false);
     }
 
     @Override

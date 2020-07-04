@@ -32,6 +32,7 @@ import org.spongepowered.api.item.inventory.SingleBlockCarrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,7 +51,7 @@ public abstract class EnchantmentContainerMixin_API implements SingleBlockCarrie
     @Override
     public ServerLocation getLocation() {
         return this.field_217006_g.apply((world, pos) ->
-                ServerLocation.of(((World) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
+                ServerLocation.of(((ServerWorld) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
         ).orElse(null);
     }
 

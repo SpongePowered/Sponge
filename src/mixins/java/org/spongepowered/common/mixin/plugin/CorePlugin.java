@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,7 +56,6 @@ public class CorePlugin implements IMixinConfigPlugin {
 
     static {
         final Map<String, BiConsumer<ClassNode, IMixinInfo>> transformers = new ConcurrentHashMap<>();
-        transformers.put()
         SUPERCLASS_TRANSFORMATIONS = Collections.unmodifiableMap(transformers);
         INCOMPATIBILITY_DETECTION_ERRORS = new ConcurrentHashMap<>();
     }
@@ -126,7 +126,8 @@ public class CorePlugin implements IMixinConfigPlugin {
             .add()
             .add(new IncompatibleClassChangeError("FoamFix Incompatibility Detected"))
             .log(SpongeCommon.getLogger(), Level.FATAL);
-        SpongeLaunch.forceEarlyExit("net.minecraftforge.fml", 1);
+        throw new MissingImplementationException("SpongeCommon", "forceEarlyExit");
+//        SpongeLaunch.forceEarlyExit("net.minecraftforge.fml", 1);
     }
 
 }

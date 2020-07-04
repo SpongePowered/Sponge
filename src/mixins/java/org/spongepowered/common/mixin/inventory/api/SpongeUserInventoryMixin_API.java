@@ -47,7 +47,7 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @Mixin(SpongeUserInventory.class)
-public abstract class SpongeUserInventoryMixin_API implements UserInventory<User>, InventoryAdapter {
+public abstract class SpongeUserInventoryMixin_API implements UserInventory, InventoryAdapter {
 
     @Nullable private User impl$carrier;
     @Nullable private PrimaryPlayerInventoryAdapter impl$grid;
