@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.modlauncher;
+package org.spongepowered.vanilla.modlauncher.plugin;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -32,6 +32,7 @@ import cpw.mods.modlauncher.api.ITransformer;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.vanilla.launch.plugin.PluginLoader;
+import org.spongepowered.vanilla.modlauncher.Main;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
