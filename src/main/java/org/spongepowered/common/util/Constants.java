@@ -1241,6 +1241,9 @@ public final class Constants {
         public static final DataQuery COUNT = of("Count");
         public static final DataQuery TYPE = of("ItemType");
         public static final DataQuery DAMAGE_VALUE = of("UnsafeDamage");
+        public static final String ATTRIBUTE_MODIFIERS = "AttributeModifiers";
+        public static final String ATTRIBUTE_NAME = "AttributeName";
+        public static final String ATTRIBUTE_SLOT = "Slot";
     }
 
     public static final class Particles {

@@ -25,16 +25,24 @@
 package org.spongepowered.common.mixin.api.mcp.item;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.SerializableDataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.entity.attribute.AttributeModifier;
+import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -43,11 +51,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
 
 @Mixin(net.minecraft.item.ItemStack.class)
 @Implements(@Interface(iface = ItemStack.class, prefix = "itemStack$")) // We need to soft implement this interface due to a synthetic bridge method
@@ -64,6 +73,8 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract CompoundNBT shadow$getTag();
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
+    @Shadow public abstract Multimap<String, net.minecraft.entity.ai.attributes.AttributeModifier> shadow$getAttributeModifiers(EquipmentSlotType equipmentSlot);
+    @Shadow public abstract void shadow$addAttributeModifier(String attributeName, net.minecraft.entity.ai.attributes.AttributeModifier modifier, @Nullable EquipmentSlotType equipmentSlot);
 
     public int itemStack$getQuantity() {
         return this.shadow$getCount();
@@ -115,6 +126,37 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     public ItemStack itemStack$copy() {
         return (ItemStack) (Object) this.shadow$copy();
+    }
+
+    public Collection<AttributeModifier> itemStack$getAttributeModifiers(final AttributeType attributeType, final EquipmentType equipmentType) {
+        Preconditions.checkNotNull(attributeType, "Attribute type cannot be null");
+        Preconditions.checkNotNull(equipmentType, "Equipment type cannot be null");
+
+        final ImmutableList.Builder<AttributeModifier> builder = ImmutableList.builder();
+
+        for (EquipmentSlotType equipmentSlotType : ((SpongeEquipmentType) equipmentType).getSlots()) {
+            final Multimap<String, net.minecraft.entity.ai.attributes.AttributeModifier> modifierMultimap = this.shadow$getAttributeModifiers(equipmentSlotType);
+            builder.addAll((Iterable) modifierMultimap.get(attributeType.getKey().getValue()));
+        }
+
+        return builder.build();
+    }
+
+    public void itemStack$addAttributeModifier(final AttributeType attributeType, final AttributeModifier modifier, final EquipmentType equipmentType) {
+        Preconditions.checkNotNull(attributeType, "Attribute type cannot be null");
+        Preconditions.checkNotNull(modifier, "Attribute modifier cannot be null");
+        Preconditions.checkNotNull(equipmentType, "Equipment type cannot be null");
+
+        if (equipmentType.equals(EquipmentTypes.ANY.get()) || equipmentType.equals(EquipmentTypes.EQUIPPED.get())) {
+            // Any equipment slot = null
+            this.shadow$addAttributeModifier(modifier.getName(), (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, null);
+            return;
+        }
+
+        // Get all slots this modifier applies to, and apply
+        for (EquipmentSlotType equipmentSlotType : ((SpongeEquipmentType) equipmentType).getSlots()) {
+            this.shadow$addAttributeModifier(modifier.getName(), (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, equipmentSlotType);
+        }
     }
 
     @Override

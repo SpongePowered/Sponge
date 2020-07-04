@@ -22,31 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.api.mcp.entity.ai.attributes;
 
-import net.minecraft.inventory.EquipmentSlotType;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.util.MissingImplementationException;
+import net.minecraft.entity.ai.attributes.RangedAttribute;
+import org.spongepowered.api.entity.attribute.type.RangedAttributeType;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Arrays;
+@Mixin(RangedAttribute.class)
+public abstract class RangedAttributeMixin_API implements RangedAttributeType {
+    @Shadow @Final private double minimumValue;
+    @Shadow @Final private double maximumValue;
 
-public class SpongeEquipmentType extends SpongeCatalogType implements EquipmentType {
-
-    private EquipmentSlotType[] slots;
-
-    public SpongeEquipmentType(ResourceKey key, EquipmentSlotType... slots) {
-        super(key);
-        this.slots = slots;
-    }
-
-    public EquipmentSlotType[] getSlots() {
-        return this.slots;
+    @Override
+    public double getMinimumValue() {
+        return this.minimumValue;
     }
 
     @Override
-    public boolean includes(EquipmentType other) {
-        throw new MissingImplementationException("SpongeEquipmentType", "includes");
+    public double getMaximumValue() {
+        return this.maximumValue;
     }
 }

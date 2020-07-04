@@ -22,31 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.accessor.entity.monster;
 
-import net.minecraft.inventory.EquipmentSlotType;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.util.MissingImplementationException;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.monster.ZombieEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Arrays;
+@Mixin(ZombieEntity.class)
+public interface ZombieEntityAccessor {
 
-public class SpongeEquipmentType extends SpongeCatalogType implements EquipmentType {
-
-    private EquipmentSlotType[] slots;
-
-    public SpongeEquipmentType(ResourceKey key, EquipmentSlotType... slots) {
-        super(key);
-        this.slots = slots;
+    @Accessor("SPAWN_REINFORCEMENTS_CHANCE")
+    static IAttribute accessor$getSpawnReinforcementsChance() {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    public EquipmentSlotType[] getSlots() {
-        return this.slots;
-    }
-
-    @Override
-    public boolean includes(EquipmentType other) {
-        throw new MissingImplementationException("SpongeEquipmentType", "includes");
-    }
 }

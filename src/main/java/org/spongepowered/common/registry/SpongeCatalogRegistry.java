@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.monster.PhantomEntity;
 import net.minecraft.entity.monster.SpellcastingIllagerEntity;
 import net.minecraft.entity.passive.FoxEntity;
@@ -101,6 +102,8 @@ import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalType;
+import org.spongepowered.api.entity.attribute.AttributeOperation;
+import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.cause.EventContextKey;
@@ -108,6 +111,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -148,6 +152,7 @@ import org.spongepowered.common.registry.builtin.sponge.PortalAgentTypeStreamGen
 import org.spongepowered.common.registry.builtin.sponge.RabbitTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.vanilla.AttributeTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
@@ -157,6 +162,7 @@ import org.spongepowered.common.registry.builtin.vanilla.DragonPhaseTypeStreamGe
 import org.spongepowered.common.registry.builtin.vanilla.EffectSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.EnchantmentSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.EntityTypeSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.EquipmentTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.FireworkShapeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.FluidSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ItemSupplier;
@@ -412,6 +418,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .registerRegistry(AdvancementTree.class, ResourceKey.minecraft("advancement_tree"))
 //            .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
             .generateRegistry(ArmorMaterial.class, ResourceKey.minecraft("armor_material"), Arrays.stream(net.minecraft.item.ArmorMaterial.values()), true)
+            .generateRegistry(AttributeOperation.class, ResourceKey.minecraft("attribute_operation"), Arrays.stream(AttributeModifier.Operation.values()), true)
+            .generateRegistry(AttributeType.class, ResourceKey.minecraft("attribute_type"), AttributeTypeStreamGenerator.stream(), true)
             .generateRegistry(BanType.class, ResourceKey.minecraft("ban_type"), BanTypeStreamGenerator.stream(), true)
             .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true)
 //            .generateRegistry(BossBarOverlay.class, ResourceKey.minecraft("boss_bar_overlay"), Arrays.stream(BossInfo.Overlay.values()), true)
@@ -431,6 +439,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(DyeColor.class, ResourceKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
             .generateRegistry(CatalogedValueParameter.class, ResourceKey.sponge("value_parameter"), CatalogedValueParameterStreamGenerator.stream(), true)
             .generateRegistry(CommandRegistrar.class, ResourceKey.sponge("command_registrar"), CommandRegistrarStreamGenerator.stream(), true)
+            .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true)
             .generateRegistry(EventContextKey.class, ResourceKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true)
             .generateRegistry(FoxType.class, ResourceKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true)
             .generateRegistry(GameMode.class, ResourceKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true)

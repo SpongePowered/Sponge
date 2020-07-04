@@ -22,31 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.api.mcp.entity.ai.attributes;
 
-import net.minecraft.inventory.EquipmentSlotType;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.util.MissingImplementationException;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.attribute.type.AttributeType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Arrays;
+import java.util.Optional;
 
-public class SpongeEquipmentType extends SpongeCatalogType implements EquipmentType {
-
-    private EquipmentSlotType[] slots;
-
-    public SpongeEquipmentType(ResourceKey key, EquipmentSlotType... slots) {
-        super(key);
-        this.slots = slots;
-    }
-
-    public EquipmentSlotType[] getSlots() {
-        return this.slots;
-    }
+@Mixin(IAttribute.class)
+@Implements(@Interface(iface = AttributeType.class, prefix = "api$"))
+public interface IAttributeMixin_API extends AttributeType {
+    @Shadow @Nullable IAttribute shadow$getParent();
+    @Shadow double shadow$getDefaultValue();
+    @Shadow double shadow$clampValue(double value);
 
     @Override
-    public boolean includes(EquipmentType other) {
-        throw new MissingImplementationException("SpongeEquipmentType", "includes");
+    default Optional<AttributeType> getParent() {
+        return Optional.ofNullable((AttributeType) this.shadow$getParent());
+    }
+
+    @Intrinsic
+    default double api$getDefaultValue() {
+        return this.shadow$getDefaultValue();
+    }
+
+    @Intrinsic
+    default double api$clampValue(final double value) {
+        return this.shadow$clampValue(value);
     }
 }

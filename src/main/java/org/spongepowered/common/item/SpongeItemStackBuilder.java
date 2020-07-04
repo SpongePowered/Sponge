@@ -28,7 +28,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -48,9 +51,12 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.item.inventory.equipment.WornEquipmentType;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -124,8 +130,46 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
     }
 
     @Override
-    public ItemStack.Builder attributeModifier(AttributeType attributeType, AttributeModifier modifier, EquipmentType equipmentType) {
-        throw new MissingImplementationException("SpongeItemStackBuilder", "attributeModifier");
+    public ItemStack.Builder attributeModifier(final AttributeType attributeType, final AttributeModifier modifier, final EquipmentType equipmentType) {
+        Preconditions.checkNotNull(attributeType, "AttributeType cannot be null");
+        Preconditions.checkNotNull(modifier, "AttributeModifier cannot be null");
+        Preconditions.checkNotNull(equipmentType, "EquipmentType cannot be null");
+
+        // Create the compound if needed
+        if (this.compound == null) {
+            this.compound = new CompoundNBT();
+        }
+
+        final CompoundNBT compound = this.compound;
+
+        if (!compound.contains(Constants.ItemStack.ATTRIBUTE_MODIFIERS, Constants.NBT.TAG_LIST)) {
+            compound.put(Constants.ItemStack.ATTRIBUTE_MODIFIERS, new ListNBT());
+        }
+
+        final ListNBT attributeModifiers = compound.getList(Constants.ItemStack.ATTRIBUTE_MODIFIERS, Constants.NBT.TAG_COMPOUND);
+
+        // The modifier will apply in any slot, equipable or not. Pass null for the slot
+        if (equipmentType.equals(EquipmentTypes.ANY.get()) || equipmentType.equals(EquipmentTypes.EQUIPPED.get())) {
+            this.writeAttributeModifier(attributeModifiers, (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, null);
+        } else {
+            // Write modifier to every applicable slot.
+            for (EquipmentSlotType slot : ((SpongeEquipmentType) equipmentType).getSlots()) {
+                this.writeAttributeModifier(attributeModifiers, (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, slot);
+            }
+        }
+
+        return this;
+    }
+
+    private void writeAttributeModifier(final ListNBT attributeModifiers, final net.minecraft.entity.ai.attributes.AttributeModifier attributeModifier, final EquipmentSlotType slot) {
+        final CompoundNBT modifierNbt = SharedMonsterAttributes.writeAttributeModifier(attributeModifier);
+        modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_NAME, attributeModifier.getName());
+
+        if (slot != null) {
+            modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_SLOT, slot.getName());
+        }
+
+        attributeModifiers.add(modifierNbt);
     }
 
     @Override
