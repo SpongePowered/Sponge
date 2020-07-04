@@ -462,6 +462,13 @@ project("SpongeVanilla") {
                 implProject = vanillaProject,
                 dependencyConfigName = this.implementationConfigurationName
         )
+        applyNamedDependencyOnOutput(
+                originProject = vanillaProject,
+                sourceAdding = vanillaMixins,
+                targetSource = this,
+                implProject = vanillaProject,
+                dependencyConfigName = this.runtimeConfigurationName
+        )
     }
     val vanillaInvalid by sourceSets.register("invalid") {
         java.srcDir("invalid" + File.separator + "main" + File.separator + "java")

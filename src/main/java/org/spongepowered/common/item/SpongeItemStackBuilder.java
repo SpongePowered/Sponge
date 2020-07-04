@@ -42,13 +42,17 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.attribute.AttributeModifier;
+import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.HashSet;
@@ -117,6 +121,13 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
 //            this.itemDataSet.addAll(itemStack.getValues());
         }
         return this;
+    }
+
+    @Override
+    public ItemStack.Builder attributeModifier(
+        AttributeType attributeType, AttributeModifier modifier, EquipmentType equipmentType
+    ) {
+        throw new MissingImplementationException("SpongeItemStackBuilder", "attributeModifier");
     }
 
     @Override
