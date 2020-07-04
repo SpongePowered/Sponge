@@ -48,6 +48,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginKeys;
@@ -63,7 +64,10 @@ public final class SpongeCommon {
     public static final String GAME_ID = "minecraft";
     public static final String ECOSYSTEM_ID = "sponge";
 
-    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.12.2", 340);
+    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion(
+        Constants.MINECRAFT_VERSION,
+        Constants.MINECRAFT_PROTOCOL_VERSION
+    );
 
     // Can't @Inject these because they are referenced before everything is initialized
     @Nullable private static SpongeConfig<GlobalConfig> globalConfigAdapter;

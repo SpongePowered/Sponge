@@ -55,6 +55,6 @@ public abstract class ServerStatusResponse_VersionMixin_API implements Minecraft
 
     @Override
     public int compareTo(MinecraftVersion o) {
-        return SpongeMinecraftVersion.compare((ProtocolMinecraftVersion) this, o);
+        return SpongeMinecraftVersion.compare(this, o);
     }
 }
