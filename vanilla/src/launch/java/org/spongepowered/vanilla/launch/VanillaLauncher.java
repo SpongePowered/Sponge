@@ -57,7 +57,7 @@ public abstract class VanillaLauncher extends Launcher {
     @Override
     protected PluginContainer getPlatformPlugin() {
         if (this.vanillaPlugin == null) {
-            this.vanillaPlugin = this.getPluginManager().getPlugin("sponge").orElse(null);
+            this.vanillaPlugin = this.getPluginManager().getPlugin("spongevanilla").orElse(null);
 
             if (this.vanillaPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing SpongeVanilla, this is a serious issue!");
