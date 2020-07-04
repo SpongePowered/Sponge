@@ -47,7 +47,7 @@ public final class ChatUtil {
     private ChatUtil() {
     }
 
-    public static void sendMessage(ITextComponent component, MessageChannel channel, CommandCause source, boolean isChat) {
+    public static void sendMessage(ITextComponent component, MessageChannel channel, Object source, boolean isChat) {
         final Text raw = SpongeTexts.toText(component);
         final MessageFormatter formatter = new MessageEvent.MessageFormatter(raw);
         final Cause cause = SpongeImplHooks.onServerThread() ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source);
