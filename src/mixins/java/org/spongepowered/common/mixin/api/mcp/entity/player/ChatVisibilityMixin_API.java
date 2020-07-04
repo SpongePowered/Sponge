@@ -46,7 +46,7 @@ public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.t
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int p_i50176_3_, String p_i50176_4_, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(enumName.toLowerCase());
+        this.api$key = CatalogKey.of(container, enumName.toLowerCase());
         this.api$translation = new SpongeTranslation(p_i50176_4_);
     }
 

@@ -53,10 +53,10 @@ public abstract class DoubleSidedInventoryMixin_API implements MultiBlockCarrier
     public List<ServerLocation> getLocations() {
         final List<ServerLocation> list = new ArrayList<>();
         if (this.field_70477_b instanceof BlockEntity) {
-            list.add(((BlockEntity) this.field_70477_b).getLocation());
+            list.add(((BlockEntity) this.field_70477_b).getServerLocation());
         }
         if (this.field_70478_c instanceof BlockEntity) {
-            list.add(((BlockEntity) this.field_70478_c).getLocation());
+            list.add(((BlockEntity) this.field_70478_c).getServerLocation());
         }
         return Collections.unmodifiableList(list);
     }

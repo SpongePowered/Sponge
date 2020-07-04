@@ -39,6 +39,7 @@ import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.recipe.crafting.IngredientUtil;
@@ -68,7 +69,7 @@ public interface IRecipeMixin_API<C extends IInventory> extends Recipe {
     }
 
     @Override
-    default boolean isValid(@Nonnull Inventory inv, @Nonnull World world) {
+    default boolean isValid(@Nonnull Inventory inv, @Nonnull ServerWorld world) {
         return this.shadow$matches(toNativeInventory(inv), (net.minecraft.world.World) world);
     }
 

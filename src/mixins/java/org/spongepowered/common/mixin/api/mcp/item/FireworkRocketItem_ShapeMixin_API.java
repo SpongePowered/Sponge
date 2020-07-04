@@ -40,9 +40,9 @@ public abstract class FireworkRocketItem_ShapeMixin_API implements FireworkShape
     private CatalogKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, int p_i47931_3_, String p_i47931_4_, CallbackInfo ci) {
+    private void api$setKey(String enumName, int ordinal, int p_i47931_3_, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(p_i47931_4_);
+        this.api$key = CatalogKey.of(container, name.toLowerCase());
     }
 
     @Override

@@ -46,7 +46,7 @@ public abstract class TropicalFishEntityMixin_TypeMixin_API implements TropicalF
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, int p_i49832_3_, int p_i49832_4_, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(enumName.toLowerCase());
+        this.api$key = CatalogKey.of(container, enumName.toLowerCase());
     }
 
     @Override

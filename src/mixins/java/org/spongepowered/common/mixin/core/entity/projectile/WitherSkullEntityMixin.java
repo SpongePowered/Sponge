@@ -36,6 +36,7 @@ import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -118,7 +119,7 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);
             frame.pushCause(shooter);
             return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                    .location(ServerLocation.of((World) worldObj, new Vector3d(x, y, z)))
+                    .location(ServerLocation.of((ServerWorld) worldObj, x, y, z))
                     .sourceExplosive(((WitherSkull) this))
                     .radius(this.impl$explosionRadius)
                     .canCauseFire(flaming)

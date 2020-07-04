@@ -38,6 +38,8 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -51,16 +53,13 @@ public abstract class FallingBlockMixin {
     @Inject(method = "checkFallable", at = @At(value = "JUMP", opcode = Opcodes.IFNE), cancellable = true)
     public void impl$checkFallable(World worldIn, BlockPos pos, CallbackInfo ci) {
         final EntityType<org.spongepowered.api.entity.FallingBlock> fallingBlock = EntityTypes.FALLING_BLOCK.get();
-        final Vector3d position = new Vector3d(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
         final org.spongepowered.api.world.World<?> spongeWorld = (org.spongepowered.api.world.World<?>) worldIn;
         final BlockSnapshot snapshot = spongeWorld.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(snapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
-            final Transform transform = Transform.of(position);
-            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), fallingBlock, transform, spongeWorld);
-            SpongeCommon.postEvent(event);
-            if (event.isCancelled()) {
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), ServerLocation.of((ServerWorld) worldIn, pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D), new Vector3d(0, 0, 0), fallingBlock);
+            if (SpongeCommon.postEvent(event)) {
                 ci.cancel();
             }
         }

@@ -42,7 +42,7 @@ public abstract class PhantomEntity_AttackPhaseMixin_API implements PhantomPhase
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(enumName.toLowerCase());
+        this.api$key = CatalogKey.of(container, enumName.toLowerCase());
     }
 
     @Override

@@ -32,6 +32,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -87,7 +88,7 @@ public abstract class EnderCrystalEntityMixin extends EntityMixin implements Exp
                 frame.pushCause(source);
             }
             return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(ServerLocation.of((World) world, new Vector3d(x, y, z)))
+                .location(ServerLocation.of((ServerWorld) world, x, y, z))
                 .radius(this.impl$explosionStrength)
                 .shouldPlaySmoke(smoking))
                 .orElse(null);

@@ -73,7 +73,7 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (Player) player);
 
-            final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, ((org.spongepowered.api.entity.Entity) this).getLocation());
+            final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, ((org.spongepowered.api.entity.Entity) this).getServerLocation());
             if (event.isCancelled()) {
                 return true;
             }

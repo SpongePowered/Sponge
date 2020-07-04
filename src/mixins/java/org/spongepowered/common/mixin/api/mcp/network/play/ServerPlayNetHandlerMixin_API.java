@@ -30,6 +30,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,8 +49,8 @@ public abstract class ServerPlayNetHandlerMixin_API implements PlayerConnection 
     @Shadow public abstract void shadow$disconnect(ITextComponent reason);
 
     @Override
-    public Player getPlayer() {
-        return (Player) this.player;
+    public ServerPlayer getPlayer() {
+        return (ServerPlayer) this.player;
     }
 
     @Override

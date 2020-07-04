@@ -31,6 +31,7 @@ import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +50,8 @@ public abstract class NextTickListEntryMixin implements NextTickListEntryBridge 
     @Override
     public void bridge$setWorld(World world) {
         checkState(this.impl$location == null, "World already known");
-        this.impl$location = ServerLocation.of((org.spongepowered.api.world.World) world, VecHelper.toVector3i(this.position));
+        final BlockPos position = this.position;
+        this.impl$location = ServerLocation.of((ServerWorld) world, position.getX(), position.getY(), position.getZ());
     }
 
     @Override

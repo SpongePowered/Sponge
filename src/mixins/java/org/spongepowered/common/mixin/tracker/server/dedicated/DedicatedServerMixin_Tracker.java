@@ -28,6 +28,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -65,6 +66,6 @@ public abstract class DedicatedServerMixin_Tracker {
 
         return protectionRadius > 0
                 && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <= protectionRadius
-                && !((Player) playerIn).hasPermission("minecraft.spawn-protection.override");
+                && !((ServerPlayer) playerIn).hasPermission("minecraft.spawn-protection.override");
     }
 }

@@ -30,6 +30,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -47,7 +48,7 @@ public abstract class CactusBlockMixin extends BlockMixin {
             return entity.attackEntityFrom(source, damage);
         }
         try {
-            final ServerLocation location = ServerLocation.of((World) world, pos.getX(), pos.getY(), pos.getZ());
+            final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
             final MinecraftBlockDamageSource cactus = new MinecraftBlockDamageSource("cactus", location);
             ((DamageSourceBridge) (Object) cactus).bridge$setCactusSource();
             return entity.attackEntityFrom(DamageSource.CACTUS, damage);

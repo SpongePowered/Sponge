@@ -33,6 +33,7 @@ import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -144,7 +145,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
     private net.minecraft.world.Explosion onExplode(final net.minecraft.world.World world, final Entity self, final double x,
         final double y, final double z, final float strength, final Mode mode) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-                .location(ServerLocation.of((World) world, new Vector3d(x, y, z)))
+                .location(ServerLocation.of((ServerWorld) world, x, y, z))
                 .sourceExplosive(((Creeper) this))
                 .radius(strength)
                 .shouldPlaySmoke(mode != Mode.NONE)

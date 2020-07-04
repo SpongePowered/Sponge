@@ -43,9 +43,9 @@ public abstract class PandaEntity_TypeMixin_API implements PandaGene {
     private CatalogKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, int p_i51468_3_, String p_i51468_4_, boolean p_i51468_5_, CallbackInfo ci) {
+    private void api$setKey(String enumName, int ordinal, int p_i51468_3_, String name, boolean p_i51468_5_, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(p_i51468_4_);
+        this.api$key = CatalogKey.of(container, name);
     }
 
     @Override

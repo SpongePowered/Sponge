@@ -63,6 +63,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -307,7 +308,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public DataContainer getGeneratorSettings() {
-        // TODO 1.14 - This may not be correct...
+        // TODO Minecraft 1.14 - This may not be correct...
         if (this.legacyCustomOptions != null) {
             try {
                 return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, DataFormats.JSON.get().read(this.legacyCustomOptions));
@@ -327,8 +328,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public WorldBorder getWorldBorder() {
-        // TODO 1.14 - Fetch the WorldBorder if a live world instance, return a dummy if it isn't?
-        return null;
+        // TODO Minecraft 1.14 - Fetch the WorldBorder if a live world instance, return a dummy if it isn't?
+        throw new MissingImplementationException("WorldInfoMixin_API", "getWorldBorder");
     }
 
     @Override
@@ -404,7 +405,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public Duration getRunningWeatherDuration() {
-        // TODO 1.14 - Weather has no finite maximum and we don't know how much it started with so....I guess I'll hardcode it? How do I implement this??
+        // TODO Minecraft 1.14 - Weather has no finite maximum and we don't know how much it started with so....I guess I'll hardcode it? How do I implement this??
         if (this.shadow$isRaining()) {
             return Duration.ofSeconds(6000 - this.shadow$getRainTime());
         } else if (this.shadow$isThundering()) {
@@ -444,7 +445,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public <V> V getGameRule(GameRule<V> gameRule) {
-        // TODO 1.14 - Boy, this is baaaad....
+        // TODO Minecraft 1.14 - Boy, this is baaaad....
         final GameRules.RuleValue<?> value = this.shadow$getGameRulesInstance().get((GameRules.RuleKey<?>) (Object) gameRule);
         if (value instanceof GameRules.BooleanValue) {
             return (V) Boolean.valueOf(((GameRules.BooleanValue) value).get());
@@ -456,14 +457,14 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public <V> void setGameRule(GameRule<V> gameRule, V value) {
-        // TODO 1.14 - Boy, this is baaaad....
+        // TODO Minecraft 1.14 - Boy, this is baaaad....
         final GameRules.RuleValue<?> mValue = this.shadow$getGameRulesInstance().get((GameRules.RuleKey<?>) (Object) gameRule);
         ((GameRules_RuleValueAccessor) mValue).accessor$func_223553_a(value.toString());
     }
 
     @Override
     public Map<GameRule<?>, ?> getGameRules() {
-        // TODO 1.14 - Boy, this is baaaad....
+        // TODO Minecraft 1.14 - Boy, this is baaaad....
         final Map<GameRules.RuleKey<?>, GameRules.RuleValue<?>> rules =
             ((GameRulesAccessor) this.shadow$getGameRulesInstance()).accessor$getRules();
 
@@ -488,20 +489,11 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public int getViewDistance() {
-        // TODO ChunkManager#viewDistance
-        // originates from ServerPlayNetHandler#getViewDistance()
+        throw new MissingImplementationException("WorldInfoMixin_API", "getViewDistance");
     }
 
     @Override
     public void setViewDistance(int viewDistance) {
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.getWorldInfo()).bridge$getConfigAdapter();
-        // don't use the parameter, use the field that has been clamped
-        configAdapter.getConfig().getWorld().setViewDistance(((PlayerChunkMapBridge) this.playerChunkMap).accessor$getViewDistance());
-        configAdapter.save();
-        // TODO ChunkManager#setViewDistance();
-        throw new UnsupportedOperationException();
+        throw new MissingImplementationException("WorldInfoMixin_API", "setViewDistance");
     }
-
-    // TODO resetViewDistance? this.setViewDistance(this.server.getPlayerList().getViewDistance());
-
 }

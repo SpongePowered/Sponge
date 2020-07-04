@@ -41,9 +41,9 @@ public abstract class MooshroomEntity_TypeMixin_API implements MooshroomType {
     private CatalogKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, String nameIn, BlockState renderStateIn, CallbackInfo ci) {
+    private void api$setKey(String enumName, int ordinal, String name, BlockState renderStateIn, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(nameIn);
+        this.api$key = CatalogKey.of(container, name);
     }
 
     @Override

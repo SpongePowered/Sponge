@@ -31,6 +31,7 @@ import org.spongepowered.api.item.inventory.SingleBlockCarrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,9 +44,7 @@ public abstract class WorkbenchContainerMixin_API implements SingleBlockCarrier 
 
     @Override
     public ServerLocation getLocation() {
-        return this.field_217070_e.apply((world, pos) ->
-                ServerLocation.of(((World) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
-        ).orElse(null);
+        return this.field_217070_e.apply((world, pos) -> ServerLocation.of(((ServerWorld) world), pos.getX(), pos.getY(), pos.getZ())).orElse(null);
     }
 
     @Override

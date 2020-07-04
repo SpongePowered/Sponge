@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -55,7 +56,7 @@ public abstract class ExplosionMixin_API implements Explosion {
     @Override
     public ServerLocation getLocation() {
         if (this.api$location == null) {
-            this.api$location = ServerLocation.of((World) this.world, new Vector3d(this.x, this.y, this.z));
+            this.api$location = ServerLocation.of((ServerWorld) this.world, this.x, this.y, this.z);
         }
         return this.api$location;
     }

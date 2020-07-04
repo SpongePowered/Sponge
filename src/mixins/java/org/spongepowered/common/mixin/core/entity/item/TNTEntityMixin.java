@@ -34,6 +34,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -112,7 +113,7 @@ public abstract class TNTEntityMixin extends EntityMixin implements EntityTNTPri
         final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
         final net.minecraft.world.Explosion.Mode modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-            .location(ServerLocation.of((World) world, new Vector3d(xIn, yIn, zIn)))
+            .location(ServerLocation.of((ServerWorld) world, xIn, yIn, zIn))
             .sourceExplosive((PrimedTNT) this)
             .radius(this.bridge$explosionRadius)
             .shouldPlaySmoke(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal())

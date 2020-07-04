@@ -50,6 +50,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
@@ -178,9 +179,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                     return false;
                 }
 
-                location = ServerLocation.of(event.getToWorld(), event.getToTransform().getPosition());
-                this.rotationPitch = (float) event.getToTransform().getPitch();
-                this.rotationYaw = (float) event.getToTransform().getYaw();
+                location = ServerLocation.of(event.getToWorld(), event.getToPosition());
             }
 
             final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) ((ServerWorld) this.world).getChunkProvider();
@@ -191,12 +190,12 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
                 boolean isTeleporting = true;
                 boolean isChangingDimension = false;
-                if (location.getWorld().getProperties().getUniqueId() != ((World) this.world).getProperties().getUniqueId()) {
+                if (location.getWorld().getProperties().getUniqueId() != ((World) this.world).getUniqueId()) {
                     if ((Entity) (Object) this instanceof ServerPlayerEntity) {
                         // Close open containers
                         final ServerPlayerEntity entityPlayerMP = (ServerPlayerEntity) (Object) this;
                         if (entityPlayerMP.openContainer != entityPlayerMP.container) {
-                            ((Player) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
+                            ((ServerPlayer) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
                         }
 
                         EntityUtil.transferPlayerToWorld(entityPlayerMP, event, (ServerWorld) location.getWorld(),
@@ -222,7 +221,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                     if (isTeleporting || isChangingDimension) {
                         // Close open containers
                         if (player.openContainer != player.container) {
-                            ((Player) player).closeInventory(); // Call API method to make sure we capture it
+                            ((ServerPlayer) player).closeInventory(); // Call API method to make sure we capture it
                         }
 
                         // TODO - determine if this is right.
@@ -240,7 +239,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 if (isTeleporting || isChangingDimension) {
                     // Re-attach passengers
                     for (final Entity passenger : passengers) {
-                        if (((World) passenger.getEntityWorld()).getProperties().getUniqueId() != ((World) this.world).getProperties().getUniqueId()) {
+                        if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
                             ((org.spongepowered.api.entity.Entity) passenger).setLocation(location);
                         }
                         passenger.startRiding((Entity) (Object) this, true);
@@ -364,7 +363,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean transferToWorld(final World world, final Vector3d position) {
+    public boolean transferToWorld(final org.spongepowered.api.world.server.ServerWorld world, final Vector3d position) {
         checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
         return this.setLocation(ServerLocation.of(world, position));
@@ -471,7 +470,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Entity.CLASS, this.getClass().getName())
-                .set(Queries.WORLD_ID, this.getWorld().getProperties().getUniqueId().toString())
+                .set(Queries.WORLD_ID, this.getWorld().getUniqueId().toString())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, transform.getPosition().getX())
                 .set(Queries.POSITION_Y, transform.getPosition().getY())

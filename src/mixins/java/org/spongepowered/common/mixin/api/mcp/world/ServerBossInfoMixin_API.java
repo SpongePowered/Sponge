@@ -28,6 +28,7 @@ import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -118,13 +119,13 @@ public abstract class ServerBossInfoMixin_API extends BossInfoMixin_API implemen
     }
 
     @Override
-    public ServerBossBar addPlayer(final Player player) {
+    public ServerBossBar addPlayer(final ServerPlayer player) {
         this.shadow$addPlayer((ServerPlayerEntity) player);
         return this;
     }
 
     @Override
-    public ServerBossBar removePlayer(final Player player) {
+    public ServerBossBar removePlayer(final ServerPlayer player) {
         this.shadow$removePlayer((ServerPlayerEntity) player);
         return this;
     }

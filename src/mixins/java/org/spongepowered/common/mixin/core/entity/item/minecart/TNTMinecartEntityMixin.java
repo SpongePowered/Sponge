@@ -35,6 +35,7 @@ import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -109,7 +110,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
             return;
         }
         if (receivingPower) {
-            ((World) this.world).getNotifier(x, y, z).ifPresent(notifier -> this.impl$primeCause = notifier);
+            ((ServerWorld) this.world).getNotifier(x, y, z).ifPresent(notifier -> this.impl$primeCause = notifier);
         }
     }
 
@@ -147,14 +148,16 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
     private net.minecraft.world.Explosion onSpongeExplode(final net.minecraft.world.World world, final Entity entityIn,
         final double xIn, final double yIn, final double zIn, final float explosionRadius, final net.minecraft.world.Explosion.Mode modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
-            .location(ServerLocation.of((World) world, new Vector3d(xIn, yIn, zIn))).sourceExplosive((TNTMinecart) this)
-            .radius(this.impl$explosionRadius != null ? this.impl$explosionRadius : explosionRadius)
-            .shouldPlaySmoke(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal())
-            .shouldBreakBlocks(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal()))
-            .orElseGet(() -> {
-                this.impl$detonationCancelled = true;
-                return null;
-            });
+                .location(ServerLocation.of((ServerWorld) world, xIn, yIn, zIn))
+                .sourceExplosive((TNTMinecart) this)
+                .radius(this.impl$explosionRadius != null ? this.impl$explosionRadius : explosionRadius)
+                .shouldPlaySmoke(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal())
+                .shouldBreakBlocks(modeIn.ordinal() > net.minecraft.world.Explosion.Mode.NONE.ordinal()))
+                .orElseGet(() -> {
+                            this.impl$detonationCancelled = true;
+                            return null;
+                        }
+                );
     }
 
     @Inject(method = "explodeCart",

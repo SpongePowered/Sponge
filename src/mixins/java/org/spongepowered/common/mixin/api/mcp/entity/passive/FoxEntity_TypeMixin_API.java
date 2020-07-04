@@ -41,9 +41,9 @@ public abstract class FoxEntity_TypeMixin_API implements FoxType {
     private CatalogKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, int indexIn, String nameIn, Biome[] spawnBiomesIn, CallbackInfo ci) {
+    private void api$setKey(String enumName, int ordinal, int indexIn, String name, Biome[] spawnBiomesIn, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(nameIn);
+        this.api$key = CatalogKey.of(container, name.toLowerCase());
     }
 
     @Override

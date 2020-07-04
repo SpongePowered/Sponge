@@ -115,9 +115,10 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
             return Optional.empty();
         }
         // get player if online
-        final User player = Sponge.getServer().getPlayer(uuid).orElse(null);
-        if (player != null) {
-            return Optional.of(player);
+        final ServerPlayer player = Sponge.getServer().getPlayer(uuid).orElse(null);
+        final User user = player == null ? null : player.getUser();
+        if (user != null) {
+            return Optional.of(user);
         }
         // player is not online, get user from storage if one exists
         if (this.tracker$profileManager == null) {

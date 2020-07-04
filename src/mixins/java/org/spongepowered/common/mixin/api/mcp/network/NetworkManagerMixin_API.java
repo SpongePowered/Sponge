@@ -29,6 +29,7 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,9 +44,9 @@ public abstract class NetworkManagerMixin_API extends SimpleChannelInboundHandle
     @Shadow private INetHandler packetListener;
 
     @Override
-    public Player getPlayer() {
+    public ServerPlayer getPlayer() {
         if(this.packetListener instanceof ServerPlayNetHandler) {
-            return (Player) ((ServerPlayNetHandler) this.packetListener).player;
+            return (ServerPlayer) ((ServerPlayNetHandler) this.packetListener).player;
         }
         throw new IllegalStateException("Player is not currently available");
     }

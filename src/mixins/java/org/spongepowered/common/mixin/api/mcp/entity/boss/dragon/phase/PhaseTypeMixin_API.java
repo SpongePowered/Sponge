@@ -41,11 +41,11 @@ public abstract class PhaseTypeMixin_API implements DragonPhaseType {
     private CatalogKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(int idIn, Class<? extends IPhase> clazzIn, String nameIn, CallbackInfo ci) {
+    private void api$setKey(int idIn, Class<? extends IPhase> clazzIn, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
 
         // Honestly, fuck off Mojang with HoldingPattern instead of Holding_Pattern or holding_pattern
-        this.api$key = container.createCatalogKey(String.join("_", nameIn.split("(?<=.)(?=\\p{Lu})")).toLowerCase());
+        this.api$key = CatalogKey.of(container, String.join("_", name.split("(?<=.)(?=\\p{Lu})")).toLowerCase());
     }
 
     @Override

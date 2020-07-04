@@ -164,7 +164,8 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
         }
         final BlockPos pos = new BlockPos(x, y, z);
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
-        builder.worldId(this.getProperties().getUniqueId())
+        builder
+                .worldId(this.getUniqueId())
                 .position(new Vector3i(x, y, z));
         final net.minecraft.world.chunk.Chunk chunk = this.shadow$getChunkAt(pos);
         final net.minecraft.block.BlockState state = chunk.getBlockState(pos);

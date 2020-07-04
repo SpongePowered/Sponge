@@ -44,6 +44,7 @@ import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.inventory.container.PlayerContainerAccessor;
@@ -90,7 +91,7 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
     }
 
     @Override
-    public Optional<Recipe> findMatchingRecipe(Inventory inventory, World world) {
+    public Optional<Recipe> findMatchingRecipe(Inventory inventory, ServerWorld world) {
         if (inventory instanceof AbstractFurnaceTileEntity) {
             final IRecipeType<? extends AbstractCookingRecipe> type = ((AbstractFurnaceTileEntityAccessor) inventory).accessor$getRecipeType();
             return this.shadow$getRecipe(type, (IInventory) inventory, (net.minecraft.world.World) world).map(Recipe.class::cast);

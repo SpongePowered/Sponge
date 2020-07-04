@@ -48,11 +48,10 @@ public abstract class DyeColorMixin_API implements DyeColor {
     private Translation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKeyAndTranslation(String enumName, int ordinal, int idIn, String translationKeyIn, int colorValueIn, MaterialColor mapColorIn,
-        int fireworkColorIn, int textColorIn, CallbackInfo ci) {
+    private void api$setKeyAndTranslation(String enumName, int ordinal, int idIn, String translationKey, int colorValueIn, MaterialColor mapColorIn, int fireworkColorIn, int textColorIn, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(translationKeyIn);
-        this.api$translation = new SpongeTranslation("color.minecraft." + translationKeyIn);
+        this.api$key = CatalogKey.of(container, translationKey.toLowerCase());
+        this.api$translation = new SpongeTranslation("color.minecraft." + translationKey);
     }
 
     @Override

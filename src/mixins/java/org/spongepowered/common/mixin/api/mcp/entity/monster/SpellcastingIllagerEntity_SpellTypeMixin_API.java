@@ -43,7 +43,7 @@ public abstract class SpellcastingIllagerEntity_SpellTypeMixin_API implements Sp
     private void api$setKey(String enumName, int ordinal, int idIn, double xParticleSpeed, double yParticleSpeed, double zParticleSpeed,
         CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(enumName.toLowerCase());
+        this.api$key = CatalogKey.of(container, enumName.toLowerCase());
     }
 
     @Override
