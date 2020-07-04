@@ -26,7 +26,7 @@ package org.spongepowered.common.text.chat;
 
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
@@ -47,7 +47,7 @@ public final class ChatUtil {
     private ChatUtil() {
     }
 
-    public static void sendMessage(ITextComponent component, MessageChannel channel, CommandSource source, boolean isChat) {
+    public static void sendMessage(ITextComponent component, MessageChannel channel, CommandCause source, boolean isChat) {
         final Text raw = SpongeTexts.toText(component);
         final MessageFormatter formatter = new MessageEvent.MessageFormatter(raw);
         final Cause cause = SpongeImplHooks.onServerThread() ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source);
