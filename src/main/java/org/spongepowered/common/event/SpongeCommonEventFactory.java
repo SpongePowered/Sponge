@@ -492,14 +492,8 @@ public class SpongeCommonEventFactory {
             if (!stack.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
             }
-            final InteractEntityEvent.Primary event;
-            if (hand == Hand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractEntityEventPrimaryMainHand(
-                        frame.getCurrentCause(), (Entity) entity, HandTypes.MAIN_HAND.get(), Optional.ofNullable(hitVec));
-            } else {
-                event = SpongeEventFactory.createInteractEntityEventPrimaryOffHand(
-                        frame.getCurrentCause(), (Entity) entity, HandTypes.OFF_HAND.get(), Optional.ofNullable(hitVec));
-            }
+            final InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(frame.getCurrentCause(), (Entity) entity,
+                    Optional.ofNullable(hitVec));
             if (entity instanceof Player && !((org.spongepowered.api.world.server.ServerWorld) player.world).getProperties().isPVPEnabled()) {
                 event.setCancelled(true); // if PvP is disabled for world, cancel
             }
@@ -518,14 +512,8 @@ public class SpongeCommonEventFactory {
             if (!stack.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
             }
-            final InteractEntityEvent.Secondary event;
-            if (hand == Hand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractEntityEventSecondaryMainHand(
-                        frame.getCurrentCause(), (Entity) entity, HandTypes.MAIN_HAND.get(), Optional.ofNullable(hitVec));
-            } else {
-                event = SpongeEventFactory.createInteractEntityEventSecondaryOffHand(
-                        frame.getCurrentCause(), (Entity) entity, HandTypes.OFF_HAND.get(), Optional.ofNullable(hitVec));
-            }
+            final InteractEntityEvent.Secondary event = SpongeEventFactory.createInteractEntityEventSecondary(frame.getCurrentCause(),
+                    (Entity) entity, Optional.ofNullable(hitVec));
             SpongeCommon.postEvent(event);
             return event;
         }
@@ -552,14 +540,8 @@ public class SpongeCommonEventFactory {
             }
             final HandType handType = (HandType) (Object) hand;
             frame.addContext(EventContextKeys.USED_HAND, handType);
-            final InteractItemEvent.Primary event;
-            if (hand == Hand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractItemEventPrimaryMainHand(frame.getCurrentCause(),
-                        HandTypes.MAIN_HAND.get(), Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
-            } else {
-                event = SpongeEventFactory.createInteractItemEventPrimaryOffHand(frame.getCurrentCause(),
-                        HandTypes.OFF_HAND.get(), Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
-            }
+            final InteractItemEvent.Primary event = SpongeEventFactory.createInteractItemEventPrimary(frame.getCurrentCause(),
+                    Optional.ofNullable(hitVec), ItemStackUtil.snapshotOf(stack));
             SpongeCommon.postEvent(event);
             return event;
         }
@@ -587,12 +569,8 @@ public class SpongeCommonEventFactory {
         }
         final HandType handType = (HandType) (Object) hand;
         frame.addContext(EventContextKeys.USED_HAND, handType);
-        final InteractItemEvent.Secondary event;
-        if (hand == Hand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(frame.getCurrentCause(), HandTypes.MAIN_HAND.get(), Optional.ofNullable(hitVec), snapshot);
-        } else {
-            event = SpongeEventFactory.createInteractItemEventSecondaryOffHand(frame.getCurrentCause(), HandTypes.OFF_HAND.get(), Optional.ofNullable(hitVec), snapshot);
-        }
+        final InteractItemEvent.Secondary event = SpongeEventFactory.createInteractItemEventSecondary(frame.getCurrentCause(),
+                Optional.ofNullable(hitVec), snapshot);
         SpongeCommon.postEvent(event);
         return event;
 
@@ -617,7 +595,6 @@ public class SpongeCommonEventFactory {
 
             frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
             frame.addContext(EventContextKeys.USED_HAND, handType);
-            final InteractBlockEvent.Primary event;
             final Direction direction;
             if (side != null) {
                 direction = DirectionFacingProvider.getInstance().getKey(side).get();
@@ -627,13 +604,8 @@ public class SpongeCommonEventFactory {
             if (!heldItem.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
             }
-            if (hand == Hand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(frame.getCurrentCause(), blockSnapshot, handType,
-                        Optional.ofNullable(hitVec), direction);
-            } else {
-                event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(frame.getCurrentCause(), blockSnapshot, handType,
-                        Optional.ofNullable(hitVec), direction);
-            }
+            final InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimary(frame.getCurrentCause(), blockSnapshot,
+                    Optional.ofNullable(hitVec), direction);
             SpongeCommon.postEvent(event);
             return event;
         }
@@ -664,16 +636,9 @@ public class SpongeCommonEventFactory {
             }
             final HandType handType = (HandType) (Object) hand;
             frame.addContext(EventContextKeys.USED_HAND, handType);
-            final InteractBlockEvent.Secondary event;
-            if (hand == Hand.MAIN_HAND) {
-                event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(frame.getCurrentCause(),
-                        originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, targetBlock, HandTypes.MAIN_HAND.get(), Optional.ofNullable
-                                (hitVec), targetSide);
-            } else {
-                event = SpongeEventFactory.createInteractBlockEventSecondaryOffHand(frame.getCurrentCause(),
-                        originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, targetBlock, HandTypes.OFF_HAND.get(), Optional.ofNullable
-                                (hitVec), targetSide);
-            }
+            final InteractBlockEvent.Secondary event = SpongeEventFactory.createInteractBlockEventSecondary(frame.getCurrentCause(),
+                    originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, targetBlock, Optional.ofNullable(hitVec),
+                    targetSide);
             return event;
         }
     }
@@ -1017,10 +982,8 @@ public class SpongeCommonEventFactory {
         }
 
         // SECOND throw the ConstructEntityEvent
-        final Transform suggested = Transform.of(new Vector3d(posX, posY, posZ));
         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), EntityTypes.ITEM.get(),
-                suggested, ((org.spongepowered.api.world.server.ServerWorld) entity.world));
+        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) entity.world, posX, posY, posZ), new Vector3d(0, 0, 0), EntityTypes.ITEM.get());
         frame.removeContext(EventContextKeys.SPAWN_TYPE);
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.config;
 
-import org.spongepowered.api.GameState;
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.HashSet;
@@ -44,8 +43,8 @@ public class SpongeConfigSaveManager {
 
     public void save(SpongeConfig<?> spongeConfig) {
         synchronized (this) {
-            if (!SpongeCommon.isInitialized() || // if we're not initialised, then we're likely testing and should just pass on through.
-                    SpongeCommon.getGame().getState() == GameState.SERVER_STARTED || SpongeCommon.getGame().getState() == GameState.GAME_STOPPED) {
+            // TODO Minecraft 1.14 - Check if the server is up or the game has stopped.
+            if (!SpongeCommon.isInitialized()) {
                 if (!this.stagedConfigs.isEmpty()) {
                     // We want to save and flush now, but add this into the set in case it is already present.
                     this.stagedConfigs.add(spongeConfig);

@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.launch;
 
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
+import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
 import org.spongepowered.vanilla.launch.plugin.PluginLoader;
@@ -36,6 +37,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 
 public abstract class VanillaLauncher extends Launcher {
+
+    private PluginContainer vanillaPlugin;
 
     // TODO Minecraft 1.14 - DI
     protected VanillaLauncher() {
@@ -49,6 +52,19 @@ public abstract class VanillaLauncher extends Launcher {
         pluginLoader.discoverPluginResources();
         pluginLoader.createPluginCandidates();
         pluginLoader.createPlugins();
+    }
+
+    @Override
+    protected PluginContainer getPlatformPlugin() {
+        if (this.vanillaPlugin == null) {
+            this.vanillaPlugin = this.getPluginManager().getPlugin("sponge").orElse(null);
+
+            if (this.vanillaPlugin == null) {
+                throw new RuntimeException("Could not find the plugin representing SpongeVanilla, this is a serious issue!");
+            }
+        }
+
+        return this.vanillaPlugin;
     }
 
     @Override

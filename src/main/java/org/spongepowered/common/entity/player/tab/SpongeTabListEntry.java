@@ -111,7 +111,7 @@ public final class SpongeTabListEntry implements TabListEntry {
         // We may be updating our values, so we don't want to send any updates
         // since that will result in a continuous loop.
         if (this.updateWithoutSend) {
-            this.updateWithoutSend = false; // (╯°□°）╯︵ ┻━┻
+            this.updateWithoutSend = false;
             return;
         }
 

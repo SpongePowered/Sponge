@@ -51,6 +51,7 @@ import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
+import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
 
 import javax.annotation.Nullable;
@@ -139,6 +140,21 @@ public final class SpongeCommon {
         return Launcher.getInstance().getPluginEnvironment().getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElseGet(Collections::emptyList);
     }
 
+    @Deprecated
+    public static PluginContainer getMinecraftPlugin() {
+        return Launcher.getInstance().getMinecraftPlugin();
+    }
+
+    @Deprecated
+    public static PluginContainer getPlugin() {
+        return Launcher.getInstance().getCommonPlugin();
+    }
+
+    @Deprecated
+    public static List<PluginContainer> getInternalPlugins() {
+        return Launcher.getInstance().getLauncherPlugins();
+    }
+
     public static Path getSpongeConfigDir() {
         throw new MissingImplementationException("SpongeImpl", "getSpongeConfigDir");
     }
@@ -180,6 +196,11 @@ public final class SpongeCommon {
      * @return True if the event is cancellable and is cancelled, false if not cancelled
      */
     public static boolean postEvent(Event event) {
+        return Sponge.getEventManager().post(event);
+    }
+
+    @Deprecated
+    public static boolean postEvent(Event event, boolean allowClientThread) {
         return Sponge.getEventManager().post(event);
     }
 

@@ -30,6 +30,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.Blackboard;
+import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.metadata.PluginMetadata;
@@ -37,6 +38,7 @@ import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -47,11 +49,14 @@ public abstract class Launcher {
     private final Logger logger;
     private final PluginEnvironment pluginEnvironment;
     private final SpongePluginManager pluginManager;
+    private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
+    private List<PluginContainer> launcherPlugins;
 
     protected Launcher(SpongePluginManager pluginManager) {
         this.logger = LogManager.getLogger("Sponge");
         this.pluginEnvironment = new PluginEnvironment();
         this.pluginManager = pluginManager;
+        this.launcherPlugins = new ArrayList<>();
     }
 
     @SuppressWarnings("unchecked")
@@ -77,6 +82,55 @@ public abstract class Launcher {
 
     public SpongePluginManager getPluginManager() {
         return this.pluginManager;
+    }
+
+    public final PluginContainer getMinecraftPlugin() {
+        if (this.minecraftPlugin == null) {
+            this.minecraftPlugin = this.pluginManager.getPlugin("minecraft").orElse(null);
+
+            if (this.minecraftPlugin == null) {
+                throw new RuntimeException("Could not find the plugin representing Minecraft, this is a serious issue!");
+            }
+        }
+
+        return this.minecraftPlugin;
+    }
+
+    public final PluginContainer getApiPlugin() {
+        if (this.apiPlugin == null) {
+            this.apiPlugin = this.pluginManager.getPlugin("spongeapi").orElse(null);
+
+            if (this.apiPlugin == null) {
+                throw new RuntimeException("Could not find the plugin representing SpongeAPI, this is a serious issue!");
+            }
+        }
+
+        return this.apiPlugin;
+    }
+
+    public final PluginContainer getCommonPlugin() {
+        if (this.commonPlugin == null) {
+            this.commonPlugin = this.pluginManager.getPlugin("sponge").orElse(null);
+
+            if (this.commonPlugin == null) {
+                throw new RuntimeException("Could not find the plugin representing Sponge, this is a serious issue!");
+            }
+        }
+
+        return this.commonPlugin;
+    }
+
+    protected abstract PluginContainer getPlatformPlugin();
+
+    public final List<PluginContainer> getLauncherPlugins() {
+        if (this.launcherPlugins.isEmpty()) {
+            this.launcherPlugins.add(this.getMinecraftPlugin());
+            this.launcherPlugins.add(this.getApiPlugin());
+            this.launcherPlugins.add(this.getCommonPlugin());
+            this.launcherPlugins.add(this.getPlatformPlugin());
+        }
+
+        return this.launcherPlugins;
     }
 
     protected void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
