@@ -116,10 +116,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
     private void impl$ThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
-            final Vector3d targetPosition = new Vector3d(playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ);
-            final Transform targetTransform = Transform.of(targetPosition);
-            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
-                EntityTypes.EYE_OF_ENDER.get(), targetTransform, (org.spongepowered.api.world.World) worldIn);
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), ServerLocation.of((ServerWorld) worldIn, playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }

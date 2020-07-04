@@ -47,7 +47,7 @@ public abstract class RailShapeMixin_API implements RailDirection {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, int meta, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(name);
+        this.api$key = CatalogKey.of(container, name.toLowerCase());
     }
 
     @Override

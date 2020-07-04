@@ -41,7 +41,7 @@ public abstract class ChatTypeMixin_API implements org.spongepowered.api.text.ch
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, byte p_i50783_3_, boolean p_i50783_4_, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(enumName.toLowerCase());
+        this.api$key = CatalogKey.of(container, enumName.toLowerCase());
     }
 
     @Override

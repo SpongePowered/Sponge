@@ -44,7 +44,7 @@ public abstract class PistonTypeMixin_API implements org.spongepowered.api.data.
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(name);
+        this.api$key = CatalogKey.of(container, name.toLowerCase());
         this.api$translation = new SpongeTranslation("block.minecraft." + ((PistonType) (Object) this == PistonType.STICKY ? "sticky_piston" : "piston"));
     }
 

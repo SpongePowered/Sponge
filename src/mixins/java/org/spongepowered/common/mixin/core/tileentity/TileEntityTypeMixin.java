@@ -63,18 +63,18 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
         Registry.register(registry, key, tileEntityType);
 
         final CatalogKeyBridge catalogKeyBridge = (CatalogKeyBridge) tileEntityType;
-        catalogKeyBridge.bridge$setKey(container.createCatalogKey(key));
+        catalogKeyBridge.bridge$setKey(CatalogKey.of(container, key));
 
         final TrackableBridge trackableBridge = (TrackableBridge) tileEntityType;
 
         final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeCommon.getTrackerConfigAdapter();
         final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.getConfig().getBlockEntityTracker();
 
-        BlockEntityTrackerModCategory modCapturing = blockEntityTracker.getModMappings().get(container.getId());
+        BlockEntityTrackerModCategory modCapturing = blockEntityTracker.getModMappings().get(container.getMetadata().getId());
 
         if (modCapturing == null) {
             modCapturing = new BlockEntityTrackerModCategory();
-            blockEntityTracker.getModMappings().put(container.getId(), modCapturing);
+            blockEntityTracker.getModMappings().put(container.getMetadata().getId(), modCapturing);
         }
 
         if (!modCapturing.isEnabled()) {

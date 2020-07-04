@@ -33,6 +33,7 @@ import net.minecraft.tileentity.BeaconTileEntity;
 import net.minecraft.tileentity.LecternTileEntity;
 import net.minecraft.tileentity.LockableTileEntity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
@@ -60,7 +61,7 @@ import java.util.stream.Stream;
 })
 public abstract class ViewableInventoryMixin implements ViewableInventoryBridge {
 
-    private List<Container> impl$openContainers = new ArrayList<>();
+    private final List<Container> impl$openContainers = new ArrayList<>();
 
     @Override
     public void viewableBridge$addContainer(Container container) {
@@ -72,19 +73,19 @@ public abstract class ViewableInventoryMixin implements ViewableInventoryBridge 
         this.impl$openContainers.remove(container);
     }
 
-    private Stream<Player> impl$getPlayerStream() {
-        return this.impl$openContainers.stream()
-                .flatMap(c -> ((ContainerBridge) c).bridge$listeners().stream())
-                .map(Player.class::cast);
-    }
-
     @Override
-    public Set<Player> viewableBridge$getViewers() {
+    public Set<ServerPlayer> viewableBridge$getViewers() {
         return this.impl$getPlayerStream() .collect(Collectors.toSet());
     }
 
     @Override
     public boolean viewableBridge$hasViewers() {
         return this.impl$getPlayerStream().findAny().isPresent();
+    }
+
+    private Stream<ServerPlayer> impl$getPlayerStream() {
+        return this.impl$openContainers.stream()
+                .flatMap(c -> ((ContainerBridge) c).bridge$listeners().stream())
+                .map(ServerPlayer.class::cast);
     }
 }

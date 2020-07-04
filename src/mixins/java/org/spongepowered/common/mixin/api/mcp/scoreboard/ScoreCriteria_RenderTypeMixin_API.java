@@ -36,7 +36,7 @@ public abstract class ScoreCriteria_RenderTypeMixin_API implements ObjectiveDisp
 
     @Shadow public abstract String shadow$getId();
 
-    private CatalogKey api$key = SpongeImplHooks.getActiveModContainer().createCatalogKey(this.shadow$getId());
+    private final CatalogKey api$key = CatalogKey.of(SpongeImplHooks.getActiveModContainer(), this.shadow$getId().toLowerCase());
 
     @Override
     public CatalogKey getKey() {

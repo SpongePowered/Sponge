@@ -48,9 +48,9 @@ public abstract class Team_VisibleMixin_API implements Visibility {
     private SpongeTranslation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKeyAndTranslation(String enumName, int ordinal, String nameIn, int idIn, CallbackInfo ci) {
+    private void api$setKeyAndTranslation(String enumName, int ordinal, String name, int idIn, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(nameIn.toLowerCase());
+        this.api$key = CatalogKey.of(container, name.toLowerCase());
         this.api$translation = new SpongeTranslation(((TranslationTextComponent) this.shadow$getDisplayName()).getKey());
     }
 

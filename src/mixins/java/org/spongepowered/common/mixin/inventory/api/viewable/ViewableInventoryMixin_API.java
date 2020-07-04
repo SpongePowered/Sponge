@@ -29,6 +29,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,7 +46,7 @@ import java.util.Set;
 public interface ViewableInventoryMixin_API extends ViewableInventory {
 
     @Override
-    default Set<Player> getViewers() {
+    default Set<ServerPlayer> getViewers() {
         if (this instanceof ViewableInventoryBridge) {
             return ((ViewableInventoryBridge) this).viewableBridge$getViewers();
         }
@@ -60,7 +61,7 @@ public interface ViewableInventoryMixin_API extends ViewableInventory {
     }
 
     @Override
-    default boolean canInteractWith(Player player) {
+    default boolean canInteractWith(ServerPlayer player) {
         if (this instanceof IInventory) {
             return ((IInventory) this).isUsableByPlayer((PlayerEntity) player);
         }

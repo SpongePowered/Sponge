@@ -42,7 +42,7 @@ public abstract class BannerPatternMixin_API implements BannerPatternShape {
     @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;)V", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String fileName, String hashName, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(fileName);
+        this.api$key = CatalogKey.of(container, fileName.toLowerCase());
     }
 
     @Override

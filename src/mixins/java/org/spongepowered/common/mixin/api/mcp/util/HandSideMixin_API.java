@@ -49,7 +49,7 @@ public abstract class HandSideMixin_API implements HandPreference {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, ITextComponent name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(((TranslationTextComponent) name).getKey().replace("options.mainHand.", ""));
+        this.api$key = CatalogKey.of(container, ((TranslationTextComponent) name).getKey().replace("options.mainHand.", ""));
         this.api$translation = new SpongeTranslation(((TranslationTextComponent) name).getKey());
     }
 

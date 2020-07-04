@@ -94,7 +94,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
                 final IPhaseState<?> currentState = peek.state;
                 try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.SERVER)
                         .source(new SpongeLocatableBlockBuilder()
-                                .world((World) worldIn)
+                                .world((ServerWorld) worldIn)
                                 .position(pos.getX(), pos.getY(), pos.getZ())
                                 .state((BlockState) state)
                                 .build())) {

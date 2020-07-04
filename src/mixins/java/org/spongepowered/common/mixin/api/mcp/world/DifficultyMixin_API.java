@@ -47,7 +47,7 @@ public abstract class DifficultyMixin_API implements Difficulty {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int id, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(name);
+        this.api$key = CatalogKey.of(container, name.toLowerCase());
         this.api$translation = new SpongeTranslation(this.shadow$getTranslationKey());
     }
 

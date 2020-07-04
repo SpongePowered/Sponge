@@ -50,7 +50,7 @@ public abstract class BossInfo_ColorMixin_API implements BossBarColor {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndColor(String enumName, int ordinal, String name, TextFormatting formatting, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(this.shadow$getName());
+        this.api$key = CatalogKey.of(container, this.shadow$getName().toLowerCase());
         this.api$color = SpongeTextColor.of(this.shadow$getFormatting());
     }
 

@@ -50,8 +50,7 @@ public abstract class GameTypeMixin_API implements GameMode {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int gameTypeId, String gameTypeName, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-
-        this.api$key = container.createCatalogKey(gameTypeName.isEmpty() ? "not_set" : gameTypeName);
+        this.api$key = CatalogKey.of(container, gameTypeName.isEmpty() ? "not_set" : gameTypeName.toLowerCase());
         this.api$translation = new SpongeTranslation((TranslationTextComponent) this.shadow$getDisplayName());
     }
 

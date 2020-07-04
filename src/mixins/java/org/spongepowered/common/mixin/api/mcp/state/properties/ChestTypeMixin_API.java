@@ -42,7 +42,7 @@ public abstract class ChestTypeMixin_API implements ChestAttachmentType {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String name, int opposite, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(name);
+        this.api$key = CatalogKey.of(container, name.toLowerCase());
     }
 
     @Override

@@ -47,7 +47,7 @@ public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String name, SoundEvent sound, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = container.createCatalogKey(name);
+        this.api$key = CatalogKey.of(container, name.toLowerCase());
     }
 
     @Override
