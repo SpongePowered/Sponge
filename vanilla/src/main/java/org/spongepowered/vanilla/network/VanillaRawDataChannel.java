@@ -33,11 +33,13 @@ import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.network.RawDataListener;
 import org.spongepowered.api.network.RemoteConnection;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.vanilla.bridge.network.NetHandlerPlayServerBridge_Vanilla;
 
@@ -90,7 +92,7 @@ public final class VanillaRawDataChannel extends VanillaChannelBinding implement
     }
 
     @Override
-    public void sendTo(Player player, Consumer<ChannelBuf> payload) {
+    public void sendTo(ServerPlayer player, Consumer<ChannelBuf> payload) {
         validate();
         final ServerPlayerEntity playerMP = (ServerPlayerEntity) player;
         if (((NetHandlerPlayServerBridge_Vanilla) playerMP.connection).vanillaBridge$supportsChannel((ResourceLocation) (Object) getKey())) {
@@ -108,7 +110,7 @@ public final class VanillaRawDataChannel extends VanillaChannelBinding implement
     public void sendToAll(Consumer<ChannelBuf> payload) {
         validate();
         SCustomPayloadPlayPacket packet = null;
-        for (ServerPlayerEntity player : SpongeImpl.getServer().getPlayerList().getPlayers()) {
+        for (ServerPlayerEntity player : SpongeCommon.getServer().getPlayerList().getPlayers()) {
             if (((NetHandlerPlayServerBridge_Vanilla) player.connection).vanillaBridge$supportsChannel((ResourceLocation) (Object) getKey())) {
                 if (packet == null) {
                     packet = createPacket(payload);

@@ -28,6 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.minecart.TNTMinecartEntity;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -110,7 +111,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
             return;
         }
         if (receivingPower) {
-            ((ServerWorld) this.world).getNotifier(x, y, z).ifPresent(notifier -> this.impl$primeCause = notifier);
+            ((ServerWorld) this.world).get(x, y, z, Keys.NOTIFIER).ifPresent(notifier -> this.impl$primeCause = notifier);
         }
     }
 

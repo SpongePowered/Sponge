@@ -117,7 +117,7 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public <T extends Recipe> Optional<T> findMatchingRecipe(RecipeType<T> type, Inventory inventory, World world) {
+    public <T extends Recipe> Optional<T> findMatchingRecipe(RecipeType<T> type, Inventory inventory, ServerWorld world) {
         if (!(inventory instanceof IInventory)) {
             return Optional.empty();
         }

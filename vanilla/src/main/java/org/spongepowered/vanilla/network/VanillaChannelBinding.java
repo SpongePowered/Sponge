@@ -30,8 +30,8 @@ import net.minecraft.network.PacketBuffer;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.network.RemoteConnection;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.network.SpongeNetworkManager;
+import org.spongepowered.plugin.PluginContainer;
 
 public abstract class VanillaChannelBinding extends SpongeNetworkManager.AbstractChannelBinding {
 

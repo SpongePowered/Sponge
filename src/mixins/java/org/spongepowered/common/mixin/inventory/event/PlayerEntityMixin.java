@@ -80,14 +80,16 @@ public class PlayerEntityMixin {
 
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/container/Container;onContainerClosed(Lnet/minecraft/entity/player/PlayerEntity;)V"))
     private void onOnContainerClosed(final Container container, final PlayerEntity player) {
-        // Corner case where the server is shutting down on the client, the enzity player mp is also being killed off.
-        if (Sponge.isServerAvailable() && SpongeImplHooks.isClientAvailable() && Sponge.getGame().getState() == GameState.SERVER_STOPPING) {
+
+        // TODO Minecraft 1.14 - Know if the server is shutting down
+
+        // Corner case where the server is shutting down on the client, the server player is also being killed off.
+        if (Sponge.isServerAvailable() && SpongeImplHooks.isClientAvailable()) {
             container.onContainerClosed(player);
             return;
         }
         if (player instanceof ServerPlayerEntity) {
             final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
-
 
             try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext(PhaseTracker.SERVER)
                     .source(serverPlayer)
