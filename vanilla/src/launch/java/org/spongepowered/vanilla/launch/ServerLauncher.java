@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.launch;
 
+import com.google.inject.Stage;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.common.launch.Launcher;
 
@@ -32,8 +33,12 @@ import java.util.List;
 
 public final class ServerLauncher extends VanillaLauncher {
 
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        final ServerLauncher launcher = new ServerLauncher();
+    protected ServerLauncher(final Stage injectionStage) {
+        super(injectionStage);
+    }
+
+    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final boolean isDeveloperEnvironment, final String[] args) {
+        final ServerLauncher launcher = new ServerLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
         Launcher.setInstance(launcher);
         launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
     }

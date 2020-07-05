@@ -22,31 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.common.inject;
 
-import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
-import org.spongepowered.common.launch.Launcher;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.inject.provider.ConfigDirAnnotation;
+import org.spongepowered.common.inject.provider.PathAsFileProvider;
 
+import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
 
-public final class ClientLauncher extends VanillaLauncher {
-
-    protected ClientLauncher(final Stage injectionStage) {
-        super(injectionStage);
-    }
-
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-    }
+public class SpongeModule extends AbstractModule {
 
     @Override
-    public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-        this.getLogger().info("Loading Minecraft Client, please wait...");
-        Main.main(args);
+    protected void configure() {
+        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeCommon.getPluginConfigDir());
+        this.bind(File.class).annotatedWith(ConfigDirAnnotation.SHARED).toProvider(new PathAsFileProvider() {
+            @Inject
+            void init(@ConfigDir(sharedRoot = true) Provider<Path> path) {
+                this.path = path;
+            }
+        });
     }
+
 }

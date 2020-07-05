@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.launch;
 
+import com.google.inject.Stage;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
@@ -38,11 +39,13 @@ import java.util.Collection;
 
 public abstract class VanillaLauncher extends Launcher {
 
+    private final Stage injectionStage;
     private PluginContainer vanillaPlugin;
 
     // TODO Minecraft 1.14 - DI
-    protected VanillaLauncher() {
+    protected VanillaLauncher(Stage injectionStage) {
         super(new VanillaPluginManager());
+        this.injectionStage = injectionStage;
     }
 
     public void loadPlugins() {
@@ -52,6 +55,11 @@ public abstract class VanillaLauncher extends Launcher {
         pluginLoader.discoverPluginResources();
         pluginLoader.createPluginCandidates();
         pluginLoader.createPlugins();
+    }
+
+    @Override
+    public Stage getInjectionStage() {
+        return this.injectionStage;
     }
 
     @Override

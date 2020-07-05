@@ -25,6 +25,7 @@
 package org.spongepowered.common.launch;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
@@ -72,17 +73,19 @@ public abstract class Launcher {
         Launcher.INSTANCE = Preconditions.checkNotNull(instance);
     }
 
-    public Logger getLogger() {
+    public final Logger getLogger() {
         return this.logger;
     }
 
-    public PluginEnvironment getPluginEnvironment() {
+    public final PluginEnvironment getPluginEnvironment() {
         return this.pluginEnvironment;
     }
 
-    public SpongePluginManager getPluginManager() {
+    public final SpongePluginManager getPluginManager() {
         return this.pluginManager;
     }
+
+    public abstract Stage getInjectionStage();
 
     public final PluginContainer getMinecraftPlugin() {
         if (this.minecraftPlugin == null) {

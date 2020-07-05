@@ -24,17 +24,26 @@
  */
 package org.spongepowered.vanilla.mixin.core.server;
 
+import com.google.inject.Guice;
+import com.google.inject.Stage;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.inject.SpongeGuice;
+import org.spongepowered.common.inject.SpongeModule;
+import org.spongepowered.vanilla.inject.VanillaServerModule;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla {
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServer;startServerThread()V"))
     private static void vanilla$prepareGameAndLoadPlugins(final DedicatedServer server) {
+        final Stage stage = SpongeGuice.getInjectorStage(Launcher.getInstance().getInjectionStage());
+        SpongeCommon.getLogger().debug("Creating injector in stage '{}'", stage);
+        Guice.createInjector(stage, new SpongeModule(), new VanillaServerModule(server));
         Thread.dumpStack();
     }
 }

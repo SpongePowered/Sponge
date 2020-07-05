@@ -22,31 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.vanilla.inject;
 
-import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.api.network.ChannelRegistrar;
+import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.common.SpongeGame;
+import org.spongepowered.common.inject.SpongeCommonModule;
+import org.spongepowered.vanilla.VanillaGame;
 
-import java.nio.file.Path;
-import java.util.List;
-
-public final class ClientLauncher extends VanillaLauncher {
-
-    protected ClientLauncher(final Stage injectionStage) {
-        super(injectionStage);
-    }
-
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-    }
+public class SpongeVanillaModule extends SpongeCommonModule {
 
     @Override
-    public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-        this.getLogger().info("Loading Minecraft Client, please wait...");
-        Main.main(args);
+    protected void configure() {
+        super.configure();
+
+        this.bind(SpongeGame.class).to(VanillaGame.class);
+        this.bind(PluginManager.class).to(VanillaPluginManager.class);
+        this.bind(ChannelRegistrar.class).to(VanillaChannelRegistrar.class);
     }
 }

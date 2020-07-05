@@ -22,31 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.common.inject.provider;
 
-import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
-import org.spongepowered.common.launch.Launcher;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.asset.AssetId;
+import org.spongepowered.api.asset.AssetManager;
+import org.spongepowered.common.inject.SpongeInjectionPoint;
+import org.spongepowered.plugin.PluginContainer;
 
-import java.nio.file.Path;
-import java.util.List;
+import java.util.NoSuchElementException;
 
-public final class ClientLauncher extends VanillaLauncher {
+public class PluginAssetProvider implements Provider<Asset> {
 
-    protected ClientLauncher(final Stage injectionStage) {
-        super(injectionStage);
-    }
-
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-    }
+    @Inject private PluginContainer container;
+    @Inject private AssetManager assetManager;
+    @Inject private SpongeInjectionPoint point;
 
     @Override
-    public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-        this.getLogger().info("Loading Minecraft Client, please wait...");
-        Main.main(args);
+    public Asset get() {
+        String name = this.point.getAnnotation(AssetId.class).value();
+        return this.assetManager.getAsset(this.container, name)
+                .orElseThrow(() -> new NoSuchElementException("Cannot find asset " + name));
     }
+
 }
