@@ -50,8 +50,8 @@ public abstract class Launcher {
     private final Logger logger;
     private final PluginEnvironment pluginEnvironment;
     private final SpongePluginManager pluginManager;
+    private final List<PluginContainer> launcherPlugins;
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
-    private List<PluginContainer> launcherPlugins;
 
     protected Launcher(SpongePluginManager pluginManager) {
         this.logger = LogManager.getLogger("Sponge");
