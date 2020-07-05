@@ -42,7 +42,6 @@ public abstract class VanillaLauncher extends Launcher {
     private final Stage injectionStage;
     private PluginContainer vanillaPlugin;
 
-    // TODO Minecraft 1.14 - DI
     protected VanillaLauncher(Stage injectionStage) {
         super(new VanillaPluginManager());
         this.injectionStage = injectionStage;
@@ -58,12 +57,17 @@ public abstract class VanillaLauncher extends Launcher {
     }
 
     @Override
-    public Stage getInjectionStage() {
+    public final boolean isVanilla() {
+        return true;
+    }
+
+    @Override
+    public final Stage getInjectionStage() {
         return this.injectionStage;
     }
 
     @Override
-    protected PluginContainer getPlatformPlugin() {
+    protected final PluginContainer getPlatformPlugin() {
         if (this.vanillaPlugin == null) {
             this.vanillaPlugin = this.getPluginManager().getPlugin("spongevanilla").orElse(null);
 
@@ -76,7 +80,7 @@ public abstract class VanillaLauncher extends Launcher {
     }
 
     @Override
-    protected void createPlatformPlugins(final Path gameDirectory) {
+    protected final void createPlatformPlugins(final Path gameDirectory) {
         try {
             final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(VanillaLauncher.class.getResourceAsStream("/plugins.json"));
             for (final PluginMetadata metadata : read) {

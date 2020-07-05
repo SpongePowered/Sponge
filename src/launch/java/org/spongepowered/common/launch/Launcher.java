@@ -73,6 +73,8 @@ public abstract class Launcher {
         Launcher.INSTANCE = Preconditions.checkNotNull(instance);
     }
 
+    public abstract boolean isVanilla();
+
     public final Logger getLogger() {
         return this.logger;
     }
@@ -86,6 +88,10 @@ public abstract class Launcher {
     }
 
     public abstract Stage getInjectionStage();
+
+    public final boolean isDeveloperEnvironment() {
+        return this.getInjectionStage() == Stage.DEVELOPMENT;
+    }
 
     public final PluginContainer getMinecraftPlugin() {
         if (this.minecraftPlugin == null) {
