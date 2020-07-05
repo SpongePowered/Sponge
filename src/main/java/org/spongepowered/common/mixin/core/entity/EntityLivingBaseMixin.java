@@ -464,7 +464,9 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                     if (this.entityType.isModdedDamageEntityMethod) {
                         this.damageEntity(source, amount - this.lastDamage);
                     } else {
-                        this.bridge$damageEntityHook(source, amount - this.lastDamage);
+                        if (!this.bridge$damageEntityHook(source, amount - this.lastDamage)) {
+                            return false;
+                        }
                     }
 
                     // this.damageEntity(source, amount - this.lastDamage); // handled above
@@ -476,7 +478,9 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
                     if (this.entityType.isModdedDamageEntityMethod) {
                         this.damageEntity(source, amount);
                     } else {
-                        this.bridge$damageEntityHook(source, amount);
+                        if (!this.bridge$damageEntityHook(source, amount)) {
+                            return false;
+                        }
                     }
                     this.lastDamage = amount;
                     this.hurtResistantTime = this.maxHurtResistantTime;
@@ -606,7 +610,7 @@ public abstract class EntityLivingBaseMixin extends EntityMixin implements Livin
             damage = bridge$applyModDamage((EntityLivingBase) (Object) this, damageSource, damage);
             final float originalDamage = damage; // set after forge hook.
             if (damage <= 0) {
-                return false;
+                return true;
             }
 
             final List<DamageFunction> originalFunctions = new ArrayList<>();
