@@ -28,10 +28,6 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
-import org.spongepowered.common.data.fixer.entity.player.PlayerRespawnData;
-import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Collections;
 import java.util.HashSet;

@@ -31,7 +31,7 @@ public final class VanillaLaunchMixinConnector extends LaunchMixinConnector {
 
     @Override
     public void connect() {
-        super.connect();
+        //super.connect();
         Mixins.addConfigurations(
                 "mixins.vanilla.core.json"
         );

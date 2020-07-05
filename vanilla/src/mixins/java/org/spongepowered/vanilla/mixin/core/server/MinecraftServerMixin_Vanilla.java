@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.mixin.core.server;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -32,8 +33,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla {
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;startServerThread()V"))
-    private static void vanilla$prepareGameAndLoadPlugins(final MinecraftServer minecraftServer) {
+    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServer;startServerThread()V"))
+    private static void vanilla$prepareGameAndLoadPlugins(final DedicatedServer server) {
         Thread.dumpStack();
     }
 }

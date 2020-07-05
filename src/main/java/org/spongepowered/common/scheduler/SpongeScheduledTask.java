@@ -41,6 +41,7 @@ public final class SpongeScheduledTask implements ScheduledTask {
     private final String name;
     private long timestamp;
     private ScheduledTaskState state;
+    private boolean isCancelled = false;
 
     SpongeScheduledTask(SpongeScheduler scheduler, SpongeTask task, String taskName) {
         this.scheduler = scheduler;
@@ -74,7 +75,13 @@ public final class SpongeScheduledTask implements ScheduledTask {
             success = true;
         }
         this.state = ScheduledTaskState.CANCELED;
+        this.isCancelled = true;
         return success;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return this.isCancelled;
     }
 
     public SpongeScheduler getScheduler() {
