@@ -78,7 +78,7 @@ public final class ClientDevLaunchHandler implements ILaunchHandlerService {
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.VERSION).orElse(null),
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElse(null),
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElse(null),
-                true,
+                Boolean.TRUE,
                 arguments);
             return null;
         };

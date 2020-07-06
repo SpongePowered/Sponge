@@ -26,6 +26,7 @@ package org.spongepowered.common.inject.provider;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelId;
 import org.spongepowered.api.network.ChannelRegistrar;
@@ -46,7 +47,7 @@ public abstract class ChannelBindingProvider<B extends ChannelBinding> implement
 
         @Override
         public ChannelBinding.IndexedMessageChannel get() {
-            return this.registrar.getOrCreate(this.container, this.getChannel());
+            return this.registrar.getOrCreate(this.container, CatalogKey.of(this.container, this.getChannel()));
         }
 
     }
@@ -55,7 +56,7 @@ public abstract class ChannelBindingProvider<B extends ChannelBinding> implement
 
         @Override
         public ChannelBinding.RawDataChannel get() {
-            return this.registrar.getOrCreateRaw(this.container, this.getChannel());
+            return this.registrar.getOrCreateRaw(this.container, CatalogKey.of(this.container, this.getChannel()));
         }
 
     }

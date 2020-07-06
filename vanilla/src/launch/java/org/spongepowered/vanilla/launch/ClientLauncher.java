@@ -37,7 +37,7 @@ public final class ClientLauncher extends VanillaLauncher {
         super(injectionStage);
     }
 
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final boolean isDeveloperEnvironment, final String[] args) {
+    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final Boolean isDeveloperEnvironment, final String[] args) {
         final ClientLauncher launcher = new ClientLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
         Launcher.setInstance(launcher);
         launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);

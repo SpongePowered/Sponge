@@ -52,6 +52,16 @@ public final class SpongeConfigManager implements ConfigManager {
             .getPluginConfigDir().resolve(container.getMetadata().getId().toLowerCase()));
     }
 
+    public static ConfigRoot getSharedRoot(PluginContainer container) {
+        final String name = container.getMetadata().getId();
+        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeCommon.getPluginConfigDir());
+    }
+
+    public static ConfigRoot getPrivateRoot(PluginContainer container) {
+        final String name = container.getMetadata().getId();
+        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeCommon.getPluginConfigDir().resolve(name));
+    }
+
     private static ObjectMapperFactory getMapperFactory(PluginContainer container) {
         if (container instanceof PluginContainerExtension) {
             Injector injector = ((PluginContainerExtension) container).getInjector();

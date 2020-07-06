@@ -24,11 +24,11 @@
  */
 package org.spongepowered.vanilla.inject;
 
-import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.vanilla.VanillaGame;
+import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 public class SpongeVanillaModule extends SpongeCommonModule {
 
@@ -38,6 +38,5 @@ public class SpongeVanillaModule extends SpongeCommonModule {
 
         this.bind(SpongeGame.class).to(VanillaGame.class);
         this.bind(PluginManager.class).to(VanillaPluginManager.class);
-        this.bind(ChannelRegistrar.class).to(VanillaChannelRegistrar.class);
     }
 }
