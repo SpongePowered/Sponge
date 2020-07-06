@@ -166,10 +166,7 @@ val invalid by sourceSets.registering {
 }
 
 
-configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
-//    add(sourceSet = mixins, refMapName = "mixins.common.refmap.json")
-//    add(sourceSet = accessors, refMapName = "mixins.common.accessors.refmap.json")
-}
+configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {}
 repositories {
     maven("https://files.minecraftforge.net/maven")
 }
@@ -181,7 +178,6 @@ dependencies {
     // api
     api(project(":SpongeAPI"))
     api("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
-    api("org.spongepowered:plugin-meta:0.6.0-SNAPSHOT")
 
     // Database stuffs... likely needs to be looked at
     implementation("com.zaxxer:HikariCP:2.6.3")
@@ -215,11 +211,6 @@ dependencies {
     launchConfig("org.spongepowered:configurate-hocon:3.6.1")
     launchConfig("org.spongepowered:configurate-json:3.6.1")
     add(launch.get().implementationConfigurationName, launchConfig)
-
-    // Mixins needs to be able to target api classes
-//    mixins(spongeDev.api.get())
-
-
 
     // Annotation Processor
     "accessorsAnnotationProcessor"(launchConfig)
@@ -339,7 +330,7 @@ project("SpongeVanilla") {
     description = "The SpongeAPI implementation for Vanilla Minecraft"
 
     val vanillaMinecraftConfig by configurations.named("minecraft")
-    val vanillaLaunchConfig by configurations.register("modlauncher") {
+    val vanillaModLauncherConfig by configurations.register("modlauncher") {
         extendsFrom(launchConfig)
         extendsFrom(vanillaMinecraftConfig)
     }
@@ -362,20 +353,27 @@ project("SpongeVanilla") {
         )
     }
     val vanillaLaunch by sourceSets.register("launch") {
+        val thisLaunch = this
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = launch.get(),
-                targetSource = this,
+                targetSource = thisLaunch,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisLaunch.implementationConfigurationName
+        )
+        applyNamedDependencyOnOutput(
+                originProject = commonProject,
+                sourceAdding = main,
+                targetSource = thisLaunch,
+                implProject = vanillaProject,
+                dependencyConfigName = thisLaunch.implementationConfigurationName
         )
         applyNamedDependencyOnOutput(
                 originProject = vanillaProject,
-                sourceAdding = this,
+                sourceAdding = thisLaunch,
                 targetSource = vanillaMain,
                 implProject = vanillaProject,
                 dependencyConfigName = vanillaMain.implementationConfigurationName
-
         )
     }
     val vanillaAccessors by sourceSets.register("accessors") {
@@ -385,14 +383,14 @@ project("SpongeVanilla") {
                 sourceAdding = launch.get(),
                 targetSource = thisAccessor,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisAccessor.implementationConfigurationName
         )
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = accessors.get(),
                 targetSource = thisAccessor,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisAccessor.implementationConfigurationName
         )
         applyNamedDependencyOnOutput(
                 originProject = vanillaProject,
@@ -404,9 +402,9 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(
                 originProject = vanillaProject,
                 sourceAdding = vanillaLaunch,
-                targetSource = this,
+                targetSource = thisAccessor,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisAccessor.implementationConfigurationName
         )
     }
     val vanillaMixins by sourceSets.register("mixins") {
@@ -435,9 +433,9 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = launch.get(),
-                targetSource = this,
+                targetSource = thisMixin,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisMixin.implementationConfigurationName
         )
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
@@ -456,33 +454,33 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(
                 originProject = vanillaProject,
                 sourceAdding = vanillaLaunch,
-                targetSource = this,
+                targetSource = thisMixin,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisMixin.implementationConfigurationName
         )
-
     }
     val vanillaModLauncher by sourceSets.register("modlauncher") {
+        val thisModLauncher = this;
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = launch.get(),
-                targetSource = this,
+                targetSource = thisModLauncher,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisModLauncher.implementationConfigurationName
         )
         applyNamedDependencyOnOutput(
                 originProject = vanillaProject,
                 sourceAdding = vanillaLaunch,
-                targetSource = this,
+                targetSource = thisModLauncher,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisModLauncher.implementationConfigurationName
         )
         applyNamedDependencyOnOutput(
                 originProject = vanillaProject,
                 sourceAdding = vanillaMixins,
-                targetSource = this,
+                targetSource = thisModLauncher,
                 implProject = vanillaProject,
-                dependencyConfigName = this.runtimeConfigurationName
+                dependencyConfigName = thisModLauncher.runtimeConfigurationName
         )
     }
     val vanillaInvalid by sourceSets.register("invalid") {
@@ -491,23 +489,23 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = launch.get(),
-                targetSource = this,
+                targetSource = thisInvalid,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisInvalid.implementationConfigurationName
         )
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = accessors.get(),
                 targetSource = thisInvalid,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisInvalid.implementationConfigurationName
         )
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = mixins.get(),
                 targetSource = thisInvalid,
                 implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
+                dependencyConfigName = thisInvalid.implementationConfigurationName
         )
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
@@ -518,7 +516,6 @@ project("SpongeVanilla") {
         )
     }
 
-
     val vanillaInvalidImplementation by configurations.named(vanillaInvalid.implementationConfigurationName)
     val vanillaAccessorsAnnotationProcessor by configurations.named(vanillaAccessors.annotationProcessorConfigurationName)
     val vanillaAccessorsImplementation by configurations.named(vanillaAccessors.implementationConfigurationName)
@@ -526,7 +523,6 @@ project("SpongeVanilla") {
         extendsFrom(vanillaMinecraftConfig)
     }
     val vanillaMixinsAnnotationProcessor by configurations.named(vanillaMixins.annotationProcessorConfigurationName)
-
     val vanillaModLauncherImplementation by configurations.named(vanillaModLauncher.implementationConfigurationName) {
         extendsFrom(launchConfig)
     }
@@ -575,14 +571,14 @@ project("SpongeVanilla") {
             exclude(group = "net.minecraft", module = "server")
         }
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
-        add(vanillaLaunch.implementationConfigurationName, vanillaLaunchConfig)
+        add(vanillaLaunch.implementationConfigurationName, vanillaModLauncherConfig)
 
-        vanillaLaunchConfig(project(":SpongeAPI"))
-        vanillaLaunchConfig("org.spongepowered:mixin:0.8")
-        vanillaLaunchConfig("org.ow2.asm:asm-util:6.2")
-        vanillaLaunchConfig("org.ow2.asm:asm-tree:6.2")
-        vanillaLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
-        vanillaLaunchConfig("org.apache.logging.log4j:log4j-api:2.8.1")
+        vanillaModLauncherConfig(project(":SpongeAPI"))
+        vanillaModLauncherConfig("org.spongepowered:mixin:0.8")
+        vanillaModLauncherConfig("org.ow2.asm:asm-util:6.2")
+        vanillaModLauncherConfig("org.ow2.asm:asm-tree:6.2")
+        vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+        vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.8.1")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
@@ -592,9 +588,9 @@ project("SpongeVanilla") {
         vanillaModLauncherImplementation("net.minecraftforge:accesstransformers:1.0.+:shadowed")
         vanillaModLauncherImplementation("net.sf.jopt-simple:jopt-simple:5.0.4")
         implementation(vanillaModLauncher.output)
-        vanillaModLauncherImplementation(vanillaLaunchConfig)
-        vanillaMixinsImplementation(vanillaLaunchConfig)
-        vanillaAccessorsImplementation(vanillaLaunchConfig)
+        vanillaModLauncherImplementation(vanillaModLauncherConfig)
+        vanillaMixinsImplementation(vanillaModLauncherConfig)
+        vanillaAccessorsImplementation(vanillaModLauncherConfig)
 
 
 

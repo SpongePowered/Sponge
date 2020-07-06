@@ -26,6 +26,8 @@ package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.launch.Launcher;
 
 import java.nio.file.Path;
@@ -47,6 +49,8 @@ public final class ServerLauncher extends VanillaLauncher {
     public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
         super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
         this.getLogger().info("Loading Minecraft Server, please wait...");
+        final ClassLoader classLoader = Launcher.class.getClassLoader();
+        final ClassLoader classLoader1 = SpongeEventManager.class.getClassLoader();
         MinecraftServer.main(args);
     }
 }
