@@ -188,6 +188,7 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:2.0.3")
     implementation("com.h2database:h2:1.4.196")
     implementation("org.xerial:sqlite-jdbc:3.20.0")
+    implementation("com.google.inject:guice:4.1.0")
 
     // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:6.2")
@@ -368,6 +369,14 @@ project("SpongeVanilla") {
                 implProject = vanillaProject,
                 dependencyConfigName = this.implementationConfigurationName
         )
+        applyNamedDependencyOnOutput(
+                originProject = vanillaProject,
+                sourceAdding = this,
+                targetSource = vanillaMain,
+                implProject = vanillaProject,
+                dependencyConfigName = vanillaMain.implementationConfigurationName
+
+        )
     }
     val vanillaAccessors by sourceSets.register("accessors") {
         val thisAccessor = this
@@ -423,7 +432,13 @@ project("SpongeVanilla") {
                 implProject = vanillaProject,
                 dependencyConfigName = thisMixin.implementationConfigurationName
         )
-
+        applyNamedDependencyOnOutput(
+                originProject = commonProject,
+                sourceAdding = launch.get(),
+                targetSource = this,
+                implProject = vanillaProject,
+                dependencyConfigName = this.implementationConfigurationName
+        )
         applyNamedDependencyOnOutput(
                 originProject = commonProject,
                 sourceAdding = main,
