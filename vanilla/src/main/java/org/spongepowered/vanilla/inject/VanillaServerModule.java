@@ -24,14 +24,13 @@
  */
 package org.spongepowered.vanilla.inject;
 
-import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Server;
 
 public final class VanillaServerModule extends SpongeVanillaModule {
 
-    private final MinecraftServer server;
+    private final Server server;
 
-    public VanillaServerModule(final MinecraftServer server) {
+    public VanillaServerModule(final Server server) {
         this.server = server;
     }
 
@@ -39,6 +38,6 @@ public final class VanillaServerModule extends SpongeVanillaModule {
     protected void configure() {
         super.configure();
 
-        this.bind(Server.class).toInstance((Server) this.server);
+        this.bind(Server.class).toInstance(this.server);
     }
 }

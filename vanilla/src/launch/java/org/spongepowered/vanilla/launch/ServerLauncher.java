@@ -24,16 +24,16 @@
  */
 package org.spongepowered.vanilla.launch;
 
+import com.google.inject.Module;
 import com.google.inject.Stage;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.launch.Launcher;
 
 import java.nio.file.Path;
 import java.util.List;
 
-public final class ServerLauncher extends VanillaLauncher {
+public final class ServerLauncher extends VanillaLauncher<VanillaServer> {
 
     protected ServerLauncher(final Stage injectionStage) {
         super(injectionStage);
@@ -49,8 +49,6 @@ public final class ServerLauncher extends VanillaLauncher {
     public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
         super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
         this.getLogger().info("Loading Minecraft Server, please wait...");
-        final ClassLoader classLoader = Launcher.class.getClassLoader();
-        final ClassLoader classLoader1 = SpongeEventManager.class.getClassLoader();
         MinecraftServer.main(args);
     }
 }

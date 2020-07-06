@@ -30,7 +30,7 @@ import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.vanilla.VanillaGame;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
-public class SpongeVanillaModule extends SpongeCommonModule {
+public abstract class SpongeVanillaModule extends SpongeCommonModule {
 
     @Override
     protected void configure() {

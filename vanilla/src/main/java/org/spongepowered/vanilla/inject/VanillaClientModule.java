@@ -24,14 +24,13 @@
  */
 package org.spongepowered.vanilla.inject;
 
-import net.minecraft.client.Minecraft;
 import org.spongepowered.api.Client;
 
 public final class VanillaClientModule extends SpongeVanillaModule {
 
-    private final Minecraft client;
+    private final Client client;
 
-    public VanillaClientModule(final Minecraft client) {
+    public VanillaClientModule(final Client client) {
         this.client = client;
     }
 
@@ -39,6 +38,6 @@ public final class VanillaClientModule extends SpongeVanillaModule {
     protected void configure() {
         super.configure();
 
-        this.bind(Client.class).toInstance((Client) this.client);
+        this.bind(Client.class).toInstance(this.client);
     }
 }

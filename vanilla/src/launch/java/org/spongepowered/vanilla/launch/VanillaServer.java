@@ -24,29 +24,8 @@
  */
 package org.spongepowered.vanilla.launch;
 
-import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.api.Server;
 
-import java.nio.file.Path;
-import java.util.List;
+public interface VanillaServer extends VanillaEngine, Server {
 
-public final class ClientLauncher extends VanillaLauncher<VanillaEngine> {
-
-    protected ClientLauncher(final Stage injectionStage) {
-        super(injectionStage);
-    }
-
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-    }
-
-    @Override
-    public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-        this.getLogger().info("Loading Minecraft Client, please wait...");
-        Main.main(args);
-    }
 }

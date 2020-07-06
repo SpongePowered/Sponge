@@ -1,16 +1,15 @@
 {
     "required": true,
     "minVersion": "0.8",
-    "package": "org.spongepowered.vanilla.mixin.core",
+    "package": "org.spongepowered.vanilla.mixin.api",
     "refmap": "mixins.vanilla.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
-    "priority": 1101,
+    "priority": 1100,
     "server": [
     ],
     "mixins": [
-        "server.MinecraftServerMixin_Vanilla",
-        "util.registry.BootstrapMixin_Vanilla"
+        "server.MinecraftServerMixin_Vanilla_API"
     ],
     "injectors": {
         "defaultRequire": 1

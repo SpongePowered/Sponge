@@ -22,14 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.vanilla.mixin.api.server;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.Module;
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.vanilla.inject.VanillaServerModule;
+import org.spongepowered.vanilla.launch.VanillaServer;
 
-public final class LauncherModule extends AbstractModule {
+@Mixin(MinecraftServer.class)
+public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer {
 
     @Override
-    protected void configure() {
-
+    public Module createInjectionModule() {
+        return new VanillaServerModule(this);
     }
 }
