@@ -27,6 +27,7 @@ package org.spongepowered.common.accessor.entity;
 import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.potion.EffectInstance;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
@@ -40,7 +41,7 @@ public interface AreaEffectCloudEntityAccessor {
 
     @Accessor("effects") List<EffectInstance> accessor$getEffects();
 
-    @Accessor("effects") void accessor$setEffects(List<EffectInstance> effects);
+    @Mutable @Accessor("effects") void accessor$setEffects(List<EffectInstance> effects);
 
     @Accessor("reapplicationDelay") int accessor$getReapplicationDelay();
 

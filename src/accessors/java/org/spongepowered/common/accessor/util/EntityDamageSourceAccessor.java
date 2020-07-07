@@ -22,11 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.entity.monster;
+package org.spongepowered.common.accessor.util;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.util.EntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(targets = "net.minecraft.entity.monster.PhantomEntity$AttackPhase")
-public interface PhantomEntityPhaseAccessor {
+@Mixin(EntityDamageSource.class)
+public interface EntityDamageSourceAccessor {
 
+    @Accessor("damageSourceEntity") void accessor$setDamageSourceEntity(Entity entity);
 }

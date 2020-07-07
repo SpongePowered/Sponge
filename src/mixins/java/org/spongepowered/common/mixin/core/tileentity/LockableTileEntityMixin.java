@@ -25,9 +25,16 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.LockableTileEntity;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.accessor.tileentity.LockableTileEntityAccessor;
+import org.spongepowered.common.bridge.CustomNameableBridge;
 
 @Mixin(LockableTileEntity.class)
-public abstract class LockableTileEntityMixin extends TileEntityMixin {
+public abstract class LockableTileEntityMixin extends TileEntityMixin implements CustomNameableBridge {
 
+    @Override
+    public void bridge$setCustomDisplayName(ITextComponent component) {
+        ((LockableTileEntityAccessor) this).accessor$setCustomName(component);
+    }
 }

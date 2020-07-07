@@ -5,7 +5,7 @@
     "refmap": "mixins.vanilla.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
-    "priority": 1100,
+    "priority": 1300,
     "server": [
     ],
     "mixins": [

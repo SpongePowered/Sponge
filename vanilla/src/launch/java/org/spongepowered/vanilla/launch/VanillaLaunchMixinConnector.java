@@ -33,6 +33,7 @@ public final class VanillaLaunchMixinConnector extends LaunchMixinConnector {
     @Override
     public List<String> getMixinConfigs() {
         final List<String> mixinConfigs = super.getMixinConfigs();
+        mixinConfigs.add("mixins.vanilla.accessors.json");
         mixinConfigs.add("mixins.vanilla.api.json");
         mixinConfigs.add("mixins.vanilla.core.json");
         return mixinConfigs;

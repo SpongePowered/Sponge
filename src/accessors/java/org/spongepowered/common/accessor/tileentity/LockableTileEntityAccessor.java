@@ -31,14 +31,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.accessor.CustomNameableAccessor;
 
 @Mixin(LockableTileEntity.class)
-public interface LockableTileEntityAccessor extends CustomNameableAccessor {
+public interface LockableTileEntityAccessor {
 
     @Accessor("code") LockCode accessor$getCode();
 
     @Accessor("code") void accessor$setCode(LockCode code);
 
-    @Invoker("setCustomName") void accessor$setCustomDisplayName(@Nullable ITextComponent component);
+    @Invoker("setCustomName") void accessor$setCustomName(@Nullable ITextComponent component);
 }

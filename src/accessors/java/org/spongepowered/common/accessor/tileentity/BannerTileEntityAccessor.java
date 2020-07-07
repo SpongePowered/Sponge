@@ -28,12 +28,10 @@ import net.minecraft.tileentity.BannerTileEntity;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.accessor.CustomNameableAccessor;
 
-@Mixin({ BannerTileEntity.class })
-public interface BannerTileEntityAccessor extends CustomNameableAccessor {
+@Mixin(BannerTileEntity.class)
+public interface BannerTileEntityAccessor {
 
     @Invoker("func_213136_a")
-    @Override
-    void accessor$setCustomDisplayName(ITextComponent component);
+    void accessor$func_213136_a(ITextComponent component);
 }

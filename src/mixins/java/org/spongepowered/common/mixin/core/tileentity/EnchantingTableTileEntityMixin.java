@@ -22,12 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor;
+package org.spongepowered.common.mixin.core.tileentity;
 
+import net.minecraft.tileentity.EnchantingTableTileEntity;
 import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.accessor.tileentity.EnchantingTableTileEntityAccessor;
+import org.spongepowered.common.bridge.CustomNameableBridge;
 
-// Extend by target specific accessor mixins
-public interface CustomNameableAccessor {
+@Mixin(EnchantingTableTileEntity.class)
+public abstract class EnchantingTableTileEntityMixin implements CustomNameableBridge {
 
-    void accessor$setCustomDisplayName(ITextComponent component);
+    @Override
+    public void bridge$setCustomDisplayName(ITextComponent component) {
+        ((EnchantingTableTileEntityAccessor) this).accessor$setCustomName(component);
+    }
 }

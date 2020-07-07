@@ -26,10 +26,11 @@ package org.spongepowered.common.accessor.util.text;
 
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(StringTextComponent.class)
 public interface StringTextComponentAccessor {
 
-    @Accessor("text") void accessor$setText(String text);
+    @Mutable @Accessor("text") void accessor$setText(String text);
 }

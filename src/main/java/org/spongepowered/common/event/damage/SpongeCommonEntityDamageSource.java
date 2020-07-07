@@ -26,7 +26,7 @@ package org.spongepowered.common.event.damage;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EntityDamageSource;
-import org.spongepowered.accessor.util.EntityDamageSourceAccessor;
+import org.spongepowered.common.accessor.util.EntityDamageSourceAccessor;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
 import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 

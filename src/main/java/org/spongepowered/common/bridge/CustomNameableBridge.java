@@ -22,15 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.accessor.util;
+package org.spongepowered.common.bridge;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.EntityDamageSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import net.minecraft.util.text.ITextComponent;
 
-@Mixin(EntityDamageSource.class)
-public interface EntityDamageSourceAccessor {
+public interface CustomNameableBridge {
 
-    @Accessor("damageSourceEntity") void accessor$setDamageSourceEntity(Entity entity);
+    void bridge$setCustomDisplayName(ITextComponent component);
 }

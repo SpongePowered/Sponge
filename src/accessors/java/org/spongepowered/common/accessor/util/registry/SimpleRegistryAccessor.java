@@ -39,5 +39,5 @@ public interface SimpleRegistryAccessor {
 
     @Accessor(value = "nextFreeId") int accessor$getNextFreeId();
 
-    @Accessor(value = "nextFreeId") int accessor$setNextFreeId(int nextFreeId);
+    @Accessor(value = "nextFreeId") void accessor$setNextFreeId(int nextFreeId);
 }

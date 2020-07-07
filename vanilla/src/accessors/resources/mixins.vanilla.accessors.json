@@ -5,13 +5,11 @@
     "refmap": "mixins.vanilla.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
-    "mixinPriority": 901,
-    "priority": 1111,
+    "mixinPriority": 1200,
     "server": [
     ],
     "mixins": [
         "server.MinecraftServerAccessor_Vanilla",
-        "world.chunk.storage.AnvilChunkLoaderAccessor_Vanilla",
         "world.storage.SaveFormatAccessor_Vanilla"
     ],
     "injectors": {

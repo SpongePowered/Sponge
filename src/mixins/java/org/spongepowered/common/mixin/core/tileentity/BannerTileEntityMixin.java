@@ -31,6 +31,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.BannerTileEntity;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
@@ -39,6 +40,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.tileentity.BannerTileEntityAccessor;
+import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
 import org.spongepowered.common.data.provider.item.stack.ItemStackShieldBannerPatternsProvider;
 import org.spongepowered.common.util.NonNullArrayList;
@@ -47,7 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(BannerTileEntity.class)
-public abstract class BannerTileEntityMixin extends TileEntityMixin implements BannerTileEntityBridge {
+public abstract class BannerTileEntityMixin extends TileEntityMixin implements BannerTileEntityBridge, CustomNameableBridge {
 
     @Shadow private net.minecraft.item.DyeColor baseColor;
     @Shadow private ListNBT patterns;
@@ -113,5 +116,10 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
             this.baseColor = net.minecraft.item.DyeColor.BLACK;
         }
         this.impl$markDirtyAndUpdate();
+    }
+
+    @Override
+    public void bridge$setCustomDisplayName(ITextComponent component) {
+        ((BannerTileEntityAccessor) this).accessor$func_213136_a(component);
     }
 }

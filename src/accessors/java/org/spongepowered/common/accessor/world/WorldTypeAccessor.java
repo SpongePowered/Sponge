@@ -26,6 +26,7 @@ package org.spongepowered.common.accessor.world;
 
 import net.minecraft.world.WorldType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(WorldType.class)
@@ -35,7 +36,7 @@ public interface WorldTypeAccessor {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 
-    @Accessor("WORLD_TYPES") static void accessor$setWorldTypes(WorldType[] types) {
+    @Mutable @Accessor("WORLD_TYPES") static void accessor$setWorldTypes(WorldType[] types) {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 

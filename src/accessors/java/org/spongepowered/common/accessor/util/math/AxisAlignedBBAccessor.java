@@ -26,21 +26,22 @@ package org.spongepowered.common.accessor.util.math;
 
 import net.minecraft.util.math.AxisAlignedBB;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(AxisAlignedBB.class)
 public interface AxisAlignedBBAccessor {
 
-    @Accessor("minX") void accessor$setMinX(double minX);
+    @Mutable @Accessor("minX") void accessor$setMinX(double minX);
 
-    @Accessor("minY") void accessor$setMinY(double minY);
+    @Mutable @Accessor("minY") void accessor$setMinY(double minY);
 
-    @Accessor("minZ") void accessor$setMinZ(double minZ);
+    @Mutable @Accessor("minZ") void accessor$setMinZ(double minZ);
 
-    @Accessor("maxX") void accessor$setMaxX(double maxX);
+    @Mutable @Accessor("maxX") void accessor$setMaxX(double maxX);
 
-    @Accessor("maxY") void accessor$setMaxY(double maxY);
+    @Mutable @Accessor("maxY") void accessor$setMaxY(double maxY);
 
-    @Accessor("maxZ") void accessor$setMaxZ(double maxZ);
+    @Mutable @Accessor("maxZ") void accessor$setMaxZ(double maxZ);
 
 }

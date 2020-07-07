@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.generic;
 import net.minecraft.util.INameable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.accessor.CustomNameableAccessor;
+import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -41,8 +41,8 @@ public class INameableDisplayNameProvider extends GenericMutableDataProvider<INa
 
     @Override
     protected boolean set(INameable dataHolder, Text value) {
-        if (dataHolder instanceof CustomNameableAccessor) {
-            ((CustomNameableAccessor) dataHolder).accessor$setCustomDisplayName(SpongeTexts.toComponent(value));
+        if (dataHolder instanceof CustomNameableBridge) {
+            ((CustomNameableBridge) dataHolder).bridge$setCustomDisplayName(SpongeTexts.toComponent(value));
             return true;
         }
         return false;

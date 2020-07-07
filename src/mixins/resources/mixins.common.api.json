@@ -5,6 +5,7 @@
     "refmap": "mixins.common.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
+    "mixinPriority": 1100,
     "mixins": [
       "mcp.server.dedicated.DedicatedServerMixin_API",
       "mcp.server.MinecraftServerMixin_API"

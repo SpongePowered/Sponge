@@ -25,17 +25,14 @@
 package org.spongepowered.common.accessor.tileentity;
 
 import net.minecraft.tileentity.EnchantingTableTileEntity;
-import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.util.text.ITextComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.accessor.CustomNameableAccessor;
 
-@Mixin({EnchantingTableTileEntity.class})
-public interface EnchantingTableTileEntityAccessor extends CustomNameableAccessor {
+@Mixin(EnchantingTableTileEntity.class)
+public interface EnchantingTableTileEntityAccessor {
 
     @Invoker("setCustomName")
-    @Override
-    void accessor$setCustomDisplayName(@Nullable ITextComponent component);
+    void accessor$setCustomName(@Nullable ITextComponent component);
 }
