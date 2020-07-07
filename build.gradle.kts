@@ -618,17 +618,23 @@ project("SpongeVanilla") {
         vanillaModLauncherConfig("org.ow2.asm:asm-tree:6.2")
         vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.8.1")
-        vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.8.1")
-        vanillaModLauncherConfig("com.lmax:disruptor:3.4.2")
+//        vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.8.1")
+//        vanillaModLauncherConfig("com.lmax:disruptor:3.4.2")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
-        vanillaModLauncherImplementation("cpw.mods:modlauncher:4.1.+")
+        vanillaModLauncherImplementation("cpw.mods:modlauncher:4.1.+") {
+            exclude(group = "org.apache.logging.log4j")
+        }
         vanillaModLauncherImplementation("org.ow2.asm:asm-commons:6.2")
-        vanillaModLauncherImplementation("cpw.mods:grossjava9hacks:1.1.+")
-        vanillaModLauncherImplementation("net.minecraftforge:accesstransformers:1.0.+:shadowed")
-        vanillaModLauncherImplementation("net.sf.jopt-simple:jopt-simple:5.0.4")
-        implementation(vanillaModLauncher.output)
+        vanillaModLauncherImplementation("cpw.mods:grossjava9hacks:1.1.+") {
+            exclude(group = "org.apache.logging.log4j")
+        }
+        vanillaModLauncherImplementation("net.minecraftforge:accesstransformers:1.0.+:shadowed") {
+            exclude(group = "org.apache.logging.log4j")
+        }
+//        vanillaModLauncherImplementation("net.sf.jopt-simple:jopt-simple:5.0.4")
+//        implementation(vanillaModLauncher.output)
         vanillaModLauncherImplementation(vanillaModLauncherConfig)
         vanillaMixinsImplementation(vanillaModLauncherConfig)
         vanillaAccessorsImplementation(vanillaModLauncherConfig)
