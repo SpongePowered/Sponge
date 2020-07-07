@@ -34,7 +34,7 @@ import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.sql.SqlService;
+import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -70,7 +70,7 @@ import java.util.regex.Pattern;
  *     -- if some plugin makes database connections to a ton of different databases
  *     we may want to implement this, but it is kinda unimportant.
  */
-public class SqlServiceImpl implements SqlService, Closeable {
+public class SqlManagerImpl implements SqlManager, Closeable {
 
     static final Map<String, Properties> PROTOCOL_SPECIFIC_PROPS;
     static final Map<String, BiFunction<PluginContainer, String, String>> PATH_CANONICALIZERS;
@@ -105,7 +105,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
 
     @Nullable private LoadingCache<ConnectionInfo, HikariDataSource> connectionCache;
 
-    public SqlServiceImpl() {
+    public SqlManagerImpl() {
         this.buildConnectionCache();
     }
 
@@ -229,7 +229,7 @@ public class SqlServiceImpl implements SqlService, Closeable {
         }
 
         /**
-         * Extracts the connection info from a JDBC url with additional authentication information as specified in {@link SqlService}.
+         * Extracts the connection info from a JDBC url with additional authentication information as specified in {@link SqlManager}.
          *
          *
          * @param container The plugin to put a path relative to

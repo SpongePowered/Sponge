@@ -24,7 +24,9 @@
  */
 package org.spongepowered.vanilla;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
@@ -38,19 +40,31 @@ import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
-import org.spongepowered.common.SpongeGame;
 
-public abstract class VanillaGame extends SpongeGame {
+public final class VanillaServerGame extends VanillaGame {
 
-    public VanillaGame(final Platform platform, final GameRegistry registry, final DataManager dataManager,
-        final PluginManager pluginManager, final EventManager eventManager, final AssetManager assetManager,
-        final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
+    private final Server server;
+
+    @Inject
+    public VanillaServerGame(final Server server, final Platform platform, final GameRegistry registry,
+        final DataManager dataManager, final PluginManager pluginManager, final EventManager eventManager,
+        final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
         final TeleportHelper teleportHelper, final CauseStackManager causeStackManager,
-        final MetricsConfigManager metricsConfigManager,
-        final CommandManager commandManager, final SqlManager sqlManager,
+        final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
         final ServiceProvider serviceProvider) {
 
         super(platform, registry, dataManager, pluginManager, eventManager, assetManager, configManager, channelRegistrar, teleportHelper,
             causeStackManager, metricsConfigManager, commandManager, sqlManager, serviceProvider);
+        this.server = server;
+    }
+
+    @Override
+    public boolean isServerAvailable() {
+        return true;
+    }
+
+    @Override
+    public Server getServer() {
+        return this.server;
     }
 }

@@ -24,10 +24,8 @@
  */
 package org.spongepowered.vanilla.launch;
 
-import com.google.inject.Module;
 import com.google.inject.Stage;
 import net.minecraft.server.MinecraftServer;
-import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.Launcher;
 
 import java.nio.file.Path;
@@ -42,11 +40,10 @@ public final class ServerLauncher extends VanillaLauncher<VanillaServer> {
     public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final Boolean isDeveloperEnvironment, final String[] args) {
         final ServerLauncher launcher = new ServerLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
         Launcher.setInstance(launcher);
-        launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
+        launcher.launchPlatform(pluginSpiVersion, baseDirectory, pluginDirectories, args);
     }
 
-    @Override
-    public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
+    public void launchPlatform(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
         super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
         this.getLogger().info("Loading Minecraft Server, please wait...");
         MinecraftServer.main(args);

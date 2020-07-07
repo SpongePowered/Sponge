@@ -25,6 +25,8 @@
 package org.spongepowered.vanilla.inject;
 
 import org.spongepowered.api.Server;
+import org.spongepowered.vanilla.VanillaGame;
+import org.spongepowered.vanilla.VanillaServerGame;
 
 public final class VanillaServerModule extends SpongeVanillaModule {
 
@@ -39,5 +41,6 @@ public final class VanillaServerModule extends SpongeVanillaModule {
         super.configure();
 
         this.bind(Server.class).toInstance(this.server);
+        this.bind(VanillaGame.class).to(VanillaServerGame.class);
     }
 }

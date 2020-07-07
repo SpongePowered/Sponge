@@ -34,14 +34,14 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.rcon.RconService;
-import org.spongepowered.api.service.sql.SqlService;
+import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.command.SpongeCommandFactory;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
-import org.spongepowered.common.service.sql.SqlServiceImpl;
+import org.spongepowered.common.service.sql.SqlManagerImpl;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
 import org.spongepowered.common.text.action.SpongeCallbackHolder;
@@ -56,7 +56,7 @@ public final class SpongeBootstrap {
     @Inject private static CommandManager commandManager;
 
     public static void initializeServices() {
-        registerService(SqlService.class, new SqlServiceImpl());
+        registerService(SqlManager.class, new SqlManagerImpl());
         registerService(PaginationService.class, new SpongePaginationService());
         if (SpongeCommon.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             registerService(RconService.class, new MinecraftRconService((DedicatedServer) Sponge.getServer()));

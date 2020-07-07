@@ -22,9 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla;
+package org.spongepowered.vanilla.client;
 
+import com.google.inject.Inject;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.integrated.IntegratedServer;
+import org.spongepowered.api.Client;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
@@ -38,19 +43,49 @@ import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
-import org.spongepowered.common.SpongeGame;
+import org.spongepowered.vanilla.VanillaGame;
 
-public abstract class VanillaGame extends SpongeGame {
+public final class VanillaClientGame extends VanillaGame {
 
-    public VanillaGame(final Platform platform, final GameRegistry registry, final DataManager dataManager,
-        final PluginManager pluginManager, final EventManager eventManager, final AssetManager assetManager,
-        final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
+    private final Client client;
+
+    @Inject
+    public VanillaClientGame(final Client client, final Platform platform, final GameRegistry registry,
+        final DataManager dataManager, final PluginManager pluginManager, final EventManager eventManager,
+        final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
         final TeleportHelper teleportHelper, final CauseStackManager causeStackManager,
-        final MetricsConfigManager metricsConfigManager,
-        final CommandManager commandManager, final SqlManager sqlManager,
+        final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
         final ServiceProvider serviceProvider) {
 
         super(platform, registry, dataManager, pluginManager, eventManager, assetManager, configManager, channelRegistrar, teleportHelper,
             causeStackManager, metricsConfigManager, commandManager, sqlManager, serviceProvider);
+        this.client = client;
+    }
+
+    @Override
+    public boolean isClientAvailable() {
+        return true;
+    }
+
+    @Override
+    public Client getClient() {
+        return this.client;
+    }
+
+    @Override
+    public boolean isServerAvailable() {
+        final Minecraft minecraft = (Minecraft) this.client;
+        final IntegratedServer integratedServer = minecraft.getIntegratedServer();
+        return integratedServer != null;
+    }
+
+    @Override
+    public Server getServer() {
+        final Minecraft minecraft = (Minecraft) this.client;
+        final IntegratedServer integratedServer = minecraft.getIntegratedServer();
+        if (integratedServer == null) {
+            throw new IllegalStateException("The singleplayer server is not running on the client!");
+        }
+        return (Server) integratedServer;
     }
 }
