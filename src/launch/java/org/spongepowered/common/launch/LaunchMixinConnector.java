@@ -24,16 +24,25 @@
  */
 package org.spongepowered.common.launch;
 
+import com.google.common.collect.Lists;
 import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.asm.mixin.connect.IMixinConnector;
+
+import java.util.List;
 
 public abstract class LaunchMixinConnector implements IMixinConnector {
 
     @Override
-    public void connect() {
-        Mixins.addConfigurations(
-                "mixins.common.api.json",
-                "mixins.common.core.json"
+    public final void connect() {
+        for (final String config : this.getMixinConfigs()) {
+            Mixins.addConfiguration(config);
+        }
+    }
+
+    public List<String> getMixinConfigs() {
+        return Lists.newArrayList(
+            "mixins.common.api.json",
+            "mixins.common.core.json"
         );
     }
 }

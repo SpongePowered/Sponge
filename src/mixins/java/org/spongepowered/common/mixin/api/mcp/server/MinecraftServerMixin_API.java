@@ -80,9 +80,9 @@ public abstract class MinecraftServerMixin_API implements Server {
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
 
     private final SpongeScheduler api$scheduler = new ServerScheduler();
+    private MessageChannel api$broadcastChannel = MessageChannel.toPlayersAndServer();
     @Nullable private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
-    private MessageChannel api$broadcastChannel = MessageChannel.toPlayersAndServer();
 
     @Override
     public ChunkLayout getChunkLayout() {
