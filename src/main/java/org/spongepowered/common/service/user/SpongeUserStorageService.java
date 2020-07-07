@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Sets;
+import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
@@ -40,7 +41,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-public class SpongeUserStorageService implements UserStorageService {
+@Singleton
+public final class SpongeUserStorageService implements UserStorageService {
 
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("41C82C87-7AfB-4024-BA57-13D2C99CAE77");
     public static final GameProfile FAKEPLAYER_PROFILE = (GameProfile) new com.mojang.authlib.GameProfile(FAKEPLAYER_UUID, null);

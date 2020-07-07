@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.whitelist;
 
+import com.google.inject.Singleton;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeCommon;
@@ -37,7 +38,8 @@ import java.util.List;
 import net.minecraft.server.management.WhiteList;
 import net.minecraft.server.management.WhitelistEntry;
 
-public class SpongeWhitelistService implements WhitelistService {
+@Singleton
+public final class SpongeWhitelistService implements WhitelistService {
 
     @SuppressWarnings("unchecked")
     @Override

@@ -33,6 +33,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
+import com.google.inject.Singleton;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -61,7 +62,8 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class SpongePaginationService implements PaginationService {
+@Singleton
+public final class SpongePaginationService implements PaginationService {
 
     static class SourcePaginations {
         private final Map<UUID, ActivePagination> paginations = new ConcurrentHashMap<>();

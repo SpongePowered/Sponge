@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.ban;
 
+import com.google.inject.Singleton;
 import net.minecraft.server.management.BanList;
 import net.minecraft.server.management.IPBanEntry;
 import net.minecraft.server.management.IPBanList;
@@ -34,7 +35,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.BanService;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.common.SpongeCommon;
@@ -57,7 +57,8 @@ import java.util.Optional;
  * while allowing plugin-provided {@link BanService}s to be used for all aspects
  * of Vanilla bans.</p>
  */
-public class SpongeBanService implements BanService {
+@Singleton
+public final class SpongeBanService implements BanService {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override

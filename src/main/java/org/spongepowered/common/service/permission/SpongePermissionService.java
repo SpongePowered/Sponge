@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import net.minecraft.server.management.OpList;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.service.context.ContextCalculator;
@@ -56,7 +58,8 @@ import java.util.function.Predicate;
  *
  * <p>Really doesn't do much else. Don't use this guys.
  */
-public class SpongePermissionService implements PermissionService {
+@Singleton
+public final class SpongePermissionService implements PermissionService {
     private static final String SUBJECTS_DEFAULT = "default";
 
     private final Game game;
@@ -66,6 +69,7 @@ public class SpongePermissionService implements PermissionService {
     private final SpongeSubjectCollection defaultCollection;
     private final SpongeSubject defaultData;
 
+    @Inject
     public SpongePermissionService(Game game) {
         this.game = game;
         this.subjects.put(SUBJECTS_DEFAULT, (this.defaultCollection = this.newCollection(SUBJECTS_DEFAULT)));
