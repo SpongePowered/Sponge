@@ -26,6 +26,7 @@ package org.spongepowered.common.config.category;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.util.MissingImplementationException;
 
 @ConfigSerializable
@@ -122,8 +123,7 @@ public class OptimizationCategory extends ConfigCategory {
     public OptimizationCategory() {
         // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
         // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-        throw new MissingImplementationException("OptimizationCategory", "isVanilla");
-//        this.preItemDropMerge = SpongeLaunch.isVanilla();
+        this.preItemDropMerge = Launcher.getInstance().isVanilla();
     }
 
 

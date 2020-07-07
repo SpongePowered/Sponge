@@ -36,11 +36,12 @@ import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.GameRegistry;
+import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
+import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongePlatform;
@@ -49,14 +50,15 @@ import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.service.sql.SpongeSqlManager;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
-public class SpongeCommonModule extends PrivateModule {
+public final class SpongeCommonModule extends PrivateModule {
 
     @Override
     @OverridingMethodsMustInvokeSuper
@@ -73,12 +75,11 @@ public class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);
         this.bindAndExpose(CauseStackManager.class).to(SpongeCauseStackManager.class);
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
+        this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
 
         // These are bound in implementation-specific modules
-        this.expose(Platform.class);
         this.expose(PluginManager.class);
         this.expose(EventManager.class);
-        this.expose(ChannelRegistrar.class);
 
         this.bind(Logger.class).toInstance(SpongeCommon.getLogger());
 

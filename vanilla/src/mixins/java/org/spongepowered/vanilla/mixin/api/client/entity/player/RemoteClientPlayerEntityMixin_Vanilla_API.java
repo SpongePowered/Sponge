@@ -22,30 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject;
+package org.spongepowered.vanilla.mixin.api.client.entity.player;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.inject.provider.config.ConfigDirAnnotation;
-import org.spongepowered.common.inject.provider.PathAsFileProvider;
+import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
+import org.spongepowered.api.entity.living.player.client.RemotePlayer;
+import org.spongepowered.asm.mixin.Mixin;
 
-import java.io.File;
-import java.nio.file.Path;
-
-public class SpongeModule extends AbstractModule {
-
-    @Override
-    protected void configure() {
-        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeCommon.getPluginConfigDirectory());
-        this.bind(File.class).annotatedWith(ConfigDirAnnotation.SHARED).toProvider(new PathAsFileProvider() {
-            @Inject
-            void init(@ConfigDir(sharedRoot = true) Provider<Path> path) {
-                this.path = path;
-            }
-        });
-    }
+@Mixin(RemoteClientPlayerEntity.class)
+public abstract class RemoteClientPlayerEntityMixin_Vanilla_API implements RemotePlayer {
 
 }

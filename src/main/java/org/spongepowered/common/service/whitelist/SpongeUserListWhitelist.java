@@ -46,19 +46,15 @@ public class SpongeUserListWhitelist extends WhiteList {
         super(file);
     }
 
-    private static WhitelistService getService() {
-        return Sponge.getServiceManager().provideUnchecked(WhitelistService.class);
-    }
-
     @Override
     protected boolean hasEntry(final com.mojang.authlib.GameProfile entry) {
-        return getService().isWhitelisted((GameProfile) entry);
+        return Sponge.getServiceProvider().whitelistService().isWhitelisted((GameProfile) entry);
     }
 
     @Override
     public String[] getKeys() {
         final List<String> names = new ArrayList<>();
-        for (final GameProfile profile : getService().getWhitelistedProfiles()) {
+        for (final GameProfile profile : Sponge.getServiceProvider().whitelistService().getWhitelistedProfiles()) {
             profile.getName().ifPresent(names::add);
         }
         return names.toArray(new String[names.size()]);
@@ -67,22 +63,22 @@ public class SpongeUserListWhitelist extends WhiteList {
     @SuppressWarnings("unchecked")
     @Override
     public void addEntry(final WhitelistEntry entry) {
-        getService().addProfile(((UserListEntryAccessor<GameProfile>) entry).accessor$getValue());
+        Sponge.getServiceProvider().whitelistService().addProfile(((UserListEntryAccessor<GameProfile>) entry).accessor$getValue());
     }
 
     @Override
     public void removeEntry(final com.mojang.authlib.GameProfile entry) {
-        getService().removeProfile((GameProfile) entry);
+        Sponge.getServiceProvider().whitelistService().removeProfile((GameProfile) entry);
     }
 
     @Override
     public boolean isEmpty() {
-        return getService().getWhitelistedProfiles().isEmpty();
+        return Sponge.getServiceProvider().whitelistService().getWhitelistedProfiles().isEmpty();
     }
 
     @Nullable
     public com.mojang.authlib.GameProfile getByName(final String profileName) {
-        for (final GameProfile profile : Sponge.getServiceManager().provideUnchecked(WhitelistService.class).getWhitelistedProfiles()) {
+        for (final GameProfile profile : Sponge.getServiceProvider().whitelistService().getWhitelistedProfiles()) {
             if (profile.getName().isPresent() && profile.getName().get().equals(profileName)) {
                 return (com.mojang.authlib.GameProfile) profile;
             }

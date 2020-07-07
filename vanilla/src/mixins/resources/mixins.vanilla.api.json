@@ -11,6 +11,13 @@
     "mixins": [
         "server.MinecraftServerMixin_Vanilla_API"
     ],
+    "client": [
+        "client.MinecraftMixin_Vanilla_API",
+        "client.entity.player.AbstractClientPlayerEntityMixin_Vanilla_API",
+        "client.entity.player.ClientPlayerEntityMixin_Vanilla_API",
+        "client.entity.player.RemoteClientPlayerEntityMixin_Vanilla_API",
+        "server.integrated.IntegratedServerMixin_Vanilla_API"
+    ],
     "injectors": {
         "defaultRequire": 1
     },

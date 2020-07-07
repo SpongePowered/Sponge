@@ -43,23 +43,23 @@ public final class SpongeConfigManager implements ConfigManager {
 
     @Override
     public ConfigRoot getSharedConfig(PluginContainer container) {
-        return new SpongeConfigRoot(getMapperFactory(container), container.getMetadata().getId().toLowerCase(), SpongeCommon.getPluginConfigDir());
+        return new SpongeConfigRoot(getMapperFactory(container), container.getMetadata().getId().toLowerCase(), SpongeCommon.getPluginConfigDirectory());
     }
 
     @Override
     public ConfigRoot getPluginConfig(PluginContainer container) {
         return new SpongeConfigRoot(getMapperFactory(container), container.getMetadata().getId().toLowerCase(), SpongeCommon
-            .getPluginConfigDir().resolve(container.getMetadata().getId().toLowerCase()));
+            .getPluginConfigDirectory().resolve(container.getMetadata().getId().toLowerCase()));
     }
 
     public static ConfigRoot getSharedRoot(PluginContainer container) {
         final String name = container.getMetadata().getId();
-        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeCommon.getPluginConfigDir());
+        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeCommon.getPluginConfigDirectory());
     }
 
     public static ConfigRoot getPrivateRoot(PluginContainer container) {
         final String name = container.getMetadata().getId();
-        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeCommon.getPluginConfigDir().resolve(name));
+        return new SpongeConfigRoot(getMapperFactory(container), name, SpongeCommon.getPluginConfigDirectory().resolve(name));
     }
 
     private static ObjectMapperFactory getMapperFactory(PluginContainer container) {

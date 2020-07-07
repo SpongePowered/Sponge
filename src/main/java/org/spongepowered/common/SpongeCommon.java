@@ -32,7 +32,6 @@ import static org.spongepowered.common.config.SpongeConfig.Type.TRACKER;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
@@ -47,22 +46,18 @@ import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 @Singleton
 public final class SpongeCommon {
 
-    public static final String GAME_ID = "minecraft";
     public static final String ECOSYSTEM_ID = "sponge";
 
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion(
@@ -78,7 +73,6 @@ public final class SpongeCommon {
 
     @Inject @Nullable private static SpongeGame game;
     @Inject @Nullable private static SpongeGameRegistry registry;
-    @Inject @Nullable private static SpongeScheduler scheduler;
     @Inject @Nullable private static SpongeCauseStackManager causeStackManager;
     @Inject @Nullable private static SpongeWorldManager worldManager;
 
@@ -126,18 +120,17 @@ public final class SpongeCommon {
         return check(worldManager);
     }
 
-    public static Path getGameDir() {
-        return Launcher.getInstance().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
-            .orElseThrow(() -> new IllegalStateException("Somehow we do not have a Game Directory set"));
+    public static Path getGameDirectory() {
+        return Launcher.getInstance().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
     }
 
-    public static Path getPluginConfigDir() {
-        throw new MissingImplementationException("SpongeImpl", "getPluginConfigDir");
-//        return SpongeLaunch.getPluginConfigDir(() -> ECOSYSTEM_ID, () -> SpongeImpl.getGlobalConfigAdapter().getConfig().getGeneral().configDir());
+    public static Path getPluginConfigDirectory() {
+        return SpongeCommon.getGameDirectory().resolve(SpongeCommon.getGlobalConfigAdapter().getConfig().getGeneral().configDir());
     }
 
-    public static List<Path> getPluginsDir() {
-        return Launcher.getInstance().getPluginEnvironment().getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElseGet(Collections::emptyList);
+    public static Path getSpongeConfigDirectory() {
+        // TODO Launch needs to track this, pass down to us
+        return SpongeCommon.getGameDirectory().resolve("config");
     }
 
     @Deprecated
@@ -155,10 +148,6 @@ public final class SpongeCommon {
         return Launcher.getInstance().getLauncherPlugins();
     }
 
-    public static Path getSpongeConfigDir() {
-        throw new MissingImplementationException("SpongeImpl", "getSpongeConfigDir");
-    }
-
     public static SpongeConfigSaveManager getConfigSaveManager() {
         if (configSaveManager == null) {
             configSaveManager = new SpongeConfigSaveManager();
@@ -169,7 +158,7 @@ public final class SpongeCommon {
 
     public static SpongeConfig<GlobalConfig> getGlobalConfigAdapter() {
         if (globalConfigAdapter == null) {
-            globalConfigAdapter = new SpongeConfig<>(GLOBAL, getSpongeConfigDir().resolve("global.conf"), ECOSYSTEM_ID, null, false);
+            globalConfigAdapter = new SpongeConfig<>(GLOBAL, getSpongeConfigDirectory().resolve("global.conf"), ECOSYSTEM_ID, null, false);
         }
 
         return globalConfigAdapter;
@@ -177,14 +166,14 @@ public final class SpongeCommon {
 
     public static SpongeConfig<CustomDataConfig> getCustomDataConfigAdapter() {
         if (customDataConfigAdapter == null) {
-            customDataConfigAdapter = new SpongeConfig<>(CUSTOM_DATA, getSpongeConfigDir().resolve("custom_data.conf"), ECOSYSTEM_ID, null, true);
+            customDataConfigAdapter = new SpongeConfig<>(CUSTOM_DATA, getSpongeConfigDirectory().resolve("custom_data.conf"), ECOSYSTEM_ID, null, true);
         }
         return customDataConfigAdapter;
     }
 
     public static SpongeConfig<TrackerConfig> getTrackerConfigAdapter() {
         if (trackerConfigAdapter == null) {
-            trackerConfigAdapter = new SpongeConfig<>(TRACKER, getSpongeConfigDir().resolve("tracker.conf"), ECOSYSTEM_ID, null, true);
+            trackerConfigAdapter = new SpongeConfig<>(TRACKER, getSpongeConfigDirectory().resolve("tracker.conf"), ECOSYSTEM_ID, null, true);
         }
         return trackerConfigAdapter;
     }

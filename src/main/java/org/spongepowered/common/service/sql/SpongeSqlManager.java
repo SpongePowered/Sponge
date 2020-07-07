@@ -57,7 +57,6 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
  * Implementation of a SQL-using service.
  *
@@ -70,7 +69,7 @@ import java.util.regex.Pattern;
  *     -- if some plugin makes database connections to a ton of different databases
  *     we may want to implement this, but it is kinda unimportant.
  */
-public class SqlManagerImpl implements SqlManager, Closeable {
+public final class SpongeSqlManager implements SqlManager, Closeable {
 
     static final Map<String, Properties> PROTOCOL_SPECIFIC_PROPS;
     static final Map<String, BiFunction<PluginContainer, String, String>> PATH_CANONICALIZERS;
@@ -105,7 +104,7 @@ public class SqlManagerImpl implements SqlManager, Closeable {
 
     @Nullable private LoadingCache<ConnectionInfo, HikariDataSource> connectionCache;
 
-    public SqlManagerImpl() {
+    public SpongeSqlManager() {
         this.buildConnectionCache();
     }
 

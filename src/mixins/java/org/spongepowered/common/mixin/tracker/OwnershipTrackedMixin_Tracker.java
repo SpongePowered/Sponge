@@ -125,7 +125,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
             this.tracker$profileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
         }
         if (this.tracker$userService == null) {
-            this.tracker$userService = SpongeCommon.getGame().getServiceManager().provide(UserStorageService.class).get();
+            this.tracker$userService = Sponge.getServiceProvider().userStorageService();
         }
 
         // check username cache

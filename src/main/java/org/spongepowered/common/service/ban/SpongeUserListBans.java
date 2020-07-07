@@ -46,24 +46,20 @@ public class SpongeUserListBans extends BanList {
         super(bansFile);
     }
 
-    private static BanService getService() {
-        return Sponge.getServiceManager().provideUnchecked(BanService.class);
-    }
-
     @Override
     protected boolean hasEntry(com.mojang.authlib.GameProfile entry) {
-        return getService().isBanned((GameProfile) entry);
+        return Sponge.getServiceProvider().banService().isBanned((GameProfile) entry);
     }
 
     @Override
     public ProfileBanEntry getEntry(com.mojang.authlib.GameProfile obj) {
-        return (ProfileBanEntry) getService().getBanFor((GameProfile) obj).orElse(null);
+        return (ProfileBanEntry) Sponge.getServiceProvider().banService().getBanFor((GameProfile) obj).orElse(null);
     }
 
     @Override
     public String[] getKeys() {
         List<String> names = new ArrayList<>();
-        for (Ban.Profile ban : getService().getProfileBans()) {
+        for (Ban.Profile ban : Sponge.getServiceProvider().banService().getProfileBans()) {
             ban.getProfile().getName().ifPresent(names::add);
         }
         return names.toArray(new String[names.size()]);
@@ -71,22 +67,22 @@ public class SpongeUserListBans extends BanList {
 
     @Override
     public void addEntry(ProfileBanEntry entry) {
-        getService().addBan((Ban) entry);
+        Sponge.getServiceProvider().banService().addBan((Ban) entry);
     }
 
     @Override
     public boolean isEmpty() {
-        return getService().getProfileBans().isEmpty();
+        return Sponge.getServiceProvider().banService().getProfileBans().isEmpty();
     }
 
     @Override
     public void removeEntry(com.mojang.authlib.GameProfile entry) {
-        getService().pardon((GameProfile) entry);
+        Sponge.getServiceProvider().banService().pardon((GameProfile) entry);
     }
 
     @Nullable
     public com.mojang.authlib.GameProfile getBannedProfile(String username) {
-        for (Ban.Profile ban : getService().getProfileBans()) {
+        for (Ban.Profile ban : Sponge.getServiceProvider().banService().getProfileBans()) {
             if (ban.getProfile().getName().isPresent() && ban.getProfile().getName().get().equals(username)) {
                 return (com.mojang.authlib.GameProfile) ban.getProfile();
             }

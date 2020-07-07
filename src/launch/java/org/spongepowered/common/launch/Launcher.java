@@ -129,7 +129,7 @@ public abstract class Launcher {
         return this.commonPlugin;
     }
 
-    protected abstract PluginContainer getPlatformPlugin();
+    public abstract PluginContainer getPlatformPlugin();
 
     public final List<PluginContainer> getLauncherPlugins() {
         if (this.launcherPlugins.isEmpty()) {

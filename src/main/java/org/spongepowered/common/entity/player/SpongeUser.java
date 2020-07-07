@@ -38,6 +38,7 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataSerializable;
@@ -832,8 +833,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     @Override
     public Optional<SubjectReference> bridge$resolveReferenceOptional() {
         if (this.impl$subjectReference == null) {
-            final Optional<PermissionService> serv = SpongeCommon.getGame().getServiceManager().provide(PermissionService.class);
-            serv.ifPresent(permissionService -> new SubjectSettingCallback(this).test(permissionService));
+            new SubjectSettingCallback(this).test(Sponge.getServiceProvider().permissionService());
         }
         return Optional.ofNullable(this.impl$subjectReference);
     }

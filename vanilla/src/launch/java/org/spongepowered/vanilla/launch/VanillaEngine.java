@@ -27,7 +27,9 @@ package org.spongepowered.vanilla.launch;
 import com.google.inject.Module;
 import org.spongepowered.api.Engine;
 
+import java.util.List;
+
 public interface VanillaEngine extends Engine {
 
-    Module createInjectionModule();
+    List<Module> createInjectionModules();
 }

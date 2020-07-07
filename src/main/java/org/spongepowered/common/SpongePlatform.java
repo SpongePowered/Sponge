@@ -32,19 +32,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
-import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public class SpongePlatform implements Platform {
+public final class SpongePlatform implements Platform {
 
-    private final PluginContainer api;
-    private final PluginContainer common;
-    private final PluginContainer impl;
-    private final PluginContainer minecraft;
+    private final PluginContainer apiPlugin;
+    private final PluginContainer platformPlugin;
+    private final PluginContainer minecraftPlugin;
     private final MinecraftVersion minecraftVersion;
 
     protected final Map<String, Object> platformMap = new HashMap<String, Object>() {
@@ -59,33 +58,22 @@ public class SpongePlatform implements Platform {
     };
 
     @Inject
-    public SpongePlatform(PluginManager manager, MinecraftVersion minecraftVersion) {
-        this(manager, manager.getPlugin(SpongeImplHooks.getImplementationId()).get(), minecraftVersion);
-    }
-
-    // For SpongeForge (implementation container isn't registered when SpongePlatform is initialized)
-    protected SpongePlatform(PluginManager manager,  PluginContainer impl, MinecraftVersion minecraftVersion) {
-        this.api = manager.getPlugin(Platform.API_ID).get();
-        this.common = manager.getPlugin(SpongeCommon.ECOSYSTEM_ID).get();
-        this.impl = checkNotNull(impl, "impl");
-        this.minecraft = manager.getPlugin(SpongeCommon.GAME_ID).get();
+    public SpongePlatform(MinecraftVersion minecraftVersion) {
         this.minecraftVersion = checkNotNull(minecraftVersion, "minecraftVersion");
 
+        this.apiPlugin = Launcher.getInstance().getApiPlugin();
+        this.platformPlugin = Launcher.getInstance().getPlatformPlugin();
+        this.minecraftPlugin = Launcher.getInstance().getMinecraftPlugin();
+
+        final PluginContainer common = Launcher.getInstance().getCommonPlugin();
         this.platformMap.put("Type", this.getType());
-        this.platformMap.put("ApiName", this.api.getMetadata().getName());
-        this.platformMap.put("ApiVersion", this.api.getMetadata().getVersion());
-        this.platformMap.put("CommonName", this.common.getMetadata().getName());
-        this.platformMap.put("CommonVersion", this.common.getMetadata().getVersion());
-        this.platformMap.put("ImplementationName", this.impl.getMetadata().getName());
-        this.platformMap.put("ImplementationVersion", this.impl.getMetadata().getVersion());
+        this.platformMap.put("ApiName", this.apiPlugin.getMetadata().getName());
+        this.platformMap.put("ApiVersion", this.apiPlugin.getMetadata().getVersion());
+        this.platformMap.put("CommonName", common.getMetadata().getName());
+        this.platformMap.put("CommonVersion", common.getMetadata().getVersion());
+        this.platformMap.put("ImplementationName", this.platformPlugin.getMetadata().getName());
+        this.platformMap.put("ImplementationVersion", this.platformPlugin.getMetadata().getVersion());
         this.platformMap.put("MinecraftVersion", this.getMinecraftVersion());
-    }
-
-    // For SpongeCommon we assume that we are always on the server
-    // SpongeForge overrides this to return CLIENT when running in a client environment
-
-    public PluginContainer getCommon() {
-        return this.common;
     }
 
     @Override
@@ -102,11 +90,11 @@ public class SpongePlatform implements Platform {
     public PluginContainer getContainer(Component component) {
         switch (component) {
             case API:
-                return this.api;
+                return this.apiPlugin;
             case IMPLEMENTATION:
-                return this.impl;
+                return this.platformPlugin;
             case GAME:
-                return this.minecraft;
+                return this.minecraftPlugin;
             default:
                 throw new AssertionError("Unknown platform component: " + component);
         }
@@ -127,10 +115,9 @@ public class SpongePlatform implements Platform {
         return MoreObjects.toStringHelper(this)
                 .add("type", this.getType())
                 .add("executionType", this.getExecutionType())
-                .add("api", this.api)
-                .add("impl", this.impl)
+                .add("api", this.apiPlugin)
+                .add("impl", this.platformPlugin)
                 .add("minecraftVersion", this.getMinecraftVersion())
                 .toString();
     }
-
 }

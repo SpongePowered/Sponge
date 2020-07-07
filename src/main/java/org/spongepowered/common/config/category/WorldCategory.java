@@ -26,6 +26,7 @@ package org.spongepowered.common.config.category;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.HashMap;
@@ -120,8 +121,7 @@ public class WorldCategory extends ConfigCategory {
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
             // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-            throw new MissingImplementationException("WorldCategory", "isVanilla");
-//            this.denyChunkRequests = SpongeLaunch.isVanilla();
+            this.denyChunkRequests = Launcher.getInstance().isVanilla();
         } catch (Exception e) {
             e.printStackTrace();
         }

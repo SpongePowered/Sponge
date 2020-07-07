@@ -59,7 +59,7 @@ public final class SpongeDimensionType implements DimensionType {
         final String dimName = id.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
 
         this.key = CatalogKey.of(modId, dimName);
-        this.configPath = SpongeCommon.getSpongeConfigDir().resolve("worlds").resolve(modId).resolve(dimName);
+        this.configPath = SpongeCommon.getSpongeConfigDirectory().resolve("worlds").resolve(modId).resolve(dimName);
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"),
             SpongeCommon.ECOSYSTEM_ID, SpongeCommon.getGlobalConfigAdapter(), false);
         this.context = new Context(Context.DIMENSION_KEY, modId + "." + dimName);

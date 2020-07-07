@@ -31,6 +31,8 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.concurrent.RecursiveEventLoop;
+import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -66,11 +68,9 @@ import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 @Implements(value = @Interface(iface = Server.class, prefix = "server$"))
-public abstract class MinecraftServerMixin_API implements Server {
+public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements Server {
 
     @Shadow @Final public long[] tickTimeArray;
-    @Shadow @Final protected Thread serverThread;
-
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract boolean shadow$isServerInOnlineMode();
     @Shadow public abstract String shadow$getMOTD();
@@ -80,9 +80,13 @@ public abstract class MinecraftServerMixin_API implements Server {
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
 
     private final SpongeScheduler api$scheduler = new ServerScheduler();
-    private MessageChannel api$broadcastChannel = MessageChannel.toPlayersAndServer();
+    private MessageChannel api$broadcastChannel;
     @Nullable private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
+
+    public MinecraftServerMixin_API(String name) {
+        super(name);
+    }
 
     @Override
     public ChunkLayout getChunkLayout() {
@@ -91,6 +95,10 @@ public abstract class MinecraftServerMixin_API implements Server {
 
     @Override
     public MessageChannel getBroadcastChannel() {
+        if (this.api$broadcastChannel == null) {
+            this.api$broadcastChannel = MessageChannel.toPlayersAndServer();
+        }
+
         return this.api$broadcastChannel;
     }
 
@@ -233,7 +241,7 @@ public abstract class MinecraftServerMixin_API implements Server {
 
     @Override
     public boolean onMainThread() {
-        return this.serverThread == Thread.currentThread();
+        return this.isOnExecutionThread();
     }
 
     @Override

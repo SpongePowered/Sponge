@@ -24,9 +24,12 @@
  */
 package org.spongepowered.vanilla.launch;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.Stage;
+import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launcher;
@@ -42,6 +45,7 @@ import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.List;
 
 public abstract class VanillaLauncher<E extends VanillaEngine> extends Launcher {
 
@@ -56,7 +60,12 @@ public abstract class VanillaLauncher<E extends VanillaEngine> extends Launcher 
     public final void setupInjection(E engine) {
         final Stage stage = SpongeGuice.getInjectorStage(this.getInjectionStage());
         this.getLogger().debug("Creating injector in stage '{}'", stage);
-        final Injector injector = Guice.createInjector(stage, new SpongeModule(), engine.createInjectionModule());
+        final List<Module> modules = Lists.newArrayList(
+            new SpongeModule(),
+            new SpongeCommonModule()
+        );
+        modules.addAll(engine.createInjectionModules());
+        final Injector injector = Guice.createInjector(stage, modules);
         final PluginEnvironment environment = this.getPluginEnvironment();
         environment.getBlackboard().getOrCreate(PluginKeys.PARENT_INJECTOR, () -> injector);
     }
@@ -81,7 +90,7 @@ public abstract class VanillaLauncher<E extends VanillaEngine> extends Launcher 
     }
 
     @Override
-    protected final PluginContainer getPlatformPlugin() {
+    public final PluginContainer getPlatformPlugin() {
         if (this.vanillaPlugin == null) {
             this.vanillaPlugin = this.getPluginManager().getPlugin("spongevanilla").orElse(null);
 

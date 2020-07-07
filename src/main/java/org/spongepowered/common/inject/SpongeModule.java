@@ -39,7 +39,7 @@ public class SpongeModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeCommon.getPluginConfigDir());
+        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeCommon.getPluginConfigDirectory());
         this.bind(File.class).annotatedWith(ConfigDirAnnotation.SHARED).toProvider(new PathAsFileProvider() {
             @Inject
             void init(@ConfigDir(sharedRoot = true) Provider<Path> path) {

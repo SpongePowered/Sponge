@@ -88,10 +88,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     private void tracker$setUpUserService(World worldIn, ChunkPos p_i49946_2_, Biome[] p_i49946_3_, UpgradeData p_i49946_4_,
             ITickList<Block> p_i49946_5_, ITickList<Fluid> p_i49946_6_, long p_i49946_7_, ChunkSection[] p_i49946_9_, Consumer<Chunk> p_i49946_10_,
             CallbackInfo ci) {
-        this.trackerImpl$userStorageService = worldIn != null && ((WorldBridge) worldIn).bridge$isFake()
-                                  ? null
-                                  : SpongeCommon.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
-
+        this.trackerImpl$userStorageService = worldIn != null && ((WorldBridge) worldIn).bridge$isFake() ? null : Sponge.getServiceProvider().userStorageService();
     }
 
     @Override
@@ -104,7 +101,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             return;
         }
         // Don't track fake players
-        if (user instanceof ServerPlayerEntity && SpongeImplHooks.isFakePlayer((ServerPlayerEntity) user)) {
+        if (user instanceof ServerPlayerEntity && SpongeImplHooks.isFakePlayer((ServerPlayerEntity) user.getPlayer().orElse(null))) {
             return;
         }
         // Update TE tracking cache

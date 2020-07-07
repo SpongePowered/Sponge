@@ -24,17 +24,24 @@
  */
 package org.spongepowered.vanilla.mixin.api.server;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Module;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.vanilla.inject.SpongeVanillaModule;
 import org.spongepowered.vanilla.inject.VanillaServerModule;
 import org.spongepowered.vanilla.launch.VanillaServer;
+
+import java.util.List;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer {
 
     @Override
-    public Module createInjectionModule() {
-        return new VanillaServerModule(this);
+    public List<Module> createInjectionModules() {
+        return Lists.newArrayList(
+            new SpongeVanillaModule(),
+            new VanillaServerModule(this)
+        );
     }
 }

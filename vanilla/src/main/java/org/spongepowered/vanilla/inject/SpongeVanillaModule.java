@@ -24,16 +24,24 @@
  */
 package org.spongepowered.vanilla.inject;
 
+import com.google.inject.AbstractModule;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.common.inject.SpongeCommonModule;
+import org.spongepowered.common.SpongeGame;
+import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.world.server.SpongeWorldManager;
+import org.spongepowered.vanilla.VanillaGame;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
+import org.spongepowered.vanilla.world.VanillaWorldManager;
 
-public abstract class SpongeVanillaModule extends SpongeCommonModule {
+public final class SpongeVanillaModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        super.configure();
-
+        //noinspection UninstantiableBinding
+        this.bind(SpongeGame.class).to(VanillaGame.class);
+        this.bind(EventManager.class).to(SpongeEventManager.class);
         this.bind(PluginManager.class).to(VanillaPluginManager.class);
+        this.bind(SpongeWorldManager.class).to(VanillaWorldManager.class);
     }
 }

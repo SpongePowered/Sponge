@@ -26,7 +26,6 @@ package org.spongepowered.common;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.SystemSubject;
@@ -90,7 +89,7 @@ public abstract class SpongeGame implements Game {
 
     @Override
     public Path getGameDirectory() {
-        return SpongeCommon.getGameDir();
+        return SpongeCommon.getGameDirectory();
     }
 
     @Override

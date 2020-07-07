@@ -22,30 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject;
+package org.spongepowered.vanilla.inject.client;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.inject.provider.config.ConfigDirAnnotation;
-import org.spongepowered.common.inject.provider.PathAsFileProvider;
+import org.spongepowered.api.Client;
+import org.spongepowered.vanilla.VanillaGame;
+import org.spongepowered.vanilla.client.VanillaClientGame;
 
-import java.io.File;
-import java.nio.file.Path;
+public final class VanillaClientModule extends AbstractModule {
 
-public class SpongeModule extends AbstractModule {
+    private final Client client;
+
+    public VanillaClientModule(final Client client) {
+        this.client = client;
+    }
 
     @Override
     protected void configure() {
-        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeCommon.getPluginConfigDirectory());
-        this.bind(File.class).annotatedWith(ConfigDirAnnotation.SHARED).toProvider(new PathAsFileProvider() {
-            @Inject
-            void init(@ConfigDir(sharedRoot = true) Provider<Path> path) {
-                this.path = path;
-            }
-        });
+        this.bind(Client.class).toInstance(this.client);
+        this.bind(VanillaGame.class).to(VanillaClientGame.class);
     }
-
 }

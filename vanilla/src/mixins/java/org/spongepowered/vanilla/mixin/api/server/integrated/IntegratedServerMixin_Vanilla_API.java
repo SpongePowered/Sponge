@@ -22,22 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.inject;
+package org.spongepowered.vanilla.mixin.api.server.integrated;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.integrated.IntegratedServer;
 import org.spongepowered.api.Client;
+import org.spongepowered.api.client.LocalServer;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public final class VanillaClientModule extends SpongeVanillaModule {
+@Mixin(IntegratedServer.class)
+public abstract class IntegratedServerMixin_Vanilla_API implements LocalServer {
 
-    private final Client client;
-
-    public VanillaClientModule(final Client client) {
-        this.client = client;
-    }
+    @Shadow @Final private Minecraft mc;
 
     @Override
-    protected void configure() {
-        super.configure();
-
-        this.bind(Client.class).toInstance(this.client);
+    public Client getClient() {
+        return (Client) this.mc;
     }
 }

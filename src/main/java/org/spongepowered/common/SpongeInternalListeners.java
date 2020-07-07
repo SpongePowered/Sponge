@@ -29,7 +29,6 @@ import com.google.common.collect.Multimap;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
 import org.spongepowered.api.event.world.SaveWorldEvent;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
 import org.spongepowered.common.util.SpongeUsernameCache;
@@ -56,16 +55,6 @@ public class SpongeInternalListeners {
             callback.accept(o);
             return true;
         });
-    }
-
-    @Listener
-    public void onServiceChange(ChangeServiceProviderEvent event) {
-        Iterator<Predicate<Object>> it = this.serviceCallbacks.get(event.getService()).iterator();
-        while (it.hasNext()) {
-            if (!it.next().test(event.getNewProvider())) {
-                it.remove();
-            }
-        }
     }
 
     @Listener

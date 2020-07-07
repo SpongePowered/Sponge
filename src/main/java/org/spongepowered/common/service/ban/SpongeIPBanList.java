@@ -52,10 +52,6 @@ public final class SpongeIPBanList extends IPBanList {
         super(bansFile);
     }
 
-    private BanService getService() {
-        return Sponge.getServiceManager().provideUnchecked(BanService.class);
-    }
-
     @Override
     protected boolean hasEntry(String entry) {
         if (entry.equals(LOCAL_ADDRESS)) { // Check for single player
@@ -63,7 +59,7 @@ public final class SpongeIPBanList extends IPBanList {
         }
 
         try {
-            return this.getService().isBanned(InetAddress.getByName(entry));
+            return Sponge.getServiceProvider().banService().isBanned(InetAddress.getByName(entry));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -77,7 +73,7 @@ public final class SpongeIPBanList extends IPBanList {
         }
 
         try {
-            return (IPBanEntry) this.getService().getBanFor(InetAddress.getByName(obj)).orElse(null);
+            return (IPBanEntry) Sponge.getServiceProvider().banService().getBanFor(InetAddress.getByName(obj)).orElse(null);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -90,7 +86,7 @@ public final class SpongeIPBanList extends IPBanList {
         }
 
         try {
-            this.getService().pardon(InetAddress.getByName(entry));
+            Sponge.getServiceProvider().banService().pardon(InetAddress.getByName(entry));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -99,7 +95,7 @@ public final class SpongeIPBanList extends IPBanList {
     @Override
     public String[] getKeys() {
         List<String> ips = new ArrayList<>();
-        for (Ban.Ip ban : getService().getIpBans()) {
+        for (Ban.Ip ban : Sponge.getServiceProvider().banService().getIpBans()) {
             ips.add(this.addressToString(new InetSocketAddress(ban.getAddress(), 0)));
         }
         return ips.toArray(new String[0]);
@@ -107,12 +103,12 @@ public final class SpongeIPBanList extends IPBanList {
 
     @Override
     public void addEntry(IPBanEntry entry) {
-        getService().addBan((Ban) entry);
+        Sponge.getServiceProvider().banService().addBan((Ban) entry);
     }
 
     @Override
     public boolean isEmpty() {
-        return getService().getIpBans().isEmpty();
+        return Sponge.getServiceProvider().banService().getIpBans().isEmpty();
     }
 
     /**

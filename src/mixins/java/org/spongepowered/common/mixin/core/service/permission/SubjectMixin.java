@@ -30,6 +30,7 @@ import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockTileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
@@ -70,8 +71,7 @@ public abstract class SubjectMixin implements SubjectBridge {
     @Override
     public Optional<SubjectReference> bridge$resolveReferenceOptional() {
         if (this.impl$subjectReference == null) {
-            final Optional<PermissionService> serv = SpongeCommon.getGame().getServiceManager().provide(PermissionService.class);
-            serv.ifPresent(permissionService -> new SubjectSettingCallback(this).test(permissionService));
+            new SubjectSettingCallback(this).test(Sponge.getServiceProvider().permissionService());
         }
         return Optional.ofNullable(this.impl$subjectReference);
     }

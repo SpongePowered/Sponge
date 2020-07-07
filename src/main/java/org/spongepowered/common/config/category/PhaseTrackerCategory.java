@@ -26,6 +26,7 @@ package org.spongepowered.common.config.category;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.HashMap;
@@ -178,7 +179,7 @@ public class PhaseTrackerCategory extends ConfigCategory {
     }
 
     private boolean isVanilla() {
-        throw new MissingImplementationException("PhaseTrackerCategory", "isVanilla");
+        return Launcher.getInstance().isVanilla();
     }
 
     public void setAutoFixedTiles(Map<String, Boolean> autoFixedTiles) {

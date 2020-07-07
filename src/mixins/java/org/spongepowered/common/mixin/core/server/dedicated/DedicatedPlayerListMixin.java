@@ -53,7 +53,7 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
             ci.setReturnValue(true);
             return;
         }
-        final PermissionService permissionService = Sponge.getServiceManager().provideUnchecked(PermissionService.class);
+        final PermissionService permissionService = Sponge.getServiceProvider().permissionService();
         final Subject subject = permissionService.getUserSubjects()
                 .getSubject(profile.getId().toString()).orElse(permissionService.getDefaults());
         ci.setReturnValue(subject.hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION));
@@ -61,7 +61,7 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
 
     @Inject(method = "bypassesPlayerLimit", at = @At("HEAD"), cancellable = true)
     private void onBypassPlayerLimit(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
-        final PermissionService permissionService = Sponge.getServiceManager().provideUnchecked(PermissionService.class);
+        final PermissionService permissionService = Sponge.getServiceProvider().permissionService();
         final Subject subject = permissionService.getUserSubjects()
                 .getSubject(profile.getId().toString()).orElse(permissionService.getDefaults());
         final Tristate tristate = subject.getPermissionValue(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_PLAYER_LIMIT_PERMISSION);
