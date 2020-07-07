@@ -92,74 +92,20 @@ val launch by sourceSets.registering {
 }
 
 val accessors by sourceSets.registering {
-    applyNamedDependencyOnOutput(
-            originProject = project,
-            sourceAdding = launch.get(),
-            targetSource = this,
-            implProject = project,
-            dependencyConfigName = this.implementationConfigurationName
-    )
-    applyNamedDependencyOnOutput(
-            originProject = project,
-            sourceAdding = this,
-            targetSource = main,
-            implProject = project,
-            dependencyConfigName = main.implementationConfigurationName
-    )
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = this, targetSource = main, implProject = project, dependencyConfigName = main.implementationConfigurationName)
 }
 val mixins by sourceSets.registering {
-    applyNamedDependencyOnOutput(
-            originProject = project,
-            sourceAdding = launch.get(),
-            targetSource = this,
-            implProject = project,
-            dependencyConfigName = this.implementationConfigurationName
-    )
-    applyNamedDependencyOnOutput(
-            originProject = project,
-            sourceAdding = accessors.get(),
-            targetSource = this,
-            implProject = project,
-            dependencyConfigName = this.implementationConfigurationName
-    )
-    applyNamedDependencyOnOutput(
-            originProject = project,
-            sourceAdding = main,
-            targetSource = this,
-            implProject = project,
-            dependencyConfigName = this.implementationConfigurationName
-    )
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = accessors.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = main, targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
 }
 val invalid by sourceSets.registering {
     java.srcDir("invalid" + File.separator + "main" + File.separator + "java")
-    applyNamedDependencyOnOutput(
-            originProject = project,
-            sourceAdding = launch.get(),
-            targetSource = this,
-            implProject = project,
-            dependencyConfigName = this.implementationConfigurationName
-    )
-    applyNamedDependencyOnOutput(
-            originProject = project,
-            sourceAdding = accessors.get(),
-            targetSource = this,
-            implProject = project,
-            dependencyConfigName = this.implementationConfigurationName
-    )
-    applyNamedDependencyOnOutput(
-            originProject = project,
-            sourceAdding = mixins.get(),
-            targetSource = this,
-            implProject = project,
-            dependencyConfigName = this.implementationConfigurationName
-    )
-    applyNamedDependencyOnOutput(
-            originProject = project,
-            sourceAdding = main,
-            targetSource = this,
-            implProject = project,
-            dependencyConfigName = this.implementationConfigurationName
-    )
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = accessors.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = mixins.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = main, targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
 }
 
 
@@ -201,11 +147,11 @@ dependencies {
     launchConfig("com.google.code.gson:gson:2.2.4")
     launchConfig("org.ow2.asm:asm-tree:6.2")
     launchConfig("org.ow2.asm:asm-util:6.2")
-    launchConfig("org.apache.logging.log4j:log4j-api:2.8.1")
+    launchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
     launchConfig("org.spongepowered:configurate-core:3.6.1")
     launchConfig("org.spongepowered:configurate-hocon:3.6.1")
     launchConfig("org.spongepowered:configurate-json:3.6.1")
-    launchConfig("org.apache.logging.log4j:log4j-core:2.8.1")
+    launchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
     add(launch.get().implementationConfigurationName, launchConfig)
 
     // Annotation Processor
@@ -327,232 +273,56 @@ project("SpongeVanilla") {
 
     val vanillaMinecraftConfig by configurations.named("minecraft")
     val vanillaModLauncherConfig by configurations.register("modlauncher") {
-        extendsFrom(launchConfig)
         extendsFrom(vanillaMinecraftConfig)
     }
 
     val vanillaMain by sourceSets.named("main") {
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = accessors.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = launch.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
+        // implementation (compile) dependencies
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
     }
     val vanillaLaunch by sourceSets.register("launch") {
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = launch.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = main,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = this,
-                targetSource = vanillaMain,
-                implProject = vanillaProject,
-                dependencyConfigName = vanillaMain.implementationConfigurationName
-        )
+        // implementation (compile) dependencies
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaMain, implProject = vanillaProject, dependencyConfigName = vanillaMain.implementationConfigurationName)
     }
     val vanillaAccessors by sourceSets.register("accessors") {
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = launch.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = accessors.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = this,
-                targetSource = vanillaMain,
-                implProject = vanillaProject,
-                dependencyConfigName = vanillaMain.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaLaunch,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
+        // implementation (compile) dependencies
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaMain, implProject = vanillaProject, dependencyConfigName = vanillaMain.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
     }
     val vanillaMixins by sourceSets.register("mixins") {
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = mixins.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = accessors.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaAccessors,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = launch.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = main,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaMain,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaLaunch,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
+        // implementation (compile) dependencies
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = mixins.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaAccessors, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMain, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
     }
     val vanillaModLauncher by sourceSets.register("modlauncher") {
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = launch.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaLaunch,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaMixins,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.runtimeConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = main,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.runtimeConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = mixins.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.runtimeConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = accessors.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.runtimeConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaAccessors,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.runtimeConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaMixins,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.runtimeConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaMain,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.runtimeConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = vanillaProject,
-                sourceAdding = vanillaLaunch,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.runtimeConfigurationName
-        )
+        // implementation (compile) dependencies
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        // runtime dependencies - literally add the rest of the project, because we want to launch the game
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMixins, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaAccessors, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = mixins.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMain, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
     }
     val vanillaInvalid by sourceSets.register("invalid") {
         java.srcDir("invalid" + File.separator + "main" + File.separator + "java")
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = launch.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = accessors.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = mixins.get(),
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
-        applyNamedDependencyOnOutput(
-                originProject = commonProject,
-                sourceAdding = main,
-                targetSource = this,
-                implProject = vanillaProject,
-                dependencyConfigName = this.implementationConfigurationName
-        )
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = mixins.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
     }
 
     val vanillaInvalidImplementation by configurations.named(vanillaInvalid.implementationConfigurationName)
@@ -617,9 +387,8 @@ project("SpongeVanilla") {
         vanillaModLauncherConfig("org.ow2.asm:asm-util:6.2")
         vanillaModLauncherConfig("org.ow2.asm:asm-tree:6.2")
         vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
-        vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.8.1")
-//        vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.8.1")
-//        vanillaModLauncherConfig("com.lmax:disruptor:3.4.2")
+        vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.11.2")
+        vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.11.2")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
@@ -638,8 +407,6 @@ project("SpongeVanilla") {
         vanillaModLauncherImplementation(vanillaModLauncherConfig)
         vanillaMixinsImplementation(vanillaModLauncherConfig)
         vanillaAccessorsImplementation(vanillaModLauncherConfig)
-
-
 
         // Annotation Processor
         vanillaAccessorsAnnotationProcessor(vanillaModLauncherImplementation)
