@@ -14,3 +14,9 @@ pluginManagement {
     }
 
 }
+val testPlugins = file("testplugins.settings.gradle.kts")
+if (testPlugins.exists()) {
+    apply(from= testPlugins)
+} else {
+    testPlugins.writeText("// Uncomment to enable client module for debugging\n//include(\":testplugins\")\n")
+}

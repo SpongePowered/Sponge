@@ -257,6 +257,40 @@ allprojects {
     }
 }
 
+val testplugins: Project? = subprojects.find { "testplugins".equals(it.name) }
+if (testplugins != null) {
+    project("testplugins") {
+        apply {
+            plugin("java-library")
+            plugin("idea")
+            plugin("eclipse")
+            plugin("net.minecrell.licenser")
+        }
+
+        dependencies {
+            implementation(rootProject.project(":SpongeAPI"))
+            annotationProcessor(rootProject.project(":SpongeAPI"))
+        }
+
+        tasks.jar {
+            manifest {
+                attributes("Loader" to "java_plain")
+            }
+        }
+        license {
+            (this as ExtensionAware).extra.apply {
+                this["name"] = "Sponge"
+                this["organization"] = organization
+                this["url"] = projectUrl
+            }
+            header = apiProject.file("HEADER.txt")
+
+            include("**/*.java")
+            newLine = false
+        }
+    }
+}
+
 project("SpongeVanilla") {
     val vanillaProject = this
     apply {
@@ -416,6 +450,12 @@ project("SpongeVanilla") {
         vanillaMixinsAnnotationProcessor(vanillaModLauncherImplementation)
         vanillaAccessorsAnnotationProcessor("org.spongepowered:mixin:0.8")
         vanillaMixinsAnnotationProcessor("org.spongepowered:mixin:0.8")
+
+        testplugins?.apply {
+            vanillaModLauncherRuntime(project(testplugins.path)) {
+                exclude(group = "org.spongepowered")
+            }
+        }
     }
 
     license {
