@@ -27,7 +27,7 @@ package org.spongepowered.common.data.type;
 import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.SpongeCatalogType;
 
@@ -35,7 +35,7 @@ public abstract class SpongeEntityMetadataType<T> extends SpongeCatalogType {
 
     private final T metadata;
 
-    public SpongeEntityMetadataType(CatalogKey key, T metadata) {
+    public SpongeEntityMetadataType(ResourceKey key, T metadata) {
         super(key);
         this.metadata = metadata;
     }

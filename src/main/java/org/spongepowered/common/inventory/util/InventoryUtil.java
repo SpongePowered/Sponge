@@ -30,7 +30,7 @@ import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.state.properties.ChestType;
 import net.minecraft.tileentity.ChestTileEntity;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.carrier.chest.Chest;
@@ -158,12 +158,12 @@ public final class InventoryUtil {
         final Object base = inventory;
 
         if (base instanceof BlockEntity) {
-            CatalogKey key = ((BlockEntity) base).getBlock().getType().getKey();
+            ResourceKey key = ((BlockEntity) base).getBlock().getType().getKey();
             final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId)
                     .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + key.getNamespace() + ":" + key.getValue()));
         } else if (base instanceof Entity) {
-            CatalogKey key = ((Entity) base).getType().getKey();
+            ResourceKey key = ((Entity) base).getType().getKey();
             final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
                 SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);

@@ -33,7 +33,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.ChannelRegistrar;
@@ -69,11 +69,11 @@ public abstract class SpongeNetworkManager implements ChannelRegistrar {
     public static abstract class AbstractChannelBinding implements ChannelBinding {
 
         private final ChannelRegistrar registrar;
-        private final CatalogKey channelKey;
+        private final ResourceKey channelKey;
         private final PluginContainer owner;
 
         public AbstractChannelBinding(
-            final ChannelRegistrar registrar, final CatalogKey channelKey, final PluginContainer owner) {
+            final ChannelRegistrar registrar, final ResourceKey channelKey, final PluginContainer owner) {
             this.registrar = registrar;
             this.channelKey = channelKey;
             this.owner = owner;
@@ -85,7 +85,7 @@ public abstract class SpongeNetworkManager implements ChannelRegistrar {
         }
 
         @Override
-        public CatalogKey getKey() {
+        public ResourceKey getKey() {
             return this.channelKey;
         }
 

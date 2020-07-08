@@ -32,7 +32,7 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapelessRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
@@ -70,13 +70,13 @@ public class SpongeShapelessCraftingRecipeBuilder extends SpongeCatalogBuilder<S
     }
 
     @Override
-    public ShapelessCraftingRecipe.Builder.EndStep key(CatalogKey key) {
+    public ShapelessCraftingRecipe.Builder.EndStep key(ResourceKey key) {
         super.key(key);
         return this;
     }
 
     @Override
-    protected ShapelessCraftingRecipe build(CatalogKey key) {
+    protected ShapelessCraftingRecipe build(ResourceKey key) {
         checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
         // Copy the ingredient list
         final NonNullList<Ingredient> ingredients = NonNullList.create();

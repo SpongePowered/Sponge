@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.state.properties;
 
 import net.minecraft.state.properties.RailShape;
 import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,16 +42,16 @@ import org.spongepowered.plugin.PluginContainer;
 public abstract class RailShapeMixin_API implements RailDirection {
 
     @Shadow @Final private int meta;
-    private CatalogKey api$key;
+    private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, int meta, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, name.toLowerCase());
+        this.api$key = ResourceKey.of(container, name.toLowerCase());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

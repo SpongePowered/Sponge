@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.nbt.validation;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 
 public class Validations {
 
-    public static final ValidationType ENTITY = new SpongeValidationType(CatalogKey.sponge("entity"));
-    public static final ValidationType TILE_ENTITY = new SpongeValidationType(CatalogKey.sponge("block_entity"));
+    public static final ValidationType ENTITY = new SpongeValidationType(ResourceKey.sponge("entity"));
+    public static final ValidationType TILE_ENTITY = new SpongeValidationType(ResourceKey.sponge("block_entity"));
 
 
 }

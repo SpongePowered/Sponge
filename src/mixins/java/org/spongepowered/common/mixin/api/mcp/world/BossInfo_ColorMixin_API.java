@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.BossInfo;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,18 +44,18 @@ public abstract class BossInfo_ColorMixin_API implements BossBarColor {
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract TextFormatting shadow$getFormatting();
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
     private SpongeTextColor api$color;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndColor(String enumName, int ordinal, String name, TextFormatting formatting, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, this.shadow$getName().toLowerCase());
+        this.api$key = ResourceKey.of(container, this.shadow$getName().toLowerCase());
         this.api$color = SpongeTextColor.of(this.shadow$getFormatting());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

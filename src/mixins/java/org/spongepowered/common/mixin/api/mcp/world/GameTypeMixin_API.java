@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,18 +44,18 @@ public abstract class GameTypeMixin_API implements GameMode {
 
     @Shadow public abstract ITextComponent shadow$getDisplayName();
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
     private SpongeTranslation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int gameTypeId, String gameTypeName, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, gameTypeName.isEmpty() ? "not_set" : gameTypeName.toLowerCase());
+        this.api$key = ResourceKey.of(container, gameTypeName.isEmpty() ? "not_set" : gameTypeName.toLowerCase());
         this.api$translation = new SpongeTranslation((TranslationTextComponent) this.shadow$getDisplayName());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

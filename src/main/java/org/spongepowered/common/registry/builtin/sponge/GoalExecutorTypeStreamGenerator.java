@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.common.entity.ai.SpongeGoalExecutorType;
 
@@ -37,8 +37,8 @@ public final class GoalExecutorTypeStreamGenerator {
 
     public static Stream<GoalExecutorType> stream() {
         return Stream.of(
-            new SpongeGoalExecutorType(CatalogKey.minecraft("normal")),
-            new SpongeGoalExecutorType(CatalogKey.minecraft("target"))
+            new SpongeGoalExecutorType(ResourceKey.minecraft("normal")),
+            new SpongeGoalExecutorType(ResourceKey.minecraft("target"))
         );
     }
 }

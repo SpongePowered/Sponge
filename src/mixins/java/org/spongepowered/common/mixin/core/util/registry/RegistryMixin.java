@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.util.registry;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -49,7 +49,7 @@ public abstract class RegistryMixin {
         if (potentialCatalog instanceof CatalogType && registry instanceof SimpleRegistry) {
             // We don't care about non-catalog types and custom implementations of Registry
             SpongeCommon.getRegistry().getCatalogRegistry().registerRegistry((Class<CatalogType>) potentialCatalog.getClass(),
-                (CatalogKey) (Object) location, (Registry<CatalogType>) (Object) registry);
+                (ResourceKey) (Object) location, (Registry<CatalogType>) (Object) registry);
         }
     }
 }

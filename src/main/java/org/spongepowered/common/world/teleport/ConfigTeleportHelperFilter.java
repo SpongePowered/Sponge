@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world.teleport;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -59,39 +59,39 @@ public class ConfigTeleportHelperFilter implements TeleportHelperFilter {
         if (floorBlockTypes == null) {
             TeleportHelperCategory teleportHelperCat = SpongeCommon.getGlobalConfigAdapter().getConfig().getTeleportHelper();
             floorBlockTypes = teleportHelperCat.getUnsafeFloorBlockIds().stream()
-                    .map(x -> CatalogKey.resolve(x.toLowerCase(Locale.ENGLISH)))
+                    .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockType.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             floorBlockStates = teleportHelperCat.getUnsafeFloorBlockIds().stream()
-                    .map(x -> CatalogKey.resolve(x.toLowerCase(Locale.ENGLISH)))
+                    .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockState.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             bodyBlockTypes = teleportHelperCat.getUnsafeBodyBlockIds().stream()
-                    .map(x -> CatalogKey.resolve(x.toLowerCase(Locale.ENGLISH)))
+                    .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockType.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             bodyBlockStates = teleportHelperCat.getUnsafeBodyBlockIds().stream()
-                    .map(x -> CatalogKey.resolve(x.toLowerCase(Locale.ENGLISH)))
+                    .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Sponge.getRegistry().getCatalogRegistry().get(BlockState.class, x).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
     }
 
-    private final CatalogKey key;
+    private final ResourceKey key;
 
     public ConfigTeleportHelperFilter() {
-        this.key = CatalogKey.sponge("config");
+        this.key = ResourceKey.sponge("config");
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

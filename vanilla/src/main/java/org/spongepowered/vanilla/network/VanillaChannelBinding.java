@@ -27,7 +27,7 @@ package org.spongepowered.vanilla.network;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.network.PacketBuffer;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.common.network.SpongeNetworkManager;
@@ -37,7 +37,7 @@ public abstract class VanillaChannelBinding extends SpongeNetworkManager.Abstrac
 
     private boolean valid = true;
 
-    public VanillaChannelBinding(ChannelRegistrar registrar, CatalogKey registration, PluginContainer owner) {
+    public VanillaChannelBinding(ChannelRegistrar registrar, ResourceKey registration, PluginContainer owner) {
         super(registrar, registration, owner);
     }
 

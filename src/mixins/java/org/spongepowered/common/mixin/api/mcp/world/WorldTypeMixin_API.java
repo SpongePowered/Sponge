@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.MoreObjects;
 import net.minecraft.world.WorldType;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.api.world.gen.TerrainGenerator;
@@ -43,16 +43,16 @@ import org.spongepowered.common.SpongeImplHooks;
 @Mixin(WorldType.class)
 public abstract class WorldTypeMixin_API implements GeneratorType {
 
-    @Nullable private CatalogKey api$key;
+    @Nullable private ResourceKey api$key;
 
     @Inject(method = "<init>(ILjava/lang/String;Ljava/lang/String;I)V", at = @At("RETURN"))
     private void onConstructSpongeRegister(int id, String name, String serializedName, int version, CallbackInfo ci) {
-        this.api$key = CatalogKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), name);
+        this.api$key = ResourceKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), name);
         // TODO - register this with our registry?
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

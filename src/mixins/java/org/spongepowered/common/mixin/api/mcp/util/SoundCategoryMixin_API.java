@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.util;
 
 import net.minecraft.util.SoundCategory;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
@@ -35,10 +35,10 @@ public abstract class SoundCategoryMixin_API implements org.spongepowered.api.ef
 
     @Shadow public abstract String shadow$getName();
 
-    private final CatalogKey api$key = CatalogKey.of(SpongeImplHooks.getActiveModContainer(), this.shadow$getName().toLowerCase());
+    private final ResourceKey api$key = ResourceKey.of(SpongeImplHooks.getActiveModContainer(), this.shadow$getName().toLowerCase());
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 }

@@ -32,14 +32,13 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixerBuilder;
-import com.mojang.datafixers.schemas.Schema;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Util;
 import net.minecraft.util.registry.Registry;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -63,8 +62,6 @@ import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
-import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
-import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.registry.MappedRegistry;
@@ -384,7 +381,7 @@ public final class SpongeDataManager implements DataManager {
                         final SpongeCatalogRegistry catalogRegistry = SpongeCommon.getRegistry().getCatalogRegistry();
                         // Then find the registration for deserialization
                         final Optional<DataRegistration> registration = dataContainer.getString(Constants.Sponge.DATA_ID)
-                                .flatMap(registrationId -> catalogRegistry.get(DataRegistration.class, CatalogKey.resolve(registrationId)));
+                                .flatMap(registrationId -> catalogRegistry.get(DataRegistration.class, ResourceKey.resolve(registrationId)));
                         // Find and attempt to deserialize with the datastore for this dataholder
                         final Optional<DataStore> dataStore = registration.flatMap(r -> r.getDataStore(TypeToken.of(dataHolder.getClass())));
                         if (dataStore.isPresent()) {

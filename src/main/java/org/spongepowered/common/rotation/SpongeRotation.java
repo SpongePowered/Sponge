@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.rotation;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.common.SpongeCatalogType;
 
@@ -33,7 +33,7 @@ public class SpongeRotation extends SpongeCatalogType implements Rotation {
     private final int angle;
 
 
-    public SpongeRotation(final CatalogKey key, final int angle) {
+    public SpongeRotation(final ResourceKey key, final int angle) {
         super(key);
         this.angle = angle;
     }

@@ -27,7 +27,7 @@ package org.spongepowered.common.advancement;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.text.translation.FixedTranslation;
@@ -79,7 +79,7 @@ public final class SpongeAdvancementTreeBuilder extends SpongeCatalogBuilder<Adv
     }
 
     @Override
-    protected AdvancementTree build(CatalogKey key) {
+    protected AdvancementTree build(ResourceKey key) {
         checkNotNull(key);
         checkState(this.rootAdvancement != null, "The root advancement must be set");
         final SpongeAdvancementTree advancementTree = new SpongeAdvancementTree(this.rootAdvancement, key, this.translation);

@@ -28,9 +28,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.registry.Registry;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -54,7 +52,7 @@ public abstract class BlockMixin_API implements BlockType {
     @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return ((CatalogKeyBridge) this).bridge$getKey();
     }
 

@@ -30,42 +30,42 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.plugin.PluginContainer;
 
-public final class SpongeCatalogKeyBuilder implements CatalogKey.Builder {
+public final class SpongeCatalogKeyBuilder implements ResourceKey.Builder {
 
     @Nullable private String namespace;
     private String value;
 
     @Override
-    public CatalogKey.Builder namespace(String namespace) {
+    public ResourceKey.Builder namespace(String namespace) {
         checkNotNull(namespace, "Namespace cannot be null");
         this.namespace = namespace;
         return this;
     }
 
     @Override
-    public CatalogKey.Builder namespace(PluginContainer container) {
+    public ResourceKey.Builder namespace(PluginContainer container) {
         checkNotNull(container, "PluginContainer cannot be null");
         this.namespace = container.getMetadata().getId();
         return this;
     }
 
     @Override
-    public CatalogKey.Builder value(String value) {
+    public ResourceKey.Builder value(String value) {
         checkNotNull(value, "Value cannot be null");
         this.value = value;
         return this;
     }
 
     @Override
-    public CatalogKey build() throws IllegalStateException {
+    public ResourceKey build() throws IllegalStateException {
         checkState(this.value != null, "Value cannot be empty");
         if (this.namespace != null) {
             try {
                 final ResourceLocation resourceLocation = new ResourceLocation(this.namespace, this.value);
-                return (CatalogKey) (Object) resourceLocation;
+                return (ResourceKey) (Object) resourceLocation;
             } catch (ResourceLocationException e) {
                 throw new IllegalStateException(e);
             }
@@ -73,14 +73,14 @@ public final class SpongeCatalogKeyBuilder implements CatalogKey.Builder {
 
         try {
             final ResourceLocation resourceLocation = new ResourceLocation(this.value);
-            return (CatalogKey) (Object) resourceLocation;
+            return (ResourceKey) (Object) resourceLocation;
         } catch (ResourceLocationException e) {
             throw new IllegalStateException(e);
         }
     }
 
     @Override
-    public CatalogKey.Builder reset() {
+    public ResourceKey.Builder reset() {
         this.namespace = null;
         this.value = null;
         return this;

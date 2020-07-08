@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.common.ban.SpongeBanType;
@@ -38,8 +38,8 @@ public final class BanTypeStreamGenerator {
 
     public static Stream<BanType> stream() {
         return Stream.of(
-            new SpongeBanType(CatalogKey.minecraft("ip"), Ban.Ip.class),
-            new SpongeBanType(CatalogKey.minecraft("profile"), Ban.Profile.class)
+            new SpongeBanType(ResourceKey.minecraft("ip"), Ban.Ip.class),
+            new SpongeBanType(ResourceKey.minecraft("profile"), Ban.Profile.class)
         );
     }
 }

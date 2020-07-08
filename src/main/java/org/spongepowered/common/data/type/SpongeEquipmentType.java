@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.type;
 
 import net.minecraft.inventory.EquipmentSlotType;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.SpongeCatalogType;
 
@@ -33,7 +33,7 @@ public class SpongeEquipmentType extends SpongeCatalogType implements EquipmentT
 
     private EquipmentSlotType[] slots;
 
-    public SpongeEquipmentType(CatalogKey key, EquipmentSlotType... slots) {
+    public SpongeEquipmentType(ResourceKey key, EquipmentSlotType... slots) {
         super(key);
         this.slots = slots;
     }

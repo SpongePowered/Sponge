@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.raid;
 
 import net.minecraft.world.raid.Raid;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,16 +40,16 @@ public abstract class Raid_StatusMixin_API implements RaidStatus {
 
     @Shadow public abstract String shadow$func_221277_a();
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void api$setKey(CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, this.shadow$func_221277_a().toLowerCase());
+        this.api$key = ResourceKey.of(container, this.shadow$func_221277_a().toLowerCase());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

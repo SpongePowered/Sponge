@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.world;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeSerializationBehavior extends SpongeCatalogType implements SerializationBehavior {
 
-    public SpongeSerializationBehavior(CatalogKey key) {
+    public SpongeSerializationBehavior(ResourceKey key) {
         super(key);
     }
 }

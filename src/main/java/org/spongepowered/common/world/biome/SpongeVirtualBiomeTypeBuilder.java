@@ -27,7 +27,7 @@ package org.spongepowered.common.world.biome;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
@@ -65,7 +65,7 @@ public class SpongeVirtualBiomeTypeBuilder extends SpongeCatalogBuilder<VirtualB
     }
 
     @Override
-    protected VirtualBiomeType build(CatalogKey key) {
+    protected VirtualBiomeType build(ResourceKey key) {
         checkNotNull(key, "key");
         checkNotNull(this.persisted, "persistedBiome");
         return new SpongeVirtualBiomeType(this.key, this.temperature, this.humidity, this.persisted);

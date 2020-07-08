@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.potion.Effect;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -69,13 +69,13 @@ public abstract class EffectMixin_API implements PotionEffectType {
 
     @Nullable private Translation api$translation;
     @Nullable private Translation api$potionTranslation;
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         if (this.impl$key == null) {
             final ResourceLocation location = Registry.EFFECTS.getKey((Effect) (Object) this);
-            this.impl$key = (CatalogKey) (Object) location;
+            this.impl$key = (ResourceKey) (Object) location;
         }
         return this.impl$key;
     }

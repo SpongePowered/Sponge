@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.entitycollision.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.world.World;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeCommon;
@@ -45,7 +45,7 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
     private boolean entityCollision$refreshCache = true;
 
     @Override
-    public CatalogKey collision$getKey() {
+    public ResourceKey collision$getKey() {
         return ((BlockType) this).getKey();
     }
 

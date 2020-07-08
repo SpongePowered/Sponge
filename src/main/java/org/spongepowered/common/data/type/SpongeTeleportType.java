@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeTeleportType extends SpongeCatalogType implements TeleportType {
 
-    public SpongeTeleportType(CatalogKey key) {
+    public SpongeTeleportType(ResourceKey key) {
         super(key);
     }
 }

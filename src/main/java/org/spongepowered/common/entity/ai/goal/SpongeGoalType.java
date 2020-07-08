@@ -25,23 +25,23 @@
 package org.spongepowered.common.entity.ai.goal;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.Agent;
 
 public final class SpongeGoalType implements GoalType {
 
-    private final CatalogKey key;
+    private final ResourceKey key;
     private final Class<? extends Goal<? extends Agent>> goalClass;
 
-    public SpongeGoalType(CatalogKey key, Class<? extends Goal<? extends Agent>> goalClass) {
+    public SpongeGoalType(ResourceKey key, Class<? extends Goal<? extends Agent>> goalClass) {
         this.key = key;
         this.goalClass = goalClass;
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

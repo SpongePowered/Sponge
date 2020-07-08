@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.data.type.SpongeLlamaType;
@@ -38,10 +38,10 @@ public final class LlamaTypeStreamGenerator {
 
     public static Stream<Tuple<LlamaType, Integer>> stream() {
         return Stream.of(
-            Tuple.of(new SpongeLlamaType(CatalogKey.minecraft("creamy"), 0), 0),
-            Tuple.of(new SpongeLlamaType(CatalogKey.minecraft("white"), 1), 1),
-            Tuple.of(new SpongeLlamaType(CatalogKey.minecraft("brown"), 2), 2),
-            Tuple.of(new SpongeLlamaType(CatalogKey.minecraft("gray"), 3), 3)
+            Tuple.of(new SpongeLlamaType(ResourceKey.minecraft("creamy"), 0), 0),
+            Tuple.of(new SpongeLlamaType(ResourceKey.minecraft("white"), 1), 1),
+            Tuple.of(new SpongeLlamaType(ResourceKey.minecraft("brown"), 2), 2),
+            Tuple.of(new SpongeLlamaType(ResourceKey.minecraft("gray"), 3), 3)
         );
     }
 }

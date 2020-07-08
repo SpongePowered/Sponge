@@ -28,13 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.EventContextKey;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class SpongeEventContextKey<T> implements EventContextKey<T> {
 
-    private final CatalogKey key;
+    private final ResourceKey key;
     private final TypeToken<T> allowed;
 
     SpongeEventContextKey(SpongeEventContextKeyBuilder<T> builder) {
@@ -42,14 +42,14 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
         this.allowed = builder.typeClass;
     }
 
-    public SpongeEventContextKey(CatalogKey key, TypeToken<T> allowed) {
+    public SpongeEventContextKey(ResourceKey key, TypeToken<T> allowed) {
         this.key = checkNotNull(key, "key");
         this.allowed = checkNotNull(allowed, "Allowed");
     }
 
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

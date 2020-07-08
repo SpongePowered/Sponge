@@ -30,7 +30,7 @@ import com.google.common.reflect.TypeToken;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.FixTypes;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
@@ -81,7 +81,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     private static final ConcurrentSkipListSet<String> MISSING_MOD_IDS = new ConcurrentSkipListSet<>();
 
     private static final DataContentUpdater V1_TO_2 = new SchematicUpdater1_to_2();
-    private static final CatalogKey CATALOG_KEY = CatalogKey.sponge("schematic");
+    private static final ResourceKey CATALOG_KEY = ResourceKey.sponge("schematic");
 
     @Nullable private static DataFixer VANILLA_FIXER;
 
@@ -94,7 +94,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return CATALOG_KEY;
     }
 

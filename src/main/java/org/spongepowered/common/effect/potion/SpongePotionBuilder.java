@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -75,7 +75,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
         }
         String effectName = container.getString(Constants.Item.Potions.POTION_TYPE).get();
         Optional<PotionEffectType> optional = Sponge.getRegistry().getCatalogRegistry()
-                .get(PotionEffectType.class, CatalogKey.resolve(effectName));
+                .get(PotionEffectType.class, ResourceKey.resolve(effectName));
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }

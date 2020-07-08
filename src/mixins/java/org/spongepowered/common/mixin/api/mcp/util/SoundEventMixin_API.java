@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.util;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,8 +38,8 @@ public abstract class SoundEventMixin_API implements SoundType {
     @Shadow @Final private ResourceLocation name;
 
     @Override
-    public CatalogKey getKey() {
-        return (CatalogKey) (Object) this.name;
+    public ResourceKey getKey() {
+        return (ResourceKey) (Object) this.name;
     }
 
 }

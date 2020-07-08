@@ -30,7 +30,7 @@ import net.minecraft.fluid.IFluidState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.IProperty;
 import net.minecraft.util.IStringSerializable;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -61,7 +61,7 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
     @Shadow public abstract Block shadow$getBlock();
     @Shadow public abstract IFluidState shadow$getFluidState();
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
 
     @Override
     public BlockType getType() {
@@ -123,7 +123,7 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         if (this.impl$key == null) {
             this.impl$generateIdFromParentBlock(this.shadow$getBlock());
         }
@@ -145,6 +145,6 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
             builder.append(joiner.join(propertyValues));
             builder.append(']');
         }
-        this.impl$key = CatalogKey.of(((BlockType) block).getKey().getNamespace(), builder.toString());
+        this.impl$key = ResourceKey.of(((BlockType) block).getKey().getNamespace(), builder.toString());
     }
 }

@@ -26,7 +26,7 @@ package org.spongepowered.common.data.key;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
@@ -46,7 +46,7 @@ import java.util.function.Supplier;
 
 public class SpongeKey<V extends Value<E>, E> implements Key<V> {
 
-    private final CatalogKey key;
+    private final ResourceKey key;
     private final TypeToken<V> valueToken;
     private final TypeToken<E> elementToken;
     private final Comparator<? super E> elementComparator;
@@ -55,7 +55,7 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
     private final Supplier<E> defaultValueSupplier;
     private final EmptyDataProvider<V, E> emptyDataProvider;
 
-    SpongeKey(final CatalogKey key, final TypeToken<V> valueToken, final TypeToken<E> elementToken,
+    SpongeKey(final ResourceKey key, final TypeToken<V> valueToken, final TypeToken<E> elementToken,
         final Comparator<? super E> elementComparator,
         final BiPredicate<? super E, ? super E> elementIncludesTester, final Supplier<E> defaultValueSupplier) {
         this.key = key;
@@ -69,7 +69,7 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

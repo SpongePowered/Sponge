@@ -30,7 +30,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.common.data.util.NbtCollectors;
 import org.spongepowered.common.data.util.NbtStreams;
@@ -51,7 +51,7 @@ public final class BreakablePlaceableUtils {
         final CompoundNBT tag = stack.getOrCreateTag();
         final ListNBT list = value.stream()
                 .map(type -> {
-                    final CatalogKey key = type.getKey();
+                    final ResourceKey key = type.getKey();
                     if (key.getNamespace().equals("minecraft")) {
                         return key.getValue();
                     } else {

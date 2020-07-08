@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +40,7 @@ public abstract class EntityTypeMixin_API implements EntityType {
     private Translation api$translation;
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return ((CatalogKeyBridge) this).bridge$getKey();
     }
 

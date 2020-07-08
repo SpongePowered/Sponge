@@ -31,7 +31,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.event.HoverEvent;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
@@ -73,7 +73,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                         EntityType type = null;
                         if (nbt.contains("type", Constants.NBT.TAG_STRING)) {
                             type = SpongeCommon.getGame().getRegistry().getCatalogRegistry().get(EntityType.class,
-                                CatalogKey.resolve(name)).orElse(null);
+                                ResourceKey.resolve(name)).orElse(null);
                         }
 
                         UUID uniqueId = UUID.fromString(nbt.getString("id"));

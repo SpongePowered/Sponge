@@ -25,11 +25,11 @@
 package org.spongepowered.common.bridge.entitycollision;
 
 import net.minecraft.world.World;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 
 public interface CollisionCapabilityBridge {
 
-    CatalogKey collision$getKey();
+    ResourceKey collision$getKey();
 
     int collision$getMaxCollisions();
 

@@ -53,7 +53,7 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.EndDimension;
 import net.minecraft.world.dimension.OverworldDimension;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
 import org.spongepowered.api.entity.living.player.Player;
@@ -521,7 +521,7 @@ public final class EntityUtil {
 
         // Check if we're to use a different teleporter for this world
         if (teleporter.getClass().getName().equals("net.minecraft.world.Teleporter")) {
-            final CatalogKey key = ((DimensionTypeBridge) toWorld.dimension.getType()).bridge$getKey();
+            final ResourceKey key = ((DimensionTypeBridge) toWorld.dimension.getType()).bridge$getKey();
             worldName = portalAgents.get("minecraft:default_" + key.getValue().toLowerCase(Locale.ENGLISH));
         } else {
             worldName = portalAgents.get("minecraft:" + teleporter.getClass().getSimpleName());

@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Tuple;
@@ -42,22 +42,22 @@ public final class TextColorStreamGenerator {
 
     public static Stream<Tuple<TextColor, TextFormatting>> stream() {
         return Stream.of(
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("aqua"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.AQUA).accessor$getColor())), TextFormatting.AQUA),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("black"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.BLACK).accessor$getColor())), TextFormatting.BLACK),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("blue"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.BLUE).accessor$getColor())), TextFormatting.BLUE),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("dark_aqua"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_AQUA).accessor$getColor())), TextFormatting.DARK_AQUA),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("dark_blue"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_BLUE).accessor$getColor())), TextFormatting.DARK_BLUE),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("dark_gray"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_GRAY).accessor$getColor())), TextFormatting.DARK_GRAY),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("dark_green"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_GREEN).accessor$getColor())), TextFormatting.DARK_GREEN),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("dark_purple"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_PURPLE).accessor$getColor())), TextFormatting.DARK_PURPLE),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("dark_red"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_RED).accessor$getColor())), TextFormatting.DARK_RED),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("gold"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.GOLD).accessor$getColor())), TextFormatting.GOLD),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("gray"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.GRAY).accessor$getColor())), TextFormatting.GRAY),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("green"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.GREEN).accessor$getColor())), TextFormatting.GREEN),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("light_purple"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.LIGHT_PURPLE).accessor$getColor())), TextFormatting.LIGHT_PURPLE),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("red"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.RED).accessor$getColor())), TextFormatting.RED),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("yellow"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.YELLOW).accessor$getColor())), TextFormatting.YELLOW),
-            Tuple.of(new SpongeTextColor(CatalogKey.minecraft("white"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.WHITE).accessor$getColor())), TextFormatting.WHITE)
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("aqua"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.AQUA).accessor$getColor())), TextFormatting.AQUA),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("black"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.BLACK).accessor$getColor())), TextFormatting.BLACK),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("blue"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.BLUE).accessor$getColor())), TextFormatting.BLUE),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("dark_aqua"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_AQUA).accessor$getColor())), TextFormatting.DARK_AQUA),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("dark_blue"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_BLUE).accessor$getColor())), TextFormatting.DARK_BLUE),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("dark_gray"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_GRAY).accessor$getColor())), TextFormatting.DARK_GRAY),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("dark_green"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_GREEN).accessor$getColor())), TextFormatting.DARK_GREEN),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("dark_purple"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_PURPLE).accessor$getColor())), TextFormatting.DARK_PURPLE),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("dark_red"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.DARK_RED).accessor$getColor())), TextFormatting.DARK_RED),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("gold"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.GOLD).accessor$getColor())), TextFormatting.GOLD),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("gray"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.GRAY).accessor$getColor())), TextFormatting.GRAY),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("green"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.GREEN).accessor$getColor())), TextFormatting.GREEN),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("light_purple"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.LIGHT_PURPLE).accessor$getColor())), TextFormatting.LIGHT_PURPLE),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("red"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.RED).accessor$getColor())), TextFormatting.RED),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("yellow"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.YELLOW).accessor$getColor())), TextFormatting.YELLOW),
+            Tuple.of(new SpongeTextColor(ResourceKey.minecraft("white"), Color.ofRgb(((TextFormattingAccessor) (Object) TextFormatting.WHITE).accessor$getColor())), TextFormatting.WHITE)
         );
     }
 }

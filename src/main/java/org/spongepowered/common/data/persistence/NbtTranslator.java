@@ -43,7 +43,7 @@ import net.minecraft.nbt.LongArrayNBT;
 import net.minecraft.nbt.LongNBT;
 import net.minecraft.nbt.ShortNBT;
 import net.minecraft.nbt.StringNBT;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
@@ -68,7 +68,7 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
     }
 
     private NbtTranslator() {
-        super(CatalogKey.sponge("nbt"));
+        super(ResourceKey.sponge("nbt"));
     }
 
     private static CompoundNBT containerToCompound(final DataView container) {

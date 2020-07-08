@@ -30,9 +30,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Platform;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelBuf;
@@ -50,7 +49,7 @@ public final class VanillaRawDataChannel extends VanillaChannelBinding implement
 
     private final Set<RawDataListener> listeners = Sets.newIdentityHashSet();
 
-    public VanillaRawDataChannel(ChannelRegistrar registrar, CatalogKey registration, PluginContainer owner) {
+    public VanillaRawDataChannel(ChannelRegistrar registrar, ResourceKey registration, PluginContainer owner) {
         super(registrar, registration, owner);
     }
 

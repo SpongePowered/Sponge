@@ -27,10 +27,9 @@ package org.spongepowered.common.mixin.api.mcp.scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,18 +44,18 @@ public abstract class Team_CollisionRuleMixin_API implements CollisionRule {
 
     @Shadow public abstract ITextComponent shadow$getDisplayName();
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
     private SpongeTranslation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, String name, int idIn, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, name.toLowerCase());
+        this.api$key = ResourceKey.of(container, name.toLowerCase());
         this.api$translation = new SpongeTranslation((TranslationTextComponent) this.shadow$getDisplayName());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

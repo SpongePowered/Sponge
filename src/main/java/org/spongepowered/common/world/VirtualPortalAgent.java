@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.api.world.teleport.PortalAgentType;
@@ -61,7 +61,7 @@ public final class VirtualPortalAgent implements PortalAgent {
             final String modId = SpongeImplHooks.getModIdFromClass(teleporterClass);
             final String name = teleporterClass.getSimpleName().toLowerCase(Locale.ENGLISH);
             return SpongeCommon
-                .getRegistry().getCatalogRegistry().registerCatalog(new SpongePortalAgentType(CatalogKey.of(modId, name), teleporterClass));
+                .getRegistry().getCatalogRegistry().registerCatalog(new SpongePortalAgentType(ResourceKey.of(modId, name), teleporterClass));
         });
     }
 

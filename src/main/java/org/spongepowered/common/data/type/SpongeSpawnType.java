@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.common.SpongeCatalogType;
 
@@ -32,7 +32,7 @@ public final class SpongeSpawnType extends SpongeCatalogType implements SpawnTyp
 
     private boolean isForced = false;
 
-    public SpongeSpawnType(CatalogKey key) {
+    public SpongeSpawnType(ResourceKey key) {
         super(key);
     }
 

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.item;
 
 import net.minecraft.block.material.MaterialColor;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
@@ -44,18 +44,18 @@ public abstract class DyeColorMixin_API implements DyeColor {
 
     @Shadow public abstract float[] shadow$getColorComponentValues();
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
     private Translation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int idIn, String translationKey, int colorValueIn, MaterialColor mapColorIn, int fireworkColorIn, int textColorIn, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, translationKey.toLowerCase());
+        this.api$key = ResourceKey.of(container, translationKey.toLowerCase());
         this.api$translation = new SpongeTranslation("color.minecraft." + translationKey);
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.fluid;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -41,7 +41,6 @@ import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.common.util.Constants;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -107,7 +106,7 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
         try {
             if (container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
                 final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
-                final Optional<FluidType> type = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, CatalogKey.resolve(fluidId));
+                final Optional<FluidType> type = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, ResourceKey.resolve(fluidId));
                 if (!type.isPresent()) {
                     throw new InvalidDataException("Unknown fluid id found: " + fluidId);
                 }

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.entity.merchant.villager;
 import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -36,7 +36,7 @@ import org.spongepowered.common.bridge.CatalogKeyBridge;
 @Mixin(VillagerProfession.class)
 public abstract class VillagerProfessionMixin implements CatalogKeyBridge {
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
 
     @Redirect(
         method = "register(Ljava/lang/String;Lnet/minecraft/village/PointOfInterestType;Lcom/google/common/collect/ImmutableSet;Lcom/google/common/collect/ImmutableSet;)Lnet/minecraft/entity/merchant/villager/VillagerProfession;",
@@ -46,17 +46,17 @@ public abstract class VillagerProfessionMixin implements CatalogKeyBridge {
         )
     )
     private static Object impl$setKey(final Registry<Object> registry, final ResourceLocation key, final Object profession) {
-        ((CatalogKeyBridge) profession).bridge$setKey((CatalogKey) (Object) key);
+        ((CatalogKeyBridge) profession).bridge$setKey((ResourceKey) (Object) key);
         return Registry.register(registry, key, profession);
     }
 
     @Override
-    public CatalogKey bridge$getKey() {
+    public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
 
     @Override
-    public void bridge$setKey(final CatalogKey key) {
+    public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
     }
 }

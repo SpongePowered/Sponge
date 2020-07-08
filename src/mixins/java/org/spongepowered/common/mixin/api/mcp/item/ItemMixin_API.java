@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
@@ -49,10 +49,10 @@ public abstract class ItemMixin_API implements ItemType {
     @Nullable protected BlockType blockType = null;
 
     @Override
-    public final CatalogKey getKey() {
+    public final ResourceKey getKey() {
         final ResourceLocation resourceLocation = SpongeImplHooks.getItemResourceLocation((Item) (Object) this);
         checkState(resourceLocation != null, "Attempted to access the id before the Item is registered.");
-        return (CatalogKey) (Object) resourceLocation;
+        return (ResourceKey) (Object) resourceLocation;
     }
 
     @Override

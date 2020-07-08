@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Color;
@@ -57,16 +57,16 @@ public final class SpongeTextColor implements TextColor {
         return formatting;
     }
 
-    private final CatalogKey key;
+    private final ResourceKey key;
     private final Color color;
 
-    public SpongeTextColor(CatalogKey key, Color color) {
+    public SpongeTextColor(ResourceKey key, Color color) {
         this.key = key;
         this.color = checkNotNull(color, "color");
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

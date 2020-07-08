@@ -39,7 +39,7 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.RecipeType;
@@ -113,7 +113,7 @@ public class SpongeSmeltingRecipeBuilder extends SpongeCatalogBuilder<SmeltingRe
     }
 
     @Override
-    protected SmeltingRecipe build(CatalogKey key) {
+    protected SmeltingRecipe build(ResourceKey key) {
         checkNotNull(this.type);
         checkNotNull(this.ingredient);
         checkNotNull(this.result);

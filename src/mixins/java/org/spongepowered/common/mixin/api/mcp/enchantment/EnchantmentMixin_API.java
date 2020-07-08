@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.enchantment;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.translation.Translation;
@@ -62,14 +62,14 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         if (this.api$id == null) {
             final ResourceLocation id = Registry.ENCHANTMENT.getKey((Enchantment) (Object) this);
             if (id != null) {
                 this.api$id = id;
             }
         }
-        return (CatalogKey) (Object) this.api$id;
+        return (ResourceKey) (Object) this.api$id;
     }
 
     @Override

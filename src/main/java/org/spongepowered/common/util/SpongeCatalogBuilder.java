@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.util.CatalogBuilder;
 import org.spongepowered.api.util.ResettableBuilder;
@@ -40,10 +40,10 @@ import org.spongepowered.api.util.ResettableBuilder;
 public abstract class SpongeCatalogBuilder<C extends CatalogType, B extends ResettableBuilder<C, B>>
         implements CatalogBuilder<C, B> {
 
-    @Nullable protected CatalogKey key;
+    @Nullable protected ResourceKey key;
 
     @Override
-    public B key(CatalogKey key) {
+    public B key(ResourceKey key) {
         checkNotNull(key, "key");
         checkArgument(!key.getNamespace().isEmpty(), "The key namespace may not be empty.");
         checkArgument(!key.getValue().isEmpty(), "The key value may not be empty.");
@@ -57,7 +57,7 @@ public abstract class SpongeCatalogBuilder<C extends CatalogType, B extends Rese
         return this.build(this.key);
     }
 
-    protected abstract C build(CatalogKey key);
+    protected abstract C build(ResourceKey key);
 
     @Override
     public B reset() {

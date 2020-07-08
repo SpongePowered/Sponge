@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world.teleport;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3i;
@@ -32,7 +32,7 @@ import org.spongepowered.math.vector.Vector3i;
 public class SurfaceOnlyTeleportHelperFilter extends DefaultTeleportHelperFilter {
 
     public SurfaceOnlyTeleportHelperFilter() {
-        super(CatalogKey.sponge("surface_only"));
+        super(ResourceKey.sponge("surface_only"));
     }
 
     @Override

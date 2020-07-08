@@ -29,7 +29,7 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.RangedAttackGoal;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.LookRandomlyGoal;
@@ -52,15 +52,15 @@ public final class GoalTypeStreamGenerator {
 
     public static Stream<Tuple<GoalType, Class<? extends Goal>>> stream() {
         return Stream.of(
-            Tuple.of(new SpongeGoalType(CatalogKey.minecraft("attack_living"), AttackLivingGoal.class), MeleeAttackGoal.class),
-            Tuple.of(new SpongeGoalType(CatalogKey.minecraft("avoid_living"), AvoidLivingGoal.class), AvoidEntityGoal.class),
-            Tuple.of(new SpongeGoalType(CatalogKey.minecraft("find_nearest_attackable"), FindNearestAttackableTargetGoal.class), NearestAttackableTargetGoal.class),
-            Tuple.of(new SpongeGoalType(CatalogKey.minecraft("look_at"), LookAtGoal.class), net.minecraft.entity.ai.goal.LookAtGoal.class),
-            Tuple.of(new SpongeGoalType(CatalogKey.minecraft("look_randomly"), LookRandomlyGoal.class), net.minecraft.entity.ai.goal.LookRandomlyGoal.class),
-            Tuple.of(new SpongeGoalType(CatalogKey.minecraft("random_walking"), RandomWalkingGoal.class), net.minecraft.entity.ai.goal.RandomWalkingGoal.class),
-            Tuple.of(new SpongeGoalType(CatalogKey.minecraft("ranged_attack_against_agent"), RangedAttackAgainstAgentGoal.class), RangedAttackGoal.class),
-            Tuple.of(new SpongeGoalType(CatalogKey.minecraft("run_around_like_crazy"), RunAroundLikeCrazyGoal.class), net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal.class),
-            Tuple.of(new SpongeGoalType(CatalogKey.minecraft("swim"), SwimGoal.class), net.minecraft.entity.ai.goal.SwimGoal.class)
+            Tuple.of(new SpongeGoalType(ResourceKey.minecraft("attack_living"), AttackLivingGoal.class), MeleeAttackGoal.class),
+            Tuple.of(new SpongeGoalType(ResourceKey.minecraft("avoid_living"), AvoidLivingGoal.class), AvoidEntityGoal.class),
+            Tuple.of(new SpongeGoalType(ResourceKey.minecraft("find_nearest_attackable"), FindNearestAttackableTargetGoal.class), NearestAttackableTargetGoal.class),
+            Tuple.of(new SpongeGoalType(ResourceKey.minecraft("look_at"), LookAtGoal.class), net.minecraft.entity.ai.goal.LookAtGoal.class),
+            Tuple.of(new SpongeGoalType(ResourceKey.minecraft("look_randomly"), LookRandomlyGoal.class), net.minecraft.entity.ai.goal.LookRandomlyGoal.class),
+            Tuple.of(new SpongeGoalType(ResourceKey.minecraft("random_walking"), RandomWalkingGoal.class), net.minecraft.entity.ai.goal.RandomWalkingGoal.class),
+            Tuple.of(new SpongeGoalType(ResourceKey.minecraft("ranged_attack_against_agent"), RangedAttackAgainstAgentGoal.class), RangedAttackGoal.class),
+            Tuple.of(new SpongeGoalType(ResourceKey.minecraft("run_around_like_crazy"), RunAroundLikeCrazyGoal.class), net.minecraft.entity.ai.goal.RunAroundLikeCrazyGoal.class),
+            Tuple.of(new SpongeGoalType(ResourceKey.minecraft("swim"), SwimGoal.class), net.minecraft.entity.ai.goal.SwimGoal.class)
         );
     }
 }

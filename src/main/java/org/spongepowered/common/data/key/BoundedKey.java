@@ -26,7 +26,7 @@ package org.spongepowered.common.data.key;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.value.BoundedValueConstructor;
 
@@ -39,7 +39,7 @@ public final class BoundedKey<V extends BoundedValue<E>, E> extends SpongeKey<V,
     private final Supplier<E> minimum;
     private final Supplier<E> maximum;
 
-    BoundedKey(final CatalogKey key, final TypeToken<V> valueToken,
+    BoundedKey(final ResourceKey key, final TypeToken<V> valueToken,
         final TypeToken<E> elementToken, final Comparator<E> elementComparator,
         final BiPredicate<E, E> elementIncludesTester, final Supplier<E> minimum, final Supplier<E> maximum) {
         super(key, valueToken, elementToken, elementComparator, elementIncludesTester, () -> null);

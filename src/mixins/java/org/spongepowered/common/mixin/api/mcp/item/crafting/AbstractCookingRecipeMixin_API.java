@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.item.crafting;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingResult;
@@ -76,7 +76,7 @@ public abstract class AbstractCookingRecipeMixin_API implements SmeltingRecipe {
     }
 
     @Override
-    public CatalogKey getKey() {
-        return (CatalogKey) (Object) this.id;
+    public ResourceKey getKey() {
+        return (ResourceKey) (Object) this.id;
     }
 }

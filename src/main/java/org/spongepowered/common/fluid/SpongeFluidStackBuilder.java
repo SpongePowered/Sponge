@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -107,7 +107,7 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
         }
         this.reset();
         final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
-        final Optional<FluidType> fluidType = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, CatalogKey.resolve(fluidId));
+        final Optional<FluidType> fluidType = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, ResourceKey.resolve(fluidId));
         if (!fluidType.isPresent()) {
             throw new InvalidDataException("Invalid fluid id found: " + fluidId);
         }

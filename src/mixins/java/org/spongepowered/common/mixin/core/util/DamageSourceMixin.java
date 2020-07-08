@@ -33,7 +33,7 @@ import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Explosion;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
@@ -120,7 +120,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
         if (!this.damageType.contains(":")) {
             this.impl$damageType = DamageSourceToTypeProvider.getInstance().getOrCustom(this.damageType).get();
         } else {
-            this.impl$damageType = Sponge.getRegistry().getCatalogRegistry().get(DamageType.class, CatalogKey.resolve(this.damageType)).orElseGet(DamageTypes.CUSTOM);
+            this.impl$damageType = Sponge.getRegistry().getCatalogRegistry().get(DamageType.class, ResourceKey.resolve(this.damageType)).orElseGet(DamageTypes.CUSTOM);
         }
     }
 

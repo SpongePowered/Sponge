@@ -35,7 +35,7 @@ import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
@@ -85,7 +85,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private ITextComponent displayText;
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
     private AdvancementCriterion impl$criterion;
     @Nullable private AdvancementTree impl$tree;
     private List<Text> impl$toastText;
@@ -101,7 +101,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
         if (!SpongeImplHooks.onServerThread()) {
             return;
         }
-        this.impl$key = (CatalogKey) (Object) location;
+        this.impl$key = (ResourceKey) (Object) location;
         if (displayInfo != null) {
             ((DisplayInfoBridge) displayInfo).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this);
         }
@@ -129,7 +129,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
                 fixedPath = fixedPath.substring(0, fixedPath.lastIndexOf('/'));
             }
             fixedPath = fixedPath.replace('/', '_');
-            this.impl$tree = new SpongeAdvancementTree((org.spongepowered.api.advancement.Advancement) this, CatalogKey.of(this.impl$key
+            this.impl$tree = new SpongeAdvancementTree((org.spongepowered.api.advancement.Advancement) this, ResourceKey.of(this.impl$key
                     .getNamespace(), fixedPath), displayInfo != null ? this.impl$translation : new FixedTranslation(fixedPath));
             AdvancementTreeRegistryModule.getInstance().registerAdditionalCatalog(this.impl$tree);
         } else {
@@ -190,7 +190,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     }
 
     @Override
-    public CatalogKey bridge$getKey() {
+    public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
 

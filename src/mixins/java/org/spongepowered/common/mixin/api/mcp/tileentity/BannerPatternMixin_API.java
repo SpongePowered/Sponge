@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.tileentity.BannerPattern;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,16 +37,16 @@ import org.spongepowered.plugin.PluginContainer;
 @Mixin(BannerPattern.class)
 public abstract class BannerPatternMixin_API implements BannerPatternShape {
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
 
     @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;)V", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String fileName, String hashName, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, fileName.toLowerCase());
+        this.api$key = ResourceKey.of(container, fileName.toLowerCase());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.common.economy.SpongeAccountDeletionResultType;
 
@@ -37,11 +37,11 @@ public final class AccountDeletionResultTypeStreamGenerator {
 
     public static Stream<AccountDeletionResultType> stream() {
         return Stream.of(
-            new SpongeAccountDeletionResultType(CatalogKey.sponge("absent")),
-            new SpongeAccountDeletionResultType(CatalogKey.sponge("failed")),
-            new SpongeAccountDeletionResultType(CatalogKey.sponge("success")),
-            new SpongeAccountDeletionResultType(CatalogKey.sponge("unsupported")),
-            new SpongeAccountDeletionResultType(CatalogKey.sponge("undeletable"))
+            new SpongeAccountDeletionResultType(ResourceKey.sponge("absent")),
+            new SpongeAccountDeletionResultType(ResourceKey.sponge("failed")),
+            new SpongeAccountDeletionResultType(ResourceKey.sponge("success")),
+            new SpongeAccountDeletionResultType(ResourceKey.sponge("unsupported")),
+            new SpongeAccountDeletionResultType(ResourceKey.sponge("undeletable"))
         );
     }
 }

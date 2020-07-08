@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.state.properties;
 
 import net.minecraft.state.properties.DoorHingeSide;
 import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,16 +40,16 @@ import org.spongepowered.plugin.PluginContainer;
 @Mixin(DoorHingeSide.class)
 public abstract class DoorHingeSideMixin_API implements Hinge {
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, enumName.toLowerCase());
+        this.api$key = ResourceKey.of(container, enumName.toLowerCase());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

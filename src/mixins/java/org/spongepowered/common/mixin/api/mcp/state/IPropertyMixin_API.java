@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.state;
 import net.minecraft.state.IProperty;
 import net.minecraft.state.Property;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Implements;
@@ -55,9 +55,9 @@ import java.util.function.Predicate;
 @Implements(@Interface(iface = StateProperty.class, prefix = "state$"))
 public interface IPropertyMixin_API<T extends Comparable<T>> extends IProperty<T> {
 
-    default CatalogKey state$getKey() {
+    default ResourceKey state$getKey() {
         final String id = BlockPropertyIdProvider.getIdFor(this);
-        return (CatalogKey) (Object) new ResourceLocation(id);
+        return (ResourceKey) (Object) new ResourceLocation(id);
     }
 
     @Intrinsic

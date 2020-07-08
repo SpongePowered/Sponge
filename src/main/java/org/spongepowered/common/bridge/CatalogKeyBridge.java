@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.bridge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 
 public interface CatalogKeyBridge {
 
-    CatalogKey bridge$getKey();
+    ResourceKey bridge$getKey();
 
-    default void bridge$setKey(CatalogKey key) {
+    default void bridge$setKey(ResourceKey key) {
         throw new UnsupportedOperationException("Catalog key is not allowed to be set outside Mixin!");
     }
 }

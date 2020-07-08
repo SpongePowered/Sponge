@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.common.event.cause.entity.dismount.SpongeDismountType;
 
@@ -37,9 +37,9 @@ public final class DismountTypeStreamGenerator {
 
     public static Stream<DismountType> stream() {
         return Stream.of(
-            new SpongeDismountType(CatalogKey.minecraft("player")),
-            new SpongeDismountType(CatalogKey.minecraft("derail")),
-            new SpongeDismountType(CatalogKey.minecraft("death"))
+            new SpongeDismountType(ResourceKey.minecraft("player")),
+            new SpongeDismountType(ResourceKey.minecraft("derail")),
+            new SpongeDismountType(ResourceKey.minecraft("death"))
         );
     }
 }

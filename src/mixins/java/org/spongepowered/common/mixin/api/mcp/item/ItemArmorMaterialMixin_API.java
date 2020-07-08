@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.ArmorMaterial;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Final;
@@ -43,12 +43,12 @@ public abstract class ItemArmorMaterialMixin_API implements ArmorMaterial {
     @Shadow @Final private String name;
     @Shadow public abstract net.minecraft.item.crafting.Ingredient shadow$getRepairMaterial();
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         if (this.impl$key == null) {
-            this.impl$key = CatalogKey.minecraft(this.name);
+            this.impl$key = ResourceKey.minecraft(this.name);
         }
         return this.impl$key;
     }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.entity.player;
 
 import net.minecraft.entity.player.ChatVisibility;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,18 +40,18 @@ import org.spongepowered.plugin.PluginContainer;
 @Mixin(ChatVisibility.class)
 public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.text.chat.ChatVisibility {
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
     private SpongeTranslation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int p_i50176_3_, String p_i50176_4_, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, enumName.toLowerCase());
+        this.api$key = ResourceKey.of(container, enumName.toLowerCase());
         this.api$translation = new SpongeTranslation(p_i50176_4_);
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

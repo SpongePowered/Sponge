@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.reflect.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ListValue;
@@ -128,13 +128,13 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> key(final CatalogKey key) {
+    public SpongeKeyBuilder<E, V> key(final ResourceKey key) {
         super.key(key);
         return this;
     }
 
     @Override
-    protected Key<V> build(final CatalogKey key) {
+    protected Key<V> build(final ResourceKey key) {
         checkNotNull(this.valueToken, "The value token must be set");
 
         final TypeToken<E> elementToken = (TypeToken<E>) this.valueToken.resolveType(valueElementParameter);

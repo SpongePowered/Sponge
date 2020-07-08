@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -41,8 +41,8 @@ public interface ICriterionTriggerMixin_API<C extends FilteredTriggerConfigurati
     @Shadow ResourceLocation shadow$getId();
 
     @Override
-    default CatalogKey getKey() {
-        return (CatalogKey) (Object) this.shadow$getId();
+    default ResourceKey getKey() {
+        return (ResourceKey) (Object) this.shadow$getId();
     }
 
     @Override

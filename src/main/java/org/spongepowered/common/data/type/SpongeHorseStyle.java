@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.HorseStyle;
 
 public final class SpongeHorseStyle extends SpongeEntityMetadataType<Integer> implements HorseStyle {
 
-    public SpongeHorseStyle(CatalogKey key, int metadata) {
+    public SpongeHorseStyle(ResourceKey key, int metadata) {
         super(key, metadata);
     }
 

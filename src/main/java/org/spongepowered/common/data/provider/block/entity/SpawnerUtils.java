@@ -29,7 +29,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedSpawnerEntity;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.spawner.AbstractSpawner;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -65,7 +65,7 @@ public class SpawnerUtils {
     public static void setNextEntity(final AbstractSpawner logic, final WeightedSerializableObject<EntityArchetype> value) {
         final CompoundNBT compound = NbtTranslator.getInstance().translateData(value.get().getEntityData());
         if (!compound.contains(Constants.Entity.ENTITY_TYPE_ID)) {
-            CatalogKey key = value.get().getType().getKey();
+            ResourceKey key = value.get().getType().getKey();
             compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
         }
 
@@ -103,7 +103,7 @@ public class SpawnerUtils {
 
             final CompoundNBT compound = NbtTranslator.getInstance().translateData(object.get().getEntityData());
             if (!compound.contains(Constants.Entity.ENTITY_TYPE_ID)) {
-                CatalogKey key = object.get().getType().getKey();
+                ResourceKey key = object.get().getType().getKey();
                 compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
             }
 

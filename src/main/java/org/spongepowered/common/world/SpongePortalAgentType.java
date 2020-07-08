@@ -25,7 +25,7 @@
 package org.spongepowered.common.world;
 
 import com.google.common.base.Preconditions;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.SpongeCatalogType;
@@ -35,7 +35,7 @@ public final class SpongePortalAgentType extends SpongeCatalogType implements Po
 
     private final Class<? extends ForgeITeleporterBridge> portalAgentClass;
 
-    public SpongePortalAgentType(CatalogKey key, Class<? extends ForgeITeleporterBridge> portalAgentClass) {
+    public SpongePortalAgentType(ResourceKey key, Class<? extends ForgeITeleporterBridge> portalAgentClass) {
         super(key);
         this.portalAgentClass = Preconditions.checkNotNull(portalAgentClass, "The class was null for '" + this.getKey() + ".");
     }

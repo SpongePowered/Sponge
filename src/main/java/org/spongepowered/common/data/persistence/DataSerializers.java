@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.persistence;
 
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
@@ -93,7 +93,7 @@ public final class DataSerializers {
     static {
         UUID_DATA_SERIALIZER = new DataTranslator<UUID>() {
 
-            final CatalogKey key = CatalogKey.sponge("uuid");
+            final ResourceKey key = ResourceKey.sponge("uuid");
             final TypeToken<UUID> token = TypeToken.of(UUID.class);
 
             @Override
@@ -123,13 +123,13 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_2_D_DATA_SERIALIZER = new DataTranslator<Vector2d>() {
 
-            final CatalogKey key = CatalogKey.sponge("vector_2_d");
+            final ResourceKey key = ResourceKey.sponge("vector_2_d");
             final TypeToken<Vector2d> token = TypeToken.of(Vector2d.class);
 
             @Override
@@ -158,13 +158,13 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_2_F_DATA_SERIALIZER = new DataTranslator<Vector2f>() {
 
-            final CatalogKey key = CatalogKey.sponge("vector_2_f");
+            final ResourceKey key = ResourceKey.sponge("vector_2_f");
             final TypeToken<Vector2f> token = TypeToken.of(Vector2f.class);
 
             @Override
@@ -193,13 +193,13 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_2_I_DATA_SERIALIZER = new DataTranslator<Vector2i>() {
 
-            final CatalogKey key = CatalogKey.sponge("vector_2_i");
+            final ResourceKey key = ResourceKey.sponge("vector_2_i");
             final TypeToken<Vector2i> token = TypeToken.of(Vector2i.class);
 
             @Override
@@ -229,12 +229,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_2_L_DATA_SERIALIZER = new DataTranslator<Vector2l>() {
-            final CatalogKey key = CatalogKey.sponge("vector_2_l");
+            final ResourceKey key = ResourceKey.sponge("vector_2_l");
             final TypeToken<Vector2l> token = TypeToken.of(Vector2l.class);
 
             @Override
@@ -263,12 +263,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_3_D_DATA_SERIALIZER = new DataTranslator<Vector3d>() {
-            final CatalogKey key = CatalogKey.sponge("vector_3_d");
+            final ResourceKey key = ResourceKey.sponge("vector_3_d");
             final TypeToken<Vector3d> token = TypeToken.of(Vector3d.class);
 
             @Override
@@ -301,12 +301,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_3_F_DATA_SERIALIZER = new DataTranslator<Vector3f>() {
-            final CatalogKey key = CatalogKey.sponge("vector_3_f");
+            final ResourceKey key = ResourceKey.sponge("vector_3_f");
             final TypeToken<Vector3f> token = TypeToken.of(Vector3f.class);
 
             @Override
@@ -339,12 +339,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_3_I_DATA_SERIALIZER = new DataTranslator<Vector3i>() {
-            final CatalogKey key = CatalogKey.sponge("vector_3_i");
+            final ResourceKey key = ResourceKey.sponge("vector_3_i");
             final TypeToken<Vector3i> token = TypeToken.of(Vector3i.class);
 
             @Override
@@ -377,12 +377,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_3_L_DATA_SERIALIZER = new DataTranslator<Vector3l>() {
-            final CatalogKey key = CatalogKey.sponge("vector_3_l");
+            final ResourceKey key = ResourceKey.sponge("vector_3_l");
             final TypeToken<Vector3l> token = TypeToken.of(Vector3l.class);
 
             @Override
@@ -415,12 +415,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_4_F_DATA_SERIALIZER = new DataTranslator<Vector4f>() {
-            final CatalogKey key = CatalogKey.sponge("vector_4_f");
+            final ResourceKey key = ResourceKey.sponge("vector_4_f");
             final TypeToken<Vector4f> token = TypeToken.of(Vector4f.class);
 
             @Override
@@ -456,12 +456,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_4_I_DATA_SERIALIZER = new DataTranslator<Vector4i>() {
-            final CatalogKey key = CatalogKey.sponge("vector_4_i");
+            final ResourceKey key = ResourceKey.sponge("vector_4_i");
             final TypeToken<Vector4i> token = TypeToken.of(Vector4i.class);
 
             @Override
@@ -497,12 +497,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_4_L_DATA_SERIALIZER = new DataTranslator<Vector4l>() {
-            final CatalogKey key = CatalogKey.sponge("vector_4_l");
+            final ResourceKey key = ResourceKey.sponge("vector_4_l");
             final TypeToken<Vector4l> token = TypeToken.of(Vector4l.class);
 
             @Override
@@ -538,12 +538,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         VECTOR_4_D_DATA_SERIALIZER = new DataTranslator<Vector4d>() {
-            final CatalogKey key = CatalogKey.sponge("vector_4_d");
+            final ResourceKey key = ResourceKey.sponge("vector_4_d");
             final TypeToken<Vector4d> token = TypeToken.of(Vector4d.class);
 
             @Override
@@ -579,12 +579,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         COMPLEXD_DATA_SERIALIZER = new DataTranslator<Complexd>() {
-            final CatalogKey key = CatalogKey.sponge("complexd");
+            final ResourceKey key = ResourceKey.sponge("complexd");
             final TypeToken<Complexd> token = TypeToken.of(Complexd.class);
 
             @Override
@@ -614,12 +614,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         COMPLEXF_DATA_SERIALIZER = new DataTranslator<Complexf>() {
-            final CatalogKey key = CatalogKey.sponge("complexf");
+            final ResourceKey key = ResourceKey.sponge("complexf");
             final TypeToken<Complexf> token = TypeToken.of(Complexf.class);
 
             @Override
@@ -648,12 +648,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         QUATERNIOND_DATA_SERIALIZER = new DataTranslator<Quaterniond>() {
-            final CatalogKey key = CatalogKey.sponge("quaterniond");
+            final ResourceKey key = ResourceKey.sponge("quaterniond");
             final TypeToken<Quaterniond> token = TypeToken.of(Quaterniond.class);
 
             @Override
@@ -688,12 +688,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         QUATERNIONF_DATA_SERIALIZER = new DataTranslator<Quaternionf>() {
-            final CatalogKey key = CatalogKey.sponge("quaternionf");
+            final ResourceKey key = ResourceKey.sponge("quaternionf");
             final TypeToken<Quaternionf> token = TypeToken.of(Quaternionf.class);
 
             @Override
@@ -728,12 +728,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         LOCAL_TIME_DATA_SERIALIZER = new DataTranslator<LocalTime>() {
-            final CatalogKey key = CatalogKey.sponge("local_time");
+            final ResourceKey key = ResourceKey.sponge("local_time");
             final TypeToken<LocalTime> token = TypeToken.of(LocalTime.class);
 
             @Override
@@ -782,12 +782,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         LOCAL_DATE_DATA_SERIALIZER = new DataTranslator<LocalDate>() {
-            final CatalogKey key = CatalogKey.sponge("local_date");
+            final ResourceKey key = ResourceKey.sponge("local_date");
             final TypeToken<LocalDate> token = TypeToken.of(LocalDate.class);
 
             @Override
@@ -828,12 +828,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         LOCAL_DATE_TIME_DATA_SERIALIZER = new DataTranslator<LocalDateTime>() {
-            final CatalogKey key = CatalogKey.sponge("local_date_time");
+            final ResourceKey key = ResourceKey.sponge("local_date_time");
             final TypeToken<LocalDateTime> token = TypeToken.of(LocalDateTime.class);
 
             @Override
@@ -900,12 +900,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         ZONED_DATE_TIME_DATA_SERIALIZER = new DataTranslator<ZonedDateTime>() {
-            final CatalogKey key = CatalogKey.sponge("zoned_date_time");
+            final ResourceKey key = ResourceKey.sponge("zoned_date_time");
             final TypeToken<ZonedDateTime> token = TypeToken.of(ZonedDateTime.class);
 
             @Override
@@ -979,12 +979,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         INSTANT_DATA_SERIALIZER = new DataTranslator<Instant>() {
-            final CatalogKey key = CatalogKey.sponge("instant");
+            final ResourceKey key = ResourceKey.sponge("instant");
             final TypeToken<Instant> token = TypeToken.of(Instant.class);
 
             @Override
@@ -1053,12 +1053,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };
         MONTH_DATA_SERIALIZER = new DataTranslator<Month>() {
-            final CatalogKey key = CatalogKey.sponge("month");
+            final ResourceKey key = ResourceKey.sponge("month");
             final TypeToken<Month> token = TypeToken.of(Month.class);
 
             @Override
@@ -1086,7 +1086,7 @@ public final class DataSerializers {
             }
 
             @Override
-            public CatalogKey getKey() {
+            public ResourceKey getKey() {
                 return this.key;
             }
         };

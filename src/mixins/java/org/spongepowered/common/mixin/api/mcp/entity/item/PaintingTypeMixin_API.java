@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -41,7 +41,7 @@ public abstract class PaintingTypeMixin_API implements ArtType {
     @Shadow public abstract int shadow$getHeight();
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return ((CatalogKeyBridge) this).bridge$getKey();
     }
 

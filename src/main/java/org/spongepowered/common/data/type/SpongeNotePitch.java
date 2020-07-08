@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.type;
 
 import net.minecraft.util.registry.SimpleRegistry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.common.SpongeCatalogType;
@@ -35,7 +35,7 @@ public final class SpongeNotePitch extends SpongeCatalogType implements NotePitc
 
     private final int id;
 
-    public SpongeNotePitch(CatalogKey key, int id) {
+    public SpongeNotePitch(ResourceKey key, int id) {
         super(key);
         this.id = id;
     }

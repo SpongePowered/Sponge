@@ -25,12 +25,12 @@
 package org.spongepowered.common.data.type;
 
 import net.minecraft.inventory.EquipmentSlotType;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.equipment.WornEquipmentType;
 
 public final class SpongeWornEquipmentType extends SpongeEquipmentType implements WornEquipmentType {
 
-    public SpongeWornEquipmentType(CatalogKey key, EquipmentSlotType... slots) {
+    public SpongeWornEquipmentType(ResourceKey key, EquipmentSlotType... slots) {
         super(key, slots);
     }
 }

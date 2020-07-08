@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.item.recipe.crafting;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 
 public class SpongeIngredientBuilder implements Ingredient.Builder {
 
     private ItemType[] types;
-    private CatalogKey itemTag;
+    private ResourceKey itemTag;
 
     @Override
     public Ingredient.Builder reset() {
@@ -48,7 +48,7 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
     }
 
     @Override
-    public Ingredient.Builder with(CatalogKey itemTag) {
+    public Ingredient.Builder with(ResourceKey itemTag) {
         this.itemTag = itemTag;
         this.types = null;
         return this;

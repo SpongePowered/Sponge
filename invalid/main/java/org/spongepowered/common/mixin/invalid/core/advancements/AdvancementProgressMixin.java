@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.PlayerAdvancements;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -76,7 +76,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
     @Shadow @Final private Map<String, net.minecraft.advancements.CriterionProgress> criteria;
 
     @Nullable private Map<AdvancementCriterion, ImplementationBackedCriterionProgress> impl$progressMap;
-    @Nullable private CatalogKey impl$advancementKey;
+    @Nullable private ResourceKey impl$advancementKey;
     @Nullable private PlayerAdvancements impl$playerAdvancements;
 
     @Override
@@ -101,7 +101,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
     }
 
     @Override
-    public void bridge$setAdvancementKey(CatalogKey key) {
+    public void bridge$setAdvancementKey(ResourceKey key) {
         checkState(SpongeImplHooks.onServerThread());
         this.impl$advancementKey = key;
     }

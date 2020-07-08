@@ -30,7 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.StonecuttingRecipe;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -75,7 +75,7 @@ public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<S
     }
 
     @Override
-    protected StoneCutterRecipe build(CatalogKey key) {
+    protected StoneCutterRecipe build(ResourceKey key) {
         String group = ""; // unused
         if (this.ingredientPredicate == null) {
             return (StoneCutterRecipe) new StonecuttingRecipe((ResourceLocation) (Object) key, group, this.ingredient, this.result);
@@ -85,7 +85,7 @@ public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<S
     }
 
     @Override
-    public StoneCutterRecipe.Builder.EndStep key(CatalogKey key) {
+    public StoneCutterRecipe.Builder.EndStep key(ResourceKey key) {
         super.key(key);
         return this;
     }

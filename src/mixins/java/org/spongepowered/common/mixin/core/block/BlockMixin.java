@@ -38,15 +38,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
-import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -93,15 +91,15 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Shadow public abstract Material getMaterial(net.minecraft.block.BlockState state);
     @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
 
     @Override
-    public CatalogKey bridge$getKey() {
+    public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
 
     @Override
-    public void bridge$setKey(CatalogKey key) {
+    public void bridge$setKey(ResourceKey key) {
         this.impl$key = key;
     }
 

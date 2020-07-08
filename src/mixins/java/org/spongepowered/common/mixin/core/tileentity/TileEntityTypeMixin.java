@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -44,7 +44,7 @@ import org.spongepowered.plugin.PluginContainer;
 @Mixin(TileEntityType.class)
 public abstract class TileEntityTypeMixin implements CatalogKeyBridge, TrackableBridge, TileEntityTypeBridge {
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
     private boolean impl$allowsBlockBulkCaptures = true;
     private boolean impl$allowsBlockEventCreation = true;
     private boolean impl$allowsEntityBulkCaptures = true;
@@ -63,7 +63,7 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
         Registry.register(registry, key, tileEntityType);
 
         final CatalogKeyBridge catalogKeyBridge = (CatalogKeyBridge) tileEntityType;
-        catalogKeyBridge.bridge$setKey(CatalogKey.of(container, key));
+        catalogKeyBridge.bridge$setKey(ResourceKey.of(container, key));
 
         final TrackableBridge trackableBridge = (TrackableBridge) tileEntityType;
 
@@ -101,12 +101,12 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
     }
 
     @Override
-    public CatalogKey bridge$getKey() {
+    public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
 
     @Override
-    public void bridge$setKey(final CatalogKey key) {
+    public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
     }
 

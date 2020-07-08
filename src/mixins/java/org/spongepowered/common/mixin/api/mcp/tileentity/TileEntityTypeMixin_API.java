@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +39,7 @@ public abstract class TileEntityTypeMixin_API implements BlockEntityType {
     @Shadow public abstract boolean shadow$isValidBlock(Block block);
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return ((CatalogKeyBridge) this).bridge$getKey();
     }
 

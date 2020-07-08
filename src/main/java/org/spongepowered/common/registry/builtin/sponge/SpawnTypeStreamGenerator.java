@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.common.data.type.SpongeSpawnType;
 
@@ -32,29 +32,29 @@ import java.util.stream.Stream;
 
 public final class SpawnTypeStreamGenerator {
 
-    public static final SpongeSpawnType ENTITY_DEATH = new SpongeSpawnType(CatalogKey.sponge("entity_death"));
-    public static final SpawnType FORCED = new SpongeSpawnType(CatalogKey.sponge("forced")).forced();
+    public static final SpongeSpawnType ENTITY_DEATH = new SpongeSpawnType(ResourceKey.sponge("entity_death"));
+    public static final SpawnType FORCED = new SpongeSpawnType(ResourceKey.sponge("forced")).forced();
 
     public static Stream<SpawnType> stream() {
         return Stream.of(
-            new SpongeSpawnType(CatalogKey.sponge("dispense")),
-            new SpongeSpawnType(CatalogKey.sponge("block_spawning")),
-            new SpongeSpawnType(CatalogKey.sponge("breeding")),
-            new SpongeSpawnType(CatalogKey.sponge("dropped_item")),
-            new SpongeSpawnType(CatalogKey.sponge("experience")),
-            new SpongeSpawnType(CatalogKey.sponge("falling_block")),
-            new SpongeSpawnType(CatalogKey.sponge("mob_spawner")),
-            new SpongeSpawnType(CatalogKey.sponge("passive")),
-            new SpongeSpawnType(CatalogKey.sponge("placement")),
-            new SpongeSpawnType(CatalogKey.sponge("projectile")),
-            new SpongeSpawnType(CatalogKey.sponge("spawn_egg")),
-            new SpongeSpawnType(CatalogKey.sponge("structure")),
-            new SpongeSpawnType(CatalogKey.sponge("tnt_ignite")),
-            new SpongeSpawnType(CatalogKey.sponge("weather")),
-            new SpongeSpawnType(CatalogKey.sponge("custom")),
-            new SpongeSpawnType(CatalogKey.sponge("chunk_load")),
-            new SpongeSpawnType(CatalogKey.sponge("world_spawner")),
-            new SpongeSpawnType(CatalogKey.sponge("plugin")),
+            new SpongeSpawnType(ResourceKey.sponge("dispense")),
+            new SpongeSpawnType(ResourceKey.sponge("block_spawning")),
+            new SpongeSpawnType(ResourceKey.sponge("breeding")),
+            new SpongeSpawnType(ResourceKey.sponge("dropped_item")),
+            new SpongeSpawnType(ResourceKey.sponge("experience")),
+            new SpongeSpawnType(ResourceKey.sponge("falling_block")),
+            new SpongeSpawnType(ResourceKey.sponge("mob_spawner")),
+            new SpongeSpawnType(ResourceKey.sponge("passive")),
+            new SpongeSpawnType(ResourceKey.sponge("placement")),
+            new SpongeSpawnType(ResourceKey.sponge("projectile")),
+            new SpongeSpawnType(ResourceKey.sponge("spawn_egg")),
+            new SpongeSpawnType(ResourceKey.sponge("structure")),
+            new SpongeSpawnType(ResourceKey.sponge("tnt_ignite")),
+            new SpongeSpawnType(ResourceKey.sponge("weather")),
+            new SpongeSpawnType(ResourceKey.sponge("custom")),
+            new SpongeSpawnType(ResourceKey.sponge("chunk_load")),
+            new SpongeSpawnType(ResourceKey.sponge("world_spawner")),
+            new SpongeSpawnType(ResourceKey.sponge("plugin")),
             ENTITY_DEATH,
             FORCED
         );

@@ -26,19 +26,19 @@ package org.spongepowered.common.event.damage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 
 public class SpongeDamageModifierType implements DamageModifierType {
 
-    private final CatalogKey key;
+    private final ResourceKey key;
 
-    public SpongeDamageModifierType(final CatalogKey key) {
+    public SpongeDamageModifierType(final ResourceKey key) {
         this.key = key;
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

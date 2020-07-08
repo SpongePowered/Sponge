@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.data;
 
-import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DuplicateDataStoreException;
@@ -37,7 +36,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -82,7 +80,7 @@ public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<Da
     }
 
     @Override
-    protected DataRegistration build(CatalogKey key) {
+    protected DataRegistration build(ResourceKey key) {
         // TODO restrictions?
         return new SpongeDataRegistration(key, SpongeImplHooks.getActiveModContainer(), this);
     }

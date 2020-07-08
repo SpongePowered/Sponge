@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.EventContextKey;
 
 import javax.annotation.Nullable;
@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Builder<T> {
 
     @Nullable TypeToken<T> typeClass;
-    @Nullable CatalogKey key;
+    @Nullable ResourceKey key;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -48,7 +48,7 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
     }
 
     @Override
-    public EventContextKey.Builder<T> key(CatalogKey key) {
+    public EventContextKey.Builder<T> key(ResourceKey key) {
         checkArgument(key != null, "CatalogKey cannot be null!");
         this.key = key;
         return this;

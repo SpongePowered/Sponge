@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.item.crafting;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,8 +36,8 @@ import org.spongepowered.asm.mixin.Mixin;
 public interface IRecipeTypeMixin_API<R extends Recipe> extends RecipeType<R> {
 
     @Override
-    default CatalogKey getKey() {
+    default ResourceKey getKey() {
         ResourceLocation key = Registry.RECIPE_TYPE.getKey(((IRecipeType) this));
-        return (CatalogKey) (Object) key;
+        return (ResourceKey) (Object) key;
     }
 }

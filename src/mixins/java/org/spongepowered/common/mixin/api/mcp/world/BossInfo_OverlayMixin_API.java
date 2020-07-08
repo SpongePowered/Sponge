@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.world.BossInfo;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,16 +37,16 @@ import org.spongepowered.plugin.PluginContainer;
 @Mixin(BossInfo.Overlay.class)
 public abstract class BossInfo_OverlayMixin_API implements BossBarOverlay {
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, name.toLowerCase());
+        this.api$key = ResourceKey.of(container, name.toLowerCase());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 }

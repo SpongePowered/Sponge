@@ -37,8 +37,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ArrayUtils;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManager;
@@ -761,7 +760,7 @@ public class MemoryDataView implements DataView {
         return this.getString(path)
             .flatMap(string -> {
                     return Sponge.getRegistry().getCatalogRegistry().get(catalogType,
-                        CatalogKey.resolve(string));
+                        ResourceKey.resolve(string));
                 }
             );
     }
@@ -772,7 +771,7 @@ public class MemoryDataView implements DataView {
         checkNotNull(catalogType, "catalogType");
         return this.getStringList(path).map(list ->
             list.stream()
-                .map(string -> Sponge.getRegistry().getCatalogRegistry().get(catalogType, CatalogKey.resolve(string)))
+                .map(string -> Sponge.getRegistry().getCatalogRegistry().get(catalogType, ResourceKey.resolve(string)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList())

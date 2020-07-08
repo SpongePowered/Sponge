@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,6 +39,6 @@ public abstract class BiomesMixin {
     @Inject(method = "register", at = @At("HEAD"))
     private static void impl$setCatalogKey(int id, String key, Biome biome, CallbackInfoReturnable<Biome> cir) {
         // TODO Minecraft 1.14 - Biomes are odd, Forge likely had Modders call another method so we need to intercept that too for the key
-        ((BiomeBridge) biome).bridge$setKey(CatalogKey.minecraft(key));
+        ((BiomeBridge) biome).bridge$setKey(ResourceKey.minecraft(key));
     }
 }

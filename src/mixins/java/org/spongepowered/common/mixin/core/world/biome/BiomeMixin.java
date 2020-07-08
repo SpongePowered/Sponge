@@ -25,22 +25,22 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.biome.BiomeBridge;
 
 @Mixin(Biome.class)
 public abstract class BiomeMixin implements BiomeBridge {
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
 
     @Override
-    public CatalogKey bridge$getKey() {
+    public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
 
     @Override
-    public void bridge$setKey(CatalogKey key) {
+    public void bridge$setKey(ResourceKey key) {
         this.impl$key = key;
     }
 }

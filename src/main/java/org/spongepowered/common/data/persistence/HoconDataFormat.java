@@ -27,7 +27,7 @@ package org.spongepowered.common.data.persistence;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -51,7 +51,7 @@ import java.util.concurrent.Callable;
 
 public class HoconDataFormat extends SpongeCatalogType implements StringDataFormat {
 
-    public HoconDataFormat(CatalogKey key) {
+    public HoconDataFormat(ResourceKey key) {
         super(key);
     }
 

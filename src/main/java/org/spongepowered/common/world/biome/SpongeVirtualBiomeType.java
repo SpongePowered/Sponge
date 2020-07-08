@@ -27,7 +27,7 @@ package org.spongepowered.common.world.biome;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.common.SpongeCatalogType;
@@ -38,7 +38,7 @@ public class SpongeVirtualBiomeType extends SpongeCatalogType implements Virtual
     private final double humidity;
     private final BiomeType persisted;
 
-    public SpongeVirtualBiomeType(CatalogKey key, double temperature, double humidity, BiomeType persistedType) {
+    public SpongeVirtualBiomeType(ResourceKey key, double temperature, double humidity, BiomeType persistedType) {
         super(key);
         this.temperature = temperature;
         this.humidity = humidity;

@@ -36,7 +36,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
@@ -83,7 +83,7 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
     }
 
     private void impl$disconnectClient(final Optional<Text> disconnectMessage) {
-        ITextComponent reason = null;
+        ITextComponent reason;
         if (disconnectMessage.isPresent()) {
             reason = SpongeTexts.toComponent(disconnectMessage.get());
         } else {
@@ -97,7 +97,7 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
         final Text disconnectMessage = Text.of("You are not allowed to log in to this server.");
         // Cause is created directly as we can't access the cause stack manager
         // from off the main thread
-        final ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(
+        final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
                 Cause.of(EventContext.empty(), this.loginGameProfile), (RemoteConnection) this.networkManager,
                 new MessageEvent.MessageFormatter(disconnectMessage), (GameProfile) this.loginGameProfile, false
         );

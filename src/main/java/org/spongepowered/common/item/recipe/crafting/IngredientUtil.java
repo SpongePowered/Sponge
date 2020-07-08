@@ -30,7 +30,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 
 import java.util.Arrays;
@@ -54,7 +54,7 @@ public class IngredientUtil {
     }
 
     @Nullable
-    public static org.spongepowered.api.item.recipe.crafting.Ingredient of(CatalogKey tagKey) {
+    public static org.spongepowered.api.item.recipe.crafting.Ingredient of(ResourceKey tagKey) {
         Tag<Item> itemTag = ItemTags.getCollection().get(((ResourceLocation) (Object) tagKey));
         if (itemTag == null) {
             return null;

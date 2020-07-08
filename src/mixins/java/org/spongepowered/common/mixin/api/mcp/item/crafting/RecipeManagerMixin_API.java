@@ -36,14 +36,13 @@ import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.CampfireTileEntity;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -67,7 +66,7 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
             net.minecraft.world.World worldIn);
 
     @Override
-    public Optional<Recipe> getById(CatalogKey key) {
+    public Optional<Recipe> getByKey(ResourceKey key) {
         return this.shadow$getRecipe((ResourceLocation) (Object) key).map(Recipe.class::cast);
     }
 

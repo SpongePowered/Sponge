@@ -492,7 +492,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         values.add(this.gameMode().asImmutable());
 
         // Player
-        values.add(this.firstPlayed().asImmutable());
+        values.add(this.firstJoined().asImmutable());
         values.add(this.lastPlayed().asImmutable());
         values.add(this.sleepingIgnored().asImmutable());
 

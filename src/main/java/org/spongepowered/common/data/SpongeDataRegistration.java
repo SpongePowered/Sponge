@@ -25,7 +25,7 @@
 package org.spongepowered.common.data;
 
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
@@ -41,13 +41,13 @@ import java.util.Optional;
 
 public final class SpongeDataRegistration implements DataRegistration {
 
-    final CatalogKey key;
+    final ResourceKey key;
     final List<Key<?>> keys;
     final Map<TypeToken, DataStore> dataStoreMap;
     final Map<Key, DataProvider> dataProviderMap;
     final PluginContainer plugin;
 
-    SpongeDataRegistration(CatalogKey key, PluginContainer plugin, SpongeDataRegistrationBuilder builder) {
+    SpongeDataRegistration(ResourceKey key, PluginContainer plugin, SpongeDataRegistrationBuilder builder) {
         this.key = key;
         this.keys = builder.keys;
         this.dataStoreMap = builder.dataStoreMap;
@@ -81,7 +81,7 @@ public final class SpongeDataRegistration implements DataRegistration {
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

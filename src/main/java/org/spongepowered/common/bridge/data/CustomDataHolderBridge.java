@@ -25,9 +25,6 @@
 package org.spongepowered.common.bridge.data;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
@@ -35,8 +32,6 @@ import org.spongepowered.api.data.SerializableDataHolder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.List;

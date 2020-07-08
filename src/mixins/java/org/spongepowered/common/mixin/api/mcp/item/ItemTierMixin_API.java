@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.item;
 
 import net.minecraft.item.ItemTier;
 import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,17 +43,17 @@ public abstract class ItemTierMixin_API implements ToolType {
 
     @Shadow public abstract Ingredient shadow$getRepairMaterial();
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, int p_i48458_3_, int p_i48458_4_, float p_i48458_5_, float p_i48458_6_, int p_i48458_7_,
         Supplier<Ingredient> p_i48458_8_, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, enumName.toLowerCase());
+        this.api$key = ResourceKey.of(container, enumName.toLowerCase());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

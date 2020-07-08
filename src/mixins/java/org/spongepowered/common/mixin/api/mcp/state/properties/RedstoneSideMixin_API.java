@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.state.properties;
 
 import net.minecraft.state.properties.RedstoneSide;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,16 +37,16 @@ import org.spongepowered.plugin.PluginContainer;
 @Mixin(RedstoneSide.class)
 public abstract class RedstoneSideMixin_API implements WireAttachmentType {
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, name.toLowerCase());
+        this.api$key = ResourceKey.of(container, name.toLowerCase());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 }

@@ -37,7 +37,7 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -50,7 +50,7 @@ public class SpongeStonecuttingRecipe extends SingleItemRecipe {
     private static IRecipeSerializer<SpongeStonecuttingRecipe> SPONGE_STONECUTTER = register("stonecutting", new SpongeStoneCutterSerializer());
 
     static <S extends IRecipeSerializer<T>, T extends IRecipe<?>> S register(String key, S recipeSerializer) {
-        ResourceLocation resourceLocation = (ResourceLocation) (Object) CatalogKey.sponge("stonecutting");
+        ResourceLocation resourceLocation = (ResourceLocation) (Object) ResourceKey.sponge("stonecutting");
         return (S)(Registry.<IRecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, resourceLocation, recipeSerializer));
     }
 

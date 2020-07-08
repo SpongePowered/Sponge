@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.data.type.SpongeNotePitch;
@@ -38,31 +38,31 @@ public final class NotePitchStreamGenerator {
 
     public static Stream<Tuple<NotePitch, Integer>> stream() {
         return Stream.of(
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("f_sharp0"), 0), 0),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("g0"), 1), 1),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("g_sharp0"), 2), 2),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("a1"), 3), 3),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("a_sharp1"), 4), 4),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("b1"), 5), 5),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("c1"), 6), 6),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("c_sharp1"), 7), 7),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("d1"), 8), 8),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("d_sharp1"), 9), 9),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("e1"), 10), 10),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("f1"), 11), 11),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("f_sharp1"), 12), 12),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("g1"), 13), 13),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("g_sharp1"), 14), 14),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("a2"), 15), 15),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("a_sharp2"), 16), 16),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("b2"), 17), 17),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("c2"), 18), 18),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("c_sharp2"), 19), 19),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("d2"), 20), 20),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("d_sharp2"), 21), 21),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("e2"), 22), 22),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("f2"), 23), 23),
-            Tuple.of(new SpongeNotePitch(CatalogKey.minecraft("f_sharp2"), 24), 24)
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("f_sharp0"), 0), 0),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("g0"), 1), 1),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("g_sharp0"), 2), 2),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("a1"), 3), 3),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("a_sharp1"), 4), 4),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("b1"), 5), 5),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("c1"), 6), 6),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("c_sharp1"), 7), 7),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("d1"), 8), 8),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("d_sharp1"), 9), 9),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("e1"), 10), 10),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("f1"), 11), 11),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("f_sharp1"), 12), 12),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("g1"), 13), 13),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("g_sharp1"), 14), 14),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("a2"), 15), 15),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("a_sharp2"), 16), 16),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("b2"), 17), 17),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("c2"), 18), 18),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("c_sharp2"), 19), 19),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("d2"), 20), 20),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("d_sharp2"), 21), 21),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("e2"), 22), 22),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("f2"), 23), 23),
+            Tuple.of(new SpongeNotePitch(ResourceKey.minecraft("f_sharp2"), 24), 24)
         );
     }
 }

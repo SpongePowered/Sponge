@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.bridge.stats;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 
 public interface StatTypeBridge {
 
-    CatalogKey bridge$getKey();
+    ResourceKey bridge$getKey();
 
-    void bridge$setKey(CatalogKey key);
+    void bridge$setKey(ResourceKey key);
 }

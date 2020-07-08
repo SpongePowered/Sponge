@@ -27,17 +27,17 @@ package org.spongepowered.common.world.server;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 
 import javax.annotation.Nullable;
 
 public final class SpongeWorldRegistrationBuilder implements WorldRegistration.Builder {
 
-    @Nullable private CatalogKey key;
+    @Nullable private ResourceKey key;
     @Nullable private String directoryName;
 
     @Override
-    public WorldRegistration.Builder key(CatalogKey key) {
+    public WorldRegistration.Builder key(ResourceKey key) {
         this.key = checkNotNull(key);
         return this;
     }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.util.DamageSource;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.common.event.damage.SpongeDamageType;
 import org.spongepowered.common.accessor.util.DamageSourceAccessor;
@@ -40,21 +40,21 @@ public final class DamageTypeStreamGenerator {
 
     public static Stream<DamageType> stream() {
         return Stream.of(
-                new SpongeDamageType(CatalogKey.minecraft("attack")),
-                new SpongeDamageType(CatalogKey.minecraft("contact")),
-                new SpongeDamageType(CatalogKey.minecraft("custom")),
-                new SpongeDamageType(CatalogKey.minecraft("drown")),
-                new SpongeDamageType(CatalogKey.minecraft("explosive")),
-                new SpongeDamageType(CatalogKey.minecraft("fall")),
-                new SpongeDamageType(CatalogKey.minecraft("fire")),
-                new SpongeDamageType(CatalogKey.minecraft("generic")),
-                new SpongeDamageType(CatalogKey.minecraft("hunger")),
-                new SpongeDamageType(CatalogKey.minecraft("magic")),
-                new SpongeDamageType(CatalogKey.minecraft("projectile")),
-                new SpongeDamageType(CatalogKey.minecraft("suffocate")),
-                new SpongeDamageType(CatalogKey.minecraft("void")),
-                new SpongeDamageType(CatalogKey.minecraft("sweeping_attack")),
-                new SpongeDamageType(CatalogKey.minecraft("magma"))
+                new SpongeDamageType(ResourceKey.minecraft("attack")),
+                new SpongeDamageType(ResourceKey.minecraft("contact")),
+                new SpongeDamageType(ResourceKey.minecraft("custom")),
+                new SpongeDamageType(ResourceKey.minecraft("drown")),
+                new SpongeDamageType(ResourceKey.minecraft("explosive")),
+                new SpongeDamageType(ResourceKey.minecraft("fall")),
+                new SpongeDamageType(ResourceKey.minecraft("fire")),
+                new SpongeDamageType(ResourceKey.minecraft("generic")),
+                new SpongeDamageType(ResourceKey.minecraft("hunger")),
+                new SpongeDamageType(ResourceKey.minecraft("magic")),
+                new SpongeDamageType(ResourceKey.minecraft("projectile")),
+                new SpongeDamageType(ResourceKey.minecraft("suffocate")),
+                new SpongeDamageType(ResourceKey.minecraft("void")),
+                new SpongeDamageType(ResourceKey.minecraft("sweeping_attack")),
+                new SpongeDamageType(ResourceKey.minecraft("magma"))
         );
     }
 }

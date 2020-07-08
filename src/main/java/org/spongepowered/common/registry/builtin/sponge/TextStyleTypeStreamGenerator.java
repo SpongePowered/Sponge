@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.text.format.SpongeTextStyleType;
@@ -39,12 +39,12 @@ public final class TextStyleTypeStreamGenerator {
 
     public static Stream<Tuple<TextStyle.Type, TextFormatting>> stream() {
         return Stream.of(
-            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("bold"), TextFormatting.BOLD), TextFormatting.BOLD),
-            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("italic"), TextFormatting.ITALIC), TextFormatting.ITALIC),
-            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("obfuscated"), TextFormatting.OBFUSCATED), TextFormatting.OBFUSCATED),
-            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("reset"), TextFormatting.RESET), TextFormatting.RESET),
-            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("strikethrough"), TextFormatting.STRIKETHROUGH), TextFormatting.STRIKETHROUGH),
-            Tuple.of(new SpongeTextStyleType(CatalogKey.minecraft("underline"), TextFormatting.UNDERLINE), TextFormatting.UNDERLINE)
+            Tuple.of(new SpongeTextStyleType(ResourceKey.minecraft("bold"), TextFormatting.BOLD), TextFormatting.BOLD),
+            Tuple.of(new SpongeTextStyleType(ResourceKey.minecraft("italic"), TextFormatting.ITALIC), TextFormatting.ITALIC),
+            Tuple.of(new SpongeTextStyleType(ResourceKey.minecraft("obfuscated"), TextFormatting.OBFUSCATED), TextFormatting.OBFUSCATED),
+            Tuple.of(new SpongeTextStyleType(ResourceKey.minecraft("reset"), TextFormatting.RESET), TextFormatting.RESET),
+            Tuple.of(new SpongeTextStyleType(ResourceKey.minecraft("strikethrough"), TextFormatting.STRIKETHROUGH), TextFormatting.STRIKETHROUGH),
+            Tuple.of(new SpongeTextStyleType(ResourceKey.minecraft("underline"), TextFormatting.UNDERLINE), TextFormatting.UNDERLINE)
         );
     }
 }

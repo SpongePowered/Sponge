@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.SpongeCommon;
@@ -46,15 +46,15 @@ public final class SpongeTextStyleType extends SpongeTextStyle implements TextSt
         return (SpongeTextStyleType) style;
     }
 
-    private final CatalogKey key;
+    private final ResourceKey key;
 
-    public SpongeTextStyleType(CatalogKey key, TextFormatting handle) {
+    public SpongeTextStyleType(ResourceKey key, TextFormatting handle) {
         super(handle);
         this.key = checkNotNull(key);
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

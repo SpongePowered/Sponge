@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.util;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,18 +43,18 @@ import javax.annotation.Nullable;
 @Mixin(HandSide.class)
 public abstract class HandSideMixin_API implements HandPreference {
 
-    @Nullable private CatalogKey api$key;
+    @Nullable private ResourceKey api$key;
     @Nullable private Translation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, ITextComponent name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, ((TranslationTextComponent) name).getKey().replace("options.mainHand.", ""));
+        this.api$key = ResourceKey.of(container, ((TranslationTextComponent) name).getKey().replace("options.mainHand.", ""));
         this.api$translation = new SpongeTranslation(((TranslationTextComponent) name).getKey());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

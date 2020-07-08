@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,12 +41,12 @@ import javax.annotation.Nullable;
 @Mixin(FrameType.class)
 public abstract class FrameTypeMixin_API implements AdvancementType {
 
-    @Nullable private CatalogKey api$key;
+    @Nullable private ResourceKey api$key;
     @Nullable private TextFormat api$textFormat;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setFields(String enumName, int ordinal, String name, int icon, TextFormatting format, CallbackInfo ci) {
-        this.api$key = CatalogKey.minecraft(name);
+        this.api$key = ResourceKey.minecraft(name);
         this.api$textFormat = TextFormat.of(
                 SpongeTextColor.of(format),
                 SpongeTextStyleType.of(format)
@@ -54,7 +54,7 @@ public abstract class FrameTypeMixin_API implements AdvancementType {
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

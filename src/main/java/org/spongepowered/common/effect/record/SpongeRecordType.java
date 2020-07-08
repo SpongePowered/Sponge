@@ -30,7 +30,7 @@ import net.minecraft.item.MusicDiscItem;
 import net.minecraft.network.play.server.SPlaySoundEventPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.SpongeCatalogType;
@@ -50,7 +50,7 @@ public final class SpongeRecordType extends SpongeCatalogType.Translatable imple
     private final MusicDiscItem item;
     private final int id;
 
-    public SpongeRecordType(CatalogKey key, MusicDiscItem item) {
+    public SpongeRecordType(ResourceKey key, MusicDiscItem item) {
         super(key, new SpongeTranslation(item.getTranslationKey()));
         this.item = item;
         this.id = Registry.ITEM.getId(item);

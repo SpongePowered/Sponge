@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.text.serializer.TextSerializer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.JsonTextSerializer;
@@ -42,7 +42,7 @@ public final class TextSerializerStreamGenerator {
         return Stream.of(
                 new PlainTextSerializer(),
                 new JsonTextSerializer(),
-                new SpongeFormattingCodeTextSerializer(CatalogKey.sponge("formatting_code"), '&'),
-                new SpongeFormattingCodeTextSerializer(CatalogKey.minecraft("legacy_formatting_code"), SpongeTexts.COLOR_CHAR));
+                new SpongeFormattingCodeTextSerializer(ResourceKey.sponge("formatting_code"), '&'),
+                new SpongeFormattingCodeTextSerializer(ResourceKey.minecraft("legacy_formatting_code"), SpongeTexts.COLOR_CHAR));
     }
 }

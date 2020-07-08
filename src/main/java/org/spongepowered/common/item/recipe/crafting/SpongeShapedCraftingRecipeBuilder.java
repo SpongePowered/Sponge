@@ -33,7 +33,7 @@ import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.item.crafting.ShapedRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
@@ -134,13 +134,13 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     }
 
     @Override
-    public ShapedCraftingRecipe.Builder.EndStep key(CatalogKey key) {
+    public ShapedCraftingRecipe.Builder.EndStep key(ResourceKey key) {
         super.key(key);
         return this;
     }
 
     @Override
-    protected ShapedCraftingRecipe build(CatalogKey key) {
+    protected ShapedCraftingRecipe build(ResourceKey key) {
         checkState(!this.aisle.isEmpty(), "aisle has not been set");
         checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
         checkState(!this.result.isEmpty(), "no result set");

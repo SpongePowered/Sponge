@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity;
 
 import co.aikar.timings.Timing;
 import net.minecraft.entity.EntityType;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,7 +41,7 @@ import org.spongepowered.common.util.Constants;
 @Mixin(EntityType.class)
 public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBridge, EntityTypeBridge {
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
     private boolean impl$allowsBlockBulkCaptures = true;
     private boolean impl$allowsBlockEventCreation = true;
     private boolean impl$allowsEntityBulkCaptures = true;
@@ -67,12 +67,12 @@ public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBrid
     }
 
     @Override
-    public CatalogKey bridge$getKey() {
+    public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
 
     @Override
-    public void bridge$setKey(final CatalogKey key) {
+    public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
     }
 

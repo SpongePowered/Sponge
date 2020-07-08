@@ -26,7 +26,7 @@ package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.item.Items;
 import net.minecraft.item.MusicDiscItem;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 
@@ -39,18 +39,18 @@ public final class MusicDiscStreamGenerator {
 
     public static Stream<MusicDisc> stream() {
         return Stream.of(
-            new SpongeRecordType(CatalogKey.minecraft("blocks"), (MusicDiscItem) Items.MUSIC_DISC_BLOCKS),
-            new SpongeRecordType(CatalogKey.minecraft("cat"), (MusicDiscItem) Items.MUSIC_DISC_CAT),
-            new SpongeRecordType(CatalogKey.minecraft("chirp"), (MusicDiscItem) Items.MUSIC_DISC_CHIRP),
-            new SpongeRecordType(CatalogKey.minecraft("eleven"), (MusicDiscItem) Items.MUSIC_DISC_11),
-            new SpongeRecordType(CatalogKey.minecraft("far"), (MusicDiscItem) Items.MUSIC_DISC_FAR),
-            new SpongeRecordType(CatalogKey.minecraft("mall"), (MusicDiscItem) Items.MUSIC_DISC_MALL),
-            new SpongeRecordType(CatalogKey.minecraft("mellohi"), (MusicDiscItem) Items.MUSIC_DISC_MELLOHI),
-            new SpongeRecordType(CatalogKey.minecraft("stal"), (MusicDiscItem) Items.MUSIC_DISC_STAL),
-            new SpongeRecordType(CatalogKey.minecraft("strad"), (MusicDiscItem) Items.MUSIC_DISC_STRAD),
-            new SpongeRecordType(CatalogKey.minecraft("thirteen"), (MusicDiscItem) Items.MUSIC_DISC_13),
-            new SpongeRecordType(CatalogKey.minecraft("wait"), (MusicDiscItem) Items.MUSIC_DISC_WAIT),
-            new SpongeRecordType(CatalogKey.minecraft("ward"), (MusicDiscItem) Items.MUSIC_DISC_WARD)
+            new SpongeRecordType(ResourceKey.minecraft("blocks"), (MusicDiscItem) Items.MUSIC_DISC_BLOCKS),
+            new SpongeRecordType(ResourceKey.minecraft("cat"), (MusicDiscItem) Items.MUSIC_DISC_CAT),
+            new SpongeRecordType(ResourceKey.minecraft("chirp"), (MusicDiscItem) Items.MUSIC_DISC_CHIRP),
+            new SpongeRecordType(ResourceKey.minecraft("eleven"), (MusicDiscItem) Items.MUSIC_DISC_11),
+            new SpongeRecordType(ResourceKey.minecraft("far"), (MusicDiscItem) Items.MUSIC_DISC_FAR),
+            new SpongeRecordType(ResourceKey.minecraft("mall"), (MusicDiscItem) Items.MUSIC_DISC_MALL),
+            new SpongeRecordType(ResourceKey.minecraft("mellohi"), (MusicDiscItem) Items.MUSIC_DISC_MELLOHI),
+            new SpongeRecordType(ResourceKey.minecraft("stal"), (MusicDiscItem) Items.MUSIC_DISC_STAL),
+            new SpongeRecordType(ResourceKey.minecraft("strad"), (MusicDiscItem) Items.MUSIC_DISC_STRAD),
+            new SpongeRecordType(ResourceKey.minecraft("thirteen"), (MusicDiscItem) Items.MUSIC_DISC_13),
+            new SpongeRecordType(ResourceKey.minecraft("wait"), (MusicDiscItem) Items.MUSIC_DISC_WAIT),
+            new SpongeRecordType(ResourceKey.minecraft("ward"), (MusicDiscItem) Items.MUSIC_DISC_WARD)
         );
     }
 }

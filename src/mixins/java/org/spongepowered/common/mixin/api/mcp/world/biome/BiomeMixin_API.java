@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.biome;
 
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,7 +38,7 @@ public abstract class BiomeMixin_API implements BiomeType {
     @Shadow public abstract float shadow$getDownfall();
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return ((BiomeBridge) this).bridge$getKey();
     }
 

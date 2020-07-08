@@ -25,7 +25,7 @@
 package org.spongepowered.common.effect.particle;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.common.SpongeCatalogType;
 
@@ -37,14 +37,14 @@ public final class SpongeParticleOption<V> extends SpongeCatalogType implements 
     private final Class<V> valueType;
     @Nullable private final Function<V, IllegalArgumentException> valueValidator;
 
-    public SpongeParticleOption(CatalogKey key, Class<V> valueType,
+    public SpongeParticleOption(ResourceKey key, Class<V> valueType,
             @Nullable Function<V, IllegalArgumentException> valueValidator) {
         super(key);
         this.valueValidator = valueValidator;
         this.valueType = valueType;
     }
 
-    public SpongeParticleOption(CatalogKey key, Class<V> valueType) {
+    public SpongeParticleOption(ResourceKey key, Class<V> valueType) {
         this(key, valueType, null);
     }
 

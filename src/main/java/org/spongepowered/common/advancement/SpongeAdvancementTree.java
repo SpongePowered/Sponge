@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.advancement;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.DisplayInfo;
@@ -36,17 +36,17 @@ import java.util.Optional;
 public final class SpongeAdvancementTree implements AdvancementTree {
 
     private final Advancement rootAdvancement;
-    private final CatalogKey key;
+    private final ResourceKey key;
     private final Translation translation;
 
-    public SpongeAdvancementTree(Advancement rootAdvancement, CatalogKey key, Translation translation) {
+    public SpongeAdvancementTree(Advancement rootAdvancement, ResourceKey key, Translation translation) {
         this.rootAdvancement = rootAdvancement;
         this.key = key;
         this.translation = translation;
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

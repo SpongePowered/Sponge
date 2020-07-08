@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.PaintingType;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -35,24 +35,24 @@ import org.spongepowered.common.bridge.CatalogKeyBridge;
 @Mixin(PaintingType.class)
 public abstract class PaintingTypeMixin implements CatalogKeyBridge {
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
 
     @Redirect(method = "register",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"))
     private static Object impl$setKey(final Registry<Object> registry, final String resourcePath,
         final Object paintingType) {
-        ((CatalogKeyBridge) paintingType).bridge$setKey(CatalogKey.resolve(resourcePath));
+        ((CatalogKeyBridge) paintingType).bridge$setKey(ResourceKey.resolve(resourcePath));
         return Registry.register(registry, resourcePath, paintingType);
     }
 
     @Override
-    public CatalogKey bridge$getKey() {
+    public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
 
     @Override
-    public void bridge$setKey(final CatalogKey key) {
+    public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
     }
 }

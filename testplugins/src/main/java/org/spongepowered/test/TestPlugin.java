@@ -28,6 +28,7 @@ import com.google.inject.Inject;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
 @Plugin("test")
@@ -36,7 +37,7 @@ public final class TestPlugin {
     private final Logger logger;
 
     @Inject
-    public TestPlugin(final Logger logger) {
+    public TestPlugin(final Logger logger, final PluginContainer container) {
         this.logger = logger;
         this.logger.info("HELLO FROM A SPONGE PLUGIN");
     }

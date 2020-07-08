@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.util.text.TextFormatting;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
@@ -42,16 +42,16 @@ public final class DisplaySlotStreamGenerator {
 
     public static Stream<Tuple<DisplaySlot, Integer>> stream() {
         final Stream.Builder<Tuple<DisplaySlot, Integer>> builder = Stream.builder();
-        builder.add(new Tuple<>(new SpongeDisplaySlot(CatalogKey.minecraft("below_name"), 0), 0));
-        builder.add(new Tuple<>(new SpongeDisplaySlot(CatalogKey.minecraft("list"), 1), 1));
+        builder.add(new Tuple<>(new SpongeDisplaySlot(ResourceKey.minecraft("below_name"), 0), 0));
+        builder.add(new Tuple<>(new SpongeDisplaySlot(ResourceKey.minecraft("list"), 1), 1));
 
         final Map<TextFormatting, SpongeDisplaySlot> sidebarByColor = new HashMap<>();
         final Function<TextFormatting, DisplaySlot> sidebarWithColor = sidebarByColor::get;
 
-        sidebarByColor.put(TextFormatting.RESET, new SpongeDisplaySlot(CatalogKey.minecraft("sidebar"), 2, null, sidebarWithColor));
+        sidebarByColor.put(TextFormatting.RESET, new SpongeDisplaySlot(ResourceKey.minecraft("sidebar"), 2, null, sidebarWithColor));
         for (final TextFormatting formatting : TextFormatting.values()) {
             if (formatting.isColor() && formatting != TextFormatting.RESET) {
-                sidebarByColor.put(formatting, new SpongeDisplaySlot(CatalogKey.minecraft("sidebar_team_" + formatting.getFriendlyName()),
+                sidebarByColor.put(formatting, new SpongeDisplaySlot(ResourceKey.minecraft("sidebar_team_" + formatting.getFriendlyName()),
                         3 + formatting.getColorIndex(), formatting, sidebarWithColor));
             }
         }

@@ -54,10 +54,9 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
@@ -519,7 +518,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final String rawLogicType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
 
             final SpongeDimensionType logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.spongepowered
-                .api.world.dimension.DimensionType.class, CatalogKey.resolve(rawLogicType)).orElse(null);
+                .api.world.dimension.DimensionType.class, ResourceKey.resolve(rawLogicType)).orElse(null);
 
             if (logicType == null) {
                 MinecraftServerAccessor_Vanilla.accessor$getLogger().error("World '{}' has an unknown DimensionType '{}'. Skipping...",

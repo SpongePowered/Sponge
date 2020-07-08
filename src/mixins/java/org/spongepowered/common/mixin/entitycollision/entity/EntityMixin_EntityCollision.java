@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.entitycollision.entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +49,7 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
 
     @Shadow public abstract World shadow$getEntityWorld();
 
-    private CatalogKey entityCollision$key;
+    private ResourceKey entityCollision$key;
     private int entityCollision$maxCollisions = 8;
     private boolean entityCollision$refreshCache = false;
 
@@ -72,7 +72,7 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
     }
 
     @Override
-    public CatalogKey collision$getKey() {
+    public ResourceKey collision$getKey() {
         return this.entityCollision$key;
     }
 

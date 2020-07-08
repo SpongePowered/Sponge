@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.advancements;
 
 import net.minecraft.advancements.Advancement;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.text.Text;
@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 
 public interface AdvancementBridge {
 
-    CatalogKey bridge$getKey();
+    ResourceKey bridge$getKey();
 
     Translation bridge$getTranslation();
 

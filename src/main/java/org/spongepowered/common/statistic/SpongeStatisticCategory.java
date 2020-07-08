@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.statistic;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticCategory;
 
@@ -38,7 +38,7 @@ public class SpongeStatisticCategory<S extends Statistic> implements StatisticCa
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return null;
     }
 }

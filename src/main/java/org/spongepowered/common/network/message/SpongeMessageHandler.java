@@ -27,7 +27,7 @@ package org.spongepowered.common.network.message;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
@@ -53,7 +53,7 @@ public final class SpongeMessageHandler {
     }
 
     public static void init() {
-        channel = Sponge.getChannelRegistrar().createChannel(SpongeCommon.getPlugin(), CatalogKey.sponge("Sponge"));
+        channel = Sponge.getChannelRegistrar().createChannel(SpongeCommon.getPlugin(), ResourceKey.sponge("Sponge"));
         channel.registerMessage(MessageTrackerDataRequest.class, 0, Platform.Type.SERVER, SpongeMessageHandler::handleRequest);
         channel.registerMessage(MessageTrackerDataResponse.class, 1);
     }

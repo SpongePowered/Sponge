@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -57,7 +57,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     private static final Random RANDOM = new Random();
 
-    private CatalogKey key;
+    private ResourceKey key;
     private Supplier<? extends DimensionType> dimensionType = Functional.throwNull();
     private Supplier<? extends GeneratorType> generatorType = Functional.throwNull();
     private Supplier<? extends Difficulty> difficulty = Functional.throwNull();
@@ -82,7 +82,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     }
 
     @Override
-    public WorldArchetype.Builder key(CatalogKey key) {
+    public WorldArchetype.Builder key(ResourceKey key) {
         this.key = checkNotNull(key);
         return this;
     }

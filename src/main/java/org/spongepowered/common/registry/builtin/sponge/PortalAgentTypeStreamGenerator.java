@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.world.Teleporter;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
 import org.spongepowered.common.world.SpongePortalAgentType;
@@ -39,8 +39,8 @@ public final class PortalAgentTypeStreamGenerator {
 
     public static Stream<PortalAgentType> stream() {
         return Stream.of(
-                new SpongePortalAgentType(CatalogKey.minecraft("default_the_nether"), (Class<ForgeITeleporterBridge>) (Object) Teleporter.class),
-                new SpongePortalAgentType(CatalogKey.minecraft("default_the_end"), (Class<ForgeITeleporterBridge>) (Object) Teleporter.class)
+                new SpongePortalAgentType(ResourceKey.minecraft("default_the_nether"), (Class<ForgeITeleporterBridge>) (Object) Teleporter.class),
+                new SpongePortalAgentType(ResourceKey.minecraft("default_the_end"), (Class<ForgeITeleporterBridge>) (Object) Teleporter.class)
         );
     }
 }

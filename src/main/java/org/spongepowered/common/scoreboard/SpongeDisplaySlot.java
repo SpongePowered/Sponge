@@ -27,7 +27,7 @@ package org.spongepowered.common.scoreboard;
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.text.TextFormatting;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.common.SpongeCatalogType;
@@ -44,11 +44,11 @@ public final class SpongeDisplaySlot extends SpongeCatalogType implements Displa
 
     private @Nullable TextColor color;
 
-    public SpongeDisplaySlot(CatalogKey key, int index) {
+    public SpongeDisplaySlot(ResourceKey key, int index) {
         this(key, index, null, null);
     }
 
-    public SpongeDisplaySlot(CatalogKey key, int index,
+    public SpongeDisplaySlot(ResourceKey key, int index,
             @Nullable TextFormatting color, @Nullable Function<TextFormatting, DisplaySlot> withColorFunction) {
         super(key);
         this.withColorFunction = withColorFunction;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.text.serializer;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
 import org.spongepowered.common.bridge.api.text.TextBridge;
@@ -32,19 +32,19 @@ import org.spongepowered.common.bridge.api.text.TextBridge;
 public final class SpongeFormattingCodeTextSerializer implements FormattingCodeTextSerializer {
 
     private final char formattingChar;
-    private final CatalogKey key;
+    private final ResourceKey key;
 
     public SpongeFormattingCodeTextSerializer(char formattingChar) {
-        this(CatalogKey.sponge("formatting_code_" + formattingChar), formattingChar);
+        this(ResourceKey.sponge("formatting_code_" + formattingChar), formattingChar);
     }
 
-    public SpongeFormattingCodeTextSerializer(CatalogKey key, char formattingChar) {
+    public SpongeFormattingCodeTextSerializer(ResourceKey key, char formattingChar) {
         this.key = key;
         this.formattingChar = formattingChar;
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

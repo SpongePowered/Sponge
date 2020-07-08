@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.state;
 import net.minecraft.state.IProperty;
 import net.minecraft.state.Property;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
@@ -45,16 +45,16 @@ import javax.annotation.Nullable;
 @Mixin(value = Property.class)
 public abstract class PropertyMixin_API<T extends Comparable<T>> implements StateProperty<T> {
 
-    @Nullable private CatalogKey api$catalogKey = null;
+    @Nullable private ResourceKey api$resourceKey = null;
 
     @SuppressWarnings("rawtypes")
     @Override
-    public CatalogKey getKey() {
-        if (this.api$catalogKey == null) {
+    public ResourceKey getKey() {
+        if (this.api$resourceKey == null) {
             final String id = BlockPropertyIdProvider.getIdFor((IProperty<T>) this);
-            this.api$catalogKey = (CatalogKey) (Object) new ResourceLocation(id);
+            this.api$resourceKey = (ResourceKey) (Object) new ResourceLocation(id);
         }
-        return this.api$catalogKey;
+        return this.api$resourceKey;
     }
 
     @SuppressWarnings("unchecked")

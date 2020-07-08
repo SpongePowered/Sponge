@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.common.data.type.SpongeBodyPart;
 
@@ -37,12 +37,12 @@ public final class BodyPartStreamGenerator {
 
     public static Stream<BodyPart> stream() {
         return Stream.of(
-            new SpongeBodyPart(CatalogKey.minecraft("head")),
-            new SpongeBodyPart(CatalogKey.minecraft("body")),
-            new SpongeBodyPart(CatalogKey.minecraft("left_arm")),
-            new SpongeBodyPart(CatalogKey.minecraft("right_arm")),
-            new SpongeBodyPart(CatalogKey.minecraft("left_leg")),
-            new SpongeBodyPart(CatalogKey.minecraft("right_leg"))
+            new SpongeBodyPart(ResourceKey.minecraft("head")),
+            new SpongeBodyPart(ResourceKey.minecraft("body")),
+            new SpongeBodyPart(ResourceKey.minecraft("left_arm")),
+            new SpongeBodyPart(ResourceKey.minecraft("right_arm")),
+            new SpongeBodyPart(ResourceKey.minecraft("left_leg")),
+            new SpongeBodyPart(ResourceKey.minecraft("right_leg"))
         );
     }
 }

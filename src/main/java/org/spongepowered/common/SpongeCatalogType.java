@@ -27,20 +27,20 @@ package org.spongepowered.common;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.translation.Translation;
 
 public abstract class SpongeCatalogType implements CatalogType {
 
-    private final CatalogKey key;
+    private final ResourceKey key;
 
-    public SpongeCatalogType(CatalogKey key) {
+    public SpongeCatalogType(ResourceKey key) {
         this.key = checkNotNull(key);
     }
 
     @Override
-    public final CatalogKey getKey() {
+    public final ResourceKey getKey() {
         return this.key;
     }
 
@@ -75,7 +75,7 @@ public abstract class SpongeCatalogType implements CatalogType {
 
         private final Translation translation;
 
-        public Translatable(CatalogKey key, Translation translation) {
+        public Translatable(ResourceKey key, Translation translation) {
             super(key);
             this.translation = checkNotNull(translation, "translation");
         }

@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
@@ -36,7 +36,7 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface WorldSettingsBridge {
 
-    CatalogKey bridge$getKey();
+    ResourceKey bridge$getKey();
 
     SpongeDimensionType bridge$getLogicType();
 
@@ -60,7 +60,7 @@ public interface WorldSettingsBridge {
 
     boolean bridge$isPVPEnabled();
 
-    void bridge$setKey(CatalogKey key);
+    void bridge$setKey(ResourceKey key);
 
     void bridge$setDimensionType(DimensionType dimensionType);
 

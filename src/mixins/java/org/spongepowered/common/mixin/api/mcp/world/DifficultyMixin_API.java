@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,18 +41,18 @@ public abstract class DifficultyMixin_API implements Difficulty {
 
     @Shadow public abstract String shadow$getTranslationKey();
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
     private SpongeTranslation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int id, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, name.toLowerCase());
+        this.api$key = ResourceKey.of(container, name.toLowerCase());
         this.api$translation = new SpongeTranslation(this.shadow$getTranslationKey());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

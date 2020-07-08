@@ -35,10 +35,10 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-public class UserFirstDatePlayedProvider extends GenericMutableDataProvider<Identifiable, Instant> {
+public final class UserFirstDateJoinedProvider extends GenericMutableDataProvider<Identifiable, Instant> {
 
-    public UserFirstDatePlayedProvider() {
-        super(Keys.FIRST_DATE_PLAYED);
+    public UserFirstDateJoinedProvider() {
+        super(Keys.FIRST_DATE_JOINED);
     }
 
     @Override

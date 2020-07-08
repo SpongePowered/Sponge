@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.weather;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeWeather extends SpongeCatalogType implements Weather {
 
-    public SpongeWeather(final CatalogKey key) {
+    public SpongeWeather(final ResourceKey key) {
         super(key);
     }
 

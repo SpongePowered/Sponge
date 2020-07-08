@@ -27,7 +27,7 @@ package org.spongepowered.common.registry.builtin.vanilla;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
@@ -41,7 +41,7 @@ public final class EntityTypeSupplier {
     }
 
     private static net.minecraft.entity.EntityType<HumanEntity> createHumanType() {
-        final CatalogKey key = CatalogKey.sponge("human");
+        final ResourceKey key = ResourceKey.sponge("human");
         final net.minecraft.entity.EntityType<HumanEntity> builder = net.minecraft.entity.EntityType.Builder.create(HumanEntity::new, EntityClassification.MISC)
                 .size(Constants.Entity.Player.PLAYER_WIDTH, Constants.Entity.Player.PLAYER_HEIGHT)
                 .build(key.getValue());

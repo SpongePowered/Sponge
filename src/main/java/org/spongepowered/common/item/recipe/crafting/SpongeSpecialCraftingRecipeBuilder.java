@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.item.crafting.SpecialRecipeSerializer;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -95,14 +95,14 @@ public final class SpongeSpecialCraftingRecipeBuilder extends SpongeCatalogBuild
     }
 
     @Override
-    public SpecialCraftingRecipe.Builder.EndStep key(CatalogKey key) {
+    public SpecialCraftingRecipe.Builder.EndStep key(ResourceKey key) {
         super.key(key);
         return this;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public SpecialCraftingRecipe build(CatalogKey key) {
+    public SpecialCraftingRecipe build(ResourceKey key) {
         checkState(this.biPredicate != null || this.exemplaryShape != null, "predicate or shape");
         checkState(this.resultFunction != null || this.exemplaryResult != null, "resultfunction or result");
 

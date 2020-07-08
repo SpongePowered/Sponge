@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.item;
 
 import net.minecraft.item.FireworkRocketItem;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,16 +37,16 @@ import org.spongepowered.plugin.PluginContainer;
 @Mixin(FireworkRocketItem.Shape.class)
 public abstract class FireworkRocketItem_ShapeMixin_API implements FireworkShape {
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, int p_i47931_3_, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, name.toLowerCase());
+        this.api$key = ResourceKey.of(container, name.toLowerCase());
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 }

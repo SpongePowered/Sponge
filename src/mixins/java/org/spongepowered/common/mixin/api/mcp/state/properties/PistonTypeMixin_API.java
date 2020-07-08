@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.state.properties;
 
 import net.minecraft.state.properties.PistonType;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,18 +38,18 @@ import org.spongepowered.plugin.PluginContainer;
 @Mixin(PistonType.class)
 public abstract class PistonTypeMixin_API implements org.spongepowered.api.data.type.PistonType {
 
-    private CatalogKey api$key;
+    private ResourceKey api$key;
     private Translation api$translation;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, String name, CallbackInfo ci) {
         final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = CatalogKey.of(container, name.toLowerCase());
+        this.api$key = ResourceKey.of(container, name.toLowerCase());
         this.api$translation = new SpongeTranslation("block.minecraft." + ((PistonType) (Object) this == PistonType.STICKY ? "sticky_piston" : "piston"));
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.api$key;
     }
 

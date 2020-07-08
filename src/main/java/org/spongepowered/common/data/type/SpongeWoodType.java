@@ -26,7 +26,7 @@ package org.spongepowered.common.data.type;
 
 import net.minecraft.block.Block;
 import net.minecraft.tags.Tag;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
@@ -36,7 +36,7 @@ public final class SpongeWoodType extends SpongeCatalogType.Translatable impleme
 
     private final Tag<Block> tag;
 
-    public SpongeWoodType(CatalogKey key, Translation translation, Tag<Block> tag) {
+    public SpongeWoodType(ResourceKey key, Translation translation, Tag<Block> tag) {
         super(key, translation);
         this.tag = tag;
     }

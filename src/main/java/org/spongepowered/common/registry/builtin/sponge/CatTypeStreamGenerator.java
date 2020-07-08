@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.entity.passive.CatEntity;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.data.type.SpongeCatType;
@@ -44,7 +44,7 @@ public final class CatTypeStreamGenerator {
             .map(kv -> {
                 final String value = kv.getValue().getPath();
 
-                return Tuple.of(new SpongeCatType(CatalogKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)),
+                return Tuple.of(new SpongeCatType(ResourceKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)),
                     kv.getKey()), kv.getKey());
             });
     }

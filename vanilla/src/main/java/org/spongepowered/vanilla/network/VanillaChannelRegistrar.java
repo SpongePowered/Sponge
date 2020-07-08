@@ -25,7 +25,7 @@
 package org.spongepowered.vanilla.network;
 
 import com.google.inject.Singleton;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelRegistrationException;
@@ -39,17 +39,17 @@ import java.util.Set;
 public final class VanillaChannelRegistrar extends SpongeNetworkManager {
 
     @Override
-    public ChannelBinding.IndexedMessageChannel createChannel(PluginContainer plugin, CatalogKey channelKey) throws ChannelRegistrationException {
+    public ChannelBinding.IndexedMessageChannel createChannel(PluginContainer plugin, ResourceKey channelKey) throws ChannelRegistrationException {
         return null;
     }
 
     @Override
-    public ChannelBinding.RawDataChannel createRawChannel(PluginContainer plugin, CatalogKey channelKey) throws ChannelRegistrationException {
+    public ChannelBinding.RawDataChannel createRawChannel(PluginContainer plugin, ResourceKey channelKey) throws ChannelRegistrationException {
         return null;
     }
 
     @Override
-    public Optional<ChannelBinding> getChannel(CatalogKey channelkey) {
+    public Optional<ChannelBinding> getChannel(ResourceKey channelkey) {
         return Optional.empty();
     }
 
@@ -59,12 +59,12 @@ public final class VanillaChannelRegistrar extends SpongeNetworkManager {
     }
 
     @Override
-    public Set<CatalogKey> getRegisteredChannels(Platform.Type side) {
+    public Set<ResourceKey> getRegisteredChannels(Platform.Type side) {
         return null;
     }
 
     @Override
-    public boolean isChannelAvailable(CatalogKey channelKey) {
+    public boolean isChannelAvailable(ResourceKey channelKey) {
         return false;
     }
 }

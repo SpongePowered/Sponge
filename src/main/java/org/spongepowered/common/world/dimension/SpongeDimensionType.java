@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.Dimension;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.common.SpongeCommon;
@@ -43,7 +43,7 @@ import java.util.function.Supplier;
 
 public final class SpongeDimensionType implements DimensionType {
 
-    private final CatalogKey key;
+    private final ResourceKey key;
     private final Path configPath;
     private final SpongeConfig<DimensionConfig> config;
     private final Context context;
@@ -58,7 +58,7 @@ public final class SpongeDimensionType implements DimensionType {
         final String modId = SpongeImplHooks.getActiveModContainer().getMetadata().getId();
         final String dimName = id.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
 
-        this.key = CatalogKey.of(modId, dimName);
+        this.key = ResourceKey.of(modId, dimName);
         this.configPath = SpongeCommon.getSpongeConfigDirectory().resolve("worlds").resolve(modId).resolve(dimName);
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"),
             SpongeCommon.ECOSYSTEM_ID, SpongeCommon.getGlobalConfigAdapter(), false);
@@ -68,7 +68,7 @@ public final class SpongeDimensionType implements DimensionType {
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

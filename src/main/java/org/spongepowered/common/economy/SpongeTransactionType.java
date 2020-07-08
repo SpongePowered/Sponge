@@ -27,19 +27,19 @@ package org.spongepowered.common.economy;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 
 public final class SpongeTransactionType implements TransactionType {
 
-    private final CatalogKey key;
+    private final ResourceKey key;
 
-    public SpongeTransactionType(CatalogKey key) {
+    public SpongeTransactionType(ResourceKey key) {
         this.key = checkNotNull(key);
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

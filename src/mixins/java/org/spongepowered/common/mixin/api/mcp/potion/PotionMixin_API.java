@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.asm.mixin.Final;
@@ -42,7 +42,7 @@ public abstract class PotionMixin_API implements PotionType {
 
     @Shadow @Final private ImmutableList<net.minecraft.potion.EffectInstance> effects;
 
-    private CatalogKey impl$key;
+    private ResourceKey impl$key;
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
@@ -51,10 +51,10 @@ public abstract class PotionMixin_API implements PotionType {
     }
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         if (this.impl$key == null) {
             final ResourceLocation location = Registry.POTION.getKey((Potion) (Object) this);
-            this.impl$key = (CatalogKey) (Object) location;
+            this.impl$key = (ResourceKey) (Object) location;
         }
         return this.impl$key;
     }

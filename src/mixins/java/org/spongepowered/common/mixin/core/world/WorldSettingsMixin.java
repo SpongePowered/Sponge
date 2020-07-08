@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import com.google.gson.JsonElement;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionType;
@@ -57,7 +57,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     @Shadow private boolean commandsAllowed;
     @Shadow private boolean bonusChestEnabled;
 
-    @Nullable private CatalogKey key;
+    @Nullable private ResourceKey key;
     @Nullable private SpongeDimensionType dimensionType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
     @Nullable private Difficulty difficulty = Difficulties.NORMAL.get();
     @Nullable private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
@@ -103,7 +103,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public CatalogKey bridge$getKey() {
+    public ResourceKey bridge$getKey() {
         return this.key;
     }
 
@@ -169,7 +169,7 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public void bridge$setKey(CatalogKey key) {
+    public void bridge$setKey(ResourceKey key) {
         this.key = key;
     }
 

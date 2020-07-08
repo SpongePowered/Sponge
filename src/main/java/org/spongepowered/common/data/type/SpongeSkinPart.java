@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.type;
 
 import com.google.common.base.MoreObjects;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
@@ -35,7 +35,7 @@ public final class SpongeSkinPart extends SpongeCatalogType.Translatable impleme
     private final int ordinal;
     private final int mask;
 
-    public SpongeSkinPart(CatalogKey key, Translation translation, int ordinal) {
+    public SpongeSkinPart(ResourceKey key, Translation translation, int ordinal) {
         super(key, translation);
         this.ordinal = ordinal;
         this.mask = 1 << this.ordinal;

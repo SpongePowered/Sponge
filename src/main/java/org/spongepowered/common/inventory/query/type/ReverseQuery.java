@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.Query;
@@ -44,10 +44,10 @@ import java.util.List;
  */
 public class ReverseQuery extends SpongeQuery implements QueryType.NoParam {
 
-    private CatalogKey key = CatalogKey.sponge("reverse");
+    private ResourceKey key = ResourceKey.sponge("reverse");
 
     @Override
-    public CatalogKey getKey() {
+    public ResourceKey getKey() {
         return this.key;
     }
 

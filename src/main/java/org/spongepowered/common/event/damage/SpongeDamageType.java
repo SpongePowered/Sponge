@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.event.damage;
 
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeDamageType extends SpongeCatalogType implements DamageType {
 
-    public SpongeDamageType(CatalogKey key) {
+    public SpongeDamageType(ResourceKey key) {
         super(key);
     }
 }

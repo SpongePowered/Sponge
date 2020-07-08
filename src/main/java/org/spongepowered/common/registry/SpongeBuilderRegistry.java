@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -245,7 +245,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)
             .register(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
             .register(Trigger.Builder.class, SpongeTriggerBuilder::new)
-            .register(CatalogKey.Builder.class, SpongeCatalogKeyBuilder::new)
+            .register(ResourceKey.Builder.class, SpongeCatalogKeyBuilder::new)
         ;
     }
 }
