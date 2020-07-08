@@ -81,13 +81,13 @@ public class SpongeEventManager implements EventManager {
 
     private static final TypeVariable<?> GENERIC_EVENT_TYPE = GenericEvent.class.getTypeParameters()[0];
 
-    private final Object lock = new Object();
+    private final Object lock;
     protected final Logger logger;
-    private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
-    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders = new HashMap<>();
-    private final Set<Object> registeredListeners = new HashSet<>();
+    private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent;
+    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders;
+    private final Set<Object> registeredListeners;
 
-    public final ListenerChecker checker = new ListenerChecker(ShouldFire.class);
+    public final ListenerChecker checker;
 
     /**
      * A cache of all the handlers for an event type for quick event posting.
@@ -100,6 +100,11 @@ public class SpongeEventManager implements EventManager {
     @Inject
     public SpongeEventManager(final Logger logger) {
         this.logger = logger;
+        this.lock = new Object();
+        this.handlersByEvent = HashMultimap.create();
+        this.classLoaders = new HashMap<>();
+        this.registeredListeners = new HashSet<>();
+        this.checker = new ListenerChecker(ShouldFire.class);
 
         // Caffeine offers no control over the concurrency level of the
         // ConcurrentHashMap which backs the cache. By default this concurrency

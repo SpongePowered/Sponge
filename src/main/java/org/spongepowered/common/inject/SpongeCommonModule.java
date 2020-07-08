@@ -32,12 +32,14 @@ import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.AssetManager;
+import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.GameRegistry;
+import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
@@ -46,11 +48,13 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongePlatform;
 import org.spongepowered.common.asset.SpongeAssetManager;
+import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.sql.SpongeSqlManager;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
 import org.spongepowered.common.world.server.SpongeWorldManager;
@@ -63,6 +67,7 @@ public final class SpongeCommonModule extends PrivateModule {
     @Override
     @OverridingMethodsMustInvokeSuper
     protected void configure() {
+        this.bindAndExpose(Logger.class).toInstance(SpongeCommon.getLogger());
         //noinspection UninstantiableBinding
         this.bindAndExpose(Game.class).to(SpongeGame.class);
         this.bindAndExpose(Platform.class).to(SpongePlatform.class);
@@ -76,12 +81,8 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(CauseStackManager.class).to(SpongeCauseStackManager.class);
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
         this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
-
-        // These are bound in implementation-specific modules
-        this.expose(PluginManager.class);
-        this.expose(EventManager.class);
-
-        this.bind(Logger.class).toInstance(SpongeCommon.getLogger());
+        this.bindAndExpose(ServiceProvider.class).to(SpongeServiceProvider.class);
+        this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
 
         this.requestStaticInjection(SpongeCommon.class);
         this.requestStaticInjection(Sponge.class);

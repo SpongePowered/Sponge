@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.world;
 import static com.google.gson.internal.$Gson$Preconditions.checkNotNull;
 
 import com.google.gson.JsonElement;
+import com.google.inject.Inject;
 import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -54,6 +55,7 @@ import net.minecraft.world.server.TicketType;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.CatalogKey;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
@@ -98,8 +100,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     private final Map<String, ServerWorld> worldByName;
     private final Map<String, WorldRegistration> pendingWorlds;
 
-    public VanillaWorldManager(MinecraftServer server) {
-        this.server = server;
+    @Inject
+    public VanillaWorldManager(Server server) {
+        this.server = (MinecraftServer) server;
         this.serverAccessor = (MinecraftServerAccessor_Vanilla) this.server;
         this.savesDirectory = this.serverAccessor.accessor$getAnvilFile().toPath().resolve(this.server.getFolderName());
         this.worldsByType = this.serverAccessor.accessor$getWorlds();

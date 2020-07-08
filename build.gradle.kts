@@ -389,6 +389,7 @@ project("SpongeVanilla") {
         vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.11.2")
+        vanillaModLauncherConfig("com.zaxxer:HikariCP:2.6.3")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer

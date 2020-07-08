@@ -25,23 +25,32 @@
 package org.spongepowered.vanilla.inject;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.PrivateModule;
+import com.google.inject.binder.AnnotatedBindingBuilder;
 import org.spongepowered.api.event.EventManager;
+import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.vanilla.VanillaGame;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
+import org.spongepowered.vanilla.network.VanillaChannelRegistrar;
 import org.spongepowered.vanilla.world.VanillaWorldManager;
 
-public final class SpongeVanillaModule extends AbstractModule {
+public final class SpongeVanillaModule extends PrivateModule {
 
     @Override
     protected void configure() {
         //noinspection UninstantiableBinding
-        this.bind(SpongeGame.class).to(VanillaGame.class);
-        this.bind(EventManager.class).to(SpongeEventManager.class);
-        this.bind(PluginManager.class).to(VanillaPluginManager.class);
+        this.bindAndExpose(SpongeGame.class).to(VanillaGame.class);
+        this.bindAndExpose(PluginManager.class).to(VanillaPluginManager.class);
+        this.bindAndExpose(ChannelRegistrar.class).to(VanillaChannelRegistrar.class);
         this.bind(SpongeWorldManager.class).to(VanillaWorldManager.class);
+    }
+
+    protected <T> AnnotatedBindingBuilder<T> bindAndExpose(final Class<T> type) {
+        this.expose(type);
+        return this.bind(type);
     }
 }

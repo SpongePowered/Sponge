@@ -36,6 +36,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfigSaveManager;
 import org.spongepowered.common.config.type.CustomDataConfig;
@@ -74,7 +75,6 @@ public final class SpongeCommon {
     @Inject @Nullable private static SpongeGame game;
     @Inject @Nullable private static SpongeGameRegistry registry;
     @Inject @Nullable private static SpongeCauseStackManager causeStackManager;
-    @Inject @Nullable private static SpongeWorldManager worldManager;
 
     private SpongeCommon() {
     }
@@ -117,7 +117,7 @@ public final class SpongeCommon {
     }
 
     public static SpongeWorldManager getWorldManager() {
-        return check(worldManager);
+        return (SpongeWorldManager) Sponge.getServer().getWorldManager();
     }
 
     public static Path getGameDirectory() {

@@ -100,8 +100,8 @@ public final class SpongeDataManager implements DataManager {
     public static final DataFixer spongeDataFixer = addFixers(new DataFixerBuilder(Constants.Sponge.SPONGE_DATA_VERSION)).build(Util.getServerExecutor());
 
     static DataFixerBuilder addFixers(DataFixerBuilder builder) {
-        builder.addFixer(new SpongeLevelFixer(builder.addSchema(Constants.Legacy.World.WORLD_UUID_1_9_VERSION, Schema::new), true));
-        builder.addFixer(new EntityTrackedUser(builder.addSchema(Constants.Legacy.Entity.TRACKER_ID_VERSION, Schema::new), true));
+    //        builder.addFixer(new SpongeLevelFixer(builder.addSchema(Constants.Legacy.World.WORLD_UUID_1_9_VERSION, Schema::new), true));
+    //        builder.addFixer(new EntityTrackedUser(builder.addSchema(Constants.Legacy.Entity.TRACKER_ID_VERSION, Schema::new), true));
 // TODO this fixer did nothing       builder.addFixer(new PlayerRespawnData(builder.addSchema( Constants.Sponge.PlayerData.RESPAWN_DATA_1_9_VERSION, Schema::new), true));
         return builder;
     }
