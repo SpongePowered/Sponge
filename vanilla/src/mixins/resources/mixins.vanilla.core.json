@@ -6,6 +6,9 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "priority": 1301,
+    "client": [
+        "client.MinecraftMixin_Vanilla"
+    ],
     "server": [
     ],
     "mixins": [
