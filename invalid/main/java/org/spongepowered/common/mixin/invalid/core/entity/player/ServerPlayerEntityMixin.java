@@ -425,7 +425,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
     private void impl$$onSetGameTypeThrowEvent(final GameType gameType, final CallbackInfo ci) {
-        if (ShouldFire.CHANGE_GAME_MODE_EVENT_TARGET_PLAYER) {
+        if (ShouldFire.CHANGE_GAME_MODE_EVENT) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 final ChangeGameModeEvent event =

@@ -118,7 +118,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     // It's fine for this to be a supertype of the actual event - that will
     // just result in unnecessarily firing events.
     protected boolean shouldFire() {
-       return ShouldFire.CLICK_INVENTORY_EVENT;
+       return ShouldFire.CLICK_CONTAINER_EVENT;
     }
 
     @Override

@@ -68,7 +68,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
     @Redirect(method = "addGoal", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddEntityTask(final Set<PrioritizedGoal> goals, final Object task, final int priority, final Goal base) {
         ((GoalBridge) base).bridge$setGoalExecutor((GoalExecutor<?>) this);
-        if (!ShouldFire.A_I_TASK_EVENT_ADD || this.owner == null || ((EntityBridge) this.owner).bridge$isConstructing()) {
+        if (!ShouldFire.GOAL_EVENT_ADD || this.owner == null || ((EntityBridge) this.owner).bridge$isConstructing()) {
             // Event is fired in bridge$fireConstructors
             return goals.add(new PrioritizedGoal(priority, base));
         }
@@ -115,7 +115,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
     public void removeGoal(final Goal task) {
         this.goals.removeIf(prioritizedGoal -> {
             if (prioritizedGoal.getGoal() == task) {
-                if (ShouldFire.A_I_TASK_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
+                if (ShouldFire.GOAL_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
                     GoalEvent.Remove event = SpongeEventFactory.createGoalEventRemove(Sponge.getCauseStackManager().getCurrentCause(),
                             (Agent) this.owner, (GoalExecutor) this, (org.spongepowered.api.entity.ai.goal.Goal) task, prioritizedGoal.getPriority());
                     SpongeCommon.postEvent(event);

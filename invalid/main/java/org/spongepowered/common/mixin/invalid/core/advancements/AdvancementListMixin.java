@@ -64,7 +64,7 @@ public abstract class AdvancementListMixin {
             target = "Ljava/util/Map;size()I", remap = false))
     private void impl$postRegisterAdvancements(Map<ResourceLocation, Advancement.Builder> advancements, CallbackInfo ci) {
         // Don't post events when loading advancements on the client
-        if (!SpongeImplHooks.onServerThread() || !ShouldFire.GAME_REGISTRY_EVENT_REGISTER) {
+        if (!SpongeImplHooks.onServerThread()) {
             return;
         }
         try (final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.SERVER)

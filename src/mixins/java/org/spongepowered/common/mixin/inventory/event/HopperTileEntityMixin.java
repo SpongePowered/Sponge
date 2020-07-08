@@ -67,7 +67,7 @@ public abstract class HopperTileEntityMixin {
                      target = "Lnet/minecraft/tileentity/HopperTileEntity;isInventoryEmpty(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/Direction;)Z"))
     private static boolean impl$throwTransferPreIfNotEmpty(final IInventory inventory, final Direction facing, final IHopper hopper) {
         final boolean result = shadow$isInventoryEmpty(inventory, facing);
-        if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
+        if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
         }
         return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(inventory), InventoryUtil.toInventory(hopper)).isCancelled();
@@ -78,7 +78,7 @@ public abstract class HopperTileEntityMixin {
                      target = "Lnet/minecraft/tileentity/HopperTileEntity;isInventoryFull(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/Direction;)Z"))
     private boolean impl$throwTransferPreIfNotFull(final HopperTileEntity hopper, final IInventory inventory, final Direction enumfacing) {
         final boolean result = this.shadow$isInventoryFull(inventory, enumfacing);
-        if (result || !ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_PRE) {
+        if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
         }
         return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(hopper), InventoryUtil.toInventory(inventory)).isCancelled();
@@ -95,7 +95,7 @@ public abstract class HopperTileEntityMixin {
         if (!((source instanceof TrackedInventoryBridge || destination instanceof TrackedInventoryBridge) && destination instanceof InventoryAdapter)) {
             return shadow$insertStack(source, destination, stack, index, direction);
         }
-        if (!ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST) {
+        if (!ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
             return shadow$insertStack(source, destination, stack, index, direction);
         }
         TrackedInventoryBridge captureIn = impl$forCapture(source);
@@ -115,7 +115,7 @@ public abstract class HopperTileEntityMixin {
     private void impl$afterPutStackInSlots(final CallbackInfoReturnable<Boolean> cir, final IInventory iInventory, final Direction enumFacing,
             final int i, final ItemStack itemStack, ItemStack itemStack1) {
         // after putStackInInventoryAllSlots if the transfer worked
-        if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack1.isEmpty()) {
+        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = impl$forCapture(this);
             SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) this, i, itemStack);
@@ -133,7 +133,7 @@ public abstract class HopperTileEntityMixin {
             final Direction direction,
             final CallbackInfoReturnable<Boolean> cir, final ItemStack itemStack, ItemStack itemStack1, final ItemStack itemStack2) {
         // after putStackInInventoryAllSlots if the transfer worked
-        if (ShouldFire.CHANGE_INVENTORY_EVENT_TRANSFER_POST && itemStack2.isEmpty()) {
+        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = impl$forCapture(hopper);
             SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);

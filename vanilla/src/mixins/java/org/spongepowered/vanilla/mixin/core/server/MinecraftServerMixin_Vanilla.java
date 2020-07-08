@@ -41,5 +41,6 @@ public abstract class MinecraftServerMixin_Vanilla {
         final ServerLauncher launcher = Launcher.getInstance();
         launcher.setupInjection((VanillaServer) server);
         launcher.loadPlugins((VanillaServer) server);
+        server.startServerThread();
     }
 }

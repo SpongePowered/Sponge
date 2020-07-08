@@ -70,7 +70,7 @@ public abstract class BreedGoalMixin {
             return null;
         }
 
-        if (ShouldFire.BREED_ENTITY_EVENT_FIND_MATE) {
+        if (ShouldFire.BREEDING_EVENT_FIND_MATE) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this.animal);
                 final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
@@ -104,7 +104,7 @@ public abstract class BreedGoalMixin {
             target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
             ordinal = 0))
     private boolean impl$throwBreedEvent(final World world, final Entity baby) {
-        if (ShouldFire.BREED_ENTITY_EVENT_BREED) {
+        if (ShouldFire.BREEDING_EVENT_BREED) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 // TODO API 8 is removing this TargetXXXX nonsense so that is why I put the parents into the Cause
                 frame.pushCause(this.animal);

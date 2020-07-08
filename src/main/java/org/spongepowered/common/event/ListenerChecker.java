@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ListenerChecker {
+public final class ListenerChecker {
 
     private static final boolean ALL_TRUE = Boolean.parseBoolean(System.getProperty("sponge.shouldFireAll", "").toLowerCase());
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("sponge.debugShouldFire", "").toLowerCase());
@@ -53,14 +53,6 @@ public class ListenerChecker {
         //
         String name = clazz.getName().substring(clazz.getName().lastIndexOf(".") + 1).replace("$", "");
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, name);
-    }
-
-    public <T> void registerListenerFor(Class<T> eventClass) {
-        this.updateFields(eventClass, true);
-    }
-
-    public <T> void unregisterListenerFor(Class<T> eventClass) {
-        this.updateFields(eventClass, false);
     }
 
     public ListenerChecker(Class<?> clazz) {
@@ -81,15 +73,24 @@ public class ListenerChecker {
                     }
                 }
             } else {
-                throw new IllegalStateException(String.format("ShouldFire filed %s must be public and static!", field));
+                throw new IllegalStateException(String.format("ShouldFire field %s must be public and static!", field));
             }
         }
+    }
+
+    public <T> void registerListenerFor(Class<T> eventClass) {
+        this.updateFields(eventClass, true);
+    }
+
+    public <T> void unregisterListenerFor(Class<T> eventClass) {
+        this.updateFields(eventClass, false);
     }
 
     private Class<?> getClassForField(Field field) {
         String name = field.getName();
 
-        for (Method eventMethod: SpongeEventFactory.class.getMethods()) {
+        final Method[] methods = SpongeEventFactory.class.getMethods();
+        for (Method eventMethod : methods) {
             // Not all fields will directly correspond to an event in SpongeEventFactory.
             // For example, SpongeEventFactory has no method to create a ChangeBlockEvent,
             // (only methods for its subtypes), but ShouldFire.CHANGE_BLOCK_EVENT exists, and is valid

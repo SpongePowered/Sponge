@@ -54,7 +54,7 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
     @Override
     protected boolean shouldFire() {
-        return ShouldFire.CLICK_INVENTORY_EVENT_DOUBLE;
+        return ShouldFire.CLICK_CONTAINER_EVENT_DOUBLE;
     }
 
     @Override
