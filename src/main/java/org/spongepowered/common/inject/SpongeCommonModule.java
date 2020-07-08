@@ -68,7 +68,7 @@ public final class SpongeCommonModule extends PrivateModule {
     @Override
     @OverridingMethodsMustInvokeSuper
     protected void configure() {
-        this.bindAndExpose(Logger.class).toInstance(SpongeCommon.getLogger());
+        this.bind(Logger.class).toInstance(SpongeCommon.getLogger());
         //noinspection UninstantiableBinding
         this.bindAndExpose(Game.class).to(SpongeGame.class);
         this.bindAndExpose(Platform.class).to(SpongePlatform.class);

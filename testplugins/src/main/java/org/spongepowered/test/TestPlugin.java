@@ -22,13 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.plugin;
+package org.spongepowered.test;
 
-import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.plugin.jvm.Plugin;
 
-public final class PluginModule extends AbstractModule {
+@Plugin("test")
+public final class TestPlugin {
 
-    @Override
-    protected void configure() {
+    private final Logger logger;
+
+    @Inject
+    public TestPlugin(final Logger logger) {
+        this.logger = logger;
+        this.logger.info("HELLO FROM A SPONGE PLUGIN");
+    }
+
+    @Listener
+    public void onConstruct(final ConstructPluginEvent event) {
+        this.logger.info("Hello world");
     }
 }

@@ -1,10 +1,10 @@
 {
     "plugins": [{
-        "id": "basicplugininitializers",
-        "name": "BasicPluginInitializers",
+        "id": "test",
+        "name": "TestPlugin",
         "version": "8.0.0",
-        "main-class": "org.spongepowered.testplugin.BasicPluginInitializers",
-        "description": "Basic run-of-the-mill test plugins",
+        "main-class": "org.spongepowered.test.TestPlugin",
+        "description": "Just testing things...",
         "links": {
             "homepage": "https://www.spongepowered.org",
             "source": "https://www.spongepowered.org/source",

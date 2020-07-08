@@ -206,6 +206,7 @@ allprojects {
     }
 
     repositories {
+        mavenLocal()
         maven {
             name = "sponge v2"
             setUrl("https://repo-new.spongepowered.org/repository/maven-public/")

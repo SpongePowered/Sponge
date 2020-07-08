@@ -25,19 +25,17 @@
 package org.spongepowered.vanilla.launch.plugin;
 
 import com.google.inject.Injector;
+import org.spongepowered.common.inject.plugin.PluginModule;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
+import org.spongepowered.plugin.jvm.JVMPluginContainer;
 import org.spongepowered.plugin.jvm.JVMPluginLanguageService;
 
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
+import java.util.Optional;
 
-public final class JavaPluginLanguageService extends JVMPluginLanguageService {
+public final class JavaPluginLanguageService extends JVMPluginLanguageService<JVMPluginContainer> {
 
     private final static String NAME = "java_plain";
 
@@ -47,18 +45,23 @@ public final class JavaPluginLanguageService extends JVMPluginLanguageService {
     }
 
     @Override
-    protected Object createPluginInstance(final PluginEnvironment environment, final PluginCandidate candidate, final ClassLoader targetClassLoader) throws InvalidPluginException {
+    public Optional<JVMPluginContainer> createPluginContainer(final PluginCandidate candidate, final PluginEnvironment environment) {
+        return Optional.of(new JVMPluginContainer(candidate));
+    }
+
+    @Override
+    protected Object createPluginInstance(final PluginEnvironment environment, final JVMPluginContainer container, final ClassLoader targetClassLoader) throws InvalidPluginException {
         try {
-            final String mainClass = candidate.getMetadata().getMainClass();
+            final String mainClass = container.getMetadata().getMainClass();
             final Class<?> pluginClass = Class.forName(mainClass, true, targetClassLoader);
             final Injector parentInjector = environment.getBlackboard().get(PluginKeys.PARENT_INJECTOR).orElse(null);
             if (parentInjector != null) {
-                final Injector childInjector = parentInjector.createChildInjector(new PluginModule());
+                final Injector childInjector = parentInjector.createChildInjector(new PluginModule(container, pluginClass));
                 return childInjector.getInstance(pluginClass);
             }
             return pluginClass.newInstance();
         } catch (final Exception ex) {
-            throw new InvalidPluginException("An error occurred creating an instance of plugin '" + candidate.getMetadata().getId() + "'!", ex);
+            throw new InvalidPluginException("An error occurred creating an instance of plugin '" + container.getMetadata().getId() + "'!", ex);
         }
     }
 }
