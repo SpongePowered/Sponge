@@ -389,15 +389,7 @@ project("SpongeVanilla") {
         vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.11.2")
-        vanillaModLauncherConfig("com.zaxxer:HikariCP:2.6.3")
-        vanillaModLauncherConfig("com.google.guava:guava:25.1-jre") {
-            exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
-            exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
-            exclude(group = "com.google.j2objc", module = "j2objc-annotations")
-            exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
-            exclude(group = "com.google.errorprone", module = "error_prone_annotations")
-        }
-        vanillaModLauncherConfig("org.spongepowered:math:2.0.0-SNAPSHOT")
+        add(vanillaModLauncher.runtimeConfigurationName, "com.zaxxer:HikariCP:2.6.3")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer

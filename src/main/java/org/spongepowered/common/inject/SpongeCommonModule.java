@@ -53,6 +53,7 @@ import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.sql.SpongeSqlManager;
@@ -74,6 +75,7 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(MinecraftVersion.class).toInstance(SpongeCommon.MINECRAFT_VERSION);
         this.bindAndExpose(AssetManager.class).to(SpongeAssetManager.class);
         this.bindAndExpose(EventManager.class).to(SpongeEventManager.class);
+        this.bindAndExpose(PluginManager.class).toInstance(Launcher.getInstance().getPluginManager());
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
         this.bindAndExpose(TeleportHelper.class).to(SpongeTeleportHelper.class);
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
