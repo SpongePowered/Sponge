@@ -40,7 +40,6 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.SpongeEventContextKey;
@@ -69,7 +68,6 @@ public class EventContextKeyStreamGenerator {
             new SpongeEventContextKey<>(CatalogKey.sponge("player"), new TypeToken<Player>() { private static final long serialVersionUID = 1L; }),
             new SpongeEventContextKey<>(CatalogKey.sponge("player_simulated"), new TypeToken<GameProfile>() { private static final long serialVersionUID = 1L; }),
             new SpongeEventContextKey<>(CatalogKey.sponge("projectile_source"), new TypeToken<ProjectileSource>() { private static final long serialVersionUID = 1L; }),
-            new SpongeEventContextKey<>(CatalogKey.sponge("service_provider"), new TypeToken<ServiceProvider>() { private static final long serialVersionUID = 1L; }),
             new SpongeEventContextKey<>(CatalogKey.sponge("spawn_type"), new TypeToken<SpawnType>() { private static final long serialVersionUID = 1L; }),
             new SpongeEventContextKey<>(CatalogKey.sponge("teleport_type"), new TypeToken<TeleportType>() { private static final long serialVersionUID = 1L; }),
             new SpongeEventContextKey<>(CatalogKey.sponge("thrower"), new TypeToken<User>() { private static final long serialVersionUID = 1L; }),

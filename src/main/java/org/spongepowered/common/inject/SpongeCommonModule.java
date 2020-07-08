@@ -40,10 +40,10 @@ import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
+import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
-import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongePlatform;
@@ -56,9 +56,12 @@ import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.SpongeServiceProvider;
-import org.spongepowered.common.service.sql.SpongeSqlManager;
+import org.spongepowered.common.service.ban.SpongeBanService;
+import org.spongepowered.common.service.permission.SpongePermissionService;
+import org.spongepowered.common.service.user.SpongeUserStorageService;
+import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
+import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -85,6 +88,13 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
         this.bindAndExpose(ServiceProvider.class).to(SpongeServiceProvider.class);
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
+
+        // Default services that might need to be injected
+        this.bind(SpongeBanService.class);
+        // TODO: Pagination Service
+        this.bind(SpongePermissionService.class);
+        this.bind(SpongeUserStorageService.class);
+        this.bind(SpongeWhitelistService.class);
 
         this.requestStaticInjection(SpongeCommon.class);
         this.requestStaticInjection(Sponge.class);

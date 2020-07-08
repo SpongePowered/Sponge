@@ -44,7 +44,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.SimpleServiceManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
@@ -72,7 +71,6 @@ public class SpongeImplementationModule extends PrivateModule {
         //noinspection UninstantiableBinding
         this.bindAndExpose(Game.class).to(SpongeGame.class);
         this.bindAndExpose(MinecraftVersion.class).toInstance(SpongeCommon.MINECRAFT_VERSION);
-        this.bindAndExpose(ServiceManager.class).to(SimpleServiceManager.class);
         this.bindAndExpose(AssetManager.class).to(SpongeAssetManager.class);
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
         this.bindAndExpose(TeleportHelper.class).to(SpongeTeleportHelper.class);

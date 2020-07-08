@@ -24,51 +24,34 @@
  */
 package org.spongepowered.common.service.permission;
 
+import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
-import java.lang.ref.WeakReference;
-import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
-
 /**
- * {@link SubjectMixin} helper class to apply the appropriate subject to the
+ * {@link SubjectBridge} helper class to apply the appropriate subject to the
  * mixin.
  */
-public class SubjectSettingCallback implements Predicate<PermissionService> {
+public final class SubjectHelper {
 
-    private final WeakReference<SubjectBridge> ref;
-
-    public SubjectSettingCallback(SubjectBridge ref) {
-        this.ref = new WeakReference<>(ref);
+    private SubjectHelper() {
     }
 
-    @Override
-    public boolean test(@Nullable PermissionService input) {
-        SubjectBridge ref = this.ref.get();
-        if (ref == null) {
-            // returning false from this predicate means this setting callback will be removed
-            // as a listener, and will not be tested again.
-            return false;
-        }
-
-        // if PS has just been unregistered, ignore the change.
-        if (input == null) {
-            return true;
-        }
-
-        SubjectReference subject;
+    public static void applySubject(final SubjectBridge ref) {
+        Preconditions.checkNotNull(ref);
+        final PermissionService service = SpongeCommon.getGame().getServiceProvider().permissionService();
+        final SubjectReference subject;
 
         // check if we're using the native Sponge impl
         // we can skip some unnecessary instance creation this way.
-        if (input instanceof SpongePermissionService) {
-            SpongePermissionService serv = (SpongePermissionService) input;
-            SpongeSubjectCollection collection = serv.get(ref.bridge$getSubjectCollectionIdentifier());
+        if (service instanceof SpongePermissionService) {
+            final SpongePermissionService serv = (SpongePermissionService) service;
+            final SpongeSubjectCollection collection = serv.get(ref.bridge$getSubjectCollectionIdentifier());
 
             if (ref instanceof User && collection instanceof UserCollection) {
                 // GameProfile is already resolved, use it directly
@@ -79,11 +62,10 @@ public class SubjectSettingCallback implements Predicate<PermissionService> {
         } else {
             // build a new subject reference using the permission service
             // this doesn't actually load the subject, so it will be lazily init'd when needed.
-            subject = input.newSubjectReference(ref.bridge$getSubjectCollectionIdentifier(), ((Subject) ref).getIdentifier());
+            subject = service.newSubjectReference(ref.bridge$getSubjectCollectionIdentifier(), ((Subject) ref).getIdentifier());
         }
 
         ref.bridge$setSubject(subject);
-        return true;
     }
 
 }

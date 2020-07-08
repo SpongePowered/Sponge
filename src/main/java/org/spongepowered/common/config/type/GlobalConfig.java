@@ -41,6 +41,7 @@ import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.config.category.MovementChecksCategory;
 import org.spongepowered.common.config.category.OptimizationCategory;
 import org.spongepowered.common.config.category.PermissionCategory;
+import org.spongepowered.common.config.category.ServicesCategory;
 import org.spongepowered.common.config.category.SqlCategory;
 import org.spongepowered.common.config.category.MetricsCategory;
 import org.spongepowered.common.config.category.TeleportHelperCategory;
@@ -100,6 +101,10 @@ public class GlobalConfig extends GeneralConfigBase {
     @Setting(value = "metrics")
     private MetricsCategory metricsCategory = new MetricsCategory();
 
+    @Setting(value = "service-registration",
+            comment = "Enables server owners to require specific plugins to provide Sponge services")
+    private ServicesCategory servicesCategory;
+
     public GlobalConfig() {
         super();
     }
@@ -126,6 +131,10 @@ public class GlobalConfig extends GeneralConfigBase {
 
     public ModuleCategory getModules() {
         return this.mixins;
+    }
+
+    public ServicesCategory getServicesCategory() {
+        return this.servicesCategory;
     }
 
     public Map<String, Predicate<InetAddress>> getIpSets() {

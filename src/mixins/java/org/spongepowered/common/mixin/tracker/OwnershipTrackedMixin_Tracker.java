@@ -70,7 +70,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
     }
 
     @Override
-    public void tracked$setOwnerReference(@Nullable User owner) {
+    public void tracked$setOwnerReference(@Nullable final User owner) {
         this.tracker$ownerUser = new WeakReference<>(owner);
         this.tracker$owner = owner == null ? null : owner.getUniqueId();
     }
@@ -89,7 +89,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
     }
 
     @Override
-    public void tracked$setNotifier(@Nullable User notifier) {
+    public void tracked$setNotifier(@Nullable final User notifier) {
         this.tracker$notifierUser = new WeakReference<>(notifier);
         this.tracker$notifier = notifier == null ? null : notifier.getUniqueId();
     }
@@ -108,7 +108,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
     }
 
     @Override
-    public Optional<User> tracked$getTrackedUser(PlayerTracker.Type nbtKey) {
+    public Optional<User> tracked$getTrackedUser(final PlayerTracker.Type nbtKey) {
         final UUID uuid = this.getTrackedUniqueId(nbtKey);
 
         if (uuid == null) {
@@ -125,7 +125,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
             this.tracker$profileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
         }
         if (this.tracker$userService == null) {
-            this.tracker$userService = Sponge.getServiceProvider().userStorageService();
+            this.tracker$userService = SpongeCommon.getGame().getServiceProvider().userStorageService();
         }
 
         // check username cache
@@ -146,7 +146,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
     }
 
     @Override
-    public void tracked$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid) {
+    public void tracked$setTrackedUUID(final PlayerTracker.Type type, @Nullable final UUID uuid) {
         if (PlayerTracker.Type.OWNER == type) {
             this.tracker$owner = uuid;
         } else if (PlayerTracker.Type.NOTIFIER == type) {
@@ -172,7 +172,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
     }
 
     @Nullable
-    private UUID getTrackedUniqueId(PlayerTracker.Type type) {
+    private UUID getTrackedUniqueId(final PlayerTracker.Type type) {
         if (this.tracker$owner != null && PlayerTracker.Type.OWNER == type) {
             return this.tracker$owner;
         }

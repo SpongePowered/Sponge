@@ -208,7 +208,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Override
     public User bridge$getUserObject() {
-        final UserStorageService service = SpongeCommon.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        final UserStorageService service = SpongeCommon.getGame().getServiceProvider().provideUnchecked(UserStorageService.class);
         if (this.impl$isFake) { // Fake players are recogizeable through the field set up with bridge$isFake.
             return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
         }
@@ -216,7 +216,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     private User impl$getUserObjectOnConstruction() {
-        final UserStorageService service = SpongeCommon.getGame().getServiceManager().provideUnchecked(UserStorageService.class);
+        final UserStorageService service = SpongeCommon.getGame().getServiceProvider().provideUnchecked(UserStorageService.class);
         if (this.impl$isFake || !(service instanceof SpongeUserStorageService)) {
             return bridge$getUserObject();
         }

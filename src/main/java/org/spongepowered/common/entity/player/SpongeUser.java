@@ -63,7 +63,6 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeInternalListeners;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -76,7 +75,7 @@ import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.service.permission.SpongeBridgeSubject;
-import org.spongepowered.common.service.permission.SubjectSettingCallback;
+import org.spongepowered.common.service.permission.SubjectHelper;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -135,9 +134,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     public SpongeUser(final GameProfile profile) {
         this.profile = profile;
-        if (SpongeCommon.isInitialized()) {
-            SpongeInternalListeners.getInstance().registerExpirableServiceCallback(PermissionService.class, new SubjectSettingCallback(this));
-        }
+        SubjectHelper.applySubject(this);
     }
 
     private void reset() {
@@ -148,7 +145,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
         return this.nbt != null;
     }
 
-    public DataHolder getDataHolder(boolean markDirty) {
+    public DataHolder getDataHolder(final boolean markDirty) {
         if (this.isOnline()) {
             return this.getPlayer().get();
         }
@@ -185,10 +182,10 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
         }
 
         try {
-            try (FileInputStream in = new FileInputStream(file)) {
+            try (final FileInputStream in = new FileInputStream(file)) {
                 this.readFromNbt(CompressedStreamTools.readCompressed(in));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             SpongeCommon.getLogger().warn("Corrupt user file {}", file, e);
         }
     }
@@ -585,7 +582,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     }
 
     @Override
-    public void setHelmet(ItemStack helmet) {
+    public void setHelmet(final ItemStack helmet) {
         this.equip(EquipmentTypes.HEADWEAR, helmet);
     }
 
@@ -595,7 +592,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     }
 
     @Override
-    public void setChestplate(ItemStack chestplate) {
+    public void setChestplate(final ItemStack chestplate) {
         this.equip(EquipmentTypes.CHESTPLATE, chestplate);
     }
 
@@ -605,7 +602,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     }
 
     @Override
-    public void setLeggings(ItemStack leggings) {
+    public void setLeggings(final ItemStack leggings) {
         this.equip(EquipmentTypes.LEGGINGS, leggings);
     }
 
@@ -615,7 +612,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     }
 
     @Override
-    public void setBoots(ItemStack boots) {
+    public void setBoots(final ItemStack boots) {
         this.equip(EquipmentTypes.BOOTS, boots);
     }
 
@@ -676,7 +673,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
         CompoundNBT compound;
         try {
             compound = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
-        } catch (IOException ignored) {
+        } catch (final IOException ignored) {
             // Nevermind
             compound = new CompoundNBT();
         }
@@ -685,7 +682,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
             CompressedStreamTools.writeCompressed(compound, out);
             dirtyUsers.remove(this);
             this.invalidate();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             SpongeCommon.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
     }
@@ -769,10 +766,10 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     }
 
     @Override
-    public boolean setLocation(Vector3d position, UUID worldUniqueId) {
+    public boolean setLocation(final Vector3d position, final UUID worldUniqueId) {
         final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
-            Optional<org.spongepowered.api.world.server.ServerWorld> world = SpongeCommon.getWorldManager().getWorld(worldUniqueId);
+            final Optional<org.spongepowered.api.world.server.ServerWorld> world = SpongeCommon.getWorldManager().getWorld(worldUniqueId);
             return world.filter(serverWorld -> playerOpt.get().setLocation(ServerLocation.of(serverWorld, position))).isPresent();
         }
         final WorldProperties properties =
@@ -833,14 +830,14 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     @Override
     public Optional<SubjectReference> bridge$resolveReferenceOptional() {
         if (this.impl$subjectReference == null) {
-            new SubjectSettingCallback(this).test(Sponge.getServiceProvider().permissionService());
+            SubjectHelper.applySubject(this);
         }
         return Optional.ofNullable(this.impl$subjectReference);
     }
 
     @Override
     public Optional<Subject> bridge$resolveOptional() {
-        return bridge$resolveReferenceOptional().map(SubjectReference::resolve).map(CompletableFuture::join);
+        return this.bridge$resolveReferenceOptional().map(SubjectReference::resolve).map(CompletableFuture::join);
     }
 
     @Override
@@ -966,7 +963,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
         }
