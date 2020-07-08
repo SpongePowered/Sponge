@@ -22,28 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.inject;
+package org.spongepowered.vanilla.mixin.core.client;
 
-import com.google.inject.PrivateModule;
-import com.google.inject.binder.AnnotatedBindingBuilder;
-import org.spongepowered.api.network.ChannelRegistrar;
-import org.spongepowered.common.SpongeGame;
-import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.vanilla.VanillaGame;
-import org.spongepowered.vanilla.network.VanillaChannelRegistrar;
-import org.spongepowered.vanilla.world.VanillaWorldManager;
+import net.minecraft.client.ClientBrandRetriever;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 
-public final class SpongeVanillaModule extends PrivateModule {
+@Mixin(ClientBrandRetriever.class)
+public abstract class ClientBrandRetrieverMixin_Vanilla {
 
-    @Override
-    protected void configure() {
-        //noinspection UninstantiableBinding
-        this.bindAndExpose(SpongeGame.class).to(VanillaGame.class);
-        this.bindAndExpose(ChannelRegistrar.class).to(VanillaChannelRegistrar.class);
-    }
-
-    protected <T> AnnotatedBindingBuilder<T> bindAndExpose(final Class<T> type) {
-        this.expose(type);
-        return this.bind(type);
+    /**
+     * @author Zidane - Chris Sanders
+     * @reason This isn't Kansas anymore
+     */
+    @Overwrite
+    public static String getClientModName() {
+        return "spongevanilla";
     }
 }

@@ -56,12 +56,16 @@ public final class ClientDevLaunchHandler implements ILaunchHandlerService {
 
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        // Allow the entire classpath to be transformed...for now
+        // TODO Minecraft 1.14 - Very much not correct...
         for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
+            if (url.toString().contains("mixin") && url.toString().endsWith(".jar")) {
+                continue;
+            }
+
             try {
                 builder.addTransformationPath(Paths.get(url.toURI()));
-            } catch (URISyntaxException ex) {
-                ex.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
             }
         }
     }
