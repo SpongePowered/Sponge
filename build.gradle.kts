@@ -335,6 +335,7 @@ project("SpongeVanilla") {
     val vanillaModLauncherImplementation by configurations.named(vanillaModLauncher.implementationConfigurationName) {
         extendsFrom(launchConfig)
     }
+    val vanillaModLauncherRuntime by configurations.named(vanillaModLauncher.runtimeConfigurationName)
 
     configure<net.minecraftforge.gradle.userdev.UserDevExtension> {
         mappings(mcpType, mcpMappings)
@@ -389,7 +390,8 @@ project("SpongeVanilla") {
         vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.11.2")
-        add(vanillaModLauncher.runtimeConfigurationName, "com.zaxxer:HikariCP:2.6.3")
+        vanillaModLauncherRuntime("com.zaxxer:HikariCP:2.6.3")
+        vanillaModLauncherRuntime("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
