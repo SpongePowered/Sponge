@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.Preconditions;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -57,8 +55,8 @@ import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.storage.WorldInfo;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -73,13 +71,11 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.chunk.Chunk;
-import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -112,10 +108,8 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     @Shadow public @Final Random rand;
     @Shadow protected @Final WorldInfo worldInfo;
 
-    // Shadowed methods and fields for reference. All should be prefixed with 'shadow$' to avoid confusion
-
     @Shadow public abstract Biome shadow$getBiome(BlockPos p_180494_1_);
-    @Shadow public abstract @javax.annotation.Nullable MinecraftServer shadow$getServer();
+    @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract net.minecraft.world.chunk.Chunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
     @Shadow public abstract boolean shadow$setBlockState(BlockPos p_180501_1_, BlockState p_180501_2_, int p_180501_3_);
@@ -125,9 +119,9 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     @Shadow public abstract int shadow$getLightFor(LightType p_175642_1_, BlockPos p_175642_2_);
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
-    @Shadow public abstract @javax.annotation.Nullable TileEntity shadow$getTileEntity(BlockPos p_175625_1_);
-    @Shadow public abstract List<Entity> shadow$getEntitiesInAABBexcluding(@javax.annotation.Nullable Entity p_175674_1_, AxisAlignedBB p_175674_2_, @javax.annotation.Nullable Predicate<? super Entity> p_175674_3_);
-    @Shadow public abstract <T extends Entity> List<T> shadow$getEntitiesWithinAABB(Class<? extends T> p_175647_1_, AxisAlignedBB p_175647_2_, @javax.annotation.Nullable Predicate<? super T> p_175647_3_);
+    @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos p_175625_1_);
+    @Shadow public abstract List<Entity> shadow$getEntitiesInAABBexcluding(@Nullable Entity p_175674_1_, AxisAlignedBB p_175674_2_, @Nullable Predicate<? super Entity> p_175674_3_);
+    @Shadow public abstract <T extends Entity> List<T> shadow$getEntitiesWithinAABB(Class<? extends T> p_175647_1_, AxisAlignedBB p_175647_2_, @Nullable Predicate<? super T> p_175647_3_);
     @Shadow public abstract int shadow$getSeaLevel();
     @Shadow public abstract long shadow$getSeed();
     @Shadow public abstract AbstractChunkProvider shadow$getChunkProvider();
@@ -142,15 +136,16 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     @Shadow public abstract boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<BlockState> p_217375_2_);
     @Shadow public abstract BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
 
+    private Context impl$context;
+
     // World
 
     @Override
     public boolean isLoaded() {
-        return ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getWorld(this.shadow$getDimension().getType()) == (Object) this;
+        return ((SpongeWorldManager) ((Server) this.shadow$getServer()).getWorldManager()).getWorld(this.shadow$getDimension().getType()) == (Object) this;
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<? extends Player> getClosestPlayer(int x, int y, int z, double distance, Predicate<? super Player> predicate) {
         final PlayerEntity player = this.shadow$getClosestPlayer(x, y, z, distance, (Predicate) predicate);
         return Optional.ofNullable((Player) player);
@@ -295,11 +290,13 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
 
     @Override
     public void setWeather(Weather weather) {
+        Preconditions.checkNotNull(weather);
         this.impl$setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
     }
 
     @Override
     public void setWeather(Weather weather, Duration duration) {
+        Preconditions.checkNotNull(weather);
         ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
         int ticks = (int) (duration.toMillis() / TemporalUnits.MINECRAFT_TICKS.getDuration().toMillis());
         this.impl$setWeather(weather, ticks);
@@ -328,21 +325,19 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     }
 
     // ContextSource
-
-    private Context impl$worldContext;
-
+    
     @Override
     public Context getContext() {
-        if (this.impl$worldContext == null) {
+        if (this.impl$context == null) {
             WorldInfo worldInfo = this.shadow$getWorldInfo();
             if (worldInfo == null) {
                 // We still have to consider some mods are making dummy worlds that
                 // override getWorldInfo with a null, or submit a null value.
                 worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT), "sponge$dummy_World");
             }
-            this.impl$worldContext = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
+            this.impl$context = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
         }
-        return this.impl$worldContext;
+        return this.impl$context;
     }
 
     // Viewer
@@ -375,19 +370,18 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
         }
     }
 
-    private void apiImpl$stopSounds(@javax.annotation.Nullable final SoundType sound, @javax.annotation.Nullable final org.spongepowered.api.effect.sound.SoundCategory category) {
-        this.shadow$getServer().getPlayerList().sendPacketToAllPlayersInDimension(new SStopSoundPacket((ResourceLocation) (Object) sound.getKey(),
-                (net.minecraft.util.SoundCategory) (Object) category), this.shadow$getDimension().getType());
+    private void api$stopSounds(@Nullable final SoundType sound, final org.spongepowered.api.effect.sound.SoundCategory category) {
+        this.shadow$getServer().getPlayerList().sendPacketToAllPlayersInDimension(new SStopSoundPacket((ResourceLocation) (Object) sound.getKey(), (net.minecraft.util.SoundCategory) (Object) category), this.shadow$getDimension().getType());
     }
 
     @Override
     public void stopSounds() {
-        this.apiImpl$stopSounds(null, null);
+        this.api$stopSounds(null, null);
     }
 
     @Override
     public void stopSounds(SoundType sound) {
-        this.apiImpl$stopSounds(checkNotNull(sound, "sound"), null);
+        this.api$stopSounds(Preconditions.checkNotNull(sound, "sound"), null);
     }
 
     @Override
@@ -397,7 +391,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
 
     @Override
     public void stopSounds(org.spongepowered.api.effect.sound.SoundCategory category) {
-        this.apiImpl$stopSounds(null, checkNotNull(category, "category"));
+        this.api$stopSounds(null, Preconditions.checkNotNull(category, "category"));
     }
 
     @Override
@@ -407,7 +401,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
 
     @Override
     public void stopSounds(SoundType sound, org.spongepowered.api.effect.sound.SoundCategory category) {
-        this.apiImpl$stopSounds(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
+        this.api$stopSounds(Preconditions.checkNotNull(sound, "sound"), Preconditions.checkNotNull(category, "category"));
     }
 
     @Override
@@ -437,7 +431,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
 
     @Override
     public void sendTitle(Title title) {
-        checkNotNull(title, "title");
+        Preconditions.checkNotNull(title, "title");
 
         for (Player player : getPlayers()) {
             player.sendTitle(title);
@@ -446,15 +440,15 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
 
     @Override
     public void sendBookView(BookView bookView) {
-        checkNotNull(bookView, "bookview");
+        Preconditions.checkNotNull(bookView, "bookview");
 
         BookFaker.fakeBookView(bookView, this.getPlayers());
     }
 
     @Override
     public void sendBlockChange(int x, int y, int z, org.spongepowered.api.block.BlockState state) {
-        checkNotNull(state, "state");
-        SChangeBlockPacket packet = new SChangeBlockPacket();
+        Preconditions.checkNotNull(state, "state");
+        final SChangeBlockPacket packet = new SChangeBlockPacket();
         ((SChangeBlockPacketAccessor) packet).accessor$setPos(new BlockPos(x, y, z));
         ((SChangeBlockPacketAccessor) packet).accessor$setState((BlockState) state);
 
@@ -475,9 +469,4 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     }
 
     // ArchetypeVolumeCreator
-
-    @Override
-    public ArchetypeVolume createArchetypeVolume(Vector3i min, Vector3i max, Vector3i origin) {
-        throw new UnsupportedOperationException("Implement me"); // TODO implement me
-    }
 }

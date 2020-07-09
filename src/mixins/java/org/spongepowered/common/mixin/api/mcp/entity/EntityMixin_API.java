@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -43,11 +42,8 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -100,7 +96,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     // @formatter:off
 
-    @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
     @Shadow public double posY;
     @Shadow public double posZ;
@@ -116,6 +111,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected UUID entityUniqueID;
     @Shadow @Final private net.minecraft.entity.EntityType<?> type;
 
+    @Shadow public abstract net.minecraft.world.World shadow$getEntityWorld();
+    @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract int shadow$getAir();
@@ -126,37 +123,30 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract int shadow$getEntityId();
     @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
-    @Shadow protected abstract AxisAlignedBB shadow$getBoundingBox();
-    @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
+    @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
     @Shadow public abstract boolean shadow$writeUnlessRemoved(CompoundNBT compound);
     @Shadow @Nullable public abstract Team shadow$getTeam();
 
     // @formatter:on
 
     @Override
-    public EntitySnapshot createSnapshot() {
-        throw new UnsupportedOperationException("implement me");
-    }
-
-    @Override
     public Random getRandom() {
         return this.rand;
     }
 
-
+    @Override
     public Vector3d getPosition() {
         return new Vector3d(this.posX, this.posY, this.posZ);
     }
 
     @Override
     public ServerLocation getLocation() {
-        return ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.world, this.getPosition());
+        return ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.shadow$getEntityWorld(), this.getPosition());
     }
 
-    @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Override
     public boolean setLocation(ServerLocation location) {
-        checkNotNull(location, "The location was null!");
+        Preconditions.checkNotNull(location, "The location was null!");
         if (this.isRemoved()) {
             return false;
         }
@@ -184,7 +174,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 location = ServerLocation.of(event.getToWorld(), event.getToPosition());
             }
 
-            final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) ((ServerWorld) this.world).getChunkProvider();
+            final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) ((ServerWorld) this.shadow$getEntityWorld()).getChunkProvider();
             final boolean previous = chunkProviderServer.bridge$getForceChunkRequests();
             chunkProviderServer.bridge$setForceChunkRequests(true);
             try {
@@ -192,7 +182,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
                 boolean isTeleporting = true;
                 boolean isChangingDimension = false;
-                if (location.getWorld().getProperties().getUniqueId() != ((World) this.world).getUniqueId()) {
+                if (location.getWorld().getProperties().getUniqueId() != ((World) this.shadow$getEntityWorld()).getUniqueId()) {
                     if ((Entity) (Object) this instanceof ServerPlayerEntity) {
                         // Close open containers
                         final ServerPlayerEntity entityPlayerMP = (ServerPlayerEntity) (Object) this;
@@ -241,7 +231,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 if (isTeleporting || isChangingDimension) {
                     // Re-attach passengers
                     for (final Entity passenger : passengers) {
-                        if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.world).getUniqueId()) {
+                        if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.shadow$getEntityWorld()).getUniqueId()) {
                             ((org.spongepowered.api.entity.Entity) passenger).setLocation(location);
                         }
                         passenger.startRiding((Entity) (Object) this, true);
@@ -255,7 +245,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
     }
 
-    @SuppressWarnings({"RedundantCast", "ConstantConditions"})
     @Override
     public boolean setLocationAndRotation(final ServerLocation location, final Vector3d rotation, final EnumSet<RelativePositions> relativePositions) {
         boolean relocated = true;
@@ -351,14 +340,14 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public boolean setTransform(final Transform transform) {
-        checkNotNull(transform, "The transform cannot be null!");
+        Preconditions.checkNotNull(transform, "The transform cannot be null!");
         final Vector3d position = transform.getPosition();
 
         this.shadow$setPosition(position.getX(), position.getY(), position.getZ());
         this.setRotation(transform.getRotation());
         this.setScale(transform.getScale());
-        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.onServerThread()) {
-            ((ServerWorld) this.world).chunkCheck((Entity) (Object) this);
+        if (!((WorldBridge) this.shadow$getEntityWorld()).bridge$isFake() && SpongeImplHooks.onServerThread()) {
+            ((ServerWorld) this.shadow$getEntityWorld()).chunkCheck((Entity) (Object) this);
         }
 
         return false;
@@ -366,8 +355,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public boolean transferToWorld(final org.spongepowered.api.world.server.ServerWorld world, final Vector3d position) {
-        checkNotNull(world, "World was null!");
-        checkNotNull(position, "Position was null!");
+        Preconditions.checkNotNull(world, "World was null!");
+        Preconditions.checkNotNull(position, "Position was null!");
         return this.setLocation(ServerLocation.of(world, position));
     }
 
@@ -379,7 +368,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void setRotation(final Vector3d rotation) {
-        checkNotNull(rotation, "Rotation was null!");
+        Preconditions.checkNotNull(rotation, "Rotation was null!");
         if (this.isRemoved()) {
             return;
         }
@@ -388,7 +377,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             ((ServerPlayerEntity) (Entity) (Object) this).connection.setPlayerLocation(this.getPosition().getX(), this.getPosition().getY(),
                     this.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
-            if (!this.world.isRemote) { // We can't set the rotation update on client worlds.
+            if (!this.shadow$getEntityWorld().isRemote) { // We can't set the rotation update on client worlds.
                 ((ServerWorldBridge) this.getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 
@@ -448,16 +437,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean validateRawData(final DataView container) {
-        throw new UnsupportedOperationException(); // TODO Data API
-    }
-
-    @Override
-    public void setRawData(final DataView container) throws InvalidDataException {
-        throw new UnsupportedOperationException(); // TODO Data API
-    }
-
-    @Override
     public int getContentVersion() {
         return 1;
     }
@@ -503,7 +482,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         try {
             final CompoundNBT compound = new CompoundNBT();
             this.shadow$writeUnlessRemoved(compound);
-            final Entity entity = net.minecraft.entity.EntityType.func_220335_a(compound, this.world, (createdEntity) -> {
+            final Entity entity = net.minecraft.entity.EntityType.func_220335_a(compound, this.shadow$getEntityWorld(), (createdEntity) -> {
                 compound.putUniqueId(Constants.UUID, createdEntity.getUniqueID());
                 createdEntity.read(compound);
                 return createdEntity;
