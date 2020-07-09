@@ -59,7 +59,6 @@ public abstract class SpongeGame implements Game {
     private final AssetManager assetManager;
     private final ConfigManager configManager;
     private final ChannelRegistrar channelRegistrar;
-    private final TeleportHelper teleportHelper;
     private final MetricsConfigManager metricsConfigManager;
     private final CommandManager commandManager;
     private final SqlManager sqlManager;
@@ -68,8 +67,8 @@ public abstract class SpongeGame implements Game {
 
     protected SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
         final EventManager eventManager, final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
-        final TeleportHelper teleportHelper, final MetricsConfigManager metricsConfigManager, final CommandManager commandManager,
-        final SqlManager sqlManager, final ServiceProvider serviceProvider) {
+        final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
+        final ServiceProvider serviceProvider) {
 
         this.platform = platform;
         this.registry = registry;
@@ -79,7 +78,6 @@ public abstract class SpongeGame implements Game {
         this.assetManager = assetManager;
         this.configManager = configManager;
         this.channelRegistrar = channelRegistrar;
-        this.teleportHelper = teleportHelper;
         this.metricsConfigManager = metricsConfigManager;
         this.commandManager = commandManager;
         this.sqlManager = sqlManager;
@@ -134,11 +132,6 @@ public abstract class SpongeGame implements Game {
     @Override
     public ChannelRegistrar getChannelRegistrar() {
         return this.channelRegistrar;
-    }
-
-    @Override
-    public TeleportHelper getTeleportHelper() {
-        return this.teleportHelper;
     }
 
     @Override

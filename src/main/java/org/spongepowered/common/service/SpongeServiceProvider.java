@@ -41,7 +41,7 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.config.category.ServicesCategory;
@@ -51,7 +51,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.permission.SpongePermissionService;
-import org.spongepowered.common.service.user.SpongeUserStorageService;
+import org.spongepowered.common.service.user.SpongeUserManager;
 import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
@@ -86,10 +86,6 @@ public final class SpongeServiceProvider implements ServiceProvider {
                             PermissionService.class,
                             ServicesCategory.ServicePluginSubCategory::getPermissionService,
                             SpongePermissionService.class))
-                    .add(new Service<>(
-                            UserStorageService.class,
-                            ServicesCategory.ServicePluginSubCategory::getUserStorageService,
-                            SpongeUserStorageService.class))
                     .add(new Service<>(
                             WhitelistService.class,
                             ServicesCategory.ServicePluginSubCategory::getWhitelistService,
@@ -157,12 +153,6 @@ public final class SpongeServiceProvider implements ServiceProvider {
     @NonNull
     public final PermissionService permissionService() {
         return this.provideUnchecked(PermissionService.class);
-    }
-
-    @Override
-    @NonNull
-    public final UserStorageService userStorageService() {
-        return this.provideUnchecked(UserStorageService.class);
     }
 
     @Override
@@ -259,7 +249,7 @@ public final class SpongeServiceProvider implements ServiceProvider {
             // If after all that we have a registration, we... register it.
             if (registration != null) {
                 this.services.put(candidate.getServiceClass(), registration);
-                SpongeCommon.getLogger().info("Registered service {} to plugin {}.",
+                SpongeCommon.getLogger().info("Registered service [{}] to plugin '{}'.",
                         registration.clazz.getSimpleName(),
                         registration.pluginContainer.getMetadata().getId());
             }

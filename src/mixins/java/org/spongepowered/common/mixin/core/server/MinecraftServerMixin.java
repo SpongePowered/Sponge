@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import com.google.gson.JsonElement;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -34,7 +33,6 @@ import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.server.ServerWorld;
@@ -47,7 +45,6 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
-import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -67,6 +64,7 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
@@ -83,6 +81,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract boolean shadow$isServerRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract Iterable<ServerWorld> shadow$getWorlds();
+    @Shadow @Final protected Thread serverThread;
 
     @Nullable private ResourcePack impl$resourcePack;
     private boolean impl$enableSaving = true;
@@ -101,20 +100,29 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         return Tristate.TRUE;
     }
 
-    /**
-     * @author Zidane - Minecraft 1.14.4
-     * @reason Sponge rewrites the method to use the Sponge {@link WorldManager} to load worlds,
-     * migrating old worlds, upgrading worlds to our standard, and configuration loading.
-     */
-    @Overwrite
-    public void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions) {
-        SpongeCommon.getWorldManager().loadAllWorlds((MinecraftServer) (Object) this, directoryName, levelName, seed, type, generatorOptions);
+    @Inject(method = "startServerThread", at = @At("HEAD"))
+    private void vanilla$prepareServerPhaseTracker(CallbackInfo ci) {
+        try {
+            PhaseTracker.SERVER.setThread(this.serverThread);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Could not initialize the server PhaseTracker!");
+        }
     }
 
-    @Inject(method = "loadInitialChunks", at = @At("HEAD"), cancellable = true)
-    private void impl$cancelLoadInitialChunks(IChunkStatusListener p_213186_1_, CallbackInfo ci) {
-        ci.cancel();
-    }
+//    /**
+//     * @author Zidane - Minecraft 1.14.4
+//     * @reason Sponge rewrites the method to use the Sponge {@link WorldManager} to load worlds,
+//     * migrating old worlds, upgrading worlds to our standard, and configuration loading.
+//     */
+//    @Overwrite
+//    public void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions) {
+//        SpongeCommon.getWorldManager().loadAllWorlds((MinecraftServer) (Object) this, directoryName, levelName, seed, type, generatorOptions);
+//    }
+
+//    @Inject(method = "loadInitialChunks", at = @At("HEAD"), cancellable = true)
+//    private void impl$cancelLoadInitialChunks(IChunkStatusListener p_213186_1_, CallbackInfo ci) {
+//        ci.cancel();
+//    }
 
     @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )
     private void impl$createSpongeResourcePackWrapper(String url, String hash, CallbackInfo ci) {
@@ -149,128 +157,128 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         TimingsManager.FULL_SERVER_TICK.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "RETURN"))
-    private void impl$completeTickCheckAnimation(CallbackInfo ci) {
-        final int lastAnimTick = SpongeCommonEventFactory.lastAnimationPacketTick;
-        final int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
-        final int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
-        if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
-            final ServerPlayerEntity player = SpongeCommonEventFactory.lastAnimationPlayer.get();
-            if (player != null && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
-                final BlockSnapshot blockSnapshot = BlockSnapshot.empty();
+//    @Inject(method = "tick", at = @At(value = "RETURN"))
+//    private void impl$completeTickCheckAnimation(CallbackInfo ci) {
+//        final int lastAnimTick = SpongeCommonEventFactory.lastAnimationPacketTick;
+//        final int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
+//        final int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
+//        if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
+//            final ServerPlayerEntity player = SpongeCommonEventFactory.lastAnimationPlayer.get();
+//            if (player != null && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
+//                final BlockSnapshot blockSnapshot = BlockSnapshot.empty();
+//
+//                final RayTraceResult result = SpongeImplHooks.rayTraceEyes(player, SpongeImplHooks.getBlockReachDistance(player) + 1);
+//
+//                // Hit non-air block
+//                if (result instanceof BlockRayTraceResult) {
+//                    return;
+//                }
+//
+//                if (!player.getHeldItemMainhand().isEmpty() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), Hand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
+//                    SpongeCommonEventFactory.lastAnimationPacketTick = 0;
+//                    SpongeCommonEventFactory.lastAnimationPlayer = null;
+//                    return;
+//                }
+//
+//                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, player.getHeldItemMainhand(), Hand.MAIN_HAND, null);
+//            }
+//            SpongeCommonEventFactory.lastAnimationPlayer = null;
+//        }
+//        SpongeCommonEventFactory.lastAnimationPacketTick = 0;
+//
+//        TimingsManager.FULL_SERVER_TICK.stopTiming();
+//    }
 
-                final RayTraceResult result = SpongeImplHooks.rayTraceEyes(player, SpongeImplHooks.getBlockReachDistance(player) + 1);
+//    @ModifyConstant(method = "tick", constant = @Constant(intValue = 900))
+//    private int getSaveTickInterval(int tickInterval) {
+//        if (!this.shadow$isDedicatedServer()) {
+//            return tickInterval;
+//        } else if (!this.shadow$isServerRunning()) {
+//            // Don't autosave while server is stopping
+//            return this.tickCounter + 1;
+//        }
+//
+//        final int autoPlayerSaveInterval = SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getAutoPlayerSaveInterval();
+//        if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
+//            this.shadow$getPlayerList().saveAllPlayerData();
+//        }
+//
+//        this.save(true, true, false);
+//        // force check to fail as we handle everything above
+//        return this.tickCounter + 1;
+//    }
 
-                // Hit non-air block
-                if (result instanceof BlockRayTraceResult) {
-                    return;
-                }
+//    /**
+//     * @author Zidane - Minecraft 1.14.4
+//     * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
+//     */
+//    @Overwrite
+//    public boolean save(boolean suppressLog, boolean flush, boolean forced) {
+//        if (!this.impl$enableSaving) {
+//            return false;
+//        }
+//
+//        for (final ServerWorld world : this.shadow$getWorlds()) {
+//            final SerializationBehavior serializationBehavior = ((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior();
+//            final boolean save = serializationBehavior != SerializationBehaviors.NONE;
+//            boolean log = !suppressLog;
+//
+//            if (save) {
+//                // Sponge start - check auto save interval in world config
+//                if (this.shadow$isDedicatedServer() && this.shadow$isServerRunning()) {
+//                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+//                    final int autoSaveInterval = configAdapter.getConfig().getWorld().getAutoSaveInterval();
+//                    if (log) {
+//                        log = configAdapter.getConfig().getLogging().logWorldAutomaticSaving();
+//                    }
+//                    if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehaviors.AUTOMATIC) {
+//                        if (log) {
+//                            LOGGER.warn("Auto-saving has been disabled for world \'" + world.getWorldInfo().getWorldName() + "\'/"
+//                                    + ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey() + ". "
+//                                    + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
+//                                    + " zero in the corresponding serverWorld config.");
+//                        }
+//                        continue;
+//                    }
+//                    if (this.tickCounter % autoSaveInterval != 0) {
+//                        continue;
+//                    }
+//                    if (log) {
+//                        LOGGER.info("Auto-saving chunks for world \'" + world.getWorldInfo().getWorldName() + "\'/"
+//                                + ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
+//                    }
+//                } else if (log) {
+//                    LOGGER.info("Saving chunks for world \'" + world.getWorldInfo().getWorldName() + "\'/"
+//                        + ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
+//                }
+//
+//                try {
+//                    ((ServerWorldBridge) world).bridge$saveChunksAndProperties(null, flush, world.disableLevelSaving && !forced);
+//                } catch (SessionLockException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//        return true;
+//    }
 
-                if (!player.getHeldItemMainhand().isEmpty() && SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), Hand.MAIN_HAND, null, blockSnapshot).isCancelled()) {
-                    SpongeCommonEventFactory.lastAnimationPacketTick = 0;
-                    SpongeCommonEventFactory.lastAnimationPlayer = null;
-                    return;
-                }
+//    @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
+//    private void impl$dontExecuteServerStopOffThread(CallbackInfo ci) {
+//        // If the server is already stopping, don't allow stopServer to be called off the main thread
+//        // (from the shutdown handler thread in MinecraftServer)
+//        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !SpongeImplHooks.onServerThread())) {
+//            ci.cancel();
+//        }
+//    }
 
-                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, player.getHeldItemMainhand(), Hand.MAIN_HAND, null);
-            }
-            SpongeCommonEventFactory.lastAnimationPlayer = null;
-        }
-        SpongeCommonEventFactory.lastAnimationPacketTick = 0;
-
-        TimingsManager.FULL_SERVER_TICK.stopTiming();
-    }
-
-    @ModifyConstant(method = "tick", constant = @Constant(intValue = 900))
-    private int getSaveTickInterval(int tickInterval) {
-        if (!this.shadow$isDedicatedServer()) {
-            return tickInterval;
-        } else if (!this.shadow$isServerRunning()) {
-            // Don't autosave while server is stopping
-            return this.tickCounter + 1;
-        }
-
-        final int autoPlayerSaveInterval = SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getAutoPlayerSaveInterval();
-        if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
-            this.shadow$getPlayerList().saveAllPlayerData();
-        }
-
-        this.save(true, true, false);
-        // force check to fail as we handle everything above
-        return this.tickCounter + 1;
-    }
-
-    /**
-     * @author Zidane - Minecraft 1.14.4
-     * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
-     */
-    @Overwrite
-    public boolean save(boolean suppressLog, boolean flush, boolean forced) {
-        if (!this.impl$enableSaving) {
-            return false;
-        }
-
-        for (final ServerWorld world : this.shadow$getWorlds()) {
-            final SerializationBehavior serializationBehavior = ((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior();
-            final boolean save = serializationBehavior != SerializationBehaviors.NONE;
-            boolean log = !suppressLog;
-
-            if (save) {
-                // Sponge start - check auto save interval in world config
-                if (this.shadow$isDedicatedServer() && this.shadow$isServerRunning()) {
-                    final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-                    final int autoSaveInterval = configAdapter.getConfig().getWorld().getAutoSaveInterval();
-                    if (log) {
-                        log = configAdapter.getConfig().getLogging().logWorldAutomaticSaving();
-                    }
-                    if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehaviors.AUTOMATIC) {
-                        if (log) {
-                            LOGGER.warn("Auto-saving has been disabled for world \'" + world.getWorldInfo().getWorldName() + "\'/"
-                                    + ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey() + ". "
-                                    + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
-                                    + " zero in the corresponding serverWorld config.");
-                        }
-                        continue;
-                    }
-                    if (this.tickCounter % autoSaveInterval != 0) {
-                        continue;
-                    }
-                    if (log) {
-                        LOGGER.info("Auto-saving chunks for world \'" + world.getWorldInfo().getWorldName() + "\'/"
-                                + ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
-                    }
-                } else if (log) {
-                    LOGGER.info("Saving chunks for world \'" + world.getWorldInfo().getWorldName() + "\'/"
-                        + ((DimensionTypeBridge) world.dimension.getType()).bridge$getKey());
-                }
-
-                try {
-                    ((ServerWorldBridge) world).bridge$saveChunksAndProperties(null, flush, world.disableLevelSaving && !forced);
-                } catch (SessionLockException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return true;
-    }
-
-    @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$dontExecuteServerStopOffThread(CallbackInfo ci) {
-        // If the server is already stopping, don't allow stopServer to be called off the main thread
-        // (from the shutdown handler thread in MinecraftServer)
-        if ((Sponge.isServerAvailable() && !((MinecraftServer) Sponge.getServer()).isServerRunning() && !SpongeImplHooks.onServerThread())) {
-            ci.cancel();
-        }
-    }
-
-    /**
-     * @author Zidane - Minecraft 1.14.4
-     * @reason Set the difficulty without marking as custom
-     */
-    @Overwrite
-    public void setDifficultyForAllWorlds(Difficulty difficulty, boolean forceDifficulty) {
-        for (ServerWorld world : this.shadow$getWorlds()) {
-            this.bridge$updateWorldForDifficulty(world, difficulty, false);
-        }
-    }
+//    /**
+//     * @author Zidane - Minecraft 1.14.4
+//     * @reason Set the difficulty without marking as custom
+//     */
+//    @Overwrite
+//    public void setDifficultyForAllWorlds(Difficulty difficulty, boolean forceDifficulty) {
+//        for (ServerWorld world : this.shadow$getWorlds()) {
+//            this.bridge$updateWorldForDifficulty(world, difficulty, false);
+//        }
+//    }
 }

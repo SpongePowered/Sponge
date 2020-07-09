@@ -41,7 +41,6 @@ import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
-import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongePlatform;
@@ -55,7 +54,6 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
-import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
@@ -73,7 +71,6 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(EventManager.class).to(SpongeEventManager.class);
         this.bindAndExpose(PluginManager.class).toInstance(Launcher.getInstance().getPluginManager());
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
-        this.bindAndExpose(TeleportHelper.class).to(SpongeTeleportHelper.class);
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);

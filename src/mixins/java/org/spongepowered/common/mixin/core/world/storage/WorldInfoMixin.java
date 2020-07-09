@@ -40,6 +40,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.teleport.PortalAgentType;
@@ -203,7 +204,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
     @Override
     public void bridge$updatePlayersForDifficulty() {
-        SpongeCommon.getWorldManager().getWorlds()
+        Sponge.getServer().getWorldManager().getWorlds()
             .stream()
             .map(world -> (ServerWorld) world)
             .filter(world -> world.getWorldInfo() == (WorldInfo) (Object) this)

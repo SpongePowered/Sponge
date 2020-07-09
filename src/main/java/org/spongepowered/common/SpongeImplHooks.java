@@ -65,6 +65,7 @@ import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -76,6 +77,7 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
@@ -275,8 +277,8 @@ public class SpongeImplHooks {
         return null;
     }
 
-    public static boolean shouldKeepSpawnLoaded(final DimensionType dimensionType) {
-        final ServerWorld world = SpongeCommon.getWorldManager().getWorld(dimensionType);
+    public static boolean shouldKeepSpawnLoaded(final Server server, final DimensionType dimensionType) {
+        final ServerWorld world = ((SpongeWorldManager) server.getWorldManager()).getWorld(dimensionType);
         return world != null && ((WorldInfoBridge) world.getWorldInfo()).bridge$doesKeepSpawnLoaded();
 
     }

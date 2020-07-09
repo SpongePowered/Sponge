@@ -9,6 +9,8 @@
     "mixins": [
     ],
     "server": [
+        "server.MinecraftServerMixin",
+        "server.management.PlayerProfileCacheMixin"
     ],
     "injectors": {
         "defaultRequire": 1

@@ -25,10 +25,12 @@
 package org.spongepowered.common.profile.query;
 
 import com.google.common.collect.Lists;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.ProfileNotFoundException;
-import org.spongepowered.common.util.SpongeUsernameCache;
+import org.spongepowered.common.server.SpongeServer;
+import org.spongepowered.common.util.UsernameCache;
 
 import java.time.Instant;
 import java.util.Collection;
@@ -60,7 +62,7 @@ public abstract class Query<V> implements Callable<V> {
             Iterator<UUID> it = pool.iterator();
             while (it.hasNext()) {
                 UUID uniqueId = it.next();
-                @Nullable String username = SpongeUsernameCache.getLastKnownUsername(uniqueId);
+                @Nullable String username = ((SpongeServer) Sponge.getServer()).getUsernameCache().getLastKnownUsername(uniqueId);
                 if (username != null) {
                     result.add(GameProfile.of(uniqueId, username));
                     it.remove();

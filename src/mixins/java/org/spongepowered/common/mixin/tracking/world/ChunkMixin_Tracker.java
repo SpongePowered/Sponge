@@ -27,27 +27,16 @@ package org.spongepowered.common.mixin.tracking.world;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.Fluid;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.ITickList;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.UpgradeData;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
@@ -58,44 +47,32 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.profile.SpongeGameProfileManager;
+import org.spongepowered.common.server.SpongeServer;
+import org.spongepowered.common.service.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.world.chunk.Chunk.class)
 public abstract class ChunkMixin_Tracker implements ChunkBridge {
-
-
-    @Shadow @Final private World world;
-    @Shadow @Final private ChunkPos pos;
+    
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
 
+    @Shadow public abstract World shadow$getWorld();
 
-    @Nullable private UserStorageService trackerImpl$userStorageService;
     private Map<Integer, PlayerTracker> trackerImpl$trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> trackerImpl$trackedShortBlockPositions = new HashMap<>();
 
-    @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/util/math/ChunkPos;[Lnet/minecraft/world/biome/Biome;Lnet/minecraft/world/chunk/UpgradeData;Lnet/minecraft/world/ITickList;Lnet/minecraft/world/ITickList;J[Lnet/minecraft/world/chunk/ChunkSection;Ljava/util/function/Consumer;)V", at = @At("RETURN"))
-    private void tracker$setUpUserService(final World worldIn, final ChunkPos p_i49946_2_, final Biome[] p_i49946_3_, final UpgradeData p_i49946_4_,
-            final ITickList<Block> p_i49946_5_, final ITickList<Fluid> p_i49946_6_, final long p_i49946_7_, final ChunkSection[] p_i49946_9_,
-            final Consumer<Chunk> p_i49946_10_, final CallbackInfo ci) {
-        this.trackerImpl$userStorageService = worldIn != null && ((WorldBridge) worldIn).bridge$isFake()
-                                  ? null
-                                  : SpongeCommon.getGame().getServiceProvider().userStorageService();
-    }
-
     @Override
     public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
             return;
         }
         if (!PhaseTracker.getInstance().getCurrentState().tracksOwnersAndNotifiers()) {
@@ -128,16 +105,16 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             }
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter();
+        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.getConfig().getLogging().blockTrackLogging()) {
             if (!configAdapter.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getKey().toString())) {
-                SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
+                SpongeHooks.logBlockTrack(this.shadow$getWorld(), block, pos, user, true);
             } else {
-                SpongeHooks.logBlockTrack(this.world, block, pos, user, false);
+                SpongeHooks.logBlockTrack(this.shadow$getWorld(), block, pos, user, false);
             }
         }
 
-        final WorldInfoBridge worldInfo = (WorldInfoBridge) this.world.getWorldInfo();
+        final WorldInfoBridge worldInfo = (WorldInfoBridge) this.shadow$getWorld().getWorldInfo();
         final int indexForUniqueId = worldInfo.bridge$getIndexForUniqueId(user.getUniqueId());
         if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
@@ -180,7 +157,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Override
     public Optional<User> bridge$getBlockOwner(final BlockPos pos) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
             return Optional.empty();
         }
         final int intKey = Constants.Sponge.blockPosToInt(pos);
@@ -202,7 +179,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Override
     public Optional<UUID> bridge$getBlockOwnerUUID(final BlockPos pos) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
             return Optional.empty();
         }
         final int key = Constants.Sponge.blockPosToInt(pos);
@@ -224,7 +201,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Override
     public Optional<User> bridge$getBlockNotifier(final BlockPos pos) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
             return Optional.empty();
         }
         final int intKey = Constants.Sponge.blockPosToInt(pos);
@@ -244,7 +221,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Override
     public Optional<UUID> bridge$getBlockNotifierUUID(final BlockPos pos) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
             return Optional.empty();
         }
         final int key = Constants.Sponge.blockPosToInt(pos);
@@ -267,7 +244,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         if (uuid.isPresent()) {
             final UUID userUniqueId = uuid.get();
             // get player if online
-            final PlayerEntity player = this.world.getPlayerByUuid(userUniqueId);
+            final PlayerEntity player = this.shadow$getWorld().getPlayerByUuid(userUniqueId);
             if (player != null) {
                 return Optional.of((User) player);
             }
@@ -278,7 +255,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     }
 
     private Optional<UUID> tracker$getValidatedUUID(final int key, final int ownerIndex) {
-        final UUID uuid = (((WorldInfoBridge) this.world.getWorldInfo()).bridge$getUniqueIdForIndex(ownerIndex)).orElse(null);
+        final UUID uuid = (((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getUniqueIdForIndex(ownerIndex)).orElse(null);
         if (uuid != null) {
             // Verify id is valid and not invalid
             if (SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
@@ -293,46 +270,48 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     private Optional<User> tracker$getUserFromId(final UUID uuid) {
         // check username cache
-        final String username = SpongeUsernameCache.getLastKnownUsername(uuid);
-        if (username != null && this.trackerImpl$userStorageService != null) {
-            return this.trackerImpl$userStorageService.get(GameProfile.of(uuid, username));
+        final SpongeUserManager userManager = this.getUserManager();
+        final Server server = (Server) this.shadow$getWorld().getServer();
+        final String username = ((SpongeServer) server).getUsernameCache().getLastKnownUsername(uuid);
+        if (username != null && userManager != null) {
+            return userManager.get(GameProfile.of(uuid, username));
         }
 
         // check mojang cache
-        final GameProfile profile = Sponge.getServer().getGameProfileManager().getCache().getById(uuid).orElse(null);
-        if (profile != null && this.trackerImpl$userStorageService != null) {
-            return this.trackerImpl$userStorageService.get(profile);
+        final GameProfile profile = server.getGameProfileManager().getCache().getById(uuid).orElse(null);
+        if (profile != null && userManager != null) {
+            return userManager.get(profile);
         }
 
         // If we reach this point, queue UUID for async lookup and return empty
-        ((SpongeProfileManager) Sponge.getServer().getGameProfileManager()).lookupUserAsync(uuid);
+        ((SpongeGameProfileManager) server.getGameProfileManager()).lookupUserAsync(uuid);
         return Optional.empty();
     }
 
     // Special setter used by API
     @Override
     public void bridge$setBlockNotifier(final BlockPos pos, @Nullable final UUID uuid) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
             return;
         }
         if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
-                shortTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid);
+                shortTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
                 this.trackerImpl$trackedShortBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid),
+                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
         } else {
             final int blockPos = Constants.Sponge.blockPosToInt(pos);
             final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
-                intTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid);
+                intTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
                 this.trackerImpl$trackedIntBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid),
+                        new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
         }
@@ -341,25 +320,25 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     // Special setter used by API
     @Override
     public void bridge$setBlockCreator(final BlockPos pos, @Nullable final UUID uuid) {
-        if (((WorldBridge) this.world).bridge$isFake()) {
+        if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
             return;
         }
         if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
             final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
-                shortTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid);
+                shortTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
-                this.trackerImpl$trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo())
+                this.trackerImpl$trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo())
                         .bridge$getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
             }
         } else {
             final int blockPos = Constants.Sponge.blockPosToInt(pos);
             final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
-                intTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getIndexForUniqueId(uuid);
+                intTracker.ownerIndex = uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
-                this.trackerImpl$trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.world.getWorldInfo())
+                this.trackerImpl$trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo())
                         .bridge$getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
             }
         }
@@ -375,5 +354,12 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         this.trackerImpl$trackedShortBlockPositions = trackedPositions;
     }
 
+    private SpongeUserManager getUserManager() {
+        final World world = this.shadow$getWorld();
+        if (world == null || ((WorldBridge) world).bridge$isFake()) {
+            return null;
+        }
 
+        return (SpongeUserManager) ((Server) world.getServer()).getUserManager();
+    }
 }

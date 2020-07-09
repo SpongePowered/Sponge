@@ -42,6 +42,6 @@ public final class TestPlugin {
 
     @Listener
     public void onConstruct(final ConstructPluginEvent event) {
-        this.logger.info("Hello world");
+        this.logger.info(event);
     }
 }

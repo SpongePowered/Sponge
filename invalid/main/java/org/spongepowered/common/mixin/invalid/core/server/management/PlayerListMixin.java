@@ -97,7 +97,7 @@ import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
-import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
+import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.io.File;
@@ -371,7 +371,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Inject(method = "writePlayerData", at = @At(target = "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/PlayerEntity;)V", value = "INVOKE"))
     private void impl$saveSpongePlayerDataAfterSavingPlayerData(ServerPlayerEntity player, CallbackInfo ci) {
-        SpongePlayerDataHandler.savePlayer(player.getUniqueID());
+        SpongePlayerDataManager.savePlayer(player.getUniqueID());
     }
 
     @ModifyVariable(method = "sendPlayerPermissionLevel", at = @At("HEAD"), argsOnly = true)

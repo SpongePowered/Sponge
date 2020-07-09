@@ -31,19 +31,18 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.user.UserManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.profile.SpongeGameProfileManager;
+import org.spongepowered.common.server.SpongeServer;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.SpongeUsernameCache;
+import org.spongepowered.common.util.UsernameCache;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;
@@ -56,8 +55,6 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
     @Nullable private UUID tracker$notifier;
     @Nullable private WeakReference<User> tracker$ownerUser;
     @Nullable private WeakReference<User> tracker$notifierUser;
-    @Nullable private SpongeProfileManager tracker$profileManager;
-    @Nullable private UserStorageService tracker$userService;
 
     @Override
     public Optional<UUID> tracked$getOwnerUUID() {
@@ -120,28 +117,21 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
         if (user != null) {
             return Optional.of(user);
         }
-        // player is not online, get user from storage if one exists
-        if (this.tracker$profileManager == null) {
-            this.tracker$profileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
-        }
-        if (this.tracker$userService == null) {
-            this.tracker$userService = SpongeCommon.getGame().getServiceProvider().userStorageService();
-        }
 
         // check username cache
-        final String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+        final String username = ((SpongeServer) Sponge.getServer()).getUsernameCache().getLastKnownUsername(uuid);
         if (username != null) {
-            return this.tracker$userService.get(GameProfile.of(uuid, username));
+            return Sponge.getServer().getUserManager().get(GameProfile.of(uuid, username));
         }
 
         // check mojang cache
-        final GameProfile profile = this.tracker$profileManager.getCache().getById(uuid).orElse(null);
+        final GameProfile profile = Sponge.getServer().getGameProfileManager().getCache().getById(uuid).orElse(null);
         if (profile != null) {
-            return this.tracker$userService.get(profile);
+            return Sponge.getServer().getUserManager().get(profile);
         }
 
         // If we reach this point, queue UUID for async lookup and return empty
-        this.tracker$profileManager.lookupUserAsync(uuid);
+        ((SpongeGameProfileManager) Sponge.getServer().getGameProfileManager()).lookupUserAsync(uuid);
         return Optional.empty();
     }
 

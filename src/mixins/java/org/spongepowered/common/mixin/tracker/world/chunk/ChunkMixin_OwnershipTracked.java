@@ -39,11 +39,12 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.UpgradeData;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.user.UserManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -59,12 +60,15 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.profile.SpongeGameProfileManager;
+import org.spongepowered.common.server.SpongeServer;
+import org.spongepowered.common.service.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.SpongeUsernameCache;
+import org.spongepowered.common.util.UsernameCache;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,19 +83,8 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
     @Shadow public abstract ChunkPos shadow$getPos();
     @Shadow public abstract Map<BlockPos, TileEntity> shadow$getTileEntityMap();
 
-    @Nullable private UserStorageService tracker$userStorageService;
     private Map<Integer, PlayerTracker> tracker$trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> tracker$trackedShortBlockPositions = new HashMap<>();
-
-    @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/util/math/ChunkPos;[Lnet/minecraft/world/biome/Biome;Lnet/minecraft/world/"
-            + "chunk/UpgradeData;Lnet/minecraft/world/ITickList;Lnet/minecraft/world/ITickList;J[Lnet/minecraft/world/chunk/ChunkSection;Ljava/util"
-            + "/function/Consumer;)V", at = @At("RETURN"))
-    private void tracker$setUpUserService(final World world, final ChunkPos pos, final Biome[] biomes, final UpgradeData data, final ITickList<Block> blockTickList,
-                                          final ITickList<Fluid> fluidTickList, final long inhabitedTime, final ChunkSection[] sections, final Consumer<Chunk> chunkConsumer, final CallbackInfo ci) {
-        this.tracker$userStorageService = world != null && !((WorldBridge) world).bridge$isFake()
-                                  ? null
-                                  : SpongeCommon.getGame().getServiceProvider().userStorageService();
-    }
 
     @Override
     public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type type) {
@@ -293,19 +286,21 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
 
     private Optional<User> tracker$getUserFromId(final UUID uuid) {
         // check username cache
-        final String username = SpongeUsernameCache.getLastKnownUsername(uuid);
-        if (username != null && this.tracker$userStorageService != null) {
-            return this.tracker$userStorageService.get(GameProfile.of(uuid, username));
+        final SpongeUserManager userManager = this.getUserManager();
+        final Server server = (Server) this.shadow$getWorld().getServer();
+        final String username = ((SpongeServer) server).getUsernameCache().getLastKnownUsername(uuid);
+        if (username != null && userManager != null) {
+            return userManager.get(GameProfile.of(uuid, username));
         }
 
         // check mojang cache
-        final GameProfile profile = Sponge.getServer().getGameProfileManager().getCache().getById(uuid).orElse(null);
-        if (profile != null && this.tracker$userStorageService != null) {
-            return this.tracker$userStorageService.get(profile);
+        final GameProfile profile = server.getGameProfileManager().getCache().getById(uuid).orElse(null);
+        if (profile != null && userManager != null) {
+            return userManager.get(profile);
         }
 
         // If we reach this point, queue UUID for async lookup and return empty
-        ((SpongeProfileManager) Sponge.getServer().getGameProfileManager()).lookupUserAsync(uuid);
+        ((SpongeGameProfileManager) server.getGameProfileManager()).lookupUserAsync(uuid);
         return Optional.empty();
     }
 
@@ -415,4 +410,12 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
         }
     }
 
+    private SpongeUserManager getUserManager() {
+        final World world = this.shadow$getWorld();
+        if (world == null || ((WorldBridge) world).bridge$isFake()) {
+            return null;
+        }
+
+        return (SpongeUserManager) ((Server) world.getServer()).getUserManager();
+    }
 }

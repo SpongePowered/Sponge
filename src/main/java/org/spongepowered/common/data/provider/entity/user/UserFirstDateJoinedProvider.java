@@ -25,11 +25,12 @@
 package org.spongepowered.common.data.provider.entity.user;
 
 import net.minecraft.entity.player.PlayerEntity;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
+import org.spongepowered.common.server.SpongeServer;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -48,14 +49,14 @@ public final class UserFirstDateJoinedProvider extends GenericMutableDataProvide
 
     @Override
     protected Optional<Instant> getFrom(Identifiable dataHolder) {
-        return SpongePlayerDataHandler.getFirstJoined(dataHolder.getUniqueId());
+        return ((SpongeServer) Sponge.getServer()).getPlayerDataManager().getFirstJoined(dataHolder.getUniqueId());
     }
 
     @Override
     protected boolean set(Identifiable dataHolder, Instant value) {
         final UUID id = dataHolder.getUniqueId();
-        final Instant played = SpongePlayerDataHandler.getFirstJoined(id).orElse(value);
-        SpongePlayerDataHandler.setPlayerInfo(id, played, value);
+        final Instant played = ((SpongeServer) Sponge.getServer()).getPlayerDataManager().getFirstJoined(id).orElse(value);
+        ((SpongeServer) Sponge.getServer()).getPlayerDataManager().setPlayerInfo(id, played, value);
         return true;
     }
 }

@@ -77,6 +77,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.service.permission.SpongeBridgeSubject;
 import org.spongepowered.common.service.permission.SubjectHelper;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.io.File;
@@ -168,7 +169,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     public void initialize() {
         this.nbt = new CompoundNBT();
-        final ServerWorld world = SpongeCommon.getWorldManager().getDefaultWorld();
+        final ServerWorld world = ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDefaultWorld();
         if (world == null) {
             return;
         }
@@ -668,7 +669,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     public void save() {
         Preconditions.checkState(this.isInitialized(), "User {} is not initialized", this.profile.getId());
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) SpongeCommon.getWorldManager().getDefaultWorld();
+        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDefaultWorld();
         final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), this.getUniqueId() + ".dat");
         CompoundNBT compound;
         try {
@@ -762,18 +763,18 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
             return Optional.empty();
         }
 
-        return Optional.ofNullable(SpongeCommon.getWorldManager().getDimensionTypeUniqueId(dimensionType));
+        return Optional.ofNullable(((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDimensionTypeUniqueId(dimensionType));
     }
 
     @Override
     public boolean setLocation(final Vector3d position, final UUID worldUniqueId) {
         final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
-            final Optional<org.spongepowered.api.world.server.ServerWorld> world = SpongeCommon.getWorldManager().getWorld(worldUniqueId);
+            final Optional<org.spongepowered.api.world.server.ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(worldUniqueId);
             return world.filter(serverWorld -> playerOpt.get().setLocation(ServerLocation.of(serverWorld, position))).isPresent();
         }
         final WorldProperties properties =
-                SpongeCommon.getWorldManager().getProperties(worldUniqueId).orElseThrow(() -> new IllegalArgumentException(String.format("Unknown "
+            Sponge.getServer().getWorldManager().getProperties(worldUniqueId).orElseThrow(() -> new IllegalArgumentException(String.format("Unknown "
                         + "World UUID '%s' given when setting location of user!", worldUniqueId)));
         final Integer dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionType().getId();
         this.dimension = dimensionId;

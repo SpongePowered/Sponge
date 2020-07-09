@@ -82,6 +82,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
@@ -160,7 +161,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             return false;
         }
 
-        if (!SpongeCommon.getWorldManager().isDimensionTypeRegistered(((ServerWorld) location.getWorld()).getDimension().getType())) {
+        // Don't allow setting locations to dimensions we have zero idea about
+        if (!((SpongeWorldManager) Sponge.getServer().getWorldManager()).isDimensionTypeRegistered(((ServerWorld) location.getWorld()).getDimension().getType())) {
             return false;
         }
 

@@ -73,7 +73,6 @@ public final class SpongeCommon {
     @Nullable private static SpongeConfigSaveManager configSaveManager;
 
     @Inject @Nullable private static SpongeGame game;
-    @Inject @Nullable private static SpongeGameRegistry registry;
 
     private SpongeCommon() {
     }
@@ -100,7 +99,7 @@ public final class SpongeCommon {
     }
 
     public static SpongeGameRegistry getRegistry() {
-        return check(registry);
+        return (SpongeGameRegistry) Sponge.getRegistry();
     }
 
     public static ServerScheduler getServerScheduler() {
@@ -109,10 +108,6 @@ public final class SpongeCommon {
 
     public static AsyncScheduler getAsyncScheduler() {
         return getGame().getAsyncScheduler();
-    }
-
-    public static SpongeWorldManager getWorldManager() {
-        return (SpongeWorldManager) Sponge.getServer().getWorldManager();
     }
 
     public static Path getGameDirectory() {

@@ -22,33 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.server;
 
-import com.google.inject.Inject;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.manager.CommandManager;
-import org.spongepowered.common.text.action.SpongeCallbackHolder;
-import org.spongepowered.common.util.SpongeUsernameCache;
+import org.spongepowered.api.Server;
+import org.spongepowered.common.util.UsernameCache;
+import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 
-/**
- * Used to setup the ecosystem.
- */
-public final class SpongeBootstrap {
+public interface SpongeServer extends Server {
 
-    @Inject private static CommandManager commandManager;
+    SpongePlayerDataManager getPlayerDataManager();
 
-    public static void initializeServices() {
-        SpongeCommon.getGame().getServiceProvider().init();
-        if (Sponge.isServerAvailable()) {
-            Sponge.getSystemSubject().getContainingCollection();
-        }
-        SpongeUsernameCache.load();
-    }
-
-    public static void initializeCommands() {
-        commandManager.register(SpongeCommon.getSpongePlugin(), SpongeCommandFactory.createSpongeCommand(), "sponge", "sp");
-        commandManager.register(SpongeCommon.getSpongePlugin(), SpongeCommandFactory.createHelpCommand(), "help", "?");
-        commandManager.register(SpongeCommon.getSpongePlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
-    }
-
+    UsernameCache getUsernameCache();
 }

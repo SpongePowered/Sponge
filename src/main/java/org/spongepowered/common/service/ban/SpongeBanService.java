@@ -149,7 +149,7 @@ public final class SpongeBanService implements BanService {
             return false;
         }
         if (ban.getType().equals(BanTypes.PROFILE.get())) {
-            final User user = Sponge.getServiceProvider().userStorageService().getOrCreate(((Ban.Profile) ban).getProfile());
+            final User user = Sponge.getServer().getUserManager().getOrCreate(((Ban.Profile) ban).getProfile());
             Sponge.getEventManager().post(SpongeEventFactory.createPardonUserEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
 
             UserListUtils.removeEntry(this.getUserBanList(), ((Ban.Profile) ban).getProfile());
@@ -171,7 +171,7 @@ public final class SpongeBanService implements BanService {
         if (ban.getType().equals(BanTypes.PROFILE.get())) {
             prevBan = this.getBanFor(((Ban.Profile) ban).getProfile());
 
-            final User user = Sponge.getServiceProvider().userStorageService().getOrCreate(((Ban.Profile) ban).getProfile());
+            final User user = Sponge.getServer().getUserManager().getOrCreate(((Ban.Profile) ban).getProfile());
             Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
 
             UserListUtils.addEntry(this.getUserBanList(), (UserListEntry<?>) ban);

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.vanilla.launch;
 
-import org.spongepowered.api.Server;
+import org.spongepowered.common.server.SpongeServer;
 
-public interface VanillaServer extends VanillaEngine, Server {
+public interface VanillaServer extends VanillaEngine, SpongeServer {
 
 }

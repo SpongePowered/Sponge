@@ -81,7 +81,7 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
@@ -118,7 +118,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.accessor.network.play.client.CClientSettingsPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.mixin.core.entity.player.PlayerEntityMixin;
-import org.spongepowered.common.service.user.SpongeUserStorageService;
+import org.spongepowered.common.service.user.SpongeUserManager;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.util.Constants;
@@ -208,20 +208,20 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Override
     public User bridge$getUserObject() {
-        final UserStorageService service = SpongeCommon.getGame().getServiceProvider().provideUnchecked(UserStorageService.class);
+        final UserManager service = SpongeCommon.getGame().getServiceProvider().provideUnchecked(UserManager.class);
         if (this.impl$isFake) { // Fake players are recogizeable through the field set up with bridge$isFake.
-            return service.getOrCreate(SpongeUserStorageService.FAKEPLAYER_PROFILE);
+            return service.getOrCreate(SpongeUserManager.FAKEPLAYER_PROFILE);
         }
         return service.getOrCreate((GameProfile) this.shadow$getGameProfile());
     }
 
     private User impl$getUserObjectOnConstruction() {
-        final UserStorageService service = SpongeCommon.getGame().getServiceProvider().provideUnchecked(UserStorageService.class);
-        if (this.impl$isFake || !(service instanceof SpongeUserStorageService)) {
+        final UserManager service = SpongeCommon.getGame().getServiceProvider().provideUnchecked(UserManager.class);
+        if (this.impl$isFake || !(service instanceof SpongeUserManager)) {
             return bridge$getUserObject();
         }
         // Emnsure that the game profile is up to date.
-        return ((SpongeUserStorageService) service).forceRecreateUser((GameProfile) this.shadow$getGameProfile());
+        return ((SpongeUserManager) service).forceRecreateUser((GameProfile) this.shadow$getGameProfile());
     }
 
     @Override

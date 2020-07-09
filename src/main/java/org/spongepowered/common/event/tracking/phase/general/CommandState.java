@@ -149,16 +149,17 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                     final UUID key = entry.getKey();
                     @Nullable
                     net.minecraft.entity.Entity foundEntity = null;
-                    for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds())
-                    {
-                        final ServerWorld world = (ServerWorld) apiWorld;
-                        final net.minecraft.entity.Entity entityFromUuid = world.getEntityByUuid(key);
-                        if (entityFromUuid != null)
-                        {
-                            foundEntity = entityFromUuid;
-                            break;
-                        }
-                    }
+                    // TODO Minecraft 1.14, States need to know their engine...
+//                    for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds())
+//                    {
+//                        final ServerWorld world = (ServerWorld) apiWorld;
+//                        final net.minecraft.entity.Entity entityFromUuid = world.getEntityByUuid(key);
+//                        if (entityFromUuid != null)
+//                        {
+//                            foundEntity = entityFromUuid;
+//                            break;
+//                        }
+//                    }
                     final Optional<Entity> affectedEntity = Optional.ofNullable((Entity) foundEntity);
                     if (!affectedEntity.isPresent())
                     {

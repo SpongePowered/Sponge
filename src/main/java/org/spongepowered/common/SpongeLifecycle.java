@@ -26,31 +26,47 @@ package org.spongepowered.common;
 
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
-import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.launch.plugin.SpongePluginManager;
+import org.spongepowered.common.registry.SpongeFactoryRegistry;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
+import org.spongepowered.common.server.SpongeServer;
 import org.spongepowered.common.service.SpongeServiceProvider;
 
 public abstract class SpongeLifecycle {
 
-    protected final Game game;
     protected final Engine engine;
+    protected final GameRegistry gameRegistry;
     protected final EventManager eventManager;
     protected final PluginManager pluginManager;
     protected final ServiceProvider serviceProvider;
 
-    public SpongeLifecycle(final Game game, final Engine engine, final EventManager eventManager, final PluginManager pluginManager,
-        final ServiceProvider serviceProvider) {
-        this.game = game;
+    public SpongeLifecycle(final Engine engine, final GameRegistry gameRegistry, final EventManager eventManager,
+        final PluginManager pluginManager, final ServiceProvider serviceProvider) {
         this.engine = engine;
+        this.gameRegistry = gameRegistry;
         this.eventManager = eventManager;
         this.pluginManager = pluginManager;
         this.serviceProvider = serviceProvider;
     }
 
+    public void establishFactories() {
+        ((SpongeFactoryRegistry) this.gameRegistry.getFactoryRegistry()).registerDefaultFactories();
+    }
+
+    public void initTimings() {
+        SpongeTimingsFactory.INSTANCE.init();
+    }
+
     public void establishServices() {
         ((SpongeServiceProvider) this.serviceProvider).init();
+    }
+
+    public void establishServerFeatures() {
+        //Sponge.getSystemSubject().getContainingCollection();
+        ((SpongeServer) this.engine).getUsernameCache().load();
     }
 }

@@ -34,6 +34,7 @@ import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,8 +48,9 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
+import org.spongepowered.common.server.SpongeServer;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
+import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -243,15 +245,16 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
             playerId = compound.getUniqueId(Constants.UUID);
         }
         if (playerId != null) {
-            final Optional<Instant> savedFirst = SpongePlayerDataHandler.getFirstJoined(playerId);
+            final SpongePlayerDataManager playerDataManager = ((SpongeServer) Sponge.getServer()).getPlayerDataManager();
+            final Optional<Instant> savedFirst = playerDataManager.getFirstJoined(playerId);
             if (savedFirst.isPresent()) {
                 creation = savedFirst.get();
             }
-            final Optional<Instant> savedJoined = SpongePlayerDataHandler.getLastPlayed(playerId);
+            final Optional<Instant> savedJoined = playerDataManager.getLastPlayed(playerId);
             if (savedJoined.isPresent()) {
                 lastPlayed = savedJoined.get();
             }
-            SpongePlayerDataHandler.setPlayerInfo(playerId, creation, lastPlayed);
+            playerDataManager.setPlayerInfo(playerId, creation, lastPlayed);
         }
         this.impl$file = null;
         return compound;
@@ -262,7 +265,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
             target = "Lnet/minecraft/nbt/CompressedStreamTools;writeCompressed(Lnet/minecraft/nbt/CompoundNBT;Ljava/io/OutputStream;)V",
             shift = At.Shift.AFTER))
     private void impl$saveSpongePlayerData(PlayerEntity player, CallbackInfo callbackInfo) {
-        SpongePlayerDataHandler.savePlayer(player.getUniqueID());
+        ((SpongeServer) Sponge.getServer()).getPlayerDataManager().savePlayer(player.getUniqueID());
     }
 
     @Inject(

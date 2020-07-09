@@ -26,32 +26,38 @@ package org.spongepowered.vanilla;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.Engine;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.common.SpongeLifecycle;
-import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.service.SpongeServiceProvider;
+import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 
 public final class VanillaLifecycle extends SpongeLifecycle {
 
     @Inject
-    public VanillaLifecycle(Game game, Engine engine, EventManager eventManager, PluginManager pluginManager, ServiceProvider serviceProvider) {
-        super(game, engine, eventManager, pluginManager, serviceProvider);
+    public VanillaLifecycle(Engine engine, GameRegistry gameRegistry, EventManager eventManager, PluginManager pluginManager,
+        ServiceProvider serviceProvider) {
+        super(engine, gameRegistry, eventManager, pluginManager, serviceProvider);
     }
 
     public void registerPluginListeners() {
         for (final PluginContainer plugin : this.pluginManager.getPlugins()) {
+            if (plugin instanceof DummyPluginContainer) {
+                continue;
+            }
             this.eventManager.registerListeners(plugin, plugin.getInstance());
         }
     }
 
     public void callConstructEventToPlugins() {
         for (final PluginContainer plugin : this.pluginManager.getPlugins()) {
-            this.eventManager.post(SpongeEventFactory.createConstructPluginEvent(this.engine.getCauseStackManager().getCurrentCause(), this.game, plugin));
+            if (plugin instanceof DummyPluginContainer) {
+                continue;
+            }
+            this.eventManager.post(SpongeEventFactory.createConstructPluginEvent(this.engine.getCauseStackManager().getCurrentCause(), this.engine.getGame(), plugin));
         }
     }
 }

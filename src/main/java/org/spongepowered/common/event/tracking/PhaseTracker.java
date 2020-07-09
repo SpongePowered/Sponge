@@ -314,18 +314,19 @@ public final class PhaseTracker {
         this.stack.pop();
 
         if (this.stack.isEmpty()) {
-            for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds()) {
-                final TrackedWorldBridge trackedWorld = (TrackedWorldBridge) apiWorld;
-                if (trackedWorld.bridge$getProxyAccess().hasProxy()) {
-                    new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
-                        .add("When completing the Phase: %s, some foreign BlockProxy was pushed, but never pruned.", state)
-                        .add()
-                        .add("Please analyze the following exception from the proxy:")
-                        .add(new Exception())
-                        .print(System.err);
-
-                }
-            }
+            // TODO Minecraft 1.14 - PhaseTracker is per-engine, cannot assume this anymore
+//            for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds()) {
+//                final TrackedWorldBridge trackedWorld = (TrackedWorldBridge) apiWorld;
+//                if (trackedWorld.bridge$getProxyAccess().hasProxy()) {
+//                    new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
+//                        .add("When completing the Phase: %s, some foreign BlockProxy was pushed, but never pruned.", state)
+//                        .add()
+//                        .add("Please analyze the following exception from the proxy:")
+//                        .add(new Exception())
+//                        .print(System.err);
+//
+//                }
+//            }
         }
 
     }

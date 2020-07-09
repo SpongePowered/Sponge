@@ -7,10 +7,12 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1100,
     "mixins": [
-      "mcp.server.dedicated.DedicatedServerMixin_API",
-      "mcp.server.MinecraftServerMixin_API"
+        "authlib.GameProfileMixin_API",
+        "mcp.server.management.PlayerProfileCacheMixin_API",
+        "mcp.server.MinecraftServerMixin_API"
     ],
     "server": [
+        "mcp.server.dedicated.DedicatedServerMixin_API"
     ],
     "injectors": {
       "defaultRequire": 1

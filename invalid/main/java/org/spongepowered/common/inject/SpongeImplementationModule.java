@@ -47,7 +47,6 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.service.SimpleServiceManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
-import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.asset.SpongeAssetManager;

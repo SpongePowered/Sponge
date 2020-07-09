@@ -28,15 +28,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.datafixers.DataFixer;
+import net.minecraft.command.Commands;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.server.ServerWorld;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.profile.GameProfileManager;
@@ -45,7 +53,8 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.world.server.WorldManager;
+import org.spongepowered.api.user.UserManager;
+import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -53,17 +62,25 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
-import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
+import org.spongepowered.common.server.SpongeServer;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.UsernameCache;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
+import org.spongepowered.common.world.storage.SpongePlayerDataManager;
+import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 
+import java.io.File;
 import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +88,7 @@ import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 @Implements(value = @Interface(iface = Server.class, prefix = "server$"))
-public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements Server {
+public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer {
 
     @Shadow @Final public long[] tickTimeArray;
     @Shadow public abstract PlayerList shadow$getPlayerList();
@@ -82,13 +99,27 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract int shadow$getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
 
-    private final SpongeScheduler api$scheduler = new ServerScheduler();
+    private SpongeScheduler api$scheduler;
+    private SpongeTeleportHelper api$teleportHelper;
+    private SpongePlayerDataManager api$playerDataHandler;
+    private UsernameCache api$usernameCache;
     private MessageChannel api$broadcastChannel;
-    @Nullable private ServerScoreboard api$scoreboard;
+    private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
 
     public MinecraftServerMixin_API(String name) {
         super(name);
+    }
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void api$initializeSpongeFields(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn, Commands p_i50590_4_,
+        YggdrasilAuthenticationService p_i50590_5_, MinecraftSessionService p_i50590_6_, GameProfileRepository p_i50590_7_,
+        PlayerProfileCache p_i50590_8_, IChunkStatusListenerFactory p_i50590_9_, String p_i50590_10_, CallbackInfo ci) {
+
+        this.api$scheduler = new ServerScheduler();
+        this.api$playerDataHandler = new SpongePlayerDataManager(this);
+        this.api$profileManager = new SpongeGameProfileManager(this);
+        this.api$teleportHelper = new SpongeTeleportHelper();
     }
 
     @Override
@@ -131,8 +162,12 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public WorldManager getWorldManager() {
-        return SpongeCommon.getWorldManager();
+    public UserManager getUserManager() {
+        return null;
+    }
+
+    @Override public TeleportHelper getTeleportHelper() {
+        return this.api$teleportHelper;
     }
 
     @Override
@@ -203,9 +238,6 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public GameProfileManager getGameProfileManager() {
-        if (this.api$profileManager == null) {
-            this.api$profileManager = new SpongeProfileManager();
-        }
         return this.api$profileManager;
     }
 
@@ -217,7 +249,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
         if (this.api$scoreboard == null) {
-            final ServerWorld world = SpongeCommon.getWorldManager().getDefaultWorld();
+            final ServerWorld world = ((SpongeWorldManager) this.getWorldManager()).getDefaultWorld();
             if (world == null) {
                 return Optional.empty();
             }
@@ -238,6 +270,11 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
+    public Game getGame() {
+        return Sponge.getGame();
+    }
+
+    @Override
     public CauseStackManager getCauseStackManager() {
         return PhaseTracker.getCauseStackManager();
     }
@@ -255,5 +292,19 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Override
     public String toString() {
         return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public SpongePlayerDataManager getPlayerDataManager() {
+        return this.api$playerDataHandler;
+    }
+
+    @Override
+    public UsernameCache getUsernameCache() {
+        if (this.api$usernameCache == null) {
+            this.api$usernameCache = new UsernameCache(this);
+        }
+
+        return this.api$usernameCache;
     }
 }

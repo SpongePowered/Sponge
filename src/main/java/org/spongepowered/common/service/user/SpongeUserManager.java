@@ -26,14 +26,13 @@ package org.spongepowered.common.service.user;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Sets;
-import com.google.inject.Singleton;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.user.UserManager;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -41,16 +40,21 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-@Singleton
-public final class SpongeUserStorageService implements UserStorageService {
+public final class SpongeUserManager implements UserManager {
 
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("41C82C87-7AfB-4024-BA57-13D2C99CAE77");
     public static final GameProfile FAKEPLAYER_PROFILE = (GameProfile) new com.mojang.authlib.GameProfile(FAKEPLAYER_UUID, null);
 
+    private final UserDiscoverer userDiscoverer;
+
+    public SpongeUserManager(Server server) {
+        this.userDiscoverer = new UserDiscoverer(server);
+    }
+    
     @Override
     public Optional<User> get(UUID uniqueId) {
         try {
-            return Optional.ofNullable(UserDiscoverer.findByProfile(Sponge.getServer().getGameProfileManager().get(checkNotNull(uniqueId, "uniqueId")).get()));
+            return Optional.ofNullable(this.userDiscoverer.findByProfile(Sponge.getServer().getGameProfileManager().get(checkNotNull(uniqueId, "uniqueId")).get()));
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Error looking up GameProfile!", e);
         }
@@ -60,13 +64,12 @@ public final class SpongeUserStorageService implements UserStorageService {
     public Optional<User> get(String lastKnownName) {
         checkNotNull(lastKnownName, "lastKnownName");
         checkArgument(lastKnownName.length() > 0 && lastKnownName.length() <= 16, "Invalid username %s", lastKnownName);
-        checkState(Sponge.isServerAvailable(), "Server is not available!");
-        return Optional.ofNullable(UserDiscoverer.findByUsername(lastKnownName));
+        return Optional.ofNullable(this.userDiscoverer.findByUsername(lastKnownName));
     }
 
     @Override
     public Optional<User> get(GameProfile profile) {
-        return Optional.ofNullable(UserDiscoverer.findByProfile(profile));
+        return Optional.ofNullable(this.userDiscoverer.findByProfile(profile));
     }
 
     @Override
@@ -81,34 +84,32 @@ public final class SpongeUserStorageService implements UserStorageService {
         if (user.isPresent()) {
             return user.get();
         }
-        return UserDiscoverer.create((com.mojang.authlib.GameProfile) profile);
+        return this.userDiscoverer.create((com.mojang.authlib.GameProfile) profile);
     }
 
     public User forceRecreateUser(GameProfile profile) {
-        return UserDiscoverer.forceRecreate((com.mojang.authlib.GameProfile) profile);
+        return this.userDiscoverer.forceRecreate((com.mojang.authlib.GameProfile) profile);
     }
 
     @Override
     public Collection<GameProfile> getAll() {
-        return UserDiscoverer.getAllProfiles();
+        return this.userDiscoverer.getAllProfiles();
     }
 
     @Override
     public boolean delete(GameProfile profile) {
-        checkState(Sponge.isServerAvailable(), "Server is not available!");
-        return UserDiscoverer.delete(checkNotNull(profile, "profile").getUniqueId());
+        return this.userDiscoverer.delete(checkNotNull(profile, "profile").getUniqueId());
     }
 
     @Override
     public boolean delete(User user) {
-        checkState(Sponge.isServerAvailable(), "Server is not available!");
-        return UserDiscoverer.delete(checkNotNull(user, "user").getUniqueId());
+        return this.userDiscoverer.delete(checkNotNull(user, "user").getUniqueId());
     }
 
     @Override
     public Collection<GameProfile> match(String lastKnownName) {
         lastKnownName = checkNotNull(lastKnownName, "lastKnownName").toLowerCase(Locale.ROOT);
-        Collection<GameProfile> allProfiles = UserDiscoverer.getAllProfiles();
+        Collection<GameProfile> allProfiles = this.userDiscoverer.getAllProfiles();
         Collection<GameProfile> matching = Sets.newHashSet();
         for (GameProfile profile : allProfiles) {
             if (profile.getName().isPresent() && profile.getName().get().startsWith(lastKnownName)) {

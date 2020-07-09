@@ -114,13 +114,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         this.submitRegistration0(this.server.getFolderName(), null);
         this.submitRegistration0("DIM-1", null);
         this.submitRegistration0("DIM1", null);
-
-        // Not sure if I'm sold on doing this-this early...
-        try {
-            this.loadExistingWorldRegistrations();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

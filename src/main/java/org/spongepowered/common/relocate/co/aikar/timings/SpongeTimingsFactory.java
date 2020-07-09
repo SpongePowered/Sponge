@@ -39,9 +39,9 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
-public class SpongeTimingsFactory implements TimingsFactory {
+public final class SpongeTimingsFactory implements TimingsFactory {
 
-    public static final TimingsFactory INSTANCE = new SpongeTimingsFactory().init();
+    public static final SpongeTimingsFactory INSTANCE = new SpongeTimingsFactory();
 
     private final int MAX_HISTORY_FRAMES = 12;
     public final Timing NULL_HANDLER = new NullTimingHandler();

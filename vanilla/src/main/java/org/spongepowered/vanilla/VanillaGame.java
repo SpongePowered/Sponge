@@ -44,11 +44,11 @@ public abstract class VanillaGame extends SpongeGame {
 
     public VanillaGame(final Platform platform, final GameRegistry registry, final DataManager dataManager,
         final PluginManager pluginManager, final EventManager eventManager, final AssetManager assetManager,
-        final ConfigManager configManager, final ChannelRegistrar channelRegistrar, final TeleportHelper teleportHelper,
+        final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
         final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
         final ServiceProvider serviceProvider) {
 
-        super(platform, registry, dataManager, pluginManager, eventManager, assetManager, configManager, channelRegistrar, teleportHelper,
+        super(platform, registry, dataManager, pluginManager, eventManager, assetManager, configManager, channelRegistrar,
             metricsConfigManager, commandManager, sqlManager, serviceProvider);
     }
 

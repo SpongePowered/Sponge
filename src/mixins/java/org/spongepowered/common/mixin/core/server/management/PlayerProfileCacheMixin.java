@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.util.SpongeUsernameCache;
+import org.spongepowered.common.server.SpongeServer;
 
 import java.util.Date;
 import java.util.Deque;
@@ -48,9 +48,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Mixin(PlayerProfileCache.class)
 public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridge {
 
-    @Shadow public abstract void save();
     // Thread-safe queue
-    private Queue<com.mojang.authlib.GameProfile> impl$profiles = new ConcurrentLinkedQueue<>();
+    private final Queue<com.mojang.authlib.GameProfile> impl$profiles = new ConcurrentLinkedQueue<>();
     private boolean impl$canSave = false;
 
     @Override
@@ -60,7 +59,7 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
 
     @Inject(method = "addEntry(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;)V", at = @At(value = "RETURN"))
     private void impl$UpdateCacheUsername(final com.mojang.authlib.GameProfile profile, final Date date, final CallbackInfo ci) {
-        SpongeUsernameCache.setUsername(profile.getId(), profile.getName());
+        ((SpongeServer) Sponge.getServer()).getUsernameCache().setUsername(profile.getId(), profile.getName());
     }
 
     @Redirect(method = "addEntry(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;)V",

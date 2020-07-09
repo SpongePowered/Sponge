@@ -29,6 +29,7 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.world.server.WorldManager;
 
 public interface MinecraftServerBridge {
 

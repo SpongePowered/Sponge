@@ -57,6 +57,8 @@ import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -89,6 +91,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -143,7 +146,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
 
     @Override
     public boolean isLoaded() {
-        return SpongeCommon.getWorldManager().getWorld(this.shadow$getDimension().getType()) == (Object) this;
+        return ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getWorld(this.shadow$getDimension().getType()) == (Object) this;
     }
 
     @Override

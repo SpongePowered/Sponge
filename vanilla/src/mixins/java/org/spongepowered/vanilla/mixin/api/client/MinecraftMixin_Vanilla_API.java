@@ -30,6 +30,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.client.LocalServer;
 import org.spongepowered.api.entity.living.player.client.LocalPlayer;
 import org.spongepowered.api.event.CauseStackManager;
@@ -76,6 +78,11 @@ public abstract class MinecraftMixin_Vanilla_API extends RecursiveEventLoop<Runn
     @Override
     public Optional<ClientWorld> getWorld() {
         return Optional.ofNullable((ClientWorld) this.world);
+    }
+
+    @Override
+    public Game getGame() {
+        return Sponge.getGame();
     }
 
     @Override

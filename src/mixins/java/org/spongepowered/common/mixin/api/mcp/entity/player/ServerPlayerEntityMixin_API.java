@@ -101,12 +101,13 @@ import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.server.SpongeServer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
+import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -370,7 +371,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public boolean hasPlayedBefore() {
-        final Instant instant = SpongePlayerDataHandler.getFirstJoined(this.getUniqueId()).get();
+        final Instant instant = ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().getFirstJoined(this.getUniqueId()).get();
         final Instant toTheMinute = instant.truncatedTo(ChronoUnit.MINUTES);
         final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
         final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
