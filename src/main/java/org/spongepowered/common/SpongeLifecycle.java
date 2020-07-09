@@ -26,6 +26,9 @@ package org.spongepowered.common;
 
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.event.EventManager;
+import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.common.service.SpongeServiceProvider;
@@ -34,12 +37,12 @@ public abstract class SpongeLifecycle {
 
     protected final Game game;
     protected final Engine engine;
-    protected final SpongeEventManager eventManager;
-    protected final SpongePluginManager pluginManager;
-    protected final SpongeServiceProvider serviceProvider;
+    protected final EventManager eventManager;
+    protected final PluginManager pluginManager;
+    protected final ServiceProvider serviceProvider;
 
-    public SpongeLifecycle(final Game game, final Engine engine, final SpongeEventManager eventManager, final SpongePluginManager pluginManager,
-        final SpongeServiceProvider serviceProvider) {
+    public SpongeLifecycle(final Game game, final Engine engine, final EventManager eventManager, final PluginManager pluginManager,
+        final ServiceProvider serviceProvider) {
         this.game = game;
         this.engine = engine;
         this.eventManager = eventManager;
@@ -48,6 +51,6 @@ public abstract class SpongeLifecycle {
     }
 
     public void establishServices() {
-        this.serviceProvider.init();
+        ((SpongeServiceProvider) this.serviceProvider).init();
     }
 }

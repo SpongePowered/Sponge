@@ -290,7 +290,11 @@ public final class SpongeServiceProvider implements ServiceProvider {
                         this.game);
 
         // This is the actual query - a generic event.
-        ((SpongeEventManager) this.game.getEventManager()).post(event, container);
+        try {
+            ((SpongeEventManager) this.game.getEventManager()).post(event, container);
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
         if (event.getSuggestion() != null) {
             try {
                 return new Registration<>(service.getServiceClass(), event.getSuggestion().get(), container);

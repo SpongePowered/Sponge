@@ -103,7 +103,7 @@ public class GlobalConfig extends GeneralConfigBase {
 
     @Setting(value = "service-registration",
             comment = "Enables server owners to require specific plugins to provide Sponge services")
-    private ServicesCategory servicesCategory;
+    private ServicesCategory servicesCategory = new ServicesCategory();
 
     public GlobalConfig() {
         super();

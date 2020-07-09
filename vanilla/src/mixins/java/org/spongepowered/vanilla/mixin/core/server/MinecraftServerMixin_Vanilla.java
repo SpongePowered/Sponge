@@ -50,7 +50,7 @@ public abstract class MinecraftServerMixin_Vanilla {
         server.startServerThread();
     }
 
-    @Inject(method = "startServerThread", at = @At("HEAD"))
+    @Inject(method = "run", at = @At("HEAD"))
     private void vanilla$bootstrapLifecycle(CallbackInfo ci) {
         final Injector injector = Launcher.getInstance().getPlatformInjector();
         this.vanilla$lifecycle = injector.getInstance(VanillaLifecycle.class);

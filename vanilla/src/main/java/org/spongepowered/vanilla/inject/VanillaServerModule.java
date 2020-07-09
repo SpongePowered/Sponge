@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.inject;
 
 import com.google.inject.AbstractModule;
+import org.spongepowered.api.Engine;
 import org.spongepowered.api.Server;
 import org.spongepowered.vanilla.VanillaGame;
 import org.spongepowered.vanilla.VanillaServerGame;
@@ -39,6 +40,8 @@ public final class VanillaServerModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        //noinspection UninstantiableBinding
+        this.bind(Engine.class).to(Server.class);
         this.bind(Server.class).toInstance(this.server);
         this.bind(VanillaGame.class).to(VanillaServerGame.class);
     }

@@ -27,18 +27,19 @@ package org.spongepowered.vanilla;
 import com.google.inject.Inject;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.plugin.PluginContainer;
 
 public final class VanillaLifecycle extends SpongeLifecycle {
 
     @Inject
-    public VanillaLifecycle(Game game, Engine engine, SpongeEventManager eventManager, SpongePluginManager pluginManager,
-        SpongeServiceProvider serviceProvider) {
+    public VanillaLifecycle(Game game, Engine engine, EventManager eventManager, PluginManager pluginManager, ServiceProvider serviceProvider) {
         super(game, engine, eventManager, pluginManager, serviceProvider);
     }
 
