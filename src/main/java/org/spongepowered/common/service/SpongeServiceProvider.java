@@ -303,12 +303,8 @@ public final class SpongeServiceProvider implements ServiceProvider {
                         service.getServiceClass().getSimpleName(),
                         container.getMetadata().getId(),
                         e);
-                return null;
             }
         }
-        SpongeCommon.getLogger().error("Could not create service {} from plugin {}, no service was provided.",
-                service.getServiceClass().getSimpleName(),
-                container.getMetadata().getId());
         return null;
     }
 
