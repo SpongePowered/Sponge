@@ -37,7 +37,6 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -95,7 +94,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     public void unwind(final EntityTickContext phaseContext) {
         final Entity tickingEntity = phaseContext.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             this.processCaptures(tickingEntity, phaseContext, frame);
         }
     }
@@ -319,7 +318,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         }
         // It kinda sucks we have to make the cause frame here, but if we're already here, we are
         // effectively already going to throw an event, and we're configured not to bulk capture.
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             context.addNotifierAndOwnerToCauseStack(frame);
             frame.pushCause(tickingEntity);
             if (entity instanceof ExperienceOrbEntity) {

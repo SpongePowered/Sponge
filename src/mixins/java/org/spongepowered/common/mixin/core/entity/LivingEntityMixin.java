@@ -499,7 +499,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             armorEnchantments.ifPresent(originalFunctions::addAll);
 
             absorptionFunction.ifPresent(originalFunctions::add);
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 DamageEventHandler.generateCauseFor(damageSource, frame);
 
                 final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this, originalFunctions, originalDamage);
@@ -742,11 +742,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
 
         final UseItemStackEvent.Start event;
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            event = SpongeEventFactory.createUseItemStackEventStart(Sponge.getCauseStackManager().getCurrentCause(),
+            event = SpongeEventFactory.createUseItemStackEventStart(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 stack.getUseDuration(), stack.getUseDuration(), snapshot);
         }
 
@@ -795,11 +795,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
 
         final UseItemStackEvent.Tick event;
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
             final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            event = SpongeEventFactory.createUseItemStackEventTick(Sponge.getCauseStackManager().getCurrentCause(),
+            event = SpongeEventFactory.createUseItemStackEventTick(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
             SpongeCommon.postEvent(event);
         }
@@ -830,11 +830,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
 
         final UseItemStackEvent.Finish event;
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.activeItemStack);
             final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            event = SpongeEventFactory.createUseItemStackEventFinish(Sponge.getCauseStackManager().getCurrentCause(),
+            event = SpongeEventFactory.createUseItemStackEventFinish(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot);
         }
         SpongeCommon.postEvent(event);
@@ -869,11 +869,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
 
         final UseItemStackEvent.Replace event;
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack == null ? ItemStack.EMPTY : stack);
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, activeItemStackSnapshot, handType);
-            event = SpongeEventFactory.createUseItemStackEventReplace(Sponge.getCauseStackManager().getCurrentCause(),
+            event = SpongeEventFactory.createUseItemStackEventReplace(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, activeItemStackSnapshot,
                 new Transaction<>(ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy), snapshot));
         }
@@ -901,11 +901,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             stack.onPlayerStoppedUsing(world, self, duration);
             return;
         }
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) this.shadow$getActiveHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            if (!SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventStop(Sponge.getCauseStackManager().getCurrentCause(),
+            if (!SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 duration, duration, snapshot))) {
                 stack.onPlayerStoppedUsing(world, self, duration);
             }
@@ -923,9 +923,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         // However, if a player stopped using an item early, impl$activeItemStackCopy will not be set
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy != null ? this.impl$activeItemStackCopy : this.activeItemStack);
 
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             this.impl$addSelfToFrame(frame, snapshot);
-            SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventReset(Sponge.getCauseStackManager().getCurrentCause(),
+            SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventReset(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 this.activeItemStackUseCount, this.activeItemStackUseCount, snapshot));
         }
         this.impl$activeItemStackCopy = null;

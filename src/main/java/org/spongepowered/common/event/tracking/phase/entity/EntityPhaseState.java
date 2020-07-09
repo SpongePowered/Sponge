@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -32,6 +31,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
@@ -64,7 +64,7 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
             .filter(entity -> entity instanceof ExperienceOrb)
             .collect(Collectors.toList());
         if (!experience.isEmpty()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
             SpongeCommonEventFactory.callSpawnEntity(experience, context);
 
         }
@@ -74,7 +74,7 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
             .filter(entity -> !(entity instanceof ExperienceOrb))
             .collect(Collectors.toList());
         if (!other.isEmpty()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.ENTITY_DEATH);
+            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.ENTITY_DEATH);
             SpongeCommonEventFactory.callSpawnEntity(experience, context);
         }
     }

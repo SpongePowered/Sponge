@@ -28,7 +28,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
@@ -45,6 +44,7 @@ import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
@@ -173,7 +173,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     public void onClose(PlayerEntity player, Container container) {
 
         if (this.closeHandler != null) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
                 Cause cause = frame.getCurrentCause();
                 this.closeHandler.handle(cause, container);
@@ -183,7 +183,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     public boolean onClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player, Container container) {
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             Cause cause = frame.getCurrentCause();
             if (clickTypeIn == ClickType.QUICK_CRAFT) {
@@ -322,7 +322,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         }
 
         if (this.changeHandler != null) {
-            Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             return this.changeHandler.handle(cause, container, ((org.spongepowered.api.item.inventory.Slot) slot), slotIndex,
                     ItemStackUtil.snapshotOf(oldStack), ItemStackUtil.snapshotOf(newStack));
         }

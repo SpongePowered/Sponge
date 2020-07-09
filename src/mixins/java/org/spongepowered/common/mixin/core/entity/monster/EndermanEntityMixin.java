@@ -51,7 +51,7 @@ public abstract class EndermanEntityMixin extends MonsterEntityMixin {
             return entityEnderman.attemptTeleport(x, y, z, particles);
         }
         
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
             return this.attemptTeleport(x, y, z, particles);
         }

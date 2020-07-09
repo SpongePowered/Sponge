@@ -81,6 +81,7 @@ import org.spongepowered.common.config.category.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -134,7 +135,7 @@ public final class PhaseTracker {
 
                     final List<net.minecraft.entity.Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
                     PhaseTracker.ASYNC_CAPTURED_ENTITIES.removeAll(entities);
-                    try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                         // We are forcing the spawn, as we can't throw the proper event at the proper time, so
                         // we'll just mark it as "forced".
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.FORCED);
@@ -151,6 +152,8 @@ public final class PhaseTracker {
 
     @Nullable private WeakReference<Thread> sidedThread;
     private boolean hasRun = false;
+    final SpongeCauseStackManager causeStackManager = new SpongeCauseStackManager();
+
 
 
     public void setThread(@Nullable final Thread thread) throws IllegalAccessException {
@@ -205,6 +208,11 @@ public final class PhaseTracker {
         });
     }
 
+    public static SpongeCauseStackManager getCauseStackManager() {
+        return getInstance().causeStackManager;
+    }
+
+
     static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
 
     final PhaseStack stack = new PhaseStack();
@@ -235,8 +243,8 @@ public final class PhaseTracker {
             }
         }
 
-        if (Sponge.isServerAvailable() && ((IPhaseState) state).shouldProvideModifiers(phaseContext)) {
-            SpongeCommon.getCauseStackManager().registerPhaseContextProvider(phaseContext);
+        if (((IPhaseState) state).shouldProvideModifiers(phaseContext)) {
+            this.causeStackManager.registerPhaseContextProvider(phaseContext);
         }
         this.stack.push(state, phaseContext);
     }
@@ -623,10 +631,10 @@ public final class PhaseTracker {
                 final Transaction<BlockSnapshot> transaction = TrackingUtil.TRANSACTION_CREATION.apply(originalBlockSnapshot).get();
                 final ImmutableList<Transaction<BlockSnapshot>> transactions = ImmutableList.of(transaction);
                 // Create and throw normal event
-                final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
+                final Cause currentCause = this.causeStackManager.getCurrentCause();
                 final ChangeBlockEvent normalEvent =
                         originalBlockSnapshot.blockChange.createEvent(currentCause, transactions);
-                try (@SuppressWarnings("try") final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (@SuppressWarnings("try") final CauseStackManager.StackFrame frame = this.causeStackManager.pushCauseFrame()) {
                     SpongeCommon.postEvent(normalEvent);
                     // We put the normal event at the end of the cause, still keeping in line with the
                     // API contract that the ChangeBlockEvnets are pushed to the cause for Post, but they
@@ -892,7 +900,7 @@ public final class PhaseTracker {
 
         final SpawnEntityEvent.Custom
             event =
-            SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+            SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
         SpongeCommon.postEvent(event);
         if (entity instanceof PlayerEntity || !event.isCancelled()) {
             EntityUtil.processEntitySpawn(entity, Optional::empty);

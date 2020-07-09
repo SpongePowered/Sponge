@@ -78,7 +78,7 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
     private void impl$rconLogoutCallback(final CallbackInfo ci) {
         if (this.loggedIn) {
             SpongeCommon.getServerScheduler().execute(() -> {
-                final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+                final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
                 causeStackManager.pushCause(this);
                 causeStackManager.pushCause(this.impl$source);
                 final RconConnectionEvent.Disconnect event = SpongeEventFactory.createRconConnectionEventDisconnect(
@@ -107,7 +107,7 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
         final RconConnectionEvent.Connect connectEvent;
         try {
             connectEvent = SpongeCommon.getServerScheduler().execute(() -> {
-                final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+                final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
                 causeStackManager.pushCause(this);
                 causeStackManager.pushCause(this.impl$source);
                 final RconConnectionEvent.Connect event = SpongeEventFactory.createRconConnectionEventConnect(
@@ -166,7 +166,7 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
                                     /// Sponge: START
                                     // Execute the command on the main thread and wait for it
                                     SpongeCommon.getServerScheduler().execute(() -> {
-                                        final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+                                        final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
                                         // Only add the RemoteConnection here, the RconSource
                                         // will be added by the command manager
                                         causeStackManager.pushCause(this);
@@ -189,7 +189,7 @@ public abstract class ClientThreadMixin extends RConThread implements ClientThre
                             if (!password.isEmpty() && password.equals(this.rconPassword)) {
                                 /// Sponge: START
                                 final RconConnectionEvent.Auth event = SpongeCommon.getServerScheduler().execute(() -> {
-                                    final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+                                    final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
                                     causeStackManager.pushCause(this);
                                     causeStackManager.pushCause(this.impl$source);
                                     final RconConnectionEvent.Auth event1 = SpongeEventFactory.createRconConnectionEventAuth(

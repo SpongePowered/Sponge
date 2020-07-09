@@ -67,6 +67,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GeneralConfigBase;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
@@ -363,7 +364,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     ((WorldInfoBridge) worldInfo).bridge$setGenerateSpawnOnLoad(true);
                 }
 
-                SpongeCommon.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(SpongeCommon.getCauseStackManager().getCurrentCause(),
+                SpongeCommon.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(
+                    PhaseTracker.getCauseStackManager().getCurrentCause(),
                     (WorldArchetype) (Object) defaultSettings, (WorldProperties) worldInfo));
             } else {
                 worldInfo.setWorldName(directoryName);
@@ -440,7 +442,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             this.server.setDifficultyForAllWorlds(this.server.getDifficulty(), true);
 
-            SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(SpongeCommon.getCauseStackManager().getCurrentCause(),
+            SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(
+                PhaseTracker.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.server.ServerWorld) serverWorld));
 
             if (infoBridge.bridge$doesGenerateSpawnOnLoad()) {

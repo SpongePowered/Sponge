@@ -39,6 +39,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -82,7 +83,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
             return this.get();
         }
         final CriterionEvent.Score.Change event;
-        final Cause cause = SpongeCommon.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         final Advancement advancement = this.progress.getAdvancement();
         final ServerPlayer player = ((PlayerAdvancementsBridge) ((AdvancementProgressBridge) this.progress).bridge$getPlayerAdvancements()).bridge$getPlayer();
         if (lastScore == this.getGoal()) {

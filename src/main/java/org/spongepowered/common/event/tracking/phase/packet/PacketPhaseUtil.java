@@ -184,7 +184,7 @@ public final class PacketPhaseUtil {
                     || ((CClientStatusPacket) packetIn).getStatus() != CClientStatusPacket.State.PERFORM_RESPAWN))) {
                 return;
             }
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(packetPlayer);
                 if (SpongeImplHooks.creativeExploitCheck(packetIn, packetPlayer)) {
                     return;

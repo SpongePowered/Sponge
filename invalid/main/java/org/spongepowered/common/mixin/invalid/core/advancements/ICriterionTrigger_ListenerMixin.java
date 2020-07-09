@@ -49,6 +49,7 @@ import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(ICriterionTrigger.Listener.class)
 public abstract class ICriterionTrigger_ListenerMixin {
@@ -88,20 +89,20 @@ public abstract class ICriterionTrigger_ListenerMixin {
                 }
             }
         }
-        SpongeCommon.getCauseStackManager().pushCause(this.criterionInstance);
+        PhaseTracker.getCauseStackManager().pushCause(this.criterionInstance);
         // Handle the score criteria ourselves, with each trigger will
         // the score be increased by one.
         if (advancementCriterion instanceof ScoreAdvancementCriterion) {
             ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer().getProgress(advancement)
                     .get((ScoreAdvancementCriterion) advancementCriterion).get().add(1);
             ci.cancel();
-            SpongeCommon.getCauseStackManager().popCause();
+            PhaseTracker.getCauseStackManager().popCause();
         }
     }
 
     @Inject(method = "grantCriterion", at = @At("RETURN"))
     private void impl$popCauseAtEndOfEvent(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
-        SpongeCommon.getCauseStackManager().popCause();
+        PhaseTracker.getCauseStackManager().popCause();
     }
 
 }

@@ -46,7 +46,7 @@ public abstract class AgeableEntityMixin extends EntityMixin {
     private void impl$callReadyToMateOnAgeUp(final int age, final CallbackInfo ci) {
         if (age == 0) {
             if (!((WorldBridge) this.world).bridge$isFake() && ShouldFire.BREEDING_EVENT_READY_TO_MATE && ((AgeableEntity) (Object) this) instanceof AnimalEntity) {
-                final BreedingEvent.ReadyToMate event = SpongeEventFactory.createBreedingEventReadyToMate(Sponge.getCauseStackManager().getCurrentCause(), (Animal) this);
+                final BreedingEvent.ReadyToMate event = SpongeEventFactory.createBreedingEventReadyToMate(PhaseTracker.getCauseStackManager().getCurrentCause(), (Animal) this);
                 SpongeCommon.postEvent(event);
             }
         }

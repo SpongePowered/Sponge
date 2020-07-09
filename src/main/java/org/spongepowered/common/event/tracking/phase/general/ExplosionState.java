@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -102,7 +101,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         TrackingUtil.processBlockCaptures(context);
         context.getCapturedEntitySupplier()
             .acceptAndClearIfNotEmpty(entities -> {
-                try (final CauseStackManager.StackFrame smaller = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame smaller = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
                 }
@@ -112,7 +111,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                 if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
                     final List<Entity> itemEntities = items.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                     final DropItemEvent.Destruct event =
-                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
+                        SpongeEventFactory.createDropItemEventDestruct(PhaseTracker.getCauseStackManager().getCurrentCause(), itemEntities);
                     SpongeCommon.postEvent(event);
                     if (!event.isCancelled()) {
                         EntityUtil.processEntitySpawnsFromEvent(context, event);
@@ -147,7 +146,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         }).orElseGet(() -> {
             final ArrayList<Entity> entities = new ArrayList<>(1);
             entities.add(entity);
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()){
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()){
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                 return SpongeCommonEventFactory.callSpawnEntity(entities, context);
             }

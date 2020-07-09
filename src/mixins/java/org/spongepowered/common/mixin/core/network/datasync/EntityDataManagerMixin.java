@@ -93,7 +93,7 @@ public abstract class EntityDataManagerMixin {
                         final DataTransactionResult transaction = optional.get();
                         final ChangeDataHolderEvent.ValueChange
                             event =
-                            SpongeEventFactory.createChangeDataHolderEventValueChange(Sponge.getCauseStackManager().getCurrentCause(), transaction,
+                            SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getCauseStackManager().getCurrentCause(), transaction,
                                 (DataHolder.Mutable) this.entity);
                         Sponge.getEventManager().post(event);
                         if (event.isCancelled()) {

@@ -69,7 +69,7 @@ public abstract class NoteBlockMixin extends BlockMixin {
 
         float pitch = (float) Math.pow(2.0D, (double) (param - 12) / 12.0D);
 
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
                     frame.getCurrentCause(), (org.spongepowered.api.world.World) worldIn, pos,
                     NoteBlockInstrument.byState(state).getSound(), instrumentType,

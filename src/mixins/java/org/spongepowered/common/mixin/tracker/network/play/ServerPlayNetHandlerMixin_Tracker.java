@@ -75,7 +75,7 @@ public class ServerPlayNetHandlerMixin_Tracker {
             player.playerTick();
             return;
         }
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
              final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
             context.buildAndSwitch();
             frame.pushCause(player);
@@ -125,7 +125,7 @@ public class ServerPlayNetHandlerMixin_Tracker {
         if (ShouldFire.ANIMATE_HAND_EVENT) {
             final HandType handType = (HandType) (Object) packetIn.getHand();
             final ItemStack heldItem = this.player.getHeldItem(packetIn.getHand());
-            final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+            final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
             causeStackManager.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
             causeStackManager.addContext(EventContextKeys.USED_HAND, handType);
             final AnimateHandEvent event =

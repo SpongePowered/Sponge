@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -33,6 +32,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
 import java.util.List;
@@ -42,7 +42,7 @@ import net.minecraft.network.IPacket;
 public final class SwapHandItemsState extends BasicInventoryPacketState {
 
     public ChangeInventoryEvent.SwapHand createInventoryEvent(final Inventory inventory, final List<SlotTransaction> slotTransactions) {
-        return SpongeEventFactory.createChangeInventoryEventSwapHand(Sponge.getCauseStackManager().getCurrentCause(), inventory, slotTransactions);
+        return SpongeEventFactory.createChangeInventoryEventSwapHand(PhaseTracker.getCauseStackManager().getCurrentCause(), inventory, slotTransactions);
     }
 
     @Override
@@ -54,7 +54,7 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
     public void unwind(final InventoryPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
         final Entity spongePlayer = (Entity) player;
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             final TrackedInventoryBridge mixinInventory = ((TrackedInventoryBridge) player.inventory);
             final List<SlotTransaction> trans = mixinInventory.bridge$getCapturedSlotTransactions();

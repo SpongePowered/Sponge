@@ -157,7 +157,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
             @SuppressWarnings("RawTypeCanBeGeneric") final IPhaseState currentState = phaseContext.state;
 
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 
                 item = SpongeCommonEventFactory.throwDropItemAndConstructEvent((PlayerEntity) (PlayerEntityBridge) this, posX1, posY1, posZ1, snapshot, original, frame);
 

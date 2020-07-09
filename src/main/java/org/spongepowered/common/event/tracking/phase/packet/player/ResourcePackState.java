@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.ServerPlayNetHandler;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
@@ -34,6 +33,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.play.client.CResourcePackStatusPacketAccessor;
 import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
@@ -72,6 +72,6 @@ public final class ResourcePackState extends BasicPacketState {
             return;
         }
         SpongeCommon.postEvent(
-            SpongeEventFactory.createResourcePackStatusEvent(Sponge.getCauseStackManager().getCurrentCause(), pack, (ServerPlayer) player, status));
+            SpongeEventFactory.createResourcePackStatusEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), pack, (ServerPlayer) player, status));
     }
 }

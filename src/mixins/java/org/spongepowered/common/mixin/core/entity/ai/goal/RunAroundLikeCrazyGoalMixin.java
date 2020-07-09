@@ -67,7 +67,7 @@ public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {
 
                 if (j > 0 && this.horseHost.getRNG().nextInt(j) < i) {
                     // Sponge start - Fire Tame Entity event
-                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                         frame.pushCause(entity);
                         if (SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(frame.getCurrentCause(), (HorseEntity) this.horseHost))) {
                             return;

@@ -130,11 +130,11 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
     private void impl$postSpongeIgnite(final CallbackInfo ci) {
         this.bridge$setFuseTicksRemaining(this.impl$fuseDuration);
         if (this.impl$primeCause != null) {
-            Sponge.getCauseStackManager().pushCause(this.impl$primeCause);
+            PhaseTracker.getCauseStackManager().pushCause(this.impl$primeCause);
         }
         this.bridge$postPrime();
         if (this.impl$primeCause != null) {
-            Sponge.getCauseStackManager().popCause();
+            PhaseTracker.getCauseStackManager().popCause();
         }
     }
 
@@ -173,7 +173,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/item/minecart/TNTMinecartEntity;explodeCart(D)V"))
     private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(),
                 (TNTMinecart) this, new ArrayList<>(), 0, amount);

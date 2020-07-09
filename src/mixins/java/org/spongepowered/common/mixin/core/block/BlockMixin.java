@@ -129,7 +129,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         final double yPos = (double) pos.getY() + yOffset;
         final double zPos = (double) pos.getZ() + zOffset;
         // Go ahead and throw the construction event
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(worldIn.getBlockState(pos));
             final ConstructEntityEvent.Pre eventPre = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), ServerLocation.of((ServerWorld) worldIn, xPos, yPos, zPos), new Vector3d(0, 0, 0), EntityTypes.ITEM.get());
             SpongeCommon.postEvent(eventPre);

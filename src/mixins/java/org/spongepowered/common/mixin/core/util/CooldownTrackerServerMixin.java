@@ -53,7 +53,7 @@ public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
             return 0;
         }
         final OptionalInt beforeCooldown = ((CooldownTracker) this).getCooldown(type);
-        final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(Sponge.getCauseStackManager().getCurrentCause(),
+        final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 ticks, ticks, type, (ServerPlayer) this.player, beforeCooldown);
 
         if (Sponge.getEventManager().post(event)) {
@@ -66,7 +66,7 @@ public abstract class CooldownTrackerServerMixin extends CooldownTrackerMixin {
 
     @Override
     protected void impl$throwEndCooldownEvent(final ItemType type) {
-        final CooldownEvent.End event = SpongeEventFactory.createCooldownEventEnd(Sponge.getCauseStackManager().getCurrentCause(),
+        final CooldownEvent.End event = SpongeEventFactory.createCooldownEventEnd(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 type, (ServerPlayer) this.player);
         Sponge.getEventManager().post(event);
     }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -36,6 +35,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -55,12 +55,12 @@ public final class PrimaryInventoryClickState extends BasicInventoryPacketState 
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
         if (!capturedEntities.isEmpty()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
+            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
             return SpongeEventFactory.createClickContainerEventDropOutsidePrimary(
-                Sponge.getCauseStackManager().getCurrentCause(),
+                PhaseTracker.getCauseStackManager().getCurrentCause(),
                 openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
         }
-        return SpongeEventFactory.createClickContainerEventPrimary(Sponge.getCauseStackManager().getCurrentCause(),
+        return SpongeEventFactory.createClickContainerEventPrimary(PhaseTracker.getCauseStackManager().getCurrentCause(),
             openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
     }
 

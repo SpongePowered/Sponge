@@ -62,6 +62,7 @@ import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.type.advancement.AdvancementRegistryModule;
 
 import javax.annotation.Nullable;
@@ -227,7 +228,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             criterionProgress.obtain();
             return true;
         }
-        final Cause cause = SpongeCommon.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         final Player player = ((PlayerAdvancementsBridge) this.impl$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();
@@ -282,7 +283,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             criterionProgress.reset();
             return true;
         }
-        final Cause cause = SpongeCommon.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         final Player player = ((PlayerAdvancementsBridge) this.impl$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
         final AdvancementCriterion criterion = progress.getCriterion();

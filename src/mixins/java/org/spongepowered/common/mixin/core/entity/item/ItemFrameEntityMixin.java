@@ -56,7 +56,7 @@ public abstract class ItemFrameEntityMixin extends HangingEntityMixin {
         cancellable = true)
     private void onAttackEntityFrom(final DamageSource source, final float amount,
         final CallbackInfoReturnable<Boolean> cir) {
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(),
                 (ItemFrame) this, new ArrayList<>(), 0, amount);

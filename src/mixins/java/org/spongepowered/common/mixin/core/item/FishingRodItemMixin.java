@@ -71,14 +71,14 @@ public abstract class FishingRodItemMixin {
         int k = EnchantmentHelper.getFishingSpeedBonus(itemstack);
         int j = EnchantmentHelper.getFishingLuckBonus(itemstack);
         FishingBobberEntity fishHook = new FishingBobberEntity(player, world, j, k);
-        Sponge.getCauseStackManager().pushCause(player);
-        if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStart(Sponge.getCauseStackManager().getCurrentCause(), (FishingBobber) fishHook))) {
+        PhaseTracker.getCauseStackManager().pushCause(player);
+        if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStart(PhaseTracker.getCauseStackManager().getCurrentCause(), (FishingBobber) fishHook))) {
             fishHook.remove(); // Bye
             cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, player.getHeldItem(hand)));
         } else {
             this.impl$fishHook = fishHook;
         }
-        Sponge.getCauseStackManager().popCause();
+        PhaseTracker.getCauseStackManager().popCause();
     }
 
     @Redirect(method = "onItemRightClick", at = @At(value = "NEW", target = "net/minecraft/entity/projectile/FishingBobberEntity"))

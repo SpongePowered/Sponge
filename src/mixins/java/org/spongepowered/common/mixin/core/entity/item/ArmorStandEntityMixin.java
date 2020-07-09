@@ -56,7 +56,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
      * destroyed.
      */
     private void fireDestroyDamageEvent(final DamageSource source, final CallbackInfoReturnable<Boolean> cir) {
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
                 (Entity) this, new ArrayList<>(), Math.max(1000, this.shadow$getHealth()));
@@ -91,7 +91,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
 
     @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ArmorStandEntity;func_213817_e(Lnet/minecraft/util/DamageSource;F)V"))
     private void impl$fireDamageEventDamage(final ArmorStandEntity self, final DamageSource source, final float amount) {
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
                 (Entity) this, new ArrayList<>(), amount);
@@ -115,7 +115,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntityMixin {
     private void fireDamageEventFirstPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         // While this doesn't technically "damage" the armor stand, it feels
         // like damage in other respects, so fire an event.
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.getCurrentCause(),
                 (Entity) this, new ArrayList<>(), 0);

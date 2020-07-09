@@ -407,7 +407,7 @@ public class SpongeEventManager implements EventManager {
         }
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") final RegisteredListener handler : handlers) {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
                  final PhaseContext<?> context = this.createPluginContext(handler);
                  final Timing timings = handler.getTimingsHandler()) {
                 frame.pushCause(handler.getPlugin());

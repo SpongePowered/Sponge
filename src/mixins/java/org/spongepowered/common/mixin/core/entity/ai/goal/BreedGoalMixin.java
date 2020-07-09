@@ -71,10 +71,10 @@ public abstract class BreedGoalMixin {
         }
 
         if (ShouldFire.BREEDING_EVENT_FIND_MATE) {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this.animal);
                 final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
-                    SpongeEventFactory.createBreedingEventFindMate(Sponge.getCauseStackManager().getCurrentCause(), TristateResult.Result.DEFAULT,
+                    SpongeEventFactory.createBreedingEventFindMate(PhaseTracker.getCauseStackManager().getCurrentCause(), TristateResult.Result.DEFAULT,
                         TristateResult.Result.DEFAULT, (Animal) nearbyMate, true);
                 if (SpongeCommon.postEvent(event) || event.getResult() == TristateResult.Result.DENY) {
                     nearbyMate = null;
@@ -105,12 +105,12 @@ public abstract class BreedGoalMixin {
             ordinal = 0))
     private boolean impl$throwBreedEvent(final World world, final Entity baby) {
         if (ShouldFire.BREEDING_EVENT_BREED) {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 // TODO API 8 is removing this TargetXXXX nonsense so that is why I put the parents into the Cause
                 frame.pushCause(this.animal);
                 frame.pushCause(this.field_75391_e);
                 final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
-                    SpongeEventFactory.createBreedingEventBreed(Sponge.getCauseStackManager().getCurrentCause(), (Ageable) baby);
+                    SpongeEventFactory.createBreedingEventBreed(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ageable) baby);
                 this.impl$spawnEntityResult = !SpongeCommon.postEvent(event) && world.addEntity(baby);
             }
         } else {

@@ -81,7 +81,7 @@ public abstract class FireballEntityMixin extends DamagingProjectileEntityMixin 
             double x, double y, double z, float strength, boolean flaming, net.minecraft.world.Explosion.Mode mode) {
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
         final ProjectileSource shooter = ((Projectile) this).shooter().get();
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);
             frame.pushCause(shooter);

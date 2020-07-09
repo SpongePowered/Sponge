@@ -67,10 +67,10 @@ public abstract class ServerPlayerEntityMixin_API implements ServerPlayer {
     public Optional<Container> openInventory(final Inventory inventory, final Text displayName) {
         ContainerBridge openContainer = (ContainerBridge) ((PlayerEntity) (Object) this).openContainer;
         if (openContainer.bridge$isInUse()) {
-            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delayTicks(0).execute(() -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
                     cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
                     this.closeInventory(); // Cause close event first. So cursor item is not lost.
@@ -87,10 +87,10 @@ public abstract class ServerPlayerEntityMixin_API implements ServerPlayer {
     public boolean closeInventory() throws IllegalArgumentException {
         net.minecraft.inventory.container.Container openContainer = ((PlayerEntity) (Object) this).openContainer;
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
-            final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+            final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delayTicks(0).delayTicks(0).execute(() -> {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
                     cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
                     this.closeInventory();

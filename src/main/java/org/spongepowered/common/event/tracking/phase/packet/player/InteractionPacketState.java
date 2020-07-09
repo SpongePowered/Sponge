@@ -33,7 +33,6 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
@@ -156,7 +155,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         final net.minecraft.item.ItemStack endActiveItem = player.getActiveItemStack();
         ((LivingEntityAccessor) player).accessor$setActiveItemStack(ItemStackUtil.toNative(phaseContext.getActiveItem()));
 
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             frame.addContext(EventContextKeys.USED_ITEM, usedSnapshot);
@@ -181,7 +180,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                         if (!entry.getValue().isEmpty()) {
                             final List<Entity> items = entry.getValue().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
                             final DropItemEvent.Destruct event =
-                                SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), items);
+                                SpongeEventFactory.createDropItemEventDestruct(PhaseTracker.getCauseStackManager().getCurrentCause(), items);
                             SpongeCommon.postEvent(event);
                             if (!event.isCancelled()) {
                                 processSpawnedEntities(player, event);
@@ -205,7 +204,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                         entities.add((Entity) item);
                     }
                     final DropItemEvent.Dispense dispense =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeEventFactory.createDropItemEventDispense(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
                     SpongeCommon.postEvent(dispense);
                     if (!dispense.isCancelled()) {
                         processSpawnedEntities(player, dispense);
@@ -238,7 +237,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                     } else {
                         final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.world).getEntityByUuid(entry.getKey());
                         if (spawnedEntity != null) {
-                            try (final CauseStackManager.StackFrame entityFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                            try (final CauseStackManager.StackFrame entityFrame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                                 entityFrame.pushCause(spawnedEntity);
                                 this.throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
                             }
@@ -277,7 +276,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
         if (!projectiles.isEmpty()) {
             if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame2 = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
                     frame2.pushCause(usedSnapshot);
                     SpongeCommonEventFactory.callSpawnEntity(projectiles, phaseContext);
@@ -288,7 +287,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
         if (!spawnEggs.isEmpty()) {
             if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame frame2 = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame frame2 = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
                     frame2.pushCause(usedSnapshot);
                     SpongeCommonEventFactory.callSpawnEntity(spawnEggs, phaseContext);
@@ -300,7 +299,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         if (!items.isEmpty()) {
             if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
                 final DropItemEvent.Dispense dispense = SpongeEventFactory
-                    .createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), items);
+                    .createDropItemEventDispense(PhaseTracker.getCauseStackManager().getCurrentCause(), items);
                 if (!SpongeCommon.postEvent(dispense)) {
                     processSpawnedEntities(player, dispense);
                 }
@@ -310,7 +309,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
         if (!xpOrbs.isEmpty()) {
             if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame stackFrame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     if (firstBlockChange != null) {
                         stackFrame.pushCause(firstBlockChange);
                     }
@@ -323,7 +322,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
         if (!normalPlacement.isEmpty()) {
             if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame stackFrame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (final CauseStackManager.StackFrame stackFrame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     if (firstBlockChange != null) {
                         stackFrame.pushCause(firstBlockChange);
                     }

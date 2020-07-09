@@ -27,7 +27,6 @@ package org.spongepowered.common.data.key;
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
@@ -38,6 +37,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.EmptyDataProvider;
 import org.spongepowered.common.data.value.ValueConstructor;
 import org.spongepowered.common.data.value.ValueConstructorFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Comparator;
@@ -101,7 +101,7 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
 
     @Override
     public <E extends DataHolder> void registerEvent(Class<E> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
-        final PluginContainer currentContainer = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).orElse(SpongeCommon.getMinecraftPlugin());
+        final PluginContainer currentContainer = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class).orElse(SpongeCommon.getMinecraftPlugin());
         SpongeDataManager.getInstance().registerKeyListener(new KeyBasedDataListener<>(holderFilter, this, listener, currentContainer));
     }
 

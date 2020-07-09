@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.registry.SpongeGameRegistryRegisterEvent;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
@@ -71,9 +70,10 @@ public abstract class AdvancementListMixin {
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 
-            SpongeCommon.getCauseStackManager().pushCause(SpongeCommon.getRegistry());
+            PhaseTracker.getCauseStackManager().pushCause(SpongeCommon.getRegistry());
             final SpongeGameRegistryRegisterEvent<org.spongepowered.api.advancement.Advancement> event =
-                    new SpongeGameRegistryRegisterEvent<>(SpongeCommon.getCauseStackManager().getCurrentCause(),
+                    new SpongeGameRegistryRegisterEvent<>(
+                        PhaseTracker.getCauseStackManager().getCurrentCause(),
                             org.spongepowered.api.advancement.Advancement.class, AdvancementRegistryModule.getInstance());
             context.event(event);
             SpongeCommon.postEvent(event);
@@ -90,9 +90,10 @@ public abstract class AdvancementListMixin {
                 .source(Sponge.getGame())) {
             context.buildAndSwitch();
 
-            SpongeCommon.getCauseStackManager().pushCause(SpongeCommon.getRegistry());
+            PhaseTracker.getCauseStackManager().pushCause(SpongeCommon.getRegistry());
             final SpongeGameRegistryRegisterEvent<AdvancementTree> event =
-                    new SpongeGameRegistryRegisterEvent<>(SpongeCommon.getCauseStackManager().getCurrentCause(),
+                    new SpongeGameRegistryRegisterEvent<>(
+                        PhaseTracker.getCauseStackManager().getCurrentCause(),
                             AdvancementTree.class, AdvancementTreeRegistryModule.getInstance());
             context.event(event);
             SpongeCommon.postEvent(event);

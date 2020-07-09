@@ -30,6 +30,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.explosive.DefuseExplosiveEvent;
 import org.spongepowered.api.event.entity.explosive.PrimeExplosiveEvent;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public interface FusedExplosiveBridge {
 
@@ -44,7 +45,7 @@ public interface FusedExplosiveBridge {
     default boolean bridge$shouldPrime() {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             final PrimeExplosiveEvent.Pre event = SpongeEventFactory.createPrimeExplosiveEventPre(
-                Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
+                PhaseTracker.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             return !Sponge.getEventManager().post(event);
         }
         return true;
@@ -53,7 +54,7 @@ public interface FusedExplosiveBridge {
     default void bridge$postPrime() {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_POST) {
             final PrimeExplosiveEvent.Post event = SpongeEventFactory.createPrimeExplosiveEventPost(
-                Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
+                PhaseTracker.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             Sponge.getEventManager().post(event);
         }
     }
@@ -61,7 +62,7 @@ public interface FusedExplosiveBridge {
     default boolean bridge$shouldDefuse() {
         if (ShouldFire.DEFUSE_EXPLOSIVE_EVENT_PRE) {
             final DefuseExplosiveEvent.Pre event = SpongeEventFactory.createDefuseExplosiveEventPre(
-                Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
+                PhaseTracker.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             return !Sponge.getEventManager().post(event);
         }
         return true;
@@ -70,7 +71,7 @@ public interface FusedExplosiveBridge {
     default void bridge$postDefuse() {
         if (ShouldFire.DEFUSE_EXPLOSIVE_EVENT_POST) {
             final DefuseExplosiveEvent.Post event = SpongeEventFactory.createDefuseExplosiveEventPost(
-                Sponge.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
+                PhaseTracker.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
             Sponge.getEventManager().post(event);
         }
     }

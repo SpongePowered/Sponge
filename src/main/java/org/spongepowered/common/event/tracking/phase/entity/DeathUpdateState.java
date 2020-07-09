@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import net.minecraft.entity.item.ItemEntity;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.event.CauseStackManager;
@@ -65,7 +64,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
         context.getCapturedItemsSupplier()
                 .acceptAndClearIfNotEmpty(items -> {
                     final DamageSource damageSource = context.getDamageSource();
-                    try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                         if (damageSource != null) {
                             frame.pushCause(damageSource);
                         }
@@ -80,7 +79,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                             .filter(entity -> entity instanceof ExperienceOrb)
                             .collect(Collectors.toList());
                     if (!experience.isEmpty()) {
-                        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                             frame.pushCause(dyingEntity);
                             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                             SpongeCommonEventFactory.callSpawnEntity(experience, context);
@@ -91,7 +90,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
                             .filter(entity -> !(entity instanceof ExperienceOrb))
                             .collect(Collectors.toList());
                     if (!other.isEmpty()) {
-                        try (final StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (final StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                             frame.pushCause(dyingEntity);
                             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.ENTITY_DEATH);
                             SpongeCommonEventFactory.callSpawnEntity(other, context);
@@ -101,7 +100,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
 
                 });
         context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty((map) -> {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 final DamageSource damageSource = context.getDamageSource();
                 if (damageSource != null) {
                     frame.pushCause(damageSource);

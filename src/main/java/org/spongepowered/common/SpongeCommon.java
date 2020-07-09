@@ -74,7 +74,6 @@ public final class SpongeCommon {
 
     @Inject @Nullable private static SpongeGame game;
     @Inject @Nullable private static SpongeGameRegistry registry;
-    @Inject @Nullable private static SpongeCauseStackManager causeStackManager;
 
     private SpongeCommon() {
     }
@@ -110,10 +109,6 @@ public final class SpongeCommon {
 
     public static AsyncScheduler getAsyncScheduler() {
         return getGame().getAsyncScheduler();
-    }
-
-    public static SpongeCauseStackManager getCauseStackManager() {
-        return check(causeStackManager);
     }
 
     public static SpongeWorldManager getWorldManager() {

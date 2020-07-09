@@ -47,7 +47,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -282,7 +281,7 @@ public final class TrackingUtil {
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(block, pos, BlockChangeFlags.NONE);
-            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Sponge.getCauseStackManager().getCurrentCause(), snapshot);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().getCurrentCause(), snapshot);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 return;
@@ -319,7 +318,7 @@ public final class TrackingUtil {
             final BlockSnapshot currentTickBlock = mixinWorld.bridge$createSnapshot(state, pos, BlockChangeFlags.NONE);
             final TickBlockEvent
                 event =
-                SpongeEventFactory.createTickBlockEventRandom(Sponge.getCauseStackManager().getCurrentCause(), currentTickBlock);
+                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().getCurrentCause(), currentTickBlock);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 return;
@@ -591,14 +590,14 @@ public final class TrackingUtil {
                 continue;
             }
             if (!transactionArrays[blockChange.ordinal()].isEmpty()) {
-                final ChangeBlockEvent event = blockChange.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactionArrays[blockChange.ordinal()]);
+                final ChangeBlockEvent event = blockChange.createEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), transactionArrays[blockChange.ordinal()]);
                 mainEvents[blockChange.ordinal()] = event;
                 SpongeCommon.postEvent(event);
                 blockEvents.add(event);
             }
         }
         if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) { // Needs to be placed into iterateChangeBlockEvents
-            final ChangeBlockEvent event = BlockChange.DECAY.createEvent(Sponge.getCauseStackManager().getCurrentCause(), transactionArrays[BlockChange.DECAY.ordinal()]);
+            final ChangeBlockEvent event = BlockChange.DECAY.createEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), transactionArrays[BlockChange.DECAY.ordinal()]);
             mainEvents[BlockChange.DECAY.ordinal()] = event;
             SpongeCommon.postEvent(event);
             blockEvents.add(event);
@@ -791,7 +790,7 @@ public final class TrackingUtil {
         final List<Entity> itemDrops = entityItems.stream()
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(newBlockSnapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
@@ -807,7 +806,7 @@ public final class TrackingUtil {
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
         final ImmutableList<ItemStackSnapshot> originalSnapshots = ImmutableList.copyOf(itemSnapshots);
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(oldBlockSnapshot);
             final DropItemEvent.Pre
                 dropItemEventPre =
@@ -836,7 +835,7 @@ public final class TrackingUtil {
                 })
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(oldBlockSnapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             phaseContext.applyNotifierIfAvailable(notifier ->  frame.addContext(EventContextKeys.NOTIFIER, notifier));
@@ -849,7 +848,7 @@ public final class TrackingUtil {
         final List<Entity> entitiesSpawned = entities.stream()
             .map(entity -> (Entity) entity)
             .collect(Collectors.toList());
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             SpongeCommonEventFactory.callSpawnEntity(entitiesSpawned, phaseContext);
         }
@@ -864,7 +863,7 @@ public final class TrackingUtil {
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
             // We suffix the cause with the extra events, without modifying the cause stack manager to avoid adding extra
             // contexts or resetting the caches, this allows us to avoid adding extra frames when unnecessary.
-            final Cause currentCause = Sponge.getCauseStackManager().getCurrentCause();
+            final Cause currentCause = PhaseTracker.getCauseStackManager().getCurrentCause();
             final Cause causeToUse;
             if (((IPhaseState) context.state).shouldProvideModifiers(context)) {
                 final Cause.Builder builder = Cause.builder().from(currentCause);

@@ -45,6 +45,7 @@ import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -200,7 +201,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     public Trigger<C> build() {
         checkState(this.id != null, "The id must be set");
         checkState(this.configType != null, "The configType must be set");
-        final PluginContainer plugin = Sponge.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
+        final PluginContainer plugin = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
         final String name = StringUtils.isNotEmpty(this.name) ? this.name : this.id;
         return (Trigger<C>) new SpongeTrigger((Class) this.configType, (Function) this.constructor,
                 new ResourceLocation(plugin.getMetadata().getId(), this.id), (Consumer) this.eventHandler, name);

@@ -159,7 +159,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     private boolean impl$postSleepingEvent(final PlayerEntity self) {
         if (self.isSleeping()) {
             if (!((WorldBridge) this.world).bridge$isFake()) {
-                final CauseStackManager csm = Sponge.getCauseStackManager();
+                final CauseStackManager csm = PhaseTracker.getCauseStackManager();
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.spawnPos;
                 final BlockSnapshot snapshot = ((org.spongepowered.api.world.World) this.world).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
@@ -255,7 +255,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
             // Note that this can potentially cause phase contexts to auto populate frames
             // we shouldn't rely so much on them, but sometimes the extra information is provided
             // through this method.
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 // Go ahead and add the item stack in use, just in the event the current phase contexts don't provide
                 // that information.
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));

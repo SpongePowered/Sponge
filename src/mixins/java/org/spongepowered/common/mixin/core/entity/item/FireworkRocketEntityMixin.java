@@ -117,7 +117,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
             target = "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V")
     )
     private void impl$onExplosionDamage(final World world, final Entity self, final byte state) {
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             // Fireworks don't typically explode like other explosives, but we'll
             // post an event regardless and if the radius is zero the explosion
             // won't be triggered (the default behavior).
@@ -135,7 +135,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$postPrimeEvent(final CallbackInfo ci) {
         if (this.fireworkAge == 1 && !this.world.isRemote) {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$projectileSource);
                 this.bridge$postPrime();

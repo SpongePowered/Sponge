@@ -68,7 +68,7 @@ public abstract class TNTBlockMixin extends BlockMixin {
             @Nullable final LivingEntity igniter, final CallbackInfo ci, final TNTEntity tnt) {
         ((EntityTNTPrimedBridge) tnt).bridge$setDetonator(igniter);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 if (igniter != null) {
                     frame.addContext(EventContextKeys.IGNITER, (Living) igniter);
                 }
@@ -88,7 +88,7 @@ public abstract class TNTBlockMixin extends BlockMixin {
     private void impl$CheckIfCanPrimeFromExplosion(
         final World worldIn, final BlockPos pos, final Explosion explosionIn, final CallbackInfo ci, final TNTEntity tnt) {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
                 if (!((FusedExplosiveBridge) tnt).bridge$shouldPrime()) {
                     ci.cancel();

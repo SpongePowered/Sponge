@@ -81,7 +81,7 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(CallbackInfo ci) {
         if (SpongeCommon
-            .postEvent(SpongeEventFactory.createFishingEventHookEntity(Sponge.getCauseStackManager().getCurrentCause(), (Entity) this.caughtEntity, (FishingBobber) this))) {
+            .postEvent(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().getCurrentCause(), (Entity) this.caughtEntity, (FishingBobber) this))) {
             this.caughtEntity = null;
             ci.cancel();
         }
@@ -115,9 +115,9 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
             } else {
                 transactions = new ArrayList<>();
             }
-            Sponge.getCauseStackManager().pushCause(this.angler);
+            PhaseTracker.getCauseStackManager().pushCause(this.angler);
 
-            if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStop(Sponge.getCauseStackManager().getCurrentCause(), ((FishingBobber) this), transactions))) {
+            if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStop(PhaseTracker.getCauseStackManager().getCurrentCause(), ((FishingBobber) this), transactions))) {
                 // Event is cancelled
                 return -1;
             }
@@ -157,7 +157,7 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
                         this.angler.addStat(Stats.FISH_CAUGHT, 1);
                     }
                 }
-                Sponge.getCauseStackManager().popCause();
+                PhaseTracker.getCauseStackManager().popCause();
 
                 i = Math.max(i, 1); // Sponge: Don't lower damage if we've also caught an entity
             }

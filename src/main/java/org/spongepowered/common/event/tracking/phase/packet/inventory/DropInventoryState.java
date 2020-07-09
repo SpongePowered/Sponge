@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -37,6 +36,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
         final ItemStack usedStack = context.getItemUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = (Entity) player;
-        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             // TODO - Determine if we need to pass the supplier or perform some parameterized
@@ -63,7 +63,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
                         entities.add((Entity) item);
                     }
                     final DropItemEvent.Dispense dropItemEvent =
-                        SpongeEventFactory.createDropItemEventDispense(Sponge.getCauseStackManager().getCurrentCause(), entities);
+                        SpongeEventFactory.createDropItemEventDispense(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
                     SpongeCommon.postEvent(dropItemEvent);
                     if (!dropItemEvent.isCancelled()) {
                         processSpawnedEntities(player, dropItemEvent);

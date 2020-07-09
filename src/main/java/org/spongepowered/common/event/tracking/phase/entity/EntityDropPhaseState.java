@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -89,7 +88,7 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
         // Forge always fires a living drop event even if nothing was captured
         // This allows mods such as Draconic Evolution to add items to the drop list
         if (context.getPerEntityItemEntityDropSupplier().isEmpty() && context.getPerEntityItemDropSupplier().isEmpty()) {
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             final ArrayList<Entity> entities = new ArrayList<>();
             SpongeCommonEventFactory.callDropItemDestruct(entities, context);
             return;
@@ -105,7 +104,7 @@ public class EntityDropPhaseState extends EntityPhaseState<BasicEntityContext> {
                 // This will also provide the highest compatibility with mods such as Tinkers Construct
                 entityPlayer.inventory.clear();
             }
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
             SpongeCommonEventFactory.callDropItemDestruct(entities, context);
 

@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
@@ -37,6 +35,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -56,7 +55,6 @@ import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
-@Singleton
 public final class SpongeCauseStackManager implements CauseStackManager {
 
     private static final boolean DEBUG_CAUSE_FRAMES = Boolean.parseBoolean(System.getProperty("sponge.debugcauseframes", "false"));
@@ -95,21 +93,20 @@ public final class SpongeCauseStackManager implements CauseStackManager {
     // Frames not currently in use
     private final Deque<CauseStackFrameImpl> framePool = new ArrayDeque<>(MAX_POOL_SIZE);
 
-    private Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
+    private final Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
     private int min_depth = 0;
     private int[] duplicateCauses = new int[100];
     @Nullable private Cause cached_cause;
     @Nullable private EventContext cached_ctx;
-    private AtomicBoolean pendingProviders = new AtomicBoolean(false);
+    private final AtomicBoolean pendingProviders = new AtomicBoolean(false);
     /**
      * Specifically a Deque because we need to replicate
      * the stack iteration from the bottom of the stack
      * to the top when pushing frames.
      */
-    private Deque<PhaseContext<?>> phaseContextProviders = new ArrayDeque<>();
+    private final Deque<PhaseContext<?>> phaseContextProviders = new ArrayDeque<>();
 
-    @Inject
-    private SpongeCauseStackManager() {
+    public SpongeCauseStackManager() { // temporarily while the packages get reshuffled
         for (int i = 0; i < INITIAL_POOL_SIZE; i++) {
             this.framePool.push(new CauseStackFrameImpl());
         }
@@ -493,39 +490,39 @@ public final class SpongeCauseStackManager implements CauseStackManager {
 
         @Override
         public Cause getCurrentCause() {
-            return Sponge.getCauseStackManager().getCurrentCause();
+            return PhaseTracker.getCauseStackManager().getCurrentCause();
         }
 
         @Override
         public EventContext getCurrentContext() {
-            return Sponge.getCauseStackManager().getCurrentContext();
+            return PhaseTracker.getCauseStackManager().getCurrentContext();
         }
 
         @Override
         public StackFrame pushCause(final Object obj) {
-            Sponge.getCauseStackManager().pushCause(obj);
+            PhaseTracker.getCauseStackManager().pushCause(obj);
             return this;
         }
 
         @Override
         public Object popCause() {
-            return Sponge.getCauseStackManager().popCause();
+            return PhaseTracker.getCauseStackManager().popCause();
         }
 
         @Override
         public <T> StackFrame addContext(final EventContextKey<T> key, final T value) {
-            Sponge.getCauseStackManager().addContext(key, value);
+            PhaseTracker.getCauseStackManager().addContext(key, value);
             return this;
         }
 
         @Override
         public <T> Optional<T> removeContext(final EventContextKey<T> key) {
-            return Sponge.getCauseStackManager().removeContext(key);
+            return PhaseTracker.getCauseStackManager().removeContext(key);
         }
 
         @Override
         public void close() {
-            Sponge.getCauseStackManager().popCauseFrame(this);
+            PhaseTracker.getCauseStackManager().popCauseFrame(this);
         }
 
     }

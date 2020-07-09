@@ -110,7 +110,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
         final net.minecraft.entity.Entity entity = this.shadow$getLeashHolder();
         if (!this.world.isRemote) {
-            final CauseStackManager csm = Sponge.getCauseStackManager();
+            final CauseStackManager csm = PhaseTracker.getCauseStackManager();
             if (entity == null) {
                 csm.pushCause(this);
             } else {
@@ -218,11 +218,11 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
 
         // Sponge Start - Throw our event and handle appropriately
         final DamageSource damageSource = DamageSource.causeMobDamage((MobEntity) (Object) this);
-        Sponge.getCauseStackManager().pushCause(damageSource);
-        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
+        PhaseTracker.getCauseStackManager().pushCause(damageSource);
+        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
             originalFunctions, knockbackModifier, originalBaseDamage);
         SpongeCommon.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
+        PhaseTracker.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             return false;
         }

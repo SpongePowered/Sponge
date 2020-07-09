@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CClickWindowPacket;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -191,9 +190,9 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                         entiy.offer(Keys.CREATOR, player.getUniqueID());
                     }
                 }
-                try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-                    Sponge.getCauseStackManager().pushCause(openContainer);
-                    Sponge.getCauseStackManager().pushCause(player);
+                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                    PhaseTracker.getCauseStackManager().pushCause(openContainer);
+                    PhaseTracker.getCauseStackManager().pushCause(player);
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
                     SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
                 }
@@ -208,9 +207,9 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             slot = ((InventoryAdapter) trackedInventory).inventoryAdapter$getSlot(packetIn.getSlotId()).orElse(null);
         }
         // else TODO slot for ClickContainerEvent.Drag
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            Sponge.getCauseStackManager().pushCause(openContainer);
-            Sponge.getCauseStackManager().pushCause(player);
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            PhaseTracker.getCauseStackManager().pushCause(openContainer);
+            PhaseTracker.getCauseStackManager().pushCause(player);
             final ClickContainerEvent inventoryEvent;
 
             // We can only proceed with normal if and only if there are no entities spawned,

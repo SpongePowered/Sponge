@@ -39,6 +39,7 @@ import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.UserListAccessor;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.UserListUtils;
 
 import java.net.InetAddress;
@@ -149,12 +150,12 @@ public final class SpongeBanService implements BanService {
         }
         if (ban.getType().equals(BanTypes.PROFILE.get())) {
             final User user = Sponge.getServiceProvider().userStorageService().getOrCreate(((Ban.Profile) ban).getProfile());
-            Sponge.getEventManager().post(SpongeEventFactory.createPardonUserEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
+            Sponge.getEventManager().post(SpongeEventFactory.createPardonUserEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
 
             UserListUtils.removeEntry(this.getUserBanList(), ((Ban.Profile) ban).getProfile());
             return true;
         } else if (ban.getType().equals(BanTypes.IP.get())) {
-            Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
+            Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
 
             final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.Ip) ban).getAddress(), 0);
             UserListUtils.removeEntry(this.getIPBanList(), this.getIPBanList().addressToString(inetSocketAddress));
@@ -171,13 +172,13 @@ public final class SpongeBanService implements BanService {
             prevBan = this.getBanFor(((Ban.Profile) ban).getProfile());
 
             final User user = Sponge.getServiceProvider().userStorageService().getOrCreate(((Ban.Profile) ban).getProfile());
-            Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
+            Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
 
             UserListUtils.addEntry(this.getUserBanList(), (UserListEntry<?>) ban);
         } else if (ban.getType().equals(BanTypes.IP.get())) {
             prevBan = this.getBanFor(((Ban.Ip) ban).getAddress());
 
-            Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Sponge.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
+            Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
 
             UserListUtils.addEntry(this.getIPBanList(), (UserListEntry<?>) ban);
         } else {

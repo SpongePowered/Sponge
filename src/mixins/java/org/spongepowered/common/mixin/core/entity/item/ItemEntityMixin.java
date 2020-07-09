@@ -189,7 +189,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
             // erroneously be calling this twice.
             return;
         }
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             final ExpireEntityEvent event = SpongeEventFactory.createExpireEntityEvent(frame.getCurrentCause(), (Item) this);
             SpongeCommon.postEvent(event);

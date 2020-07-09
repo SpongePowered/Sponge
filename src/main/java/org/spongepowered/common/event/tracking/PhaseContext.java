@@ -31,7 +31,6 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -613,10 +612,11 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
                     this.state, this, new IllegalStateException("Closing empty phase context"));
             return;
         }
-        PhaseTracker.getInstance().completePhase(this);
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        instance.completePhase(this);
         if (!((IPhaseState) this.state).shouldProvideModifiers(this)) {
             if (this.usedFrame != null) {
-                this.usedFrame.iterator().forEachRemaining(Sponge.getCauseStackManager()::popCauseFrame);
+                this.usedFrame.iterator().forEachRemaining(instance.causeStackManager::popCauseFrame);
             }
             return;
         }
@@ -624,10 +624,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             // So, this part is interesting... Since the used frame is null, that means
             // the cause stack manager still has the refernce of this context/phase, we have
             // to "pop off" the list.
-            SpongeCommon.getCauseStackManager().popFrameMutator(this);
+            instance.causeStackManager.popFrameMutator(this);
         }
         if (this.usedFrame != null) {
-            this.usedFrame.iterator().forEachRemaining(Sponge.getCauseStackManager()::popCauseFrame);
+            this.usedFrame.iterator().forEachRemaining(instance.causeStackManager::popCauseFrame);
             this.usedFrame.clear();
             this.usedFrame = null;
         }

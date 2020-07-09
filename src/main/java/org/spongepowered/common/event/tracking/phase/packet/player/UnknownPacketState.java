@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -68,7 +68,7 @@ public final class UnknownPacketState extends BasicPacketState {
     public void unwind(BasicPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
 
-        try (CauseStackManager.StackFrame frame1 = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (CauseStackManager.StackFrame frame1 = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame1.pushCause(player);
             frame1.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             // TODO - Determine if we need to pass the supplier or perform some parameterized
@@ -106,7 +106,7 @@ public final class UnknownPacketState extends BasicPacketState {
                         .map(entity -> (Entity) entity)
                         .collect(Collectors.toList());
                     if (!entities.isEmpty()) {
-                        try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                             frame.pushCause(player);
                             frame.pushCause(affectedEntity);
                             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
@@ -130,7 +130,7 @@ public final class UnknownPacketState extends BasicPacketState {
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toList());
             if (!entities.isEmpty()) {
-                try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     frame.pushCause(player);
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
                     DropItemEvent.Custom event =

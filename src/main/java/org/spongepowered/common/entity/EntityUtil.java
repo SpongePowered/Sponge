@@ -83,6 +83,7 @@ import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -153,8 +154,9 @@ public final class EntityUtil {
                 return null;
             }
 
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
-                final InvokingTeleporterContext context = createInvokingTeleporterPhase(entity, toWorld, teleporter)) {
+            final SpongeCauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
+            try (final CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame();
+                 final InvokingTeleporterContext context = createInvokingTeleporterPhase(entity, toWorld, teleporter)) {
 
                 if (!context.getDidPort()) {
                     return entity;
@@ -324,7 +326,7 @@ public final class EntityUtil {
                 return null;
             }
 
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
                 final InvokingTeleporterContext context = createInvokingTeleporterPhase(player, toWorld, teleporter)) {
 
                 if (!context.getDidPort()) {
@@ -670,10 +672,12 @@ public final class EntityUtil {
         final Entity entityIn, final Transform fromTransform, final Transform toTransform, org.spongepowered.api.world.server.ServerWorld fromWorld, org.spongepowered.api.world.server.ServerWorld toWorld) {
 
         // Use origin world to get correct cause
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        final SpongeCauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
+        try (final CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()) {
             frame.pushCause(entityIn);
 
-            final MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(Sponge.getCauseStackManager().getCurrentCause(),
+            final MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(
+                causeStackManager.getCurrentCause(),
                 fromTransform.getPosition(), toTransform.getPosition(), fromWorld, toWorld, (org.spongepowered.api.entity.Entity) entityIn, false);
             SpongeCommon.postEvent(event);
             return event;
@@ -779,7 +783,7 @@ public final class EntityUtil {
         final IPhaseState<?> currentState = phaseContext.state;
 
         // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             // Perform the event throws first, if they return false, return null
             item = SpongeCommonEventFactory.throwDropItemAndConstructEvent(entity, posX, posY, posZ, snapshot, original, frame);
 

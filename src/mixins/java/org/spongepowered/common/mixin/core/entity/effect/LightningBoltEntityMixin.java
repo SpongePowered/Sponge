@@ -109,7 +109,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
         if (this.removed || this.world.isRemote) {
             return;
         }
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             final LightningEvent.Strike
                 strike =

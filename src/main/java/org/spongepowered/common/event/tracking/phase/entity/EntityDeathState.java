@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.GameRules;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -98,7 +97,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
                 entityPlayer.inventory.clear();
             }
 
-            try (final CauseStackManager.StackFrame internal = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame internal = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 internal.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                 SpongeCommonEventFactory.callDropItemDestruct(entities, context);
             }
@@ -113,7 +112,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         // This allows mods such as Draconic Evolution to add items to the drop list
         if (!hasCaptures) {
             final ArrayList<Entity> entities = new ArrayList<>();
-            Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             boolean keepInventoryRule = false;
 
             if (entityPlayer != null) {

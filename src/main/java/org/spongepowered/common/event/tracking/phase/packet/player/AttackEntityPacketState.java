@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import org.apache.logging.log4j.Level;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
@@ -37,6 +36,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -136,7 +136,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
                 final List<ItemDropData> items = new ArrayList<>(itemStacks);
 
                 if (!items.isEmpty()) {
-                    try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+                    try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                         final List<Entity> itemEntities = items.stream()
                             .map(data -> data.create(((ServerWorld) player.world)))
                             .map(entity1 -> (Entity) entity1)
@@ -156,7 +156,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
             }
         });
         context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                 for (Map.Entry<UUID, Collection<ItemEntity>> entry : map.asMap().entrySet()) {

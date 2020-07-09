@@ -129,11 +129,11 @@ public abstract class ItemFireworkMixin {
      */
     private boolean spongeImpl$ThrowConstructPreEvent(World world, PlayerEntity player, ItemStack usedItem) {
         if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).bridge$isFake()) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);
-                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), ServerLocation.of((ServerWorld) world, player.posX, player.posY, player.posZ), new Vector3d(0, 0, 0), EntityTypes.FIREWORK_ROCKET.get());
+                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(), ServerLocation.of((ServerWorld) world, player.posX, player.posY, player.posZ), new Vector3d(0, 0, 0), EntityTypes.FIREWORK_ROCKET.get());
                 return SpongeCommon.postEvent(event);
             }
         }
@@ -182,7 +182,7 @@ public abstract class ItemFireworkMixin {
         }
         ((FireworkRocket) rocket).offer(Keys.SHOOTER, (Player) player);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
-            try (CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);

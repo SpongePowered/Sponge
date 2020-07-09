@@ -105,7 +105,7 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
     @Override
     public void bridge$trigger(final ServerPlayer player) {
         final PlayerAdvancements playerAdvancements = ((ServerPlayerEntity) player).getAdvancements();
-        final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         final TypeToken<FilteredTriggerConfiguration> typeToken = TypeToken.of(this.triggerConfigurationClass);
         for (final Listener listener : new ArrayList<>(this.listeners.get(playerAdvancements))) {
             final ICriterionTrigger_ListenerAccessor mixinListener = (ICriterionTrigger_ListenerAccessor) listener;

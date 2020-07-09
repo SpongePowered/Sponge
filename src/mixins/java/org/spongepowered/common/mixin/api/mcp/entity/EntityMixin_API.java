@@ -169,7 +169,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
             final MoveEntityEvent.Teleport event;
 
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 if (!frame.getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
                     frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
                 }

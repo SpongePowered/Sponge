@@ -113,7 +113,7 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
             final net.minecraft.world.World worldObj, final Entity self,
             final double x, final double y, final double z, final float strength, final boolean flaming, final net.minecraft.world.Explosion.Mode mode) {
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             final ProjectileSource shooter = ((WitherSkull) this).shooter().get();
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, shooter);

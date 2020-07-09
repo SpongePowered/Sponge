@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
@@ -69,7 +68,7 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
     public boolean spawnEntityOrCapture(final GrowablePhaseContext context, final Entity entity) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.STRUCTURE);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }

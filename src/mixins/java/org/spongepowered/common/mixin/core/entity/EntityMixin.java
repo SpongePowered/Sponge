@@ -222,11 +222,11 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private void impl$onStartRiding(final Entity vehicle, final boolean force,
         final CallbackInfoReturnable<Boolean> ci) {
         if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_MOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
-            Sponge.getCauseStackManager().pushCause(this);
-            if (SpongeCommon.postEvent(SpongeEventFactory.createRideEntityEventMount(Sponge.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
+            PhaseTracker.getCauseStackManager().pushCause(this);
+            if (SpongeCommon.postEvent(SpongeEventFactory.createRideEntityEventMount(PhaseTracker.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
                 ci.cancel();
             }
-            Sponge.getCauseStackManager().popCause();
+            PhaseTracker.getCauseStackManager().popCause();
         }
     }
 
@@ -248,7 +248,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @SuppressWarnings("ConstantConditions")
     private boolean impl$dismountRidingEntity(final DismountType type) {
         if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
                 if (SpongeCommon.postEvent(SpongeEventFactory.
@@ -757,7 +757,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             return;
         }
         if (this.fire < 1 && !this.impl$isImmuneToFireForIgniteEvent()) {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 
                 frame.pushCause(((org.spongepowered.api.entity.Entity) this).getLocation().getWorld());
                 final IgniteEntityEvent event = SpongeEventFactory.
@@ -807,7 +807,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             && !((WorldBridge) this.world).bridge$isFake()
             && !((Entity) (Object) this instanceof MobEntity)) {
 
-            this.impl$destructCause = Sponge.getCauseStackManager().getCurrentCause();
+            this.impl$destructCause = PhaseTracker.getCauseStackManager().getCurrentCause();
         }
     }
 

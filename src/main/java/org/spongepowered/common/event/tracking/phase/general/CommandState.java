@@ -29,7 +29,6 @@ import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -99,7 +98,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         // We have to check if there is a player, because command blocks can be triggered
         // without player interaction.
         // Fixes https://github.com/SpongePowered/SpongeForge/issues/2442
-        Sponge.getCauseStackManager().getCurrentCause().first(User.class).ifPresent(user -> {
+        PhaseTracker.getCauseStackManager().getCurrentCause().first(User.class).ifPresent(user -> {
             TrackingUtil.associateTrackerToTarget(blockChange, transaction, user);
         });
    }
@@ -115,7 +114,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     @Override
     public void unwind(final CommandPhaseContext phaseContext) {
         final Optional<PlayerEntity> playerSource = phaseContext.getSource(PlayerEntity.class);
-        final CauseStackManager csm = Sponge.getCauseStackManager();
+        final CauseStackManager csm = PhaseTracker.getCauseStackManager();
         if (playerSource.isPresent()) {
             // Post event for inventory changes
             ((TrackedInventoryBridge) playerSource.get().inventory).bridge$setCaptureInventory(false);
@@ -203,7 +202,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     @Override
     public boolean spawnEntityOrCapture(final CommandPhaseContext context, final Entity entity) {
         // Instead of bulk capturing entities that are spawned in a command, some commands could potentially
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
 
             final List<Entity> entities = new ArrayList<>(1);

@@ -47,6 +47,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.config.category.ServicesCategory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.permission.SpongePermissionService;
@@ -285,7 +286,7 @@ public final class SpongeServiceProvider implements ServiceProvider {
     private <T> Registration<T> getSpecificRegistration(final PluginContainer container, final Service<T> service) {
         final ProvideServiceEventImpl<T> event =
                 new ProvideServiceEventImpl<>(
-                        SpongeCommon.getCauseStackManager().getCurrentCause(),
+                        PhaseTracker.getCauseStackManager().getCurrentCause(),
                         TypeToken.of(service.getServiceClass()),
                         this.game);
 

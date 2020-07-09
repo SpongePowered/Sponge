@@ -177,7 +177,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
         // Set up the pre event
         final ExplosionEvent.Pre
                 event =
-                SpongeEventFactory.createExplosionEventPre(Sponge.getCauseStackManager().getCurrentCause(),
+                SpongeEventFactory.createExplosionEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
                         explosion, this);
         if (SpongeCommon.postEvent(event)) {
             this.impl$processingExplosion = false;

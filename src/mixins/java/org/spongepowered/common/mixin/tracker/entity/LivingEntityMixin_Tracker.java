@@ -87,7 +87,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
                     target = "Lnet/minecraft/entity/LivingEntity;onDeathUpdate()V"))
     private void tracker$enterPhaseOnDeath(final LivingEntity livingEntity) {
         if (!((WorldBridge) this.world).bridge$isFake()) {
-            try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame();
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
                  final PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext(PhaseTracker.SERVER).source(livingEntity)) {
                 context.buildAndSwitch();
                 frame.pushCause(this);

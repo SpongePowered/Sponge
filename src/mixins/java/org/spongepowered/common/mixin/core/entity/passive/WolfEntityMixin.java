@@ -65,14 +65,14 @@ public abstract class WolfEntityMixin extends AgeableEntityMixin implements Aggr
         if (random == 0) {
             stack.shrink(1);
             try {
-                Sponge.getCauseStackManager().pushCause(((org.spongepowered.api.item.inventory.ItemStack) (Object) stack).createSnapshot());
-                Sponge.getCauseStackManager().pushCause(player);
-                if (!SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), (Wolf) this))) {
+                PhaseTracker.getCauseStackManager().pushCause(((org.spongepowered.api.item.inventory.ItemStack) (Object) stack).createSnapshot());
+                PhaseTracker.getCauseStackManager().pushCause(player);
+                if (!SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Wolf) this))) {
                     stack.grow(1);
                     return random;
                 }
             } finally {
-                Sponge.getCauseStackManager().popCauses(2);
+                PhaseTracker.getCauseStackManager().popCauses(2);
             }
         }
         return 1;

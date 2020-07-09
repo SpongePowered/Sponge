@@ -81,7 +81,7 @@ public abstract class EnderCrystalEntityMixin extends EntityMixin implements Exp
     public net.minecraft.world.Explosion bridge$ThrowEventWithDetonation(final net.minecraft.world.World world,
         @Nullable final Entity nil, final double x, final double y, final double z, final boolean smoking,
         @Nullable final DamageSource source) {
-        final CauseStackManager causeStackManager = Sponge.getCauseStackManager();
+        final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
         try (final CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()){
             frame.pushCause(this);
             if (source != null) {

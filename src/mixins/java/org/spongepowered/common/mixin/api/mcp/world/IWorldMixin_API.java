@@ -279,7 +279,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
         final List<Entity> entitiesToSpawn = new NonNullArrayList<>();
         entities.forEach(entitiesToSpawn::add);
         final SpawnEntityEvent.Custom event = SpongeEventFactory
-                .createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
+                .createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
         if (Sponge.getEventManager().post(event)) {
             return ImmutableList.of();
         }

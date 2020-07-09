@@ -102,7 +102,7 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
                 final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
                 final List<ServerLocation> list = new ArrayList<>(1);
                 list.add(location);
-                final Cause cause = Sponge.getCauseStackManager().getCurrentCause();
+                final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
                 final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list);
                 return !SpongeCommon.postEvent(event);
             }

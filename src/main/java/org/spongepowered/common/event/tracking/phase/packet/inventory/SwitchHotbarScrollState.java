@@ -31,7 +31,6 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CHeldItemChangePacket;
 import net.minecraft.network.play.server.SHeldItemChangePacket;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -44,6 +43,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -66,7 +66,8 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
         final Transaction<ItemStackSnapshot> transaction, final List<SlotTransaction> slotTransactions,
         final List<Entity> capturedEntities,
         final int usedButton, @Nullable final org.spongepowered.api.item.inventory.Slot slot) {
-        return SpongeEventFactory.createClickContainerEventNumberPress(Sponge.getCauseStackManager().getCurrentCause(),
+        return SpongeEventFactory.createClickContainerEventNumberPress(
+            PhaseTracker.getCauseStackManager().getCurrentCause(),
             openContainer, transaction,
             Optional.ofNullable(slot), slotTransactions, usedButton);
     }
@@ -91,7 +92,7 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
         final org.spongepowered.api.item.inventory.Slot slotNew = ((InventoryAdapter) inventoryContainer).inventoryAdapter$getSlot(
             itemChange.getSlotId() + preHotbarSize).get();
         final SlotTransaction targetTransaction = new SlotTransaction(slotNew, targetSnapshot, targetSnapshot);
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             final ImmutableList<SlotTransaction> transactions =
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
