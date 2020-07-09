@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockFence;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
@@ -37,9 +38,11 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
+import org.spongepowered.common.util.Constants;
 
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,19 +60,44 @@ public abstract class BlockFenceMixin extends BlockMixin {
         return ImmutableConnectedDirectionData.class.isAssignableFrom(immutable);
     }
 
+    private IBlockState impl$applyConnectedDirections(final IBlockState blockState, final Set<Direction> directions) {
+        final Map<PropertyBool, Boolean> facingStates = new HashMap<>();
+        for (PropertyBool property : Constants.DirectionFunctions.Fence.ALL_DIRECTION_PROPERTIES) {
+            facingStates.put(property, false);
+        }
+        for (Direction connectedDirection : directions) {
+            final Optional<PropertyBool> facingPropertyBox = Constants.DirectionFunctions.Fence.getPropertyFromDirection(connectedDirection);
+            facingPropertyBox.ifPresent(facingProperty -> facingStates.put(facingProperty, true));
+        }
+        IBlockState resultBlockState = blockState;
+        for (PropertyBool property : facingStates.keySet()) {
+            resultBlockState = resultBlockState.withProperty(property, facingStates.get(property));
+        }
+        return resultBlockState;
+    }
+
     @Override
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableConnectedDirectionData) {
-            return Optional.of((BlockState) blockState);
+            final ImmutableConnectedDirectionData connectedDirectionData = (ImmutableConnectedDirectionData) manipulator;
+            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, connectedDirectionData.connectedDirections().get()));
         }
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
-        if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
-                || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {
-            return Optional.of((BlockState) blockState);
+        if (key.equals(Keys.CONNECTED_DIRECTIONS)) {
+            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, (Set<Direction>) value));
+        } else if (key.equals(Keys.CONNECTED_EAST)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockFence.EAST, (Boolean) value));
+        } else if (key.equals(Keys.CONNECTED_NORTH)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockFence.NORTH, (Boolean) value));
+        } else if (key.equals(Keys.CONNECTED_SOUTH)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockFence.SOUTH, (Boolean) value));
+        } else if (key.equals(Keys.CONNECTED_WEST)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockFence.WEST, (Boolean) value));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }

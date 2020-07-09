@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockRedstoneWire;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.IStringSerializable;
 import org.spongepowered.api.block.BlockState;
@@ -43,11 +44,11 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeRedstonePoweredData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeWireAttachmentData;
+import org.spongepowered.common.util.Constants;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -66,13 +67,31 @@ public abstract class BlockRedstoneWireMixin extends BlockMixin {
                 || ImmutableWireAttachmentData.class.isAssignableFrom(immutable);
     }
 
+    private IBlockState impl$applyConnectedDirections(final IBlockState blockState, final Set<Direction> directions) {
+        final Map<PropertyEnum<BlockRedstoneWire.EnumAttachPosition>, BlockRedstoneWire.EnumAttachPosition> facingStates = new HashMap<>();
+        for (PropertyEnum<BlockRedstoneWire.EnumAttachPosition> property : Constants.DirectionFunctions.RedstoneWire.ALL_DIRECTION_PROPERTIES) {
+            facingStates.put(property, BlockRedstoneWire.EnumAttachPosition.NONE);
+        }
+        for (Direction connectedDirection : directions) {
+            final Optional<PropertyEnum<BlockRedstoneWire.EnumAttachPosition>> facingPropertyBox =
+                    Constants.DirectionFunctions.RedstoneWire.getPropertyFromDirection(connectedDirection);
+            facingPropertyBox.ifPresent(facingProperty -> facingStates.put(facingProperty, blockState.getValue(facingProperty)));
+        }
+        IBlockState resultBlockState = blockState;
+        for (PropertyEnum<BlockRedstoneWire.EnumAttachPosition> property : facingStates.keySet()) {
+            resultBlockState = resultBlockState.withProperty(property, facingStates.get(property));
+        }
+        return resultBlockState;
+    }
+
     @Override
     public Optional<BlockState> bridge$getStateWithData(final IBlockState blockState, final ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableRedstonePoweredData) {
             return Optional.of((BlockState) blockState);
         }
         if (manipulator instanceof ImmutableConnectedDirectionData) {
-            return Optional.of((BlockState) blockState);
+            final ImmutableConnectedDirectionData connectedDirectionData = (ImmutableConnectedDirectionData) manipulator;
+            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, connectedDirectionData.connectedDirections().get()));
         }
         if (manipulator instanceof ImmutableWireAttachmentData) {
             return Optional.of((BlockState) blockState);
@@ -80,16 +99,26 @@ public abstract class BlockRedstoneWireMixin extends BlockMixin {
         return super.bridge$getStateWithData(blockState, manipulator);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<BlockState> bridge$getStateWithValue(final IBlockState blockState, final Key<? extends BaseValue<E>> key, final E value) {
         if (key.equals(Keys.POWER)) {
             return Optional.of((BlockState) blockState);
         }
-        if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
-                || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST) || key.equals(Keys.WIRE_ATTACHMENTS)
-                || key.equals(Keys.WIRE_ATTACHMENT_NORTH) || key.equals(Keys.WIRE_ATTACHMENT_SOUTH) || key.equals(Keys.WIRE_ATTACHMENT_EAST)
-                || key.equals(Keys.WIRE_ATTACHMENT_WEST)) {
+        if (key.equals(Keys.WIRE_ATTACHMENTS) || key.equals(Keys.WIRE_ATTACHMENT_NORTH) || key.equals(Keys.WIRE_ATTACHMENT_SOUTH)
+                || key.equals(Keys.WIRE_ATTACHMENT_EAST) || key.equals(Keys.WIRE_ATTACHMENT_WEST)) {
             return Optional.of((BlockState) blockState);
+        }
+        if (key.equals(Keys.CONNECTED_DIRECTIONS)) {
+            return Optional.of((BlockState) impl$applyConnectedDirections(blockState, (Set<Direction>) value));
+        } else if (key.equals(Keys.CONNECTED_EAST)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneWire.EAST, blockState.getValue(BlockRedstoneWire.EAST)));
+        } else if (key.equals(Keys.CONNECTED_NORTH)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneWire.NORTH, blockState.getValue(BlockRedstoneWire.NORTH)));
+        } else if (key.equals(Keys.CONNECTED_SOUTH)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneWire.SOUTH, blockState.getValue(BlockRedstoneWire.SOUTH)));
+        } else if (key.equals(Keys.CONNECTED_WEST)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockRedstoneWire.WEST, blockState.getValue(BlockRedstoneWire.WEST)));
         }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
