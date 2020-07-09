@@ -56,6 +56,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.event.SpongeCauseStackManager;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
@@ -82,7 +83,6 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
 
     private final SpongeScheduler api$scheduler = new ServerScheduler();
-    private final SpongeCauseStackManager api$causeStackManager = new SpongeCauseStackManager();
     private MessageChannel api$broadcastChannel;
     @Nullable private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
@@ -239,7 +239,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public CauseStackManager getCauseStackManager() {
-        return this.api$causeStackManager;
+        return PhaseTracker.getCauseStackManager();
     }
 
     @Override
