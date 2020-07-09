@@ -37,6 +37,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.OptionalInt;
 

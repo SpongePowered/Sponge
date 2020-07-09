@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.bridge.network.datasync.DataParameterBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Map;
 import java.util.Optional;

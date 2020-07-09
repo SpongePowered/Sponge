@@ -67,6 +67,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.ArrayList;
 import java.util.List;

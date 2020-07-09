@@ -32,10 +32,12 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import org.spongepowered.api.client.LocalServer;
 import org.spongepowered.api.entity.living.player.client.LocalPlayer;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.world.client.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.scheduler.ClientScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.vanilla.inject.SpongeVanillaModule;
@@ -54,7 +56,8 @@ public abstract class MinecraftMixin_Vanilla_API extends RecursiveEventLoop<Runn
     @Shadow public ClientPlayerEntity player;
     @Shadow @Nullable public abstract IntegratedServer shadow$getIntegratedServer();
 
-    private final SpongeScheduler api$scheduler = new ClientScheduler();
+    private final SpongeCauseStackManager vanilla_api$causeStackManager = new SpongeCauseStackManager();
+    private final SpongeScheduler vanilla_api$scheduler = new ClientScheduler();
 
     public MinecraftMixin_Vanilla_API(String name) {
         super(name);
@@ -76,8 +79,13 @@ public abstract class MinecraftMixin_Vanilla_API extends RecursiveEventLoop<Runn
     }
 
     @Override
+    public CauseStackManager getCauseStackManager() {
+        return this.vanilla_api$causeStackManager;
+    }
+
+    @Override
     public Scheduler getScheduler() {
-        return this.api$scheduler;
+        return this.vanilla_api$scheduler;
     }
 
     @Override

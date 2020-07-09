@@ -38,6 +38,7 @@ import org.spongepowered.common.event.ShouldFire;
 
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(AgeableEntity.class)
 public abstract class AgeableEntityMixin extends EntityMixin {

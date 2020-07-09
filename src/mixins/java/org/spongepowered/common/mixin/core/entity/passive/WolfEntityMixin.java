@@ -37,6 +37,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 
 import java.util.Random;
@@ -65,7 +67,7 @@ public abstract class WolfEntityMixin extends AgeableEntityMixin implements Aggr
         if (random == 0) {
             stack.shrink(1);
             try {
-                PhaseTracker.getCauseStackManager().pushCause(((org.spongepowered.api.item.inventory.ItemStack) (Object) stack).createSnapshot());
+                PhaseTracker.getCauseStackManager().pushCause(ItemStackUtil.fromNative(stack).createSnapshot());
                 PhaseTracker.getCauseStackManager().pushCause(player);
                 if (!SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Wolf) this))) {
                     stack.grow(1);

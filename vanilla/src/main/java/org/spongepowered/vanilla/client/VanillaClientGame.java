@@ -53,12 +53,11 @@ public final class VanillaClientGame extends VanillaGame {
     public VanillaClientGame(final Client client, final Platform platform, final GameRegistry registry,
         final DataManager dataManager, final PluginManager pluginManager, final EventManager eventManager,
         final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
-        final TeleportHelper teleportHelper, final CauseStackManager causeStackManager,
-        final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
+        final TeleportHelper teleportHelper, final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
         final ServiceProvider serviceProvider) {
 
         super(platform, registry, dataManager, pluginManager, eventManager, assetManager, configManager, channelRegistrar, teleportHelper,
-            causeStackManager, metricsConfigManager, commandManager, sqlManager, serviceProvider);
+            metricsConfigManager, commandManager, sqlManager, serviceProvider);
         this.client = client;
     }
 

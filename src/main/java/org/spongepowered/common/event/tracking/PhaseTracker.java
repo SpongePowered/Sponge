@@ -115,7 +115,9 @@ public final class PhaseTracker {
 
     private static final Map<Thread, PhaseTracker> SPINOFF_TRACKERS = new MapMaker().weakKeys().concurrencyLevel(8).makeMap();
 
-    PhaseTracker() { }
+    PhaseTracker() {
+        
+    }
 
     public void init() {
         if (this != PhaseTracker.SERVER) {

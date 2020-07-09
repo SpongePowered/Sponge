@@ -731,7 +731,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param blockEvent
      */
     default void appendNotifierToBlockEvent(final C context, final PhaseContext<?> currentContext,
-                                            final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
+        final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
 
     }
 
@@ -898,7 +898,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Allows phases to be notified when an entity successfully teleports
      * between dimensions.
-     * 
+     *
      * @param phaseContext The appropriate phase context
      */
     default void markTeleported(final C phaseContext) {

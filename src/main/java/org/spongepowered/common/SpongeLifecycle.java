@@ -22,26 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test;
+package org.spongepowered.common;
 
-import com.google.inject.Inject;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.api.Engine;
+import org.spongepowered.api.Game;
+import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.launch.plugin.SpongePluginManager;
+import org.spongepowered.common.service.SpongeServiceProvider;
 
-@Plugin("test")
-public final class TestPlugin {
+public abstract class SpongeLifecycle {
 
-    private final Logger logger;
+    protected final Game game;
+    protected final Engine engine;
+    protected final SpongeEventManager eventManager;
+    protected final SpongePluginManager pluginManager;
+    protected final SpongeServiceProvider serviceProvider;
 
-    @Inject
-    public TestPlugin(final Logger logger) {
-        this.logger = logger;
+    public SpongeLifecycle(final Game game, final Engine engine, final SpongeEventManager eventManager, final SpongePluginManager pluginManager,
+        final SpongeServiceProvider serviceProvider) {
+        this.game = game;
+        this.engine = engine;
+        this.eventManager = eventManager;
+        this.pluginManager = pluginManager;
+        this.serviceProvider = serviceProvider;
     }
 
-    @Listener
-    public void onConstruct(final ConstructPluginEvent event) {
-        this.logger.info("Hello world");
+    public void establishServices() {
+        this.serviceProvider.init();
     }
 }

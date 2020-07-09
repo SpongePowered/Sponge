@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(RunAroundLikeCrazyGoal.class)
 public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {

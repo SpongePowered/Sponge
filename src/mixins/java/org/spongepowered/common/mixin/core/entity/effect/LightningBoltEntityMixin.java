@@ -45,6 +45,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -111,10 +112,7 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            final LightningEvent.Strike
-                strike =
-                SpongeEventFactory
-                    .createLightningEventStrike(frame.getCurrentCause(), this.impl$struckEntities, this.impl$struckBlocks);
+            final LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(frame.getCurrentCause(), this.impl$struckEntities, this.impl$struckBlocks);
             Sponge.getEventManager().post(strike);
 
             if (!strike.isCancelled()) {

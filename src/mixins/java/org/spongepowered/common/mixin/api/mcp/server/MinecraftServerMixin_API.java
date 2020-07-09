@@ -38,6 +38,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scheduler.Scheduler;
@@ -54,6 +55,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
@@ -80,6 +82,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
 
     private final SpongeScheduler api$scheduler = new ServerScheduler();
+    private final SpongeCauseStackManager api$causeStackManager = new SpongeCauseStackManager();
     private MessageChannel api$broadcastChannel;
     @Nullable private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
@@ -232,6 +235,11 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Intrinsic
     public void server$setPlayerIdleTimeout(int timeout) {
         this.shadow$setPlayerIdleTimeout(timeout);
+    }
+
+    @Override
+    public CauseStackManager getCauseStackManager() {
+        return this.api$causeStackManager;
     }
 
     @Override

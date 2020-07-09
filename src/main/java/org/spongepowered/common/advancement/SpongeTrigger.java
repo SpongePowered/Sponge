@@ -33,7 +33,6 @@ import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
@@ -45,6 +44,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.advancements.ICriterionTrigger_ListenerAccessor;
 import org.spongepowered.common.bridge.advancements.TriggerBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -63,9 +63,9 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
     private final String name;
 
     SpongeTrigger(final Class<FilteredTriggerConfiguration> triggerConfigurationClass,
-            final Function<JsonObject, FilteredTriggerConfiguration> constructor,
-            final ResourceLocation id, @Nullable final Consumer<CriterionEvent.Trigger> eventHandler,
-            final String name) {
+        final Function<JsonObject, FilteredTriggerConfiguration> constructor,
+        final ResourceLocation id, @Nullable final Consumer<CriterionEvent.Trigger> eventHandler,
+        final String name) {
         this.triggerConfigurationClass = triggerConfigurationClass;
         this.eventHandler = eventHandler;
         this.constructor = constructor;
@@ -111,9 +111,9 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
             final ICriterionTrigger_ListenerAccessor mixinListener = (ICriterionTrigger_ListenerAccessor) listener;
             final Advancement advancement = (Advancement) mixinListener.accessor$getAdvancement();
             final AdvancementCriterion advancementCriterion = (AdvancementCriterion)
-                    ((net.minecraft.advancements.Advancement) advancement).getCriteria().get(mixinListener.accessor$getCriterionName());
+                ((net.minecraft.advancements.Advancement) advancement).getCriteria().get(mixinListener.accessor$getCriterionName());
             final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause, advancement, advancementCriterion,
-                    typeToken, player, (FilteredTrigger) listener.getCriterionInstance(), this.eventHandler == null);
+                typeToken, player, (FilteredTrigger) listener.getCriterionInstance(), this.eventHandler == null);
             if (this.eventHandler != null) {
                 this.eventHandler.accept(event);
                 if (!event.getResult()) {

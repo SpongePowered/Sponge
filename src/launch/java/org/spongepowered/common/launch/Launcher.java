@@ -25,6 +25,7 @@
 package org.spongepowered.common.launch;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Injector;
 import com.google.inject.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,6 +86,10 @@ public abstract class Launcher {
 
     public final SpongePluginManager getPluginManager() {
         return this.pluginManager;
+    }
+
+    public final Injector getPlatformInjector() {
+        return this.pluginEnvironment.getBlackboard().get(PluginKeys.PARENT_INJECTOR).get();
     }
 
     public abstract Stage getInjectionStage();

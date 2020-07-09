@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 
@@ -74,7 +75,7 @@ public abstract class BreedGoalMixin {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this.animal);
                 final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
-                    SpongeEventFactory.createBreedingEventFindMate(PhaseTracker.getCauseStackManager().getCurrentCause(), TristateResult.Result.DEFAULT,
+                    SpongeEventFactory.createBreedingEventFindMate(frame.getCurrentCause(), TristateResult.Result.DEFAULT,
                         TristateResult.Result.DEFAULT, (Animal) nearbyMate, true);
                 if (SpongeCommon.postEvent(event) || event.getResult() == TristateResult.Result.DENY) {
                     nearbyMate = null;

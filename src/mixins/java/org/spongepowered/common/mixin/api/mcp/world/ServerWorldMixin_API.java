@@ -123,7 +123,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    public Server getServer() {
+    public Server getEngine() {
         return (Server) this.shadow$getServer();
     }
 

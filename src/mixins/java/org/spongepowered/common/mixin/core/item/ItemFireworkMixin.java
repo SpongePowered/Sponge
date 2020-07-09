@@ -57,6 +57,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -133,7 +134,7 @@ public abstract class ItemFireworkMixin {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);
-                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(), ServerLocation.of((ServerWorld) world, player.posX, player.posY, player.posZ), new Vector3d(0, 0, 0), EntityTypes.FIREWORK_ROCKET.get());
+                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), ServerLocation.of((ServerWorld) world, player.posX, player.posY, player.posZ), new Vector3d(0, 0, 0), EntityTypes.FIREWORK_ROCKET.get());
                 return SpongeCommon.postEvent(event);
             }
         }

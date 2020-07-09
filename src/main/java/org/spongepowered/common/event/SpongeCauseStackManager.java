@@ -71,15 +71,15 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             initialPoolSize = Integer.parseInt(System.getProperty(INITIAL_POOL_SIZE_PROPERTY, "50"));
         } catch (NumberFormatException ex) {
             SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 50.",
-                    INITIAL_POOL_SIZE_PROPERTY,
-                    System.getProperty(INITIAL_POOL_SIZE_PROPERTY));
+                INITIAL_POOL_SIZE_PROPERTY,
+                System.getProperty(INITIAL_POOL_SIZE_PROPERTY));
         }
         try {
             maxPoolSize = Integer.parseInt(System.getProperty(MAX_POOL_SIZE_PROPERTY, "100"));
         } catch (NumberFormatException ex) {
             SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 100.",
-                    MAX_POOL_SIZE_PROPERTY,
-                    System.getProperty(MAX_POOL_SIZE_PROPERTY));
+                MAX_POOL_SIZE_PROPERTY,
+                System.getProperty(MAX_POOL_SIZE_PROPERTY));
         }
         MAX_POOL_SIZE = Math.max(0, maxPoolSize);
         INITIAL_POOL_SIZE = Math.max(0, Math.min(MAX_POOL_SIZE, initialPoolSize));
@@ -116,9 +116,9 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         // On clients, this may not be available immediately, we can't bomb out that early.
         if (Sponge.isServerAvailable() && !isPermittedThread()) {
             throw new IllegalStateException(String.format(
-                    "CauseStackManager called from off main thread (current='%s', expected='%s')!",
-                    ThreadUtil.getDescription(Thread.currentThread()),
-                    ThreadUtil.getDescription(((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$getServerThread())
+                "CauseStackManager called from off main thread (current='%s', expected='%s')!",
+                ThreadUtil.getDescription(Thread.currentThread()),
+                ThreadUtil.getDescription(((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$getServerThread())
             ));
         }
         this.checkProviders();
@@ -212,7 +212,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
         }
         if (size <= this.min_depth) {
             throw new IllegalStateException("Cause stack corruption, tried to pop more objects off than were pushed since last frame (Size was "
-                                            + size + " but mid depth is " + this.min_depth + ")");
+                + size + " but mid depth is " + this.min_depth + ")");
         }
         this.cached_cause = null;
         return this.cause.pop();

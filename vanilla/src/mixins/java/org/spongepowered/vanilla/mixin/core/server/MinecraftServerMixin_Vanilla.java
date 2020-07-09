@@ -24,17 +24,23 @@
  */
 package org.spongepowered.vanilla.mixin.core.server;
 
+import com.google.inject.Injector;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.vanilla.VanillaLifecycle;
 import org.spongepowered.vanilla.launch.ServerLauncher;
 import org.spongepowered.vanilla.launch.VanillaServer;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla {
+
+    private VanillaLifecycle vanilla$lifecycle;
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServer;startServerThread()V"))
     private static void vanilla$prepareGameAndLoadPlugins(final DedicatedServer server) {
@@ -42,5 +48,14 @@ public abstract class MinecraftServerMixin_Vanilla {
         launcher.setupInjection((VanillaServer) server);
         launcher.loadPlugins((VanillaServer) server);
         server.startServerThread();
+    }
+
+    @Inject(method = "startServerThread", at = @At("HEAD"))
+    private void vanilla$bootstrapLifecycle(CallbackInfo ci) {
+        final Injector injector = Launcher.getInstance().getPlatformInjector();
+        this.vanilla$lifecycle = injector.getInstance(VanillaLifecycle.class);
+        this.vanilla$lifecycle.establishServices();
+        this.vanilla$lifecycle.registerPluginListeners();
+        this.vanilla$lifecycle.callConstructEventToPlugins();
     }
 }

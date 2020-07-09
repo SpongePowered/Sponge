@@ -312,7 +312,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         // we can safely pop the frame here since this is only called when we're checking for processing
 
         return
-                this.isNonEmpty(this.blocksSupplier)
+            this.isNonEmpty(this.blocksSupplier)
                 || this.isNonEmpty(this.blockItemDropsSupplier)
                 || this.isNonEmpty(this.blockItemEntityDropsSupplier)
                 || this.isNonEmpty(this.capturedItemsSupplier)
@@ -345,7 +345,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public <T> T requireSource(final Class<T> targetClass) {
         return this.getSource(targetClass)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", this));
+            .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", this));
     }
 
     public Optional<User> getOwner() {
@@ -548,7 +548,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public Optional<BlockPos> getBlockPosition() {
         return this.getCaptureBlockPos()
-                .getPos();
+            .getPos();
     }
 
     public void addNotifierAndOwnerToCauseStack(final CauseStackManager.StackFrame frame) {
@@ -585,8 +585,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Override
     public String toString() {
         return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("isCompleted", this.isCompleted)
-                .toString();
+            .add("isCompleted", this.isCompleted)
+            .toString();
     }
 
     protected P markEmpty() {

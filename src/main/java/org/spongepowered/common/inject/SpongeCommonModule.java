@@ -35,12 +35,10 @@ import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
-import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.api.world.TeleportHelper;
@@ -51,15 +49,10 @@ import org.spongepowered.common.asset.SpongeAssetManager;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.SpongeServiceProvider;
-import org.spongepowered.common.service.ban.SpongeBanService;
-import org.spongepowered.common.service.permission.SpongePermissionService;
-import org.spongepowered.common.service.user.SpongeUserStorageService;
-import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
 import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
@@ -83,18 +76,10 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(TeleportHelper.class).to(SpongeTeleportHelper.class);
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);
-        this.bindAndExpose(CauseStackManager.class).to(SpongeCauseStackManager.class);
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
         this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
         this.bindAndExpose(ServiceProvider.class).to(SpongeServiceProvider.class);
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
-
-        // Default services that might need to be injected
-        this.bind(SpongeBanService.class);
-        // TODO: Pagination Service
-        this.bind(SpongePermissionService.class);
-        this.bind(SpongeUserStorageService.class);
-        this.bind(SpongeWhitelistService.class);
 
         this.requestStaticInjection(SpongeCommon.class);
         this.requestStaticInjection(Sponge.class);

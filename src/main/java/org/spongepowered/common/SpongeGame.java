@@ -60,7 +60,6 @@ public abstract class SpongeGame implements Game {
     private final ConfigManager configManager;
     private final ChannelRegistrar channelRegistrar;
     private final TeleportHelper teleportHelper;
-    private final CauseStackManager causeStackManager;
     private final MetricsConfigManager metricsConfigManager;
     private final CommandManager commandManager;
     private final SqlManager sqlManager;
@@ -69,8 +68,8 @@ public abstract class SpongeGame implements Game {
 
     protected SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
         final EventManager eventManager, final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
-        final TeleportHelper teleportHelper, final CauseStackManager causeStackManager, final MetricsConfigManager metricsConfigManager,
-        final CommandManager commandManager, final SqlManager sqlManager, final ServiceProvider serviceProvider) {
+        final TeleportHelper teleportHelper, final MetricsConfigManager metricsConfigManager, final CommandManager commandManager,
+        final SqlManager sqlManager, final ServiceProvider serviceProvider) {
 
         this.platform = platform;
         this.registry = registry;
@@ -81,7 +80,6 @@ public abstract class SpongeGame implements Game {
         this.configManager = configManager;
         this.channelRegistrar = channelRegistrar;
         this.teleportHelper = teleportHelper;
-        this.causeStackManager = causeStackManager;
         this.metricsConfigManager = metricsConfigManager;
         this.commandManager = commandManager;
         this.sqlManager = sqlManager;
@@ -141,11 +139,6 @@ public abstract class SpongeGame implements Game {
     @Override
     public TeleportHelper getTeleportHelper() {
         return this.teleportHelper;
-    }
-
-    @Override
-    public CauseStackManager getCauseStackManager() {
-        return this.causeStackManager;
     }
 
     @Override

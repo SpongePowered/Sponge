@@ -95,7 +95,6 @@ public final class SpongeServiceProvider implements ServiceProvider {
                             ServicesCategory.ServicePluginSubCategory::getWhitelistService,
                             SpongeWhitelistService.class))
                     .build();
-
     // --
 
     private final Game game;
