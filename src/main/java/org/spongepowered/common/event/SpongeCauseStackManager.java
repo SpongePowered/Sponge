@@ -58,8 +58,8 @@ import javax.annotation.Nullable;
 public final class SpongeCauseStackManager implements CauseStackManager {
 
     private static final boolean DEBUG_CAUSE_FRAMES = Boolean.parseBoolean(System.getProperty("sponge.debugcauseframes", "false"));
-    private static final String INITIAL_POOL_SIZE_PROPERTY =  "sponge.cause.initialFramePoolSize";
-    private static final String MAX_POOL_SIZE_PROPERTY =  "sponge.cause.maxFramePoolSize";
+    private static final String INITIAL_POOL_SIZE_PROPERTY = "sponge.cause.initialFramePoolSize";
+    private static final String MAX_POOL_SIZE_PROPERTY = "sponge.cause.maxFramePoolSize";
 
     private static final int INITIAL_POOL_SIZE;
     private static final int MAX_POOL_SIZE;

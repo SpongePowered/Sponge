@@ -99,7 +99,9 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.annotation.Nullable;
@@ -115,9 +117,7 @@ public final class PhaseTracker {
 
     private static final Map<Thread, PhaseTracker> SPINOFF_TRACKERS = new MapMaker().weakKeys().concurrencyLevel(8).makeMap();
 
-    PhaseTracker() {
-        
-    }
+    PhaseTracker() { }
 
     public void init() {
         if (this != PhaseTracker.SERVER) {
@@ -137,7 +137,7 @@ public final class PhaseTracker {
 
                     final List<net.minecraft.entity.Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
                     PhaseTracker.ASYNC_CAPTURED_ENTITIES.removeAll(entities);
-                    try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                    try (final CauseStackManager.StackFrame frame = this.causeStackManager.pushCauseFrame()) {
                         // We are forcing the spawn, as we can't throw the proper event at the proper time, so
                         // we'll just mark it as "forced".
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.FORCED);
@@ -155,7 +155,6 @@ public final class PhaseTracker {
     @Nullable private WeakReference<Thread> sidedThread;
     private boolean hasRun = false;
     final SpongeCauseStackManager causeStackManager = new SpongeCauseStackManager();
-
 
 
     public void setThread(@Nullable final Thread thread) throws IllegalAccessException {
@@ -282,7 +281,7 @@ public final class PhaseTracker {
             return;
         }
 
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() ) {
+        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
             if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING, null)) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
@@ -291,7 +290,7 @@ public final class PhaseTracker {
         }
 
         final boolean hasCaptures = currentContext.hasCaptures();
-        try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, currentContext, hasCaptures) ) {
+        try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, currentContext, hasCaptures)) {
             // With UnwindingPhaseContext#unwind checking for post, if it is null, the try
             // will not attempt to close the phase context. If it is required,
             // it already automatically pushes onto the phase stack, along with
@@ -445,7 +444,7 @@ public final class PhaseTracker {
      * Replacement of {@link net.minecraft.world.World#neighborChanged(BlockPos, Block, BlockPos)}
      * that adds tracking into play.
      *
-     *  @param mixinWorld THe world
+     * @param mixinWorld THe world
      * @param notifyPos The original notification position
      * @param sourceBlock The source block type
      * @param sourcePos The source block position
@@ -939,9 +938,37 @@ public final class PhaseTracker {
             }
         }
     }
+
     private final IdentityHashMap<IPhaseState<?>, ArrayDeque<? extends PhaseContext<?>>> stateContextPool = new IdentityHashMap<>();
 
     public <C extends PhaseContext<C>> ArrayDeque<C> getContextPoolFor(final PooledPhaseState<? extends C> state) {
         return (ArrayDeque<C>) this.stateContextPool.computeIfAbsent(state, (newState) -> new ArrayDeque<>());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        PhaseTracker that = (PhaseTracker) o;
+        return this.hasRun == that.hasRun
+                && (this.sidedThread != null && that.sidedThread != null && this.sidedThread.equals(that.sidedThread))
+                || (this.sidedThread == null && that.sidedThread == null);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.sidedThread);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", PhaseTracker.class.getSimpleName() + "[", "]")
+                .add("sidedThread=" + this.sidedThread)
+                .add("hasRun=" + this.hasRun)
+                .toString();
     }
 }

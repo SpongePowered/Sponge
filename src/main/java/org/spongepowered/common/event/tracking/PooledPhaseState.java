@@ -35,9 +35,9 @@ public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPh
     }
 
     @Override
-    public final C createPhaseContext(final PhaseTracker server) {
-        if (Thread.currentThread() != server.getSidedThread()) {
-            throw new IllegalStateException("Asynchronous Thread Access to PhaseTracker: " + server);
+    public final C createPhaseContext(final PhaseTracker tracker) {
+        if (Thread.currentThread() != tracker.getSidedThread()) {
+            throw new IllegalStateException("Asynchronous Thread Access to PhaseTracker: " + tracker);
         }
 
         if (this.cached != null && !this.cached.isCompleted) {
@@ -45,12 +45,12 @@ public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPh
             this.cached = null;
             return cached;
         }
-        final C peek = server.getContextPoolFor(this).pollFirst();
+        final C peek = tracker.getContextPoolFor(this).pollFirst();
         if (peek != null) {
             this.cached = peek;
             return peek;
         }
-        this.cached = this.createNewContext(server);
+        this.cached = this.createNewContext(tracker);
         return this.cached;
     }
 
