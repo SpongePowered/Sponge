@@ -26,14 +26,18 @@ package org.spongepowered.common.accessor.server;
 
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
 
-    @Accessor("serverThread") Thread accessor$getServerThread();
+    @Accessor("profileCache") PlayerProfileCache accessor$getProfileCache();
+
+    @Mutable @Accessor("profileCache") void accessor$setProfileCache(PlayerProfileCache profileCache);
 
     @Accessor("dataFixer") DataFixer accessor$getDataFixer();
 

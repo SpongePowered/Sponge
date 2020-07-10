@@ -7,10 +7,10 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1101,
     "mixins": [
+        "server.management.PlayerProfileCacheMixin",
+        "server.MinecraftServerMixin"
     ],
     "server": [
-        "server.MinecraftServerMixin",
-        "server.management.PlayerProfileCacheMixin"
     ],
     "injectors": {
         "defaultRequire": 1

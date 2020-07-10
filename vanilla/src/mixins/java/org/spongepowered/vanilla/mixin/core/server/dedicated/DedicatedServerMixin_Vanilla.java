@@ -59,9 +59,11 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer {
         this.vanilla$lifeCycle.establishFactories();
         this.vanilla$lifeCycle.initTimings();
         this.vanilla$lifeCycle.registerPluginListeners();
-        this.vanilla$lifeCycle.callConstructEventToPlugins();
+        this.vanilla$lifeCycle.callConstructEvent();
         this.vanilla$lifeCycle.establishServices();
         this.vanilla$lifeCycle.establishServerFeatures();
+        // TODO Evaluate exactly where we want to call this
+        this.vanilla$lifeCycle.callStartingEngineEvent();
         super.run();
     }
 }

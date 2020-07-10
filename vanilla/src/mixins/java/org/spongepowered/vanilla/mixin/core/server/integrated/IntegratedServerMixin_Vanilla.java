@@ -58,6 +58,8 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer {
         // TODO Maybe grab the client's? It is more just a utility object really
         this.vanilla$lifeCycle = new VanillaLifecycle((Engine) this);
         this.vanilla$lifeCycle.establishServerFeatures();
+        // TODO Evaluate exactly where we want to call this
+        this.vanilla$lifeCycle.callStartingEngineEvent();
         super.run();
     }
 }

@@ -391,16 +391,16 @@ public class SpongeEventManager implements EventManager {
     private boolean post(final Event event, final List<RegisteredListener<?>> handlers) {
         final Engine engine = EngineUtil.determineEngine();
 
+        // If this event is being posted asynchronously then we don't want
+        // to do any timing or cause stack changes
         if (engine == null) {
-            // If this event is being posted asynchronously then we don't want
-            // to do any timing or cause stack changes
-            for (@SuppressWarnings("rawtypes") final RegisteredListener handler : handlers) {
+            for (final RegisteredListener handler : handlers) {
                 try {
                     if (event instanceof AbstractEvent) {
                         ((AbstractEvent) event).currentOrder = handler.getOrder();
                     }
                     handler.handle(event);
-                } catch (Throwable e) {
+                } catch (final Throwable e) {
                     SpongeCommon.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
                 }
             }
@@ -451,20 +451,12 @@ public class SpongeEventManager implements EventManager {
             // Allow the client thread by default so devs can actually
             // call their own events inside the init events. Only allowing
             // this as long that there is no server available
-            return this.post(event, !Sponge.isServerAvailable());
+            return this.post(event, this.getHandlerCache(event).getListeners());
         } finally {
             if (event instanceof InteractContainerEvent) { // Finished using Container
                 ((ContainerBridge) ((InteractContainerEvent) event).getContainer()).bridge$setInUse(false);
             }
         }
-    }
-
-    public boolean postServer(final Event event) {
-        return this.post(event, false);
-    }
-
-    public boolean post(final Event event, final boolean allowClientThread) {
-        return this.post(event, this.getHandlerCache(event).getListeners());
     }
 
     public boolean post(final Event event, final PluginContainer plugin) {

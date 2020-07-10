@@ -24,9 +24,12 @@
  */
 package org.spongepowered.vanilla;
 
+import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.event.lifecycle.StartingEngineEventImpl;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -45,13 +48,22 @@ public final class VanillaLifecycle extends SpongeLifecycle {
         }
     }
 
-    public void callConstructEventToPlugins() {
+    public void callConstructEvent() {
         for (final PluginContainer plugin : this.engine.getGame().getPluginManager().getPlugins()) {
             if (plugin instanceof DummyPluginContainer) {
                 continue;
             }
             this.engine.getGame().getEventManager().post(SpongeEventFactory.createConstructPluginEvent(this.engine.getCauseStackManager()
                 .getCurrentCause(), this.engine.getGame(), plugin));
+        }
+    }
+
+    public void callStartingEngineEvent() {
+        for (final PluginContainer plugin : this.engine.getGame().getPluginManager().getPlugins()) {
+            if (plugin instanceof DummyPluginContainer) {
+                continue;
+            }
+            this.engine.getGame().getEventManager().post(new StartingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), (TypeToken<Engine>) TypeToken.of(this.engine.getClass()), this.engine.getGame(), this.engine));
         }
     }
 }

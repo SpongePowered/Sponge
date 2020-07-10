@@ -26,9 +26,12 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Client;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
+import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -51,5 +54,15 @@ public final class TestPlugin {
     public void onProvideService(final ProvideServiceEvent<WhitelistService> event) {
         this.logger.info(event);
         event.suggest(TestWhitelistService::new);
+    }
+
+    @Listener
+    public void onStartingServer(final StartingEngineEvent<Server> event) {
+        this.logger.info("Starting engine '{}'", event.getEngine());
+    }
+
+    @Listener
+    public void onStartingClient(final StartingEngineEvent<Client> event) {
+        this.logger.info("Starting engine '{}'", event.getEngine());
     }
 }
