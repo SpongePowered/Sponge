@@ -108,10 +108,15 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     // World
     @Override
     public boolean isLoaded() {
-        final ServerWorld world = ((SpongeWorldManager) ((Server) this.shadow$getServer()).getWorldManager()).getWorld(this.shadow$getDimension().getType());
-        if (world == null || ((WorldBridge) world).bridge$isFake()) {
+        if (((WorldBridge) this).bridge$isFake()) {
             return false;
         }
+
+        final ServerWorld world = ((SpongeWorldManager) ((Server) this.shadow$getServer()).getWorldManager()).getWorld(this.shadow$getDimension().getType());
+        if (world == null) {
+            return false;
+        }
+
         return world == (Object) this;
     }
 
