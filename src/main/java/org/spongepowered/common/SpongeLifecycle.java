@@ -39,22 +39,13 @@ import org.spongepowered.common.service.SpongeServiceProvider;
 public abstract class SpongeLifecycle {
 
     protected final Engine engine;
-    protected final GameRegistry gameRegistry;
-    protected final EventManager eventManager;
-    protected final PluginManager pluginManager;
-    protected final ServiceProvider serviceProvider;
 
-    public SpongeLifecycle(final Engine engine, final GameRegistry gameRegistry, final EventManager eventManager,
-        final PluginManager pluginManager, final ServiceProvider serviceProvider) {
+    public SpongeLifecycle(final Engine engine) {
         this.engine = engine;
-        this.gameRegistry = gameRegistry;
-        this.eventManager = eventManager;
-        this.pluginManager = pluginManager;
-        this.serviceProvider = serviceProvider;
     }
 
     public void establishFactories() {
-        ((SpongeFactoryRegistry) this.gameRegistry.getFactoryRegistry()).registerDefaultFactories();
+        ((SpongeFactoryRegistry) this.engine.getGame().getRegistry().getFactoryRegistry()).registerDefaultFactories();
     }
 
     public void initTimings() {
@@ -62,11 +53,12 @@ public abstract class SpongeLifecycle {
     }
 
     public void establishServices() {
-        ((SpongeServiceProvider) this.serviceProvider).init();
+        ((SpongeServiceProvider) this.engine.getGame().getServiceProvider()).init();
     }
 
     public void establishServerFeatures() {
         //Sponge.getSystemSubject().getContainingCollection();
-        ((SpongeServer) this.engine).getUsernameCache().load();
+        // Yes this looks odd but prevents having to do sided lifecycle solely to always point at the Server
+        ((SpongeServer) this.engine.getGame().getServer()).getUsernameCache().load();
     }
 }

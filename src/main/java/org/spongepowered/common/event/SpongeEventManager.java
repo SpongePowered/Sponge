@@ -35,6 +35,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Engine;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -55,6 +56,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
+import org.spongepowered.common.util.EngineUtil;
 import org.spongepowered.common.util.TypeTokenHelper;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -387,7 +389,9 @@ public class SpongeEventManager implements EventManager {
 
     @SuppressWarnings("unchecked")
     private boolean post(final Event event, final List<RegisteredListener<?>> handlers) {
-        if (!Sponge.getServer().onMainThread()) {
+        final Engine engine = EngineUtil.determineEngine();
+
+        if (engine == null) {
             // If this event is being posted asynchronously then we don't want
             // to do any timing or cause stack changes
             for (@SuppressWarnings("rawtypes") final RegisteredListener handler : handlers) {
@@ -432,7 +436,7 @@ public class SpongeEventManager implements EventManager {
     @Nullable
     private EventListenerPhaseContext createPluginContext(final RegisteredListener<?> handler) {
         if (PhaseTracker.getInstance().getCurrentState().allowsEventListener()) {
-            return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.SERVER)
+            return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.getInstance())
                 .source(handler.getPlugin());
         }
         return null;

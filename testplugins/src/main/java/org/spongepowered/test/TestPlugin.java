@@ -25,10 +25,11 @@
 package org.spongepowered.test;
 
 import com.google.inject.Inject;
-import com.google.inject.internal.asm.$ByteVector;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
+import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.plugin.jvm.Plugin;
 
 @Plugin("test")
@@ -44,5 +45,11 @@ public final class TestPlugin {
     @Listener
     public void onConstruct(final ConstructPluginEvent event) {
         this.logger.info("Constructed: '{}'", event.getPlugin().toString());
+    }
+
+    @Listener
+    public void onProvideService(final ProvideServiceEvent<WhitelistService> event) {
+        this.logger.info(event);
+        event.suggest(TestWhitelistService::new);
     }
 }

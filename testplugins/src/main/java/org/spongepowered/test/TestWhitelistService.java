@@ -22,27 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.inject.client;
+package org.spongepowered.test;
 
-import com.google.inject.AbstractModule;
-import org.spongepowered.api.Client;
-import org.spongepowered.api.Engine;
-import org.spongepowered.vanilla.VanillaGame;
-import org.spongepowered.vanilla.client.VanillaClientGame;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.service.whitelist.WhitelistService;
 
-public final class VanillaClientModule extends AbstractModule {
+import java.util.Collection;
 
-    private final Client client;
+public final class TestWhitelistService implements WhitelistService {
 
-    public VanillaClientModule(final Client client) {
-        this.client = client;
+    @Override public Collection<GameProfile> getWhitelistedProfiles() {
+        return null;
     }
 
-    @Override
-    protected void configure() {
-        //noinspection UninstantiableBinding
-        this.bind(Engine.class).to(Client.class);
-        this.bind(Client.class).toInstance(this.client);
-        this.bind(VanillaGame.class).to(VanillaClientGame.class);
+    @Override public boolean isWhitelisted(GameProfile profile) {
+        return false;
+    }
+
+    @Override public boolean addProfile(GameProfile profile) {
+        return false;
+    }
+
+    @Override public boolean removeProfile(GameProfile profile) {
+        return false;
     }
 }

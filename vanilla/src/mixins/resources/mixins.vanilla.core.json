@@ -8,9 +8,11 @@
     "priority": 1301,
     "client": [
         "client.ClientBrandRetrieverMixin_Vanilla",
-        "client.MinecraftMixin_Vanilla"
+        "client.MinecraftMixin_Vanilla",
+        "server.integrated.IntegratedServerMixin_Vanilla"
     ],
     "server": [
+        "server.dedicated.DedicatedServerMixin_Vanilla"
     ],
     "mixins": [
         "server.MinecraftServerMixin_Vanilla",

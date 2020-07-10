@@ -22,27 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.inject.client;
+package org.spongepowered.common.util;
 
-import com.google.inject.AbstractModule;
-import org.spongepowered.api.Client;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Engine;
-import org.spongepowered.vanilla.VanillaGame;
-import org.spongepowered.vanilla.client.VanillaClientGame;
+import org.spongepowered.api.Sponge;
 
-public final class VanillaClientModule extends AbstractModule {
+public final class EngineUtil {
 
-    private final Client client;
-
-    public VanillaClientModule(final Client client) {
-        this.client = client;
+    private EngineUtil() {
     }
 
-    @Override
-    protected void configure() {
-        //noinspection UninstantiableBinding
-        this.bind(Engine.class).to(Client.class);
-        this.bind(Client.class).toInstance(this.client);
-        this.bind(VanillaGame.class).to(VanillaClientGame.class);
+    @Nullable
+    public static Engine determineEngine() {
+        if (Sponge.isServerAvailable()) {
+            if (Sponge.getServer().onMainThread()) {
+                return Sponge.getServer();
+            }
+        }
+
+        if (Sponge.isClientAvailable()) {
+            if (Sponge.getClient().onMainThread()) {
+                return Sponge.getClient();
+            }
+        }
+
+        return null;
     }
 }

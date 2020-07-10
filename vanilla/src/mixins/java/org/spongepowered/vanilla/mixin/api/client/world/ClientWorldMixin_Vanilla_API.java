@@ -22,27 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.inject.client;
+package org.spongepowered.vanilla.mixin.api.client.world;
 
-import com.google.inject.AbstractModule;
-import org.spongepowered.api.Client;
-import org.spongepowered.api.Engine;
-import org.spongepowered.vanilla.VanillaGame;
-import org.spongepowered.vanilla.client.VanillaClientGame;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.world.ClientWorld;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.world.WorldBridge;
 
-public final class VanillaClientModule extends AbstractModule {
-
-    private final Client client;
-
-    public VanillaClientModule(final Client client) {
-        this.client = client;
-    }
+@Mixin(ClientWorld.class)
+public abstract class ClientWorldMixin_Vanilla_API implements org.spongepowered.api.world.client.ClientWorld {
 
     @Override
-    protected void configure() {
-        //noinspection UninstantiableBinding
-        this.bind(Engine.class).to(Client.class);
-        this.bind(Client.class).toInstance(this.client);
-        this.bind(VanillaGame.class).to(VanillaClientGame.class);
+    public boolean isLoaded() {
+        if (((WorldBridge) this).bridge$isFake()) {
+            return false;
+        }
+
+        return Minecraft.getInstance().world == (Object) this;
     }
 }
