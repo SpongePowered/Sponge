@@ -32,7 +32,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.DispenserTileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -102,7 +101,7 @@ public class DispenserBlockMixin_Tracker {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/tileentity/DispenserTileEntity;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
     private void impl$setInventoryContentsCallEvent(final DispenserTileEntity dispenserTileEntity, final int index, final ItemStack stack) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         // If we captured nothing, simply set the slot contents and return
         if (context.getCapturedItemsOrEmptyList().isEmpty()) {
             dispenserTileEntity.setInventorySlotContents(index, stack);

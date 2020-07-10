@@ -198,7 +198,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
         final List<SpongeBlockSnapshot> list = this.multimap.get(blockPos);
         if (list != null && !list.isEmpty()) {
             final SpongeBlockSnapshot originalSnapshot = list.get(0);
-            final PhaseContext<?> peek = PhaseTracker.getInstance().getCurrentContext();
+            final PhaseContext<?> peek = PhaseTracker.getInstance().getPhaseContext();
             final BlockState currentState = (BlockState) originalSnapshot.getState();
             originalSnapshot.blockChange = ((IPhaseState) peek.state).associateBlockChangeWithSnapshot(peek, newState, newState.getBlock(), currentState, originalSnapshot, currentState.getBlock());
         }

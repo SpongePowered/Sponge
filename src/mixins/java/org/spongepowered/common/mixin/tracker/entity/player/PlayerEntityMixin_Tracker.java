@@ -154,7 +154,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             final List<ItemStackSnapshot> original = new ArrayList<>();
             original.add(snapshot);
 
-            final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
+            final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             @SuppressWarnings("RawTypeCanBeGeneric") final IPhaseState currentState = phaseContext.state;
 
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {

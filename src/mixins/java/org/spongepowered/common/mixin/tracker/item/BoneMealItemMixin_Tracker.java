@@ -86,7 +86,7 @@ public abstract class BoneMealItemMixin_Tracker {
             return;
         }
 
-        final PhaseContext<?> current = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> current = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState state = current.state;
         final boolean doesBulk = state.doesBulkBlockCapture(current);
         final boolean doesEvent = state.doesBlockEventTracking(current);

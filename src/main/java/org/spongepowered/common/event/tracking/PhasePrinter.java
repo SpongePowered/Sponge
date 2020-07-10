@@ -219,7 +219,7 @@ public final class PhasePrinter {
     }
 
     public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subheader, final Throwable e) {
-        printMessageWithCaughtException(tracker.stack, header, subheader, tracker.getCurrentState(), tracker.getCurrentContext(), e);
+        printMessageWithCaughtException(tracker.stack, header, subheader, tracker.getCurrentState(), tracker.getPhaseContext(), e);
     }
 
     public static void printMessageWithCaughtException(final PhaseStack stack, final String header, final String subHeader, final IPhaseState<?> state, final PhaseContext<?> context, @Nullable final Throwable t) {

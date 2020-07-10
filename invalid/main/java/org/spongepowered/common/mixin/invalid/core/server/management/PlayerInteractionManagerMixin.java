@@ -220,7 +220,7 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
             final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(frame, player, oldStack, hand, null, currentSnapshot);
 
             if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
-                ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext()).interactItemChanged(true);
+                ((PacketContext<?>) PhaseTracker.getInstance().getPhaseContext()).interactItemChanged(true);
             }
 
             this.bridge$setLastInteractItemOnBlockCancelled(event.isCancelled()); //|| event.getUseItemResult() == Tristate.FALSE;

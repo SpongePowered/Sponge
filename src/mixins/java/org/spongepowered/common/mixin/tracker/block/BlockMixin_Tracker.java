@@ -95,7 +95,7 @@ public abstract class BlockMixin_Tracker {
                                                         final CallbackInfo ci, final float unused, final double xOffset, final double yOffset, final double zOffset,
                                                         final ItemEntity toSpawn) {
         // Sponge Start - Tell the phase state to track this position, and then unset it.
-        final PhaseContext<?> context = PhaseTracker.SERVER.getCurrentContext();
+        final PhaseContext<?> context = PhaseTracker.SERVER.getPhaseContext();
 
         if (context.allowsBulkEntityCaptures() && context.allowsBlockPosCapturing()) {
             context.getCaptureBlockPos().setPos(pos);

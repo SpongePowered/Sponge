@@ -347,7 +347,7 @@ public abstract class WorldEntitySpawnerMixin {
 
     @Inject(method = "performWorldGenSpawning", at = @At("RETURN"))
     private static void onPerformWorldGenSpawningReturn(final World worldServer, final Biome biome, final int j, final int k, final int l, final int m, final Random rand, final CallbackInfo ci) {
-        PhaseTracker.getInstance().getCurrentContext().close();
+        PhaseTracker.getInstance().getPhaseContext().close();
         WorldEntitySpawnerMixin.impl$spawnerEntityType = null;
     }
 

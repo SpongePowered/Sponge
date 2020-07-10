@@ -185,7 +185,7 @@ public abstract class ServerChunkProviderMixin implements ServerChunkProviderBri
             target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V",
             shift = At.Shift.AFTER))
     private void impl$EndTerrainGenerationPhase(final int x, final int z, final CallbackInfoReturnable<Chunk> ci) {
-        PhaseTracker.getInstance().getCurrentContext().close();
+        PhaseTracker.getInstance().getPhaseContext().close();
     }
 
     @Inject(method = "provideChunk",
@@ -201,7 +201,7 @@ public abstract class ServerChunkProviderMixin implements ServerChunkProviderBri
         final long chunkIndex, final Throwable error, final CrashReport report, final CrashReportCategory chunkGenerationCategory,
         @Coerce final Object provider, final int someVar, final int someOther) {
 
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         report.makeCategoryDepth("Current PhaseState", 1)
             .addDetail(currentContext.state.toString(), () -> {
 

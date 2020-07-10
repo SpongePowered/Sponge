@@ -43,7 +43,7 @@ public class EntityDeathContext extends EntityContext<EntityDeathContext> {
      */
     @Override
     public void close() {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         // The current phase data may not be this phase data, which would ultimately
         // lead to having to close off another on top of this one.
         if (!context.equals(this)) {

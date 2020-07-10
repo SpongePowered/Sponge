@@ -106,7 +106,7 @@ public class ChunkManagerMixin_Tracker {
                 return;
             }
             // IF we're not on the main thread,
-            PhaseTracker.getInstance().getCurrentContext().close();
+            PhaseTracker.getInstance().getPhaseContext().close();
         }
     }
 

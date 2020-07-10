@@ -231,7 +231,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
         if (((WorldBridge) this.world).bridge$isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
             return null;
         }
-        final IPhaseState<?> state = PhaseTracker.getInstance().getCurrentContext().state;
+        final IPhaseState<?> state = PhaseTracker.getInstance().getPhaseContext().state;
         tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
         if (tracksEntityDeaths) {
             final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext(PhaseTracker.SERVER)

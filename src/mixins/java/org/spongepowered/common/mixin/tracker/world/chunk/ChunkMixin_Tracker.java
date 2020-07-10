@@ -167,7 +167,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 
         }
         final TileEntity existing = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
-        final PhaseContext<?> peek = isFake ? null : PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> peek = isFake ? null : PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState state = isFake ? null : peek.state;
         final SpongeBlockSnapshot snapshot = (isFake
                 || !ShouldFire.CHANGE_BLOCK_EVENT

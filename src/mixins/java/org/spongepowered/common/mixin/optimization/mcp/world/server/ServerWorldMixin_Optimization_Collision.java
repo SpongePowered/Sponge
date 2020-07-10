@@ -45,7 +45,7 @@ public abstract class ServerWorldMixin_Optimization_Collision extends WorldMixin
         if (((WorldBridge) this).bridge$isFake()) {
             return super.isFlammableWithin(bb);
         }
-        final Optional<ActiveChunkReferantBridge> source = PhaseTracker.getInstance().getCurrentContext().getSource(Entity.class)
+        final Optional<ActiveChunkReferantBridge> source = PhaseTracker.getInstance().getPhaseContext().getSource(Entity.class)
             .map(entity -> (ActiveChunkReferantBridge) entity);
         if (source.isPresent()) {
             final ChunkBridge activeChunk = source.get().bridge$getActiveChunk();

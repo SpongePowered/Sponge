@@ -59,7 +59,6 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.Jukebox;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.sound.SoundCategories;
@@ -105,7 +104,6 @@ import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
@@ -299,7 +297,7 @@ public class SpongeCommonEventFactory {
             final List<T> entities) {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseContext<?> currentContext = phaseTracker.getCurrentContext();
+        final PhaseContext<?> currentContext = phaseTracker.getPhaseContext();
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             if (sourceEntity != null) {
                 // We only want to push the source entity if it's not the current entity being ticked or "sourced". They will be already pushed.
@@ -348,7 +346,7 @@ public class SpongeCommonEventFactory {
      */
     @SuppressWarnings("unchecked") private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
+            final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (source == null) {
                 source = phaseContext.getSource() == null ? worldIn : phaseContext.getSource();
             }
@@ -420,7 +418,7 @@ public class SpongeCommonEventFactory {
 
     public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(
         final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState fromState, final net.minecraft.block.BlockState toState) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         Object source =context.getSource(LocatableBlock.class).orElse(null);
         if (source == null) {
             source = worldIn; // Fallback
@@ -446,7 +444,7 @@ public class SpongeCommonEventFactory {
     @SuppressWarnings("rawtypes")
     @Nullable
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(final World world, final BlockPos sourcePos, final EnumSet<net.minecraft.util.Direction> notifiedSides) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         // Don't fire notify events during world gen or while restoring
         if (context.state.isWorldGeneration() || context.state.isRestoring()) {
             return null;
@@ -782,7 +780,7 @@ public class SpongeCommonEventFactory {
             if (!cancelled) {
                 final EntityBridge spongeEntity = (EntityBridge) entity;
                 if (!pos.equals(spongeEntity.bridge$getLastCollidedBlockPos())) {
-                    final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+                    final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
                     context.applyNotifierIfAvailable(notifier -> {
                         ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();
                         if (spongeChunk == null) {
@@ -805,7 +803,7 @@ public class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
                     ? UnknownProjectileSource.UNKNOWN
                     : projectileSource);
-            final Optional<User> owner = PhaseTracker.getInstance().getCurrentContext().getOwner();
+            final Optional<User> owner = PhaseTracker.getInstance().getPhaseContext().getOwner();
             owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
 
             final ServerLocation impactPoint = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) projectile.world, VecHelper.toVector3d(movingObjectPosition.getHitVec()));

@@ -62,7 +62,7 @@ public class ServerPlayNetHandlerMixin {
     private void onProcessCreativeInventoryAction(CCreativeInventoryActionPacket packetIn, CallbackInfo ci,
             boolean flag, ItemStack itemstack, CompoundNBT compoundNBT, boolean flag1, boolean flag2) {
         if (flag2) {
-            final PacketContext<?> context = (PacketContext<?>) PhaseTracker.getInstance().getCurrentContext();
+            final PacketContext<?> context = (PacketContext<?>) PhaseTracker.getInstance().getPhaseContext();
             final boolean ignoresCreative = context.getIgnoringCreative();
 
             if (!ignoresCreative) {
@@ -116,7 +116,7 @@ public class ServerPlayNetHandlerMixin {
             final boolean itemValidCheck = itemstack.isEmpty() || itemstack.getDamage() >= 0 && itemstack.getCount() <= itemstack.getMaxStackSize() && !itemstack.isEmpty();
 
             // Sponge start - handle CreativeInventoryEvent
-            final PacketContext<?> context = (PacketContext<?>) PhaseTracker.getInstance().getCurrentContext();
+            final PacketContext<?> context = (PacketContext<?>) PhaseTracker.getInstance().getPhaseContext();
             final boolean ignoresCreative = context.getIgnoringCreative();
 
             if (itemValidCheck) {

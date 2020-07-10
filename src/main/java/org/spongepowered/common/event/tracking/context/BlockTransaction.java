@@ -441,7 +441,7 @@ public abstract class BlockTransaction {
             final SpongeProxyBlockAccess proxyAccess = ((TrackedWorldBridge) serverWorld).bridge$getProxyAccess();
 
             // We can proceed to calling the break block logic since the new state has been "proxied" onto the world
-            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
             // Use the try to literally bypass any events, block notifications, neighbor switching, etc.
             // We can get away with making this phase switch because any tile entity accesses will
             // end up being ignored

@@ -95,7 +95,7 @@ public abstract class ChunkMixin_EntityCollision {
             return true;
         }
 
-        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
         final Object source = phaseContext.getSource();
         if (source == null) {
             return true;

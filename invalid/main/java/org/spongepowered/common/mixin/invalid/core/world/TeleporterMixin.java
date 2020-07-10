@@ -100,7 +100,7 @@ public abstract class TeleporterMixin implements TeleporterBridge {
         }
         
         if (didPort) {
-            ((IPhaseState) PhaseTracker.getInstance().getCurrentState()).markTeleported(PhaseTracker.getInstance().getCurrentContext());
+            ((IPhaseState) PhaseTracker.getInstance().getCurrentState()).markTeleported(PhaseTracker.getInstance().getPhaseContext());
         }
     }
 

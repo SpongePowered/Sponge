@@ -779,7 +779,7 @@ public final class EntityUtil {
         original.add(snapshot);
 
         // Gather phase states to determine whether we're merging or capturing later
-        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState<?> currentState = phaseContext.state;
 
         // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.

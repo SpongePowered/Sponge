@@ -292,7 +292,7 @@ public final class TrackingUtil {
         final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext(PhaseTracker.SERVER).source(locatable);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState<?> currentState = currentContext.state;
         ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
         // Now actually switch to the new phase
@@ -329,7 +329,7 @@ public final class TrackingUtil {
         final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext(PhaseTracker.SERVER).source(locatable);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState<?> currentState = currentContext.state;
         ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
         // Now actually switch to the new phase
@@ -749,7 +749,7 @@ public final class TrackingUtil {
             // Append the snapshot being applied that is allowing us to keep track of which source is
             // performing the notification, it's quick and dirty.
             // TODO - somehow make this more functional so we're not relying on fields.
-            final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+            final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
             final BlockSnapshot previousNeighbor = context.neighborNotificationSource;
             context.neighborNotificationSource = newBlockSnapshot;
             if (changeFlag.updateNeighbors()) {

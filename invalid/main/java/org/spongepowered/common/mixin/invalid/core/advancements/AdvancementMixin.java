@@ -110,7 +110,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
             this.impl$translation = new FixedTranslation(SpongeTexts.toPlain(displayInfo.getTitle()));
         }
         if (PhaseTracker.getInstance().getCurrentState().isEvent()) {
-            final Object event = ((ListenerPhaseContext<?>) PhaseTracker.getInstance().getCurrentContext()).getEvent();
+            final Object event = ((ListenerPhaseContext<?>) PhaseTracker.getInstance().getPhaseContext()).getEvent();
             if (event instanceof GameRegistryEvent.Register) {
                 final Class<? extends CatalogType> catalogType = ((GameRegistryEvent.Register<?>) event).getCatalogType();
                 if (catalogType.equals(org.spongepowered.api.advancement.Advancement.class) || catalogType.equals(AdvancementTree.class)) {

@@ -117,7 +117,7 @@ public final class ContainerUtil {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void performBlockInventoryDrops(final ServerWorld worldServer, final double x, final double y, final double z, final IInventory inventory) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState<?> currentState = context.state;
         if (((IPhaseState) currentState).tracksBlockSpecificDrops(context)) {
             // this is where we could perform item stack pre-merging.

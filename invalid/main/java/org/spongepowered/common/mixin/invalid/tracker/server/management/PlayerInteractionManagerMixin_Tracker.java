@@ -113,7 +113,7 @@ public class PlayerInteractionManagerMixin_Tracker {
         // Specifically this will be the SpongeToForgeEventData compatibility so we eliminate an extra overwrite.
         @Nullable final Object forgeEventObject = SpongeImplHooks.postForgeEventDataCompatForSponge(event);
 
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         if (!SpongeImplHooks.isFakePlayer(this.player) && !ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             if (currentContext instanceof PacketContext) {
                 ((PacketContext<?>) currentContext).interactItemChanged(true);

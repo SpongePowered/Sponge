@@ -34,7 +34,6 @@ import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockRayTraceResult;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.event.CauseStackManager;
@@ -89,10 +88,10 @@ public class ServerPlayNetHandlerMixin_Tracker {
     private ActionResultType impl$checkState(final PlayerInteractionManager interactionManager, final PlayerEntity playerIn,
              final net.minecraft.world.World worldIn, final ItemStack stack, final Hand hand, final BlockRayTraceResult rayTraceResult) {
         final ActionResultType actionResult = interactionManager.func_219441_a(this.player, worldIn, stack, hand, rayTraceResult);
-        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
+        if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return actionResult;
         }
-        final PacketContext<?> context = ((PacketContext<?>) PhaseTracker.getInstance().getCurrentContext());
+        final PacketContext<?> context = ((PacketContext<?>) PhaseTracker.getInstance().getPhaseContext());
 
         // If a plugin or mod has changed the item, avoid restoring
         if (!context.getInteractItemChanged()) {
@@ -117,7 +116,7 @@ public class ServerPlayNetHandlerMixin_Tracker {
             target = "Lnet/minecraft/entity/player/ServerPlayerEntity;markPlayerActive()V"),
             cancellable = true)
     private void impl$throwAnimationEvent(final CAnimateHandPacket packetIn, final CallbackInfo ci) {
-        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
+        if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return;
         }
         SpongeCommonEventFactory.lastAnimationPacketTick = SpongeCommon.getServer().getTickCounter();
@@ -151,7 +150,7 @@ public class ServerPlayNetHandlerMixin_Tracker {
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/play/client/CPlayerDiggingPacket;getPosition()Lnet/minecraft/util/math/BlockPos;"))
     private void impl$updateLastPrimaryPacket(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {
-        if (PhaseTracker.getInstance().getCurrentContext().isEmpty()) {
+        if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return;
         }
         SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeCommon.getServer().getTickCounter();

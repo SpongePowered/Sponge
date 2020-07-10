@@ -406,7 +406,7 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
                 return;
             }
             // IF we're not on the main thread,
-            PhaseTracker.getInstance().getCurrentContext().close();
+            PhaseTracker.getInstance().getPhaseContext().close();
         }
     }
 

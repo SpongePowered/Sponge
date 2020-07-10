@@ -94,7 +94,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
         // of falling blocks, but, since the world already supposedly set the block to air,
         // we don't need to re-set the block state at the position, just need to check
         // if the processing succeeded or not.
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         // By this point, we should have some sort of captured block
         if (((IPhaseState) currentContext.state).doesBulkBlockCapture(currentContext)) {
             if (!TrackingUtil.processBlockCaptures(currentContext)) {

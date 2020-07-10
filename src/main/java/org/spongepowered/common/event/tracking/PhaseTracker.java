@@ -349,7 +349,7 @@ public final class PhaseTracker {
         final BlockPos otherPos, final Chunk chunk) {
         if (blockIn == null) {
             // If the block is null, check with the PhaseState to see if it can perform a safe way
-            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
             final PhaseTrackerCategory trackerConfig = SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker();
 
             if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
@@ -432,7 +432,7 @@ public final class PhaseTracker {
         return this.stack.peekState();
     }
 
-    public PhaseContext<?> getCurrentContext() {
+    public PhaseContext<?> getPhaseContext() {
         if (Thread.currentThread() != this.getSidedThread()) {
             throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
         }
@@ -539,7 +539,7 @@ public final class PhaseTracker {
         if (!SpongeImplHooks.onServerThread()) {
             // lol no, report the block change properly
             try {
-                PhaseTracker.SERVER.proposeScheduledBlockChange(this.getCurrentContext().defensiveCopy(PhaseTracker.SERVER), mixinWorld, pos, newState, flag);
+                PhaseTracker.SERVER.proposeScheduledBlockChange(this.getPhaseContext().defensiveCopy(PhaseTracker.SERVER), mixinWorld, pos, newState, flag);
             } catch (final InterruptedException e) {
                 e.printStackTrace();
             }
@@ -935,7 +935,7 @@ public final class PhaseTracker {
             PhasePrinter.printNonEmptyStack(this.stack);
 
             while (!this.stack.isEmpty()) {
-                this.getCurrentContext().close();
+                this.getPhaseContext().close();
             }
         }
     }

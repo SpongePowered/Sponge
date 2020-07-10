@@ -56,7 +56,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
 
     public GrowablePhaseContext provideItem(final ItemStack stack) {
         this.usedItem = ItemStackUtil.snapshotOf(stack);
-        this.priorContext = PhaseTracker.getInstance().getCurrentContext();
+        this.priorContext = PhaseTracker.getInstance().getPhaseContext();
         return this;
     }
 
