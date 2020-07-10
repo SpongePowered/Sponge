@@ -27,6 +27,7 @@ package org.spongepowered.test;
 import com.google.inject.Inject;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
@@ -48,6 +49,8 @@ public final class TestPlugin {
     @Listener
     public void onConstruct(final ConstructPluginEvent event) {
         this.logger.info("Constructed: '{}'", event.getPlugin().toString());
+        final ResourceKey tester = ResourceKey.of(event.getPlugin(), "tester");
+        this.logger.info(tester);
     }
 
     @Listener

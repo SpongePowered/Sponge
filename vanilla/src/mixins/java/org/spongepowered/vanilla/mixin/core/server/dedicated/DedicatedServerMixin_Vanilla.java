@@ -68,6 +68,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
     @Override
     public void run() {
         this.vanilla$lifeCycle.establishFactories();
+        this.vanilla$lifeCycle.establishBuilders();
         this.vanilla$lifeCycle.initTimings();
         this.vanilla$lifeCycle.registerPluginListeners();
         this.vanilla$lifeCycle.callConstructEvent();

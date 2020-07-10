@@ -30,7 +30,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.vanilla.inject.SpongeVanillaModule;
 import org.spongepowered.vanilla.inject.VanillaServerModule;
@@ -47,6 +49,11 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
         ((VanillaServer) server).setupInjection();
         ((ServerLauncher) Launcher.getInstance()).loadPlugins();
         server.startServerThread();
+    }
+
+    @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$callEngineStoppingEvent(CallbackInfo ci) {
+        this.getLifecycle().callStoppingEngineEvent();
     }
 
     @Override

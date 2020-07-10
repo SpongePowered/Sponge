@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Implements;
@@ -35,7 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ResourceLocation.class)
-@Implements(value = @Interface(iface = ResourceKey.class, prefix = "catalogKey$"))
+@Implements(value = @Interface(iface = ResourceKey.class, prefix = "resourceKey$"))
 public abstract class ResourceLocationMixin_API implements ResourceKey {
 
     @Shadow public abstract String shadow$getNamespace();
@@ -44,7 +45,7 @@ public abstract class ResourceLocationMixin_API implements ResourceKey {
     @Shadow public abstract String shadow$toString();
 
     @Intrinsic
-    public String catalogKey$getNamespace() {
+    public String resourceKey$getNamespace() {
         return this.shadow$getNamespace();
     }
 
@@ -58,9 +59,9 @@ public abstract class ResourceLocationMixin_API implements ResourceKey {
         return this.shadow$toString();
     }
 
-    @Override
-    public int compareTo(ResourceKey o) {
-        checkNotNull(o);
+    @Intrinsic
+    public int resourceKey$compareTo(ResourceKey o) {
+        Preconditions.checkNotNull(o);
         return this.shadow$compareTo((ResourceLocation) (Object) o);
     }
 }

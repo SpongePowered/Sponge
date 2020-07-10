@@ -56,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -261,11 +262,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 //        }
 //        return true;
 //    }
-
-    @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$dontExecuteServerStopOffThread(CallbackInfo ci) {
-
-    }
 
 //    /**
 //     * @author Zidane - Minecraft 1.14.4

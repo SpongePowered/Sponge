@@ -9,7 +9,8 @@
     "mixins": [
         "authlib.GameProfileMixin_API",
         "mcp.server.management.PlayerProfileCacheMixin_API",
-        "mcp.server.MinecraftServerMixin_API"
+        "mcp.server.MinecraftServerMixin_API",
+        "mcp.util.ResourceLocationMixin_API"
     ],
     "server": [
         "mcp.server.dedicated.DedicatedServerMixin_API"

@@ -89,6 +89,7 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         }
 
         this.vanilla$lifecycle.establishFactories();
+        this.vanilla$lifecycle.establishBuilders();
         this.vanilla$lifecycle.initTimings();
         this.vanilla$lifecycle.registerPluginListeners();
         this.vanilla$lifecycle.callConstructEvent();

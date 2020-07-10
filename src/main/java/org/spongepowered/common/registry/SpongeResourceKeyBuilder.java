@@ -33,7 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.plugin.PluginContainer;
 
-public final class SpongeCatalogKeyBuilder implements ResourceKey.Builder {
+public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
 
     @Nullable private String namespace;
     private String value;

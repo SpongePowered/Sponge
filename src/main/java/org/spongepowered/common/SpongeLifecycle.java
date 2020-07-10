@@ -25,6 +25,7 @@
 package org.spongepowered.common;
 
 import org.spongepowered.api.Engine;
+import org.spongepowered.common.registry.SpongeBuilderRegistry;
 import org.spongepowered.common.registry.SpongeFactoryRegistry;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
@@ -39,6 +40,10 @@ public abstract class SpongeLifecycle {
 
     public void establishFactories() {
         ((SpongeFactoryRegistry) this.engine.getGame().getRegistry().getFactoryRegistry()).registerDefaultFactories();
+    }
+
+    public void establishBuilders() {
+        ((SpongeBuilderRegistry) this.engine.getGame().getRegistry().getBuilderRegistry()).registerDefaultBuilders();
     }
 
     public void initTimings() {
