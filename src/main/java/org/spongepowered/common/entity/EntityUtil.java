@@ -83,7 +83,6 @@ import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -97,6 +96,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -108,8 +108,6 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 public final class EntityUtil {
 
@@ -154,7 +152,7 @@ public final class EntityUtil {
                 return null;
             }
 
-            final SpongeCauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
+            final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
             try (final CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame();
                  final InvokingTeleporterContext context = createInvokingTeleporterPhase(entity, toWorld, teleporter)) {
 
@@ -672,7 +670,7 @@ public final class EntityUtil {
         final Entity entityIn, final Transform fromTransform, final Transform toTransform, org.spongepowered.api.world.server.ServerWorld fromWorld, org.spongepowered.api.world.server.ServerWorld toWorld) {
 
         // Use origin world to get correct cause
-        final SpongeCauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
+        final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
         try (final CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()) {
             frame.pushCause(entityIn);
 

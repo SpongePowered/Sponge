@@ -75,7 +75,6 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -86,6 +85,7 @@ import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuil
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -93,14 +93,12 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
-
 public class InventoryEventFactory {
 
 
     public static boolean callPlayerChangeInventoryPickupPreEvent(final PlayerEntity player, final ItemEntity itemToPickup, final int pickupDelay) {
         final ItemStack stack = itemToPickup.getItem();
-        final SpongeCauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
+        final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
         causeStackManager.pushCause(player);
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
         final ChangeInventoryEvent.Pickup.Pre event =

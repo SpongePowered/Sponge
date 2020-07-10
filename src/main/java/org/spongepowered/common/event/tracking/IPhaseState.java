@@ -58,7 +58,6 @@ import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -875,7 +874,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * {@link CauseStackManager}. In certain cases, there are states that can have
      * excessive modifiers being pushed and popped with and without causes that may cause
      * performance degredation due to the excessive amounts of how many recyclings occur
-     * with {@link SpongeCauseStackManager#getCurrentCause()} lacking a cached context
+     * with {@link CauseStackManager#getCurrentCause()} lacking a cached context
      * and therefor needing to re-create the context each and every time.
      *
      * @param phaseContext The appropriate phase context

@@ -25,6 +25,9 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import com.google.common.collect.Lists;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.client.CEnchantItemPacket;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -37,17 +40,14 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.client.CEnchantItemPacket;
 
 public final class EnchantItemPacketState extends BasicInventoryPacketState {
 
@@ -90,7 +90,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
             capturedItems.add((Entity) entityItem);
         }
         context.getCapturedItems().clear();
-        final SpongeCauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
+        final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
         try (CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()) {
             causeStackManager.pushCause(player);
             causeStackManager.pushCause(openContainer);

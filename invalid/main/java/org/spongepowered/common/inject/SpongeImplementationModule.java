@@ -55,7 +55,7 @@ import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
-import org.spongepowered.common.event.SpongeCauseStackManager;
+//import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
@@ -77,7 +77,8 @@ public class SpongeImplementationModule extends PrivateModule {
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);
         this.bindAndExpose(PropertyRegistry.class).to(SpongePropertyRegistry.class);
-        this.bindAndExpose(CauseStackManager.class).to(SpongeCauseStackManager.class);
+        // Gone.
+//        this.bindAndExpose(CauseStackManager.class).to(SpongeCauseStackManager.class);
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
 
         // These are bound in implementation-specific modules
