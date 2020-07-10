@@ -616,7 +616,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         instance.completePhase(this);
         if (!((IPhaseState) this.state).shouldProvideModifiers(this)) {
             if (this.usedFrame != null) {
-                this.usedFrame.iterator().forEachRemaining(instance.causeStackManager::popCauseFrame);
+                this.usedFrame.iterator().forEachRemaining(instance::popCauseFrame);
             }
             return;
         }
@@ -624,10 +624,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             // So, this part is interesting... Since the used frame is null, that means
             // the cause stack manager still has the refernce of this context/phase, we have
             // to "pop off" the list.
-            instance.causeStackManager.popFrameMutator(this);
+            instance.popFrameMutator(this);
         }
         if (this.usedFrame != null) {
-            this.usedFrame.iterator().forEachRemaining(instance.causeStackManager::popCauseFrame);
+            this.usedFrame.iterator().forEachRemaining(instance::popCauseFrame);
             this.usedFrame.clear();
             this.usedFrame = null;
         }

@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKey;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -39,6 +38,7 @@ import java.util.Set;
 public class CauseStackFrameImpl implements CauseStackManager.StackFrame {
 
     private final Map<EventContextKey<?>, Object> stored_ctx_values = new HashMap<>();
+    private final PhaseTracker createdTracker;
     int old_min_depth;
     int lastCauseSize;
     private final Map<EventContextKey<?>, Object> storedContext = new HashMap<>();
@@ -46,7 +46,9 @@ public class CauseStackFrameImpl implements CauseStackManager.StackFrame {
     @Nullable Exception stack_debug = null;
 
     // for pooling
-    CauseStackFrameImpl() {}
+    CauseStackFrameImpl(PhaseTracker phaseTracker) {
+        this.createdTracker = phaseTracker;
+    }
 
     public void clear() {
         this.stored_ctx_values.clear();
