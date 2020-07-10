@@ -112,82 +112,11 @@ import javax.annotation.Nullable;
  */
 @SuppressWarnings("unchecked")
 public final class PhaseTracker {
+
     public static final PhaseTracker CLIENT = new PhaseTracker();
     public static final PhaseTracker SERVER = new PhaseTracker();
-
+    static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
     private static final Map<Thread, PhaseTracker> SPINOFF_TRACKERS = new MapMaker().weakKeys().concurrencyLevel(8).makeMap();
-
-    PhaseTracker() { }
-
-    public void init() {
-        if (this != PhaseTracker.SERVER) {
-            return;
-        }
-        if (this.hasRun) {
-            return;
-        }
-        this.hasRun = true;
-        Task.builder()
-                .name("Sponge Async To Sync Entity Spawn Task")
-                .intervalTicks(1)
-                .execute(() -> {
-                    if (PhaseTracker.ASYNC_CAPTURED_ENTITIES.isEmpty()) {
-                        return;
-                    }
-
-                    final List<net.minecraft.entity.Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
-                    PhaseTracker.ASYNC_CAPTURED_ENTITIES.removeAll(entities);
-                    try (final CauseStackManager.StackFrame frame = this.causeStackManager.pushCauseFrame()) {
-                        // We are forcing the spawn, as we can't throw the proper event at the proper time, so
-                        // we'll just mark it as "forced".
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.FORCED);
-                        for (net.minecraft.entity.Entity entity : entities) {
-                            // At this point, we don't care what the causes are...
-                            PhaseTracker.getInstance().spawnEntityWithCause((World<?>) entity.getEntityWorld(), (Entity) entity);
-                        }
-                    }
-
-                })
-                .plugin(SpongeCommon.getPlugin())
-                .build();
-    }
-
-    @Nullable private WeakReference<Thread> sidedThread;
-    private boolean hasRun = false;
-    final SpongeCauseStackManager causeStackManager = new SpongeCauseStackManager();
-
-
-    public void setThread(@Nullable final Thread thread) throws IllegalAccessException {
-        final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-        if ((stackTrace.length < 3)) {
-            throw new IllegalAccessException("Cannot call directly to change thread.");
-        }
-        if (this != PhaseTracker.SERVER && this != PhaseTracker.CLIENT && this.sidedThread == null) {
-            this.sidedThread = new WeakReference<>(thread);
-            return;
-        }
-
-        final String callingClass = stackTrace[1].getClassName();
-        final String callingParent = stackTrace[2].getClassName();
-        if (
-            !(
-                (Constants.MINECRAFT_CLIENT.equals(callingClass) && Constants.MINECRAFT_CLIENT.equals(callingParent))
-                || (Constants.MINECRAFT_SERVER.equals(callingClass) && Constants.MINECRAFT_SERVER.equals(callingParent))
-                || (Constants.DEDICATED_SERVER.equals(callingClass) && Constants.MINECRAFT_CLIENT.equals(callingParent))
-                || (Constants.INTEGRATED_SERVER.equals(callingClass) && Constants.MINECRAFT_CLIENT.equals(callingParent))
-            )
-        ) {
-            throw new IllegalAccessException("Illegal Attempts to re-assign PhaseTracker threads on Sponge");
-        }
-
-        this.sidedThread = new WeakReference<>(thread);
-
-    }
-
-    @Nullable
-    public Thread getSidedThread() {
-        return this.sidedThread != null ? this.sidedThread.get() : null;
-    }
 
     public static PhaseTracker getInstance() {
         final Thread current = Thread.currentThread();
@@ -213,10 +142,174 @@ public final class PhaseTracker {
         return getInstance().causeStackManager;
     }
 
+    public static Block validateBlockForNeighborNotification(final ServerWorld worldServer, final BlockPos pos, @Nullable Block blockIn,
+        final BlockPos otherPos, final Chunk chunk) {
+        if (blockIn == null) {
+            // If the block is null, check with the PhaseState to see if it can perform a safe way
+            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
+            final PhaseTrackerCategory trackerConfig = SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker();
 
-    static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
+            if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
+                // Try to save ourselves
+                final TileEntity source = (TileEntity) currentContext.getSource();
 
+                final TileEntityType<?> type = Optional.ofNullable(source)
+                                                   .map(TileEntity::getType)
+                                                   .orElse(null);
+                if (type != null) {
+                    ResourceLocation id = TileEntityType.getId(type);
+                    if (id == null) {
+                        id = new ResourceLocation(source.getClass().getCanonicalName());
+                    }
+                    final Map<String, Boolean> autoFixedTiles = trackerConfig.getAutoFixedTiles();
+                    final boolean contained = autoFixedTiles.containsKey(type.toString());
+                    // If we didn't map the tile entity yet, we should apply the mapping
+                    // based on whether the source is the same as the TileEntity.
+                    if (!contained) {
+                        if (pos.equals(source.getPos())) {
+                            autoFixedTiles.put(id.toString(), true);
+                        } else {
+                            autoFixedTiles.put(id.toString(), false);
+                        }
+                    }
+                    final boolean useTile = contained && autoFixedTiles.get(id.toString());
+                    if (useTile) {
+                        blockIn = source.getBlockState().getBlock();
+                    } else {
+                        blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
+                                      ? chunk.getBlockState(pos).getBlock()
+                                      : worldServer.getBlockState(pos).getBlock();
+                    }
+                    if (!contained && trackerConfig.isReportNullSourceBlocks()) {
+                        PhasePrinter.printNullSourceBlockWithTile(pos, blockIn, otherPos, id, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
+                    }
+                } else {
+                    blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
+                                  ? chunk.getBlockState(pos).getBlock()
+                                  : worldServer.getBlockState(pos).getBlock();
+                    if (trackerConfig.isReportNullSourceBlocks()) {
+                        PhasePrinter.printNullSourceBlockNeighborNotificationWithNoTileSource(pos, blockIn, otherPos,
+                            new NullPointerException("Null Source Block For Neighbor Notification"));
+                    }
+                }
+
+            } else {
+                blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
+                              ? chunk.getBlockState(pos).getBlock()
+                              : worldServer.getBlockState(pos).getBlock();
+                if (trackerConfig.isReportNullSourceBlocks()) {
+                    PhasePrinter.printNullSourceForBlock(worldServer, pos, blockIn, otherPos, new NullPointerException("Null Source Block For Neighbor Notification"));
+                }
+            }
+        }
+        return blockIn;
+    }
+
+    /**
+     * Validates the {@link Entity} being spawned is being spawned on the main server
+     * thread, if it is available. If the entity is NOT being spawned on the main server thread,
+     * well..... a mod (or plugin) is attempting to spawn an entity to the world
+     * <b>off thread</b>. The problem with doing this is that the PhaseTracker is
+     * <b>not</b> thread safe, and capturing entities off thread is always bad.
+     *
+     * @param entity The entity to spawn
+     * @return True if the entity spawn is on the main thread.
+     */
+    public static boolean isEntitySpawnInvalid(final Entity entity) {
+        if (Sponge.isServerAvailable() && (Sponge.getServer().onMainThread() || SpongeCommon.getServer().isServerStopped())) {
+            return false;
+        }
+        PhasePrinter.printAsyncEntitySpawn(entity);
+        return true;
+    }
+
+    @Nullable private WeakReference<Thread> sidedThread;
+    private boolean hasRun = false;
+    final SpongeCauseStackManager causeStackManager = new SpongeCauseStackManager();
     final PhaseStack stack = new PhaseStack();
+
+    PhaseTracker() { }
+
+    public void init() {
+        if (this != PhaseTracker.SERVER) {
+            return;
+        }
+        if (this.hasRun) {
+            return;
+        }
+        this.hasRun = true;
+        Task.builder()
+            .name("Sponge Async To Sync Entity Spawn Task")
+            .intervalTicks(1)
+            .execute(() -> {
+                if (PhaseTracker.ASYNC_CAPTURED_ENTITIES.isEmpty()) {
+                    return;
+                }
+
+                final List<net.minecraft.entity.Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
+                PhaseTracker.ASYNC_CAPTURED_ENTITIES.removeAll(entities);
+                try (final CauseStackManager.StackFrame frame = this.causeStackManager.pushCauseFrame()) {
+                    // We are forcing the spawn, as we can't throw the proper event at the proper time, so
+                    // we'll just mark it as "forced".
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.FORCED);
+                    for (net.minecraft.entity.Entity entity : entities) {
+                        // At this point, we don't care what the causes are...
+                        PhaseTracker.getInstance().spawnEntityWithCause((World<?>) entity.getEntityWorld(), (Entity) entity);
+                    }
+                }
+
+            })
+            .plugin(SpongeCommon.getPlugin())
+            .build();
+    }
+
+    public void setThread(@Nullable final Thread thread) throws IllegalAccessException {
+        final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        if ((stackTrace.length < 3)) {
+            throw new IllegalAccessException("Cannot call directly to change thread.");
+        }
+        if (this != PhaseTracker.SERVER && this != PhaseTracker.CLIENT && this.sidedThread == null) {
+            this.sidedThread = new WeakReference<>(thread);
+            return;
+        }
+
+        final String callingClass = stackTrace[1].getClassName();
+        final String callingParent = stackTrace[2].getClassName();
+        if (
+            !(
+                (Constants.MINECRAFT_CLIENT.equals(callingClass) && Constants.MINECRAFT_CLIENT.equals(callingParent))
+                    || (Constants.MINECRAFT_SERVER.equals(callingClass) && Constants.MINECRAFT_SERVER.equals(callingParent))
+                    || (Constants.DEDICATED_SERVER.equals(callingClass) && Constants.MINECRAFT_CLIENT.equals(callingParent))
+                    || (Constants.INTEGRATED_SERVER.equals(callingClass) && Constants.MINECRAFT_CLIENT.equals(callingParent))
+            )
+        ) {
+            throw new IllegalAccessException("Illegal Attempts to re-assign PhaseTracker threads on Sponge");
+        }
+
+        this.sidedThread = new WeakReference<>(thread);
+
+    }
+
+    // ----------------- SIMPLE GETTERS --------------------------------------
+
+    public IPhaseState<?> getCurrentState() {
+        if (Thread.currentThread() != this.getSidedThread()) {
+            throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
+        }
+        return this.stack.peekState();
+    }
+
+    public PhaseContext<?> getPhaseContext() {
+        if (Thread.currentThread() != this.getSidedThread()) {
+            throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
+        }
+        return this.stack.peekContext();
+    }
+
+    @Nullable
+    public Thread getSidedThread() {
+        return this.sidedThread != null ? this.sidedThread.get() : null;
+    }
 
     // ----------------- STATE ACCESS ----------------------------------
 
@@ -331,7 +424,6 @@ public final class PhaseTracker {
 
     }
 
-
     private void checkPhaseContextProcessed(final IPhaseState<?> state, final PhaseContext<?> context) {
         if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && PhasePrinter.printedExceptionsForUnprocessedState.contains(state)) {
             return;
@@ -343,71 +435,6 @@ public final class PhaseTracker {
 
         }
     }
-
-
-    public static Block validateBlockForNeighborNotification(final ServerWorld worldServer, final BlockPos pos, @Nullable Block blockIn,
-        final BlockPos otherPos, final Chunk chunk) {
-        if (blockIn == null) {
-            // If the block is null, check with the PhaseState to see if it can perform a safe way
-            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
-            final PhaseTrackerCategory trackerConfig = SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker();
-
-            if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
-                // Try to save ourselves
-                final TileEntity source = (TileEntity) currentContext.getSource();
-
-                final TileEntityType<?> type = Optional.ofNullable(source)
-                        .map(TileEntity::getType)
-                        .orElse(null);
-                if (type != null) {
-                    ResourceLocation id = TileEntityType.getId(type);
-                    if (id == null) {
-                        id = new ResourceLocation(source.getClass().getCanonicalName());
-                    }
-                    final Map<String, Boolean> autoFixedTiles = trackerConfig.getAutoFixedTiles();
-                    final boolean contained = autoFixedTiles.containsKey(type.toString());
-                    // If we didn't map the tile entity yet, we should apply the mapping
-                    // based on whether the source is the same as the TileEntity.
-                    if (!contained) {
-                        if (pos.equals(source.getPos())) {
-                            autoFixedTiles.put(id.toString(), true);
-                        } else {
-                            autoFixedTiles.put(id.toString(), false);
-                        }
-                    }
-                    final boolean useTile = contained && autoFixedTiles.get(id.toString());
-                    if (useTile) {
-                        blockIn = source.getBlockState().getBlock();
-                    } else {
-                        blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
-                                  ? chunk.getBlockState(pos).getBlock()
-                                  : worldServer.getBlockState(pos).getBlock();
-                    }
-                    if (!contained && trackerConfig.isReportNullSourceBlocks()) {
-                        PhasePrinter.printNullSourceBlockWithTile(pos, blockIn, otherPos, id, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
-                    }
-                } else {
-                    blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
-                              ? chunk.getBlockState(pos).getBlock()
-                              : worldServer.getBlockState(pos).getBlock();
-                    if (trackerConfig.isReportNullSourceBlocks()) {
-                        PhasePrinter.printNullSourceBlockNeighborNotificationWithNoTileSource(pos, blockIn, otherPos,
-                            new NullPointerException("Null Source Block For Neighbor Notification"));
-                    }
-                }
-
-            } else {
-                blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
-                          ? chunk.getBlockState(pos).getBlock()
-                          : worldServer.getBlockState(pos).getBlock();
-                if (trackerConfig.isReportNullSourceBlocks()) {
-                    PhasePrinter.printNullSourceForBlock(worldServer, pos, blockIn, otherPos, new NullPointerException("Null Source Block For Neighbor Notification"));
-                }
-            }
-        }
-        return blockIn;
-    }
-
 
     String dumpStack() {
         if (this.stack.isEmpty()) {
@@ -421,22 +448,6 @@ public final class PhaseTracker {
         printer.print(new PrintStream(stream));
 
         return stream.toString();
-    }
-
-    // ----------------- SIMPLE GETTERS --------------------------------------
-
-    public IPhaseState<?> getCurrentState() {
-        if (Thread.currentThread() != this.getSidedThread()) {
-            throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
-        }
-        return this.stack.peekState();
-    }
-
-    public PhaseContext<?> getPhaseContext() {
-        if (Thread.currentThread() != this.getSidedThread()) {
-            throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
-        }
-        return this.stack.peekContext();
     }
 
     // --------------------- DELEGATED WORLD METHODS -------------------------
@@ -758,7 +769,6 @@ public final class PhaseTracker {
         trackedWorld.bridge$getScheduledBlockChangeList().put(new ScheduledBlockChange(defensiveCopy, pos, newState, flag));
     }
 
-
     /**
      * This is the replacement of {@link net.minecraft.world.World#addEntity(net.minecraft.entity.Entity)}
      * where it captures into phases. The causes and relations are processed by the phases.
@@ -909,24 +919,6 @@ public final class PhaseTracker {
         }
         // Sponge end
 
-        return true;
-    }
-
-    /**
-     * Validates the {@link Entity} being spawned is being spawned on the main server
-     * thread, if it is available. If the entity is NOT being spawned on the main server thread,
-     * well..... a mod (or plugin) is attempting to spawn an entity to the world
-     * <b>off thread</b>. The problem with doing this is that the PhaseTracker is
-     * <b>not</b> thread safe, and capturing entities off thread is always bad.
-     *
-     * @param entity The entity to spawn
-     * @return True if the entity spawn is on the main thread.
-     */
-    public static boolean isEntitySpawnInvalid(final Entity entity) {
-        if (Sponge.isServerAvailable() && (Sponge.getServer().onMainThread() || SpongeCommon.getServer().isServerStopped())) {
-            return false;
-        }
-        PhasePrinter.printAsyncEntitySpawn(entity);
         return true;
     }
 
