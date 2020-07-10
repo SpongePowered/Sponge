@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.GameProfileManager;
@@ -38,8 +37,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.profile.query.GameProfileQuery;
 import org.spongepowered.common.profile.query.NameQuery;
 import org.spongepowered.common.profile.query.UniqueIdQuery;
-import org.spongepowered.common.server.SpongeServer;
-import org.spongepowered.common.util.UsernameCache;
+import org.spongepowered.common.SpongeServer;
 
 import java.util.Collection;
 import java.util.UUID;

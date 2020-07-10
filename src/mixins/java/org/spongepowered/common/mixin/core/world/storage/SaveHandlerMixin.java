@@ -48,7 +48,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
-import org.spongepowered.common.server.SpongeServer;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 

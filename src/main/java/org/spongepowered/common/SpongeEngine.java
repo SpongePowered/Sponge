@@ -22,31 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.common;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
+import org.spongepowered.api.Engine;
+import org.spongepowered.common.inject.SpongeCommonModule;
+import org.spongepowered.common.inject.SpongeGuice;
+import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.plugin.PluginEnvironment;
+import org.spongepowered.plugin.PluginKeys;
 
-import java.nio.file.Path;
 import java.util.List;
 
-public final class ClientLauncher extends VanillaLauncher {
+public interface SpongeEngine extends Engine {
 
-    protected ClientLauncher(final Stage injectionStage) {
-        super(injectionStage);
-    }
+    SpongeLifecycle getLifecycle();
 
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-    }
+    List<Module> createInjectionModules();
 
-    @Override
-    public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-        this.getLogger().info("Loading Minecraft Client, please wait...");
-        Main.main(args);
+    default void setupInjection() {
+        final Stage stage = SpongeGuice.getInjectorStage(Launcher.getInstance().getInjectionStage());
+        SpongeCommon.getLogger().debug("Creating injector in stage '{}'", stage);
+        final List<Module> modules = Lists.newArrayList(
+            new SpongeModule(),
+            new SpongeCommonModule()
+        );
+        modules.addAll(this.createInjectionModules());
+        final Injector injector = Guice.createInjector(stage, modules);
+        final PluginEnvironment environment = Launcher.getInstance().getPluginEnvironment();
+        environment.getBlackboard().getOrCreate(PluginKeys.PARENT_INJECTOR, () -> injector);
     }
 }

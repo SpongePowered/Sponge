@@ -28,10 +28,15 @@ import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.event.lifecycle.StartedEngineEventImpl;
 import org.spongepowered.common.event.lifecycle.StartingEngineEventImpl;
+import org.spongepowered.common.event.lifecycle.StoppingEngineEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public final class VanillaLifecycle extends SpongeLifecycle {
 
@@ -40,30 +45,40 @@ public final class VanillaLifecycle extends SpongeLifecycle {
     }
 
     public void registerPluginListeners() {
-        for (final PluginContainer plugin : this.engine.getGame().getPluginManager().getPlugins()) {
-            if (plugin instanceof DummyPluginContainer) {
-                continue;
-            }
+        for (final PluginContainer plugin : this.filterInternalPlugins(this.engine.getGame().getPluginManager().getPlugins())) {
             this.engine.getGame().getEventManager().registerListeners(plugin, plugin.getInstance());
         }
     }
 
+    // Methods are in order of the SpongeCommon lifecycle
+
     public void callConstructEvent() {
-        for (final PluginContainer plugin : this.engine.getGame().getPluginManager().getPlugins()) {
-            if (plugin instanceof DummyPluginContainer) {
-                continue;
-            }
+        for (final PluginContainer plugin : this.filterInternalPlugins(this.engine.getGame().getPluginManager().getPlugins())) {
             this.engine.getGame().getEventManager().post(SpongeEventFactory.createConstructPluginEvent(this.engine.getCauseStackManager()
                 .getCurrentCause(), this.engine.getGame(), plugin));
         }
     }
 
     public void callStartingEngineEvent() {
-        for (final PluginContainer plugin : this.engine.getGame().getPluginManager().getPlugins()) {
-            if (plugin instanceof DummyPluginContainer) {
-                continue;
-            }
-            this.engine.getGame().getEventManager().post(new StartingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), (TypeToken<Engine>) TypeToken.of(this.engine.getClass()), this.engine.getGame(), this.engine));
-        }
+        this.engine.getGame().getEventManager().post(new StartingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), (TypeToken<Engine>) TypeToken.of(this.engine.getClass()), this.engine.getGame(), this.engine));
+    }
+
+    public void callStartedEngineEvent() {
+        this.engine.getGame().getEventManager().post(new StartedEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), (TypeToken<Engine>) TypeToken.of(this.engine.getClass()), this.engine.getGame(), this.engine));
+    }
+
+    public void callLoadedGameEvent() {
+        this.engine.getGame().getEventManager().post(SpongeEventFactory.createLoadedGameEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), this.engine.getGame()));
+    }
+
+    public void callStoppingEngineEvent() {
+        this.engine.getGame().getEventManager().post(new StoppingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), (TypeToken<Engine>) TypeToken.of(this.engine.getClass()), this.engine.getGame(), this.engine));
+    }
+
+    private Collection<PluginContainer> filterInternalPlugins(final Collection<PluginContainer> plugins) {
+        return plugins
+            .stream()
+            .filter(plugin -> !(plugin instanceof DummyPluginContainer))
+            .collect(Collectors.toList());
     }
 }

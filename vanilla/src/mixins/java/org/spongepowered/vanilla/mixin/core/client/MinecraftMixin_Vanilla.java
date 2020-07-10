@@ -24,9 +24,12 @@
  */
 package org.spongepowered.vanilla.mixin.core.client;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Module;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import net.minecraft.client.GameConfiguration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerProfileCache;
@@ -36,7 +39,6 @@ import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.chunk.listener.TrackingChunkStatusListener;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import org.spongepowered.api.Engine;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,29 +51,36 @@ import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.vanilla.VanillaLifecycle;
+import org.spongepowered.vanilla.inject.SpongeVanillaModule;
+import org.spongepowered.vanilla.inject.client.VanillaClientModule;
 import org.spongepowered.vanilla.launch.ClientLauncher;
-import org.spongepowered.vanilla.launch.VanillaClient;
+import org.spongepowered.vanilla.client.VanillaClient;
 
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin_Vanilla {
+public abstract class MinecraftMixin_Vanilla implements VanillaClient {
 
     @Shadow @Nullable private IntegratedServer integratedServer;
     @Shadow @Final private Thread thread;
     @Shadow @Final private AtomicReference<TrackingChunkStatusListener> field_213277_ad;
     @Shadow @Final private Queue<Runnable> field_213275_aU;
 
-    private VanillaLifecycle vanilla$lifeCycle;
+    private VanillaLifecycle vanilla$lifecycle;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void vanilla$setupSpongeFields(GameConfiguration gameConfig, CallbackInfo ci) {
+        this.vanilla$lifecycle = new VanillaLifecycle(this);
+    }
 
     @Inject(method = "run", at = @At("HEAD"))
     private void vanilla$prepareGameAndLoadPlugins(CallbackInfo ci) {
-        final ClientLauncher launcher = Launcher.getInstance();
-        launcher.setupInjection((VanillaClient) this);
-        launcher.loadPlugins((VanillaClient) this);
+        this.setupInjection();
+        ((ClientLauncher) Launcher.getInstance()).loadPlugins();
 
         try {
             PhaseTracker.CLIENT.setThread(this.thread);
@@ -79,15 +88,14 @@ public abstract class MinecraftMixin_Vanilla {
             throw new RuntimeException("Could not initialize the client PhaseTracker!");
         }
 
-        this.vanilla$lifeCycle = new VanillaLifecycle((Engine) this);
-        this.vanilla$lifeCycle.establishFactories();
-        this.vanilla$lifeCycle.initTimings();
-        this.vanilla$lifeCycle.registerPluginListeners();
-        this.vanilla$lifeCycle.callConstructEvent();
-        this.vanilla$lifeCycle.establishServices();
+        this.vanilla$lifecycle.establishFactories();
+        this.vanilla$lifecycle.initTimings();
+        this.vanilla$lifecycle.registerPluginListeners();
+        this.vanilla$lifecycle.callConstructEvent();
+        this.vanilla$lifecycle.establishServices();
 
         // TODO Evaluate exactly where we want to call this
-        this.vanilla$lifeCycle.callStartingEngineEvent();
+        this.vanilla$lifecycle.callStartingEngineEvent();
     }
 
     @Inject(method = "launchIntegratedServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;<init>(Lcom/mojang/authlib/GameProfileRepository;Ljava/io/File;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
@@ -108,5 +116,18 @@ public abstract class MinecraftMixin_Vanilla {
         GameProfileRepository p_i50895_7_, PlayerProfileCache p_i50895_8_, IChunkStatusListenerFactory p_i50895_9_) {
         ((MinecraftServerAccessor) this.integratedServer).accessor$setProfileCache(p_i50895_8_);
         return this.integratedServer;
+    }
+
+    @Override
+    public List<Module> createInjectionModules() {
+        return Lists.newArrayList(
+            new SpongeVanillaModule(),
+            new VanillaClientModule(this)
+        );
+    }
+
+    @Override
+    public VanillaLifecycle getLifecycle() {
+        return this.vanilla$lifecycle;
     }
 }

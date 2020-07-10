@@ -24,19 +24,10 @@
  */
 package org.spongepowered.vanilla.launch;
 
-import com.google.common.collect.Lists;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
 import com.google.inject.Stage;
-import org.spongepowered.common.inject.SpongeCommonModule;
-import org.spongepowered.common.inject.SpongeGuice;
-import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
 import org.spongepowered.vanilla.launch.plugin.PluginLoader;
@@ -45,9 +36,8 @@ import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 
-public abstract class VanillaLauncher<E extends VanillaEngine> extends Launcher {
+public abstract class VanillaLauncher extends Launcher {
 
     private final Stage injectionStage;
     private PluginContainer vanillaPlugin;
@@ -57,20 +47,7 @@ public abstract class VanillaLauncher<E extends VanillaEngine> extends Launcher 
         this.injectionStage = injectionStage;
     }
 
-    public final void setupInjection(E engine) {
-        final Stage stage = SpongeGuice.getInjectorStage(this.getInjectionStage());
-        this.getLogger().debug("Creating injector in stage '{}'", stage);
-        final List<Module> modules = Lists.newArrayList(
-            new SpongeModule(),
-            new SpongeCommonModule()
-        );
-        modules.addAll(engine.createInjectionModules());
-        final Injector injector = Guice.createInjector(stage, modules);
-        final PluginEnvironment environment = this.getPluginEnvironment();
-        environment.getBlackboard().getOrCreate(PluginKeys.PARENT_INJECTOR, () -> injector);
-    }
-
-    public void loadPlugins(E engine) {
+    public void loadPlugins() {
         final PluginLoader pluginLoader = new PluginLoader(this.getPluginEnvironment(), this.getPluginManager());
         pluginLoader.discoverLanguageServices();
         pluginLoader.initialize();

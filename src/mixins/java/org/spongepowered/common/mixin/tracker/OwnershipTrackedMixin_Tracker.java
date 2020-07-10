@@ -34,15 +34,13 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.user.UserManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.OwnershipTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
-import org.spongepowered.common.server.SpongeServer;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.UsernameCache;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;

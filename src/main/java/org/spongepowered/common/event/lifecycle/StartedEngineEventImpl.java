@@ -22,10 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.common.event.lifecycle;
 
-import org.spongepowered.api.Client;
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.Engine;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
+import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 
-public interface VanillaClient extends VanillaEngine, Client {
+public final class StartedEngineEventImpl<E extends Engine> implements StartedEngineEvent<E> {
 
+    private final Cause cause;
+    private final TypeToken<E> genericType;
+    private final E engine;
+    private final Game game;
+
+    public StartedEngineEventImpl(final Cause cause, final TypeToken<E> genericType, final Game game, final E engine) {
+        this.cause = cause;
+        this.genericType = genericType;
+        this.game = game;
+        this.engine = engine;
+    }
+
+    @Override
+    public E getEngine() {
+        return this.engine;
+    }
+
+    @Override
+    public TypeToken<E> getGenericType() {
+        return this.genericType;
+    }
+
+    @Override
+    public Game getGame() {
+        return this.game;
+    }
+
+    @Override
+    public Cause getCause() {
+        return this.cause;
+    }
 }

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.vanilla.mixin.api.client;
 
-import com.google.common.collect.Lists;
-import com.google.inject.Module;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -42,11 +40,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.scheduler.ClientScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
-import org.spongepowered.vanilla.inject.SpongeVanillaModule;
-import org.spongepowered.vanilla.inject.client.VanillaClientModule;
-import org.spongepowered.vanilla.launch.VanillaClient;
+import org.spongepowered.vanilla.client.VanillaClient;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -97,13 +92,5 @@ public abstract class MinecraftMixin_Vanilla_API extends RecursiveEventLoop<Runn
     @Override
     public boolean onMainThread() {
         return this.isOnExecutionThread();
-    }
-
-    @Override
-    public List<Module> createInjectionModules() {
-        return Lists.newArrayList(
-            new SpongeVanillaModule(),
-            new VanillaClientModule(this)
-        );
     }
 }

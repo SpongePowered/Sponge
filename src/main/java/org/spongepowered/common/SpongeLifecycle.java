@@ -25,15 +25,8 @@
 package org.spongepowered.common;
 
 import org.spongepowered.api.Engine;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.registry.GameRegistry;
-import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.common.registry.SpongeFactoryRegistry;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
-import org.spongepowered.common.server.SpongeServer;
 import org.spongepowered.common.service.SpongeServiceProvider;
 
 public abstract class SpongeLifecycle {

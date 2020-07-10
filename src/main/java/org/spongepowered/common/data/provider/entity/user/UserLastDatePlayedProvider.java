@@ -30,7 +30,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.server.SpongeServer;
+import org.spongepowered.common.SpongeServer;
 
 import java.time.Instant;
 import java.util.Optional;

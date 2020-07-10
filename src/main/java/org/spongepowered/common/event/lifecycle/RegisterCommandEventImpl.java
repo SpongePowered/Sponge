@@ -22,14 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.common.event.lifecycle;
 
-import com.google.inject.Module;
-import org.spongepowered.api.Engine;
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 
-import java.util.List;
+public final class RegisterCommandEventImpl<C extends CommandRegistrar<?>> implements RegisterCommandEvent<C> {
 
-public interface VanillaEngine extends Engine {
+    private final Cause cause;
+    private final Game game;
+    private final TypeToken<C> token;
+    private final C registrar;
 
-    List<Module> createInjectionModules();
+    public RegisterCommandEventImpl(Cause cause, Game game, TypeToken<C> token, C registrar) {
+        this.cause = cause;
+        this.game = game;
+        this.token = token;
+        this.registrar = registrar;
+    }
+
+    @Override
+    public Cause getCause() {
+        return this.cause;
+    }
+
+    @Override
+    public Game getGame() {
+        return this.game;
+    }
+
+    @Override
+    public TypeToken<C> getGenericType() {
+        return this.token;
+    }
+
+    @Override
+    public C getRegistrar() {
+        return this.registrar;
+    }
 }

@@ -31,7 +31,7 @@ import org.spongepowered.common.launch.Launcher;
 import java.nio.file.Path;
 import java.util.List;
 
-public final class ServerLauncher extends VanillaLauncher<VanillaServer> {
+public final class ServerLauncher extends VanillaLauncher {
 
     protected ServerLauncher(final Stage injectionStage) {
         super(injectionStage);

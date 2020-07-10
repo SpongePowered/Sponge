@@ -31,13 +31,12 @@ import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.server.SpongeServer;
+import org.spongepowered.common.SpongeServer;
 
 import java.util.Date;
 import java.util.Deque;

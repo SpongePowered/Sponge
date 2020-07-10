@@ -22,15 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.server;
+package org.spongepowered.vanilla;
 
-import org.spongepowered.api.Server;
-import org.spongepowered.common.util.UsernameCache;
-import org.spongepowered.common.world.storage.SpongePlayerDataManager;
+import org.spongepowered.common.SpongeEngine;
 
-public interface SpongeServer extends Server {
+public interface VanillaEngine extends SpongeEngine {
 
-    SpongePlayerDataManager getPlayerDataManager();
-
-    UsernameCache getUsernameCache();
+    @Override
+    VanillaLifecycle getLifecycle();
 }

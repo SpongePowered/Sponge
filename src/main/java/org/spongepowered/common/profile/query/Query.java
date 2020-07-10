@@ -29,8 +29,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.ProfileNotFoundException;
-import org.spongepowered.common.server.SpongeServer;
-import org.spongepowered.common.util.UsernameCache;
+import org.spongepowered.common.SpongeServer;
 
 import java.time.Instant;
 import java.util.Collection;
