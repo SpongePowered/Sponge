@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPhaseState<C> {
 
@@ -59,7 +59,7 @@ public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPh
         if (peek != null) {
             if (tracker == PhaseTracker.SERVER) {
                 this.serverCached = peek;
-            } else if (tracker == PhaseTracker.SERVER) {
+            } else if (tracker == PhaseTracker.CLIENT) {
                 this.clientCached = peek;
             }
             return peek;
