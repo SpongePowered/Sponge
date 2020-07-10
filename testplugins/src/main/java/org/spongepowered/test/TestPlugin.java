@@ -33,6 +33,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
+import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -67,5 +68,10 @@ public final class TestPlugin {
     @Listener
     public void onStartingClient(final StartingEngineEvent<Client> event) {
         this.logger.info("Starting engine '{}'", event.getEngine());
+    }
+
+    @Listener
+    public void onStoppingServer(final StoppingEngineEvent<Server> event) {
+        this.logger.info("Stopping engine '{}'", event.getEngine());
     }
 }

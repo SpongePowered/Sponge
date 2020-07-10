@@ -47,7 +47,7 @@ import java.net.Proxy;
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer implements VanillaServer {
 
-    private VanillaLifecycle vanilla$lifeCycle;
+    private VanillaLifecycle vanilla$lifecycle;
 
     public DedicatedServerMixin_Vanilla(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn,
         Commands p_i50590_4_, YggdrasilAuthenticationService p_i50590_5_,
@@ -62,25 +62,25 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
         YggdrasilAuthenticationService p_i50720_4_, MinecraftSessionService p_i50720_5_, GameProfileRepository p_i50720_6_,
         PlayerProfileCache p_i50720_7_, IChunkStatusListenerFactory p_i50720_8_, String p_i50720_9_, CallbackInfo ci) {
 
-        this.vanilla$lifeCycle = new VanillaLifecycle(this);
+        this.vanilla$lifecycle = new VanillaLifecycle(this);
     }
 
     @Override
     public void run() {
-        this.vanilla$lifeCycle.establishFactories();
-        this.vanilla$lifeCycle.establishBuilders();
-        this.vanilla$lifeCycle.initTimings();
-        this.vanilla$lifeCycle.registerPluginListeners();
-        this.vanilla$lifeCycle.callConstructEvent();
-        this.vanilla$lifeCycle.establishServices();
-        this.vanilla$lifeCycle.establishServerFeatures();
+        this.vanilla$lifecycle.establishFactories();
+        this.vanilla$lifecycle.establishBuilders();
+        this.vanilla$lifecycle.initTimings();
+        this.vanilla$lifecycle.registerPluginListeners();
+        this.vanilla$lifecycle.callConstructEvent();
+        this.vanilla$lifecycle.establishServices();
+        this.vanilla$lifecycle.establishServerFeatures();
         // TODO Evaluate exactly where we want to call this
-        this.vanilla$lifeCycle.callStartingEngineEvent();
+        this.vanilla$lifecycle.callStartingEngineEvent();
         super.run();
     }
 
     @Override
     public VanillaLifecycle getLifecycle() {
-        return this.vanilla$lifeCycle;
+        return this.vanilla$lifecycle;
     }
 }
