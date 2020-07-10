@@ -115,7 +115,7 @@ public final class SpongeCauseStackManager implements CauseStackManager {
             throw new IllegalStateException(String.format(
                 "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                 ThreadUtil.getDescription(Thread.currentThread()),
-                ThreadUtil.getDescription(((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$getServerThread())
+                ThreadUtil.getDescription(SpongeCommon.getServer().getExecutionThread())
             ));
         }
         this.checkProviders();
