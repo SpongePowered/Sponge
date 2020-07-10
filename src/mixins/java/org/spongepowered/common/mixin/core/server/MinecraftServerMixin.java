@@ -101,7 +101,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     @Inject(method = "startServerThread", at = @At("HEAD"))
-    private void vanilla$prepareServerPhaseTracker(CallbackInfo ci) {
+    private void impl$prepareServerPhaseTracker(CallbackInfo ci) {
         try {
             PhaseTracker.SERVER.setThread(this.serverThread);
         } catch (IllegalAccessException e) {

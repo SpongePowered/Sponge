@@ -25,6 +25,7 @@
 package org.spongepowered.test;
 
 import com.google.inject.Inject;
+import com.google.inject.internal.asm.$ByteVector;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
@@ -42,6 +43,6 @@ public final class TestPlugin {
 
     @Listener
     public void onConstruct(final ConstructPluginEvent event) {
-        this.logger.info(event);
+        this.logger.info("Constructed: '{}'", event.getPlugin().toString());
     }
 }

@@ -42,7 +42,6 @@ public abstract class DedicatedServerMixin_API extends MinecraftServerMixin_API 
 
     @Shadow public abstract String shadow$getHostname();
     @Shadow public abstract int shadow$getPort();
-    @Shadow public abstract boolean shadow$isDedicatedServer();
 
     public DedicatedServerMixin_API(String name) {
         super(name);

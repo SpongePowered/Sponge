@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.player;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Preconditions;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
@@ -40,7 +37,6 @@ import net.minecraft.network.play.server.SSendResourcePackPacket;
 import net.minecraft.network.play.server.SStopSoundPacket;
 import net.minecraft.network.play.server.SWorldBorderPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -101,13 +97,13 @@ import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.SpongeServer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -128,15 +124,13 @@ import javax.annotation.Nullable;
 public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API implements ServerPlayer {
 
     @Shadow @Final public MinecraftServer server;
-    @Shadow @Final public PlayerInteractionManager interactionManager;
     @Shadow @Final private PlayerAdvancements advancements;
+    @Shadow private net.minecraft.entity.player.ChatVisibility chatVisibility;
     @Shadow private String language;
     @Shadow public ServerPlayNetHandler connection;
-    @Shadow private net.minecraft.entity.player.ChatVisibility chatVisibility = net.minecraft.entity.player.ChatVisibility.FULL;
     @Shadow private boolean chatColours;
 
-    private boolean api$sleepingIgnored;
-    private TabList api$tabList = new SpongeTabList((ServerPlayerEntity) (Object) this);
+    private final TabList api$tabList = new SpongeTabList((ServerPlayerEntity) (Object) this);
     @Nullable private WorldBorder api$worldBorder;
 
     @Override
@@ -145,9 +139,9 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
             // Don't bother sending messages to fake players
             return;
         }
-        checkNotNull(particleEffect, "The particle effect cannot be null!");
-        checkNotNull(position, "The position cannot be null");
-        checkArgument(radius > 0, "The radius has to be greater then zero!");
+        Preconditions.checkNotNull(particleEffect, "The particle effect cannot be null!");
+        Preconditions.checkNotNull(position, "The position cannot be null");
+        Preconditions.checkArgument(radius > 0, "The radius has to be greater then zero!");
 
         final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
 
@@ -196,8 +190,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
             // Don't bother sending messages to fake players
             return;
         }
-        checkNotNull(type, "type");
-        checkNotNull(message, "message");
+        Preconditions.checkNotNull(type, "type");
+        Preconditions.checkNotNull(message, "message");
 
         ITextComponent component = SpongeTexts.toComponent(message);
         if (type == ChatTypes.ACTION_BAR.get()) {
@@ -321,17 +315,17 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void stopSounds(final SoundType sound) {
-        this.stopSounds0(checkNotNull(sound, "sound"), null);
+        this.stopSounds0(Preconditions.checkNotNull(sound, "sound"), null);
     }
 
     @Override
     public void stopSounds(final SoundCategory category) {
-        this.stopSounds0(null, checkNotNull(category, "category"));
+        this.stopSounds0(null, Preconditions.checkNotNull(category, "category"));
     }
 
     @Override
     public void stopSounds(final SoundType sound, final SoundCategory category) {
-        this.stopSounds0(checkNotNull(sound, "sound"), checkNotNull(category, "category"));
+        this.stopSounds0(Preconditions.checkNotNull(sound, "sound"), Preconditions.checkNotNull(category, "category"));
     }
 
     private void stopSounds0(@Nullable final SoundType sound, @Nullable final SoundCategory category) {
@@ -340,7 +334,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void playMusicDisc(final Vector3i position, final MusicDisc recordType) {
-        this.playRecord0(position, checkNotNull(recordType, "recordType"));
+        this.playRecord0(position, Preconditions.checkNotNull(recordType, "recordType"));
     }
 
     @Override
@@ -388,13 +382,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void sendBlockChange(final int x, final int y, final int z, final BlockState state) {
-        checkNotNull(state, "state");
+        Preconditions.checkNotNull(state, "state");
         this.sendBlockChange(new BlockPos(x, y, z), (net.minecraft.block.BlockState) state);
     }
 
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
-        final SChangeBlockPacket packet = new SChangeBlockPacket(this.world, new BlockPos(x, y, z));
+        final SChangeBlockPacket packet = new SChangeBlockPacket(this.shadow$getEntityWorld(), new BlockPos(x, y, z));
         this.connection.sendPacket(packet);
     }
 
@@ -409,7 +403,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public MessageChannelEvent.Chat simulateChat(final Text message, final Cause cause) {
-        checkNotNull(message, "message");
+        Preconditions.checkNotNull(message, "message");
 
         final TranslationTextComponent component = new TranslationTextComponent("chat.type.text", SpongeTexts.toComponent(((EntityBridge) this).bridge$getDisplayNameText()),
                 SpongeTexts.toComponent(message));
@@ -439,8 +433,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public AdvancementProgress getProgress(final Advancement advancement) {
-        checkNotNull(advancement, "advancement");
-        checkState(((AdvancementBridge) advancement).bridge$isRegistered(), "The advancement must be registered");
+        Preconditions.checkNotNull(advancement, "advancement");
+        Preconditions.checkState(((AdvancementBridge) advancement).bridge$isRegistered(), "The advancement must be registered");
         return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
     }
 
@@ -449,13 +443,12 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         return ((PlayerAdvancementsBridge) this.advancements).bridge$getAdvancementTrees();
     }
 
-    // TODO remove cause from API call?
     @Override
-    public void setWorldBorder(@Nullable WorldBorder border, Cause cause) {
+    public void setWorldBorder(@Nullable WorldBorder border) {
         if (this.api$worldBorder == border) {
             return; //do not fire an event since nothing would have changed
         }
-        if (!SpongeCommon.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause,
+        if (!SpongeCommon.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 Optional.ofNullable(this.api$worldBorder), this, Optional.ofNullable(border)))) {
             if (this.api$worldBorder != null) { //is the world border about to be unset?
                 ((WorldBorderAccessor) this.api$worldBorder).accessor$getListeners().remove(
@@ -470,7 +463,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
                                 SWorldBorderPacket.Action.INITIALIZE));
             } else { //unset the border if null
                 this.connection.sendPacket(
-                        new SWorldBorderPacket(this.world.getWorldBorder(), SWorldBorderPacket.Action.INITIALIZE));
+                        new SWorldBorderPacket(this.shadow$getEntityWorld().getWorldBorder(), SWorldBorderPacket.Action.INITIALIZE));
             }
         }
     }

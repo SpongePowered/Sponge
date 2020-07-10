@@ -33,6 +33,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
@@ -54,6 +55,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
@@ -204,13 +206,22 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
 
     @Override
     public void bridge$updatePlayersForDifficulty() {
-        Sponge.getServer().getWorldManager().getWorlds()
-            .stream()
-            .map(world -> (ServerWorld) world)
-            .filter(world -> world.getWorldInfo() == (WorldInfo) (Object) this)
-            .flatMap(world -> world.getPlayers().stream())
-            .forEach(player -> player.connection.sendPacket(new SServerDifficultyPacket(this.difficulty, ((WorldInfo) (Object) this)
-                .isDifficultyLocked())));
+        ServerWorld serverWorld = null;
+        for (final org.spongepowered.api.world.server.ServerWorld world : Sponge.getServer().getWorldManager().getWorlds()) {
+            final World mcWorld = (World) world;
+            if (!((WorldBridge) mcWorld).bridge$isFake() && mcWorld.getWorldInfo() == (Object) this) {
+                serverWorld = (ServerWorld) world;
+                break;
+            }
+        }
+
+        if (serverWorld == null) {
+            return;
+        }
+
+        serverWorld
+            .getPlayers()
+            .forEach(player -> player.connection.sendPacket(new SServerDifficultyPacket(this.difficulty, ((WorldInfo) (Object) this).isDifficultyLocked())));
     }
 
     @Override

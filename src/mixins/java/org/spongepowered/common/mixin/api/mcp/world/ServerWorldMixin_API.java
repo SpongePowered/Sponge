@@ -66,11 +66,13 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.util.ChunkUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -102,6 +104,16 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Shadow @Final private ServerTickList<Block> pendingBlockTicks;
     @Shadow @Final private ServerTickList<Fluid> pendingFluidTicks;
+
+    // World
+    @Override
+    public boolean isLoaded() {
+        final ServerWorld world = ((SpongeWorldManager) ((Server) this.shadow$getServer()).getWorldManager()).getWorld(this.shadow$getDimension().getType());
+        if (world == null || ((WorldBridge) world).bridge$isFake()) {
+            return false;
+        }
+        return world == (Object) this;
+    }
 
     // LocationCreator
 

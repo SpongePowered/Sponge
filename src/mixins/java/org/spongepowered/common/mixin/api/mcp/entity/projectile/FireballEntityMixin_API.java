@@ -42,9 +42,10 @@ public abstract class FireballEntityMixin_API extends AbstractFireballEntityMixi
 
     @Override
     public void detonate() {
-        final boolean flag = this.world.getGameRules().getBoolean(GameRules.MOB_GRIEFING);
+        final boolean flag = this.shadow$getEntityWorld().getGameRules().getBoolean(GameRules.MOB_GRIEFING);
         final Explosion.Mode mode = flag ? Explosion.Mode.DESTROY : Explosion.Mode.NONE;
-        ((FireballEntityBridge) this).bridge$throwExplosionEventAndExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, flag, mode);
+        ((FireballEntityBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getEntityWorld(), null, this.posX, this.posY, this.posZ, this.explosionPower,
+            flag, mode);
         this.shadow$remove();
     }
 

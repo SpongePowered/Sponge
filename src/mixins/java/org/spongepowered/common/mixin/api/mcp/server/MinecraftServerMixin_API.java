@@ -71,6 +71,7 @@ import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.server.SpongeServer;
+import org.spongepowered.common.service.user.SpongeUserManager;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.UsernameCache;
 import org.spongepowered.common.world.server.SpongeWorldManager;
@@ -106,6 +107,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     private MessageChannel api$broadcastChannel;
     private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
+    private SpongeUserManager api$userManager;
 
     public MinecraftServerMixin_API(String name) {
         super(name);
@@ -120,6 +122,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$profileManager = new SpongeGameProfileManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
+        this.api$userManager = new SpongeUserManager(this);
     }
 
     @Override
@@ -163,7 +166,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public UserManager getUserManager() {
-        return null;
+        return this.api$userManager;
     }
 
     @Override public TeleportHelper getTeleportHelper() {

@@ -54,6 +54,7 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
@@ -139,11 +140,6 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     private Context impl$context;
 
     // World
-
-    @Override
-    public boolean isLoaded() {
-        return ((SpongeWorldManager) ((Server) this.shadow$getServer()).getWorldManager()).getWorld(this.shadow$getDimension().getType()) == (Object) this;
-    }
 
     @Override
     public Optional<? extends Player> getClosestPlayer(int x, int y, int z, double distance, Predicate<? super Player> predicate) {

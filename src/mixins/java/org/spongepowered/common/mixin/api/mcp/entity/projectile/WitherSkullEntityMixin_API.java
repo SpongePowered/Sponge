@@ -39,8 +39,9 @@ public abstract class WitherSkullEntityMixin_API extends DamagingProjectileEntit
 
     @Override
     public void detonate() {
-        final Explosion.Mode mode = this.world.getGameRules().getBoolean(GameRules.MOB_GRIEFING) ? Explosion.Mode.DESTROY : Explosion.Mode.NONE;
-        ((WitherSkullEntityBridge) this).bridge$CreateAndProcessExplosionEvent(this.world, (WitherSkullEntity) (Object) this, this.posX, this.posY, this.posZ, 1.0F, false, mode);
+        final Explosion.Mode mode = this.shadow$getEntityWorld().getGameRules().getBoolean(GameRules.MOB_GRIEFING) ? Explosion.Mode.DESTROY : Explosion.Mode.NONE;
+        ((WitherSkullEntityBridge) this).bridge$CreateAndProcessExplosionEvent(this.shadow$getEntityWorld(), (WitherSkullEntity) (Object) this, this.posX, this.posY,
+            this.posZ, 1.0F, false, mode);
         this.shadow$remove();
     }
 
