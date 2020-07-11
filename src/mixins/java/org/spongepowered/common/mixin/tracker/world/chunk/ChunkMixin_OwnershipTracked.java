@@ -45,7 +45,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -94,15 +94,15 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
         //       include blockstate.
         final TileEntity tileEntity = this.shadow$getTileEntityMap().get(pos);
         if (tileEntity != null) {
-            if (tileEntity instanceof OwnershipTrackedBridge) {
-                final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) tileEntity;
+            if (tileEntity instanceof CreatorTrackedBridge) {
+                final CreatorTrackedBridge ownerBridge = (CreatorTrackedBridge) tileEntity;
                 if (type == PlayerTracker.Type.NOTIFIER) {
                     if (ownerBridge.tracked$getNotifierReference().orElse(null) == user) {
                         return;
                     }
                     ownerBridge.tracked$setNotifier(user);
                 } else {
-                    if (ownerBridge.tracked$getOwnerReference().orElse(null) == user) {
+                    if (ownerBridge.tracked$getCreatorReference().orElse(null) == user) {
                         return;
                     }
                     ownerBridge.tracked$setOwnerReference(user);
@@ -161,7 +161,7 @@ public abstract class ChunkMixin_OwnershipTracked implements ChunkBridge {
     }
 
     @Override
-    public Optional<User> bridge$getBlockOwner(final BlockPos pos) {
+    public Optional<User> bridge$getBlockCreator(final BlockPos pos) {
         if (((WorldBridge) this.shadow$getWorld()).bridge$isFake()) {
             return Optional.empty();
         }

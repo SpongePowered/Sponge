@@ -48,7 +48,7 @@ import java.util.UUID;
  * used, but none of the owner/notifier information is persisted
  * or transferred to the target objects.
  */
-public interface OwnershipTrackedBridge {
+public interface CreatorTrackedBridge {
 
     Optional<UUID> tracked$getOwnerUUID();
 
@@ -56,7 +56,7 @@ public interface OwnershipTrackedBridge {
 
     Optional<User> tracked$getTrackedUser(PlayerTracker.Type type);
 
-    Optional<User> tracked$getOwnerReference();
+    Optional<User> tracked$getCreatorReference();
 
     void tracked$setOwnerReference(@Nullable User user);
 

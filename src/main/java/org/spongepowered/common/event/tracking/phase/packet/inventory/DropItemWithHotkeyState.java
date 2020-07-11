@@ -47,7 +47,7 @@ import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
@@ -156,8 +156,8 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
         try (final StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             for (final Entity currentEntity : capturedEntities) {
-                if (currentEntity instanceof OwnershipTrackedBridge) {
-                    ((OwnershipTrackedBridge) currentEntity).tracked$setOwnerReference(((ServerPlayer) playerMP).getUser());
+                if (currentEntity instanceof CreatorTrackedBridge) {
+                    ((CreatorTrackedBridge) currentEntity).tracked$setOwnerReference(((ServerPlayer) playerMP).getUser());
                 } else {
                     currentEntity.offer(Keys.CREATOR, playerMP.getUniqueID());
                 }

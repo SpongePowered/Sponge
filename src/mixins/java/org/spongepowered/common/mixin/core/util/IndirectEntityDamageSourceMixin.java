@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 
 import javax.annotation.Nullable;
 
@@ -51,8 +51,8 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(final CallbackInfo callbackInfo) {
         if (!(this.indirectEntity instanceof User) && this.damageSourceEntity != null) { // sources can be null
-            this.impl$owner = this.shadow$getTrueSource() instanceof OwnershipTrackedBridge
-                         ? ((OwnershipTrackedBridge) this.shadow$getTrueSource()).tracked$getOwnerReference().orElse(null)
+            this.impl$owner = this.shadow$getTrueSource() instanceof CreatorTrackedBridge
+                         ? ((CreatorTrackedBridge) this.shadow$getTrueSource()).tracked$getCreatorReference().orElse(null)
                          : null;
             if (this.indirectEntity == null && this.impl$owner instanceof Entity) {
                 this.indirectEntity = (Entity) this.impl$owner;

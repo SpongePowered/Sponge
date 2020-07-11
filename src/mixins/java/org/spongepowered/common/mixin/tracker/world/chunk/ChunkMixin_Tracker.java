@@ -50,7 +50,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -334,7 +334,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
                 // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world);
                 newTileEntity = SpongeImplHooks.createTileEntity(newState, this.world);
                 if (!isFake) { // Surround with a server check
-                    final User owner = peek.getOwner().orElse(null);
+                    final User owner = peek.getCreator().orElse(null);
                     // If current owner exists, transfer it to newly created TE pos
                     // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
                     if (owner != null) {
@@ -432,8 +432,8 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk((ChunkBridge) this);
         // Make sure to set owner/notifier for TE if any chunk data exists
         // Failure to do this during chunk load will cause TE's to not have proper user tracking
-        ((OwnershipTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, ((ChunkBridge) this).bridge$getBlockNotifierUUID(pos).orElse(null));
-        ((OwnershipTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.OWNER, ((ChunkBridge) this).bridge$getBlockOwnerUUID(pos).orElse(null));
+        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, ((ChunkBridge) this).bridge$getBlockNotifierUUID(pos).orElse(null));
+        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.OWNER, ((ChunkBridge) this).bridge$getBlockOwnerUUID(pos).orElse(null));
     }
 
 

@@ -30,11 +30,14 @@ import org.spongepowered.api.Client;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.service.whitelist.WhitelistService;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.plugin.jvm.Plugin;
 
 @Plugin("test")

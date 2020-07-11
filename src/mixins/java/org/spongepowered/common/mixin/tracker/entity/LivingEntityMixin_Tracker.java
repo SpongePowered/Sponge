@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
@@ -237,9 +237,9 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
             final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext(PhaseTracker.SERVER)
                     .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
                     .source(this);
-            if (this instanceof OwnershipTrackedBridge) {
-                ((OwnershipTrackedBridge) this).tracked$getNotifierReference().ifPresent(context::notifier);
-                ((OwnershipTrackedBridge) this).tracked$getOwnerReference().ifPresent(context::owner);
+            if (this instanceof CreatorTrackedBridge) {
+                ((CreatorTrackedBridge) this).tracked$getNotifierReference().ifPresent(context::notifier);
+                ((CreatorTrackedBridge) this).tracked$getCreatorReference().ifPresent(context::owner);
             }
             return context;
         }

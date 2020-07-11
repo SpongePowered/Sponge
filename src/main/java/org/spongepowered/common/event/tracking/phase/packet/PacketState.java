@@ -186,8 +186,8 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SPAWN_TYPE, this.getEntitySpawnType(context));
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayer)player).getUser());
             frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayer)player).getUser());
-            frame.addContext(EventContextKeys.OWNER, ((ServerPlayer)player).getUser());
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
     }

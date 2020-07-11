@@ -114,7 +114,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
@@ -155,7 +155,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class SpongeCommonEventFactory {
+public final class SpongeCommonEventFactory {
 
     public static int lastAnimationPacketTick = 0;
     // For animation packet
@@ -315,7 +315,7 @@ public class SpongeCommonEventFactory {
                     frame.pushCause(source);
                 }
             }
-            currentContext.addNotifierAndOwnerToCauseStack(frame);
+            currentContext.addCreatorAndNotifierToCauseStack(frame);
 
             final List<Entity> spEntities = (List<Entity>) (List<?>) entities;
             final CollideEntityEvent event =
@@ -361,9 +361,9 @@ public class SpongeCommonEventFactory {
                 }
             }
 
-            final User owner = phaseContext.getOwner().orElse((User) player);
-            if (owner != null) {
-                frame.addContext(EventContextKeys.OWNER, owner);
+            final User creator = phaseContext.getCreator().orElse((User) player);
+            if (creator != null) {
+                frame.addContext(EventContextKeys.CREATOR, creator);
             }
 
             if (!((IPhaseState) phaseContext.state).shouldProvideModifiers(phaseContext)) {
@@ -456,12 +456,12 @@ public class SpongeCommonEventFactory {
                     .state(blockstate)
                     .build();
             if (context.getNotifier().isPresent()) {
-                context.addNotifierAndOwnerToCauseStack(frame);
+                context.addCreatorAndNotifierToCauseStack(frame);
             } else {
 
                 final ChunkBridge mixinChunk = (ChunkBridge) ((ServerWorld) world).getChunkAt(sourcePos);
+                mixinChunk.bridge$getBlockCreator(sourcePos).ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
                 mixinChunk.bridge$getBlockNotifier(sourcePos).ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
-                mixinChunk.bridge$getBlockOwner(sourcePos).ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
             }
             PhaseTracker.getCauseStackManager().pushCause(locatable);
 
@@ -484,7 +484,7 @@ public class SpongeCommonEventFactory {
             hand, @Nullable final Vector3d hitVec) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.CREATOR, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) entity));
             if (!stack.isEmpty()) {
@@ -504,7 +504,7 @@ public class SpongeCommonEventFactory {
             final Hand hand, @Nullable final Vector3d hitVec) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.CREATOR, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             frame.addContext(EventContextKeys.ENTITY_HIT, (Entity) entity);
             if (!stack.isEmpty()) {
@@ -524,7 +524,7 @@ public class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.OWNER, (User) player);
+                frame.addContext(EventContextKeys.CREATOR, (User) player);
                 frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             }
 
@@ -552,7 +552,7 @@ public class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
         } else {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.OWNER, (User) player);
+            frame.addContext(EventContextKeys.CREATOR, (User) player);
             frame.addContext(EventContextKeys.NOTIFIER, (User) player);
         }
 
@@ -587,7 +587,7 @@ public class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.OWNER, (User) player);
+                frame.addContext(EventContextKeys.CREATOR, (User) player);
                 frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             }
 
@@ -624,7 +624,7 @@ public class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.OWNER, (User) player);
+                frame.addContext(EventContextKeys.CREATOR, (User) player);
                 frame.addContext(EventContextKeys.NOTIFIER, (User) player);
             }
 
@@ -724,10 +724,10 @@ public class SpongeCommonEventFactory {
         }
         if (source instanceof EntityDamageSource) {
             final EntityDamageSource damageSource = (EntityDamageSource) source;
-            if (damageSource.getImmediateSource() instanceof OwnershipTrackedBridge) {
-                final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) damageSource.getImmediateSource();
-                if (ownerBridge != null) {
-                    sourceCreator = ownerBridge.tracked$getOwnerReference();
+            if (damageSource.getImmediateSource() instanceof CreatorTrackedBridge) {
+                final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) damageSource.getImmediateSource();
+                if (creatorBridge != null) {
+                    sourceCreator = creatorBridge.tracked$getCreatorReference();
                 }
             }
         }
@@ -742,7 +742,7 @@ public class SpongeCommonEventFactory {
                     frame.pushCause(source);
                 }
                 if (sourceCreator.isPresent()) {
-                    frame.addContext(EventContextKeys.OWNER, sourceCreator.get());
+                    frame.addContext(EventContextKeys.CREATOR, sourceCreator.get());
                 }
             }
 
@@ -768,9 +768,9 @@ public class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause( entity);
 
-            if (entity instanceof OwnershipTrackedBridge) {
-                final OwnershipTrackedBridge spongeEntity = (OwnershipTrackedBridge) entity;
-                spongeEntity.tracked$getOwnerReference().ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
+            if (entity instanceof CreatorTrackedBridge) {
+                final CreatorTrackedBridge spongeEntity = (CreatorTrackedBridge) entity;
+                spongeEntity.tracked$getCreatorReference().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
             }
 
             // TODO: Add target side support
@@ -803,8 +803,8 @@ public class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
                     ? UnknownProjectileSource.UNKNOWN
                     : projectileSource);
-            final Optional<User> owner = PhaseTracker.getInstance().getPhaseContext().getOwner();
-            owner.ifPresent(user -> frame.addContext(EventContextKeys.OWNER, user));
+            final Optional<User> creator = PhaseTracker.getInstance().getPhaseContext().getCreator();
+            creator.ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
 
             final ServerLocation impactPoint = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) projectile.world, VecHelper.toVector3d(movingObjectPosition.getHitVec()));
             boolean cancelled = false;
@@ -827,10 +827,10 @@ public class SpongeCommonEventFactory {
                         targetBlock.getLocation().get(), side);
                 cancelled = SpongeCommon.postEvent(event);
                 // Track impact block if event is not cancelled
-                if (!cancelled && owner.isPresent()) {
+                if (!cancelled && creator.isPresent()) {
                     final BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
                     final ChunkBridge spongeChunk = (ChunkBridge) projectile.world.getChunkAt(targetPos);
-                    spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
+                    spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, creator.get(), PlayerTracker.Type.NOTIFIER);
                 }
             } else if (movingObjectType == RayTraceResult.Type.ENTITY) { // entity
                 final EntityRayTraceResult entityMovingObjectPosition = (EntityRayTraceResult) movingObjectPosition;

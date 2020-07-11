@@ -35,7 +35,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
@@ -47,7 +47,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(value = {Entity.class, TileEntity.class}, priority = 1100)
-public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedBridge {
+public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridge {
 
     @Nullable private UUID tracker$owner;
     @Nullable private UUID tracker$notifier;
@@ -71,7 +71,7 @@ public abstract class OwnershipTrackedMixin_Tracker implements OwnershipTrackedB
     }
 
     @Override
-    public Optional<User> tracked$getOwnerReference() {
+    public Optional<User> tracked$getCreatorReference() {
         final User value = this.tracker$ownerUser == null ? null : this.tracker$ownerUser.get();
         if (value == null) {
             if (this.tracker$owner != null) {

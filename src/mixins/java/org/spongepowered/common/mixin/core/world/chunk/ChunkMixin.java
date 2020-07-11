@@ -165,7 +165,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     @Override
-    public Optional<User> bridge$getBlockOwner(final BlockPos pos) {
+    public Optional<User> bridge$getBlockCreator(final BlockPos pos) {
         return Optional.empty();
     }
 

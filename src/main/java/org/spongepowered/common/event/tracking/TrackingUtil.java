@@ -72,7 +72,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -155,10 +155,10 @@ public final class TrackingUtil {
         try (final EntityTickContext context = tickContext;
              final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
         ) {
-            if (entity instanceof OwnershipTrackedBridge) {
-                ((OwnershipTrackedBridge) entity).tracked$getNotifierReference()
+            if (entity instanceof CreatorTrackedBridge) {
+                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
                     .ifPresent(context::notifier);
-                ((OwnershipTrackedBridge) entity).tracked$getOwnerReference()
+                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
                     .ifPresent(context::owner);
             }
             context.buildAndSwitch();
@@ -184,10 +184,10 @@ public final class TrackingUtil {
         try (final EntityTickContext context = tickContext;
              final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
         ) {
-            if (entity instanceof OwnershipTrackedBridge) {
-                ((OwnershipTrackedBridge) entity).tracked$getNotifierReference()
+            if (entity instanceof CreatorTrackedBridge) {
+                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
                     .ifPresent(context::notifier);
-                ((OwnershipTrackedBridge) entity).tracked$getOwnerReference()
+                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
                     .ifPresent(context::owner);
             }
             context.buildAndSwitch();
@@ -215,10 +215,10 @@ public final class TrackingUtil {
              final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
              ) {
             entityTiming.startTiming();
-            if (entity instanceof OwnershipTrackedBridge) {
-                ((OwnershipTrackedBridge) entity).tracked$getNotifierReference()
+            if (entity instanceof CreatorTrackedBridge) {
+                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
                     .ifPresent(context::notifier);
-                ((OwnershipTrackedBridge) entity).tracked$getOwnerReference()
+                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
                     .ifPresent(context::owner);
             }
             context.buildAndSwitch();
@@ -249,13 +249,13 @@ public final class TrackingUtil {
         final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext(PhaseTracker.SERVER).source(mixinTileEntity);
         try (final PhaseContext<?> phaseContext = context) {
 
-            if (tile instanceof OwnershipTrackedBridge) {
+            if (tile instanceof CreatorTrackedBridge) {
                 // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-                ((OwnershipTrackedBridge) tile).tracked$getNotifierReference().ifPresent(phaseContext::notifier);
+                ((CreatorTrackedBridge) tile).tracked$getNotifierReference().ifPresent(phaseContext::notifier);
                 // Allow the tile entity to validate the owner of itself. As long as the tile entity
                 // chunk is already loaded and activated, and the tile entity has already loaded
                 // the owner of itself.
-                ((OwnershipTrackedBridge) tile).tracked$getOwnerReference().ifPresent(phaseContext::owner);
+                ((CreatorTrackedBridge) tile).tracked$getCreatorReference().ifPresent(phaseContext::owner);
             }
 
             // Finally, switch the context now that we have the owner and notifier
@@ -363,7 +363,7 @@ public final class TrackingUtil {
 
         final User user = ((BlockEventDataBridge) event).bridge$getSourceUser();
         if (user != null) {
-            phaseContext.owner = user;
+            phaseContext.creator = user;
             phaseContext.notifier = user;
         }
 
@@ -398,7 +398,7 @@ public final class TrackingUtil {
             return notifier;
         }
 
-        return mixinChunk.bridge$getBlockOwner(blockPos).orElse(null);
+        return mixinChunk.bridge$getBlockCreator(blockPos).orElse(null);
     }
 
     public static Supplier<IllegalStateException> throwWithContext(final String s, final PhaseContext<?> phaseContext) {

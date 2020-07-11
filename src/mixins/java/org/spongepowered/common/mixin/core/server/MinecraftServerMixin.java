@@ -56,7 +56,6 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;

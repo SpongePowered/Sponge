@@ -174,7 +174,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(tickingTile.getLocatableBlock());
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                context.addNotifierAndOwnerToCauseStack(frame);
+                context.addCreatorAndNotifierToCauseStack(frame);
                 final ArrayList<Entity> exp = new ArrayList<>();
                 exp.add(entity);
                 return SpongeCommonEventFactory.callSpawnEntity(exp, context);
@@ -185,7 +185,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(tickingTile.getLocatableBlock());
             frame.addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.bridge$getTickedSpawnType());
-            context.addNotifierAndOwnerToCauseStack(frame);
+            context.addCreatorAndNotifierToCauseStack(frame);
             return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
 
         }

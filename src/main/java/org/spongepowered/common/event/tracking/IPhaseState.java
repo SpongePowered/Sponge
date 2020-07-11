@@ -93,8 +93,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             ctx.usedFrame = new ArrayDeque<>();
         }
         ctx.usedFrame.push(frame); // WE NEED TO STORE THIS SO WE CAN PROPERLY POP THE FRAME
-        if (ctx.owner != null) {
-            frame.addContext(EventContextKeys.OWNER, ctx.owner);
+        if (ctx.creator != null) {
+            frame.addContext(EventContextKeys.CREATOR, ctx.creator);
         }
         if (ctx.notifier != null) {
             frame.addContext(EventContextKeys.NOTIFIER, ctx.notifier);
@@ -716,7 +716,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         final Chunk chunk = world.getChunkAt(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
-            mixinChunk.bridge$getBlockOwner(pos).ifPresent(phaseContext::owner);
+            mixinChunk.bridge$getBlockCreator(pos).ifPresent(phaseContext::owner);
             mixinChunk.bridge$getBlockNotifier(pos).ifPresent(phaseContext::notifier);
         }
     }
@@ -758,8 +758,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         // At this point, since there's no notifier avilable, we can consider the
         // owner as one available left (you know, someone placing a redstone block to power
         // nearby redstone wire, the owner would at least be notifying the next blocks
-        if (context.owner != null) { // If the owner is set, at least set the owner
-            notification.notifier(context.owner);
+        if (context.creator != null) { // If the owner is set, at least set the owner
+            notification.notifier(context.creator);
         }
     }
 

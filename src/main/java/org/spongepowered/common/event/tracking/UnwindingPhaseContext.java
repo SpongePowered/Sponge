@@ -93,8 +93,8 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
     }
 
     @Override
-    public Optional<User> getOwner() {
-        return this.unwindingContext.getOwner();
+    public Optional<User> getCreator() {
+        return this.unwindingContext.getCreator();
     }
 
     @Override

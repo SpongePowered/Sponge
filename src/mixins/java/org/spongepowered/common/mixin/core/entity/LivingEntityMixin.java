@@ -781,7 +781,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         frame.pushCause(this);
         frame.addContext(EventContextKeys.USED_ITEM, snapshot);
         if (this instanceof User) {
-            frame.addContext(EventContextKeys.OWNER, (User) this);
+            frame.addContext(EventContextKeys.CREATOR, (User) this);
             frame.addContext(EventContextKeys.NOTIFIER, (User) this);
         }
     }

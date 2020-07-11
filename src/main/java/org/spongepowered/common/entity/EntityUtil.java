@@ -74,7 +74,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
@@ -115,7 +115,7 @@ public final class EntityUtil {
         () -> Stream.<Supplier<Optional<User>>>builder()
             .add(() -> context.getSource(User.class))
             .add(context::getNotifier)
-            .add(context::getOwner)
+            .add(context::getCreator)
             .build()
             .map(Supplier::get)
             .filter(Optional::isPresent)
@@ -707,8 +707,8 @@ public final class EntityUtil {
                     final Entity entityToSpawn = customEntityItem.get();
                     supplier.get()
                         .ifPresent(spawned -> {
-                            if (entityToSpawn instanceof OwnershipTrackedBridge) {
-                                ((OwnershipTrackedBridge) entityToSpawn).tracked$setOwnerReference(spawned);
+                            if (entityToSpawn instanceof CreatorTrackedBridge) {
+                                ((CreatorTrackedBridge) entityToSpawn).tracked$setOwnerReference(spawned);
                             }
                         });
                     if (entityToSpawn.removed) {
@@ -725,8 +725,8 @@ public final class EntityUtil {
 
         supplier.get()
             .ifPresent(spawned -> {
-                if (entity instanceof OwnershipTrackedBridge) {
-                    ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(spawned);
+                if (entity instanceof CreatorTrackedBridge) {
+                    ((CreatorTrackedBridge) entity).tracked$setOwnerReference(spawned);
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already

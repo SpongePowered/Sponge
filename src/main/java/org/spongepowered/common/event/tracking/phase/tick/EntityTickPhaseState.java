@@ -76,7 +76,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
             if (tickingEntity instanceof FallingBlockEntity) {
-                context.getOwner().ifPresent(frame::pushCause);
+                context.getCreator().ifPresent(frame::pushCause);
             }
             frame.pushCause(tickingEntity);
         });
@@ -100,7 +100,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     protected void processCaptures(final Entity tickingEntity, final EntityTickContext phaseContext, final CauseStackManager.StackFrame frame) {
-        phaseContext.addNotifierAndOwnerToCauseStack(frame);
+        phaseContext.addCreatorAndNotifierToCauseStack(frame);
         // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
         if (phaseContext.allowsBulkBlockCaptures()) {
             if (!TrackingUtil.processBlockCaptures(phaseContext)) {
@@ -319,7 +319,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         // It kinda sucks we have to make the cause frame here, but if we're already here, we are
         // effectively already going to throw an event, and we're configured not to bulk capture.
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            context.addNotifierAndOwnerToCauseStack(frame);
+            context.addCreatorAndNotifierToCauseStack(frame);
             frame.pushCause(tickingEntity);
             if (entity instanceof ExperienceOrbEntity) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);

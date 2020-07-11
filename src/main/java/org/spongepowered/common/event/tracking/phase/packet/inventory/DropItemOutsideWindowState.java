@@ -39,7 +39,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
@@ -74,8 +74,8 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
             for (final Entity currentEntity : capturedEntities) {
-                if (currentEntity instanceof OwnershipTrackedBridge) {
-                    ((OwnershipTrackedBridge) currentEntity).tracked$setOwnerReference(((ServerPlayer) playerMP).getUser());
+                if (currentEntity instanceof CreatorTrackedBridge) {
+                    ((CreatorTrackedBridge) currentEntity).tracked$setOwnerReference(((ServerPlayer) playerMP).getUser());
                 } else {
                     currentEntity.offer(Keys.CREATOR, playerMP.getUniqueID());
                 }

@@ -44,7 +44,7 @@ public interface ChunkBridge {
 
     Map<Integer, PlayerTracker> bridge$getTrackedIntPlayerPositions();
 
-    Optional<User> bridge$getBlockOwner(BlockPos pos);
+    Optional<User> bridge$getBlockCreator(BlockPos pos);
 
     Optional<UUID> bridge$getBlockOwnerUUID(BlockPos pos);
 

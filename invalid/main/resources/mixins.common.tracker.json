@@ -14,7 +14,7 @@
         "world.chunk.ChunkMixin_OwnershipTracked",
         "world.end.DragonFightManagerMixin_Tracker",
         "world.WorldMixin_OwnershipTracked",
-        "OwnershipTrackedMixin_Tracker"
+        "CreatorTrackedMixin_Tracker"
     ],
     "server": [
 

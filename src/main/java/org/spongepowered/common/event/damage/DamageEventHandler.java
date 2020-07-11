@@ -67,7 +67,7 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.item.ArmorItemAccessor;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -374,24 +374,24 @@ public class DamageEventHandler {
     public static void generateCauseFor(final DamageSource damageSource, final CauseStackManager.StackFrame frame) {
         if (damageSource instanceof IndirectEntityDamageSource) {
             final net.minecraft.entity.Entity source = damageSource.getTrueSource();
-            if (!(source instanceof PlayerEntity) && source instanceof OwnershipTrackedBridge) {
-                final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) source;
-                ownerBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
-                ownerBridge.tracked$getOwnerReference().ifPresent(owner -> frame.addContext(EventContextKeys.OWNER, owner));
+            if (!(source instanceof PlayerEntity) && source instanceof CreatorTrackedBridge) {
+                final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) source;
+                creatorBridge.tracked$getCreatorReference().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
+                creatorBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             }
         } else if (damageSource instanceof EntityDamageSource) {
             final net.minecraft.entity.Entity source = damageSource.getTrueSource();
-            if (!(source instanceof PlayerEntity) && source instanceof OwnershipTrackedBridge) {
-                final OwnershipTrackedBridge ownerBridge = (OwnershipTrackedBridge) source;
-                ownerBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
-                ownerBridge.tracked$getOwnerReference().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
+            if (!(source instanceof PlayerEntity) && source instanceof CreatorTrackedBridge) {
+                final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) source;
+                creatorBridge.tracked$getCreatorReference().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
+                creatorBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             }
         } else if (damageSource instanceof BlockDamageSource) {
             final ServerLocation location = ((BlockDamageSource) damageSource).getLocation();
             final BlockPos blockPos = VecHelper.toBlockPos(location);
             final ChunkBridge mixinChunk = (ChunkBridge) ((net.minecraft.world.World) location.getWorld()).getChunkAt(blockPos);
+            mixinChunk.bridge$getBlockCreator(blockPos).ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
             mixinChunk.bridge$getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
-            mixinChunk.bridge$getBlockOwner(blockPos).ifPresent(owner -> frame.addContext(EventContextKeys.CREATOR, owner));
         }
         frame.pushCause(damageSource);
     }

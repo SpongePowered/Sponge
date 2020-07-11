@@ -45,7 +45,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.accessor.world.ExplosionAccessor;
@@ -94,10 +94,10 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
         if (explosion != null) {
             final Entity entity = ((ExplosionAccessor) explosion).accessor$getExploder();
             if (entity != null && !((WorldBridge) ((ExplosionAccessor) explosion).accessor$getWorld()).bridge$isFake()) {
-                if (explosion.getExplosivePlacedBy() == null && entity instanceof OwnershipTrackedBridge) {
+                if (explosion.getExplosivePlacedBy() == null && entity instanceof CreatorTrackedBridge) {
                     // check creator
-                    final OwnershipTrackedBridge ownerTrackedBridge = (OwnershipTrackedBridge) entity;
-                    ownerTrackedBridge.tracked$getOwnerReference()
+                    final CreatorTrackedBridge ownerTrackedBridge = (CreatorTrackedBridge) entity;
+                    ownerTrackedBridge.tracked$getCreatorReference()
                             .filter(user -> user instanceof PlayerEntity)
                             .map(user -> (PlayerEntity) user)
                             .ifPresent(player -> {

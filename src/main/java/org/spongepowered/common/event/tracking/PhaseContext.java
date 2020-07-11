@@ -87,7 +87,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
-     * @return
      */
     public static PhaseContext<?> empty() {
         if (PhaseContext.EMPTY == null) {
@@ -120,7 +119,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
 
     // General
-    @Nullable protected User owner;
+    @Nullable protected User creator;
     @Nullable protected User notifier;
     private boolean allowsBlockEvents = true; // Defaults to allow block events
     private boolean allowsEntityEvents = true;
@@ -143,10 +142,10 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public P owner(final User owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        if (this.owner != null) {
+        if (this.creator != null) {
             throw new IllegalStateException("Owner for this phase context is already set!");
         }
-        this.owner = checkNotNull(owner, "Owner cannot be null!");
+        this.creator = checkNotNull(owner, "Owner cannot be null!");
         return (P) this;
     }
 
@@ -268,8 +267,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             printer.add(s + "StackTrace On Entry")
                 .add(this.stackTrace);
         }
-        if (this.owner != null) {
-            printer.add(s + "- %s: %s", "Owner", this.owner);
+        if (this.creator != null) {
+            printer.add(s + "- %s: %s", "Owner", this.creator);
         }
         if (this.source != null) {
             printer.add(s + "- %s: %s", "Source", this.source);
@@ -348,8 +347,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", this));
     }
 
-    public Optional<User> getOwner() {
-        return Optional.ofNullable(this.owner);
+    public Optional<User> getCreator() {
+        return Optional.ofNullable(this.creator);
     }
 
     /**
@@ -359,8 +358,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * @return True if the consumer was called
      */
     public boolean applyOwnerIfAvailable(final Consumer<? super User> consumer) {
-        if (this.owner != null) {
-            consumer.accept(this.owner);
+        if (this.creator != null) {
+            consumer.accept(this.creator);
             return true;
         }
         return false;
@@ -551,9 +550,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             .getPos();
     }
 
-    public void addNotifierAndOwnerToCauseStack(final CauseStackManager.StackFrame frame) {
-        if (this.owner != null) {
-            frame.addContext(EventContextKeys.OWNER, this.owner);
+    public void addCreatorAndNotifierToCauseStack(final CauseStackManager.StackFrame frame) {
+        if (this.creator != null) {
+            frame.addContext(EventContextKeys.CREATOR, this.creator);
         }
         if (this.notifier != null) {
             frame.addContext(EventContextKeys.NOTIFIER, this.notifier);
@@ -643,7 +642,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         this.neighborNotificationSource = null;
         this.singleSnapshot = null;
         this.stackTrace = null;
-        this.owner = null;
+        this.creator = null;
         this.notifier = null;
         if (this.blocksSupplier != null) {
             this.blocksSupplier.reset();
@@ -732,8 +731,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         if (this.notifier != null) {
             return this.notifier;
         }
-        if (this.owner != null) {
-            return this.owner;
+        if (this.creator != null) {
+            return this.creator;
         }
         if (this.source != null && this.source instanceof User) {
             return (User) this.source;

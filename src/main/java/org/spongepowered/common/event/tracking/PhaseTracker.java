@@ -79,7 +79,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -886,15 +886,15 @@ public final class PhaseTracker implements CauseStackManager {
             final LivingEntity thrower = throwable.getThrower();
             if (thrower != null) {
                 final User user;
-                if (thrower instanceof OwnershipTrackedBridge) {
-                    user = ((OwnershipTrackedBridge) thrower).tracked$getOwnerReference().orElse(null);
+                if (thrower instanceof CreatorTrackedBridge) {
+                    user = ((CreatorTrackedBridge) thrower).tracked$getCreatorReference().orElse(null);
                 } else {
                     user = (User) thrower;
                 }
                 if (user != null) {
-                    context.owner = user;
-                    if (entity instanceof OwnershipTrackedBridge) {
-                        ((OwnershipTrackedBridge) entity).tracked$setOwnerReference(user);
+                    context.creator = user;
+                    if (entity instanceof CreatorTrackedBridge) {
+                        ((CreatorTrackedBridge) entity).tracked$setOwnerReference(user);
                     } else {
                         ((Entity) entity).offer(Keys.CREATOR, user.getUniqueId());
                     }

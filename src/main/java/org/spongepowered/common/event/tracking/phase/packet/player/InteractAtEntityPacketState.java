@@ -38,7 +38,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -99,8 +99,8 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
             return;
         }
         final World spongeWorld = (World) player.world;
-        if (entity instanceof OwnershipTrackedBridge) {
-            ((OwnershipTrackedBridge) entity).tracked$setOwnerReference((User) player);
+        if (entity instanceof CreatorTrackedBridge) {
+            ((CreatorTrackedBridge) entity).tracked$setOwnerReference((User) player);
         } else {
             ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
         }

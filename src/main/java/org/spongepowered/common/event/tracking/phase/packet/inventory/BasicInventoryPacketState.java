@@ -41,7 +41,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.OwnershipTrackedBridge;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -184,8 +184,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         if (!this.shouldFire()) {
             if (ShouldFire.SPAWN_ENTITY_EVENT && !capturedItems.isEmpty()) {
                 for (final Entity entiy: capturedItems) {
-                    if (entiy instanceof OwnershipTrackedBridge) {
-                        ((OwnershipTrackedBridge) entiy).tracked$setOwnerReference(((ServerPlayer) player).getUser());
+                    if (entiy instanceof CreatorTrackedBridge) {
+                        ((CreatorTrackedBridge) entiy).tracked$setOwnerReference(((ServerPlayer) player).getUser());
                     } else {
                         entiy.offer(Keys.CREATOR, player.getUniqueID());
                     }
