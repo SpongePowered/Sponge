@@ -39,12 +39,12 @@ public final class PandaEntityEatingTimeProvider extends GenericMutableDataProvi
 
     @Override
     protected final Optional<Integer> getFrom(final PandaEntity dataHolder) {
-        return Optional.of(((PandaEntityAccessor) dataHolder).accessor$getEatingTime());
+        return Optional.of(((PandaEntityAccessor) dataHolder).accessor$func_213559_es());
     }
 
     @Override
     protected final boolean set(final PandaEntity dataHolder, final Integer value) {
-        ((PandaEntityAccessor) dataHolder).accessor$setEatingTime(value);
+        ((PandaEntityAccessor) dataHolder).accessor$func_213571_t(value);
         return true;
     }
 }
