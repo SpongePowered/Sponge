@@ -57,6 +57,7 @@
     "entity.passive.FoxEntityAccessor",
     "entity.passive.MooshroomEntityAccessor",
     "entity.passive.OcelotEntityAccessor",
+    "entity.passive.PandaEntityAccessor",
     "entity.passive.PigEntityAccessor",
     "entity.passive.SheepEntityAccessor",
     "entity.passive.TurtleEntityAccessor",

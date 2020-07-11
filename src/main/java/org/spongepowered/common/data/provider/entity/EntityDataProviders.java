@@ -592,7 +592,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
     }
 
     private void registerPanda() {
-//        register(PandaEntity.class, Keys.EATING_TIME, getter, setter); // TODO
+        register(new PandaEntityEatingTimeProvider());
         register(PandaEntity.class, Keys.HIDDEN_GENE,
                 p -> ((PandaGene) (Object) p.getHiddenGene()),
                 (p, g) -> p.setHiddenGene((PandaEntity.Type) (Object) g));
@@ -600,14 +600,14 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 p -> ((PandaGene) (Object) p.getMainGene()),
                 (p, g) -> p.setMainGene((PandaEntity.Type) (Object) g));
 
-//        register(PandaEntity.class, Keys.IS_EATING, getter, setter); // TODO
+        register(PandaEntity.class, Keys.IS_EATING, PandaEntity::func_213578_dZ, PandaEntity::func_213534_t);
 //        register(PandaEntity.class, Keys.IS_FRIGHTENED, getter, setter); // TODO
         register(PandaEntity.class, Keys.IS_LYING_ON_BACK, PandaEntity::func_213567_dY, PandaEntity::func_213542_s);
         register(PandaEntity.class, Keys.IS_ROLLING_AROUND, PandaEntity::func_213564_eh, PandaEntity::func_213576_v);
 //        register(PandaEntity.class, Keys.IS_SNEEZING, PandaEntity::, PandaEntity::); // TODO
 //        register(PandaEntity.class, Keys.IS_UNHAPPY, PandaEntity::, PandaEntity::); // TODO
         register(PandaEntity.class, Keys.SNEEZING_TIME, PandaEntity::func_213585_ee, PandaEntity::func_213562_s);
-//        register(PandaEntity.class, Keys.UNHAPPY_TIME, PandaEntity::, PandaEntity::); // TODO
+        register(PandaEntity.class, Keys.UNHAPPY_TIME, PandaEntity::func_213544_dV, PandaEntity::func_213588_r);
     }
 
     private void registerRavager() {
