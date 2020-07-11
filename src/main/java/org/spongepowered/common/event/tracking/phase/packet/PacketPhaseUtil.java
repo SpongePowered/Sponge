@@ -51,7 +51,6 @@ import net.minecraft.network.play.client.CCustomPayloadPacket;
 import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.Hand;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -219,7 +218,7 @@ public final class PacketPhaseUtil {
                             .cursor(cursor);
 
                         PacketPhase.getInstance().populateContext(packetIn, packetPlayer, packetState, context);
-                        context.owner(((ServerPlayer) packetPlayer).getUser());
+                        context.creator(((ServerPlayer) packetPlayer).getUser());
                         context.notifier(((ServerPlayer) packetPlayer).getUser());
                     }
                     try (final PhaseContext<?> packetContext = context) {

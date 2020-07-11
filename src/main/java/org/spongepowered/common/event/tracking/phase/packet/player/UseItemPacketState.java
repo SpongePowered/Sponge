@@ -35,12 +35,10 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -100,7 +98,7 @@ public final class UseItemPacketState extends BasicPacketState {
         BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getLocation().get());
         ChunkBridge spongeChunk = (ChunkBridge) ((ServerWorld) player.getWorld()).getChunkAt(pos);
         if (blockChange == BlockChange.PLACE) {
-            spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player.getUser(), PlayerTracker.Type.OWNER);
+            spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player.getUser(), PlayerTracker.Type.CREATOR);
         }
 
         spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player.getUser(), PlayerTracker.Type.NOTIFIER);

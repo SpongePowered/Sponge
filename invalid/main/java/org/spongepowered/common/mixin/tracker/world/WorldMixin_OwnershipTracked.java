@@ -53,7 +53,7 @@ public abstract class WorldMixin_OwnershipTracked implements World {
         final BlockPos pos = new BlockPos(x, y, z);
         // The difference here saves the user lookup check for snapshot creation, very hot when considering
         // blocks changing with potentially n block notifiers and n block owners.
-        return ((ChunkBridge) chunk).bridge$getBlockOwnerUUID(pos);
+        return ((ChunkBridge) chunk).bridge$getBlockCreatorUUID(pos);
     }
 
     @Override

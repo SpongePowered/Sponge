@@ -340,7 +340,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             builder.reset();
             return build;
         }
-        final Optional<UUID> creator = ((ChunkBridge) chunk).bridge$getBlockOwnerUUID(pos);
+        final Optional<UUID> creator = ((ChunkBridge) chunk).bridge$getBlockCreatorUUID(pos);
         final Optional<UUID> notifier = ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos);
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);

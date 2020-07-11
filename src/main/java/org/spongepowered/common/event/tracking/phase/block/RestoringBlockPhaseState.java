@@ -75,7 +75,7 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean tracksOwnersAndNotifiers() {
+    public boolean tracksCreatorsAndNotifiers() {
         return false;
     }
 

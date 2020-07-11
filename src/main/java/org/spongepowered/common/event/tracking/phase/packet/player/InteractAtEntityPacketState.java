@@ -100,7 +100,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
         }
         final World spongeWorld = (World) player.world;
         if (entity instanceof CreatorTrackedBridge) {
-            ((CreatorTrackedBridge) entity).tracked$setOwnerReference((User) player);
+            ((CreatorTrackedBridge) entity).tracked$setCreatorReference((User) player);
         } else {
             ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
         }

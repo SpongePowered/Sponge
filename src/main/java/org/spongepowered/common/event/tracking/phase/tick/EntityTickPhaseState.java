@@ -289,8 +289,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     @Override
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final EntityTickContext context) {
-        if (!context.applyNotifierIfAvailable(explosionContext::owner)) {
-            context.applyOwnerIfAvailable(explosionContext::owner);
+        if (!context.applyNotifierIfAvailable(explosionContext::creator)) {
+            context.applyOwnerIfAvailable(explosionContext::creator);
         }
         explosionContext.source(context.getSource(Entity.class).orElseThrow(() -> new IllegalStateException("Ticking a non Entity")));
     }

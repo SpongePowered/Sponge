@@ -159,7 +159,7 @@ public final class TrackingUtil {
                 ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
                     .ifPresent(context::notifier);
                 ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::owner);
+                    .ifPresent(context::creator);
             }
             context.buildAndSwitch();
             entityTiming.startTiming();
@@ -188,7 +188,7 @@ public final class TrackingUtil {
                 ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
                     .ifPresent(context::notifier);
                 ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::owner);
+                    .ifPresent(context::creator);
             }
             context.buildAndSwitch();
             entityTiming.startTiming();
@@ -219,7 +219,7 @@ public final class TrackingUtil {
                 ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
                     .ifPresent(context::notifier);
                 ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::owner);
+                    .ifPresent(context::creator);
             }
             context.buildAndSwitch();
             entity.updateRidden();
@@ -255,7 +255,7 @@ public final class TrackingUtil {
                 // Allow the tile entity to validate the owner of itself. As long as the tile entity
                 // chunk is already loaded and activated, and the tile entity has already loaded
                 // the owner of itself.
-                ((CreatorTrackedBridge) tile).tracked$getCreatorReference().ifPresent(phaseContext::owner);
+                ((CreatorTrackedBridge) tile).tracked$getCreatorReference().ifPresent(phaseContext::creator);
             }
 
             // Finally, switch the context now that we have the owner and notifier
@@ -896,7 +896,7 @@ public final class TrackingUtil {
             .map(world -> world.getChunkAt(pos))
             .map(chunk -> (ChunkBridge) chunk)
             .ifPresent(spongeChunk -> {
-            final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.OWNER : PlayerTracker.Type.NOTIFIER;
+            final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.CREATOR : PlayerTracker.Type.NOTIFIER;
             spongeChunk.bridge$addTrackedBlockPosition(block, pos, user, trackerType);
         });
     }

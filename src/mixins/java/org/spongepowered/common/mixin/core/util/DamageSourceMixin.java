@@ -96,8 +96,8 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
             if (entity != null && !((WorldBridge) ((ExplosionAccessor) explosion).accessor$getWorld()).bridge$isFake()) {
                 if (explosion.getExplosivePlacedBy() == null && entity instanceof CreatorTrackedBridge) {
                     // check creator
-                    final CreatorTrackedBridge ownerTrackedBridge = (CreatorTrackedBridge) entity;
-                    ownerTrackedBridge.tracked$getCreatorReference()
+                    final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) entity;
+                    creatorBridge.tracked$getCreatorReference()
                             .filter(user -> user instanceof PlayerEntity)
                             .map(user -> (PlayerEntity) user)
                             .ifPresent(player -> {

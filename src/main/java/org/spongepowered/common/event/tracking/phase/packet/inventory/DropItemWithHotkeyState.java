@@ -149,7 +149,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickContainerEvent.Drop createInventoryEvent(final ServerPlayerEntity playerMP,
+    public ClickContainerEvent.Drop createInventoryEvent(final ServerPlayerEntity serverPlayer,
         final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
@@ -157,9 +157,9 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             for (final Entity currentEntity : capturedEntities) {
                 if (currentEntity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) currentEntity).tracked$setOwnerReference(((ServerPlayer) playerMP).getUser());
+                    ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) serverPlayer).getUser());
                 } else {
-                    currentEntity.offer(Keys.CREATOR, playerMP.getUniqueID());
+                    currentEntity.offer(Keys.CREATOR, serverPlayer.getUniqueID());
                 }
             }
 

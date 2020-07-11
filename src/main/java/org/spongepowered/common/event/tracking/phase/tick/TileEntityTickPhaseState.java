@@ -152,7 +152,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     @Override
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final TileEntityTickContext context) {
         context.applyNotifierIfAvailable(explosionContext::notifier);
-        context.applyOwnerIfAvailable(explosionContext::owner);
+        context.applyOwnerIfAvailable(explosionContext::creator);
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.source(tickingTile);

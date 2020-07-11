@@ -46,16 +46,16 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
 
     @Shadow @Nullable public abstract Entity getImmediateSource();
 
-    @Nullable private User impl$owner;
+    @Nullable private User impl$creator;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(final CallbackInfo callbackInfo) {
         if (!(this.indirectEntity instanceof User) && this.damageSourceEntity != null) { // sources can be null
-            this.impl$owner = this.shadow$getTrueSource() instanceof CreatorTrackedBridge
+            this.impl$creator = this.shadow$getTrueSource() instanceof CreatorTrackedBridge
                          ? ((CreatorTrackedBridge) this.shadow$getTrueSource()).tracked$getCreatorReference().orElse(null)
                          : null;
-            if (this.indirectEntity == null && this.impl$owner instanceof Entity) {
-                this.indirectEntity = (Entity) this.impl$owner;
+            if (this.indirectEntity == null && this.impl$creator instanceof Entity) {
+                this.indirectEntity = (Entity) this.impl$creator;
             }
         }
     }
@@ -67,8 +67,8 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
             .add("Type", this.impl$damageType.getKey().toString())
             .add("Source", this.getImmediateSource())
             .add("IndirectSource", this.shadow$getTrueSource());
-        if (this.impl$owner != null) {
-            helper.add("SourceOwner", this.impl$owner);
+        if (this.impl$creator != null) {
+            helper.add("SourceOwner", this.impl$creator);
         }
         return helper.toString();
     }

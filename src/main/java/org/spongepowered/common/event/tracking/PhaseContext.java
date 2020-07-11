@@ -135,12 +135,12 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return (P) this;
     }
 
-    public P owner(final Supplier<Optional<User>> supplier) {
-        supplier.get().ifPresent(this::owner);
+    public P creator(final Supplier<Optional<User>> supplier) {
+        supplier.get().ifPresent(this::creator);
         return (P) this;
     }
 
-    public P owner(final User owner) {
+    public P creator(final User owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         if (this.creator != null) {
             throw new IllegalStateException("Owner for this phase context is already set!");

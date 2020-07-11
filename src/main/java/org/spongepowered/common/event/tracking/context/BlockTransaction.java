@@ -630,7 +630,7 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public boolean tracksOwnersAndNotifiers() {
+        public boolean tracksCreatorsAndNotifiers() {
             return false;
         }
 

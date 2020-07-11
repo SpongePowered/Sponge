@@ -75,7 +75,7 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
 
             for (final Entity currentEntity : capturedEntities) {
                 if (currentEntity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) currentEntity).tracked$setOwnerReference(((ServerPlayer) playerMP).getUser());
+                    ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) playerMP).getUser());
                 } else {
                     currentEntity.offer(Keys.CREATOR, playerMP.getUniqueID());
                 }

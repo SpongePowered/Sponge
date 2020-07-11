@@ -152,7 +152,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
 
     @Override
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final BlockTickContext context) {
-        context.applyOwnerIfAvailable(explosionContext::owner);
+        context.applyOwnerIfAvailable(explosionContext::creator);
         context.applyNotifierIfAvailable(explosionContext::notifier);
         final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
         explosionContext.source(locatableBlock);

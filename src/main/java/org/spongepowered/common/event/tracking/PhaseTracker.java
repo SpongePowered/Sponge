@@ -894,7 +894,7 @@ public final class PhaseTracker implements CauseStackManager {
                 if (user != null) {
                     context.creator = user;
                     if (entity instanceof CreatorTrackedBridge) {
-                        ((CreatorTrackedBridge) entity).tracked$setOwnerReference(user);
+                        ((CreatorTrackedBridge) entity).tracked$setCreatorReference(user);
                     } else {
                         ((Entity) entity).offer(Keys.CREATOR, user.getUniqueId());
                     }

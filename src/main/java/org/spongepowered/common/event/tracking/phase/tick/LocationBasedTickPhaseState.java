@@ -87,7 +87,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
                     context.applyOwnerIfAvailable(owner -> {
                         // We can do this when we check for notifiers because owners will always have a notifier set
                         // if not, well, file a bug report and find out the corner case that owners are set but not notifiers with block changes.
-                        changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.OWNER);
+                        changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.CREATOR);
                     });
                 }
             });

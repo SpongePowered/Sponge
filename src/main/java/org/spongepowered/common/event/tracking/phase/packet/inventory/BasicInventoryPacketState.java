@@ -185,7 +185,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             if (ShouldFire.SPAWN_ENTITY_EVENT && !capturedItems.isEmpty()) {
                 for (final Entity entiy: capturedItems) {
                     if (entiy instanceof CreatorTrackedBridge) {
-                        ((CreatorTrackedBridge) entiy).tracked$setOwnerReference(((ServerPlayer) player).getUser());
+                        ((CreatorTrackedBridge) entiy).tracked$setCreatorReference(((ServerPlayer) player).getUser());
                     } else {
                         entiy.offer(Keys.CREATOR, player.getUniqueID());
                     }

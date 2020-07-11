@@ -239,7 +239,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
                     .source(this);
             if (this instanceof CreatorTrackedBridge) {
                 ((CreatorTrackedBridge) this).tracked$getNotifierReference().ifPresent(context::notifier);
-                ((CreatorTrackedBridge) this).tracked$getCreatorReference().ifPresent(context::owner);
+                ((CreatorTrackedBridge) this).tracked$getCreatorReference().ifPresent(context::creator);
             }
             return context;
         }

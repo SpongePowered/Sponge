@@ -148,7 +148,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         tileEntityIn.remove();
     }
 
-    // These methods are enabled in ChunkMixin_OwnershipTracked as a Mixin plugin
+    // These methods are enabled in ChunkMixin_CreatorTracked as a Mixin plugin
 
     @Override
     public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) {
@@ -170,7 +170,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     @Override
-    public Optional<UUID> bridge$getBlockOwnerUUID(final BlockPos pos) {
+    public Optional<UUID> bridge$getBlockCreatorUUID(final BlockPos pos) {
         return Optional.empty();
     }
 

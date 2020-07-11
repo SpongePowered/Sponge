@@ -373,7 +373,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @return Simple true false to determine whether this phase is providing owner/notifier information
      */
-    default boolean tracksOwnersAndNotifiers() {
+    default boolean tracksCreatorsAndNotifiers() {
         return true;
     }
     /**
@@ -716,7 +716,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         final Chunk chunk = world.getChunkAt(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
-            mixinChunk.bridge$getBlockCreator(pos).ifPresent(phaseContext::owner);
+            mixinChunk.bridge$getBlockCreator(pos).ifPresent(phaseContext::creator);
             mixinChunk.bridge$getBlockNotifier(pos).ifPresent(phaseContext::notifier);
         }
     }

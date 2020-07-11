@@ -165,7 +165,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
     }
 
     @Override
-    public boolean tracksOwnersAndNotifiers() {
+    public boolean tracksCreatorsAndNotifiers() {
         return false;
     }
 

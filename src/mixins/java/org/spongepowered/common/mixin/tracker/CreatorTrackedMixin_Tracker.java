@@ -49,14 +49,14 @@ import java.util.UUID;
 @Mixin(value = {Entity.class, TileEntity.class}, priority = 1100)
 public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridge {
 
-    @Nullable private UUID tracker$owner;
+    @Nullable private UUID tracker$creator;
     @Nullable private UUID tracker$notifier;
-    @Nullable private WeakReference<User> tracker$ownerUser;
+    @Nullable private WeakReference<User> tracker$creatorUser;
     @Nullable private WeakReference<User> tracker$notifierUser;
 
     @Override
-    public Optional<UUID> tracked$getOwnerUUID() {
-        return Optional.ofNullable(this.tracker$owner);
+    public Optional<UUID> tracked$getCreatorUUID() {
+        return Optional.ofNullable(this.tracker$creator);
     }
 
     @Override
@@ -65,18 +65,18 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
     }
 
     @Override
-    public void tracked$setOwnerReference(@Nullable final User owner) {
-        this.tracker$ownerUser = new WeakReference<>(owner);
-        this.tracker$owner = owner == null ? null : owner.getUniqueId();
+    public void tracked$setCreatorReference(@Nullable final User creator) {
+        this.tracker$creator = creator == null ? null : creator.getUniqueId();
+        this.tracker$creatorUser = new WeakReference<>(creator);
     }
 
     @Override
     public Optional<User> tracked$getCreatorReference() {
-        final User value = this.tracker$ownerUser == null ? null : this.tracker$ownerUser.get();
+        final User value = this.tracker$creatorUser == null ? null : this.tracker$creatorUser.get();
         if (value == null) {
-            if (this.tracker$owner != null) {
-                final Optional<User> user = this.tracked$getTrackedUser(PlayerTracker.Type.OWNER);
-                user.ifPresent(owner -> this.tracker$ownerUser = new WeakReference<>(owner));
+            if (this.tracker$creator != null) {
+                final Optional<User> user = this.tracked$getTrackedUser(PlayerTracker.Type.CREATOR);
+                user.ifPresent(creator -> this.tracker$creatorUser = new WeakReference<>(creator));
                 return user;
             }
         }
@@ -93,9 +93,9 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
     public Optional<User> tracked$getNotifierReference() {
         final User value = this.tracker$notifierUser == null ? null : this.tracker$notifierUser.get();
         if (value == null) {
-            if (this.tracker$owner != null) {
+            if (this.tracker$creator != null) {
                 final Optional<User> user = this.tracked$getTrackedUser(PlayerTracker.Type.NOTIFIER);
-                user.ifPresent(owner -> this.tracker$notifierUser = new WeakReference<>(owner));
+                user.ifPresent(creator -> this.tracker$notifierUser = new WeakReference<>(creator));
                 return user;
             }
         }
@@ -135,8 +135,8 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
 
     @Override
     public void tracked$setTrackedUUID(final PlayerTracker.Type type, @Nullable final UUID uuid) {
-        if (PlayerTracker.Type.OWNER == type) {
-            this.tracker$owner = uuid;
+        if (PlayerTracker.Type.CREATOR == type) {
+            this.tracker$creator = uuid;
         } else if (PlayerTracker.Type.NOTIFIER == type) {
             this.tracker$notifier = uuid;
         }
@@ -161,14 +161,14 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
 
     @Nullable
     private UUID getTrackedUniqueId(final PlayerTracker.Type type) {
-        if (this.tracker$owner != null && PlayerTracker.Type.OWNER == type) {
-            return this.tracker$owner;
+        if (this.tracker$creator != null && PlayerTracker.Type.CREATOR == type) {
+            return this.tracker$creator;
         }
         if ((Object)this instanceof TameableEntity) {
             final TameableEntity ownable = (TameableEntity) (Object) this;
             final Entity owner = ownable.getOwner();
             if (owner instanceof PlayerEntity) {
-                this.tracked$setTrackedUUID(PlayerTracker.Type.OWNER, owner.getUniqueID());
+                this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, owner.getUniqueID());
                 return owner.getUniqueID();
             }
         } else if (this.tracker$notifier != null && PlayerTracker.Type.NOTIFIER == type) {
@@ -186,8 +186,8 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
         }
 
         final UUID uniqueId = creatorNbt.getUniqueId(Constants.UUID);
-        if (PlayerTracker.Type.OWNER == type) {
-            this.tracker$owner = uniqueId;
+        if (PlayerTracker.Type.CREATOR == type) {
+            this.tracker$creator = uniqueId;
         } else if (PlayerTracker.Type.NOTIFIER == type) {
             this.tracker$notifier = uniqueId;
         }

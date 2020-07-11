@@ -38,9 +38,9 @@ import java.util.UUID;
 /**
  * An optionally implemented interface to bridge getting the
  * {@link UUID} and/or {@link User} from the targets. This
- * is implemented by {@code OwnershipTrackedMixin_Tracker}
+ * is implemented by {@code CreatorTrackedMixin_Tracker}
  * backing hooks and implementation by {@code EntityMixin_Tracker},
- * {@code ChunkMixin_OwnershipTracked}, and {@code WorldMixin_OwnershipTracked}.
+ * {@code ChunkMixin_OwnershipTracked}, and {@code WorldMixin_CreatorTracked}.
  * Note that it is not guaranteed this interface is mixed onto
  * {@link Entity} and {@link TileEntity} because of the option
  * for {@link ModuleCategory#useTracking()}. If the tracking is
@@ -50,7 +50,7 @@ import java.util.UUID;
  */
 public interface CreatorTrackedBridge {
 
-    Optional<UUID> tracked$getOwnerUUID();
+    Optional<UUID> tracked$getCreatorUUID();
 
     Optional<UUID> tracked$getNotifierUUID();
 
@@ -58,7 +58,7 @@ public interface CreatorTrackedBridge {
 
     Optional<User> tracked$getCreatorReference();
 
-    void tracked$setOwnerReference(@Nullable User user);
+    void tracked$setCreatorReference(@Nullable User user);
 
     Optional<User> tracked$getNotifierReference();
 

@@ -45,11 +45,11 @@ public abstract class HopperTileEntityMixin extends LockableLootTileEntityMixin 
     private static void impl$trackNotifierWhenTransferring(final IInventory inventory, final ItemEntity entityItem,
         final CallbackInfoReturnable<Boolean> callbackInfo) {
         if (entityItem instanceof CreatorTrackedBridge) {
-            ((CreatorTrackedBridge) entityItem).tracked$getCreatorReference().ifPresent(owner -> {
+            ((CreatorTrackedBridge) entityItem).tracked$getCreatorReference().ifPresent(creator -> {
                 if (inventory instanceof ActiveChunkReferantBridge && inventory instanceof TileEntity) {
                     final TileEntity te = (TileEntity) inventory;
                     final ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) inventory).bridge$getActiveChunk();
-                    spongeChunk.bridge$addTrackedBlockPosition(te.getBlockState().getBlock(), te.getPos(), owner, PlayerTracker.Type.NOTIFIER);
+                    spongeChunk.bridge$addTrackedBlockPosition(te.getBlockState().getBlock(), te.getPos(), creator, PlayerTracker.Type.NOTIFIER);
                 }
             });
         }

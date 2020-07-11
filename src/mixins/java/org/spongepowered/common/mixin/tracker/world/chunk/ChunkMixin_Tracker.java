@@ -334,11 +334,11 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
                 // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world);
                 newTileEntity = SpongeImplHooks.createTileEntity(newState, this.world);
                 if (!isFake) { // Surround with a server check
-                    final User owner = peek.getCreator().orElse(null);
-                    // If current owner exists, transfer it to newly created TE pos
+                    final User creator = peek.getCreator().orElse(null);
+                    // If current creator exists, transfer it to newly created TE pos
                     // This is required for TE's that get created during move such as pistons and ComputerCraft turtles.
-                    if (owner != null) {
-                        ((ChunkBridge) this).bridge$addTrackedBlockPosition(newBlock, pos, owner, PlayerTracker.Type.OWNER);
+                    if (creator != null) {
+                        ((ChunkBridge) this).bridge$addTrackedBlockPosition(newBlock, pos, creator, PlayerTracker.Type.CREATOR);
                     }
                 }
                 if (transaction != null) {
@@ -383,7 +383,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         builder.blockState(state)
                 .worldId(((WorldProperties) this.world.getWorldInfo()).getUniqueId())
                 .position(VecHelper.toVector3i(pos));
-        final Optional<UUID> creator = ((ChunkBridge) this).bridge$getBlockOwnerUUID(pos);
+        final Optional<UUID> creator = ((ChunkBridge) this).bridge$getBlockCreatorUUID(pos);
         final Optional<UUID> notifier = ((ChunkBridge) this).bridge$getBlockNotifierUUID(pos);
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);
@@ -430,10 +430,10 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
     private void tracker$SetActiveChunkOnTileEntityAdd(final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk((ChunkBridge) this);
-        // Make sure to set owner/notifier for TE if any chunk data exists
+        // Make sure to set creator/notifier for TE if any chunk data exists
         // Failure to do this during chunk load will cause TE's to not have proper user tracking
+        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ChunkBridge) this).bridge$getBlockCreatorUUID(pos).orElse(null));
         ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, ((ChunkBridge) this).bridge$getBlockNotifierUUID(pos).orElse(null));
-        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.OWNER, ((ChunkBridge) this).bridge$getBlockOwnerUUID(pos).orElse(null));
     }
 
 

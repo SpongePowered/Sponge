@@ -96,7 +96,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
 
             for (final Map.Entry<Short, PlayerTracker> mapEntry : chunk.bridge$getTrackedShortPlayerPositions().entrySet()) {
                 final Short pos = mapEntry.getKey();
-                final int ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
+                final int ownerUniqueIdIndex = mapEntry.getValue().creatorindex;
                 final int notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 final CompoundNBT valueNbt = new CompoundNBT();
                 valueNbt.putInt("owner", ownerUniqueIdIndex);
@@ -107,7 +107,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
 
             for (final Map.Entry<Integer, PlayerTracker> mapEntry : chunk.bridge$getTrackedIntPlayerPositions().entrySet()) {
                 final Integer pos = mapEntry.getKey();
-                final int ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
+                final int ownerUniqueIdIndex = mapEntry.getValue().creatorindex;
                 final int notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 final CompoundNBT valueNbt = new CompoundNBT();
                 valueNbt.putInt("owner", ownerUniqueIdIndex);
@@ -131,15 +131,15 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                 final boolean isShortPos = valueNbt.contains("pos");
                 final PlayerTracker tracker = new PlayerTracker();
                 if (valueNbt.contains("owner")) {
-                    tracker.ownerIndex = valueNbt.getInt("owner");
+                    tracker.creatorindex = valueNbt.getInt("owner");
                 } else if (valueNbt.contains("uuid")) { // Migrate old data, remove in future
-                    tracker.ownerIndex = valueNbt.getInt("uuid");
+                    tracker.creatorindex = valueNbt.getInt("uuid");
                 }
                 if (valueNbt.contains("notifier")) {
                     tracker.notifierIndex = valueNbt.getInt("notifier");
                 }
 
-                if (tracker.notifierIndex != -1 || tracker.ownerIndex != -1) {
+                if (tracker.notifierIndex != -1 || tracker.creatorindex != -1) {
                     if (isShortPos) {
                         trackedShortPlayerPositions.put(valueNbt.getShort("pos"), tracker);
                     } else {

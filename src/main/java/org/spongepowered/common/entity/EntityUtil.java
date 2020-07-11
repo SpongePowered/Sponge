@@ -708,7 +708,7 @@ public final class EntityUtil {
                     supplier.get()
                         .ifPresent(spawned -> {
                             if (entityToSpawn instanceof CreatorTrackedBridge) {
-                                ((CreatorTrackedBridge) entityToSpawn).tracked$setOwnerReference(spawned);
+                                ((CreatorTrackedBridge) entityToSpawn).tracked$setCreatorReference(spawned);
                             }
                         });
                     if (entityToSpawn.removed) {
@@ -726,7 +726,7 @@ public final class EntityUtil {
         supplier.get()
             .ifPresent(spawned -> {
                 if (entity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) entity).tracked$setOwnerReference(spawned);
+                    ((CreatorTrackedBridge) entity).tracked$setCreatorReference(spawned);
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already

@@ -29,7 +29,7 @@ import org.spongepowered.common.util.Constants;
 public final class PlayerTracker {
 
     public enum Type {
-        OWNER(Constants.Sponge.SPONGE_ENTITY_CREATOR),
+        CREATOR(Constants.Sponge.SPONGE_ENTITY_CREATOR),
         NOTIFIER(Constants.Sponge.SPONGE_ENTITY_NOTIFIER);
 
         public final String compoundKey;
@@ -39,21 +39,21 @@ public final class PlayerTracker {
         }
     }
 
-    public int ownerIndex;
+    public int creatorindex;
     public int notifierIndex;
 
     public PlayerTracker() {
-        this.ownerIndex = -1;
+        this.creatorindex = -1;
         this.notifierIndex = -1;
     }
 
     public PlayerTracker(int index, Type type) {
-        if (type == Type.OWNER) {
-            this.ownerIndex = index;
+        if (type == Type.CREATOR) {
+            this.creatorindex = index;
             this.notifierIndex = -1;
         } else {
             this.notifierIndex = index;
-            this.ownerIndex = -1;
+            this.creatorindex = -1;
         }
     }
 

@@ -46,7 +46,7 @@ public interface ChunkBridge {
 
     Optional<User> bridge$getBlockCreator(BlockPos pos);
 
-    Optional<UUID> bridge$getBlockOwnerUUID(BlockPos pos);
+    Optional<UUID> bridge$getBlockCreatorUUID(BlockPos pos);
 
     Optional<User> bridge$getBlockNotifier(BlockPos pos);
 

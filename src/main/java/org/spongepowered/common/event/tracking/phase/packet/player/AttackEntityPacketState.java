@@ -101,7 +101,8 @@ public final class AttackEntityPacketState extends BasicPacketState {
         }
         final World spongeWorld = (World) player.world;
         if (entity instanceof CreatorTrackedBridge) {
-            ((CreatorTrackedBridge) entity).tracked$setOwnerReference((User) player);
+            // TODO Minecraft 1.14 - How can attacking an Entity mean you created it??
+            ((CreatorTrackedBridge) entity).tracked$setCreatorReference((User) player);
         } else {
             ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
         }
