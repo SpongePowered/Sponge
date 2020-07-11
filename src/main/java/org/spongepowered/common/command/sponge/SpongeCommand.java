@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.sponge;
 
+import co.aikar.timings.Timings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -31,10 +32,12 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -52,31 +55,44 @@ public class SpongeCommand {
                     .setKey("plugin")
                     .build();
 
+
     public static Command.Parameterized createSpongeCommand() {
+        // /sponge audit
+        final Command.Parameterized auditCommand = Command.builder()
+                .setPermission("sponge.command.audit")
+                .setExecutor(SpongeCommand::auditSubcommandExecutor)
+                .build();
+
+        // /sponge heap
+        final Command.Parameterized heapCommand = Command.builder()
+                .setPermission("sponge.command.heap")
+                .setExecutor(SpongeCommand::heapSubcommandExecutor)
+                .build();
+
+        // /sponge plugins
         final Command.Parameterized pluginsReloadCommand = Command.builder()
-                .setExecutor(SpongeCommand::pluginsReloadSubcommand)
+                .setPermission("sponge.command.plugins.reload")
+                .setExecutor(SpongeCommand::pluginsReloadSubcommandExecutor)
                 .parameter(PLUGIN_CONTAINER_PARAMETER)
                 .build();
-
-        final Command.Parameterized auditCommand = Command.builder()
-                .setExecutor(SpongeCommand::auditSubcommand)
-                .build();
-
-        final Command.Parameterized heapCommand = Command.builder()
-                .setExecutor(SpongeCommand::heapSubcommand)
-                .build();
-
         final Command.Parameterized pluginsCommand = Command.builder()
+                .setPermission("sponge.command.plugins")
                 .child(pluginsReloadCommand, "reload")
                 .setExecutor(SpongeCommand::pluginsSubcommand)
                 .build();
 
+        // /sponge timings
+        final Command.Parameterized timingsCommand = SpongeCommand.timingsSubcommand();
 
+
+        // /sponge
         return Command.builder()
+                .setPermission("sponge.command.root")
                 .setExecutor(SpongeCommand::rootCommand)
                 .child(auditCommand, "audit")
-                .child(pluginsCommand, "plugins")
                 .child(heapCommand, "heap")
+                .child(pluginsCommand, "plugins")
+                .child(timingsCommand, "timings")
                 .build();
     }
 
@@ -103,14 +119,14 @@ public class SpongeCommand {
     }
 
     @NonNull
-    public static CommandResult auditSubcommand(final CommandContext context) {
+    public static CommandResult auditSubcommandExecutor(final CommandContext context) {
         SpongeCommon.getLogger().info("Starting Mixin Audit");
         // MixinEnvironment.getCurrentEnvironment().audit();
         return CommandResult.success();
     }
 
     @NonNull
-    private static CommandResult heapSubcommand(final CommandContext context) {
+    private static CommandResult heapSubcommandExecutor(final CommandContext context) {
         final File file = new File(new File(new File("."), "dumps"),
                 "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.hprof");
         // src.sendMessage(Text.of("Writing JVM heap data to: ", file));
@@ -129,7 +145,7 @@ public class SpongeCommand {
     }
 
     @NonNull
-    private static CommandResult pluginsReloadSubcommand(final CommandContext context) {
+    private static CommandResult pluginsReloadSubcommandExecutor(final CommandContext context) {
         final Optional<PluginContainer> pluginContainer = context.getOne(PLUGIN_CONTAINER_PARAMETER);
         final RefreshGameEvent event = SpongeEventFactory.createRefreshGameEvent(
                 PhaseTracker.getCauseStackManager().getCurrentCause(),
@@ -147,6 +163,80 @@ public class SpongeCommand {
 
         SpongeCommon.getLogger().info("Completed plugin refresh.");
         return CommandResult.success();
+    }
+
+    private static Command.Parameterized timingsSubcommand() {
+        return Command.builder()
+                .setPermission("sponge.command.timings")
+                // .setShortDescription(Text.of("Manages Sponge Timings data to see performance of the server.")) //TODO: when text comes back
+                .child(Command.builder()
+                        .setExecutor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            Timings.reset();
+                            context.sendMessage(Text.of("Timings reset"));
+                            return CommandResult.success();
+                        })
+                        .build(), "reset")
+                .child(Command.builder()
+                        .setExecutor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            Timings.generateReport(context.getMessageChannel());
+                            return CommandResult.success();
+                        })
+                        .build(), "report", "paste")
+                .child(Command.builder()
+                        .setExecutor(context -> {
+                            Timings.setTimingsEnabled(true);
+                            context.sendMessage(Text.of("Enabled Timings & Reset"));
+                            return CommandResult.success();
+                        })
+                        .build(), "on")
+                .child(Command.builder()
+                        .setExecutor(context -> {
+                            Timings.setTimingsEnabled(false);
+                            context.sendMessage(Text.of("Disabled Timings"));
+                            return CommandResult.success();
+                        })
+                        .build(), "off")
+                .child(Command.builder()
+                        .setExecutor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            Timings.setVerboseTimingsEnabled(true);
+                            context.sendMessage(Text.of("Enabled Verbose Timings"));
+                            return CommandResult.success();
+                        })
+                        .build(), "verbon")
+                .child(Command.builder()
+                        .setExecutor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            Timings.setVerboseTimingsEnabled(false);
+                            context.sendMessage(Text.of("Disabled Verbose Timings"));
+                            return CommandResult.success();
+                        })
+                        .build(), "verboff")
+                .child(Command.builder()
+                        .setExecutor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                context.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
+                                return CommandResult.empty();
+                            }
+                            context.sendMessage(Text.of("Timings cost: " + SpongeTimingsFactory.getCost()));
+                            return CommandResult.success();
+                        })
+                        .build(), "cost")
+                .build();
     }
 
 }

@@ -421,12 +421,11 @@ public class SpongeCommandManager implements CommandManager {
     private void prettyPrintThrowableError(final Throwable thr, final String commandNoArgs, final String commandString, final CommandCause cause) {
         final SpongeCommandMapping mapping = this.commandMappings.get(commandNoArgs.toLowerCase());
         new PrettyPrinter(100)
-                .add("Unexpected error occurred while executing command '%s'", commandNoArgs)
+                .add("Unexpected error occurred while executing command '%s'", commandString).centre()
                 .hr()
                 .addWrapped("While trying to run '%s', an error occurred that the command processor was not expecting. "
                           + "This usually indicates an error in the plugin that owns this command. Report this error "
-                          + "to the plugin developer first - this is usually not a Sponge error.", commandNoArgs)
-                .add()
+                          + "to the plugin developer first - this is usually not a Sponge error.", commandString)
                 .hr()
                 .add()
                 .add("Command: %s", commandString)
@@ -505,8 +504,6 @@ public class SpongeCommandManager implements CommandManager {
             );
         } catch (final CommandFailedRegistrationException ex) {
             ex.printStackTrace();
-        } catch (final Error error) {
-            error.printStackTrace();
         }
         for (final CommandRegistrar<?> registrar : this.game.getRegistry().getCatalogRegistry().getAllOf(CommandRegistrar.class)) {
             this.game.getEventManager().post(this.createEvent(cause, this.game, registrar));
