@@ -204,7 +204,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
     @Override
     public <T extends CatalogType, E extends T> Supplier<E> provideSupplier(final Class<T> catalogClass, final String suggestedId) {
-        Preconditions.checkNotNull(catalogClass);
         Preconditions.checkNotNull(suggestedId);
 
         final Map<String, Supplier<CatalogType>> catalogSuppliers = this.suppliers.get(catalogClass);
@@ -223,7 +222,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     @Override
     public <T extends CatalogType> Optional<T> get(final Class<T> typeClass, final ResourceKey key) {
         Preconditions.checkNotNull(key);
-        final Registry<CatalogType> registry = this.registries.get(typeClass);
+
+        final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
         if (registry == null) {
             return Optional.empty();
         }
@@ -233,16 +233,16 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
     @Override
     public <T extends CatalogType> Collection<T> getAllOf(final Class<T> typeClass) {
-        final Registry<CatalogType> registry = this.registries.get(typeClass);
+        final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
         if (registry == null) {
             return Collections.emptyList();
         }
-        return (Collection<T>) (Object) Arrays.asList(((SimpleRegistryAccessor) registry).accessor$getValues());
+        return (Collection<T>) (Object) Collections.unmodifiableList(Arrays.asList(((SimpleRegistryAccessor) registry).accessor$getValues()));
     }
 
     @Override
     public <T extends CatalogType> Stream<T> streamAllOf(final Class<T> typeClass) {
-        final Registry<CatalogType> registry = this.registries.get(typeClass);
+        final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
         final Stream<T> stream;
         if (registry == null) {
             stream = Stream.empty();
@@ -287,9 +287,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return stream;
     }
 
-    public <T extends CatalogType, E extends T> SpongeCatalogRegistry registerSupplier(final Class<E> catalogClass, final String suggestedId,
-        Supplier<E> supplier) {
-        Preconditions.checkNotNull(catalogClass);
+    public <T extends CatalogType, E extends T> SpongeCatalogRegistry registerSupplier(final Class<E> catalogClass, final String suggestedId, Supplier<E> supplier) {
         Preconditions.checkNotNull(supplier);
 
         final Map<String, Supplier<CatalogType>> catalogSuppliers = this.suppliers.computeIfAbsent((Class<CatalogType>) (Object) catalogClass, k -> new Object2ObjectArrayMap<>());
@@ -303,14 +301,12 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key) {
-        Preconditions.checkNotNull(catalogClass);
         Preconditions.checkNotNull(key);
 
         return this.registerRegistry(catalogClass, key, null, false);
     }
 
     public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key, @Nullable final Supplier<Set<T>> defaultsSupplier, final boolean generateSuppliers) {
-        Preconditions.checkNotNull(catalogClass);
         Preconditions.checkNotNull(key);
 
         if (this.registries.get(key) != null) {
@@ -343,7 +339,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     private <T extends CatalogType> SpongeCatalogRegistry generateCallbackRegistry(Class<T> catalogClass, ResourceKey key, BiConsumer<ResourceLocation, T> callback) {
-        Preconditions.checkNotNull(catalogClass);
         Preconditions.checkNotNull(key);
 
         final Registry<CatalogType> registry = this.registries.putIfAbsent(key, (Registry<CatalogType>) new CallbackRegistry<>(callback));
@@ -355,10 +350,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    private <T extends CatalogType, U> SpongeCatalogRegistry registerMappedRegistry(Class<T> catalogClass, ResourceKey key,
-        @Nullable Supplier<Set<Tuple<T, U>>> defaultsSupplier, boolean generateSuppliers) {
-
-        Preconditions.checkNotNull(catalogClass);
+    private <T extends CatalogType, U> SpongeCatalogRegistry registerMappedRegistry(Class<T> catalogClass, ResourceKey key, @Nullable Supplier<Set<Tuple<T, U>>> defaultsSupplier, boolean generateSuppliers) {
         Preconditions.checkNotNull(key);
 
         if (this.registries.containsKey(key)) {
@@ -384,7 +376,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     public <T extends CatalogType, R extends Registry<T>> @Nullable R getRegistry(Class<T> catalogClass) {
-        Preconditions.checkNotNull(catalogClass);
         return (R) this.registriesByType.get(catalogClass);
     }
 
