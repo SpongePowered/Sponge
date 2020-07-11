@@ -160,11 +160,7 @@ import org.spongepowered.common.accessor.entity.monster.SpellcastingIllagerEntit
 import org.spongepowered.common.accessor.entity.monster.VexEntityAccessor;
 import org.spongepowered.common.accessor.entity.monster.VindicatorEntityAccessor;
 import org.spongepowered.common.accessor.entity.monster.ZombiePigmanEntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.AnimalEntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.FoxEntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.MooshroomEntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.OcelotEntityAccessor;
-import org.spongepowered.common.accessor.entity.passive.TurtleEntityAccessor;
+import org.spongepowered.common.accessor.entity.passive.*;
 import org.spongepowered.common.accessor.entity.passive.fish.PufferfishEntityAccessor;
 import org.spongepowered.common.accessor.entity.passive.horse.LlamaEntityAccessor;
 import org.spongepowered.common.accessor.entity.passive.horse.TraderLlamaEntityAccessor;
@@ -592,14 +588,13 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
     }
 
     private void registerPanda() {
-        register(new PandaEntityEatingTimeProvider());
+        register(PandaEntityAccessor.class, Keys.EATING_TIME, PandaEntityAccessor::accessor$func_213559_es, PandaEntityAccessor::accessor$func_213571_t);
         register(PandaEntity.class, Keys.HIDDEN_GENE,
                 p -> ((PandaGene) (Object) p.getHiddenGene()),
                 (p, g) -> p.setHiddenGene((PandaEntity.Type) (Object) g));
         register(PandaEntity.class, Keys.KNOWN_GENE,
                 p -> ((PandaGene) (Object) p.getMainGene()),
                 (p, g) -> p.setMainGene((PandaEntity.Type) (Object) g));
-
         register(PandaEntity.class, Keys.IS_EATING, PandaEntity::func_213578_dZ, PandaEntity::func_213534_t);
 //        register(PandaEntity.class, Keys.IS_FRIGHTENED, getter, setter); // TODO
         register(PandaEntity.class, Keys.IS_LYING_ON_BACK, PandaEntity::func_213567_dY, PandaEntity::func_213542_s);
