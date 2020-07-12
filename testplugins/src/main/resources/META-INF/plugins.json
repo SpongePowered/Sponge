@@ -89,6 +89,48 @@
                 "version": "8.0.0"
             }],
             "extra": {}
+        },
+        {
+            "id": "inventorytest",
+            "name": "InventoryTest",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.inventorytest.InventoryTest",
+            "description": "Testing inventory changes",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }],
+            "extra": {}
+        },
+        {
+            "id": "customdatatest",
+            "name": "CustomDataTest",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.customdatatest.CustomDataTest",
+            "description": "Testing custom data changes",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }],
+            "extra": {}
         }
     ]
 }
