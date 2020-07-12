@@ -30,9 +30,11 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -41,10 +43,12 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
     private final Map<String, PluginContainer> plugins;
     private final Map<Object, PluginContainer> instancesToPlugins;
+    private final List<PluginContainer> sortedPlugins;
 
     public VanillaPluginManager() {
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
+        this.sortedPlugins = new ArrayList<>();
     }
 
     @Override
@@ -59,7 +63,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
     @Override
     public Collection<PluginContainer> getPlugins() {
-        return Collections.unmodifiableCollection(this.plugins.values());
+        return Collections.unmodifiableCollection(this.sortedPlugins);
     }
 
     @Override
@@ -71,5 +75,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
     public void addPlugin(PluginContainer plugin) {
         this.plugins.put(plugin.getMetadata().getId(), Preconditions.checkNotNull(plugin));
         this.instancesToPlugins.put(plugin.getInstance(), plugin);
+        this.sortedPlugins.add(plugin);
     }
 }

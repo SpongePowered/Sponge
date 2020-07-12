@@ -18,6 +18,12 @@
             "id": "spongeapi",
             "version": "8.0.0"
         }],
-        "extra": {}
+        "extra": {
+            "test": 1,
+            "test2": "Banana",
+            "test3": "banana123",
+            "test4": "apple_cider_mahogany_salmon",
+            "test5": 3
+        }
     }]
 }
