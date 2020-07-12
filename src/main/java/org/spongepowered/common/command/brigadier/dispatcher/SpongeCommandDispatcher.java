@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.brigadier;
+package org.spongepowered.common.command.brigadier.dispatcher;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
@@ -37,6 +37,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
@@ -49,17 +50,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+// For use on the Brigadier dispatcher
 public class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
-
-    @Override
-    public LiteralCommandNode<CommandSource> register(final LiteralArgumentBuilder<CommandSource> command) {
-        return BrigadierCommandRegistrar.INSTANCE.register(command);
-    }
-
-    // Yup. It is what it is.
-    public LiteralCommandNode<CommandSource> registerInternal(final LiteralArgumentBuilder<CommandSource> command) {
-        return super.register(command);
-    }
 
     @Override
     public ParseResults<CommandSource> parse(final String command, final CommandSource source) {

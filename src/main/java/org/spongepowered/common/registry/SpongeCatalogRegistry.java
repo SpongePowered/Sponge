@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -66,6 +67,7 @@ import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
+import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.type.ArmorMaterial;
@@ -140,6 +142,7 @@ import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatalogedValueParameterStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DismountTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerator;
@@ -241,7 +244,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         if (registry == null) {
             return Collections.emptyList();
         }
-        return (Collection<T>) (Object) Collections.unmodifiableList(Arrays.asList(((SimpleRegistryAccessor) registry).accessor$getValues()));
+        return ImmutableSet.<T>copyOf((Set<T>) (Object) (((SimpleRegistryAccessor) registry).accessor$getRegistryObjects().values()));
     }
 
     @Override
@@ -251,7 +254,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         if (registry == null) {
             stream = Stream.empty();
         } else {
-            stream = (Stream<T>) (Object) Arrays.stream(((SimpleRegistryAccessor) registry).accessor$getValues());
+            stream = (Stream<T>) (Object) ((SimpleRegistryAccessor) registry).accessor$getRegistryObjects().values().stream();
         }
 
         return stream;
@@ -441,6 +444,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 //            .generateRegistry(DragonPhaseType.class, ResourceKey.minecraft("dragon_phase_type"), DragonPhaseTypeStreamGenerator.stream(), true)
 //            .generateRegistry(DyeColor.class, ResourceKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
             .generateRegistry(CatalogedValueParameter.class, ResourceKey.sponge("value_parameter"), CatalogedValueParameterStreamGenerator.stream(), true)
+            .generateRegistry(CommandRegistrar.class, ResourceKey.sponge("command_registrar"), CommandRegistrarStreamGenerator.stream(), true)
             .generateRegistry(EventContextKey.class, ResourceKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true)
 //            .generateRegistry(FoxType.class, ResourceKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true)
 //            .generateRegistry(GameMode.class, ResourceKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true)

@@ -149,6 +149,11 @@ public abstract class SpongeCommandRegistrar<T extends Command> implements Comma
     abstract LiteralArgumentBuilder<CommandSource> createNode(final String primaryAlias, final T command);
 
     protected CommandDispatcher<CommandSource> getDispatcher() {
-        return SpongeCommon.getServer().getCommandManager().getDispatcher();
+        return BrigadierCommandRegistrar.INSTANCE.getDispatcher();
+    }
+
+    @Override
+    public void reset() {
+        // nothing for us to do
     }
 }

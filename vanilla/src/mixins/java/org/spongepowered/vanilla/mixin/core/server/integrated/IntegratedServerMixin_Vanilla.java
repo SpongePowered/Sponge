@@ -35,10 +35,12 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.vanilla.VanillaLifecycle;
 import org.spongepowered.vanilla.VanillaServer;
 

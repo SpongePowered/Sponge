@@ -30,6 +30,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.user.UserManager;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -85,6 +86,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public boolean bridge$isVanished() {
         return false;
+    }
+
+    @Override
+    public Tristate bridge$permDefault(final String permission) {
+        return Tristate.FALSE;
     }
 
     /*

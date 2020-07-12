@@ -22,19 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.command;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import net.minecraft.command.ICommandSource;
-import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
+import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
+import org.spongepowered.common.command.registrar.SpongeRawCommandRegistrar;
 
-public interface CommandSourceBridge {
+import java.util.stream.Stream;
 
-    Cause bridge$getCause();
+public class CommandRegistrarStreamGenerator {
 
-    ICommandSource bridge$getICommandSource();
+    private CommandRegistrarStreamGenerator() {
+    }
 
-    CommandCause bridge$asCommandCause();
+    public static Stream<CommandRegistrar<?>> stream() {
+        return Stream.of(
+                BrigadierCommandRegistrar.INSTANCE,
+                SpongeParameterizedCommandRegistrar.INSTANCE,
+                SpongeRawCommandRegistrar.INSTANCE
+        );
+    }
 
-    void bridge$setCause(Cause build);
 }

@@ -75,4 +75,6 @@ public interface EntityAccessor {
     @Invoker("setFlag") void accessor$setFlag(int flag, boolean set);
 
     @Invoker("getFireImmuneTicks") int accessor$getFireImmuneTicks();
+
+    @Invoker("getPermissionLevel") int accessor$getPermissionLevel();
 }

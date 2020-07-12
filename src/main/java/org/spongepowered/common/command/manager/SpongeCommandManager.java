@@ -50,8 +50,6 @@ import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -62,10 +60,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.SpongeCommandDispatcher;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeRawCommandRegistrar;
@@ -74,8 +70,6 @@ import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -103,6 +97,8 @@ public class SpongeCommandManager implements CommandManager {
     private final Map<String, SpongeCommandMapping> commandMappings = new HashMap<>();
     private final Multimap<SpongeCommandMapping, String> inverseCommandMappings = HashMultimap.create();
     private final Multimap<PluginContainer, SpongeCommandMapping> pluginToCommandMap = HashMultimap.create();
+    private boolean isResetting = false;
+    private boolean hasStarted = false;
 
     @Inject
     public SpongeCommandManager(final Game game) {
@@ -165,12 +161,10 @@ public class SpongeCommandManager implements CommandManager {
             node.then(commandNode);
         }
 
-        final SpongeCommandDispatcher dispatcher =
-                ((SpongeCommandDispatcher) SpongeCommon.getServer().getCommandManager().getDispatcher());
-        final LiteralCommandNode<CommandSource> commandToAppend = dispatcher.registerInternal(node);
+        final LiteralCommandNode<CommandSource> commandToAppend = BrigadierCommandRegistrar.INSTANCE.register(node);
         for (final String secondaryAlias : mapping.getAllAliases()) {
             if (!secondaryAlias.equals(mapping.getPrimaryAlias())) {
-                dispatcher.registerInternal(LiteralArgumentBuilder.<CommandSource>literal(secondaryAlias).redirect(commandToAppend));
+                BrigadierCommandRegistrar.INSTANCE.register(LiteralArgumentBuilder.<CommandSource>literal(secondaryAlias).redirect(commandToAppend));
             }
         }
 
@@ -260,11 +254,16 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @Override
+    public boolean isResetting() {
+        return this.isResetting;
+    }
+
+    @Override
     @NonNull
     public CommandResult process(@NonNull final String arguments) throws CommandException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.COMMAND.get(), arguments);
-            return this.process(CommandCause.of(frame.getCurrentCause()), arguments);
+            return this.process(CommandCause.create(), arguments);
         } catch (final CommandSyntaxException commandSyntaxException) {
             throw new CommandException(Text.of(commandSyntaxException), commandSyntaxException);
         }
@@ -308,7 +307,7 @@ public class SpongeCommandManager implements CommandManager {
         final CommandResult result;
         // final TrackedInventoryBridge inventory = source instanceof EntityPlayer ?
         //        ((TrackedInventoryBridge) ((EntityPlayer) source).inventory) : null;
-        try (final CommandPhaseContext context = GeneralPhase.State.COMMAND
+      /*  try (final CommandPhaseContext context = GeneralPhase.State.COMMAND
                 .createPhaseContext(PhaseTracker.getInstance())
                 .source(source)
                 .command(args)) {
@@ -322,7 +321,8 @@ public class SpongeCommandManager implements CommandManager {
             //    context.inventory(inventory);
             //    inventory.bridge$setCaptureInventory(true);
             //}
-            context.buildAndSwitch();
+            context.buildAndSwitch(); */
+        try {
             result = mapping.getRegistrar().process(cause, mapping.getPrimaryAlias(), args);
         } catch (final CommandException exception) {
             final CommandResult errorResult = CommandResult.builder().setResult(0).error(exception.getText()).build();
@@ -457,7 +457,7 @@ public class SpongeCommandManager implements CommandManager {
                 }
 
                 return mapping.getRegistrar().suggestions(
-                        CommandCause.of(frame.getCurrentCause()), mapping.getPrimaryAlias(), splitArg[1]);
+                        CommandCause.create(), mapping.getPrimaryAlias(), splitArg[1]);
             }
 
             return this.commandMappings.keySet()
@@ -509,6 +509,20 @@ public class SpongeCommandManager implements CommandManager {
             this.game.getEventManager().post(this.createEvent(cause, this.game, registrar));
         }
         BrigadierCommandRegistrar.INSTANCE.completeVanillaRegistration();
+        this.hasStarted = true;
+    }
+
+    public void reset() {
+        if (this.hasStarted) {
+            this.isResetting = true;
+            for (final CommandRegistrar<?> registrar : this.game.getRegistry().getCatalogRegistry().getAllOf(CommandRegistrar.class)) {
+                registrar.reset();
+            }
+            this.commandMappings.clear();
+            this.inverseCommandMappings.clear();
+            this.pluginToCommandMap.clear();
+            this.isResetting = false;
+        }
     }
 
     private <T extends CommandRegistrar<?>> RegisterCommandEventImpl<T> createEvent(final Cause cause, final Game game, final T registrar) {

@@ -45,7 +45,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.SpongeCommandDispatcher;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
@@ -77,6 +77,8 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
     private boolean hasVanillaRegistered;
     private final List<LiteralCommandNode<CommandSource>> vanilla = new ArrayList<>();
 
+    private SpongeCommandDispatcher dispatcher = new SpongeCommandDispatcher();
+
     private BrigadierCommandRegistrar() {}
 
     // For mods and others that use this. We get the plugin container from the CauseStack
@@ -95,11 +97,10 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         return this.registerInternal(this, container, command, new String[0], BrigadierCommandRegistrar.UPDATE_REQUIREMENTS, true).getSecond();
     }
 
-    public void commandsObjectHasBeenConstructed() {
-        this.hasVanillaRegistered = true;
-    }
-
     public void completeVanillaRegistration() {
+        // At this point, let vanilla through anyway, if they haven't come through yet
+        // then they can register anyway.
+        this.hasVanillaRegistered = true;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(Launcher.getInstance().getMinecraftPlugin());
             for (final LiteralCommandNode<CommandSource> node : this.vanilla) {
@@ -154,7 +155,6 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         return this.registerInternal(registrar, container, command, secondaryAliases, false, false);
     }
 
-    @SuppressWarnings("unchecked")
     private Tuple<CommandMapping, LiteralCommandNode<CommandSource>> registerInternal(
             final CommandRegistrar<?> registrar,
             final PluginContainer container,
@@ -169,8 +169,7 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         if (allowDuplicates && existingMapping.isPresent()) {
             // then we just let it go.
             this.updateRequirement(container, command, updateRequirement, requestedAlias, command);
-            final LiteralCommandNode<CommandSource> builtNode =
-                    ((SpongeCommandDispatcher) SpongeCommon.getServer().getCommandManager().getDispatcher()).registerInternal(command);
+            final LiteralCommandNode<CommandSource> builtNode = this.dispatcher.register(command);
             return Tuple.of(existingMapping.get(), builtNode);
         }
 
@@ -206,14 +205,12 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         // Let the registration happen.
         this.updateRequirement(container, command, updateRequirement, requestedAlias, literalToRegister);
 
-        final LiteralCommandNode<CommandSource> builtNode =
-                ((SpongeCommandDispatcher) SpongeCommon.getServer().getCommandManager().getDispatcher()).registerInternal(literalToRegister);
+        final LiteralCommandNode<CommandSource> builtNode = this.dispatcher.register(literalToRegister);
 
         // Redirect aliases
         for (final String alias : mapping.getAllAliases()) {
             if (!alias.equals(literalToRegister.getLiteral())) {
-                ((SpongeCommandDispatcher) SpongeCommon.getServer().getCommandManager().getDispatcher())
-                        .registerInternal(LiteralArgumentBuilder.<CommandSource>literal(alias).requires(builtNode.getRequirement()).redirect(builtNode));
+                this.dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(alias).requires(builtNode.getRequirement()).redirect(builtNode));
             }
         }
 
@@ -226,19 +223,18 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
             final boolean updateRequirement,
             final String requestedAlias,
             final LiteralArgumentBuilder<CommandSource> literalToRegister) {
-        if (updateRequirement) {
+        /* if (updateRequirement) {
             // If the requirement should be updated, register with the permission <modid>.command.<permission>
             final String permission = String.format("%s.command.%s", container.getMetadata().getId(), requestedAlias.toLowerCase());
             literalToRegister.requires(command.getRequirement().and(commandSource -> ((CommandCause) commandSource).getSubject().hasPermission(permission)));
-        }
+        }*/ // TODO: Be able to pull out the op level zero commands and set the default permissions...
     }
 
     @Override
     @NonNull
     public CommandResult process(@NonNull final CommandCause cause, @NonNull final String command, @NonNull final String arguments) throws CommandException {
         try {
-            final CommandDispatcher<CommandSource> dispatcher = SpongeCommon.getServer().getCommandManager().getDispatcher();
-            final int result = dispatcher.execute(dispatcher.parse(command + " " + arguments, (CommandSource) cause));
+            final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
             return CommandResult.builder().setResult(result).build();
         } catch (final CommandSyntaxException e) {
             // TODO: CommandException when text is working
@@ -249,9 +245,8 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
     @Override
     @NonNull
     public List<String> suggestions(@NonNull final CommandCause cause, @NonNull final String command, @NonNull final String arguments) {
-        final CommandDispatcher<CommandSource> dispatcher = SpongeCommon.getServer().getCommandManager().getDispatcher();
         final CompletableFuture<Suggestions> suggestionsCompletableFuture =
-                dispatcher.getCompletionSuggestions(dispatcher.parse(command + " " + arguments, (CommandSource) cause));
+                this.dispatcher.getCompletionSuggestions(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
         // TODO: Fix so that we keep suggestions in the Mojang format?
         return suggestionsCompletableFuture.join().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }
@@ -259,13 +254,24 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
     @Override
     @NonNull
     public Optional<Text> help(@NonNull final CommandCause cause, @NonNull final String command) {
-        final CommandDispatcher<CommandSource> dispatcher = SpongeCommon.getServer().getCommandManager().getDispatcher();
-        final CommandNode<CommandSource> node = dispatcher.findNode(Collections.singletonList(command));
+        final CommandNode<CommandSource> node = this.dispatcher.findNode(Collections.singletonList(command));
         if (node != null) {
-            return Optional.of(Text.of(dispatcher.getSmartUsage(node, (CommandSource) cause)));
+            return Optional.of(Text.of(this.dispatcher.getSmartUsage(node, (CommandSource) cause)));
         }
 
         return Optional.empty();
+    }
+
+    public CommandDispatcher<CommandSource> getDispatcher() {
+        return this.dispatcher;
+    }
+
+    @Override
+    public void reset() {
+        if (SpongeCommon.getGame().getCommandManager().isResetting()) {
+            this.dispatcher = new SpongeCommandDispatcher();
+            this.hasVanillaRegistered = false;
+        }
     }
 
     @Override
@@ -274,8 +280,12 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         return RESOURCE_KEY;
     }
 
-    private CommandDispatcher<CommandSource> getDispatcher() {
-        return SpongeCommon.getServer().getCommandManager().getDispatcher();
+    private String createCommandString(final String command, final String argument) {
+        if (argument.isEmpty()) {
+            return command;
+        }
+
+        return command + " " + argument;
     }
 
 }

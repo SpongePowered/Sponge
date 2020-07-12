@@ -31,6 +31,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class SpongeCommandCauseFactory implements CommandCause.Factory {
 
@@ -40,14 +41,11 @@ public class SpongeCommandCauseFactory implements CommandCause.Factory {
 
     @Override
     @NonNull
-    public CommandCause create(final Cause cause) {
+    public CommandCause create() {
+        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         final CommandSource commandSource =
                 cause.first(CommandSourceProviderBridge.class).orElseGet(() ->
                         (CommandSourceProviderBridge) SpongeCommon.getServer()).bridge$getCommandSource(cause);
-        // Heh, so this is going to get slightly complicated.
-        // Our Cause controls the source we get. Of course, we just got the appropriate command source from the
-        // cause, but there might be overrides in the context. So we need to apply them now.
-        ((CommandSourceBridge) commandSource).bridge$createFromCauseAndThisSource(cause);
         return (CommandCause) commandSource;
     }
 
