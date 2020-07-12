@@ -39,7 +39,6 @@ import java.util.List;
 
 public final class SpongeBootstrap {
 
-    private static Injector bootstrapInjector;
     private static SpongeLifecycle lifecycle;
     
     public static void perform(final String engineName, final Runnable engineStart) {
@@ -49,10 +48,10 @@ public final class SpongeBootstrap {
                 new SpongeModule(),
                 new SpongeCommonModule()
         );
-        SpongeBootstrap.bootstrapInjector = Guice.createInjector(modules);
+        final Injector bootstrapInjector = Guice.createInjector(modules);
 
-        SpongeBootstrap.lifecycle = SpongeBootstrap.bootstrapInjector.getInstance(SpongeLifecycle.class);
-        Launcher.getInstance().getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.PARENT_INJECTOR, () -> SpongeBootstrap.bootstrapInjector);
+        Launcher.getInstance().getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.PARENT_INJECTOR, () -> bootstrapInjector);
+        SpongeBootstrap.lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);
         SpongeBootstrap.lifecycle.establishFactories();
         SpongeBootstrap.lifecycle.establishBuilders();
         SpongeBootstrap.lifecycle.initTimings();
@@ -63,10 +62,6 @@ public final class SpongeBootstrap {
 
         Launcher.getInstance().getLogger().info("Loading Minecraft '{}', please wait...", engineName);
         engineStart.run();
-    }
-
-    public static Injector getBootstrapInjector() {
-        return SpongeBootstrap.bootstrapInjector;
     }
 
     public static SpongeLifecycle getLifecycle() {
