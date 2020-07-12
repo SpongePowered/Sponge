@@ -29,6 +29,7 @@ import com.google.inject.Injector;
 import com.google.inject.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.Blackboard;
@@ -174,4 +175,8 @@ public abstract class Launcher {
     }
 
     protected abstract void createPlatformPlugins(final Path gameDirectory);
+
+    public final void auditMixins() {
+        MixinEnvironment.getCurrentEnvironment().audit();
+    }
 }

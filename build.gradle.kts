@@ -100,14 +100,6 @@ val mixins by sourceSets.registering {
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = accessors.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = main, targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
 }
-val invalid by sourceSets.registering {
-    java.srcDir("invalid" + File.separator + "main" + File.separator + "java")
-    applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
-    applyNamedDependencyOnOutput(originProject = project, sourceAdding = accessors.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
-    applyNamedDependencyOnOutput(originProject = project, sourceAdding = mixins.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
-    applyNamedDependencyOnOutput(originProject = project, sourceAdding = main, targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
-}
-
 
 configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {}
 repositories {
@@ -163,10 +155,6 @@ dependencies {
     add(accessors.get().implementationConfigurationName, accessorsConfig)
     add(mixins.get().implementationConfigurationName, mixinsConfig)
     add(mixins.get().implementationConfigurationName, project(":SpongeAPI"))
-
-    // Invalid
-    add(invalid.get().implementationConfigurationName, project(":SpongeAPI"))
-    add(invalid.get().implementationConfigurationName, mixinsConfig)
 }
 
 fun debug(logger: Logger, messsage: String) {
@@ -352,15 +340,7 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMain, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
     }
-    val vanillaInvalid by sourceSets.register("invalid") {
-        java.srcDir("invalid" + File.separator + "main" + File.separator + "java")
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = mixins.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-    }
 
-    val vanillaInvalidImplementation by configurations.named(vanillaInvalid.implementationConfigurationName)
     val vanillaAccessorsAnnotationProcessor by configurations.named(vanillaAccessors.annotationProcessorConfigurationName)
     val vanillaAccessorsImplementation by configurations.named(vanillaAccessors.implementationConfigurationName)
     val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
@@ -407,9 +387,6 @@ project("SpongeVanilla") {
         api(launch.get().output)
         implementation(accessors.get().output)
         implementation(project(commonProject.path)) {
-            exclude(group = "net.minecraft", module = "server")
-        }
-        vanillaInvalidImplementation(project(commonProject.path)) {
             exclude(group = "net.minecraft", module = "server")
         }
         vanillaMixinsImplementation(project(commonProject.path)) {
