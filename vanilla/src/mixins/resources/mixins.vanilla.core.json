@@ -7,6 +7,7 @@
     "compatibilityLevel": "JAVA_8",
     "priority": 1301,
     "client": [
+        "client.gui.screen.MainMenuScreenMixin_Vanilla",
         "client.ClientBrandRetrieverMixin_Vanilla",
         "client.MinecraftMixin_Vanilla",
         "server.integrated.IntegratedServerMixin_Vanilla"
