@@ -74,6 +74,7 @@ import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.SingleGridLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
@@ -177,6 +178,7 @@ public final class ContainerUtil {
                 .collect(Collectors.groupingBy(i -> Optional.<IInventory>ofNullable(i.inventory), LinkedHashMap::new, Collectors.toList()));
         int index = 0; // Count the index
         final org.spongepowered.common.inventory.util.ContainerUtil.CraftingInventoryData crafting = new org.spongepowered.common.inventory.util.ContainerUtil.CraftingInventoryData();
+        int chestHeight = 0;
         final List<Lens> lenses = new ArrayList<>();
         for (final Map.Entry<Optional<IInventory>, List<Slot>> entry : viewed.entrySet()) {
             final List<Slot> slotList = entry.getValue();
@@ -195,8 +197,29 @@ public final class ContainerUtil {
             }
             lenses.add(lens);
             index += slotCount;
-        }
 
+            // Count height of 9 width grid
+            if (chestHeight != -1) {
+                if (lens instanceof DelegatingLens) {
+                    Lens delegated = ((DelegatingLens) lens).getDelegate();
+                    if (delegated instanceof PrimaryPlayerInventoryLens) {
+                        delegated = ((PrimaryPlayerInventoryLens) delegated).getFullGrid();
+                    }
+                    if (delegated instanceof SingleGridLens) {
+                        delegated = delegated.getSpanningChildren().get(0);
+                    }
+                    if (delegated instanceof GridInventoryLens) {
+                        if (((GridInventoryLens) delegated).getWidth() == 9) {
+                            chestHeight += ((GridInventoryLens) delegated).getHeight();
+                        }
+                    } else {
+                        chestHeight = -1;
+                    }
+                } else {
+                    chestHeight = -1;
+                }
+            }
+        }
 
         final List<Lens> additional = new ArrayList<>();
         try {
@@ -208,6 +231,9 @@ public final class ContainerUtil {
         } catch (Exception e) {
             SpongeCommon
                 .getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);
+        }
+        if (chestHeight > 0) { // Add container grid for chest/double chest
+            additional.add(new GridInventoryLens(0, 9, chestHeight, slots));
         }
 
 

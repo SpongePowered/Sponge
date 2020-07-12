@@ -68,6 +68,10 @@ public class DelegatingLens extends AbstractLens {
         this.addChild(this.delegate);
     }
 
+    public Lens getDelegate() {
+        return this.delegate;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Inventory getAdapter(final Fabric fabric, final Inventory parent) {
