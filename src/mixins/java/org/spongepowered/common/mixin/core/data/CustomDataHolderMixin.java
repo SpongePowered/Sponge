@@ -35,14 +35,12 @@ import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -131,29 +129,12 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
         return this.impl$failedData;
     }
 
-    @Override
-    public DataTransactionResult bridge$offerCustom(Mutable manipulator, MergeFunction function) {
-        throw new MissingImplementationException("CustomDataHolderMixin", "bridge$removeCustom");
-    }
-
-    @Override
-    public <T extends Mutable> Optional<T> bridge$getCustom(Class<T> customClass) {
-        throw new MissingImplementationException("CustomDataHolderMixin", "bridge$removeCustom");
-    }
-
-    @Override
-    public DataTransactionResult bridge$removeCustom(Class<? extends Mutable> customClass) {
-        throw new MissingImplementationException("CustomDataHolderMixin", "bridge$removeCustom");
-    }
-
-    @Override
-    public void bridge$removeCustomFromNBT(Mutable manipulator) {
+    private void old_RemoveCustomFromNbt(Mutable manipulator) {
         if (this instanceof DataCompoundHolder) {
             final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
             if (spongeData.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_LIST)) {
                 final ListNBT tagList = spongeData.getList(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, Constants.NBT.TAG_COMPOUND);
                 if (!tagList.isEmpty()) {
-                    throw new MissingImplementationException("CustomDataHolderMixin", "bridge$removeCustomFromNBT");
                     // TODO
                     //                    final CatalogKey key = DataUtil.getRegistrationFor(manipulator).getKey();
                     //                    for (int i = 0; i < tagList.size(); i++) {
