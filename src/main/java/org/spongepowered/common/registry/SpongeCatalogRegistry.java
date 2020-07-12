@@ -314,7 +314,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         Preconditions.checkNotNull(key);
 
         if (this.registries.get(key) != null) {
-            throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered!", catalogClass));
+            throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered for '%s!", catalogClass, key));
         }
 
         final SimpleRegistry<T> registry = new SimpleRegistry<>();
@@ -347,7 +347,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         final Registry<CatalogType> registry = this.registries.putIfAbsent(key, (Registry<CatalogType>) new CallbackRegistry<>(callback));
         if (registry != null) {
-            throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered!", catalogClass));
+            throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered for '%s'!", catalogClass, key));
         }
         this.registriesByType.put((Class<CatalogType>) catalogClass, registry);
 
@@ -358,7 +358,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         Preconditions.checkNotNull(key);
 
         if (this.registries.containsKey(key)) {
-            throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered!", catalogClass));
+            throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered for '%s!", catalogClass, key));
         }
 
         final MappedRegistry<T, U> registry = new MappedRegistry<>();
