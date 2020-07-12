@@ -121,7 +121,7 @@ public class SpongeCommand {
     @NonNull
     public static CommandResult auditSubcommandExecutor(final CommandContext context) {
         SpongeCommon.getLogger().info("Starting Mixin Audit");
-        // MixinEnvironment.getCurrentEnvironment().audit();
+        Launcher.getInstance().auditMixins();
         return CommandResult.success();
     }
 

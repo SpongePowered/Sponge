@@ -25,8 +25,6 @@
 package org.spongepowered.common.command.registrar;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.LiteralMessage;
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
@@ -34,9 +32,9 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
+import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -71,7 +69,7 @@ import java.util.stream.Collectors;
 public class BrigadierCommandRegistrar implements CommandRegistrar<LiteralCommandNode<CommandSource>> {
 
     public static final BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
-    public static final ResourceKey CATALOG_KEY = ResourceKey.sponge("brigadier");
+    public static final ResourceKey RESOURCE_KEY = (ResourceKey) (Object) new ResourceLocation("sponge", "brigadier");
 
     private static final String DONT_UPDATE_REQUIREMENTS_PROPERTY = "sponge.command.dontUpdateRequirements";
     private static final boolean UPDATE_REQUIREMENTS = System.getProperty(DONT_UPDATE_REQUIREMENTS_PROPERTY) == null;
@@ -273,7 +271,7 @@ public class BrigadierCommandRegistrar implements CommandRegistrar<LiteralComman
     @Override
     @NonNull
     public ResourceKey getKey() {
-        return CATALOG_KEY;
+        return RESOURCE_KEY;
     }
 
     private CommandDispatcher<CommandSource> getDispatcher() {
