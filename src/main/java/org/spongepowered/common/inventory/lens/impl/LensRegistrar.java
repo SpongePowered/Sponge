@@ -163,14 +163,20 @@ public class LensRegistrar {
 
     @SuppressWarnings("unchecked")
     private static Lens generateLens(Object inventory, int size, SlotLensProvider slotLensProvider) {
-        LensFactory lensFactory = lensFactories.get(inventory.getClass());
+
         if (size == 0) {
             return new DefaultEmptyLens();
         }
-        Lens lens = lensFactory.apply(inventory.getClass(), size, slotLensProvider);
-        if (lens != null) {
-            return lens;
+
+        LensFactory lensFactory = lensFactories.get(inventory.getClass());
+        Lens lens = null;
+        if (lensFactory != null) {
+            lens = lensFactory.apply(inventory.getClass(), size, slotLensProvider);
+            if (lens != null) {
+                return lens;
+            }
         }
+
         if (inventory instanceof CraftingInventory) {
             lens = lensGrid(inventory, size, ((CraftingInventory) inventory).getWidth(), ((CraftingInventory) inventory).getHeight(), slotLensProvider);
         }
