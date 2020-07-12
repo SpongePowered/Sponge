@@ -116,4 +116,12 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
         this.slots().forEach(Inventory::clear);
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "(" + this.capacity() + ") in " + this.children().size() + " children\n"
+                + "Parent: " + ((this.parent == this) ? "self" : this.parent.getClass().getSimpleName()) + "\n"
+                + "Fabric: " + this.fabric.getClass().getSimpleName() + "\n"
+                + "Lens: " + this.lens.getClass().getSimpleName() + "\n"
+                ;
+    }
 }
