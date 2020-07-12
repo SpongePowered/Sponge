@@ -503,7 +503,7 @@ public class SpongeCommandManager implements CommandManager {
                     "sponge"
             );
         } catch (final CommandFailedRegistrationException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Failed to create root Sponge command!", ex);
         }
         for (final CommandRegistrar<?> registrar : this.game.getRegistry().getCatalogRegistry().getAllOf(CommandRegistrar.class)) {
             this.game.getEventManager().post(this.createEvent(cause, this.game, registrar));

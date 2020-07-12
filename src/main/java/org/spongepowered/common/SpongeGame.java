@@ -33,17 +33,14 @@ import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.network.ChannelRegistrar;
+import org.spongepowered.api.network.channel.ChannelRegistry;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
-import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.scheduler.AsyncScheduler;
-import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.util.LocaleCache;
 
 import java.nio.file.Path;
@@ -58,7 +55,7 @@ public abstract class SpongeGame implements Game {
     private final EventManager eventManager;
     private final AssetManager assetManager;
     private final ConfigManager configManager;
-    private final ChannelRegistrar channelRegistrar;
+    private final ChannelRegistry channelRegistry;
     private final MetricsConfigManager metricsConfigManager;
     private final CommandManager commandManager;
     private final SqlManager sqlManager;
@@ -66,7 +63,7 @@ public abstract class SpongeGame implements Game {
     private final AsyncScheduler asyncScheduler = new AsyncScheduler();
 
     protected SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
-        final EventManager eventManager, final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
+        final EventManager eventManager, final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistry channelRegistry,
         final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
         final ServiceProvider serviceProvider) {
 
@@ -77,7 +74,7 @@ public abstract class SpongeGame implements Game {
         this.eventManager = eventManager;
         this.assetManager = assetManager;
         this.configManager = configManager;
-        this.channelRegistrar = channelRegistrar;
+        this.channelRegistry = channelRegistry;
         this.metricsConfigManager = metricsConfigManager;
         this.commandManager = commandManager;
         this.sqlManager = sqlManager;
@@ -130,8 +127,8 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public ChannelRegistrar getChannelRegistrar() {
-        return this.channelRegistrar;
+    public ChannelRegistry getChannelRegistry() {
+        return this.channelRegistry;
     }
 
     @Override

@@ -62,6 +62,8 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.network.ServerPlayerConnection;
+import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -230,8 +232,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
 
     @Override
-    public PlayerConnection getConnection() {
-        return (PlayerConnection) this.connection;
+    public ServerPlayerConnection getConnection() {
+        return (ServerPlayerConnection) this.connection;
     }
 
     /**

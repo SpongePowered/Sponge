@@ -29,7 +29,6 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.asm.mixin.Final;
@@ -61,11 +60,6 @@ public abstract class ServerPlayNetHandlerMixin_API implements PlayerConnection 
     @Override
     public InetSocketAddress getVirtualHost() {
         return ((NetworkManagerBridge) this.netManager).bridge$getVirtualHost();
-    }
-
-    @Override
-    public int getLatency() {
-        return this.player.ping;
     }
 
 }

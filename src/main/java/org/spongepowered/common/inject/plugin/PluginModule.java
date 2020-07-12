@@ -29,10 +29,7 @@ import com.google.inject.Scopes;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetId;
-import org.spongepowered.api.network.ChannelBinding;
-import org.spongepowered.api.network.ChannelId;
 import org.spongepowered.common.inject.InjectionPointProvider;
-import org.spongepowered.common.inject.provider.ChannelBindingProvider;
 import org.spongepowered.common.inject.provider.PluginAssetProvider;
 import org.spongepowered.common.inject.provider.PluginConfigurationModule;
 import org.spongepowered.plugin.PluginContainer;
@@ -59,8 +56,6 @@ public final class PluginModule extends AbstractModule {
         this.bind(PluginContainer.class).toInstance(this.container);
         this.bind(Logger.class).toInstance(this.container.getLogger());
 
-        this.bind(ChannelBinding.IndexedMessageChannel.class).annotatedWith(ChannelId.class).toProvider(ChannelBindingProvider.Indexed.class);
-        this.bind(ChannelBinding.RawDataChannel.class).annotatedWith(ChannelId.class).toProvider(ChannelBindingProvider.Raw.class);
         this.bind(Asset.class).annotatedWith(AssetId.class).toProvider(PluginAssetProvider.class);
 
         this.install(new PluginConfigurationModule());

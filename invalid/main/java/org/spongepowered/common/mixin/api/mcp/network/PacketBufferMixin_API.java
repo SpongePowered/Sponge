@@ -33,14 +33,13 @@ import io.netty.handler.codec.EncoderException;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.network.ChannelBuf;
+import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.network.SpongeNetworkManager;
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;

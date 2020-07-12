@@ -46,7 +46,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-public class SpongeCommand {
+public final class SpongeCommand {
 
     private final static Parameter.Value<PluginContainer> PLUGIN_CONTAINER_PARAMETER =
             Parameter.builder(PluginContainer.class)
@@ -55,6 +55,9 @@ public class SpongeCommand {
                     .setKey("plugin")
                     .build();
 
+
+    private SpongeCommand() {
+    }
 
     public static Command.Parameterized createSpongeCommand() {
         // /sponge audit
@@ -71,19 +74,18 @@ public class SpongeCommand {
 
         // /sponge plugins
         final Command.Parameterized pluginsReloadCommand = Command.builder()
-                .setPermission("sponge.command.plugins.reload")
-                .setExecutor(SpongeCommand::pluginsReloadSubcommandExecutor)
-                .parameter(PLUGIN_CONTAINER_PARAMETER)
+                .setPermission("sponge.command.plugins.refresh")
+                .setExecutor(SpongeCommand::pluginsRefreshSubcommandExecutor)
+                .parameter(SpongeCommand.PLUGIN_CONTAINER_PARAMETER)
                 .build();
         final Command.Parameterized pluginsCommand = Command.builder()
                 .setPermission("sponge.command.plugins")
-                .child(pluginsReloadCommand, "reload")
+                .child(pluginsReloadCommand, "refresh")
                 .setExecutor(SpongeCommand::pluginsSubcommand)
                 .build();
 
         // /sponge timings
         final Command.Parameterized timingsCommand = SpongeCommand.timingsSubcommand();
-
 
         // /sponge
         return Command.builder()
@@ -99,8 +101,8 @@ public class SpongeCommand {
     @NonNull
     public static CommandResult rootCommand(final CommandContext context) {
         final PluginContainer platformPlugin = Launcher.getInstance().getPlatformPlugin();
-        final PluginContainer apiPlugin =  Launcher.getInstance().getApiPlugin();
-        final PluginContainer minecraftPlugin =  Launcher.getInstance().getMinecraftPlugin();
+        final PluginContainer apiPlugin = Launcher.getInstance().getApiPlugin();
+        final PluginContainer minecraftPlugin = Launcher.getInstance().getMinecraftPlugin();
 
         SpongeCommon.getLogger().info("SpongePowered Minecraft Plugin Platform (running on Minecraft {})",
                 minecraftPlugin.getMetadata().getVersion());
@@ -145,8 +147,8 @@ public class SpongeCommand {
     }
 
     @NonNull
-    private static CommandResult pluginsReloadSubcommandExecutor(final CommandContext context) {
-        final Optional<PluginContainer> pluginContainer = context.getOne(PLUGIN_CONTAINER_PARAMETER);
+    private static CommandResult pluginsRefreshSubcommandExecutor(final CommandContext context) {
+        final Optional<PluginContainer> pluginContainer = context.getOne(SpongeCommand.PLUGIN_CONTAINER_PARAMETER);
         final RefreshGameEvent event = SpongeEventFactory.createRefreshGameEvent(
                 PhaseTracker.getCauseStackManager().getCurrentCause(),
                 SpongeCommon.getGame()
@@ -154,10 +156,10 @@ public class SpongeCommand {
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
             // src.sendMessage(Text.of("Sending reload event to " + pluginContainer.get().getMetadata().getId() + ". Please wait."));
-            SpongeCommon.getLogger().info("Sending refresh event to {}. Please wait.", pluginContainer.get().getMetadata().getId());
+            SpongeCommon.getLogger().info("Sending refresh event to {}, please wait...", pluginContainer.get().getMetadata().getId());
             ((SpongeEventManager) SpongeCommon.getGame().getEventManager()).post(event, pluginContainer.get());
         } else {
-            SpongeCommon.getLogger().info("Sending refresh event to all plugins. Please wait.");
+            SpongeCommon.getLogger().info("Sending refresh event to all plugins, please wait...");
             SpongeCommon.getGame().getEventManager().post(event);
         }
 
@@ -238,5 +240,4 @@ public class SpongeCommand {
                         .build(), "cost")
                 .build();
     }
-
 }

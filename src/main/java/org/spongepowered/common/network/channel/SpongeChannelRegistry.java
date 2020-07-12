@@ -22,33 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.network;
+package org.spongepowered.common.network.channel;
 
-import static com.google.common.base.Preconditions.checkState;
-
-import net.minecraft.network.PacketBuffer;
+import com.google.inject.Singleton;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.network.ChannelRegistrar;
-import org.spongepowered.api.network.RemoteConnection;
-import org.spongepowered.common.network.SpongeNetworkManager;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.api.network.channel.Channel;
+import org.spongepowered.api.network.channel.ChannelRegistry;
 
-public abstract class VanillaChannelBinding extends SpongeNetworkManager.AbstractChannelBinding {
+import java.util.Collection;
+import java.util.Optional;
 
-    private boolean valid = true;
+@Singleton
+public final class SpongeChannelRegistry implements ChannelRegistry {
 
-    public VanillaChannelBinding(ChannelRegistrar registrar, ResourceKey registration, PluginContainer owner) {
-        super(registrar, registration, owner);
+    @Override
+    public Optional<Channel> get(ResourceKey channelKey) {
+        return Optional.empty();
     }
 
-    protected void validate() {
-        checkState(this.valid, "Channel binding in invalid state (was it unbound?)");
+    @Override
+    public <C extends Channel> C getOfType(ResourceKey channelKey, Class<C> channelType) {
+        return null;
     }
 
-    final void invalidate() {
-        this.valid = false;
+    @Override
+    public Collection<Channel> getChannels() {
+        return null;
     }
-
-    public abstract void post(RemoteConnection connection, PacketBuffer payload);
-
 }

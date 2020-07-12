@@ -31,6 +31,7 @@ import net.minecraft.network.play.ServerPlayNetHandler;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
@@ -39,7 +40,7 @@ import java.net.InetSocketAddress;
 
 @SuppressWarnings("rawtypes")
 @Mixin(NetworkManager.class)
-public abstract class NetworkManagerMixin_API extends SimpleChannelInboundHandler implements PlayerConnection {
+public abstract class NetworkManagerMixin_API extends SimpleChannelInboundHandler implements ServerPlayerConnection {
 
     @Shadow private INetHandler packetListener;
 

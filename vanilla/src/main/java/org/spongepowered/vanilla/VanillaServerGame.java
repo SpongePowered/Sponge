@@ -31,15 +31,13 @@ import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.network.ChannelRegistrar;
+import org.spongepowered.api.network.channel.ChannelRegistry;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
-import org.spongepowered.api.world.TeleportHelper;
 
 public final class VanillaServerGame extends VanillaGame {
 
@@ -48,11 +46,11 @@ public final class VanillaServerGame extends VanillaGame {
     @Inject
     public VanillaServerGame(final Server server, final Platform platform, final GameRegistry registry,
         final DataManager dataManager, final PluginManager pluginManager, final EventManager eventManager,
-        final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistrar channelRegistrar,
+        final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistry channelRegistry,
         final MetricsConfigManager metricsConfigManager, final CommandManager commandManager,
         final SqlManager sqlManager, final ServiceProvider serviceProvider) {
 
-        super(platform, registry, dataManager, pluginManager, eventManager, assetManager, configManager, channelRegistrar,
+        super(platform, registry, dataManager, pluginManager, eventManager, assetManager, configManager, channelRegistry,
             metricsConfigManager, commandManager, sqlManager, serviceProvider);
         this.server = server;
     }

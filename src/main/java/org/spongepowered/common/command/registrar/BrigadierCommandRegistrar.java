@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
  * {@link #register(PluginContainer, LiteralArgumentBuilder, String...)}
  * method.</p>
  */
-public class BrigadierCommandRegistrar implements CommandRegistrar<LiteralCommandNode<CommandSource>> {
+public final class BrigadierCommandRegistrar implements CommandRegistrar<LiteralCommandNode<CommandSource>> {
 
     public static final BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
     public static final ResourceKey RESOURCE_KEY = (ResourceKey) (Object) new ResourceLocation("sponge", "brigadier");

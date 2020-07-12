@@ -38,6 +38,7 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
+import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
@@ -98,8 +99,8 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
         // Cause is created directly as we can't access the cause stack manager
         // from off the main thread
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
-                Cause.of(EventContext.empty(), this.loginGameProfile), (RemoteConnection) this.networkManager,
-                new MessageEvent.MessageFormatter(disconnectMessage), (GameProfile) this.loginGameProfile, false
+                Cause.of(EventContext.empty(), this.loginGameProfile), (ServerSideConnection) this.networkManager,
+                new MessageEvent.MessageFormatter(disconnectMessage), false
         );
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
