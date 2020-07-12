@@ -15,6 +15,7 @@
         "entity.LivingEntityMixin",
         "entity.player.PlayerEntityMixin",
         "entity.player.ServerPlayerEntityMixin",
+        "network.rcon.RConConsoleSourceMixin",
         "server.MinecraftServerMixin",
         "server.management.PlayerProfileCacheMixin",
         "service.permission.SubjectMixin"
