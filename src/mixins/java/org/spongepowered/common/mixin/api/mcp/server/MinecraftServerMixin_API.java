@@ -124,7 +124,6 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
         this.api$scheduler = new ServerScheduler();
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
-        this.api$profileManager = new SpongeGameProfileManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
         this.api$userManager = new SpongeUserManager(this);
     }
@@ -245,6 +244,10 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public GameProfileManager getGameProfileManager() {
+        if (this.api$profileManager == null) {
+            this.api$profileManager = new SpongeGameProfileManager(this);
+        }
+
         return this.api$profileManager;
     }
 

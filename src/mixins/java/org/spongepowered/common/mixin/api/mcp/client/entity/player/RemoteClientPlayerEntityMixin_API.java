@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.api.client.entity.player;
+package org.spongepowered.common.mixin.api.mcp.client.entity.player;
 
-import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
-import org.spongepowered.api.entity.living.player.client.ClientPlayer;
+import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
+import org.spongepowered.api.entity.living.player.client.RemotePlayer;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(AbstractClientPlayerEntity.class)
-public abstract class AbstractClientPlayerEntityMixin_Vanilla_API implements ClientPlayer {
+@Mixin(RemoteClientPlayerEntity.class)
+public abstract class RemoteClientPlayerEntityMixin_API implements RemotePlayer {
 
 }

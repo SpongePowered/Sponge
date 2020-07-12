@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.api.client;
+package org.spongepowered.common.mixin.api.mcp.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -37,17 +37,17 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.world.client.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.scheduler.ClientScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
-import org.spongepowered.vanilla.client.VanillaClient;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin_Vanilla_API extends RecursiveEventLoop<Runnable> implements VanillaClient {
+public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> implements SpongeClient {
 
     @Shadow public net.minecraft.client.world.ClientWorld world;
     @Shadow public ClientPlayerEntity player;
@@ -55,7 +55,7 @@ public abstract class MinecraftMixin_Vanilla_API extends RecursiveEventLoop<Runn
 
     private final SpongeScheduler vanilla_api$scheduler = new ClientScheduler();
 
-    public MinecraftMixin_Vanilla_API(String name) {
+    public MinecraftMixin_API(String name) {
         super(name);
     }
 

@@ -22,22 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.api.client.world;
+package org.spongepowered.common.mixin.api.mcp.client.entity.player;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import org.spongepowered.api.entity.living.player.client.ClientPlayer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.WorldBridge;
 
-@Mixin(ClientWorld.class)
-public abstract class ClientWorldMixin_Vanilla_API implements org.spongepowered.api.world.client.ClientWorld {
+@Mixin(AbstractClientPlayerEntity.class)
+public abstract class AbstractClientPlayerEntityMixin_API implements ClientPlayer {
 
-    @Override
-    public boolean isLoaded() {
-        if (((WorldBridge) this).bridge$isFake()) {
-            return false;
-        }
-
-        return Minecraft.getInstance().world == (Object) this;
-    }
 }

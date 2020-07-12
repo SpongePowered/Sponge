@@ -19,6 +19,13 @@
         "mcp.util.ResourceLocationMixin_API",
         "service.permission.SubjectMixin_API"
     ],
+    "client": [
+        "mcp.client.MinecraftMixin_API",
+        "mcp.client.entity.player.AbstractClientPlayerEntityMixin_API",
+        "mcp.client.entity.player.ClientPlayerEntityMixin_API",
+        "mcp.client.entity.player.RemoteClientPlayerEntityMixin_API",
+        "mcp.client.world.ClientWorldMixin_API"
+    ],
     "server": [
         "mcp.server.dedicated.DedicatedServerMixin_API"
     ],

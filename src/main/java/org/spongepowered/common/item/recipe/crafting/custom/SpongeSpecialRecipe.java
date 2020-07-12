@@ -33,14 +33,17 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-public class SpongeSpecialRecipe extends SpecialRecipe {
+public final class SpongeSpecialRecipe extends SpecialRecipe {
 
     private final BiPredicate<org.spongepowered.api.item.inventory.crafting.CraftingInventory, ServerWorld> biPredicate;
     private final Function<org.spongepowered.api.item.inventory.crafting.CraftingInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction;
@@ -72,6 +75,12 @@ public class SpongeSpecialRecipe extends SpecialRecipe {
         org.spongepowered.api.item.inventory.ItemStack spongeStack =
                 this.resultFunction.apply((org.spongepowered.api.item.inventory.crafting.CraftingInventory) inv);
         return ItemStackUtil.toNative(spongeStack);
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    public boolean canFit(int width, int height) {
+        throw new MissingImplementationException("SpongeSpecialRecipe", "canFit");
     }
 
     @Override

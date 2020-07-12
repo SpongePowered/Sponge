@@ -131,6 +131,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.accessor.entity.AreaEffectCloudEntityAccessor;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
@@ -761,7 +762,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 ArmorStandEntity::getBodyRotation,
                 ArmorStandEntity::setBodyRotation));
 
-        register(new ArmorStandEntityRotationProvider<>(Keys.HEAD_ROTATION,
+        register(new ArmorStandEntityRotationProvider<ArmorStandEntity, ArmorStandEntity>(Keys.HEAD_ROTATION,
                 ArmorStandEntity::getHeadRotation,
                 ArmorStandEntity::setHeadRotation));
 

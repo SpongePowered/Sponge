@@ -35,12 +35,6 @@ val minecraftVersion: String by project
 
 minecraft {
     mappings(mcpType, mcpMappings)
-    runs {
-        create("server") {
-            workingDirectory(project.file("../run"))
-
-        }
-    }
     project.sourceSets["main"].resources
             .filter { it.name.endsWith("_at.cfg") }
             .files
@@ -106,7 +100,7 @@ repositories {
     maven("https://files.minecraftforge.net/maven")
 }
 dependencies {
-    minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
+    minecraft("net.minecraft:joined:$minecraftVersion")
 
     // api
     api(project(":SpongeAPI"))
@@ -387,10 +381,10 @@ project("SpongeVanilla") {
         api(launch.get().output)
         implementation(accessors.get().output)
         implementation(project(commonProject.path)) {
-            exclude(group = "net.minecraft", module = "server")
+            exclude(group = "net.minecraft", module = "joined")
         }
         vanillaMixinsImplementation(project(commonProject.path)) {
-            exclude(group = "net.minecraft", module = "server")
+            exclude(group = "net.minecraft", module = "joined")
         }
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
         add(vanillaLaunch.implementationConfigurationName, vanillaModLauncherConfig)
@@ -417,8 +411,6 @@ project("SpongeVanilla") {
         vanillaModLauncherImplementation("net.minecraftforge:accesstransformers:1.0.+:shadowed") {
             exclude(group = "org.apache.logging.log4j")
         }
-//        vanillaModLauncherImplementation("net.sf.jopt-simple:jopt-simple:5.0.4")
-//        implementation(vanillaModLauncher.output)
         vanillaModLauncherImplementation(vanillaModLauncherConfig)
         vanillaMixinsImplementation(vanillaModLauncherConfig)
         vanillaAccessorsImplementation(vanillaModLauncherConfig)
