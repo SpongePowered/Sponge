@@ -26,26 +26,30 @@ package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Client;
+import org.spongepowered.api.Server;
+import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launcher;
 
 import java.nio.file.Path;
 import java.util.List;
 
-public final class ServerLauncher extends VanillaLauncher {
+public final class DedicatedServerLauncher extends VanillaLauncher {
 
-    protected ServerLauncher(final Stage injectionStage) {
+    protected DedicatedServerLauncher(final Stage injectionStage) {
         super(injectionStage);
     }
 
     public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ServerLauncher launcher = new ServerLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
+        final DedicatedServerLauncher launcher = new DedicatedServerLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
         Launcher.setInstance(launcher);
         launcher.launchPlatform(pluginSpiVersion, baseDirectory, pluginDirectories, args);
     }
 
     public void launchPlatform(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
         super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-        this.getLogger().info("Loading Minecraft Server, please wait...");
-        MinecraftServer.main(args);
+        this.getLogger().info("Loading Sponge, please wait...");
+
+        SpongeBootstrap.perform("Server", () -> MinecraftServer.main(args));
     }
 }

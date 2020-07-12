@@ -30,15 +30,12 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.command.Commands;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerPropertiesProvider;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.vanilla.VanillaLifecycle;
+import org.spongepowered.common.SpongeBootstrap;
+import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.vanilla.VanillaServer;
 
 import java.io.File;
@@ -46,8 +43,6 @@ import java.net.Proxy;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer implements VanillaServer {
-
-    private VanillaLifecycle vanilla$lifecycle;
 
     public DedicatedServerMixin_Vanilla(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn,
         Commands p_i50590_4_, YggdrasilAuthenticationService p_i50590_5_,
@@ -57,33 +52,15 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
         super(p_i50590_1_, p_i50590_2_, dataFixerIn, p_i50590_4_, p_i50590_5_, p_i50590_6_, p_i50590_7_, p_i50590_8_, p_i50590_9_, p_i50590_10_);
     }
 
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void vanilla$setupSpongeFields(File p_i50720_1_, ServerPropertiesProvider p_i50720_2_, DataFixer dataFixerIn,
-        YggdrasilAuthenticationService p_i50720_4_, MinecraftSessionService p_i50720_5_, GameProfileRepository p_i50720_6_,
-        PlayerProfileCache p_i50720_7_, IChunkStatusListenerFactory p_i50720_8_, String p_i50720_9_, CallbackInfo ci) {
-
-        this.vanilla$lifecycle = new VanillaLifecycle(this);
-    }
-
     @Override
     public void run() {
-        this.vanilla$lifecycle.establishFactories();
-        this.vanilla$lifecycle.establishBuilders();
-        this.vanilla$lifecycle.establishRegistries();
-        this.vanilla$lifecycle.initTimings();
-        this.vanilla$lifecycle.registerPluginListeners();
-        this.vanilla$lifecycle.callConstructEvent();
-        this.vanilla$lifecycle.establishServices();
-        this.vanilla$lifecycle.establishServerFeatures();
-        this.vanilla$lifecycle.establishCommands();
+        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        lifecycle.establishRegistries();
 
-        // TODO Evaluate exactly where we want to call this
-        this.vanilla$lifecycle.callStartingEngineEvent();
-        super.run();
-    }
+        lifecycle.establishServerFeatures();
+        lifecycle.establishCommands();
 
-    @Override
-    public VanillaLifecycle getLifecycle() {
-        return this.vanilla$lifecycle;
+        // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
+        lifecycle.callStartingEngineEvent(this);
     }
 }

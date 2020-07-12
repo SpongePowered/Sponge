@@ -35,7 +35,7 @@ import org.spongepowered.common.inject.provider.PathAsFileProvider;
 import java.io.File;
 import java.nio.file.Path;
 
-public class SpongeModule extends AbstractModule {
+public final class SpongeModule extends AbstractModule {
 
     @Override
     protected void configure() {

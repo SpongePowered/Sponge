@@ -26,8 +26,12 @@ package org.spongepowered.common;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import org.spongepowered.api.Client;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.manager.CommandManager;
@@ -46,7 +50,8 @@ import org.spongepowered.common.util.LocaleCache;
 import java.nio.file.Path;
 import java.util.Locale;
 
-public abstract class SpongeGame implements Game {
+@Singleton
+public final class SpongeGame implements Game {
 
     private final Platform platform;
     private final GameRegistry registry;
@@ -62,7 +67,11 @@ public abstract class SpongeGame implements Game {
     private final ServiceProvider serviceProvider;
     private final AsyncScheduler asyncScheduler = new AsyncScheduler();
 
-    protected SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
+    private Client client;
+    private Server server;
+
+    @Inject
+    public SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
         final EventManager eventManager, final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistry channelRegistry,
         final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
         final ServiceProvider serviceProvider) {
@@ -162,10 +171,47 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
+    public boolean isServerAvailable() {
+        if (this.client != null) {
+            return this.client.getServer().isPresent();
+        }
+
+        return this.server != null;
+    }
+
+    @Override
+    public Server getServer() {
+        if (this.client != null) {
+            return this.client.getServer().orElseThrow(() -> new IllegalStateException("The singleplayer server is not available!"));
+        }
+
+        Preconditions.checkState(this.server != null, "The dedicated server is not available!");
+        return this.server;
+    }
+
+    public void setServer(final Server server) {
+        this.server = server;
+    }
+
+    @Override
+    public boolean isClientAvailable() {
+        return this.client != null;
+    }
+
+    @Override
+    public Client getClient() {
+        Preconditions.checkState(this.client != null, "The client is not available!");
+        return this.client;
+    }
+
+    public void setClient(final Client client) {
+        this.client = client;
+    }
+
+    @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("platform", this.getPlatform())
                 .toString();
     }
-
 }

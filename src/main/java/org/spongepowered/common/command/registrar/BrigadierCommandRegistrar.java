@@ -69,7 +69,7 @@ import java.util.stream.Collectors;
 public final class BrigadierCommandRegistrar implements CommandRegistrar<LiteralCommandNode<CommandSource>> {
 
     public static final BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
-    public static final ResourceKey RESOURCE_KEY = (ResourceKey) (Object) new ResourceLocation("sponge", "brigadier");
+    public static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("brigadier");
 
     private static final String DONT_UPDATE_REQUIREMENTS_PROPERTY = "sponge.command.dontUpdateRequirements";
     private static final boolean UPDATE_REQUIREMENTS = System.getProperty(DONT_UPDATE_REQUIREMENTS_PROPERTY) == null;

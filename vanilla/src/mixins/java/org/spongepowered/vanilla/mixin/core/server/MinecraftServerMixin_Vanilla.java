@@ -24,8 +24,6 @@
  */
 package org.spongepowered.vanilla.mixin.core.server;
 
-import com.google.common.collect.Lists;
-import com.google.inject.Module;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,34 +31,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.inject.SpongeVanillaModule;
-import org.spongepowered.vanilla.inject.VanillaServerModule;
-import org.spongepowered.vanilla.launch.ServerLauncher;
+import org.spongepowered.common.SpongeBootstrap;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.vanilla.VanillaServer;
-
-import java.util.List;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServer;startServerThread()V"))
     private static void vanilla$prepareGameAndLoadPlugins(DedicatedServer server) {
-        ((VanillaServer) server).setupInjection();
-        ((ServerLauncher) Launcher.getInstance()).loadPlugins();
+        SpongeCommon.getGame().setServer((VanillaServer) server);
         server.startServerThread();
     }
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
     private void impl$callEngineStoppingEvent(CallbackInfo ci) {
-        this.getLifecycle().callStoppingEngineEvent();
-    }
-
-    @Override
-    public List<Module> createInjectionModules() {
-        return Lists.newArrayList(
-            new SpongeVanillaModule(),
-            new VanillaServerModule(this)
-        );
+        SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
     }
 }

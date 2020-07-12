@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
 import net.minecraft.client.main.Main;
+import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launcher;
 
 import java.nio.file.Path;
@@ -47,6 +48,7 @@ public final class ClientLauncher extends VanillaLauncher {
     public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
         super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
         this.getLogger().info("Loading Minecraft Client, please wait...");
-        Main.main(args);
+
+        SpongeBootstrap.perform("Client", () -> Main.main(args));
     }
 }

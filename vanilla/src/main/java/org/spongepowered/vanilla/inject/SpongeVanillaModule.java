@@ -25,20 +25,10 @@
 package org.spongepowered.vanilla.inject;
 
 import com.google.inject.PrivateModule;
-import com.google.inject.binder.AnnotatedBindingBuilder;
-import org.spongepowered.common.SpongeGame;
-import org.spongepowered.vanilla.VanillaGame;
 
 public final class SpongeVanillaModule extends PrivateModule {
 
     @Override
     protected void configure() {
-        //noinspection UninstantiableBinding
-        this.bindAndExpose(SpongeGame.class).to(VanillaGame.class);
-    }
-
-    protected <T> AnnotatedBindingBuilder<T> bindAndExpose(final Class<T> type) {
-        this.expose(type);
-        return this.bind(type);
     }
 }

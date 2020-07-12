@@ -24,37 +24,7 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.collect.Lists;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.google.inject.Stage;
 import org.spongepowered.api.Engine;
-import org.spongepowered.common.inject.SpongeCommonModule;
-import org.spongepowered.common.inject.SpongeGuice;
-import org.spongepowered.common.inject.SpongeModule;
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginKeys;
-
-import java.util.List;
 
 public interface SpongeEngine extends Engine {
-
-    SpongeLifecycle getLifecycle();
-
-    List<Module> createInjectionModules();
-
-    default void setupInjection() {
-        final Stage stage = SpongeGuice.getInjectorStage(Launcher.getInstance().getInjectionStage());
-        SpongeCommon.getLogger().debug("Creating injector in stage '{}'", stage);
-        final List<Module> modules = Lists.newArrayList(
-            new SpongeModule(),
-            new SpongeCommonModule()
-        );
-        modules.addAll(this.createInjectionModules());
-        final Injector injector = Guice.createInjector(stage, modules);
-        final PluginEnvironment environment = Launcher.getInstance().getPluginEnvironment();
-        environment.getBlackboard().getOrCreate(PluginKeys.PARENT_INJECTOR, () -> injector);
-    }
 }

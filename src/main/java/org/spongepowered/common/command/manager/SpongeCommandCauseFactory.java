@@ -33,7 +33,7 @@ import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-public class SpongeCommandCauseFactory implements CommandCause.Factory {
+public final class SpongeCommandCauseFactory implements CommandCause.Factory {
 
     public static final SpongeCommandCauseFactory INSTANCE = new SpongeCommandCauseFactory();
 

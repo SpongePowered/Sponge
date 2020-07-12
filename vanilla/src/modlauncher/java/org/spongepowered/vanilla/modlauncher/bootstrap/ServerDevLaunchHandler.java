@@ -77,7 +77,7 @@ public final class ServerDevLaunchHandler implements ILaunchHandlerService {
 
         return () -> {
             final PluginEnvironment launchPluginEnvironment = Main.getLaunchPluginEnvironment();
-            Class.forName("org.spongepowered.vanilla.launch.ServerLauncher", true, launchClassLoader.getInstance()).getMethod("launch", String.class,
+            Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance()).getMethod("launch", String.class,
                 Path.class, List.class, Boolean.class, String[].class).invoke(null,
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.VERSION).orElse(null),
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElse(null),

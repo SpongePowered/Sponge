@@ -55,7 +55,7 @@ public abstract class Launcher {
     private final List<PluginContainer> launcherPlugins;
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
 
-    protected Launcher(SpongePluginManager pluginManager) {
+    protected Launcher(final SpongePluginManager pluginManager) {
         this.logger = LogManager.getLogger("Sponge");
         this.pluginEnvironment = new PluginEnvironment();
         this.pluginManager = pluginManager;
@@ -178,5 +178,8 @@ public abstract class Launcher {
 
     public final void auditMixins() {
         MixinEnvironment.getCurrentEnvironment().audit();
+    }
+
+    public void loadPlugins() {
     }
 }

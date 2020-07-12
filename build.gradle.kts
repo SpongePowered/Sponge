@@ -130,6 +130,7 @@ dependencies {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
     launchConfig("com.google.inject:guice:4.0")
+
     launchConfig("com.google.code.gson:gson:2.2.4")
     launchConfig("org.ow2.asm:asm-tree:6.2")
     launchConfig("org.ow2.asm:asm-util:6.2")

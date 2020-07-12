@@ -22,27 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.inject.client;
+package org.spongepowered.common.inject;
 
 import com.google.inject.AbstractModule;
-import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
-import org.spongepowered.vanilla.VanillaGame;
-import org.spongepowered.vanilla.client.VanillaClientGame;
+import org.spongepowered.api.Server;
 
-public final class VanillaClientModule extends AbstractModule {
+public final class DedicatedServerModule extends AbstractModule {
 
-    private final Client client;
+    private final Server server;
 
-    public VanillaClientModule(final Client client) {
-        this.client = client;
+    public DedicatedServerModule(final Server server) {
+        this.server = server;
     }
 
     @Override
     protected void configure() {
         //noinspection UninstantiableBinding
-        this.bind(Engine.class).to(Client.class);
-        this.bind(Client.class).toInstance(this.client);
-        this.bind(VanillaGame.class).to(VanillaClientGame.class);
+        this.bind(Engine.class).to(Server.class);
+        this.bind(Server.class).toInstance(this.server);
     }
 }

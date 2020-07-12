@@ -27,7 +27,4 @@ package org.spongepowered.vanilla;
 import org.spongepowered.common.SpongeEngine;
 
 public interface VanillaEngine extends SpongeEngine {
-
-    @Override
-    VanillaLifecycle getLifecycle();
 }

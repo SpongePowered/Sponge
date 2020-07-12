@@ -47,15 +47,6 @@ public abstract class VanillaLauncher extends Launcher {
         this.injectionStage = injectionStage;
     }
 
-    public void loadPlugins() {
-        final PluginLoader pluginLoader = new PluginLoader(this.getPluginEnvironment(), this.getPluginManager());
-        pluginLoader.discoverLanguageServices();
-        pluginLoader.initialize();
-        pluginLoader.discoverPluginResources();
-        pluginLoader.createPluginCandidates();
-        pluginLoader.createPlugins();
-    }
-
     @Override
     public final boolean isVanilla() {
         return true;
@@ -64,6 +55,16 @@ public abstract class VanillaLauncher extends Launcher {
     @Override
     public final Stage getInjectionStage() {
         return this.injectionStage;
+    }
+
+    @Override
+    public final void loadPlugins() {
+        final PluginLoader pluginLoader = new PluginLoader(this.getPluginEnvironment(), this.getPluginManager());
+        pluginLoader.discoverLanguageServices();
+        pluginLoader.initialize();
+        pluginLoader.discoverPluginResources();
+        pluginLoader.createPluginCandidates();
+        pluginLoader.createPlugins();
     }
 
     @Override
