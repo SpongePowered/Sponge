@@ -84,7 +84,7 @@ public class Inventory2DLens extends SlotBasedLens {
     }
 
     public SlotLens getSlot(Vector2i pos) {
-        return (SlotLens) this.spanningChildren.get(pos.getY()).getLens(pos.getX());
+        return (SlotLens) this.spanningChildren.get(pos.getY() + pos.getX() * this.width);
     }
 
     @Override

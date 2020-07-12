@@ -60,7 +60,7 @@ public class GridInventoryLens extends Inventory2DLens {
     }
 
     private void addRow(InventoryRowLens row) {
-        super.addSpanningChild(row);
+        super.addChild(row);
         this.rows.add(row);
     }
 
