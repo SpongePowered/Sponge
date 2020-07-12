@@ -248,7 +248,7 @@ public final class ContainerUtil {
         Lens lens = ((InventoryBridge) subInventory).bridge$getAdapter().inventoryAdapter$getRootLens();
         if (lens instanceof PlayerInventoryLens) {
             if (slotList.size() == 36) {
-                return new DelegatingLens(index, new PrimaryPlayerInventoryLens(index, slots, true), slots);
+                return new DelegatingLens(index, new PrimaryPlayerInventoryLens(0, slots, true), slots);
             }
             return lens;
         }

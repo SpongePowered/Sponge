@@ -30,8 +30,18 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 
 import java.util.Collection;
+import java.util.Map;
 
 public class QueryLens extends AbstractLens {
+
+    public QueryLens(Map<Lens, Integer> lensesWithOffsets) {
+        super(0, lensesWithOffsets.keySet().stream().map(Lens::slotCount).mapToInt(i -> i).sum(), BasicInventoryAdapter.class);
+        for (Map.Entry<Lens, Integer> entry : lensesWithOffsets.entrySet()) {
+            final Integer offset = entry.getValue();
+            final Lens lens = entry.getKey();
+            this.addSpanningChild(new DelegatingLens(offset, lens, new LensRegistrar.BasicSlotLensProvider(this.size)));
+        }
+    }
 
     public QueryLens(Collection<Lens> lenses) {
         super(0, lenses.stream().map(Lens::slotCount).mapToInt(i -> i).sum(), BasicInventoryAdapter.class);

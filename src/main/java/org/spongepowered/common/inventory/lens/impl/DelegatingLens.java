@@ -75,7 +75,7 @@ public class DelegatingLens extends AbstractLens {
     @SuppressWarnings("unchecked")
     @Override
     public Inventory getAdapter(final Fabric fabric, final Inventory parent) {
-        return new BasicInventoryAdapter(fabric, this, parent);
+        return this.delegate.getAdapter(fabric.fabric$offset(this.base), parent);
     }
 
     public static class CustomSlotProvider implements SlotLensProvider {

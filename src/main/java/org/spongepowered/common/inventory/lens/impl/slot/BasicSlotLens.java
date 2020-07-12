@@ -140,9 +140,4 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
         return "[" + this.base + "]";
     }
 
-    @Override
-    public String toString() {
-        return this.toString(0);
-    }
-
 }

@@ -57,12 +57,7 @@ public abstract class DelegatingSlotLens extends AbstractLens implements SlotLen
 
     @Override
     public String toString(int deep) {
-        return "[Delegate-" + this.base + "]";
-    }
-
-    @Override
-    public String toString() {
-        return this.toString(0);
+        return "[Delegate-" + this.delegate + "]";
     }
 
 }

@@ -89,16 +89,9 @@ public abstract class AbstractLens implements Lens {
 
     protected void addSpanningChild(final Lens lens, final KeyValuePair... keyValuePairs) {
         this.addChild(lens, keyValuePairs);
-
-        if (!this.spanningChildren.contains(lens)) {
-            this.spanningChildren.add(lens);
-            this.maxOrdinal += lens.slotCount();
-        } else {
-            // TODO check if this is fine
-            if (lens instanceof AbstractLens) {
-                ((AbstractLens) lens).setParent(this);
-            }
-        }
+        this.spanningChildren.add(lens);
+        this.maxOrdinal += lens.slotCount();
+        // TODO lens parent?
         this.addKeyValuePairs(lens, keyValuePairs);
     }
 
@@ -227,6 +220,11 @@ public abstract class AbstractLens implements Lens {
     @Override
     public int getMaxStackSize(final Fabric fabric) {
         return fabric.fabric$getMaxStackSize();
+    }
+
+    @Override
+    public int base() {
+        return this.base;
     }
 
     // Helpers for Debugging

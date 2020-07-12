@@ -29,14 +29,14 @@ import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
+import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.QueryLens;
-import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Checks immediate child for matches first.
@@ -57,77 +57,64 @@ public abstract class SpongeDepthQuery extends SpongeQuery {
         return this.toResult(inventory, fabric, this.reduce(lens, this.depthFirstSearch(inventory, lens)));
     }
 
-    private Inventory toResult(Inventory inventory, Fabric fabric, Set<Lens> matches) {
+    private Inventory toResult(Inventory inventory, Fabric fabric, Map<Lens, Integer> matches) {
         if (matches.isEmpty()) {
             return new EmptyInventoryImpl(inventory);
         }
         if (matches.size() == 1) {
-            return matches.iterator().next().getAdapter(fabric, inventory);
+            final Map.Entry<Lens, Integer> entry = matches.entrySet().iterator().next();
+            if (entry.getValue() == 0) {
+                return entry.getKey().getAdapter(fabric, inventory);
+            }
+            final LensRegistrar.BasicSlotLensProvider slotProvider = new LensRegistrar.BasicSlotLensProvider(entry.getKey().slotCount());
+            final DelegatingLens delegate = new DelegatingLens(entry.getValue(), entry.getKey(), slotProvider);
+            return delegate.getAdapter(fabric, inventory);
         }
 
         QueryLens lens = new QueryLens(matches);
         return lens.getAdapter(fabric, inventory);
     }
 
-    private Set<Lens> depthFirstSearch(Inventory inventory, Lens lens) {
-        Set<Lens> matches = new LinkedHashSet<>();
+    private Map<Lens, Integer> depthFirstSearch(Inventory inventory, Lens lens) {
+        Map<Lens, Integer> matches = new LinkedHashMap<>();
 
         for (Lens child : lens.getChildren()) {
             if (child == null) {
                 continue;
             }
             if (!child.getChildren().isEmpty()) {
-                matches.addAll(this.depthFirstSearch(inventory, child));
+                matches.putAll(this.depthFirstSearch(inventory, child));
             }
             if (this.matches(child, lens, inventory)) {
-                matches.add(child);
+                matches.put(child, 0);
             }
+        }
+
+
+        if (lens.base() != 0 && !matches.isEmpty()) {
+            matches.entrySet().forEach(entry -> entry.setValue(entry.getValue() + lens.base()));
         }
 
         return matches;
     }
 
-    private Set<Lens> reduce(Lens lens, Set<Lens> matches) {
-        List<SlotLens> lensSlots = lens.getSlots();
-        Set<SlotLens> matchSlots = this.getSlots(matches);
-
+    private Map<Lens, Integer> reduce(Lens lens, Map<Lens, Integer> matches) {
         if (matches.isEmpty()) {
-            return matches;
+            return Collections.emptyMap();
         }
 
-        if (lensSlots.size() == matchSlots.size() && this.allLensesAreSlots(matches) && matchSlots.containsAll(lensSlots) ) {
+        // Check if all matches are the direct children of this lens
+        List<Lens> lensSlots = lens.getChildren();
+        if (lensSlots.size() == matches.size() && matches.keySet().containsAll(lensSlots) ) {
+            // return parent lens instead of constructing a new for the query result
             matches.clear();
-            matches.add(lens);
+            matches.put(lens, 0);
             return matches;
         }
 
-        for (Lens child : lens.getChildren()) {
-            if (child == null || !child.isSubsetOf(matches)) {
-                continue;
-            }
-            matches.removeAll(child.getChildren());
-            matches.add(child);
-        }
+        // TODO maybe? Reduce when all matches are slots of this lens
+        // TODO maybe? Reduce when subset of matches are child-lens of this lens
 
         return matches;
     }
-
-    private boolean allLensesAreSlots(Set<Lens> lenses) {
-        for (Lens lens : lenses) {
-            if (!(lens instanceof SlotLens)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private Set<SlotLens> getSlots(Collection<Lens> lenses) {
-        Set<SlotLens> slots = new HashSet<>();
-        for (Lens lens : lenses) {
-            slots.addAll(lens.getSlots());
-        }
-        return slots;
-    }
-
-
 }

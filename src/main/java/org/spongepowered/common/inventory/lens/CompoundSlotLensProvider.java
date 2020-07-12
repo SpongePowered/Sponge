@@ -27,8 +27,8 @@ package org.spongepowered.common.inventory.lens;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +51,7 @@ public class CompoundSlotLensProvider implements SlotLensProvider {
     public CompoundSlotLensProvider add(InventoryAdapter adapter) {
         for (Inventory slot : ((Inventory) adapter).slots()) {
             SlotLens slotLens = ((SlotLens) ((SlotAdapter) slot).inventoryAdapter$getRootLens());
-            if (!this.slotList.contains(slotLens)) {
-                this.slotList.add(slotLens);
-            }
+            this.slotList.add(slotLens);
         }
         return this;
     }

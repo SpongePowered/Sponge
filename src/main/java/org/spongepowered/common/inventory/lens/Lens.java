@@ -133,4 +133,8 @@ public interface Lens extends LensCollection {
 
     String toString(int deep);
 
+    default int base() {
+        return 0;
+    }
+
 }

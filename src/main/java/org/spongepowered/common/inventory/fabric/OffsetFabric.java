@@ -29,38 +29,60 @@ import org.spongepowered.common.bridge.inventory.InventoryBridge;
 
 import java.util.Collection;
 
-/**
- * A fabric is an underlying view of an indexed container, this allows raw
- * inventories and containers to be handled the same via lenses, without the
- * lenses themselves having to care about the type of the target object.
- */
-public interface Fabric {
+public class OffsetFabric implements Fabric {
 
-    /**
-     * Return all inventories which compose this fabric, order is not guaranteed
-     * or enforced.
-     */
-    Collection<InventoryBridge> fabric$allInventories();
+    private final Fabric fabric;
+    private final int offset;
 
-    /**
-     * Return the inventory at the specified index in the fabric.
-     */
-    InventoryBridge fabric$get(int index);
-
-    ItemStack fabric$getStack(int index);
-
-    void fabric$setStack(int index, ItemStack stack);
-
-    int fabric$getMaxStackSize();
-
-    int fabric$getSize();
-
-    void fabric$clear();
-
-    void fabric$markDirty();
-
-    default Fabric fabric$offset(int by) {
-        return OffsetFabric.of(this, by);
+    private OffsetFabric(Fabric fabric, int offset) {
+        this.fabric = fabric;
+        this.offset = offset;
     }
 
+    public static Fabric of(Fabric fabric, int by) {
+        if (fabric instanceof OffsetFabric) {
+            by = ((OffsetFabric) fabric).offset + by;
+            fabric = ((OffsetFabric) fabric).fabric;
+        }
+        return new OffsetFabric(fabric, by);
+    }
+
+    @Override
+    public Collection<InventoryBridge> fabric$allInventories() {
+        return this.fabric.fabric$allInventories();
+    }
+
+    @Override
+    public InventoryBridge fabric$get(int index) {
+        return this.fabric.fabric$get(index + this.offset);
+    }
+
+    @Override
+    public ItemStack fabric$getStack(int index) {
+        return this.fabric.fabric$getStack(index + this.offset);
+    }
+
+    @Override
+    public void fabric$setStack(int index, ItemStack stack) {
+        this.fabric.fabric$setStack(index + this.offset, stack);
+    }
+
+    @Override
+    public int fabric$getMaxStackSize() {
+        return this.fabric.fabric$getMaxStackSize();
+    }
+
+    @Override public int fabric$getSize() {
+        return this.fabric.fabric$getSize();
+    }
+
+    @Override
+    public void fabric$clear() {
+        this.fabric.fabric$clear();
+    }
+
+    @Override
+    public void fabric$markDirty() {
+        this.fabric.fabric$markDirty();
+    }
 }

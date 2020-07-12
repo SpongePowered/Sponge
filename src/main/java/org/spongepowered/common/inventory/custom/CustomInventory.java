@@ -37,10 +37,11 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 public class CustomInventory implements IInventory, CarriedBridge {
 
@@ -104,7 +105,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
     public ItemStack getStackInSlot(final int index) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
-            if (inv.capacity() > index - offset) {
+            if (inv.capacity() <= index - offset) {
                 offset += inv.capacity();
                 continue;
             }
@@ -117,7 +118,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
     public ItemStack decrStackSize(final int index, final int count) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
-            if (inv.capacity() > index - offset) {
+            if (inv.capacity() <= index - offset) {
                 offset += inv.capacity();
                 continue;
             }
@@ -131,7 +132,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
     public ItemStack removeStackFromSlot(final int index) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
-            if (inv.capacity() > index - offset) {
+            if (inv.capacity() <= index - offset) {
                 offset += inv.capacity();
                 continue;
             }
@@ -145,7 +146,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
     public void setInventorySlotContents(final int index, final ItemStack stack) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
-            if (inv.capacity() > index - offset) {
+            if (inv.capacity() <= index - offset) {
                 offset += inv.capacity();
                 continue;
             }

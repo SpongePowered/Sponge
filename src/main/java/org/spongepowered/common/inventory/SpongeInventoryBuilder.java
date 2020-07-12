@@ -32,7 +32,10 @@ import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
+import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -76,15 +79,17 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
 
     public EndStep completeStructure() {
         CompoundLens.Builder lensBuilder = CompoundLens.builder();
+        int size = 0;
         for (Lens lens : this.lenses) {
-            lensBuilder.add(lens);
+            size += lens.slotCount();
         }
-        CompoundSlotLensProvider provider = new CompoundSlotLensProvider();
-        for (Inventory inventory : this.inventories) {
-            provider.add(((InventoryAdapter) inventory));
+        final LensRegistrar.BasicSlotLensProvider lensProvider = new LensRegistrar.BasicSlotLensProvider(size);
+        int offset = 0;
+        for (Lens lens : this.lenses) {
+            lensBuilder.add(new DelegatingLens(offset, lens, lensProvider));
+            offset += lens.slotCount();
         }
-        this.finalProvider = provider;
-        this.finalLens = lensBuilder.build(provider);
+        this.finalLens = lensBuilder.build(lensProvider);
         return this;
     }
 
