@@ -28,10 +28,11 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.type.GridInventory;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.PrimaryPlayerInventoryLens;
 
-public class PrimaryPlayerInventoryAdapter extends GridInventoryAdapter implements PrimaryPlayerInventory {
+public class PrimaryPlayerInventoryAdapter extends BasicInventoryAdapter implements PrimaryPlayerInventory {
 
     private final PrimaryPlayerInventoryLens root;
 

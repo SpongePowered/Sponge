@@ -27,10 +27,11 @@ package org.spongepowered.common.inventory.lens.impl.comp;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.impl.comp.PrimaryPlayerInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
-public class PrimaryPlayerInventoryLens extends GridInventoryLens {
+public class PrimaryPlayerInventoryLens extends AbstractLens {
 
     private static final int MAIN_INVENTORY_HEIGHT = 3;
     private static final int INVENTORY_WIDTH = 9;
@@ -45,13 +46,12 @@ public class PrimaryPlayerInventoryLens extends GridInventoryLens {
     }
 
     public PrimaryPlayerInventoryLens(int base, Class<? extends Inventory> adapterType, SlotLensProvider slots, boolean isContainer) {
-        super(base, 9, 4, adapterType, slots);
+        super(base, 9 * 4, adapterType);
         this.isContainer = isContainer;
 
         this.init(slots);
     }
 
-    @Override
     protected void init(SlotLensProvider slots) {
         int base = this.base;
 
