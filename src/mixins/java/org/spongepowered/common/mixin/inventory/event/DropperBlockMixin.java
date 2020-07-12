@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.mixin.inventory.event;
 
-import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.DropperBlock;
 import net.minecraft.dispenser.ProxyBlockSource;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.DispenserTileEntity;
-import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -39,7 +37,6 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
@@ -54,20 +51,21 @@ public abstract class DropperBlockMixin {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/tileentity/DispenserTileEntity;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
     private void afterDispense(final World worldIn, final BlockPos pos, final CallbackInfo callbackInfo,
-            final ProxyBlockSource blocksourceimpl, final DispenserTileEntity tileentitydispenser, final int i, final ItemStack itemstack,
-            final Direction enumfacing, final BlockPos blockpos, final IInventory iinventory, final ItemStack itemstack1) {
+            final ProxyBlockSource proxyblocksource, final DispenserTileEntity dispensertileentity, final int i, final ItemStack itemstack,
+            final Direction direction, final IInventory iinventory, final ItemStack itemstack1) {
         // after setInventorySlotContents
-        tileentitydispenser.setInventorySlotContents(i, itemstack1);
+        dispensertileentity.setInventorySlotContents(i, itemstack1);
         // Transfer worked if remainder is one less than the original stack
         if (itemstack1.getCount() == itemstack.getCount() - 1) {
-            final TrackedInventoryBridge capture = impl$forCapture(tileentitydispenser);
-            final Inventory sourceInv = ((Inventory) tileentitydispenser);
+            final TrackedInventoryBridge capture = impl$forCapture(dispensertileentity);
+            final Inventory sourceInv = ((Inventory) dispensertileentity);
             SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
             InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
         }
         callbackInfo.cancel();
     }
 
+    /* TODO
     @Surrogate
     private void afterDispense(final World worldIn, final BlockPos pos, final CallbackInfo callbackInfo,
             final ProxyBlockSource blocksourceimpl, final DispenserTileEntity tileentitydispenser, final int i, final ItemStack itemstack,
@@ -86,15 +84,16 @@ public abstract class DropperBlockMixin {
         }
         callbackInfo.cancel();
     }
+     */
 
     @Inject(method = "dispense", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/tileentity/HopperTileEntity;putStackInInventoryAllSlots(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/inventory/IInventory;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Direction;)Lnet/minecraft/item/ItemStack;"))
     private void onDispense(final World world, final BlockPos pos, final CallbackInfo ci,
-            final ProxyBlockSource blocksourceimpl, final DispenserTileEntity tileentitydispenser, final int i, final ItemStack itemstack,
-            final Direction enumfacing, final BlockPos blockpos, final IInventory iinventory) {
+            final ProxyBlockSource proxyblocksource, final DispenserTileEntity dispensertileentity, final int i, final ItemStack itemstack,
+            final Direction direction, final IInventory iinventory) {
         // Before putStackInInventoryAllSlots
-        if (InventoryEventFactory.callTransferPre(((Inventory) tileentitydispenser), ((Inventory) iinventory)).isCancelled()) {
+        if (InventoryEventFactory.callTransferPre(((Inventory) dispensertileentity), ((Inventory) iinventory)).isCancelled()) {
             ci.cancel();
         }
     }

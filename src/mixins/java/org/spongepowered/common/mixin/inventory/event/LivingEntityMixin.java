@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.bridge.entity.LivingEntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -80,7 +79,7 @@ public abstract class LivingEntityMixin {
             return; // Ignore Equipment on player spawn/respawn
         }
         final ItemStack after = this.getItemStackFromSlot(entityEquipmentSlot);
-        final LivingEntity entity = (LivingEntity) (LivingEntityBridge) this;
+        final LivingEntity entity = (LivingEntity) (Object) this;
         if (!ItemStack.areItemStacksEqual(after, before)) {
             final Inventory slotAdapter;
             if (entity instanceof ServerPlayerEntity) {

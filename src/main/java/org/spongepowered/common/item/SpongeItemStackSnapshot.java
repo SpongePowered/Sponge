@@ -60,6 +60,8 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
+    public static final ItemStackSnapshot EMPTY = new SpongeItemStackSnapshot(ItemStackUtil.fromNative(net.minecraft.item.ItemStack.EMPTY));
+
     private final ItemType itemType;
     private final int quantity;
     private final int damageValue;
@@ -74,7 +76,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public SpongeItemStackSnapshot(final ItemStack itemStack) {
         checkNotNull(itemStack);
         if (ItemStackUtil.toNative(itemStack) == net.minecraft.item.ItemStack.EMPTY) {
-            this.itemType = (ItemType) null; // Empty itemstack has an invalid item type that we have to have null.
+            this.itemType = itemStack.getType();
             this.quantity = 0;
             this.damageValue = 0;
             this.manipulators = ImmutableList.of();

@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.SerializableDataHolder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
@@ -39,11 +38,11 @@ import java.util.Optional;
 
 public interface CustomDataHolderBridge {
 
-    DataTransactionResult bridge$offerCustom(SerializableDataHolder.Mutable manipulator, MergeFunction function);
+    DataTransactionResult bridge$offerCustom(DataManipulator.Mutable manipulator, MergeFunction function);
 
-    <T extends SerializableDataHolder.Mutable> Optional<T> bridge$getCustom(Class<T> customClass);
+    <T extends DataManipulator.Mutable> Optional<T> bridge$getCustom(Class<T> customClass);
 
-    DataTransactionResult bridge$removeCustom(Class<? extends SerializableDataHolder.Mutable> customClass);
+    DataTransactionResult bridge$removeCustom(Class<? extends DataManipulator.Mutable> customClass);
 
     boolean bridge$hasManipulators();
 
