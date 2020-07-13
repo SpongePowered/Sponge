@@ -36,6 +36,8 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.explosion.ResistanceCalculator;
 import org.spongepowered.common.bridge.world.ExplosionBridge;
 
+import java.util.Optional;
+
 public class SpongeExplosionBuilder implements Explosion.Builder {
 
     private Location<World> location;
@@ -48,7 +50,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     private int resolution = 16;
     private float randomness = 1.0F;
     private double knockback = 1;
-    private ResistanceCalculator resistanceCalculator;
+    private Optional<ResistanceCalculator> resistanceCalculator = Optional.empty();
 
     public SpongeExplosionBuilder() {
         reset();
@@ -117,7 +119,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
     @Override
     public Explosion.Builder resistanceCalculator(ResistanceCalculator resistanceCalculator) {
-        this.resistanceCalculator = resistanceCalculator;
+        this.resistanceCalculator = Optional.ofNullable(resistanceCalculator);
         return this;
     }
 
@@ -133,7 +135,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.resolution = value.getResolution();
         this.randomness = value.getRandomness();
         this.knockback = value.getKnockback();
-        this.resistanceCalculator = value.getResistanceCalculator().orElse(null);
+        this.resistanceCalculator = value.getResistanceCalculator();
         return this;
     }
 
@@ -168,7 +170,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         ((ExplosionBridge) explosion).bridge$setResolution(this.resolution);
         ((ExplosionBridge) explosion).bridge$setRandomness(this.randomness);
         ((ExplosionBridge) explosion).bridge$setKnockback(this.knockback);
-        ((ExplosionBridge) explosion).bridge$setResistanceCalculator(this.resistanceCalculator);
+        ((ExplosionBridge) explosion).bridge$setResistanceCalculator(this.resistanceCalculator.orElse(null));
         return (Explosion) explosion;
     }
 }
