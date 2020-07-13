@@ -340,7 +340,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public boolean setTransform(final Transform transform) {
-        if (PhaseTracker.SERVER.onSidedThread()) {
+        if (!PhaseTracker.SERVER.onSidedThread()) {
             return false;
         }
         Preconditions.checkNotNull(transform, "The transform cannot be null!");
