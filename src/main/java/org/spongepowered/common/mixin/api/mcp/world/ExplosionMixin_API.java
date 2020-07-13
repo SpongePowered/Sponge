@@ -113,7 +113,7 @@ public abstract class ExplosionMixin_API implements Explosion {
 
     @Override
     public Optional<ResistanceCalculator> getResistanceCalculator() {
-        return Optional.of(((ExplosionBridge) this).bridge$getResistanceCalculator());
+        return Optional.ofNullable(((ExplosionBridge) this).bridge$getResistanceCalculator());
     }
 
 }
