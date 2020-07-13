@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -46,8 +47,7 @@ public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String name, SoundEvent sound, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = ResourceKey.of(container, name.toLowerCase());
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
     }
 
     @Override

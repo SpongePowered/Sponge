@@ -58,7 +58,7 @@ public final class InvokingTeleporterState extends EntityPhaseState<InvokingTele
     @Override
     public boolean spawnEntityOrCapture(final InvokingTeleporterContext context, final Entity entity) {
         final ServerWorld worldServer = context.getTargetWorld();
-        if (!((WorldBridge)worldServer).bridge$isFake() && SpongeImplHooks.onServerThread()) {
+        if (!((WorldBridge)worldServer).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             SpongeHooks.logEntitySpawn((net.minecraft.entity.Entity) entity);
         }
         if (entity instanceof ServerPlayerEntity) {

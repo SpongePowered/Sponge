@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.format.SpongeTextColor;
 import org.spongepowered.plugin.PluginContainer;
@@ -49,8 +50,7 @@ public abstract class BossInfo_ColorMixin_API implements BossBarColor {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndColor(String enumName, int ordinal, String name, TextFormatting formatting, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = ResourceKey.of(container, this.shadow$getName().toLowerCase());
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), this.shadow$getName().toLowerCase());
         this.api$color = SpongeTextColor.of(this.shadow$getFormatting());
     }
 

@@ -30,6 +30,7 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.CarriedBridge;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -63,7 +64,7 @@ public class CustomInventory implements IInventory, CarriedBridge {
         this.lens = lens;
         this.slotLensProvider = provider;
         this.inventories = inventories;
-        this.plugin = SpongeImplHooks.getActiveModContainer();
+        this.plugin = SpongeCommon.getActivePlugin();
     }
 
     public Carrier getCarrier() {

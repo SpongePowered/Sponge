@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -42,8 +43,7 @@ public abstract class MooshroomEntity_TypeMixin_API implements MooshroomType {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String name, BlockState renderStateIn, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = ResourceKey.of(container, name);
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name);
     }
 
     @Override

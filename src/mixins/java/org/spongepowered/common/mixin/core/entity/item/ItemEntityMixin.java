@@ -185,7 +185,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
         )
     )
     private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
-        if (!SpongeImplHooks.onServerThread() || this.shadow$getItem().isEmpty()) {
+        if (!PhaseTracker.SERVER.onSidedThread() || this.shadow$getItem().isEmpty()) {
             // In the rare case the first if block is actually at the end of the method instruction list, we don't want to 
             // erroneously be calling this twice.
             return;

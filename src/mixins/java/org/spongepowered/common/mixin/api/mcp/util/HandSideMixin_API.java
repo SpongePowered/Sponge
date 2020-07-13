@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.plugin.PluginContainer;
@@ -48,8 +49,7 @@ public abstract class HandSideMixin_API implements HandPreference {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, ITextComponent name, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = ResourceKey.of(container, ((TranslationTextComponent) name).getKey().replace("options.mainHand.", ""));
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), ((TranslationTextComponent) name).getKey().replace("options.mainHand.", ""));
         this.api$translation = new SpongeTranslation(((TranslationTextComponent) name).getKey());
     }
 

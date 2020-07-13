@@ -46,7 +46,6 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
 
     @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
     private void tracker$addPhaseTrackerToCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
-        // TODO - This should really be per thread
         report.makeCategory("Sponge PhaseTracker").addDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
     }

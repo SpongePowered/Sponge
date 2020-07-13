@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.plugin.PluginContainer;
@@ -49,8 +50,7 @@ public abstract class Team_VisibleMixin_API implements Visibility {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, String name, int idIn, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = ResourceKey.of(container, name.toLowerCase());
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
         this.api$translation = new SpongeTranslation(((TranslationTextComponent) this.shadow$getDisplayName()).getKey());
     }
 

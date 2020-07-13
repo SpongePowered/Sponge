@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -42,10 +43,8 @@ public abstract class PhaseTypeMixin_API implements DragonPhaseType {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(int idIn, Class<? extends IPhase> clazzIn, String name, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-
         // Honestly, fuck off Mojang with HoldingPattern instead of Holding_Pattern or holding_pattern
-        this.api$key = ResourceKey.of(container, String.join("_", name.split("(?<=.)(?=\\p{Lu})")).toLowerCase());
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), String.join("_", name.split("(?<=.)(?=\\p{Lu})")).toLowerCase());
     }
 
     @Override

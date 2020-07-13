@@ -26,7 +26,7 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timings;
 
-public class FullServerTickHandler extends TimingHandler {
+public final class FullServerTickHandler extends TimingHandler {
 
     private static final TimingIdentifier IDENTITY = new TimingIdentifier("Minecraft", "Full Server Tick", null, false);
     final TimingData minuteData;

@@ -69,7 +69,7 @@ public abstract class BlockMixin_Tracker {
     @Inject(method = "spawnAsEntity", at = @At("HEAD"), cancellable = true)
     private static void impl$checkMainThreadAndRestoring(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
                                                          final CallbackInfo ci) {
-        if (!SpongeImplHooks.onServerThread() || PhaseTracker.SERVER.getCurrentState().isRestoring()) {
+        if (!PhaseTracker.SERVER.onSidedThread() || PhaseTracker.SERVER.getCurrentState().isRestoring()) {
             ci.cancel();
         }
     }

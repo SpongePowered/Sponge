@@ -30,6 +30,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.relocate.co.aikar.util.LoadingIntMap;
 
 class TimingHandler implements Timing {
@@ -87,29 +88,25 @@ class TimingHandler implements Timing {
 
     @Override
     public void startTimingIfSync() {
-        if (!this.enabled || SpongeCommon.getGame().getPlatform().getExecutionType().isClient()) {
+        if (!this.enabled ) {
             return;
         }
 
-        if (Sponge.isServerAvailable() && SpongeCommon.getServer().isOnExecutionThread()) {
-            this.startTiming();
-        }
+        this.startTiming();
     }
 
     @Override
     public void stopTimingIfSync() {
-        if (!this.enabled || SpongeCommon.getGame().getPlatform().getExecutionType().isClient()) {
+        if (!this.enabled) {
             return;
         }
 
-        if (SpongeImplHooks.onServerThread()) {
-            this.stopTiming();
-        }
+        this.stopTiming();
     }
 
     @Override
     public TimingHandler startTiming() {
-        if (!this.enabled || SpongeCommon.getGame().getPlatform().getExecutionType().isClient()) {
+        if (!this.enabled) {
             return this;
         }
 
@@ -123,17 +120,12 @@ class TimingHandler implements Timing {
 
     @Override
     public void stopTiming() {
-        if (!this.enabled || SpongeCommon.getGame().getPlatform().getExecutionType().isClient()) {
+        if (!this.enabled) {
+            this.start = 0;
             return;
         }
 
         if (--this.timingDepth == 0 && this.start != 0) {
-            if (!SpongeImplHooks.onServerThread()) {
-                SpongeCommon.getLogger().fatal("stopTiming called async for " + this.name);
-                new Throwable().printStackTrace();
-                this.start = 0;
-                return;
-            }
             this.addDiff(System.nanoTime() - this.start);
             this.start = 0;
         }
@@ -167,8 +159,6 @@ class TimingHandler implements Timing {
 
     /**
      * Reset this timer, setting all values to zero.
-     *
-     * @param full
      */
     void reset(boolean full) {
         this.record.reset();

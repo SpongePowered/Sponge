@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -86,7 +87,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
         final EntityTypeBridge entityTypeBridge = (EntityTypeBridge) entityType;
         if (!entityTypeBridge.bridge$checkedDamageEntity()) {
             try {
-                final String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? Constants.Entity.ATTACK_ENTITY_FROM_MAPPING : Constants.Entity.ATTACK_ENTITY_FROM_OBFUSCATED;
+                final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? Constants.Entity.ATTACK_ENTITY_FROM_MAPPING : Constants.Entity.ATTACK_ENTITY_FROM_OBFUSCATED;
                 final Class<?>[] argTypes = {DamageSource.class, float.class};
                 final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
                 if (!(clazz.equals(LivingEntity.class) || clazz.equals(PlayerEntity.class) || clazz.equals(ServerPlayerEntity.class))) {

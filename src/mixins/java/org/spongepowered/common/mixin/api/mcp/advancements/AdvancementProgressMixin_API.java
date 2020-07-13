@@ -67,7 +67,6 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
 
     @Override
     public Optional<CriterionProgress> get(AdvancementCriterion criterion) {
-        checkState(SpongeImplHooks.onServerThread());
         checkNotNull(criterion, "criterion");
         final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         checkState(map != null, "progressMap isn't initialized");
@@ -76,7 +75,6 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
 
     @Override
     public Optional<ScoreCriterionProgress> get(ScoreAdvancementCriterion criterion) {
-        checkState(SpongeImplHooks.onServerThread());
         final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         checkState(map != null, "progressMap isn't initialized");
         return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion));

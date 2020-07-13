@@ -619,7 +619,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             }
             return;
         }
-        if (this.usedFrame == null && SpongeImplHooks.onServerThread()) {
+        if (this.usedFrame == null) {
             // So, this part is interesting... Since the used frame is null, that means
             // the cause stack manager still has the refernce of this context/phase, we have
             // to "pop off" the list.

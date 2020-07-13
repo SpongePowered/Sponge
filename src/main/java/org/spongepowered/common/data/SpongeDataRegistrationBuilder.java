@@ -32,6 +32,7 @@ import org.spongepowered.api.data.DuplicateDataStoreException;
 import org.spongepowered.api.data.DuplicateProviderException;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
@@ -81,8 +82,7 @@ public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<Da
 
     @Override
     protected DataRegistration build(ResourceKey key) {
-        // TODO restrictions?
-        return new SpongeDataRegistration(key, SpongeImplHooks.getActiveModContainer(), this);
+        return new SpongeDataRegistration(key, SpongeCommon.getActivePlugin(), this);
     }
 
     @Override

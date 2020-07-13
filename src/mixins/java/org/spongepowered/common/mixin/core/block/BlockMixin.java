@@ -65,6 +65,7 @@ import org.spongepowered.common.config.category.BlockTrackerModCategory;
 import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -238,7 +239,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
 
         // onEntityCollidedWithBlock
         try {
-            final String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityWalk" : "func_176199_a";
+            final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? "onEntityWalk" : "func_176199_a";
             final Class<?>[] argTypes = {net.minecraft.world.World.class, BlockPos.class, Entity.class };
             final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             if (clazz.equals(Block.class)) {
@@ -253,7 +254,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
 
         // onEntityCollision (IBlockState)
         try {
-            final String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollision" : "func_180634_a";
+            final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? "onEntityCollision" : "func_180634_a";
             final Class<?>[] argTypes = {net.minecraft.world.World.class, BlockPos.class, net.minecraft.block.BlockState.class, Entity.class };
             final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             if (clazz.equals(Block.class)) {
@@ -267,7 +268,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         }
         // neighborChanged
         try {
-            final String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "neighborChanged" : "func_189540_a";
+            final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? "neighborChanged" : "func_189540_a";
             final Class<?>[] argTypes = {net.minecraft.block.BlockState.class, net.minecraft.world.World.class, BlockPos.class, Block.class, BlockPos.class};
             final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             this.impl$hasNeighborOverride = !clazz.equals(Block.class);

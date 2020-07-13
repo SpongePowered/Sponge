@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common;
 
-import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.common.config.SpongeConfig.Type.CUSTOM_DATA;
-import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
-import static org.spongepowered.common.config.SpongeConfig.Type.TRACKER;
-
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
@@ -71,11 +67,13 @@ public final class SpongeCommon {
 
     @Inject @Nullable private static SpongeGame game;
 
+    @Nullable private static PluginContainer activePlugin;
+
     private SpongeCommon() {
     }
 
     private static <T> T check(@Nullable T instance) {
-        checkState(instance != null, "SpongeImpl has not been initialized!");
+        Preconditions.checkState(instance != null, "SpongeCommon has not been initialized!");
         return instance;
     }
 
@@ -84,11 +82,11 @@ public final class SpongeCommon {
     }
 
     public static boolean isInitialized() {
-        return game != null;
+        return SpongeCommon.game != null;
     }
 
     public static SpongeGame getGame() {
-        return check(game);
+        return SpongeCommon.check(SpongeCommon.game);
     }
 
     public static MinecraftServer getServer() {
@@ -116,7 +114,6 @@ public final class SpongeCommon {
     }
 
     public static Path getSpongeConfigDirectory() {
-        // TODO Launch needs to track this, pass down to us
         return SpongeCommon.getGameDirectory().resolve("config");
     }
 
@@ -135,34 +132,44 @@ public final class SpongeCommon {
         return Launcher.getInstance().getLauncherPlugins();
     }
 
-    public static SpongeConfigSaveManager getConfigSaveManager() {
-        if (configSaveManager == null) {
-            configSaveManager = new SpongeConfigSaveManager();
+    public static PluginContainer getActivePlugin() {
+        if (SpongeCommon.activePlugin == null) {
+            return Launcher.getInstance().getMinecraftPlugin();
         }
 
-        return configSaveManager;
+        return SpongeCommon.activePlugin;
+    }
+
+    public static void setActivePlugin(@Nullable final PluginContainer plugin) {
+        SpongeCommon.activePlugin = plugin;
+    }
+
+    public static SpongeConfigSaveManager getConfigSaveManager() {
+        if (SpongeCommon.configSaveManager == null) {
+            SpongeCommon.configSaveManager = new SpongeConfigSaveManager();
+        }
+        return SpongeCommon.configSaveManager;
     }
 
     public static SpongeConfig<GlobalConfig> getGlobalConfigAdapter() {
-        if (globalConfigAdapter == null) {
-            globalConfigAdapter = new SpongeConfig<>(GLOBAL, getSpongeConfigDirectory().resolve("global.conf"), ECOSYSTEM_ID, null, false);
+        if (SpongeCommon.globalConfigAdapter == null) {
+            SpongeCommon.globalConfigAdapter = new SpongeConfig<>(SpongeConfig.Type.GLOBAL, getSpongeConfigDirectory().resolve("global.conf"), SpongeCommon.ECOSYSTEM_ID, null, false);
         }
-
-        return globalConfigAdapter;
+        return SpongeCommon.globalConfigAdapter;
     }
 
     public static SpongeConfig<CustomDataConfig> getCustomDataConfigAdapter() {
-        if (customDataConfigAdapter == null) {
-            customDataConfigAdapter = new SpongeConfig<>(CUSTOM_DATA, getSpongeConfigDirectory().resolve("custom_data.conf"), ECOSYSTEM_ID, null, true);
+        if (SpongeCommon.customDataConfigAdapter == null) {
+            SpongeCommon.customDataConfigAdapter = new SpongeConfig<>(SpongeConfig.Type.CUSTOM_DATA, getSpongeConfigDirectory().resolve("custom_data.conf"), SpongeCommon.ECOSYSTEM_ID, null, true);
         }
-        return customDataConfigAdapter;
+        return SpongeCommon.customDataConfigAdapter;
     }
 
     public static SpongeConfig<TrackerConfig> getTrackerConfigAdapter() {
-        if (trackerConfigAdapter == null) {
-            trackerConfigAdapter = new SpongeConfig<>(TRACKER, getSpongeConfigDirectory().resolve("tracker.conf"), ECOSYSTEM_ID, null, true);
+        if (SpongeCommon.trackerConfigAdapter == null) {
+            SpongeCommon.trackerConfigAdapter = new SpongeConfig<>(SpongeConfig.Type.TRACKER, getSpongeConfigDirectory().resolve("tracker.conf"), SpongeCommon.ECOSYSTEM_ID, null, true);
         }
-        return trackerConfigAdapter;
+        return SpongeCommon.trackerConfigAdapter;
     }
 
     /**

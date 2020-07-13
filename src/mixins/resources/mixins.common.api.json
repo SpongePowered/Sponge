@@ -7,6 +7,7 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1100,
     "mixins": [
+        "common.entity.living.HumanEntityMixin_API",
         "common.event.cause.block.damage.MinecraftFallingBlockDamageSourceMixin_API",
         "data.persistence.DataContainerMixin_API",
         "data.DataHolderMixin_API",

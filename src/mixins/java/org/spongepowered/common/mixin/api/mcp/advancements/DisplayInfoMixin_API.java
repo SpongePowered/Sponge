@@ -48,7 +48,6 @@ import org.spongepowered.math.vector.Vector2d;
 public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spongepowered.api.advancement.DisplayInfo {
 
     @Shadow @Final private FrameType frame;
-    @Shadow @Final private ItemStack icon;
     @Shadow @Final private ITextComponent title;
     @Shadow @Final private ITextComponent description;
     @Shadow @Final private boolean showToast;

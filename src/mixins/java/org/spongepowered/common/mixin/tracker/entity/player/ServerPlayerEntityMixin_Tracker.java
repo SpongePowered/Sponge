@@ -97,9 +97,8 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
     @Overwrite
     public void onDeath(final DamageSource cause) {
         // Sponge start
-        final boolean isMainThread = SpongeImplHooks.onServerThread();
-        // TODO - Re-verify that we are handling proper drops, like wither flowers and such
-        final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((ServerPlayerEntity) (Object) this, cause, isMainThread);
+        final boolean isServerThread = PhaseTracker.SERVER.onSidedThread();
+        final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((ServerPlayerEntity) (Object) this, cause, isServerThread);
         if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;
         }
@@ -107,7 +106,7 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
 
         // Double check that the PhaseTracker is already capturing the Death phase
         final boolean tracksEntityDeaths;
-        if (isMainThread && !this.world.isRemote) {
+        if (isServerThread) {
             tracksEntityDeaths = PhaseTracker.getInstance().getCurrentState().tracksEntityDeaths();
         } else {
             tracksEntityDeaths = false;

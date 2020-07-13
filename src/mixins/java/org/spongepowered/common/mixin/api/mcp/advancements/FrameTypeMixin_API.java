@@ -33,8 +33,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.format.SpongeTextColor;
 import org.spongepowered.common.text.format.SpongeTextStyleType;
+import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
 
@@ -46,7 +49,7 @@ public abstract class FrameTypeMixin_API implements AdvancementType {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setFields(String enumName, int ordinal, String name, int icon, TextFormatting format, CallbackInfo ci) {
-        this.api$key = ResourceKey.minecraft(name);
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
         this.api$textFormat = TextFormat.of(
                 SpongeTextColor.of(format),
                 SpongeTextStyleType.of(format)

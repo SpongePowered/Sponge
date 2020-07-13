@@ -344,6 +344,10 @@ public final class PhaseTracker implements CauseStackManager {
 
     }
 
+    public boolean onSidedThread() {
+        return Thread.currentThread() == this.getSidedThread();
+    }
+
     // ----------------- SIMPLE GETTERS --------------------------------------
 
     public IPhaseState<?> getCurrentState() {
@@ -519,7 +523,7 @@ public final class PhaseTracker implements CauseStackManager {
     @SuppressWarnings("rawtypes")
     public void notifyBlockOfStateChange(final TrackedWorldBridge mixinWorld, final net.minecraft.block.BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos, final boolean isMoving) {
-        if (!SpongeImplHooks.onServerThread()) {
+        if (!PhaseTracker.SERVER.onSidedThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
@@ -601,8 +605,7 @@ public final class PhaseTracker implements CauseStackManager {
     @SuppressWarnings("rawtypes")
     public boolean setBlockState(final TrackedWorldBridge mixinWorld, final BlockPos pos,
                                  final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) {
-        if (!SpongeImplHooks.onServerThread()) {
-            // lol no, report the block change properly
+        if (!PhaseTracker.SERVER.onSidedThread()) {
             try {
                 PhaseTracker.SERVER.proposeScheduledBlockChange(this.getPhaseContext().defensiveCopy(PhaseTracker.SERVER), mixinWorld, pos, newState, flag);
             } catch (final InterruptedException e) {

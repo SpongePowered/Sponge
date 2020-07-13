@@ -399,9 +399,12 @@ public class SpongeEventManager implements EventManager {
                     if (event instanceof AbstractEvent) {
                         ((AbstractEvent) event).currentOrder = handler.getOrder();
                     }
+                    SpongeCommon.setActivePlugin(handler.getPlugin());
                     handler.handle(event);
                 } catch (final Throwable e) {
                     SpongeCommon.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+                } finally {
+                    SpongeCommon.setActivePlugin(null);
                 }
             }
             if (event instanceof AbstractEvent) {
@@ -422,9 +425,12 @@ public class SpongeEventManager implements EventManager {
                 if (event instanceof AbstractEvent) {
                     ((AbstractEvent) event).currentOrder = handler.getOrder();
                 }
+                SpongeCommon.setActivePlugin(handler.getPlugin());
                 handler.handle(event);
             } catch (Throwable e) {
                 this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+            } finally {
+                SpongeCommon.setActivePlugin(null);
             }
         }
         if (event instanceof AbstractEvent) {

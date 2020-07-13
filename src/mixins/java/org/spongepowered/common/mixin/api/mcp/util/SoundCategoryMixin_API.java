@@ -27,15 +27,20 @@ package org.spongepowered.common.mixin.api.mcp.util;
 import net.minecraft.util.SoundCategory;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 
 @Mixin(SoundCategory.class)
 public abstract class SoundCategoryMixin_API implements org.spongepowered.api.effect.sound.SoundCategory {
 
-    @Shadow public abstract String shadow$getName();
+    private ResourceKey api$key;
 
-    private final ResourceKey api$key = ResourceKey.of(SpongeImplHooks.getActiveModContainer(), this.shadow$getName().toLowerCase());
+    @Inject(method = "<init>", at = @At("HEAD"))
+    private void api$setKey(String enumName, int ordinal, String nameIn, CallbackInfo ci) {
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), nameIn.toLowerCase());
+    }
 
     @Override
     public ResourceKey getKey() {

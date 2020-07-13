@@ -78,7 +78,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
 
@@ -88,18 +87,6 @@ import java.util.Collection;
  * with calls to the Forge methods.
  */
 public class SpongeImplHooks {
-
-    public static boolean isVanilla() {
-        return true;
-    }
-
-    public static boolean isClientAvailable() {
-        return false;
-    }
-
-    public static boolean isDeobfuscatedEnvironment() {
-        return true;
-    }
 
     public static String getModIdFromClass(final Class<?> clazz) {
         final String className = clazz.getName();
@@ -263,12 +250,6 @@ public class SpongeImplHooks {
     public static boolean canConnectRedstone(final Block block, final BlockState state, final IWorldReader world, final BlockPos pos, @Nullable final Direction side) {
         return state.canProvidePower() && side != null;
     }
-
-    public static PluginContainer getActiveModContainer() {
-        return null;
-    }
-
-
 
     // Borrowed from Forge, with adjustments by us
 

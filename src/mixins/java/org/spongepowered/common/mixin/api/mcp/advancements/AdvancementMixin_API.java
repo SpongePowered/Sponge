@@ -54,57 +54,48 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
 
     @Override
     public Optional<AdvancementTree> getTree() {
-        checkState(SpongeImplHooks.onServerThread());
         return ((AdvancementBridge) this).bridge$getTree();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Collection<org.spongepowered.api.advancement.Advancement> getChildren() {
-        checkState(SpongeImplHooks.onServerThread());
         return ImmutableList.copyOf((Collection) this.children);
     }
 
     @Override
     public AdvancementCriterion getCriterion() {
-        checkState(SpongeImplHooks.onServerThread());
         return ((AdvancementBridge) this).bridge$getCriterion();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Optional<org.spongepowered.api.advancement.Advancement> getParent() {
-        checkState(SpongeImplHooks.onServerThread());
         return (Optional<org.spongepowered.api.advancement.Advancement>) (Optional<?>) ((AdvancementBridge) this).bridge$getParent();
     }
 
     @Override
     public Optional<org.spongepowered.api.advancement.DisplayInfo> getDisplayInfo() {
-        checkState(SpongeImplHooks.onServerThread());
         return Optional.ofNullable((org.spongepowered.api.advancement.DisplayInfo) this.display);
     }
 
     @Override
     public List<Text> toToastText() {
-        checkState(SpongeImplHooks.onServerThread());
         return ((AdvancementBridge) this).bridge$getToastText();
     }
 
     @Override
     public ResourceKey getKey() {
-        checkState(SpongeImplHooks.onServerThread());
         return ((AdvancementBridge) this).bridge$getKey();
     }
 
     @Override
     public String getName() {
-        checkState(SpongeImplHooks.onServerThread());
         return ((AdvancementBridge) this).bridge$getTranslation().get();
     }
 
     @Override
     public Text toText() {
-        checkState(SpongeImplHooks.onServerThread());
         return ((AdvancementBridge) this).bridge$getText();
     }
 }

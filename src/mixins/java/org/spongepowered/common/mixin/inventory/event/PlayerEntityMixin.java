@@ -84,7 +84,7 @@ public class PlayerEntityMixin {
         // TODO Minecraft 1.14 - Know if the server is shutting down
 
         // Corner case where the server is shutting down on the client, the server player is also being killed off.
-        if (Sponge.isServerAvailable() && SpongeImplHooks.isClientAvailable()) {
+        if (Sponge.isServerAvailable() && Sponge.isClientAvailable()) {
             container.onContainerClosed(player);
             return;
         }

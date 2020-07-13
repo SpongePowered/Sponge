@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.math.GenericMath;
@@ -49,8 +50,7 @@ public abstract class DyeColorMixin_API implements DyeColor {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKeyAndTranslation(String enumName, int ordinal, int idIn, String translationKey, int colorValueIn, MaterialColor mapColorIn, int fireworkColorIn, int textColorIn, CallbackInfo ci) {
-        final PluginContainer container = SpongeImplHooks.getActiveModContainer();
-        this.api$key = ResourceKey.of(container, translationKey.toLowerCase());
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), translationKey.toLowerCase());
         this.api$translation = new SpongeTranslation("color.minecraft." + translationKey);
     }
 

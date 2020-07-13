@@ -340,17 +340,19 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public boolean setTransform(final Transform transform) {
+        if (PhaseTracker.SERVER.onSidedThread()) {
+            return false;
+        }
         Preconditions.checkNotNull(transform, "The transform cannot be null!");
         final Vector3d position = transform.getPosition();
-
         this.shadow$setPosition(position.getX(), position.getY(), position.getZ());
         this.setRotation(transform.getRotation());
         this.setScale(transform.getScale());
-        if (!((WorldBridge) this.shadow$getEntityWorld()).bridge$isFake() && SpongeImplHooks.onServerThread()) {
+        if (!((WorldBridge) this.shadow$getEntityWorld()).bridge$isFake()) {
             ((ServerWorld) this.shadow$getEntityWorld()).chunkCheck((Entity) (Object) this);
         }
 
-        return false;
+        return true;
     }
 
     @Override

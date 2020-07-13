@@ -362,35 +362,36 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
     @Inject(method = "onLoad", at = @At("HEAD"))
     private void tracker$startLoad(final CallbackInfo callbackInfo) {
         final boolean isFake = ((WorldBridge) this.shadow$getWorld()).bridge$isFake();
-        if (!isFake) {
-            if (!SpongeImplHooks.onServerThread()) {
-                final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
-                    .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
-                                + " to the parented world for management. These operations are generally not"
-                                + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
-                                + " entities from another thread to the world is never ok.")
-                    .add()
-                    .add(" %s : %d, %d", "Chunk Pos", this.shadow$getPos().x, this.shadow$getPos().z)
-                    .add()
-                    .add(new Exception("Async Chunk Load Detected"))
-                    .log(SpongeCommon.getLogger(), Level.ERROR)
-                    ;
-                return;
-            }
-            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
-                return;
-            }
-            GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)
-                    .source(this)
-                    .world(this.shadow$getWorld())
-                    .chunk((net.minecraft.world.chunk.Chunk) (Object) this)
-                    .buildAndSwitch();
+        if (isFake) {
+            return;
         }
+
+        if (!PhaseTracker.SERVER.onSidedThread()) {
+            new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
+                .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
+                    + " to the parented world for management. These operations are generally not"
+                    + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
+                    + " entities from another thread to the world is never ok.")
+                .add()
+                .add(" %s : %d, %d", "Chunk Pos", this.shadow$getPos().x, this.shadow$getPos().z)
+                .add()
+                .add(new Exception("Async Chunk Load Detected"))
+                .log(SpongeCommon.getLogger(), Level.ERROR);
+            return;
+        }
+        if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+            return;
+        }
+        GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)
+            .source(this)
+            .world(this.shadow$getWorld())
+            .chunk((net.minecraft.world.chunk.Chunk) (Object) this)
+            .buildAndSwitch();
     }
 
     @Inject(method = "setLoaded", at = @At("RETURN"))
     private void tracker$endLoad(final CallbackInfo callbackInfo) {
-        if (!((WorldBridge) this.shadow$getWorld()).bridge$isFake() && SpongeImplHooks.onServerThread()) {
+        if (!((WorldBridge) this.shadow$getWorld()).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }

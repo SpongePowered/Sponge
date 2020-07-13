@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(RepairContainer.class)
@@ -52,7 +53,7 @@ public abstract class RepairContainerMixin {
 
     @Inject(method = "updateRepairOutput", at = @At(value = "RETURN"))
     private void impl$throwUpdateAnvilEvent(final CallbackInfo ci) {
-        if (!ShouldFire.UPDATE_ANVIL_EVENT || !SpongeImplHooks.onServerThread()) {
+        if (!ShouldFire.UPDATE_ANVIL_EVENT || !PhaseTracker.SERVER.onSidedThread()) {
             return;
         }
 

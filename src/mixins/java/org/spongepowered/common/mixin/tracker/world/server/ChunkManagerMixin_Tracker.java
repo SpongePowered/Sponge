@@ -51,7 +51,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkManager.class)
-public class ChunkManagerMixin_Tracker {
+public abstract class ChunkManagerMixin_Tracker {
 
     @Shadow @Final private ServerWorld world;
 
@@ -69,30 +69,30 @@ public class ChunkManagerMixin_Tracker {
     private void trackerImpl$startLoad(Chunk chunk, boolean loaded) {
         try {
             final boolean isFake = ((WorldBridge) chunk.getWorld()).bridge$isFake();
-            if (!isFake) {
-                if (!SpongeImplHooks.onServerThread()) {
-                    final PrettyPrinter printer = new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
-                            .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
-                                    + " to the parented world for management. These operations are generally not"
-                                    + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
-                                    + " entities from another thread to the world is never ok.")
-                            .add()
-                            .add(" %s : %s", "Chunk Pos", chunk.getPos().toString())
-                            .add()
-                            .add(new Exception("Async Chunk Load Detected"))
-                            .log(SpongeCommon.getLogger(), Level.ERROR)
-                            ;
-                    return;
-                }
-                if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
-                    return;
-                }
-                GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
-                        .source(chunk)
-                        .world(chunk.getWorld())
-                        .chunk(chunk)
-                        .buildAndSwitch();
+            if (isFake) {
+                return;
             }
+            if (!PhaseTracker.SERVER.onSidedThread()) {
+                new PrettyPrinter(60).add("Illegal Async Chunk Load").centre().hr()
+                    .addWrapped("Sponge relies on knowing when chunks are being loaded as chunks add entities"
+                        + " to the parented world for management. These operations are generally not"
+                        + " threadsafe and shouldn't be considered a \"Sponge bug \". Adding/removing"
+                        + " entities from another thread to the world is never ok.")
+                    .add()
+                    .add(" %s : %s", "Chunk Pos", chunk.getPos().toString())
+                    .add()
+                    .add(new Exception("Async Chunk Load Detected"))
+                    .log(SpongeCommon.getLogger(), Level.ERROR);
+                return;
+            }
+            if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
+                return;
+            }
+            GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
+                .source(chunk)
+                .world(chunk.getWorld())
+                .chunk(chunk)
+                .buildAndSwitch();
         } finally {
             chunk.setLoaded(loaded);
         }
@@ -101,7 +101,7 @@ public class ChunkManagerMixin_Tracker {
     @Inject(method = "func_219200_b", at = @At(value = "RETURN", ordinal = 0),
             slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")))
     private void trackerImpl$endLoad(ChunkHolder chunkHolder, final CallbackInfoReturnable<CompletableFuture<Either<IChunk, ChunkHolder.IChunkLoadingError>>> cir) {
-        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.onServerThread()) {
+        if (!((WorldBridge) this.world).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }
