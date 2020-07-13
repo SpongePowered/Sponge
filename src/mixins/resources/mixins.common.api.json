@@ -7,7 +7,14 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1100,
     "mixins": [
-        "authlib.GameProfileMixin_API",
+        "common.event.cause.block.damage.MinecraftFallingBlockDamageSourceMixin_API",
+        "data.persistence.DataContainerMixin_API",
+        "data.DataHolderMixin_API",
+        "entity.ai.goal.AbstractGoalMixin_API",
+        "event.cause.entity.damage.source.common.AbstractDamageSourceMixin_API",
+        "event.cause.entity.damage.source.common.AbstractEntityDamageSourceMixin_API",
+        "event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSourceMixin_API",
+        "item.merchant.MerchantMixin",
         "mcp.command.CommandSourceMixin_API",
         "mcp.command.arguments.ArgumentTypes_EntryMixin_API",
         "mcp.entity.EntityMixin_API",
@@ -17,8 +24,14 @@
         "mcp.network.rcon.RConConsoleSourceMixin_API",
         "mcp.server.MinecraftServerMixin_API",
         "mcp.server.management.PlayerProfileCacheMixin_API",
+        "mcp.util.DamageSourceMixin_API",
+        "mcp.util.EntityDamageSourceMixin_API",
+        "mcp.util.IndirectEntityDamageSourceMixin_API",
         "mcp.util.ResourceLocationMixin_API",
-        "service.permission.SubjectMixin_API"
+        "mojang.authlib.properties.PropertyMixin_API",
+        "mojang.authlib.GameProfileMixin_API",
+        "service.permission.SubjectMixin_API",
+        "world.LocatableBlockMixin"
     ],
     "client": [
         "mcp.client.MinecraftMixin_API",

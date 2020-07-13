@@ -33,7 +33,6 @@ import org.spongepowered.common.bridge.util.DamageSourceBridge;
 @Mixin(value = net.minecraft.util.DamageSource.class)
 public abstract class DamageSourceMixin_API implements DamageSource {
 
-    @Shadow public abstract boolean shadow$isProjectile();
     @Shadow public abstract boolean shadow$isUnblockable();
     @Shadow public abstract boolean shadow$canHarmInCreative();
     @Shadow public abstract boolean shadow$isDamageAbsolute();
@@ -42,8 +41,6 @@ public abstract class DamageSourceMixin_API implements DamageSource {
     @Shadow public abstract boolean shadow$isDifficultyScaled();
     @Shadow public abstract boolean shadow$isExplosion();
     @Shadow public abstract String shadow$getDamageType();
-
-    @Shadow public String damageType;
 
     @Override
     public boolean isExplosive() {

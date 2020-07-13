@@ -7,7 +7,7 @@
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 900,
     "mixins": [
-      "ai.goal.AbstractGoalMixin_API",
+        "entity.goal.AbstractGoalMixin_API",
       "authlib.GameProfileMixin_API",
       "authlib.properties.PropertyMixin_API",
       "common.entity.living.HumanEntityMixin_API",

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.authlib;
+package org.spongepowered.common.mixin.api.mojang.authlib;
 
 import com.google.common.collect.Multimap;
 import com.mojang.authlib.GameProfile;

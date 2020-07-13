@@ -22,24 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.authlib.properties;
+package org.spongepowered.common.mixin.api.entity.ai.goal;
 
-import com.mojang.authlib.properties.Property;
-import org.spongepowered.api.profile.property.ProfileProperty;
+import org.spongepowered.api.entity.ai.goal.GoalExecutor;
+import org.spongepowered.api.entity.ai.goal.Goal;
+import org.spongepowered.api.entity.ai.goal.AbstractGoal;
+import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.bridge.entity.ai.GoalBridge;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+@Mixin(value = AbstractGoal.class, remap = false)
+public abstract class AbstractGoalMixin_API<O extends Agent> implements Goal<O> {
 
-@Mixin(value = Property.class, remap = false)
-public abstract class PropertyMixin_API implements ProfileProperty {
-
-    @Nullable @Shadow public abstract String shadow$getSignature();
-
+    /**
+     * @author Zidane - when implemented
+     * @reason Superclass is re-assigned by the sponge superclass transformer
+     */
     @Override
-    public Optional<String> getSignature() { // We don't need to make this @Implements because the signature difference
-        return Optional.ofNullable(this.shadow$getSignature());
+    @Overwrite
+    public final Optional<GoalExecutor<O>> getExecutor() {
+        return (Optional<GoalExecutor<O>>) (Optional<?>) ((GoalBridge) this).bridge$getGoalExecutor();
     }
+
 }
