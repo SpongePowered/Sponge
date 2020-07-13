@@ -170,7 +170,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         ((ExplosionBridge) explosion).bridge$setResolution(this.resolution);
         ((ExplosionBridge) explosion).bridge$setRandomness(this.randomness);
         ((ExplosionBridge) explosion).bridge$setKnockback(this.knockback);
-        ((ExplosionBridge) explosion).bridge$setResistanceCalculator(this.resistanceCalculator.orElse(null));
+        this.resistanceCalculator.ifPresent(((ExplosionBridge) explosion)::bridge$setResistanceCalculator);
         return (Explosion) explosion;
     }
 }
