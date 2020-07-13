@@ -467,8 +467,8 @@ public abstract class ContainerMixin implements TrackedContainerBridge, Inventor
             // revert all changes if readonly
             for (Integer i : changes) {
                 final Slot slot = this.inventorySlots.get(i);
-                ItemStack oldStack = this.inventoryItemStacks.get(i);
-                slot.putStack(oldStack);
+                final ItemStack oldStack = slot.getStack();
+                this.inventoryItemStacks.set(i, oldStack);
                 // Send reverted slots to clients
                 for (IContainerListener listener : this.listeners) {
                     listener.sendSlotContents(((Container) (Object) this), i, oldStack);
@@ -483,7 +483,7 @@ public abstract class ContainerMixin implements TrackedContainerBridge, Inventor
 
                 // Check for on change menu callbacks
                 if (menu != null && !menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
-                    slot.putStack(oldStack); // revert changes
+                    this.inventoryItemStacks.set(i, oldStack);  // revert changes
                 } else {
                     // Capture changes for inventory events
                     this.impl$capture(i, newStack, oldStack);
@@ -494,11 +494,11 @@ public abstract class ContainerMixin implements TrackedContainerBridge, Inventor
                         continue;
                     }
                     // Perform vanilla logic - updating inventory stack - notify listeners
-                    newStack = newStack.isEmpty() ? ItemStack.EMPTY : newStack.copy();
-                    this.inventoryItemStacks.set(i, newStack);
+                    oldStack = newStack.isEmpty() ? ItemStack.EMPTY : newStack.copy();
+                    this.inventoryItemStacks.set(i, oldStack);
                     // TODO forge checks !itemstack1.equals(itemstack, true) before doing this
                     for (IContainerListener listener : this.listeners) {
-                        listener.sendSlotContents(((Container) (Object) this), i, newStack);
+                        listener.sendSlotContents(((Container) (Object) this), i, oldStack);
                     }
                 }
             }

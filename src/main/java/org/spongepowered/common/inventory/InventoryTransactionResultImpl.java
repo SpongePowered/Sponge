@@ -105,12 +105,12 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
 
     @Override
     public List<ItemStackSnapshot> getPolledItems() {
-        return null;
+        return this.polled;
     }
 
     @Override
     public ItemStackSnapshot getPolledItem() {
-        return null;
+        return this.polled.get(0);
     }
 
     public static class Builder implements InventoryTransactionResult.Builder, InventoryTransactionResult.Builder.PollBuilder {

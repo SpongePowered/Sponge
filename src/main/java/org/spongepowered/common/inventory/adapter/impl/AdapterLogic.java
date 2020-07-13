@@ -26,7 +26,6 @@ package org.spongepowered.common.inventory.adapter.impl;
 
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -151,22 +150,29 @@ public abstract class AdapterLogic {
         InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
+        if (stack.isEmpty() && lens.slotCount() == 1) {
+            final net.minecraft.item.ItemStack old = lens.getStack(fabric, 0);
+            final ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
+            lens.setStack(fabric, 0, nativeStack);
+            final SlotTransaction trans = new SlotTransaction((Slot) lens.getAdapter(fabric, null), oldSnap,
+                    ItemStackSnapshot.empty());
+            result.transaction(trans);
+            return result.build();
+        }
+
         int maxStackSize = Math.min(lens.getMaxStackSize(fabric), nativeStack.getMaxStackSize());
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
-            net.minecraft.item.ItemStack old = lens.getStack(fabric, ord);
-            ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
-            int push = Math.min(remaining, maxStackSize);
-            net.minecraft.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
+            final net.minecraft.item.ItemStack old = lens.getStack(fabric, ord);
+            final ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
+            final int push = Math.min(remaining, maxStackSize);
+            final net.minecraft.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
             if (lens.setStack(fabric, ord, newStack)) {
-                Inventory adapter = lens.getAdapter(fabric, null);
-                SlotTransaction trans = new SlotTransaction((Slot) adapter, ItemStackUtil.snapshotOf(old), ItemStackUtil.snapshotOf(newStack));
-                result.transaction(trans);
                 remaining -= push;
-
-                Slot slot = ((SlotAdapter) lens.getSlotLens(ord).getAdapter(fabric, null));
-                result.transaction(new SlotTransaction(slot, oldSnap, ItemStackUtil.snapshotOf(lens.getStack(fabric, ord))));
+                final Slot slot = lens.getSlotLens(ord).getAdapter(fabric, null);
+                final SlotTransaction trans = new SlotTransaction(slot, oldSnap, ItemStackUtil.snapshotOf(lens.getStack(fabric, ord)));
+                result.transaction(trans);
             }
         }
 
@@ -200,6 +206,7 @@ public abstract class AdapterLogic {
                 ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
                 push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
                 old.setCount(old.getCount() + push);
+                lens.setStack(fabric, ord, old);
                 remaining -= push;
                 Slot slot = ((SlotAdapter) lens.getSlotLens(ord).getAdapter(fabric, null));
                 result.transaction(new SlotTransaction(slot, oldSnap, ItemStackUtil.snapshotOf(lens.getStack(fabric, ord))));

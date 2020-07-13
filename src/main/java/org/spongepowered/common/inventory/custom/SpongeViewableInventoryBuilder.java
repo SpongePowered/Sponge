@@ -52,7 +52,6 @@ import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.IntArray;
 import org.apache.commons.lang3.Validate;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.ContainerTypes;
@@ -60,14 +59,13 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.LensCreator;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.math.vector.Vector2i;
@@ -234,23 +232,26 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         if (this.slotDefinitions.isEmpty()) {
             Inventory inventory = Inventory.builder().slots(this.info.size).completeStructure().build();
             this.finalInventories = Arrays.asList(inventory);
-            this.finalProvider = ((InventoryBridge) inventory).bridge$getAdapter().inventoryAdapter$getSlotLensProvider();
         } else {
             this.fillDummy();
             this.finalInventories = this.slotDefinitions.values().stream().map(Inventory::parent).distinct().collect(Collectors.toList());
-            CustomSlotProvider slotProvider = new CustomSlotProvider();
-            for (Map.Entry<Integer, Slot> entry : this.slotDefinitions.entrySet()) {
-                Slot slot = entry.getValue();
-                int idx = slot.get(Keys.SLOT_INDEX).get();
+// TODO custom slot provider with reduces inventories
+//            CustomSlotProvider slotProvider = new CustomSlotProvider();
+//            for (Map.Entry<Integer, Slot> entry : this.slotDefinitions.entrySet()) {
+//                Slot slot = entry.getValue();
+//                int idx = slot.get(Keys.SLOT_INDEX).get();
+//                int offset = 0;
+//                for (int i = 0; i < this.finalInventories.indexOf(slot.parent()); i++) {
+//                    offset += this.finalInventories.get(i).freeCapacity();
+//                }
+//                slotProvider.add(new BasicSlotLens(idx + offset));
+//            }
+//            this.finalProvider = slotProvider;
 
-                int offset = 0;
-                for (int i = 0; i < this.finalInventories.indexOf(slot.parent()); i++) {
-                    offset += this.finalInventories.get(i).freeCapacity();
-                }
-                slotProvider.add(new BasicSlotLens(idx + offset));
-            }
-            this.finalProvider = slotProvider;
+            this.finalInventories = this.slotDefinitions.values().stream().map(Inventory.class::cast).collect(Collectors.toList());
         }
+
+        this.finalProvider = new LensRegistrar.BasicSlotLensProvider(this.info.size);
         this.finalLens = containerTypeInfo.get(this.type).lensCreator.createLens(this.finalProvider);
         return this;
     }

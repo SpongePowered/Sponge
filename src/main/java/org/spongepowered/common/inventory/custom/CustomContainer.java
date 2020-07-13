@@ -28,13 +28,14 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.ContainerType;
 
 public class CustomContainer extends Container {
 
     public CustomInventory inv;
 
-    public CustomContainer(int id, final PlayerEntity player, final CustomInventory inventory) {
-        super(null, id); // TODO check if null ContainerType is ok
+    public CustomContainer(int id, final PlayerEntity player, final CustomInventory inventory, ContainerType type) {
+        super((net.minecraft.inventory.container.ContainerType<?>) type, id);
         this.inv = inventory;
 
         for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
@@ -64,32 +65,25 @@ public class CustomContainer extends Container {
 
     @Override
     public ItemStack transferStackInSlot(final PlayerEntity playerIn, final int index) {
+        // Almost 1:1 copy of ChestContainer#transferStackInSlot
         ItemStack itemstack = ItemStack.EMPTY;
         final Slot slot = this.inventorySlots.get(index);
 
-        if (slot != null && slot.getHasStack())
-        {
+        if (slot != null && slot.getHasStack()) {
             final ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
 
-            if (index < this.inv.getSizeInventory())
-            {
-                if (!this.mergeItemStack(itemstack1, this.inv.getSizeInventory(), this.inventorySlots.size(), true))
-                {
+            if (index < this.inv.getSizeInventory()) {
+                if (!this.mergeItemStack(itemstack1, this.inv.getSizeInventory(), this.inventorySlots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            }
-            else if (!this.mergeItemStack(itemstack1, 0, this.inv.getSizeInventory(), false))
-            {
+            } else if (!this.mergeItemStack(itemstack1, 0, this.inv.getSizeInventory(), false)) {
                 return ItemStack.EMPTY;
             }
 
-            if (itemstack1.getCount() == 0)
-            {
+            if (itemstack1.isEmpty()) {
                 slot.putStack(ItemStack.EMPTY);
-            }
-            else
-            {
+            } else {
                 slot.onSlotChanged();
             }
         }

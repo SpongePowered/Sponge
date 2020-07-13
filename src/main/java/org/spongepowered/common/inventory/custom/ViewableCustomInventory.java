@@ -85,7 +85,7 @@ public class ViewableCustomInventory extends CustomInventory implements INamedCo
         if (this.vanilla) {
             return this.info.containerProvider.createMenu(id, playerInv, player, this);
         }
-        return new CustomContainer(id, player, this);
+        return new CustomContainer(id, player, this, this.type);
     }
 
     public IntArray getData() {

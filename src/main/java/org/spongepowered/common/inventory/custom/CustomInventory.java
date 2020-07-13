@@ -105,11 +105,10 @@ public class CustomInventory implements IInventory, CarriedBridge {
     public ItemStack getStackInSlot(final int index) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
-            if (inv.capacity() <= index - offset) {
-                offset += inv.capacity();
-                continue;
+            if (inv.capacity() > index - offset) {
+                return inv.peekAt(index - offset).map(ItemStackUtil::toNative).orElse(ItemStack.EMPTY);
             }
-            return inv.peekAt(index - offset).map(ItemStackUtil::toNative).orElse(ItemStack.EMPTY);
+            offset += inv.capacity();
         }
         return ItemStack.EMPTY;
     }
@@ -132,12 +131,11 @@ public class CustomInventory implements IInventory, CarriedBridge {
     public ItemStack removeStackFromSlot(final int index) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
-            if (inv.capacity() <= index - offset) {
-                offset += inv.capacity();
-                continue;
+            if (inv.capacity() > index - offset) {
+                InventoryTransactionResult.Poll result = inv.pollFrom(index - offset);
+                return ItemStackUtil.fromSnapshotToNative(result.getPolledItem());
             }
-            InventoryTransactionResult.Poll result = inv.pollFrom(index - offset);
-            return ItemStackUtil.fromSnapshotToNative(result.getPolledItem());
+            offset += inv.capacity();
         }
         return ItemStack.EMPTY;
     }
@@ -146,11 +144,11 @@ public class CustomInventory implements IInventory, CarriedBridge {
     public void setInventorySlotContents(final int index, final ItemStack stack) {
         int offset = 0;
         for (Inventory inv : this.inventories) {
-            if (inv.capacity() <= index - offset) {
-                offset += inv.capacity();
-                continue;
+            if (inv.capacity() > index - offset) {
+                inv.set(index - offset, ItemStackUtil.fromNative(stack));
+                return;
             }
-            inv.set(index - offset, ItemStackUtil.fromNative(stack));
+            offset += inv.capacity();
         }
     }
 
