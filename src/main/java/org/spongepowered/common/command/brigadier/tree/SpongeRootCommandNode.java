@@ -22,40 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.tileentity;
+package org.spongepowered.common.command.brigadier.tree;
 
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.tileentity.SignTileEntity;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.util.Tristate;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
-import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.LinkedList;
 
-// TODO: Uncomment extends when everything is okay again.
-@Mixin(SignTileEntity.class)
-public abstract class SignTileEntityMixin /* extends TileEntityMixin */ implements SubjectBridge, CommandSourceProviderBridge {
+public final class SpongeRootCommandNode extends RootCommandNode<CommandSource> implements UnsortedChildrenNode {
 
-    @Shadow public abstract CommandSource shadow$getCommandSource(@Nullable ServerPlayerEntity p_195539_1_);
+    // used so we can have insertion order.
+    private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
 
     @Override
-    public String bridge$getSubjectCollectionIdentifier() {
-        return PermissionService.SUBJECTS_COMMAND_BLOCK;
+    public void addChild(final CommandNode<CommandSource> node) {
+        super.addChild(node);
+        this.nodeHolder.add(node);
     }
 
-    @Override
-    public Tristate bridge$permDefault(final String permission) {
-        return Tristate.TRUE;
-    }
-
-    @Override
-    public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.shadow$getCommandSource(cause.first(ServerPlayerEntity.class).orElse(null));
+    public Collection<CommandNode<CommandSource>> getUnsortedChildren() {
+        return this.nodeHolder.getChildren();
     }
 
 }

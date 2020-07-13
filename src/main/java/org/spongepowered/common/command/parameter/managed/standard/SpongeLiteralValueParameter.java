@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public class SpongeLiteralValueParameter<T> extends AbstractArgumentParser<T> {
+public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser<T> {
 
     private final Supplier<? extends Collection<String>> literalSupplier;
     private final Supplier<T> returnValue;

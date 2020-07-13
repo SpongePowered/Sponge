@@ -32,11 +32,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
 
-public class EntityCommandTreeBuilder
+// TODO
+public final class EntityCommandTreeBuilder
         extends ArgumentCommandTreeBuilder<CommandTreeBuilder.EntitySelection>
         implements CommandTreeBuilder.EntitySelection {
-
-    private static final EntityArgument.Serializer ENTITY_ARGUMENT_SERIALIZER = new EntityArgument.Serializer();
 
     private boolean playersOnly = false;
     private boolean oneOnly = false;
@@ -45,8 +44,19 @@ public class EntityCommandTreeBuilder
         super(parameterType);
     }
 
-    @Override protected ArgumentType<?> getArgumentType() {
-        return null;
+    @Override
+    protected ArgumentType<?> getArgumentType() {
+        if (this.playersOnly) {
+            if (this.oneOnly) {
+                return EntityArgument.players();
+            }
+            return EntityArgument.player();
+        } else {
+            if (this.oneOnly) {
+                return EntityArgument.entities();
+            }
+            return EntityArgument.entity();
+        }
     }
 
     @Override
@@ -60,7 +70,9 @@ public class EntityCommandTreeBuilder
         return this.playersOnly;
     }
 
-    @Override public EntitySelection single() {
-        return null;
+    @Override
+    public EntitySelection single() {
+        this.oneOnly = true;
+        return this;
     }
 }

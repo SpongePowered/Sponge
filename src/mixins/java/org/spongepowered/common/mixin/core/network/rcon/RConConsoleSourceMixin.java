@@ -37,11 +37,11 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 @Mixin(RConConsoleSource.class)
 public abstract class RConConsoleSourceMixin implements CommandSourceProviderBridge, SubjectBridge {
 
-    @Shadow public abstract CommandSource getCommandSource();
+    @Shadow public abstract CommandSource shadow$getCommandSource();
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.getCommandSource();
+        return this.shadow$getCommandSource();
     }
 
     @Override

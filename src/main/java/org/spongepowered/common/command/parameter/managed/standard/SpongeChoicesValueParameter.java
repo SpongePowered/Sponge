@@ -38,7 +38,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class SpongeChoicesValueParameter<T> extends AbstractArgumentParser<T> {
+public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser<T> {
 
     private final Supplier<? extends Collection<String>> choices;
     private final Function<String, ? extends T> results;

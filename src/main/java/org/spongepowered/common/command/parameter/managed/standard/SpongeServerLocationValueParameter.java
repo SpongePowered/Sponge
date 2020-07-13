@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class SpongeServerLocationValueParameter extends CatalogedArgumentParser<ServerLocation> {
+public final class SpongeServerLocationValueParameter extends CatalogedArgumentParser<ServerLocation> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("location");
     private static final Vec3Argument VEC_3_ARGUMENT = Vec3Argument.vec3();

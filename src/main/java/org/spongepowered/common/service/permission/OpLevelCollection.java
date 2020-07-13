@@ -43,9 +43,9 @@ public class OpLevelCollection extends SpongeSubjectCollection {
 
     private final Map<String, OpLevelSubject> levels;
 
-    public OpLevelCollection(SpongePermissionService service) {
+    public OpLevelCollection(final SpongePermissionService service) {
         super(PermissionService.SUBJECTS_GROUP, service);
-        ImmutableMap.Builder<String, OpLevelSubject> build = ImmutableMap.builder();
+        final ImmutableMap.Builder<String, OpLevelSubject> build = ImmutableMap.builder();
         for (int i = 0; i <= 4; ++i) {
             build.put("op_" + i, new OpLevelSubject(service, i)); // TODO: Add subject data
         }
@@ -53,8 +53,8 @@ public class OpLevelCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    public SpongeSubject get(String identifier) {
-        SpongeSubject subject = this.levels.get(identifier);
+    public SpongeSubject get(final String identifier) {
+        final SpongeSubject subject = this.levels.get(identifier);
         if (subject == null) {
             throw new IllegalArgumentException(identifier + " is not a valid op level group name (op_{0,4})");
         }
@@ -62,7 +62,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    public boolean isRegistered(String identifier) {
+    public boolean isRegistered(final String identifier) {
         return this.levels.containsKey(identifier);
     }
 
@@ -84,7 +84,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
             this.data = new GlobalMemorySubjectData(this) {
 
                 @Override
-                public List<SubjectReference> getParents(Set<Context> contexts) {
+                public List<SubjectReference> getParents(final Set<Context> contexts) {
                     if (!contexts.isEmpty()) {
                         return Collections.emptyList();
                     }

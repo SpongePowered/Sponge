@@ -27,12 +27,14 @@ package org.spongepowered.common.mixin.core.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.impl.AdvancementCommand;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -40,9 +42,10 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeNodePermissionCache;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
+import org.spongepowered.common.command.brigadier.tree.UnsortedChildrenNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
 
@@ -52,12 +55,15 @@ import java.util.Map;
 @Mixin(Commands.class)
 public abstract class CommandsMixin {
 
+    @Shadow public abstract CommandDispatcher<CommandSource> shadow$getDispatcher();
+
     private CauseStackManager.StackFrame impl$initFrame = null;
 
     // We augment the CommandDispatcher with our own methods using a wrapper, so we need to make sure it's replaced here.
     @Redirect(method = "<init>", at = @At(
             value = "NEW",
-            args = "class=com/mojang/brigadier/CommandDispatcher"
+            args = "class=com/mojang/brigadier/CommandDispatcher",
+            remap = false
     ))
     private CommandDispatcher<CommandSource> impl$useSpongeDispatcher() {
         return new DelegatingCommandDispatcher();
@@ -87,17 +93,22 @@ public abstract class CommandsMixin {
                     from = @At("HEAD"),
                     to = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z")
             ),
-            at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;getChildren()Ljava/util/Collection;"))
-    private Collection<CommandNode<CommandSource>> impl$handleHiddenChildrenInLoop(final CommandNode<CommandSource> commandNode) {
+            at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;getChildren()Ljava/util/Collection;", remap = false))
+    private Collection<CommandNode<CommandSource>> impl$handleHiddenChildrenAndEnsureUnsortedLoop(final CommandNode<CommandSource> commandNode) {
         if (commandNode instanceof SpongeArgumentCommandNode) {
             return ((SpongeArgumentCommandNode<CommandSource>) commandNode).getChildrenForSuggestions();
         }
-
+        // try to fix redirects.
+        if (commandNode instanceof UnsortedChildrenNode) {
+            return ((UnsortedChildrenNode) commandNode).getUnsortedChildren();
+        }
         return commandNode.getChildren();
     }
 
     @Redirect(method = "commandSourceNodesToSuggestionNodes",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;createBuilder()Lcom/mojang/brigadier/builder/ArgumentBuilder;"))
+            at = @At(value = "INVOKE",
+                    target = "Lcom/mojang/brigadier/tree/CommandNode;createBuilder()Lcom/mojang/brigadier/builder/ArgumentBuilder;",
+                    remap = false))
     private ArgumentBuilder<?, ?> impl$createArgumentBuilder(
             final CommandNode<CommandSource> commandNode,
             final CommandNode<CommandSource> rootCommandSource,
@@ -113,7 +124,7 @@ public abstract class CommandsMixin {
 
     @SuppressWarnings("unchecked")
     @Redirect(method = "commandSourceNodesToSuggestionNodes", at =
-        @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
+        @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", remap = false))
     private <K, V> V impl$preventPutIntoMapIfNodeIsComplex(final Map<K, V> map,
             final K key,
             final V value,
@@ -131,9 +142,25 @@ public abstract class CommandsMixin {
     }
 
     @Redirect(method = "commandSourceNodesToSuggestionNodes",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;addChild(Lcom/mojang/brigadier/tree/CommandNode;)V"))
+            at = @At(value = "INVOKE",
+                    target = "Lcom/mojang/brigadier/tree/CommandNode;addChild(Lcom/mojang/brigadier/tree/CommandNode;)V",
+                    remap = false))
     private void impl$preventAddChild(final CommandNode<ISuggestionProvider> root, final CommandNode<ISuggestionProvider> newChild) {
         // no-op, we did this above.
+    }
+
+    @Redirect(method = "commandSourceNodesToSuggestionNodes",
+            at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;canUse(Ljava/lang/Object;)Z", remap = false))
+    private boolean impl$testPermissionWhenSendingNodes(
+            final CommandNode<CommandSource> commandNode,
+            final Object source,
+            final CommandNode<CommandSource> rootCommandNode,
+            final CommandNode<ISuggestionProvider> rootSuggestion,
+            final CommandSource sourceButTyped,
+            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode
+    ) {
+        return SpongeNodePermissionCache.canUse(
+                rootCommandNode instanceof RootCommandNode, this.shadow$getDispatcher(), commandNode, sourceButTyped);
     }
 
 }

@@ -380,6 +380,11 @@ public final class Constants {
 
         public static final String FORCE_GAMEMODE_OVERRIDE = "minecraft.force-gamemode.override";
         public static final String SELECTOR_PERMISSION = "minecraft.selector";
+        public static final String COMMAND_BLOCK_PERMISSION = "minecraft.commandblock";
+        public static final int COMMAND_BLOCK_LEVEL = 2;
+        public static final int SELECTOR_LEVEL = 2;
+        public static final String SPONGE_HELP_PERMISSION = "sponge.command.help";
+        public static final int SPONGE_HELP_LEVEL = 0;
     }
 
     /**
@@ -1320,6 +1325,9 @@ public final class Constants {
         public static final ArgumentType<?> STANDARD_STRING_ARGUMENT_TYPE = StringArgumentType.string();
         public static final ArgumentType<?> GREEDY_STRING_ARGUMENT_TYPE = StringArgumentType.greedyString();
         public static final ArgumentType<?> NBT_ARGUMENT_TYPE = NBTCompoundTagArgument.nbt();
+        public static final String COMMAND_BLOCK_COMMAND = "";
+        public static final String SELECTOR_COMMAND = "@";
+        public static final String SPONGE_HELP_COMMAND = "sponge:help";
     }
 
     public static final class DirectionFunctions {

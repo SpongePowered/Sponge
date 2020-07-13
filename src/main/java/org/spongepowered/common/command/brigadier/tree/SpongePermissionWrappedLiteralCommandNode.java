@@ -22,23 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancements;
+package org.spongepowered.common.command.brigadier.tree;
 
-import net.minecraft.advancements.FunctionManager;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 
-@Mixin(FunctionManager.class)
-public abstract class FunctionManagerMixin implements CommandSourceProviderBridge {
+/**
+ * Used as a marker to indicate that this root node is not Sponge native.
+ */
+public final class SpongePermissionWrappedLiteralCommandNode extends SpongeLiteralCommandNode {
 
-    @Shadow public abstract CommandSource shadow$getCommandSource();
+    public SpongePermissionWrappedLiteralCommandNode(
+            final LiteralArgumentBuilder<CommandSource> builder) {
+        super(builder);
 
-    @Override
-    public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.shadow$getCommandSource();
+        for (final CommandNode<CommandSource> argument : builder.getArguments()) {
+            this.addChild(argument);
+        }
     }
 
 }

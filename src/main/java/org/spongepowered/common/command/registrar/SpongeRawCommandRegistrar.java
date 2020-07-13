@@ -54,7 +54,7 @@ import java.util.concurrent.CompletableFuture;
  * <p>Note that to simplify things for the consumer, we allow redirection from this registrar to the
  * parameterised one.</p>
  */
-public class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Command> implements StandardCommandRegistrar {
+public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Command> implements StandardCommandRegistrar {
 
     private static final String PARAMETER_NAME = "parameters";
     public static final ResourceKey CATALOG_KEY = ResourceKey.sponge("raw");

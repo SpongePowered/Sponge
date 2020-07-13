@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class SpongePluginContainerValueParameter extends CatalogedArgumentParser<PluginContainer> {
+public final class SpongePluginContainerValueParameter extends CatalogedArgumentParser<PluginContainer> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("plugin");
 

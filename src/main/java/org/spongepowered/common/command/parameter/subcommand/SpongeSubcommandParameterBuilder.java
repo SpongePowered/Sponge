@@ -35,7 +35,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SpongeSubcommandParameterBuilder implements Parameter.Subcommand.Builder {
+public final class SpongeSubcommandParameterBuilder implements Parameter.Subcommand.Builder {
 
     private final Set<String> aliases = new HashSet<>();
     private Command.@Nullable Parameterized command;

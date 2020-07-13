@@ -31,7 +31,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 
 import java.util.Set;
 
-public class SpongeSubcommandParameter implements Parameter.Subcommand {
+public final class SpongeSubcommandParameter implements Parameter.Subcommand {
 
     private final Set<String> aliases;
     private final Command.Parameterized command;

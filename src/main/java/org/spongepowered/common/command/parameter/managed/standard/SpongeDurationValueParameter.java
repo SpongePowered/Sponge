@@ -39,7 +39,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeDurationValueParameter extends CatalogedArgumentParser<Duration> {
+public final class SpongeDurationValueParameter extends CatalogedArgumentParser<Duration> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("duration");
 

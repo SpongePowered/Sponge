@@ -31,7 +31,7 @@ import org.spongepowered.api.text.Text;
 
 import java.util.Optional;
 
-public class SpongeCommandResult implements CommandResult {
+public final class SpongeCommandResult implements CommandResult {
 
     private final boolean isSuccess;
     private final int result;

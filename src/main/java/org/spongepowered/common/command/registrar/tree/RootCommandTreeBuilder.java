@@ -36,7 +36,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.Collection;
 import java.util.Map;
 
-public class RootCommandTreeBuilder extends AbstractCommandTreeBuilder<CommandTreeBuilder.Basic, RootCommandNode<CommandSource>>
+public final class RootCommandTreeBuilder extends AbstractCommandTreeBuilder<CommandTreeBuilder.Basic, RootCommandNode<CommandSource>>
         implements CommandTreeBuilder.Basic {
 
     @Override

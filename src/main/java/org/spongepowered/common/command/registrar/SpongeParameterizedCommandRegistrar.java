@@ -34,7 +34,7 @@ import org.spongepowered.common.command.SpongeParameterizedCommand;
 /**
  * For use with {@link org.spongepowered.api.command.Command.Parameterized}
  */
-public class SpongeParameterizedCommandRegistrar extends SpongeCommandRegistrar<Command.Parameterized> {
+public final class SpongeParameterizedCommandRegistrar extends SpongeCommandRegistrar<Command.Parameterized> {
 
     public static final ResourceKey CATALOG_KEY = ResourceKey.sponge("managed");
     public static final SpongeParameterizedCommandRegistrar INSTANCE = new SpongeParameterizedCommandRegistrar(CATALOG_KEY);

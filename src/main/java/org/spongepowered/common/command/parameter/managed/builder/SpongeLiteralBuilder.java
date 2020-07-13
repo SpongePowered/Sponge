@@ -33,7 +33,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeLiteral
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class SpongeLiteralBuilder<T> implements VariableValueParameters.LiteralBuilder<T> {
+public final class SpongeLiteralBuilder<T> implements VariableValueParameters.LiteralBuilder<T> {
 
     @Nullable private Supplier<? extends Collection<String>> strings;
     @Nullable private Supplier<T> returnValue;

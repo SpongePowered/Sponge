@@ -28,15 +28,22 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
+import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
+import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
-public class TranslatedParameter {
+/**
+ * A TranslatedParameter contains a fully built set of command nodes that
+ * can then be attached to a root.
+ */
+public final class TranslatedParameter {
 
     private final boolean isTerminal;
     private final List<CommandNode<CommandSource>> sourceCommandNode;
@@ -59,8 +66,9 @@ public class TranslatedParameter {
         return this.sourceCommandNode;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public LiteralArgumentBuilder<CommandSource> buildWithAlias(
-            final CommandExecutor commandExecutorIfTerminal,
+            final Command.Parameterized commandExecutorIfTerminal,
             final String primaryAlias) {
         final LiteralArgumentBuilder<CommandSource> primary = LiteralArgumentBuilder.literal(primaryAlias);
         this.sourceCommandNode.forEach(primary::then);
@@ -68,15 +76,16 @@ public class TranslatedParameter {
         if (this.isTerminal) {
             primary.executes(new SpongeCommandExecutorWrapper(commandExecutorIfTerminal));
         }
+        primary.requires((Predicate) commandExecutorIfTerminal.getExecutionRequirements());
         return primary;
     }
 
     public Collection<LiteralCommandNode<CommandSource>> buildWithAliases(
-            final CommandExecutor commandExecutorIfTerminal,
+            final Command.Parameterized commandExecutorIfTerminal,
             final Iterable<String> aliases) {
 
         final Iterator<String> iterable = aliases.iterator();
-        final LiteralCommandNode<CommandSource> built = this.buildWithAlias(commandExecutorIfTerminal, iterable.next()).build();
+        final LiteralCommandNode<CommandSource> built = new SpongeLiteralCommandNode(this.buildWithAlias(commandExecutorIfTerminal, iterable.next()));
         final List<LiteralCommandNode<CommandSource>> nodes = new ArrayList<>();
         nodes.add(built);
         while (iterable.hasNext()) {
@@ -84,7 +93,8 @@ public class TranslatedParameter {
             if (this.isTerminal) {
                 secondary.executes(new SpongeCommandExecutorWrapper(commandExecutorIfTerminal));
             }
-            nodes.add(secondary.redirect(built).build());
+            secondary.requires(built.getRequirement());
+            nodes.add(new SpongeLiteralCommandNode(secondary.redirect(built)));
         }
 
         return nodes;

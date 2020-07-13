@@ -41,7 +41,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeDateTimeValueParameter extends CatalogedArgumentParser<LocalDateTime> {
+public final class SpongeDateTimeValueParameter extends CatalogedArgumentParser<LocalDateTime> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("date_time");
 

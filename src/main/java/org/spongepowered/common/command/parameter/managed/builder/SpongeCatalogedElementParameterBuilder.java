@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class SpongeCatalogedElementParameterBuilder<T extends CatalogType>
+public final class SpongeCatalogedElementParameterBuilder<T extends CatalogType>
         implements VariableValueParameters.CatalogedTypeBuilder<T> {
 
     private final Class<T> catalogType;

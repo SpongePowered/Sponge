@@ -28,7 +28,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
 
-public class EmptyCommandTreeBuilder extends ArgumentCommandTreeBuilder<CommandTreeBuilder.Basic> implements CommandTreeBuilder.Basic {
+public final class EmptyCommandTreeBuilder extends ArgumentCommandTreeBuilder<CommandTreeBuilder.Basic> implements CommandTreeBuilder.Basic {
 
     private final ArgumentType<?> type;
 

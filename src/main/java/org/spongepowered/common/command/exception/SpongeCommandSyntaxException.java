@@ -33,7 +33,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.text.SpongeTexts;
 
-public class SpongeCommandSyntaxException extends CommandSyntaxException {
+public final class SpongeCommandSyntaxException extends CommandSyntaxException {
 
     private static final Text ERROR_MESSAGE = Text.of(TextColors.RED, "Error running command: ");
 

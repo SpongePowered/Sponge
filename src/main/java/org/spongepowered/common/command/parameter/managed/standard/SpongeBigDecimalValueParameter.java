@@ -39,7 +39,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeBigDecimalValueParameter extends CatalogedArgumentParser<BigDecimal> {
+public final class SpongeBigDecimalValueParameter extends CatalogedArgumentParser<BigDecimal> {
 
     private final ResourceKey key = ResourceKey.sponge("big_decimal");
 

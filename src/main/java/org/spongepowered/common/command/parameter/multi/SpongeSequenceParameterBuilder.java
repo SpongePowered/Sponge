@@ -31,7 +31,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpongeSequenceParameterBuilder implements Parameter.SequenceBuilder {
+public final class SpongeSequenceParameterBuilder implements Parameter.SequenceBuilder {
 
     private boolean terminal;
     private boolean optional;

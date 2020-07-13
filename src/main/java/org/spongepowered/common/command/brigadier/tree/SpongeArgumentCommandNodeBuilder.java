@@ -35,7 +35,7 @@ import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgu
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 
 // We use the ArgumentBuilder primarily for setting redirects properly.
-public class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<CommandSource, SpongeArgumentCommandNodeBuilder<T>> {
+public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<CommandSource, SpongeArgumentCommandNodeBuilder<T>> {
 
     private final SpongeParameterKey<? super T> key;
     private final ArgumentParser<? extends T> type;

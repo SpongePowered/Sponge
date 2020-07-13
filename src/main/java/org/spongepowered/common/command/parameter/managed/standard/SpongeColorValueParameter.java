@@ -48,7 +48,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class SpongeColorValueParameter extends CatalogedArgumentParser<Color> {
+public final class SpongeColorValueParameter extends CatalogedArgumentParser<Color> {
 
     private final static ResourceKey RESOURCE_KEY = ResourceKey.sponge("color");
     private final static Pattern HEX_CODE = Pattern.compile("#[0-9A-Fa-f]{6}");

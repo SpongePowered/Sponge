@@ -46,6 +46,11 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
         final CommandSource commandSource =
                 cause.first(CommandSourceProviderBridge.class).orElseGet(() ->
                         (CommandSourceProviderBridge) SpongeCommon.getServer()).bridge$getCommandSource(cause);
+
+        // We don't want the command source to have altered the cause here, so we reset it back to what it was
+        // (in the ctor of CommandSource, it will add the current source to the cause - that's for if the
+        // source is created elsewhere, not here)
+        ((CommandSourceBridge) commandSource).bridge$setCause(cause);
         return (CommandCause) commandSource;
     }
 

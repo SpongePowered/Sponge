@@ -77,6 +77,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -91,7 +92,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Singleton
-public class SpongeCommandManager implements CommandManager {
+public final class SpongeCommandManager implements CommandManager {
 
     private final Game game;
     private final Map<String, SpongeCommandMapping> commandMappings = new HashMap<>();
@@ -106,20 +107,25 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @NonNull
-    public CommandMapping registerAlias(
+    public CommandMapping registerNamespacedAlias(
             @NonNull final CommandRegistrar<?> registrar,
             @NonNull final PluginContainer container,
-            @NonNull final LiteralArgumentBuilder<CommandSource> rootArgument,
+            @NonNull final LiteralCommandNode<CommandSource> rootArgument,
             @NonNull final String @NonNull... secondaryAliases)
             throws CommandFailedRegistrationException {
-        final String requestedPrimaryAlias = rootArgument.getLiteral();
+        final String namespaced = rootArgument.getLiteral();
+        // We also need to denamespace
+        final String notnamespaced = namespaced.split(":")[1];
+        final List<String> otherAliases = new ArrayList<>();
+        otherAliases.add(notnamespaced);
+        otherAliases.addAll(Arrays.asList(secondaryAliases));
 
         // Get the mapping, if any.
-        return this.registerAliasInternal(
+        return this.registerAliasWithNamespacing(
                 registrar,
                 container,
-                requestedPrimaryAlias,
-                secondaryAliases
+                namespaced,
+                otherAliases
         );
     }
 
@@ -134,7 +140,11 @@ public class SpongeCommandManager implements CommandManager {
             @NonNull final String primaryAlias,
             @NonNull final String @NonNull ... secondaryAliases)
             throws CommandFailedRegistrationException {
-        final CommandMapping mapping = this.registerAliasInternal(registrar, container, primaryAlias, secondaryAliases);
+        final List<String> aliases = new ArrayList<>();
+        aliases.add(primaryAlias);
+        Collections.addAll(aliases, secondaryAliases);
+        final String namespaced = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
+        final CommandMapping mapping = this.registerAliasWithNamespacing(registrar, container, namespaced, aliases);
 
         // In general, this won't be executed as we will intercept it before this point. However,
         // this is as a just in case - a mod redirect or something.
@@ -178,32 +188,29 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @NonNull
-    private CommandMapping registerAliasInternal(
+    private CommandMapping registerAliasWithNamespacing(
             @NonNull final CommandRegistrar<?> registrar,
             @NonNull final PluginContainer container,
-            @NonNull final String primaryAlias,
-            @NonNull final String @NonNull... secondaryAliases)
+            @NonNull final String namespacedAlias,
+            @NonNull final Collection<String> otherAliases)
             throws CommandFailedRegistrationException {
         // Check it's been registered:
-        if (primaryAlias.contains(" ") || Arrays.stream(secondaryAliases).anyMatch(x -> x.contains(" "))) {
-                throw new CommandFailedRegistrationException("Aliases may not contain spaces.");
+        if (namespacedAlias.contains(" ") || otherAliases.stream().anyMatch(x -> x.contains(" ") || x.contains(":"))) {
+                throw new CommandFailedRegistrationException("Aliases may not contain spaces or colons.");
         }
 
         // We have a Sponge command, so let's start by checking to see what
         // we're going to register.
-        final String primaryAliasLowercase = primaryAlias.toLowerCase(Locale.ENGLISH);
-        final String namespacedAlias = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ENGLISH);
         if (this.commandMappings.containsKey(namespacedAlias)) {
             // It's registered.
             throw new CommandFailedRegistrationException(
-                    "The command alias " + primaryAlias + " has already been registered for this plugin");
+                    "The command alias " + namespacedAlias + " has already been registered for this plugin");
         }
 
         final Set<String> aliases = new HashSet<>();
-        aliases.add(primaryAliasLowercase);
         aliases.add(namespacedAlias);
-        for (final String secondaryAlias : secondaryAliases) {
-            aliases.add(secondaryAlias.toLowerCase(Locale.ENGLISH));
+        for (final String secondaryAlias : otherAliases) {
+            aliases.add(secondaryAlias.toLowerCase(Locale.ROOT));
         }
 
         // Okay, what can we register?
@@ -227,7 +234,7 @@ public class SpongeCommandManager implements CommandManager {
 
         // Create the mapping
         final SpongeCommandMapping mapping = new SpongeCommandMapping(
-                primaryAlias,
+                namespacedAlias,
                 aliases,
                 container,
                 registrar
@@ -302,7 +309,8 @@ public class SpongeCommandManager implements CommandManager {
             // TextColors.RED,
             throw new CommandException(Text.of("Unknown command. Type /help for a list of commands."));
         }
-        final Object source = cause.getCause().root();
+        // For when the phase tracker comes back online
+        // final Object source = cause.getCause().root();
 
         final CommandResult result;
         // final TrackedInventoryBridge inventory = source instanceof EntityPlayer ?

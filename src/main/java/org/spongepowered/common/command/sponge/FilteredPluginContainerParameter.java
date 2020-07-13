@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class FilteredPluginContainerParameter implements ValueParameter<PluginContainer> {
+public final class FilteredPluginContainerParameter implements ValueParameter<PluginContainer> {
 
     private final Map<String, PluginContainer> validPluginContainers = FilteredPluginContainerParameter.getValidContainers();
 

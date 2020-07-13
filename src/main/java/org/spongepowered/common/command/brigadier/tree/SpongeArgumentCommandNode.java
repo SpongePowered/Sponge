@@ -54,7 +54,10 @@ import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBu
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
@@ -63,7 +66,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 // We have to extend ArgumentCommandNode for Brig to even use this...
-public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<CommandSource, T> {
+public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<CommandSource, T> implements UnsortedChildrenNode {
 
     @Nullable
     private static SuggestionProvider<CommandSource> createSuggestionProvider(@Nullable final ValueCompleter completer) {
@@ -79,6 +82,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
 
     private final Parameter.Key<? super T> key;
     private final ArgumentParser<T> parser;
+
+    // used so we can have insertion order.
+    private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
 
     @SuppressWarnings({"unchecked"})
     public SpongeArgumentCommandNode(
@@ -199,6 +205,17 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     @Override
     public final Collection<String> getExamples() {
         return this.parser.getExamples();
+    }
+
+    @Override
+    public void addChild(final CommandNode<CommandSource> node) {
+        super.addChild(node);
+        this.nodeHolder.add(node);
+    }
+
+    @Override
+    public Collection<CommandNode<CommandSource>> getUnsortedChildren() {
+        return this.nodeHolder.getChildren();
     }
 
 }

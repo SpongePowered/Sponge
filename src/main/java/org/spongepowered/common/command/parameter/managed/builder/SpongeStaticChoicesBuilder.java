@@ -34,7 +34,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeChoices
 import java.util.HashMap;
 import java.util.function.Supplier;
 
-public class SpongeStaticChoicesBuilder<T> implements VariableValueParameters.StaticChoicesBuilder<T> {
+public final class SpongeStaticChoicesBuilder<T> implements VariableValueParameters.StaticChoicesBuilder<T> {
 
     private final HashMap<String, Supplier<? extends T>> choices = new HashMap<>();
     private boolean showInUsage = false;

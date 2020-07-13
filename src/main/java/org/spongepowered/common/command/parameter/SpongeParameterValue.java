@@ -24,12 +24,8 @@
  */
 package org.spongepowered.common.command.parameter;
 
-import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
-
 import com.google.common.collect.ImmutableList;
-import com.mojang.brigadier.LiteralMessage;
 import net.minecraft.command.CommandException;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -50,7 +46,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class SpongeParameterValue<T> implements Parameter.Value<T> {
+public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
    // private final static Text NEW_LINE = Text.of("\n");
    // private final static Text GENERIC_EXCEPTION_ERROR = t("Could not parse element");

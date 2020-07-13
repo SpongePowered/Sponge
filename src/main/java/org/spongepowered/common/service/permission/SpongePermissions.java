@@ -24,44 +24,52 @@
  */
 package org.spongepowered.common.service.permission;
 
-import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.entity.player.LoginPermissions;
+import org.spongepowered.common.util.Constants;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 public final class SpongePermissions {
 
-    private static final String COMMAND_BLOCK_COMMAND = "";
-    private static final String COMMAND_BLOCK_PERMISSION = "minecraft.commandblock";
-    private static final int COMMAND_BLOCK_LEVEL = 2;
-    private static final String SELECTOR_COMMAND = "@";
-    private static final String SELECTOR_PERMISSION = "minecraft.selector";
-    private static final int SELECTOR_LEVEL = 2;
-    private static final String SPONGE_HELP_COMMAND = "sponge:help";
-    static final String SPONGE_HELP_PERMISSION = "sponge.command.help";
-    private static final int SPONGE_HELP_LEVEL = 0;
+    private static final Set<String> REGISTERED_PERMISSIONS = new HashSet<>();
 
     private SpongePermissions() {
     }
 
-    public static void populateMinecraftPermissions(final Subject subject) {
-        // TODO: Populate command permissions - when commands are done.
-    }
-
     public static void populateNonCommandPermissions(final SubjectData data, final BiFunction<Integer, String, Boolean> testPermission) {
-        if (testPermission.apply(COMMAND_BLOCK_LEVEL, COMMAND_BLOCK_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, COMMAND_BLOCK_PERMISSION, Tristate.TRUE);
+        if (testPermission.apply(Constants.Permissions.COMMAND_BLOCK_LEVEL, Constants.Command.COMMAND_BLOCK_COMMAND)) {
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, Constants.Permissions.COMMAND_BLOCK_PERMISSION, Tristate.TRUE);
         }
-        if (testPermission.apply(SELECTOR_LEVEL, SELECTOR_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, SELECTOR_PERMISSION, Tristate.TRUE);
+        if (testPermission.apply(Constants.Permissions.SELECTOR_LEVEL, Constants.Command.SELECTOR_COMMAND)) {
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, Constants.Permissions.SELECTOR_PERMISSION, Tristate.TRUE);
         }
-        if (testPermission.apply(SPONGE_HELP_LEVEL, SPONGE_HELP_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, SPONGE_HELP_PERMISSION, Tristate.TRUE);
+        if (testPermission.apply(Constants.Permissions.SPONGE_HELP_LEVEL, Constants.Command.SPONGE_HELP_COMMAND)) {
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, Constants.Permissions.SPONGE_HELP_PERMISSION, Tristate.TRUE);
         }
         if (testPermission.apply(LoginPermissions.BYPASS_WHITELIST_LEVEL, LoginPermissions.BYPASS_WHITELIST_PERMISSION)) {
             data.setPermission(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_WHITELIST_PERMISSION, Tristate.TRUE);
+        }
+    }
+
+    public static void registerPermission(final String permissionNode, final int opLevel) {
+        if (REGISTERED_PERMISSIONS.add(permissionNode)) {
+            final PermissionService service = SpongeCommon.getGame().getServiceProvider().permissionService();
+            if (opLevel == 0) {
+                // register as a default permission
+                 service.getDefaults()
+                        .getTransientSubjectData()
+                        .setPermission(SubjectData.GLOBAL_CONTEXT, permissionNode, Tristate.TRUE);
+            }
+            if (service instanceof SpongePermissionService) {
+                ((SpongePermissionService) service).getGroupForOpLevel(opLevel).getTransientSubjectData()
+                        .setPermission(SubjectData.GLOBAL_CONTEXT, permissionNode, Tristate.TRUE);
+            }
         }
     }
 

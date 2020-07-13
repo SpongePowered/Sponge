@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.registrar.tree;
 
-import com.google.common.base.Preconditions;
 import com.mojang.brigadier.arguments.ArgumentType;
 import net.minecraft.network.PacketBuffer;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -35,19 +34,14 @@ import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-public class RangeCommandTreeBuilder<T extends Number>
+public final class RangeCommandTreeBuilder<T extends Number>
         extends ArgumentCommandTreeBuilder<CommandTreeBuilder.Range<T>> implements CommandTreeBuilder.Range<T> {
 
-    private static final String MIN_PROPERTY = "min";
-    private static final String MAX_PROPERTY = "max";
-
-    private final BiConsumer<PacketBuffer, RangeCommandTreeBuilder<T>> packetWriter;
     @Nullable private T min;
     @Nullable private T max;
 
-    public RangeCommandTreeBuilder(final ClientCompletionKey<Range<T>> parameterType, final BiConsumer<PacketBuffer, RangeCommandTreeBuilder<T>> packetWriter) {
+    public RangeCommandTreeBuilder(final ClientCompletionKey<Range<T>> parameterType) {
         super(parameterType);
-        this.packetWriter = packetWriter;
     }
 
     @Override

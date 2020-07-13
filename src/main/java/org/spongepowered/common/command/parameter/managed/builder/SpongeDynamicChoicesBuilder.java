@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class SpongeDynamicChoicesBuilder<T> implements VariableValueParameters.DynamicChoicesBuilder<T> {
+public final class SpongeDynamicChoicesBuilder<T> implements VariableValueParameters.DynamicChoicesBuilder<T> {
 
     @Nullable private Supplier<? extends Collection<String>> choices = null;
     @Nullable private Function<String, ? extends T> results = null;

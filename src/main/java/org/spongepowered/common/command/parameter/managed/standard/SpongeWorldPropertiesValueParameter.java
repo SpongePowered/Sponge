@@ -40,7 +40,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class SpongeWorldPropertiesValueParameter extends CatalogedArgumentParser<WorldProperties> {
+public final class SpongeWorldPropertiesValueParameter extends CatalogedArgumentParser<WorldProperties> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("world_properties");
 

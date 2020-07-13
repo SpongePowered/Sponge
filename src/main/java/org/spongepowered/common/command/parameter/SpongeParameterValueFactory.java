@@ -28,7 +28,7 @@ import com.google.common.reflect.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class SpongeParameterValueFactory implements Parameter.Factory {
+public final class SpongeParameterValueFactory implements Parameter.Factory {
 
     public static final Parameter.Factory INSTANCE = new SpongeParameterValueFactory();
 

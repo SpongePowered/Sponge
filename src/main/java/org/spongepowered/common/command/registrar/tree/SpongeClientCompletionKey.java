@@ -30,7 +30,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
 
-public class SpongeClientCompletionKey implements ClientCompletionKey<CommandTreeBuilder.Basic> {
+public final class SpongeClientCompletionKey implements ClientCompletionKey<CommandTreeBuilder.Basic> {
 
     private final ResourceKey key;
     private final ArgumentType<?> argumentType;

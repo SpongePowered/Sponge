@@ -39,7 +39,7 @@ import org.spongepowered.common.command.parameter.SpongeParameterKey;
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 
-public class SpongeCommandContextBuilderTransaction implements CommandContext.Builder.Transaction {
+public final class SpongeCommandContextBuilderTransaction implements CommandContext.Builder.Transaction {
 
     private static final LinkedList<SpongeCommandContextBuilderTransaction> TRANSACTION_POOL = new LinkedList<>();
     public static SpongeCommandContextBuilderTransaction getTransactionFromPool(final SpongeCommandContextBuilder builder) {

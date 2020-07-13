@@ -42,7 +42,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class DelegatingCommandDispatcher extends CommandDispatcher<CommandSource> {
+public final class DelegatingCommandDispatcher extends CommandDispatcher<CommandSource> {
 
     @Override
     public LiteralCommandNode<CommandSource> register(final LiteralArgumentBuilder<CommandSource> command) {

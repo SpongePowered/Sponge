@@ -40,7 +40,7 @@ import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentPars
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeNoneValueParameter extends CatalogedArgumentParser<Void> {
+public final class SpongeNoneValueParameter extends CatalogedArgumentParser<Void> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("none");
 

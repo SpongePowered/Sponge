@@ -91,7 +91,7 @@ public class UserSubject extends SpongeSubject {
         Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
 
         // Query op level from server ops list based on player's game profile
-        OpEntry entry = SpongePermissionService.getOps().getEntry(this.player);
+        final OpEntry entry = SpongePermissionService.getOps().getEntry(this.player);
         if (entry == null) {
             // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
             return SpongeCommon.getServer().getPlayerList().canSendCommands(this.player) ? SpongeCommon.getServer().getOpPermissionLevel() : 0;
@@ -116,7 +116,7 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public Tristate getPermissionValue(Set<Context> contexts, String permission) {
+    public Tristate getPermissionValue(final Set<Context> contexts, final String permission) {
         Tristate ret = super.getPermissionValue(contexts, permission);
         if (ret == Tristate.UNDEFINED) {
             ret = this.getDataPermissionValue(this.collection.getDefaults().getSubjectData(), permission);
@@ -131,7 +131,7 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public Optional<String> getOption(Set<Context> contexts, String option) {
+    public Optional<String> getOption(final Set<Context> contexts, final String option) {
         Optional<String> ret = super.getOption(contexts, option);
         if (!ret.isPresent()) {
             ret = this.getDataOptionValue(this.collection.getDefaults().getSubjectData(), option);

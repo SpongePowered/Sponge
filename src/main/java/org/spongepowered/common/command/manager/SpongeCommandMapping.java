@@ -32,7 +32,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Set;
 
-public class SpongeCommandMapping implements CommandMapping {
+public final class SpongeCommandMapping implements CommandMapping {
 
     private final String alias;
     private final Set<String> allAliases;

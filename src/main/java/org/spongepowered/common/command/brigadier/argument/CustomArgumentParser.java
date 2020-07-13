@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 /**
  * For use with other argument types
  */
-public class CustomArgumentParser<T> implements ArgumentParser<T>, SuggestionProvider<CommandSource> {
+public final class CustomArgumentParser<T> implements ArgumentParser<T>, SuggestionProvider<CommandSource> {
 
     public static final ClientCompletionType NONE_CLIENT_COMPLETION_TYPE = new SpongeClientCompletionType("none", null);
 

@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeDataContainerValueParameter extends CatalogedArgumentParser<DataContainer> {
+public final class SpongeDataContainerValueParameter extends CatalogedArgumentParser<DataContainer> {
 
     private static final ResourceKey KEY = ResourceKey.sponge("data_container");
 

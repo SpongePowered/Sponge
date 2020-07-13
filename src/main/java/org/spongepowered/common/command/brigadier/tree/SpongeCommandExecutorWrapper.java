@@ -33,7 +33,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 
-public class SpongeCommandExecutorWrapper implements Command<CommandSource> {
+public final class SpongeCommandExecutorWrapper implements Command<CommandSource> {
 
     private final CommandExecutor executor;
 

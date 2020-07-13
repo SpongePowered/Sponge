@@ -40,7 +40,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeTextValueParameter extends AbstractArgumentParser<Text> {
+public final class SpongeTextValueParameter extends AbstractArgumentParser<Text> {
 
     private final TextSerializer textSerializer;
     private final boolean consumeAll;

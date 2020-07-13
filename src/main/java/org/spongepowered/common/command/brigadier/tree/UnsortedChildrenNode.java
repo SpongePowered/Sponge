@@ -22,31 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.brigadier.tree;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.network.PacketBuffer;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
-import org.spongepowered.api.text.selector.Argument;
+import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.command.CommandSource;
 
-public class AmountCommandTreeBuilder<T extends CommandTreeBuilder<T>>
-        extends ArgumentCommandTreeBuilder<T> implements CommandTreeBuilder.AmountBase<T> {
+import java.util.Collection;
 
-    private ArgumentType<?> argumentType;
+public interface UnsortedChildrenNode {
 
-    public AmountCommandTreeBuilder(final ClientCompletionKey<T> parameterType, final ArgumentType<?> argumentType) {
-        super(parameterType);
-        this.argumentType = argumentType;
-    }
+    Collection<CommandNode<CommandSource>> getUnsortedChildren();
 
-    @Override
-    protected ArgumentType<?> getArgumentType() {
-        return this.argumentType;
-    }
-
-    @Override public T single() {
-        return null;
-    }
 }

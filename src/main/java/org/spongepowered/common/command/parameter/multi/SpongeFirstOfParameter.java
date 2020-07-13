@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class SpongeFirstOfParameter extends SpongeMultiParameter {
+public final class SpongeFirstOfParameter extends SpongeMultiParameter {
 
     protected SpongeFirstOfParameter(final List<Parameter> parameterCandidates, final boolean isOptional) {
         super(parameterCandidates, isOptional);

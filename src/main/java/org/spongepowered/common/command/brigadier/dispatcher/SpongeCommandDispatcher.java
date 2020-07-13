@@ -27,10 +27,10 @@ package org.spongepowered.common.command.brigadier.dispatcher;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.event.CauseStackManager;
@@ -40,8 +40,8 @@ import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
+import org.spongepowered.common.command.brigadier.tree.SpongeRootCommandNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -52,19 +52,28 @@ import java.util.List;
 import java.util.Map;
 
 // For use on the Brigadier dispatcher
-public class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
+public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
+
+    public SpongeCommandDispatcher() {
+        super(new SpongeRootCommandNode());
+    }
+
+    public LiteralCommandNode<CommandSource> register(final LiteralCommandNode<CommandSource> command) {
+        this.getRoot().addChild(command);
+        return command;
+    }
 
     @Override
     public ParseResults<CommandSource> parse(final String command, final CommandSource source) {
         final SpongeCommandContextBuilder builder = new SpongeCommandContextBuilder(this, source, this.getRoot(), 0);
-        return this.parseNodes(this.getRoot(), new SpongeStringReader(command), builder);
+        return this.parseNodes(true, this.getRoot(), new SpongeStringReader(command), builder);
     }
 
     @Override
     public ParseResults<CommandSource> parse(final StringReader command, final CommandSource source) {
         final SpongeCommandContextBuilder builder = new SpongeCommandContextBuilder(this, source, this.getRoot(), command.getCursor());
         final SpongeStringReader reader = new SpongeStringReader(command);
-        return this.parseNodes(this.getRoot(), reader, builder);
+        return this.parseNodes(true, this.getRoot(), reader, builder);
     }
 
     @Override
@@ -80,6 +89,7 @@ public class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
     }
 
     private ParseResults<CommandSource> parseNodes(
+            final boolean isRoot,
             final CommandNode<CommandSource> node,
             final SpongeStringReader reader,
             final SpongeCommandContextBuilder contextSoFar) {
@@ -92,7 +102,10 @@ public class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
         final int cursor = reader.getCursor();
 
         for (final CommandNode<CommandSource> child : node.getRelevantNodes(reader)) {
-            if (!child.canUse(source)) {
+            // Sponge Start: We need to do a little more scaffolding for permissions
+            // if (!child.canUse(source)) {
+            if (!SpongeNodePermissionCache.canUse(isRoot, this, child, source)) {
+            // Sponge End
                 continue;
             }
             // Sponge Start
@@ -131,16 +144,20 @@ public class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
                     ((SpongeArgumentCommandNode<?>) x).getParser().canParseEmpty())) {
             // Sponge End
                 reader.skip();
-                if (child.getRedirect() != null) {
-                    // Sponge Start
+                // Sponge Start: redirect is now in a local variable as we use it a fair bit
+                final CommandNode<CommandSource> redirect = child.getRedirect();
+                if (redirect != null) {
                     final SpongeCommandContextBuilder childContext =
                             new SpongeCommandContextBuilder(this, source, child.getRedirect(), reader.getCursor());
-                    final ParseResults<CommandSource> parse = this.parseNodes(child.getRedirect(), reader, childContext);
+                    final ParseResults<CommandSource> parse = this.parseNodes(redirect instanceof RootCommandNode,
+                            child.getRedirect(),
+                            reader,
+                            childContext);
                     // Sponge End
                     context.withChild(parse.getContext());
                     return new ParseResults<>(context, parse.getReader(), parse.getExceptions());
                 } else {
-                    final ParseResults<CommandSource> parse = this.parseNodes(child, reader, context);
+                    final ParseResults<CommandSource> parse = this.parseNodes(false, child, reader, context);
                     if (potentials == null) {
                         potentials = new ArrayList<>(1);
                     }

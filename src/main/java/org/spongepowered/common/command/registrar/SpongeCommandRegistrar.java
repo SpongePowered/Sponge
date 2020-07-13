@@ -41,7 +41,6 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -86,7 +85,7 @@ public abstract class SpongeCommandRegistrar<T extends Command> implements Comma
 
         final Tuple<CommandMapping, LiteralCommandNode<CommandSource>> mappingResult =
                 BrigadierCommandRegistrar.INSTANCE
-                        .registerInternal(this, container, secondaryAliases, this.createNode(primaryAlias.toLowerCase(), command));
+                        .registerFromSpongeRegistrar(this, container, secondaryAliases, this.createNode(primaryAlias.toLowerCase(), command));
         return mappingResult.getFirst();
     }
 

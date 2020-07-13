@@ -31,7 +31,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpongeFirstOfParameterBuilder implements Parameter.FirstOfBuilder {
+public final class SpongeFirstOfParameterBuilder implements Parameter.FirstOfBuilder {
 
     private boolean isTerminal;
     private boolean isOptional;

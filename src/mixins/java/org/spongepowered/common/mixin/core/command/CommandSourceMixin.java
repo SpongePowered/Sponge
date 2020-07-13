@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.command;
 
 import com.mojang.brigadier.ResultConsumer;
-import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ICommandSource;
 import net.minecraft.command.arguments.EntityAnchorArgument;
@@ -48,16 +47,16 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
-import org.spongepowered.common.accessor.command.CommandSourceAccessor;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.service.permission.SpongePermissions;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector2d;
 import org.spongepowered.math.vector.Vector3d;
+
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -77,6 +76,7 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
     @Shadow @Final @Mutable private int permissionLevel;
 
     private Cause impl$cause;
+    @Nullable private Supplier<String> impl$potentialPermissionNode = null;
 
     @Inject(method = PROTECTED_CTOR_METHOD, at = @At("RETURN"))
     private void impl$setCauseOnConstruction(
@@ -112,6 +112,30 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
                     this.permissionLevel = 4;
                 }
             });
+        }
+    }
+
+    /*
+     * All the with* methods copy this CommandSource, so we need to do our own copy.
+     * This method MUST be above all other with* return injections so that the cause copy happens
+     * FIRST. That way, we don't overwrite any changes we then need to make.
+     */
+    @Inject(method = {
+            "withEntity",
+            "withPos",
+            "withRotation(Lnet/minecraft/util/math/Vec2f;)Lnet/minecraft/command/CommandSource;",
+            "withResultConsumer(Lcom/mojang/brigadier/ResultConsumer;)Lnet/minecraft/command/CommandSource;",
+            "withFeedbackDisabled",
+            "withPermissionLevel",
+            "withMinPermissionLevel",
+            "withEntityAnchorType",
+            "withWorld"
+    }, at = @At("RETURN"))
+    private void impl$copyPermissionOnCopy(final CallbackInfoReturnable<CommandSource> cir) {
+        if (cir.getReturnValue() != (Object) this) {
+            final CommandSourceBridge commandSourceBridge = ((CommandSourceBridge) cir.getReturnValue());
+            commandSourceBridge.bridge$setPotentialPermissionNode(this.impl$potentialPermissionNode);
+            commandSourceBridge.bridge$setCause(this.impl$cause);
         }
     }
 
@@ -153,6 +177,22 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
             final Vector3d rot = new Vector3d(rotation.x, rotation.y, 0); // no roll
             ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.ROTATION.get(), rot));
         }
+    }
+
+    @Inject(method = "hasPermissionLevel", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$checkPermission(final int opLevel, final CallbackInfoReturnable<Boolean> cir) {
+        if (this.impl$potentialPermissionNode != null) {
+            final String perm = this.impl$potentialPermissionNode.get();
+            // This will register the permission with the first op level we retrieve.
+            SpongePermissions.registerPermission(perm, opLevel);
+            cir.setReturnValue(((CommandCause) this).hasPermission(perm));
+        }
+        // fall through to the op level check if we haven't set a permission node.
+    }
+
+    @Override
+    public void bridge$setPotentialPermissionNode(@Nullable final @org.checkerframework.checker.nullness.qual.Nullable Supplier<String> permission) {
+        this.impl$potentialPermissionNode = permission;
     }
 
     @Override

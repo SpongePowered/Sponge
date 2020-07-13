@@ -37,7 +37,8 @@ import org.spongepowered.common.command.brigadier.argument.CatalogedZeroAdvanceV
 
 import java.util.Optional;
 
-public class SpongeTargetBlockValueParameter extends CatalogedZeroAdvanceValueParameter<ServerLocation> {
+// TODO: When BlockRay returns
+public final class SpongeTargetBlockValueParameter extends CatalogedZeroAdvanceValueParameter<ServerLocation> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("target_block");
 

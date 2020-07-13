@@ -38,7 +38,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeBigIntegerValueParameter extends CatalogedArgumentParser<BigInteger> {
+public final class SpongeBigIntegerValueParameter extends CatalogedArgumentParser<BigInteger> {
 
     private final ResourceKey key = ResourceKey.sponge("big_integer");
 

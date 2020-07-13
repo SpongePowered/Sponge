@@ -35,7 +35,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeTextVal
 
 import java.util.function.Supplier;
 
-public class SpongeTextParameterBuilder implements VariableValueParameters.TextBuilder {
+public final class SpongeTextParameterBuilder implements VariableValueParameters.TextBuilder {
 
     @Nullable private TextSerializer textSerializer;
     private boolean consumeAllArguments;

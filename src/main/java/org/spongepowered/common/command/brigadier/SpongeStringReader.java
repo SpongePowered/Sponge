@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 // nullable - but it isn't. So we just need to suppress the warning.
 // With elements from JsonToNBT for allow this to parse Json for users.
 @SuppressWarnings("NullableProblems")
-public class SpongeStringReader extends StringReader implements ArgumentReader.Mutable {
+public final class SpongeStringReader extends StringReader implements ArgumentReader.Mutable {
 
     private static final char SYNTAX_QUOTE = '"';
 

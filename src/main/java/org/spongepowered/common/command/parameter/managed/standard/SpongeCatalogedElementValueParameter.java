@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class SpongeCatalogedElementValueParameter<T extends CatalogType> extends AbstractArgumentParser<T> {
+public final class SpongeCatalogedElementValueParameter<T extends CatalogType> extends AbstractArgumentParser<T> {
 
     private final List<String> prefixes;
     private final Class<T> catalogType;

@@ -29,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 
-public class SpongeClientCompletionType implements ClientCompletionType {
+public final class SpongeClientCompletionType implements ClientCompletionType {
 
     private final ResourceKey key;
     @Nullable private final ArgumentType<?> type;

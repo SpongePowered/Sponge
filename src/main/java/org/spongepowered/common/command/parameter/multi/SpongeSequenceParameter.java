@@ -34,7 +34,7 @@ import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrap
 import java.util.List;
 import java.util.function.Consumer;
 
-public class SpongeSequenceParameter extends SpongeMultiParameter {
+public final class SpongeSequenceParameter extends SpongeMultiParameter {
 
     protected SpongeSequenceParameter(final List<Parameter> parameterCandidates, final boolean isOptional) {
         super(parameterCandidates, isOptional);

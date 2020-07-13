@@ -48,7 +48,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class SpongeParameterizedCommandBuilder implements Command.Parameterized.Builder {
+public final class SpongeParameterizedCommandBuilder implements Command.Parameterized.Builder {
 
     private final Set<String> claimedSubcommands = new HashSet<>();
     private final Map<Command.Parameterized, List<String>> subcommands = new HashMap<>();
@@ -119,6 +119,8 @@ public class SpongeParameterizedCommandBuilder implements Command.Parameterized.
             Preconditions.checkState(!(!this.parameters.isEmpty() && this.commandExecutor == null), "An executor must exist if you set parameters!");
         }
 
+        final Predicate<CommandCause> requirements = this.executionRequirements == null ? cause -> true : this.executionRequirements;
+
         final List<Parameter.Subcommand> subcommands =
                 this.subcommands.entrySet().stream()
                         .map(x -> new SpongeSubcommandParameterBuilder().aliases(x.getValue()).setSubcommand(x.getKey()).build())
@@ -137,7 +139,7 @@ public class SpongeParameterizedCommandBuilder implements Command.Parameterized.
                 ImmutableList.copyOf(this.parameters),
                 this.shortDescription,
                 this.extendedDescription,
-                this.executionRequirements,
+                requirements,
                 this.commandExecutor
         );
     }

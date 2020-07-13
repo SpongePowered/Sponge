@@ -32,7 +32,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
-import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
@@ -46,6 +45,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
+import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
+import org.spongepowered.common.command.brigadier.tree.SpongePermissionWrappedLiteralCommandNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
@@ -66,13 +67,10 @@ import java.util.stream.Collectors;
  * {@link #register(PluginContainer, LiteralArgumentBuilder, String...)}
  * method.</p>
  */
-public final class BrigadierCommandRegistrar implements CommandRegistrar<LiteralCommandNode<CommandSource>> {
+public final class BrigadierCommandRegistrar implements CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
 
     public static final BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
     public static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("brigadier");
-
-    private static final String DONT_UPDATE_REQUIREMENTS_PROPERTY = "sponge.command.dontUpdateRequirements";
-    private static final boolean UPDATE_REQUIREMENTS = System.getProperty(DONT_UPDATE_REQUIREMENTS_PROPERTY) == null;
 
     private boolean hasVanillaRegistered;
     private final List<LiteralCommandNode<CommandSource>> vanilla = new ArrayList<>();
@@ -89,12 +87,16 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
                 .orElseThrow(() -> new IllegalStateException("Cannot register command without knowing its origin."));
 
         if (!this.hasVanillaRegistered && Launcher.getInstance().getMinecraftPlugin() == container) {
-            final LiteralCommandNode<CommandSource> vanillaCommand = command.build();
+            final LiteralCommandNode<CommandSource> vanillaCommand = this.applyNamespace(container, command, false);
             this.vanilla.add(vanillaCommand);
             return vanillaCommand;
         }
 
-        return this.registerInternal(this, container, command, new String[0], BrigadierCommandRegistrar.UPDATE_REQUIREMENTS, true).getSecond();
+        return this.registerInternal(this,
+                container,
+                this.applyNamespace(container, command, false),
+                new String[0],
+                true).getSecond();
     }
 
     public void completeVanillaRegistration() {
@@ -102,19 +104,10 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         // then they can register anyway.
         this.hasVanillaRegistered = true;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(Launcher.getInstance().getMinecraftPlugin());
+            final PluginContainer container = Launcher.getInstance().getMinecraftPlugin();
+            frame.pushCause(container);
             for (final LiteralCommandNode<CommandSource> node : this.vanilla) {
-                final LiteralArgumentBuilder<CommandSource> builder = node.createBuilder();
-
-                // createBuilder does not consider the redirect or children.
-                if (node.getRedirect() != null) {
-                    builder.forward(node.getRedirect(), node.getRedirectModifier(), node.isFork());
-                } else {
-                    for (final CommandNode<CommandSource> child : node.getChildren()) {
-                        builder.then(child);
-                    }
-                }
-                this.register(builder);
+                this.registerInternal(this, container, node, new String[0], true);
             }
         }
         this.vanilla.clear();
@@ -124,11 +117,11 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
     @NonNull
     public CommandMapping register(
             @NonNull final PluginContainer container,
-            @NonNull final LiteralCommandNode<CommandSource> command,
+            @NonNull final LiteralArgumentBuilder<CommandSource> command,
             @NonNull final String primaryAlias,
             final String @NonNull... secondaryAliases) throws CommandFailedRegistrationException {
 
-        return this.register(container, command.createBuilder(), secondaryAliases).getFirst();
+        return this.register(container, command, secondaryAliases).getFirst();
     }
 
     /**
@@ -144,90 +137,57 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
             final PluginContainer container,
             final LiteralArgumentBuilder<CommandSource> command,
             final String... secondaryAliases) {
-        return this.registerInternal(this, container, command, secondaryAliases,false, false);
+
+        return this.registerInternal(this, container, this.applyNamespace(container, command, true), secondaryAliases, false);
     }
 
-    Tuple<CommandMapping, LiteralCommandNode<CommandSource>> registerInternal(
+    Tuple<CommandMapping, LiteralCommandNode<CommandSource>> registerFromSpongeRegistrar(
             final CommandRegistrar<?> registrar,
             final PluginContainer container,
             final String[] secondaryAliases,
             final LiteralArgumentBuilder<CommandSource> command) {
-        return this.registerInternal(registrar, container, command, secondaryAliases, false, false);
+        return this.registerInternal(registrar, container, this.applyNamespace(container, command, true), secondaryAliases, false);
     }
 
     private Tuple<CommandMapping, LiteralCommandNode<CommandSource>> registerInternal(
             final CommandRegistrar<?> registrar,
             final PluginContainer container,
-            final LiteralArgumentBuilder<CommandSource> command,
+            final LiteralCommandNode<CommandSource> namespacedCommand,
             final String[] secondaryAliases,
-            final boolean updateRequirement,
             final boolean allowDuplicates) { // Brig technically allows them...
 
         // Get the builder and the first literal.
-        final String requestedAlias = command.getLiteral();
+        final String requestedAlias = namespacedCommand.getLiteral();
         final Optional<CommandMapping> existingMapping = SpongeCommon.getGame().getCommandManager().getCommandMapping(requestedAlias);
         if (allowDuplicates && existingMapping.isPresent()) {
-            // then we just let it go.
-            this.updateRequirement(container, command, updateRequirement, requestedAlias, command);
-            final LiteralCommandNode<CommandSource> builtNode = this.dispatcher.register(command);
-            return Tuple.of(existingMapping.get(), builtNode);
+            // then we just let it go, the requirements will be of the old node.
+            this.dispatcher.register(namespacedCommand);
+            return Tuple.of(existingMapping.get(), namespacedCommand);
         }
 
         // This will throw an error if there is an issue.
-        final CommandMapping mapping = ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).registerAlias(
+        final CommandMapping mapping = ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).registerNamespacedAlias(
                         registrar,
                         container,
-                        command,
+                        namespacedCommand,
                         secondaryAliases
                 );
 
-        final LiteralArgumentBuilder<CommandSource> literalToRegister;
-        if (mapping.getPrimaryAlias().equals(requestedAlias)) {
-            literalToRegister = command;
-        } else {
-            // We need to alter the primary alias.
-            literalToRegister = LiteralArgumentBuilder.literal(mapping.getPrimaryAlias());
-            if (command.getCommand() != null) {
-                literalToRegister.executes(command.getCommand());
-            }
-
-            if (command.getRedirect() != null) {
-                literalToRegister.forward(command.getRedirect(), command.getRedirectModifier(), command.isFork());
-            } else {
-                for (final CommandNode<CommandSource> argument : command.getArguments()) {
-                    literalToRegister.then(argument);
-                }
-            }
-
-            literalToRegister.requires(command.getRequirement());
-        }
-
         // Let the registration happen.
-        this.updateRequirement(container, command, updateRequirement, requestedAlias, literalToRegister);
-
-        final LiteralCommandNode<CommandSource> builtNode = this.dispatcher.register(literalToRegister);
+        this.dispatcher.register(namespacedCommand);
 
         // Redirect aliases
         for (final String alias : mapping.getAllAliases()) {
-            if (!alias.equals(literalToRegister.getLiteral())) {
-                this.dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(alias).requires(builtNode.getRequirement()).redirect(builtNode));
+            if (!alias.equals(namespacedCommand.getLiteral())) {
+                this.dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(alias)
+                        .executes(namespacedCommand.getCommand())
+                        .requires(namespacedCommand.getRequirement())
+                        .redirect(namespacedCommand)
+                        .build());
             }
         }
 
-        return Tuple.of(mapping, builtNode);
-    }
-
-    private void updateRequirement(
-            final PluginContainer container,
-            final LiteralArgumentBuilder<CommandSource> command,
-            final boolean updateRequirement,
-            final String requestedAlias,
-            final LiteralArgumentBuilder<CommandSource> literalToRegister) {
-        /* if (updateRequirement) {
-            // If the requirement should be updated, register with the permission <modid>.command.<permission>
-            final String permission = String.format("%s.command.%s", container.getMetadata().getId(), requestedAlias.toLowerCase());
-            literalToRegister.requires(command.getRequirement().and(commandSource -> ((CommandCause) commandSource).getSubject().hasPermission(permission)));
-        }*/ // TODO: Be able to pull out the op level zero commands and set the default permissions...
+        return Tuple.of(mapping, namespacedCommand);
     }
 
     @Override
@@ -286,6 +246,29 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         }
 
         return command + " " + argument;
+    }
+
+    private LiteralCommandNode<CommandSource> applyNamespace(final PluginContainer pluginContainer,
+            final LiteralArgumentBuilder<CommandSource> builder, final boolean isSpongeAware) {
+        if (builder.getLiteral().contains(":") || builder.getLiteral().contains(" ")) {
+            // nope
+            throw new IllegalArgumentException("The literal must not contain a colon or a space.");
+        }
+
+        final LiteralArgumentBuilder<CommandSource> replacementBuilder =
+                LiteralArgumentBuilder.<CommandSource>literal(pluginContainer.getMetadata().getId() + ":" + builder.getLiteral())
+                        .forward(builder.getRedirect(), builder.getRedirectModifier(), builder.isFork())
+                        .executes(builder.getCommand())
+                        .requires(builder.getRequirement());
+        for (final CommandNode<CommandSource> node : builder.getArguments()) {
+            replacementBuilder.then(node);
+        }
+
+        if (isSpongeAware) {
+            return new SpongeLiteralCommandNode(replacementBuilder);
+        } else {
+            return new SpongePermissionWrappedLiteralCommandNode(replacementBuilder);
+        }
     }
 
 }

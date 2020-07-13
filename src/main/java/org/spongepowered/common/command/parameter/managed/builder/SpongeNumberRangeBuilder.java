@@ -32,7 +32,7 @@ import org.spongepowered.common.command.brigadier.argument.StandardArgumentParse
 
 import java.util.Objects;
 
-public class SpongeNumberRangeBuilder<T extends Number> implements VariableValueParameters.NumberRangeBuilder<T> {
+public final class SpongeNumberRangeBuilder<T extends Number> implements VariableValueParameters.NumberRangeBuilder<T> {
 
     private static final Definition<Double> DOUBLE =
             new Definition<Double>() {

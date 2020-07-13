@@ -43,7 +43,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public class SpongeParameterValueBuilder<T> implements Parameter.Value.Builder<T> {
+public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Builder<T> {
 
     private static final ValueCompleter EMPTY_COMPLETER = context -> ImmutableList.of();
 

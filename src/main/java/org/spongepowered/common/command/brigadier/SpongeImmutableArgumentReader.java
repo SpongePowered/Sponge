@@ -31,7 +31,7 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.text.Text;
 
-public class SpongeImmutableArgumentReader implements ArgumentReader.Immutable, ImmutableStringReader {
+public final class SpongeImmutableArgumentReader implements ArgumentReader.Immutable, ImmutableStringReader {
 
     private final String input;
     private final int cursor;

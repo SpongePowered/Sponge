@@ -57,7 +57,7 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-public class SpongeCommandContextBuilder extends CommandContextBuilder<CommandSource>
+public final class SpongeCommandContextBuilder extends CommandContextBuilder<CommandSource>
         implements org.spongepowered.api.command.parameter.CommandContext.Builder {
 
     private final boolean isTransactionCopy;

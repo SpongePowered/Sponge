@@ -789,7 +789,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
 */
 
     @Override
-    public CommandSource bridge$getCommandSource(Cause cause) {
+    public CommandSource bridge$getCommandSource(final Cause cause) {
         return this.shadow$getCommandSource();
     }
 

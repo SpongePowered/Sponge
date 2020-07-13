@@ -39,7 +39,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeIPAddressValueParameter extends CatalogedArgumentParser<InetAddress> {
+public final class SpongeIPAddressValueParameter extends CatalogedArgumentParser<InetAddress> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("ip");
 

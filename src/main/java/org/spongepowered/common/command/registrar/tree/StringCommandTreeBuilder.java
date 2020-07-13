@@ -34,7 +34,7 @@ import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
 
 import java.util.Objects;
 
-public class StringCommandTreeBuilder extends ArgumentCommandTreeBuilder<CommandTreeBuilder.StringParser> implements CommandTreeBuilder.StringParser {
+public final class StringCommandTreeBuilder extends ArgumentCommandTreeBuilder<CommandTreeBuilder.StringParser> implements CommandTreeBuilder.StringParser {
 
     private Types type = Types.WORD;
 
@@ -51,7 +51,7 @@ public class StringCommandTreeBuilder extends ArgumentCommandTreeBuilder<Command
     }
 
     @Override
-    public StringParser type(Types type) {
+    public StringParser type(final Types type) {
         this.type = type;
         return this;
     }

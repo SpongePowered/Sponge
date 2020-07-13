@@ -22,23 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancements;
+package org.spongepowered.common.command.brigadier.tree;
 
-import net.minecraft.advancements.FunctionManager;
+import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-@Mixin(FunctionManager.class)
-public abstract class FunctionManagerMixin implements CommandSourceProviderBridge {
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
-    @Shadow public abstract CommandSource shadow$getCommandSource();
+public final class UnsortedNodeHolder {
 
-    @Override
-    public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.shadow$getCommandSource();
+    // used so we can have insertion order.
+    private final List<CommandNode<CommandSource>> standardChildren = new LinkedList<>();
+    private final List<CommandNode<CommandSource>> redirectingChildren = new LinkedList<>();
+
+    @Nullable private ImmutableList<CommandNode<CommandSource>> cachedResult;
+
+    public void add(final CommandNode<CommandSource> node) {
+        this.cachedResult = null;
+        if (node.getRedirect() == null) {
+            this.standardChildren.add(node);
+        } else {
+            this.redirectingChildren.add(node);
+        }
+    }
+
+    public Collection<CommandNode<CommandSource>> getChildren() {
+        if (this.cachedResult == null) {
+            this.cachedResult = ImmutableList.<CommandNode<CommandSource>>builder()
+                    .addAll(this.standardChildren)
+                    .addAll(this.redirectingChildren)
+                    .build();
+        }
+
+        return this.cachedResult;
     }
 
 }

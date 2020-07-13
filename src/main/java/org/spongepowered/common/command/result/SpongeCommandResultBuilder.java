@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.text.Text;
 
-public class SpongeCommandResultBuilder implements CommandResult.Builder {
+public final class SpongeCommandResultBuilder implements CommandResult.Builder {
 
     private int result;
     @Nullable private Text errorMessage;

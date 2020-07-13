@@ -49,7 +49,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class SpongeUserValueParameter extends CatalogedArgumentParser<User> {
+public final class SpongeUserValueParameter extends CatalogedArgumentParser<User> {
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("user");
     private final EntityArgument selectorArgumentType = EntityArgument.player();

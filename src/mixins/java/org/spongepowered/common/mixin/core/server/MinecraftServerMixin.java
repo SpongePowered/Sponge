@@ -72,10 +72,8 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract boolean shadow$isServerRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract Iterable<ServerWorld> shadow$getWorlds();
+    @Shadow public abstract CommandSource shadow$getCommandSource();
     @Shadow @Final protected Thread serverThread;
-
-    @Shadow public abstract CommandSource getCommandSource();
-
     @Shadow @Final private PlayerProfileCache profileCache;
     @Nullable private ResourcePack impl$resourcePack;
     private boolean impl$enableSaving = true;
@@ -163,7 +161,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
-        return this.getCommandSource();
+        return this.shadow$getCommandSource();
     }
 
     // We want to save the username cache json, as we normally bypass it.

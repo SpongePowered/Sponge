@@ -37,7 +37,8 @@ import org.spongepowered.common.command.brigadier.argument.CatalogedZeroAdvanceV
 
 import java.util.Optional;
 
-public class SpongeTargetEntityValueParameter extends CatalogedZeroAdvanceValueParameter<ServerPlayer> {
+// TODO: When Block/Entity rays return, fix
+public final class SpongeTargetEntityValueParameter extends CatalogedZeroAdvanceValueParameter<ServerPlayer> {
 
     private final ResourceKey resourceKey;
     private final boolean isPlayerOnly;

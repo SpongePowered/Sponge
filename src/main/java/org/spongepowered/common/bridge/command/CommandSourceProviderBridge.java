@@ -29,6 +29,7 @@ import org.spongepowered.api.event.cause.Cause;
 
 public interface CommandSourceProviderBridge {
 
+    // we do this because of the lectern tile entity
     CommandSource bridge$getCommandSource(Cause cause);
 
 }
