@@ -91,7 +91,7 @@ public abstract class MinecraftMixin implements SpongeClient {
     }
 
     @Redirect(method = "launchIntegratedServer", at = @At(value = "NEW", target = "net/minecraft/server/integrated/IntegratedServer"))
-    private IntegratedServer impl$provideAlreadyInitializedServer(Minecraft mcIn, String worldName, String p_i50895_3_,
+    private IntegratedServer impl$setCacheOnServer(Minecraft mcIn, String worldName, String p_i50895_3_,
         WorldSettings worldSettingsIn, YggdrasilAuthenticationService p_i50895_5_, MinecraftSessionService p_i50895_6_,
         GameProfileRepository p_i50895_7_, PlayerProfileCache p_i50895_8_, IChunkStatusListenerFactory p_i50895_9_) {
         ((MinecraftServerAccessor) this.integratedServer).accessor$setProfileCache(p_i50895_8_);
