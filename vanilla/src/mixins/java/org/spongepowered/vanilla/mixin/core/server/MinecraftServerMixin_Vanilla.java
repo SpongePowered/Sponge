@@ -25,24 +25,15 @@
 package org.spongepowered.vanilla.mixin.core.server;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.vanilla.VanillaServer;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
-
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServer;startServerThread()V"))
-    private static void vanilla$prepareGameAndLoadPlugins(DedicatedServer server) {
-        SpongeCommon.getGame().setServer((VanillaServer) server);
-        server.startServerThread();
-    }
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
     private void impl$callEngineStoppingEvent(CallbackInfo ci) {

@@ -56,6 +56,11 @@ public abstract class PlayerProfileCacheMixin implements PlayerProfileCacheBridg
         this.impl$canSave = flag;
     }
 
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;load()V"))
+    private void impl$callLoadAfterServerCreated(final PlayerProfileCache playerProfileCache) {
+        // NOOP
+    }
+
     @Inject(method = "addEntry(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;)V", at = @At(value = "RETURN"))
     private void impl$UpdateCacheUsername(final com.mojang.authlib.GameProfile profile, final Date date, final CallbackInfo ci) {
         ((SpongeServer) Sponge.getServer()).getUsernameCache().setUsername(profile.getId(), profile.getName());

@@ -25,6 +25,5 @@
 package org.spongepowered.common.bridge.server.management;
 
 public interface PlayerProfileCacheBridge {
-
     void bridge$setCanSave(boolean flag);
 }

@@ -22,31 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.client;
+package org.spongepowered.common.mixin.core.server.dedicated;
 
-import net.minecraft.client.Minecraft;
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.datafixers.DataFixer;
+import net.minecraft.server.ServerPropertiesProvider;
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.SpongeLifecycle;
-import org.spongepowered.vanilla.client.VanillaClient;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 
-@Mixin(Minecraft.class)
-public abstract class MinecraftMixin_Vanilla implements VanillaClient {
+import java.io.File;
 
-    @Inject(method = "run", at = @At("HEAD"))
-    private void vanilla$startEngineLifecycle(CallbackInfo ci) {
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
-        lifecycle.establishRegistries();
+@Mixin(DedicatedServer.class)
+public abstract class DedicatedServerMixin implements SpongeServer {
 
-        // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
-        lifecycle.callStartingEngineEvent(this);
-    }
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void impl$setServerOnGame(File p_i50720_1_, ServerPropertiesProvider p_i50720_2_, DataFixer dataFixerIn,
+        YggdrasilAuthenticationService p_i50720_4_, MinecraftSessionService p_i50720_5_, GameProfileRepository p_i50720_6_,
+        PlayerProfileCache p_i50720_7_, IChunkStatusListenerFactory p_i50720_8_, String p_i50720_9_, CallbackInfo ci) {
 
-    @Inject(method = "shutdownMinecraftApplet", at = @At("HEAD"))
-    private void vanilla$stopEngineLifecycle(CallbackInfo ci) {
-        SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
+        SpongeCommon.getGame().setServer(this);
+        p_i50720_7_.load();
     }
 }

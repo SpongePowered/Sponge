@@ -75,6 +75,15 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         super(name);
     }
 
+    @Inject(method = "startServerThread", at = @At("HEAD"))
+    private void impl$setThreadOnServerPhaseTracker(CallbackInfo ci) {
+        try {
+            PhaseTracker.SERVER.setThread(this.serverThread);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Could not initialize the server PhaseTracker!");
+        }
+    }
+
     @Override
     public String bridge$getSubjectCollectionIdentifier() {
         return PermissionService.SUBJECTS_SYSTEM;
@@ -85,14 +94,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         return Tristate.TRUE;
     }
 
-    @Inject(method = "startServerThread", at = @At("HEAD"))
-    private void impl$prepareServerPhaseTracker(CallbackInfo ci) {
-        try {
-            PhaseTracker.SERVER.setThread(this.serverThread);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Could not initialize the server PhaseTracker!");
-        }
-    }
+
 
 //    /**
 //     * @author Zidane - Minecraft 1.14.4

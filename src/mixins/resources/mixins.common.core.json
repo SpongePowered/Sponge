@@ -20,7 +20,11 @@
         "server.management.PlayerProfileCacheMixin",
         "service.permission.SubjectMixin"
     ],
+    "client": [
+        "client.MinecraftMixin"
+    ],
     "server": [
+        "server.dedicated.DedicatedServerMixin"
     ],
     "injectors": {
         "defaultRequire": 1
