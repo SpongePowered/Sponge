@@ -46,7 +46,7 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
     }
 
     @Inject(method = "shutdownMinecraftApplet", at = @At("HEAD"))
-    private void vanilla$stopEngineLifecycle(CallbackInfo ci) {
+    private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {
         SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
     }
 }

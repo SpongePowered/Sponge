@@ -36,7 +36,7 @@ import org.spongepowered.vanilla.VanillaServer;
 public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$callEngineStoppingEvent(CallbackInfo ci) {
+    private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {
         SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
     }
 }
