@@ -100,7 +100,7 @@ repositories {
     maven("https://files.minecraftforge.net/maven")
 }
 dependencies {
-    minecraft("net.minecraft:joined:$minecraftVersion")
+    minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
 
     // api
     api(project(":SpongeAPI"))
@@ -377,7 +377,7 @@ project("SpongeVanilla") {
     }
 
     dependencies {
-        minecraft("net.minecraft:joined:$minecraftVersion")
+        minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
 
         api(launch.get().output)
         implementation(accessors.get().output)

@@ -65,7 +65,7 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
     @Shadow @Final private Queue<Runnable> field_213275_aU;
 
     @Inject(method = "run", at = @At("HEAD"))
-    private void vanilla$prepareGameAndLoadPlugins(CallbackInfo ci) {
+    private void vanilla$callEngineLifecycle(CallbackInfo ci) {
         SpongeCommon.getGame().setClient(this);
 
         try {
@@ -99,5 +99,10 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         GameProfileRepository p_i50895_7_, PlayerProfileCache p_i50895_8_, IChunkStatusListenerFactory p_i50895_9_) {
         ((MinecraftServerAccessor) this.integratedServer).accessor$setProfileCache(p_i50895_8_);
         return this.integratedServer;
+    }
+
+    @Inject(method = "shutdownMinecraftApplet", at = @At("HEAD"))
+    private void vanilla$stopEngineLifecycle(CallbackInfo ci) {
+        SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
     }
 }

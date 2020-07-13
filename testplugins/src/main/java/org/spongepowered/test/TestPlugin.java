@@ -74,4 +74,9 @@ public final class TestPlugin {
     public void onStoppingServer(final StoppingEngineEvent<Server> event) {
         this.logger.info("Stopping engine '{}'", event.getEngine());
     }
+
+    @Listener
+    public void onStoppingClient(final StoppingEngineEvent<Client> event) {
+        this.logger.info("Stopping engine '{}'", event.getEngine());
+    }
 }
