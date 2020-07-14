@@ -26,17 +26,14 @@ package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.gen.ChunkGenerator;
-import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
 
-public class GenerationCompatibileContext extends GenerationContext<GenerationCompatibileContext> {
+public final class GenerationCompatibileContext extends GenerationContext<GenerationCompatibileContext> {
 
-    @Nullable private Feature type;
-//    @Nullable SpongeChunkGenerator spongeGen;
     @Nullable AbstractChunkProvider provider;
     @Nullable ChunkGenerator modGen;
 
@@ -48,35 +45,16 @@ public class GenerationCompatibileContext extends GenerationContext<GenerationCo
     @Override
     protected void reset() {
         super.reset();
-        this.type = null;
         this.provider = null;
         this.modGen = null;
-    }
-
-    public GenerationCompatibileContext populator(final Feature type) {
-        this.type = type;
-        return this;
     }
 
     @Override
     public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
         final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "PopulatorType", this.type)
-//            .add(s + "- %s: %s", "SpongeChunkGenerator", this.spongeGen)
             .add(s + "- %s: %s", "ChunkProvider", this.provider)
-            .add(s + "- %s: %s", "Mod Provided Chunk Generator", this.modGen)
-            ;
+            .add(s + "- %s: %s", "Mod Provided Chunk Generator", this.modGen);
 
     }
-//
-//    @SuppressWarnings("deprecation")
-//    public GenerationCompatibileContext assignModCompatiblity(
-//        final SpongeChunkGenerator spongeGen, final AbstractChunkProvider chunkProvider, final ChunkGenerator chunkGenerator) {
-//        this.spongeGen = spongeGen;
-//        this.provider = chunkProvider;
-//        this.modGen = chunkGenerator;
-//        return this;
-//    }
-
 }

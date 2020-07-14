@@ -24,16 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import org.spongepowered.api.world.gen.feature.Feature;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
-import javax.annotation.Nullable;
-
-public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseContext> {
-
-    @Nullable private Feature type;
+public final class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseContext> {
 
     PopulatorPhaseContext(final IPhaseState<? extends PopulatorPhaseContext> state, PhaseTracker tracker) {
         super(state, tracker);
@@ -42,22 +37,11 @@ public class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseConte
     @Override
     protected void reset() {
         super.reset();
-        this.type = null;
-    }
-
-    public PopulatorPhaseContext populator(final Feature type) {
-        this.type = type;
-        return this;
-    }
-
-    public Feature getPopulatorType() {
-        return this.type;
     }
 
     @Override
     public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
         final String s = String.format("%1$" + indent + "s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "PopulatorType", this.type);
+        return super.printCustom(printer, indent);
     }
 }

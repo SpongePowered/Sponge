@@ -59,7 +59,7 @@ public interface IEnvironmentBlockReaderMixin_API extends EnvironmentalVolume {
     }
 
     @Override
-    default boolean isSkylightMax(final Vector3i pos) {
-        return this.shadow$isSkyLightMax(new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
+    default boolean isSkylightMax(final Vector3i position) {
+        return this.shadow$isSkyLightMax(new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 }

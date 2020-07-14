@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.world.dimension;
 
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
-import org.spongepowered.api.world.gen.TerrainGenerator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -47,11 +46,6 @@ public abstract class DimensionMixin_API {
 
     public org.spongepowered.api.world.dimension.DimensionType dimension$getType() {
         return ((DimensionTypeBridge) this.type).bridge$getSpongeDimensionType();
-    }
-
-    public TerrainGenerator<?> dimension$createGenerator() {
-        // TODO 1.14 - Dimension -> TerrainGenerator
-        return null;
     }
 
     public boolean dimension$allowsPlayerRespawns() {

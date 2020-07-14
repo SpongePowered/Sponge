@@ -60,8 +60,8 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
     }
 
     @Override
-    default int getEmittedLight(final Vector3i pos) {
-        return this.shadow$getLightValue(new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
+    default int getEmittedLight(final Vector3i position) {
+        return this.shadow$getLightValue(new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @Override
