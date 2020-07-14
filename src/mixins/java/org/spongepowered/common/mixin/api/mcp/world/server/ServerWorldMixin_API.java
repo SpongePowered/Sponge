@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world;
+package org.spongepowered.common.mixin.api.mcp.world.server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -70,6 +70,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.mixin.api.mcp.world.WorldMixin_API;
 import org.spongepowered.common.util.ChunkUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldManager;

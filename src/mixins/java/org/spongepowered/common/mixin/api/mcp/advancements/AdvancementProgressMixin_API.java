@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
+import com.google.common.base.Preconditions;
 import net.minecraft.advancements.AdvancementProgress;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -34,7 +32,6 @@ import org.spongepowered.api.advancement.criteria.CriterionProgress;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 
@@ -67,16 +64,17 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
 
     @Override
     public Optional<CriterionProgress> get(AdvancementCriterion criterion) {
-        checkNotNull(criterion, "criterion");
+        Preconditions.checkNotNull(criterion, "criterion");
         final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
-        checkState(map != null, "progressMap isn't initialized");
+        Preconditions.checkState(map != null, "progressMap isn't initialized");
         return Optional.ofNullable((CriterionProgress) map.get(criterion));
     }
 
     @Override
     public Optional<ScoreCriterionProgress> get(ScoreAdvancementCriterion criterion) {
+        Preconditions.checkNotNull(criterion);
         final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
-        checkState(map != null, "progressMap isn't initialized");
+        Preconditions.checkState(map != null, "progressMap isn't initialized");
         return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion));
     }
 }

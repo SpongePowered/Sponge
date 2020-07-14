@@ -39,6 +39,9 @@ import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.recipe.crafting.IngredientUtil;
@@ -50,7 +53,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 @Mixin(IRecipe.class)
-public interface IRecipeMixin_API<C extends IInventory> extends Recipe {
+@Implements(@Interface(iface = Recipe.class, prefix = "recipe$"))
+public interface IRecipeMixin_API<C extends IInventory> {
 
     @Shadow ItemStack shadow$getCraftingResult(C inv);
     @Shadow net.minecraft.item.ItemStack shadow$getRecipeOutput();
@@ -61,48 +65,43 @@ public interface IRecipeMixin_API<C extends IInventory> extends Recipe {
     @Shadow IRecipeType<?> shadow$getType();
     @Shadow NonNullList<net.minecraft.item.crafting.Ingredient> shadow$getIngredients();
 
-    @Override
     @Nonnull
-    default ItemStackSnapshot getExemplaryResult() {
+    default ItemStackSnapshot recipe$getExemplaryResult() {
         return ItemStackUtil.snapshotOf(this.shadow$getRecipeOutput());
     }
 
-    @Override
-    default boolean isValid(@Nonnull Inventory inv, @Nonnull ServerWorld world) {
+    default boolean recipe$isValid(@Nonnull Inventory inv, @Nonnull ServerWorld world) {
         return this.shadow$matches(toNativeInventory(inv), (net.minecraft.world.World) world);
     }
 
-    @Override
     @Nonnull
-    default ItemStackSnapshot getResult(@Nonnull Inventory inv) {
+    default ItemStackSnapshot recipe$getResult(@Nonnull Inventory inv) {
         return ItemStackUtil.snapshotOf(this.shadow$getCraftingResult(toNativeInventory(inv)));
     }
 
-    @Override
     @Nonnull
-    default List<ItemStackSnapshot> getRemainingItems(@Nonnull Inventory inv) {
+    default List<ItemStackSnapshot> recipe$getRemainingItems(@Nonnull Inventory inv) {
         return this.shadow$getRemainingItems(toNativeInventory(inv)).stream()
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
     }
 
-    @Override
-    default ResourceKey getKey() {
+    default ResourceKey recipe$getKey() {
         return (ResourceKey) (Object) this.shadow$getId();
     }
 
-    @Override
-    default List<Ingredient> getIngredients() {
+    @Intrinsic
+    default List<Ingredient> recipe$getIngredients() {
         return this.shadow$getIngredients().stream().map(IngredientUtil::fromNative).collect(Collectors.toList());
     }
 
-    @Override
-    default boolean isDynamic() {
+    @Intrinsic
+    default boolean recipe$isDynamic() {
         return this.shadow$isDynamic();
     }
 
-    @Override
-    default RecipeType<? extends Recipe> getType() {
+    @Intrinsic
+    default RecipeType<? extends Recipe> recipe$getType() {
         return (RecipeType) this.shadow$getType();
     }
 }

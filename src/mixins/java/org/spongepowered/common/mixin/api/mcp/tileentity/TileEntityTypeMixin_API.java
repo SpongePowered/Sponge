@@ -31,7 +31,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(TileEntityType.class)
 public abstract class TileEntityTypeMixin_API implements BlockEntityType {
@@ -40,11 +40,11 @@ public abstract class TileEntityTypeMixin_API implements BlockEntityType {
 
     @Override
     public ResourceKey getKey() {
-        return ((CatalogKeyBridge) this).bridge$getKey();
+        return ((ResourceKeyBridge) this).bridge$getKey();
     }
 
     @Override
     public boolean isValidBlock(BlockType block) {
-        return this.shadow$isValidBlock((Block) (Object) block);
+        return this.shadow$isValidBlock((Block) block);
     }
 }

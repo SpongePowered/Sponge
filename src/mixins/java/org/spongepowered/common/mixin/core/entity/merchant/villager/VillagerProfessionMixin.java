@@ -31,10 +31,10 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(VillagerProfession.class)
-public abstract class VillagerProfessionMixin implements CatalogKeyBridge {
+public abstract class VillagerProfessionMixin implements ResourceKeyBridge {
 
     private ResourceKey impl$key;
 
@@ -46,7 +46,7 @@ public abstract class VillagerProfessionMixin implements CatalogKeyBridge {
         )
     )
     private static Object impl$setKey(final Registry<Object> registry, final ResourceLocation key, final Object profession) {
-        ((CatalogKeyBridge) profession).bridge$setKey((ResourceKey) (Object) key);
+        ((ResourceKeyBridge) profession).bridge$setKey((ResourceKey) (Object) key);
         return Registry.register(registry, key, profession);
     }
 

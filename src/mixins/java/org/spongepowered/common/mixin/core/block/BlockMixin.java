@@ -39,7 +39,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -53,8 +52,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
@@ -74,7 +72,7 @@ import java.util.Locale;
 import javax.annotation.Nullable;
 
 @Mixin(value = Block.class)
-public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge, CatalogKeyBridge {
+public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge {
 
     private final boolean impl$isVanilla = this.getClass().getName().startsWith("net.minecraft.");
     private boolean impl$hasCollideLogic;
@@ -92,18 +90,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Shadow public abstract String getTranslationKey();
     @Shadow public abstract Material getMaterial(net.minecraft.block.BlockState state);
     @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
-
-    private ResourceKey impl$key;
-
-    @Override
-    public ResourceKey bridge$getKey() {
-        return this.impl$key;
-    }
-
-    @Override
-    public void bridge$setKey(ResourceKey key) {
-        this.impl$key = key;
-    }
 
     /**
      * We captured the dye color when creating the Block.Properties.

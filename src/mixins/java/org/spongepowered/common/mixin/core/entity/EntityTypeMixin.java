@@ -32,14 +32,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(EntityType.class)
-public abstract class EntityTypeMixin implements CatalogKeyBridge, TrackableBridge, EntityTypeBridge {
+public abstract class EntityTypeMixin implements ResourceKeyBridge, TrackableBridge, EntityTypeBridge {
 
     private ResourceKey impl$key;
     private boolean impl$allowsBlockBulkCaptures = true;

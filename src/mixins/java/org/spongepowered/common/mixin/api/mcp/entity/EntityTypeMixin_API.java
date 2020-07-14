@@ -29,7 +29,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(net.minecraft.entity.EntityType.class)
@@ -41,7 +41,7 @@ public abstract class EntityTypeMixin_API implements EntityType {
 
     @Override
     public ResourceKey getKey() {
-        return ((CatalogKeyBridge) this).bridge$getKey();
+        return ((ResourceKeyBridge) this).bridge$getKey();
     }
 
     @Override

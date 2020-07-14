@@ -31,8 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
 import org.spongepowered.common.config.SpongeConfig;
@@ -42,7 +41,7 @@ import org.spongepowered.common.config.type.TrackerConfig;
 import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(TileEntityType.class)
-public abstract class TileEntityTypeMixin implements CatalogKeyBridge, TrackableBridge, TileEntityTypeBridge {
+public abstract class TileEntityTypeMixin implements ResourceKeyBridge, TrackableBridge, TileEntityTypeBridge {
 
     private ResourceKey impl$key;
     private boolean impl$allowsBlockBulkCaptures = true;
@@ -62,8 +61,8 @@ public abstract class TileEntityTypeMixin implements CatalogKeyBridge, Trackable
 
         Registry.register(registry, key, tileEntityType);
 
-        final CatalogKeyBridge catalogKeyBridge = (CatalogKeyBridge) tileEntityType;
-        catalogKeyBridge.bridge$setKey(ResourceKey.of(plugin, key));
+        final ResourceKeyBridge resourceKeyBridge = (ResourceKeyBridge) tileEntityType;
+        resourceKeyBridge.bridge$setKey(ResourceKey.of(plugin, key));
 
         final TrackableBridge trackableBridge = (TrackableBridge) tileEntityType;
 

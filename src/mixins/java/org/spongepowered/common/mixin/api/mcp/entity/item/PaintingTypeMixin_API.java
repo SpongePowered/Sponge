@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(net.minecraft.entity.item.PaintingType.class)
 @Implements(value = @Interface(iface = ArtType.class, prefix = "artType$"))
@@ -42,7 +42,7 @@ public abstract class PaintingTypeMixin_API implements ArtType {
 
     @Override
     public ResourceKey getKey() {
-        return ((CatalogKeyBridge) this).bridge$getKey();
+        return ((ResourceKeyBridge) this).bridge$getKey();
     }
 
     @Intrinsic

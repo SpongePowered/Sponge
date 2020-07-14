@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item.crafting;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.PlayerContainer;
@@ -67,6 +68,7 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
 
     @Override
     public Optional<Recipe> getByKey(ResourceKey key) {
+        Preconditions.checkNotNull(key);
         return this.shadow$getRecipe((ResourceLocation) (Object) key).map(Recipe.class::cast);
     }
 
@@ -79,11 +81,14 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public <T extends Recipe> Collection<T> getAllOfType(RecipeType<T> type) {
+        Preconditions.checkNotNull(type);
         return this.shadow$getRecipes((IRecipeType)type).values();
     }
 
     @Override
     public <T extends Recipe> Collection<T> findByResult(RecipeType<T> type, ItemStackSnapshot result) {
+        Preconditions.checkNotNull(type);
+        Preconditions.checkNotNull(result);
         return this.getAllOfType(type).stream()
                 .filter(r -> r.getExemplaryResult().equals(result))
                 .collect(Collectors.toList());
@@ -91,6 +96,8 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
 
     @Override
     public Optional<Recipe> findMatchingRecipe(Inventory inventory, ServerWorld world) {
+        Preconditions.checkNotNull(inventory);
+        Preconditions.checkNotNull(world);
         if (inventory instanceof AbstractFurnaceTileEntity) {
             final IRecipeType<? extends AbstractCookingRecipe> type = ((AbstractFurnaceTileEntityAccessor) inventory).accessor$getRecipeType();
             return this.shadow$getRecipe(type, (IInventory) inventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
@@ -117,6 +124,9 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public <T extends Recipe> Optional<T> findMatchingRecipe(RecipeType<T> type, Inventory inventory, ServerWorld world) {
+        Preconditions.checkNotNull(type);
+        Preconditions.checkNotNull(inventory);
+        Preconditions.checkNotNull(world);
         if (!(inventory instanceof IInventory)) {
             return Optional.empty();
         }
@@ -126,6 +136,8 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public <T extends SmeltingRecipe> Optional<T> findSmeltingRecipe(RecipeType<T> type, ItemStackSnapshot ingredient) {
+        Preconditions.checkNotNull(type);
+        Preconditions.checkNotNull(ingredient);
         final net.minecraft.inventory.Inventory fakeFurnace = new net.minecraft.inventory.Inventory(1);
         fakeFurnace.setInventorySlotContents(0, ItemStackUtil.fromSnapshotToNative(ingredient));
         return this.shadow$getRecipe((IRecipeType) type, fakeFurnace, null);

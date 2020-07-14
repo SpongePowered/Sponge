@@ -108,11 +108,6 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public void setRawData(final DataView container) throws InvalidDataException {
-        throw new UnsupportedOperationException(); // TODO Data API
-    }
-
-    @Override
     public boolean isValid() {
         return !this.removed;
     }
@@ -132,13 +127,6 @@ public abstract class TileEntityMixin_API implements BlockEntity {
         return (BlockState) this.world.getBlockState(this.shadow$getPos());
     }
 
-
-    @Override
-    public BlockEntityArchetype createArchetype() {
-//        return new SpongeBlockEntityArchetypeBuilder().tile(this).build();
-        throw new UnsupportedOperationException("lolnope");
-    }
-
     @Override
     public LocatableBlock getLocatableBlock() {
         if (this.api$LocatableBlock == null) {
@@ -155,14 +143,12 @@ public abstract class TileEntityMixin_API implements BlockEntity {
 
     @Override
     public Set<Value.Immutable<?>> getValues() {
-        // TODO: Merge custom and Vanilla values and return the merged result.
+        // TODO: Minecraft 1.14 - Merge custom and Vanilla values and return the merged result.
         return this.api$getVanillaValues();
     }
 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = new HashSet<>();
-
-        return values;
+        return new HashSet<>();
     }
 
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.ai.goal;
 
+import net.minecraft.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.TargetGoal;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,7 +34,7 @@ import org.spongepowered.common.mixin.core.entity.ai.goal.GoalMixin;
 
 @SuppressWarnings("unchecked")
 @Mixin(net.minecraft.entity.ai.goal.TargetGoal.class)
-public abstract class TargetGoalMixin_API<A extends TargetGoal<A>> extends GoalMixin implements TargetGoal<A> {
+public abstract class TargetGoalMixin_API<A extends TargetGoal<A>> extends Goal implements TargetGoal<A> {
 
     @Shadow @Final @Mutable protected boolean shouldCheckSight;
     @Shadow @Final @Mutable private boolean nearbyOnly;

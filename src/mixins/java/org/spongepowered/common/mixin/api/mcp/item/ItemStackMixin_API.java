@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.SerializableDataHolder;
@@ -49,7 +50,7 @@ import org.spongepowered.common.util.Constants;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.item.ItemStack.class)
-@Implements(@Interface(iface = ItemStack.class, prefix = "apiStack$")) // We need to soft implement this interface due to a synthetic bridge method
+@Implements(@Interface(iface = ItemStack.class, prefix = "itemStack$")) // We need to soft implement this interface due to a synthetic bridge method
 public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutable {       // conflict from overriding ValueContainer#copy() from DataHolder
 
     @Shadow public abstract int shadow$getCount();
@@ -64,29 +65,32 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
 
-    public int apiStack$getQuantity() {
+    public int itemStack$getQuantity() {
         return this.shadow$getCount();
     }
 
-    public ItemType apiStack$getType() {
+    public ItemType itemStack$getType() {
         return (ItemType) this.shadow$getItem();
     }
 
-    public void apiStack$setQuantity(final int quantity) throws IllegalArgumentException {
+    public void itemStack$setQuantity(final int quantity) throws IllegalArgumentException {
         this.shadow$setCount(quantity);
     }
 
-    public int apiStack$getMaxStackQuantity() {
+    public int itemStack$getMaxStackQuantity() {
         return this.shadow$getMaxStackSize();
     }
 
     @Override
     public boolean validateRawData(final DataView container) {
+        Preconditions.checkNotNull(container);
         return false;
     }
 
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
+        Preconditions.checkNotNull(container);
+
         if (this.shadow$isEmpty()) {
             throw new IllegalArgumentException("Cannot set data on empty item stacks!");
         }
@@ -106,10 +110,10 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public SerializableDataHolder.Mutable copy() {
-        return this.apiStack$copy();
+        return this.itemStack$copy();
     }
 
-    public ItemStack apiStack$copy() {
+    public ItemStack itemStack$copy() {
         return (ItemStack) (Object) this.shadow$copy();
     }
 
@@ -122,8 +126,8 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.ItemStack.TYPE, this.apiStack$getType().getKey())
-                .set(Constants.ItemStack.COUNT, this.apiStack$getQuantity())
+                .set(Constants.ItemStack.TYPE, this.itemStack$getType().getKey())
+                .set(Constants.ItemStack.COUNT, this.itemStack$getQuantity())
                 .set(Constants.ItemStack.DAMAGE_VALUE, this.shadow$getDamage());
         if (this.shadow$hasTag()) { // no tag? no data, simple as that.
             final CompoundNBT compound = this.shadow$getTag().copy();
@@ -152,15 +156,15 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         return container;
     }
 
-    public Translation apiStack$getTranslation() {
+    public Translation itemStack$getTranslation() {
         return new SpongeTranslation(this.shadow$getItem().getTranslationKey((net.minecraft.item.ItemStack) (Object) this) + ".name");
     }
 
-    public ItemStackSnapshot apiStack$createSnapshot() {
+    public ItemStackSnapshot itemStack$createSnapshot() {
         return new SpongeItemStackSnapshot((ItemStack) this);
     }
 
-    public boolean apiStack$equalTo(final ItemStack that) {
+    public boolean itemStack$equalTo(final ItemStack that) {
         return net.minecraft.item.ItemStack.areItemStacksEqual(
                 (net.minecraft.item.ItemStack) (Object) this,
                 (net.minecraft.item.ItemStack) (Object) that
@@ -168,7 +172,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     }
 
     @Intrinsic
-    public boolean apiStack$isEmpty() {
+    public boolean itemStack$isEmpty() {
         return this.shadow$isEmpty();
     }
 

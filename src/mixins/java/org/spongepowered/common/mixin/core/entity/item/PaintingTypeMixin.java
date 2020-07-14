@@ -30,10 +30,10 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(PaintingType.class)
-public abstract class PaintingTypeMixin implements CatalogKeyBridge {
+public abstract class PaintingTypeMixin implements ResourceKeyBridge {
 
     private ResourceKey impl$key;
 
@@ -42,7 +42,7 @@ public abstract class PaintingTypeMixin implements CatalogKeyBridge {
             target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"))
     private static Object impl$setKey(final Registry<Object> registry, final String resourcePath,
         final Object paintingType) {
-        ((CatalogKeyBridge) paintingType).bridge$setKey(ResourceKey.resolve(resourcePath));
+        ((ResourceKeyBridge) paintingType).bridge$setKey(ResourceKey.resolve(resourcePath));
         return Registry.register(registry, resourcePath, paintingType);
     }
 

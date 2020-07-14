@@ -36,7 +36,7 @@ import org.spongepowered.math.vector.Vector3d;
 import java.time.Duration;
 
 @Mixin(net.minecraft.world.border.WorldBorder.class)
-@Implements(@Interface(iface = WorldBorder.class, prefix = "apiBorder$"))
+@Implements(@Interface(iface = WorldBorder.class, prefix = "worldBorder$"))
 public abstract class WorldBorderMixin_API implements WorldBorder {
 
     @Shadow public abstract double getCenterX();
@@ -57,22 +57,22 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     @Shadow public abstract double shadow$getDiameter();
 
     @Intrinsic
-    public Duration apiBorder$getWarningTime() {
+    public Duration worldBorder$getWarningTime() {
         return Duration.of(this.shadow$getWarningTime(), TemporalUnits.MILLIS);
     }
 
     @Intrinsic
-    public void apiBorder$setWarningTime(final Duration time) {
+    public void worldBorder$setWarningTime(final Duration time) {
         this.shadow$setWarningTime((int) time.toMillis());
     }
 
     @Intrinsic
-    public double apiBorder$getWarningDistance() {
+    public double worldBorder$getWarningDistance() {
         return this.shadow$getWarningDistance();
     }
 
     @Intrinsic
-    public void apiBorder$setWarningDistance(final double distance) {
+    public void worldBorder$setWarningDistance(final double distance) {
         this.shadow$setWarningDistance((int) distance);
     }
 
@@ -82,7 +82,7 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     }
 
     @Intrinsic
-    public double apiBorder$getDiameter() {
+    public double worldBorder$getDiameter() {
         return this.shadow$getDiameter();
     }
 
@@ -112,7 +112,7 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     }
 
     @Intrinsic
-    public void apiBorder$setCenter(final double x, final double z) {
+    public void worldBorder$setCenter(final double x, final double z) {
         this.shadow$setCenter(x, z);
     }
 
@@ -127,12 +127,12 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     }
 
     @Intrinsic
-    public double apiBorder$getDamageAmount() {
+    public double worldBorder$getDamageAmount() {
         return this.shadow$getDamagePerBlock();
     }
 
     @Intrinsic
-    public void apiBorder$setDamageAmount(final double damage) {
+    public void worldBorder$setDamageAmount(final double damage) {
         this.shadow$setDamagePerBlock(damage);
     }
 

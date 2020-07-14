@@ -40,9 +40,9 @@ public abstract class BannerPatternMixin_API implements BannerPatternShape {
 
     private ResourceKey api$key;
 
-    @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;)V", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, String fileName, String hashName, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), fileName.toLowerCase());
+    @Inject(method = "<init>(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, String fileNameIn, String hashNameIn, CallbackInfo ci) {
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), fileNameIn.toLowerCase());
     }
 
     @Override

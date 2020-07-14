@@ -35,8 +35,6 @@ public abstract class ItemMixin implements ItemBridge {
 
     @Shadow private String translationKey;
 
-    @Shadow public abstract String getTranslationKey();
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

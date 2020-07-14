@@ -24,48 +24,29 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.MoreObjects;
 import net.minecraft.world.WorldType;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.gen.GeneratorType;
-import org.spongepowered.api.world.gen.TerrainGenerator;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.SpongeCommon;
 
 @Mixin(WorldType.class)
 public abstract class WorldTypeMixin_API implements GeneratorType {
 
-    @Nullable private ResourceKey api$key;
+    private ResourceKey api$key;
 
     @Inject(method = "<init>(ILjava/lang/String;Ljava/lang/String;I)V", at = @At("RETURN"))
-    private void onConstructSpongeRegister(int id, String name, String serializedName, int version, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeImplHooks.getModIdFromClass(this.getClass()), name);
-        // TODO - register this with our registry?
+    private void api$setKey(int id, String name, String serializedName, int version, CallbackInfo ci) {
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
     }
 
     @Override
     public ResourceKey getKey() {
         return this.api$key;
-    }
-
-    @Override
-    public DataContainer getDefaultGeneratorSettings() {
-        // TODO 1.14 - Json settings/legacy settings -> DataContainer
-        return null;
-    }
-
-    @Override
-    public TerrainGenerator createGenerator(ServerWorld world) {
-        checkNotNull(world);
-        throw new UnsupportedOperationException("implement me");
     }
 
     @Override
@@ -87,7 +68,7 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("key", this.api$key)
-            .add("settings", ((GeneratorType) this).getDefaultGeneratorSettings())
+            .add("settings", this.getDefaultGeneratorSettings())
             .toString();
     }
 }

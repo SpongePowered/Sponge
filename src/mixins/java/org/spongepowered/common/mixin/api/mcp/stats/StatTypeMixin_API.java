@@ -49,8 +49,8 @@ public abstract class StatTypeMixin_API implements StatisticCategory {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     public Collection<? extends Statistic> getStatistics() {
-        return Collections.unmodifiableCollection((Collection<? extends Statistic>) (Collection) this.map.values());
+        return Collections.unmodifiableCollection((Collection<? extends Statistic>) (Object) this.map.values());
     }
 }

@@ -28,6 +28,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
@@ -37,7 +38,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
@@ -51,9 +52,15 @@ public abstract class BlockMixin_API implements BlockType {
     @Shadow public abstract String shadow$getTranslationKey();
     @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
 
+    private ResourceKey api$key;
+    private SpongeTranslation api$translation;
+
     @Override
-    public ResourceKey getKey() {
-        return ((CatalogKeyBridge) this).bridge$getKey();
+    public final ResourceKey getKey() {
+        if (this.api$key == null) {
+            this.api$key = (ResourceKey) (Object) Registry.BLOCK.getKey((Block) (Object) this);
+        }
+        return this.api$key;
     }
 
     @Override
@@ -87,6 +94,10 @@ public abstract class BlockMixin_API implements BlockType {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.shadow$getTranslationKey());
+        if (this.api$translation == null) {
+            this.api$translation = new SpongeTranslation(this.shadow$getTranslationKey());
+        }
+
+        return this.api$translation;
     }
 }

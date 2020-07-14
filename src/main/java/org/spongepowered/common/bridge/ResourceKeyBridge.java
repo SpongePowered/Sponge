@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge;
 
 import org.spongepowered.api.ResourceKey;
 
-public interface CatalogKeyBridge {
+public interface ResourceKeyBridge {
 
     ResourceKey bridge$getKey();
 

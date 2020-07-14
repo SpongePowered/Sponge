@@ -26,12 +26,10 @@ package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.TreeLayoutElement;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -81,11 +79,6 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     @Override
     public Text getDescription() {
         return SpongeTexts.toText(this.description);
-    }
-
-    @Override
-    public ItemStackSnapshot getIcon() {
-        throw new UnsupportedOperationException("implement me");
     }
 
     @Override

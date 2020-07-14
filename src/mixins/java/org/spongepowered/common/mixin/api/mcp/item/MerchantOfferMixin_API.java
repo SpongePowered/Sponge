@@ -30,6 +30,8 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,6 +42,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(MerchantOffer.class)
+@Implements(@Interface(iface = TradeOffer.class, prefix = "tradeOffer$"))
 public abstract class MerchantOfferMixin_API implements TradeOffer {
 
     @Shadow public abstract net.minecraft.item.ItemStack shadow$getBuyingStackFirst();
@@ -74,7 +77,7 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
     }
 
     @Intrinsic
-    public int getUses() {
+    public int tradeOffer$getUses() {
         return this.shadow$getUses();
     }
 

@@ -39,9 +39,10 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Mixin(StateHolder.class)
-public abstract class StateHolderMixin_API<S extends State<S>, C> implements IStateHolderMixin_API<S>, SpongeImmutableDataHolder<S> {
+public abstract class StateHolderMixin_API<S extends State<S>, C> implements State<S>, SpongeImmutableDataHolder<S> {
 
     @Shadow public abstract <V extends Comparable<V>> boolean shadow$has(IProperty<V> property);
+    @Shadow public abstract <T extends Comparable<T>> T shadow$get(IProperty<T> property);
     @Shadow public abstract <T extends Comparable<T>, V extends T> C shadow$with(IProperty<T> property, V value);
     @Shadow public abstract <T extends Comparable<T>> C shadow$cycle(IProperty<T> property);
     @Shadow public abstract Collection<IProperty<?>> shadow$getProperties();
@@ -89,6 +90,4 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements ISt
         }
         return Optional.empty();
     }
-
-
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
+import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.ArmorMaterial;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
@@ -32,25 +33,31 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Mixin(net.minecraft.item.ArmorMaterial.class)
-@Implements(@Interface(iface = ArmorMaterial.class, prefix = "apiArmor$"))
-public abstract class ItemArmorMaterialMixin_API implements ArmorMaterial {
-    // TODO support modded using IArmorMaterial
+@Implements(@Interface(iface = ArmorMaterial.class, prefix = "armorMaterial$"))
+public abstract class ArmorMaterialMixin_API implements ArmorMaterial {
 
-    @Shadow @Final private String name;
     @Shadow public abstract net.minecraft.item.crafting.Ingredient shadow$getRepairMaterial();
 
-    private ResourceKey impl$key;
+    private ResourceKey api$key;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(String enumName, int ordinal, String nameIn, int maxDamageFactorIn, int[] damageReductionAmountsIn, int enchantabilityIn,
+        SoundEvent equipSoundIn, float p_i48533_8_, Supplier<net.minecraft.item.crafting.Ingredient> repairMaterialSupplier, CallbackInfo ci) {
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), nameIn.toLowerCase());
+    }
 
     @Override
     public ResourceKey getKey() {
-        if (this.impl$key == null) {
-            this.impl$key = ResourceKey.minecraft(this.name);
-        }
-        return this.impl$key;
+        return this.api$key;
     }
 
     @Override

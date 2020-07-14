@@ -37,7 +37,6 @@ public interface IRecipeTypeMixin_API<R extends Recipe> extends RecipeType<R> {
 
     @Override
     default ResourceKey getKey() {
-        ResourceLocation key = Registry.RECIPE_TYPE.getKey(((IRecipeType) this));
-        return (ResourceKey) (Object) key;
+        return (ResourceKey) (Object) Registry.RECIPE_TYPE.getKey(((IRecipeType) this));
     }
 }

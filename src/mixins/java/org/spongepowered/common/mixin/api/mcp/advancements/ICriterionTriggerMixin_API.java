@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.advancements.ICriterionTrigger;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
@@ -52,11 +53,13 @@ public interface ICriterionTriggerMixin_API<C extends FilteredTriggerConfigurati
 
     @Override
     default void trigger(final Iterable<ServerPlayer> players) {
+        Preconditions.checkNotNull(players);
         players.forEach(((TriggerBridge) this)::bridge$trigger);
     }
 
     @Override
     default void trigger(final ServerPlayer player) {
+        Preconditions.checkNotNull(player);
         ((TriggerBridge) this).bridge$trigger(player);
         // This could possibly be implemented in all the vanilla triggers
         // and construct trigger method arguments based on context values

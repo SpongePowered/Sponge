@@ -24,17 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import javax.annotation.Nullable;
@@ -48,16 +45,24 @@ public abstract class ItemMixin_API implements ItemType {
 
     @Nullable protected BlockType blockType = null;
 
+    private ResourceKey api$key;
+    private SpongeTranslation api$translation;
+
     @Override
     public final ResourceKey getKey() {
-        final ResourceLocation resourceLocation = SpongeImplHooks.getItemResourceLocation((Item) (Object) this);
-        checkState(resourceLocation != null, "Attempted to access the id before the Item is registered.");
-        return (ResourceKey) (Object) resourceLocation;
+        if (this.api$key == null) {
+            this.api$key = (ResourceKey) (Object) Registry.ITEM.getKey((Item) (Object) this);
+        }
+        return this.api$key;
     }
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.shadow$getTranslationKey() + ".name");
+        if (this.api$translation == null) {
+            this.api$translation = new SpongeTranslation(this.shadow$getTranslationKey() + ".name");
+        }
+
+        return this.api$translation;
     }
 
     @Override

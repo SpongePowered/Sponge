@@ -31,7 +31,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.common.bridge.CatalogKeyBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduledTask;
 import org.spongepowered.plugin.PluginContainer;
@@ -105,7 +105,7 @@ public final class SpongeTimings {
      * @return The timing
      */
     public static Timing getEntityTiming(EntityType<?> entity) {
-        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + ((CatalogKeyBridge) entity).bridge$getKey().getFormatted());
+        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + ((ResourceKeyBridge) entity).bridge$getKey().getFormatted());
     }
 
     /**

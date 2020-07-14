@@ -35,11 +35,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = { BlockItem.class, AirItem.class })
-// Mixin into ItemAir too because ItemAir does not extend ItemBlock but has a Block
 public abstract class BlockItemMixin_API extends ItemMixin_API {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    private void impl$setSpongeBlockType(Block block, Item.Properties builder, CallbackInfo ci) {
+    private void api$setBlockType(Block block, Item.Properties builder, CallbackInfo ci) {
         this.blockType = (BlockType) block;
     }
 }

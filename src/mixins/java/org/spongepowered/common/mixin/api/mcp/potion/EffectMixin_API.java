@@ -43,7 +43,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 @Mixin(Effect.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
+@Implements(@Interface(iface = PotionEffectType.class, prefix = "potionEffectType$"))
 public abstract class EffectMixin_API implements PotionEffectType {
 
     private static final Map<String, String> potionMapping = ImmutableMap.<String, String>builder()
@@ -69,32 +69,30 @@ public abstract class EffectMixin_API implements PotionEffectType {
 
     @Nullable private Translation api$translation;
     @Nullable private Translation api$potionTranslation;
-    private ResourceKey impl$key;
+    private ResourceKey api$key;
 
     @Override
     public ResourceKey getKey() {
-        if (this.impl$key == null) {
-            final ResourceLocation location = Registry.EFFECTS.getKey((Effect) (Object) this);
-            this.impl$key = (ResourceKey) (Object) location;
+        if (this.api$key == null) {
+            this.api$key = (ResourceKey) (Object) Registry.EFFECTS.getKey((Effect) (Object) this);
         }
-        return this.impl$key;
+        return this.api$key;
     }
 
     @Intrinsic
-    public boolean potion$isInstant() {
+    public boolean potionEffectType$isInstant() {
         return this.shadow$isInstant();
     }
 
     @Override
     public Translation getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.api$translation == null) {
             this.api$translation = new SpongeTranslation(this.shadow$getName());
         }
         return this.api$translation;
     }
 
-    // TODO: Remove this from the API or change return type to Optional
+    // TODO: Minecraft 1.14 - Remove this from the API or change return type to Optional
     // TODO: potionMapping is not up to date
     @Override
     public Translation getPotionTranslation() {
