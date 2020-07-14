@@ -353,14 +353,14 @@ project("SpongeVanilla") {
             create("server") {
                 workingDirectory(vanillaProject.file("./run"))
                 args.addAll(listOf("nogui", "--launchTarget", "sponge_server_dev"))
-                main = "org.spongepowered.server.modlauncher.Main"
+                main = "org.spongepowered.vanilla.modlauncher.Main"
             }
 
             create("client") {
                 environment("target", "client")
                 workingDirectory(vanillaProject.file("./run"))
                 args.addAll(listOf("--launchTarget", "sponge_client_dev", "--version", "1.14.4", "--accessToken", "0"))
-                main = "org.spongepowered.server.modlauncher.Main"
+                main = "org.spongepowered.vanilla.modlauncher.Main"
             }
         }
         commonProject.sourceSets["main"].resources
