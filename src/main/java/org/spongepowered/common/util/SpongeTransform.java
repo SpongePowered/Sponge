@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.util;
 
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.math.imaginary.Quaterniond;
 import org.spongepowered.math.matrix.Matrix4d;
@@ -169,11 +170,11 @@ public final class SpongeTransform implements Transform {
 
     @Override
     public String toString() {
-        return "SpongeTransform{" +
-                "position=" + this.position +
-                ", rotation=" + this.rotation +
-                ", scale=" + this.scale +
-                '}';
+        return MoreObjects.toStringHelper(this)
+                .add("position", this.position)
+                .add("rotation", this.rotation)
+                .add("scale", this.scale)
+                .toString();
     }
 
     private static Vector3d toAxesAngles(final Quaterniond quaternion) {
