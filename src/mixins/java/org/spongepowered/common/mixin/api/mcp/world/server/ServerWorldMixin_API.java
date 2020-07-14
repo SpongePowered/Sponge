@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world.server;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -81,6 +82,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -105,6 +107,8 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Shadow @Final private ServerTickList<Block> pendingBlockTicks;
     @Shadow @Final private ServerTickList<Fluid> pendingFluidTicks;
+
+    @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
 
     // World
     @Override
@@ -188,6 +192,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     // TODO move to bridge?
     private boolean impl$processingExplosion;
+
     @Override
     public void triggerExplosion(org.spongepowered.api.world.explosion.Explosion explosion) {
         checkNotNull(explosion, "explosion");
@@ -240,6 +245,11 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public Collection<ServerPlayer> getPlayers() {
         return ImmutableList.copyOf((Collection<ServerPlayer>) (Collection<?>) this.shadow$getPlayers());
+    }
+
+    @Override
+    public Collection<org.spongepowered.api.entity.Entity> getEntities() {
+        return (Collection< org.spongepowered.api.entity.Entity>) (Object) Collections.unmodifiableCollection(this.entitiesById.values());
     }
 
     @Override
