@@ -72,7 +72,6 @@ public final class ServerDevLaunchHandler implements ILaunchHandlerService {
 
     @Override
     public Callable<Void> launchService(final String[] arguments, final ITransformingClassLoader launchClassLoader) {
-
         this.logger.info("Transitioning to Sponge launcher, please wait...");
 
         return () -> {

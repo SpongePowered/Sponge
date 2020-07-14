@@ -359,7 +359,16 @@ project("SpongeVanilla") {
             create("client") {
                 environment("target", "client")
                 workingDirectory(vanillaProject.file("./run"))
-                args.addAll(listOf("--launchTarget", "sponge_client_dev", "--version", "1.14.4", "--accessToken", "0"))
+                args.addAll(listOf(
+                        "--launchTarget", "sponge_client_dev",
+                        "--version", "1.14.4",
+                        "--accessToken", "0",
+                        "--assetIndex", "1.14",
+                        "--assetsDir", (tasks.findByName("downloadAssets") as net.minecraftforge.gradle.common.task.DownloadAssets).output.absolutePath
+                ))
+                jvmArgs.addAll(listOf(
+                        "-Djava.library.path=" + (tasks.findByName("extractNatives") as net.minecraftforge.gradle.common.task.ExtractNatives).output.absolutePath
+                ))
                 main = "org.spongepowered.vanilla.modlauncher.Main"
             }
         }
