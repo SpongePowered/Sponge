@@ -16,6 +16,7 @@
         "server.dedicated.DedicatedServerMixin_Vanilla"
     ],
     "mixins": [
+        "crash.CrashReportMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
         "util.registry.BootstrapMixin_Vanilla"
     ],
