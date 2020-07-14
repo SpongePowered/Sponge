@@ -2,7 +2,7 @@
     "plugins": [{
         "id": "spongevanilla",
         "name": "SpongeVanilla",
-        "version": "8.0.0-1.14.4",
+        "version": "1.14.4-8.0.0",
         "main-class": "org.spongepowered.vanilla.SpongeVanilla",
         "description": "Vanilla Minecraft with Sponge",
         "links": {
