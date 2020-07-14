@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.metadata.PluginMetadata;
 
 @Mixin(CrashReport.class)
 public abstract class CrashReportMixin_Vanilla {
@@ -41,11 +42,15 @@ public abstract class CrashReportMixin_Vanilla {
     @Shadow @Final private CrashReportCategory systemDetailsCategory;
 
     @Inject(method = "populateEnvironment", at = @At("RETURN"))
-    private void vanilla$addPluginsToEnvironment(CallbackInfo ci) {
+    private void vanilla$addPluginsToEnvironment(final CallbackInfo ci) {
         this.systemDetailsCategory.addDetail("Plugins", () -> {
-            StringBuilder result = new StringBuilder(64);
-            for (PluginContainer container : Sponge.getPluginManager().getPlugins()) {
-                result.append("\n\t\t").append(container);
+            final StringBuilder result = new StringBuilder(64);
+            for (final PluginContainer container : Sponge.getPluginManager().getPlugins()) {
+                final PluginMetadata metadata = container.getMetadata();
+
+                final String name = metadata.getName().orElse(metadata.getId());
+                result.append("\n\t\t")
+                        .append(name).append(" (").append(metadata.getId()).append(") ").append(metadata.getVersion());
             }
             return result.toString();
         });
