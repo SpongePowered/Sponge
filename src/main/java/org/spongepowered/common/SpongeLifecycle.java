@@ -66,9 +66,19 @@ public final class SpongeLifecycle {
         ((SpongeBuilderRegistry) this.game.getRegistry().getBuilderRegistry()).registerDefaultBuilders();
     }
 
+    public void callRegisterFactoryEvent() {
+        this.game.getEventManager().post(SpongeEventFactory.createRegisterFactoryEvent(Cause.of(EventContext.empty(), this.game), this.game));
+    }
+
+    public void callRegisterBuilderEvent() {
+        this.game.getEventManager().post(SpongeEventFactory.createRegisterBuilderEvent(Cause.of(EventContext.empty(), this.game), this.game));
+    }
+
     public void establishRegistries() {
         ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultRegistries();
         ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultSuppliers();
+
+        this.game.getEventManager().post(SpongeEventFactory.createRegisterCatalogRegistryEvent(Cause.of(EventContext.empty(), this.game), this.game));
     }
 
     public void initTimings() {

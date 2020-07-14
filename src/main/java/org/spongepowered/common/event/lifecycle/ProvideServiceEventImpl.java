@@ -79,4 +79,8 @@ public final class ProvideServiceEventImpl<T> implements ProvideServiceEvent<T> 
         return this.game;
     }
 
+    @Override
+    public String toString() {
+        return "ProvideServiceEvent{cause=" + this.cause + "}";
+    }
 }

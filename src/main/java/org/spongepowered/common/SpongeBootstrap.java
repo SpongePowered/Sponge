@@ -52,12 +52,14 @@ public final class SpongeBootstrap {
 
         Launcher.getInstance().getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.PARENT_INJECTOR, () -> bootstrapInjector);
         SpongeBootstrap.lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);
+        Launcher.getInstance().loadPlugins();
         SpongeBootstrap.lifecycle.establishFactories();
         SpongeBootstrap.lifecycle.establishBuilders();
         SpongeBootstrap.lifecycle.initTimings();
-        Launcher.getInstance().loadPlugins();
         SpongeBootstrap.lifecycle.registerPluginListeners();
         SpongeBootstrap.lifecycle.callConstructEvent();
+        SpongeBootstrap.lifecycle.callRegisterFactoryEvent();
+        SpongeBootstrap.lifecycle.callRegisterBuilderEvent();
         SpongeBootstrap.lifecycle.establishServices();
 
         Launcher.getInstance().getLogger().info("Loading Minecraft '{}', please wait...", engineName);

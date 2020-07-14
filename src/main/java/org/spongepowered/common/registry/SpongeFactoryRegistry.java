@@ -89,16 +89,17 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
     }
 
     public void registerDefaultFactories() {
-        this.registerFactory(TextSerializers.Factory.class, SpongeTextSerializerFactory.INSTANCE);
-        this.registerFactory(AdvancementCriterion.Factory.class, SpongeAdvancementCriterionFactory.INSTANCE);
-        this.registerFactory(TimingsFactory.class, SpongeTimingsFactory.INSTANCE);
-        this.registerFactory(ResourcePack.Factory.class, SpongeResourcePackFactory.INSTANCE);
-        this.registerFactory(CommandCause.Factory.class, SpongeCommandCauseFactory.INSTANCE);
-        this.registerFactory(Parameter.Value.Factory.class, SpongeParameterValueFactory.INSTANCE);
-        this.registerFactory(CommandTreeBuilder.RootNodeFactory.class, SpongeRootCommandTreeBuilderFactory.INSTANCE);
-        this.registerFactory(VariableValueParameters.Factory.class, SpongeVariableValueParameterBuilderFactory.INSTANCE);
-        this.registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY);
-        this.registerFactory(Transform.Factory.class, SpongeTransformFactory.INSTANCE);
+        this
+            .registerFactory(TimingsFactory.class, SpongeTimingsFactory.INSTANCE)
+            .registerFactory(TextSerializers.Factory.class, SpongeTextSerializerFactory.INSTANCE)
+            .registerFactory(AdvancementCriterion.Factory.class, SpongeAdvancementCriterionFactory.INSTANCE)
+            .registerFactory(ResourcePack.Factory.class, SpongeResourcePackFactory.INSTANCE)
+            .registerFactory(CommandCause.Factory.class, SpongeCommandCauseFactory.INSTANCE)
+            .registerFactory(Parameter.Value.Factory.class, SpongeParameterValueFactory.INSTANCE)
+            .registerFactory(CommandTreeBuilder.RootNodeFactory.class, SpongeRootCommandTreeBuilderFactory.INSTANCE)
+            .registerFactory(VariableValueParameters.Factory.class, SpongeVariableValueParameterBuilderFactory.INSTANCE)
+            .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
+            .registerFactory(Transform.Factory.class, SpongeTransformFactory.INSTANCE);
     }
 
 }
