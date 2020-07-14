@@ -39,6 +39,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 
 public final class SpongeUserManager implements UserManager {
 
@@ -94,6 +95,11 @@ public final class SpongeUserManager implements UserManager {
     @Override
     public Collection<GameProfile> getAll() {
         return this.userDiscoverer.getAllProfiles();
+    }
+
+    @Override
+    public Stream<GameProfile> streamAll() {
+        return this.userDiscoverer.streamAllProfiles();
     }
 
     @Override

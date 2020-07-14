@@ -50,6 +50,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
 import org.spongepowered.common.accessor.server.management.UserListAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
 import java.io.File;
@@ -63,6 +64,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 final class UserDiscoverer {
 
@@ -383,4 +385,7 @@ final class UserDiscoverer {
         return true;
     }
 
+    protected Stream<org.spongepowered.api.profile.GameProfile> streamAllProfiles() {
+        throw new MissingImplementationException("UserDiscoverer", "streamAllProfiles");
+    }
 }
