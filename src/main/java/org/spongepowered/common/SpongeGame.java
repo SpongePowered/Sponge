@@ -211,7 +211,7 @@ public final class SpongeGame implements Game {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("platform", this.getPlatform())
+                .add("platform", this.platform)
                 .toString();
     }
 }

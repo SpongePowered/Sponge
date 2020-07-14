@@ -52,4 +52,9 @@ public final class DedicatedServerLauncher extends VanillaLauncher {
 
         SpongeBootstrap.perform("Server", () -> MinecraftServer.main(args));
     }
+
+    @Override
+    public boolean isDedicatedServer() {
+        return true;
+    }
 }

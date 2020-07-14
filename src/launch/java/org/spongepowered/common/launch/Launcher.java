@@ -77,6 +77,8 @@ public abstract class Launcher {
 
     public abstract boolean isVanilla();
 
+    public abstract boolean isDedicatedServer();
+
     public final Logger getLogger() {
         return this.logger;
     }

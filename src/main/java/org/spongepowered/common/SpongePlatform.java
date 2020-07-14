@@ -32,6 +32,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -78,12 +79,19 @@ public final class SpongePlatform implements Platform {
 
     @Override
     public Type getType() {
-        return Type.SERVER;
+        return !Launcher.getInstance().isDedicatedServer() ? Type.CLIENT : Type.SERVER;
     }
 
     @Override
     public Type getExecutionType() {
-        return Type.SERVER;
+        if (Sponge.isServerAvailable() && Sponge.getServer().onMainThread()) {
+            return Type.SERVER;
+        }
+        if (Sponge.isClientAvailable() && Sponge.getClient().onMainThread()) {
+            return Type.CLIENT;
+        }
+
+        return Type.UNKNOWN;
     }
 
     @Override
@@ -115,8 +123,8 @@ public final class SpongePlatform implements Platform {
         return MoreObjects.toStringHelper(this)
                 .add("type", this.getType())
                 .add("executionType", this.getExecutionType())
-                .add("api", this.apiPlugin)
-                .add("impl", this.platformPlugin)
+                .add("api", this.apiPlugin.getMetadata().getId())
+                .add("implementation", this.platformPlugin.getMetadata().getId())
                 .add("minecraftVersion", this.getMinecraftVersion())
                 .toString();
     }
