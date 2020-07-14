@@ -42,9 +42,13 @@ import java.util.List;
 /**
  * Reverses the slot order of an inventory.
  */
-public class ReverseQuery extends SpongeQuery implements QueryType.NoParam {
+public final class ReverseQuery extends SpongeQuery implements QueryType.NoParam {
 
-    private ResourceKey key = ResourceKey.sponge("reverse");
+    private final ResourceKey key;
+
+    public ReverseQuery(final ResourceKey key) {
+        this.key = key;
+    }
 
     @Override
     public ResourceKey getKey() {

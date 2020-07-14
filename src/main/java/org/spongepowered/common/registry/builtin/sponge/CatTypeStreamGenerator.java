@@ -44,7 +44,7 @@ public final class CatTypeStreamGenerator {
             .map(kv -> {
                 final String value = kv.getValue().getPath();
 
-                return Tuple.of(new SpongeCatType(ResourceKey.minecraft(value.substring(value.lastIndexOf("."), value.lastIndexOf("/") + 1)),
+                return Tuple.of(new SpongeCatType(ResourceKey.minecraft(value.substring(value.lastIndexOf("/") + 1, value.lastIndexOf("."))),
                     kv.getKey()), kv.getKey());
             });
     }

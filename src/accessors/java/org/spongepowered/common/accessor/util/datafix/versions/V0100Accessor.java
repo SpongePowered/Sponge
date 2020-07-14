@@ -22,36 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.query.type;
+package org.spongepowered.common.accessor.util.datafix.versions;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.api.item.inventory.query.QueryType;
-import org.spongepowered.common.inventory.EmptyInventoryImpl;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.query.SpongeQuery;
+import com.mojang.datafixers.schemas.Schema;
+import com.mojang.datafixers.types.templates.TypeTemplate;
+import net.minecraft.util.datafix.versions.V0100;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-public final class EmptyQuery extends SpongeQuery implements QueryType.NoParam {
+@Mixin(V0100.class)
+public interface V0100Accessor {
 
-    private final ResourceKey key;
-
-    public EmptyQuery(final ResourceKey key) {
-        this.key = key;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public Inventory execute(Inventory inventory, InventoryAdapter adapter) {
-        return new EmptyInventoryImpl(inventory);
-    }
-
-    @Override
-    public Query toQuery() {
-        return this;
+    @Invoker("equipment") static TypeTemplate equipment(Schema schema) {
+        throw new IllegalStateException("Untransformed Accessor!");
     }
 }

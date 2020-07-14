@@ -18,7 +18,9 @@
         "network.rcon.RConConsoleSourceMixin",
         "server.MinecraftServerMixin",
         "server.management.PlayerProfileCacheMixin",
-        "service.permission.SubjectMixin"
+        "service.permission.SubjectMixin",
+        "world.dimension.DimensionTypeMixin",
+        "util.datafix.versions.V1125Mixin"
     ],
     "client": [
         "client.MinecraftMixin"

@@ -35,17 +35,19 @@ import org.spongepowered.common.util.Constants;
 
 public final class EntityTypeSupplier {
 
-    public static final net.minecraft.entity.EntityType<HumanEntity> HUMAN_TYPE = createHumanType();
+    public static final net.minecraft.entity.EntityType<HumanEntity> HUMAN = createHumanType();
 
     private EntityTypeSupplier() {
     }
 
+    // TODO Minecraft 1.14 - Figure out how to turn back on serialization for Human
     private static net.minecraft.entity.EntityType<HumanEntity> createHumanType() {
         final ResourceKey key = ResourceKey.sponge("human");
-        final net.minecraft.entity.EntityType<HumanEntity> builder = net.minecraft.entity.EntityType.Builder.create(HumanEntity::new, EntityClassification.MISC)
+        final net.minecraft.entity.EntityType<HumanEntity> entityType = net.minecraft.entity.EntityType.Builder.create(HumanEntity::new, EntityClassification.CREATURE)
                 .size(Constants.Entity.Player.PLAYER_WIDTH, Constants.Entity.Player.PLAYER_HEIGHT)
-                .build(key.getValue());
-        return Registry.register(Registry.ENTITY_TYPE, (ResourceLocation) (Object) key, builder);
+                .disableSerialization()
+                .build(key.getFormatted());
+        return Registry.register(Registry.ENTITY_TYPE, (ResourceLocation) (Object) key, entityType);
     }
 
     public static void registerSuppliers(SpongeCatalogRegistry registry) {
@@ -152,7 +154,7 @@ public final class EntityTypeSupplier {
             .registerSupplier(EntityType.class, "lightning_bolt", () -> (EntityType) net.minecraft.entity.EntityType.LIGHTNING_BOLT)
             .registerSupplier(EntityType.class, "player", () -> (EntityType) net.minecraft.entity.EntityType.PLAYER)
             .registerSupplier(EntityType.class, "fishing_bobber", () -> (EntityType) net.minecraft.entity.EntityType.FISHING_BOBBER)
-            .registerSupplier(EntityType.class, "human", () -> (EntityType) HUMAN_TYPE)
+            .registerSupplier(EntityType.class, "human", () -> (EntityType) HUMAN)
         ;
     }
 }

@@ -133,6 +133,7 @@
     "util.CombatTrackerAccessor",
     "util.CooldownTracker_CooldownAccessor",
     "util.DamageSourceAccessor",
+    "util.datafix.versions.V0100Accessor",
     "util.EntityDamageSourceAccessor",
     "util.FoodStatsAccessor",
     "util.IndirectEntityDamageSourceAccessor",

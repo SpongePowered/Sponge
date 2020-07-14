@@ -55,21 +55,22 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
     @Inject(method = "register", at = @At("RETURN"))
     private static void impl$setupBridgeFields(String id, final DimensionType dimensionType, CallbackInfoReturnable<DimensionType> cir) {
         // Commence hackery to get the dimension class this type is meant to make
-        final MinecraftServer server = SpongeCommon.getServer();
-        final WorldSettings worldSettings = new WorldSettings(0L, GameType.ADVENTURE, false, false, WorldType.DEFAULT);
-        final IChunkStatusListener iChunkStatusListener = ((MinecraftServerAccessor) server).accessor$getChunkStatusListenerFactory().create(11);
-        final ServerWorld fakeWorld = new ServerWorld(server, server.getBackgroundExecutor(),
-            server.getActiveAnvilConverter().getSaveLoader("fake", server), new WorldInfo(worldSettings, "fake"), dimensionType,
-            server.getProfiler(), iChunkStatusListener);
-
-        final Dimension dimension = dimensionType.create(fakeWorld);
-        final Class<? extends Dimension> dimensionClass = dimension.getClass();
-        @Nullable SpongeDimensionType logicType = DimensionToTypeRegistry.getInstance().getLogicType(dimensionClass);
-
-        if (logicType == null) {
-            logicType = new SpongeDimensionType(id, ((DimensionTypeAccessor) dimensionType)::accessor$getFactory, dimensionType::hasSkyLight);
-            DimensionToTypeRegistry.getInstance().registerTypeMapping(dimensionClass, SpongeCommon.getRegistry().getCatalogRegistry().registerCatalog(logicType));
-        }
+        // TODO Minecraft 1.14 - Yeah this isn't going to work, too early.
+//        final MinecraftServer server = SpongeCommon.getServer();
+//        final WorldSettings worldSettings = new WorldSettings(0L, GameType.ADVENTURE, false, false, WorldType.DEFAULT);
+//        final IChunkStatusListener iChunkStatusListener = ((MinecraftServerAccessor) server).accessor$getChunkStatusListenerFactory().create(11);
+//        final ServerWorld fakeWorld = new ServerWorld(server, server.getBackgroundExecutor(),
+//            server.getActiveAnvilConverter().getSaveLoader("fake", server), new WorldInfo(worldSettings, "fake"), dimensionType,
+//            server.getProfiler(), iChunkStatusListener);
+//
+//        final Dimension dimension = dimensionType.create(fakeWorld);
+//        final Class<? extends Dimension> dimensionClass = dimension.getClass();
+//        @Nullable SpongeDimensionType logicType = DimensionToTypeRegistry.getInstance().getLogicType(dimensionClass);
+//
+//        if (logicType == null) {
+//            logicType = new SpongeDimensionType(id, ((DimensionTypeAccessor) dimensionType)::accessor$getFactory, dimensionType::hasSkyLight);
+//            DimensionToTypeRegistry.getInstance().registerTypeMapping(dimensionClass, SpongeCommon.getRegistry().getCatalogRegistry().registerCatalog(logicType));
+//        }
     }
 
     @Override

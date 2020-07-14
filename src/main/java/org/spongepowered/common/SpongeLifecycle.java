@@ -68,6 +68,7 @@ public final class SpongeLifecycle {
 
     public void establishRegistries() {
         ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultRegistries();
+        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultSuppliers();
     }
 
     public void initTimings() {

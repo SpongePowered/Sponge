@@ -22,36 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.query.type;
+package org.spongepowered.common.mixin.core.util.datafix.versions;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.api.item.inventory.query.QueryType;
-import org.spongepowered.common.inventory.EmptyInventoryImpl;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.query.SpongeQuery;
+import com.mojang.datafixers.DSL;
+import com.mojang.datafixers.schemas.Schema;
+import com.mojang.datafixers.types.templates.TypeTemplate;
+import net.minecraft.util.datafix.NamespacedSchema;
+import net.minecraft.util.datafix.versions.V1125;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.accessor.util.datafix.versions.V0100Accessor;
 
-public final class EmptyQuery extends SpongeQuery implements QueryType.NoParam {
+import java.util.Map;
+import java.util.function.Supplier;
 
-    private final ResourceKey key;
+@Mixin(V1125.class)
+public abstract class V1125Mixin extends NamespacedSchema {
 
-    public EmptyQuery(final ResourceKey key) {
-        this.key = key;
+    public V1125Mixin(int versionKey, Schema schema) {
+        super(versionKey, schema);
     }
 
     @Override
-    public ResourceKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public Inventory execute(Inventory inventory, InventoryAdapter adapter) {
-        return new EmptyInventoryImpl(inventory);
-    }
-
-    @Override
-    public Query toQuery() {
-        return this;
+    public Map<String, Supplier<TypeTemplate>> registerEntities(Schema schema) {
+        final Map<String, Supplier<TypeTemplate>> map = super.registerEntities(schema);
+        map.put("sponge:human", () -> DSL.and(V0100Accessor.equipment(schema), DSL.remainder()));
+        return map;
     }
 }
