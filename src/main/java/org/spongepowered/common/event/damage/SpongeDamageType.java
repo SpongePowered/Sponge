@@ -30,7 +30,7 @@ import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeDamageType extends SpongeCatalogType implements DamageType {
 
-    public SpongeDamageType(ResourceKey key) {
+    public SpongeDamageType(final ResourceKey key) {
         super(key);
     }
 }

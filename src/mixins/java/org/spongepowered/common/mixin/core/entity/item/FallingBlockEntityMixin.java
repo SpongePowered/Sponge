@@ -29,21 +29,12 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.damage.MinecraftFallingBlockDamageSource;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
 @Mixin(FallingBlockEntity.class)
@@ -66,14 +57,14 @@ public abstract class FallingBlockEntityMixin extends EntityMixin {
         try {
             if (isAnvil) {
                 final MinecraftFallingBlockDamageSource anvil = new MinecraftFallingBlockDamageSource("anvil", (FallingBlockEntity) (Object) this);
-                ((DamageSourceBridge) anvil).bridge$setAnvilSource();
+                ((DamageSourceBridge) (Object) anvil).bridge$setAnvilSource();
 
                 return entity.attackEntityFrom(DamageSource.ANVIL, damage);
             } else {
                 final MinecraftFallingBlockDamageSource
                     fallingblock =
                     new MinecraftFallingBlockDamageSource("fallingblock", (FallingBlockEntity) (Object) this);
-                ((DamageSourceBridge) fallingblock).bridge$setFallingBlockSource();
+                ((DamageSourceBridge) (Object) fallingblock).bridge$setFallingBlockSource();
                 return entity.attackEntityFrom(DamageSource.FALLING_BLOCK, damage);
             }
         } finally {

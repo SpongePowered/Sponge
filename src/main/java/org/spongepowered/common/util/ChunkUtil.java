@@ -52,10 +52,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class ChunkUtil {
-
-    private ChunkUtil() {
-    }
+public final class ChunkUtil {
 
     public static Optional<Chunk> regenerateChunk(org.spongepowered.api.world.server.ServerWorld world, int cx, int cy, int cz, ChunkRegenerateFlag flag) {
         Chunk spongeChunk;
@@ -140,6 +137,9 @@ public class ChunkUtil {
 
             return Optional.of((Chunk) chunk);
         }
+    }
+
+    private ChunkUtil() {
     }
 
     public static class NoOpChunkStatusListener implements IChunkStatusListener {

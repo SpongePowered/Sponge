@@ -79,7 +79,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Singleton
-public class SpongeEventManager implements EventManager {
+public final class SpongeEventManager implements EventManager {
 
     private static final TypeVariable<?> GENERIC_EVENT_TYPE = GenericEvent.class.getTypeParameters()[0];
 

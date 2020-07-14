@@ -82,7 +82,7 @@ import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Predicate;
 
-public class DamageEventHandler {
+public final class DamageEventHandler {
 
     public static final DoubleUnaryOperator HARD_HAT_FUNCTION = damage -> -(damage - (damage * 0.75F));
     public static final DoubleUnaryOperator BLOCKING_FUNCTION = damage -> -(damage - ((1.0F + damage) * 0.5F));
@@ -96,10 +96,8 @@ public class DamageEventHandler {
     public static Optional<DamageFunction> createHardHatModifier(final LivingEntity entityLivingBase,
             final DamageSource damageSource) {
         if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.getItemStackFromSlot(EquipmentSlotType.HEAD).isEmpty()) {
-            // TODO: direct cause creation: bad bad bad
             final DamageModifier modifier = DamageModifier.builder()
-                .cause(
-                    Cause.of(EventContext.empty(), ((ItemStack) (Object) entityLivingBase.getItemStackFromSlot(EquipmentSlotType.HEAD)).createSnapshot()))
+                .cause(Cause.of(EventContext.empty(), ((ItemStack) (Object) entityLivingBase.getItemStackFromSlot(EquipmentSlotType.HEAD)).createSnapshot()))
                 .type(DamageModifierTypes.HARD_HAT)
                 .build();
             return Optional.of(new DamageFunction(modifier, HARD_HAT_FUNCTION));
@@ -185,11 +183,6 @@ public class DamageEventHandler {
      * Basically, this accepts the various "objects" needed to work for an armor piece to be "damaged".
      *
      * This is also where we can likely throw a damage item event.
-     *
-     * @param entity
-     * @param damageSource
-     * @param modifier
-     * @param damage
      */
     public static void acceptArmorModifier(final LivingEntity entity, final DamageSource damageSource, final DamageModifier modifier, double damage) {
         final Optional<DamageObject> property = modifier.getCause().first(DamageObject.class);

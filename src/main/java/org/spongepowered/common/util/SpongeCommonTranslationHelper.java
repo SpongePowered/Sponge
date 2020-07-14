@@ -33,11 +33,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-/**
- * This class provides translations for SpongeCommon code.
-
- */
-public class SpongeCommonTranslationHelper {
+public final class SpongeCommonTranslationHelper {
 
     private static final Function<Locale, ResourceBundle> LOOKUP_FUNC = new Function<Locale, ResourceBundle>() {
         @Nullable
@@ -46,9 +42,6 @@ public class SpongeCommonTranslationHelper {
             return ResourceBundle.getBundle("org.spongepowered.common.Translations", input);
         }
     };
-
-    private SpongeCommonTranslationHelper() {
-    } // Prevent instance creation
 
     /**
      * Get the translated text for a given string.
@@ -61,4 +54,6 @@ public class SpongeCommonTranslationHelper {
         return Text.of(new ResourceBundleTranslation(key, LOOKUP_FUNC), args);
     }
 
+    private SpongeCommonTranslationHelper() {
+    }
 }

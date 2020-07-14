@@ -39,7 +39,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collection;
 
-public class BookFaker {
+public final class BookUtil {
 
     public static final int WINDOW_PLAYER_INVENTORY = 0;
 
@@ -69,4 +69,6 @@ public class BookFaker {
         }
     }
 
+    private BookUtil() {
+    }
 }

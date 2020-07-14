@@ -32,8 +32,9 @@ import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
-public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder> implements BlockDamageSource.Builder {
+public final class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder> implements BlockDamageSource.Builder {
 
     private ServerLocation location;
     private BlockSnapshot blockSnapshot;

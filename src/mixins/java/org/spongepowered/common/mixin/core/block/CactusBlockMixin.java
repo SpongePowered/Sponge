@@ -29,13 +29,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
 @Mixin(CactusBlock.class)
 public abstract class CactusBlockMixin extends BlockMixin {

@@ -33,11 +33,11 @@ import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 import org.spongepowered.common.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 import java.lang.ref.WeakReference;
 
-public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder>
-    implements FallingBlockDamageSource.Builder {
+public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder> implements FallingBlockDamageSource.Builder {
 
     protected WeakReference<Entity> reference = null;
 
@@ -61,7 +61,7 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
         final MinecraftFallingBlockDamageSource damageSource =
             new MinecraftFallingBlockDamageSource(this.damageType.getKey().getFormatted(),
                 (FallingBlockEntity) this.reference.get());
-        final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
         if (this.creative) {
             accessor.accessor$setDamageAllowedInCreativeMode();
         }
@@ -83,7 +83,7 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
         if (this.exhaustion != null) {
             accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
         }
-        return (FallingBlockDamageSource) damageSource;
+        return (FallingBlockDamageSource) (Object) damageSource;
     }
 
     @Override

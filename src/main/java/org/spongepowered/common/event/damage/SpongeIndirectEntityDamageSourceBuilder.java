@@ -33,8 +33,7 @@ import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 
 import java.lang.ref.WeakReference;
 
-public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<IndirectEntityDamageSource, IndirectEntityDamageSource.Builder>
-    implements IndirectEntityDamageSource.Builder {
+public final class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<IndirectEntityDamageSource, IndirectEntityDamageSource.Builder> implements IndirectEntityDamageSource.Builder {
 
     protected WeakReference<Entity> reference = null;
     private WeakReference<Entity> proxy = null;

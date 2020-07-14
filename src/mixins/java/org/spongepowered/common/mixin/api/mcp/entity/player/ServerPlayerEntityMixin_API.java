@@ -61,9 +61,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.network.ServerPlayerConnection;
-import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -82,9 +80,6 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.border.WorldBorderAccessor;
@@ -93,7 +88,6 @@ import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.api.text.title.TitleBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -102,7 +96,7 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.BookFaker;
+import org.spongepowered.common.util.BookUtil;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -209,7 +203,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
             // Don't bother sending messages to fake players
             return;
         }
-        BookFaker.fakeBookView(bookView, Collections.singletonList(this));
+        BookUtil.fakeBookView(bookView, Collections.singletonList(this));
     }
 
     @Override

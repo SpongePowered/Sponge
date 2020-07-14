@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.damage;
 
-public class DamageObject {
+public final class DamageObject {
 
     int slot;
     double ratio;

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.cause.entity.dismount;
+package org.spongepowered.common.data.type;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;

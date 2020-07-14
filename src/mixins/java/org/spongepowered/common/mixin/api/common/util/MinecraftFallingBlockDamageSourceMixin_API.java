@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.common.event.cause.block.damage;
+package org.spongepowered.common.mixin.api.common.util;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.event.damage.MinecraftFallingBlockDamageSource;
+import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 import org.spongepowered.common.mixin.api.mcp.util.EntityDamageSourceMixin_API;
 
 @Mixin(value = MinecraftFallingBlockDamageSource.class, priority = 992)
@@ -41,7 +41,7 @@ public abstract class MinecraftFallingBlockDamageSourceMixin_API extends EntityD
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper("FallingBlockDamageSource")
+        return MoreObjects.toStringHelper(this)
             .add("Name", this.shadow$getDamageType())
             .add("Key", this.getType().getKey())
             .add("FallingBlock", this.getSource().toString())

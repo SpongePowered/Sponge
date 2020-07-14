@@ -83,7 +83,7 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.util.BookFaker;
+import org.spongepowered.common.util.BookUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -92,7 +92,6 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -429,7 +428,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     public void sendBookView(final BookView bookView) {
         Preconditions.checkNotNull(bookView, "bookview");
 
-        BookFaker.fakeBookView(bookView, this.getPlayers());
+        BookUtil.fakeBookView(bookView, this.getPlayers());
     }
 
     @Override

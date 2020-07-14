@@ -22,31 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.damage;
+package org.spongepowered.common.util;
 
-import com.google.common.base.MoreObjects;
-import net.minecraft.util.DamageSource;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.world.ServerLocation;
+import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.util.EntityDamageSource;
 
-public final class MinecraftBlockDamageSource extends DamageSource {
+public final class MinecraftFallingBlockDamageSource extends EntityDamageSource {
 
-    private final ServerLocation location;
-    private final BlockSnapshot blockSnapshot;
-
-    public MinecraftBlockDamageSource(final String damageTypeIn, final ServerLocation location) {
-        super(damageTypeIn);
-        this.blockSnapshot = location.createSnapshot();
-        this.location = location;
+    public MinecraftFallingBlockDamageSource(final String damageType, final FallingBlockEntity damageSourceEntityIn) {
+        super(damageType, damageSourceEntityIn);
     }
-
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper("BlockDamageSource")
-            .add("Name", this.damageType)
-            .add("BlockSnapshot", this.blockSnapshot)
-            .add("Location", this.location)
-            .toString();
+    public FallingBlockEntity getTrueSource() {
+        return (FallingBlockEntity) super.getTrueSource();
     }
+
 }

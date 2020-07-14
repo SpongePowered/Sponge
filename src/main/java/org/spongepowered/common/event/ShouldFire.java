@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event;
 
-public class ShouldFire {
+public final class ShouldFire {
 
     // Format is event class name with underscores
     // For example: SpawnEntityEvent.Spawner becomes SPAWN_ENTITY_EVENT_SPAWNER

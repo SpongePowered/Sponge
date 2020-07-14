@@ -27,7 +27,7 @@ package org.spongepowered.common.util;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.ChunkPos;
 
-public class QueuedChunk {
+public final class QueuedChunk {
     public ChunkPos coords;
     public CompoundNBT compound;
 
