@@ -39,6 +39,7 @@ import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.common.command.parameter.SpongeParameterValueFactory;
 import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParameterBuilderFactory;
 import org.spongepowered.common.command.registrar.tree.SpongeRootCommandTreeBuilderFactory;
@@ -49,6 +50,7 @@ import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
 import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
+import org.spongepowered.common.util.SpongeTransformFactory;
 
 import java.util.Map;
 
@@ -96,6 +98,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
         this.registerFactory(CommandTreeBuilder.RootNodeFactory.class, SpongeRootCommandTreeBuilderFactory.INSTANCE);
         this.registerFactory(VariableValueParameters.Factory.class, SpongeVariableValueParameterBuilderFactory.INSTANCE);
         this.registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY);
+        this.registerFactory(Transform.Factory.class, SpongeTransformFactory.INSTANCE);
     }
 
 }
