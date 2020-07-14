@@ -34,6 +34,10 @@ val minecraftDep: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
 
+base {
+    archivesBaseName = "spongecommon"
+}
+
 minecraft {
     mappings(mcpType, mcpMappings)
     project.sourceSets["main"].resources
@@ -90,6 +94,44 @@ val modlauncherConfig by configurations.register("modlauncher") {
 // create the sourcesets
 val main by sourceSets
 
+val launchJar by tasks.registering(Jar::class) {
+    group = "build"
+    archiveClassifier.set("launch")
+}
+
+val mixinsJar by tasks.registering(Jar::class) {
+    group = "build"
+    archiveClassifier.set("mixins")
+}
+
+val accessorsJar by tasks.registering(Jar::class) {
+    group = "build"
+    archiveClassifier.set("accessors")
+}
+val javadocJar by tasks.registering(Jar::class) {
+    group = "build"
+    archiveClassifier.set("javadoc")
+    from(tasks.javadoc)
+}
+
+val sourceJar by tasks.registering(Jar::class) {
+    group = "build"
+    archiveClassifier.set("sources")
+    from(sourceSets["main"].allJava)
+}
+
+val jar by tasks.named("jar", Jar::class) {
+    archiveClassifier.set("core")
+}
+
+val fatJar by tasks.registering(Jar::class) {
+    group = "build"
+    from(jar)
+    from(accessorsJar)
+    from(mixinsJar)
+    from(launchJar)
+}
+
 val launch by sourceSets.registering {
     project.dependencies {
         mixinsConfig(this@registering.output)
@@ -98,16 +140,35 @@ val launch by sourceSets.registering {
         implementation(this@registering.output)
     }
 
+    launchJar {
+        from(this@registering.output)
+    }
+    sourceJar {
+        from(this@registering.allJava)
+    }
+
 }
 
 val accessors by sourceSets.registering {
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = this, targetSource = main, implProject = project, dependencyConfigName = main.implementationConfigurationName)
+    accessorsJar {
+        from(this@registering.output)
+    }
+    sourceJar {
+        from(this@registering.allJava)
+    }
 }
 val mixins by sourceSets.registering {
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = accessors.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = main, targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    mixinsJar {
+        from(this@registering.output)
+    }
+    sourceJar {
+        from(this@registering.allJava)
+    }
 }
 
 configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {}
@@ -198,6 +259,41 @@ license {
 
     include("**/*.java")
     newLine = false
+}
+
+val projectDescription: String by project
+
+publishing {
+    publications {
+        register("sponge", MavenPublication::class) {
+            from(components["java"])
+
+            artifact(javadocJar.get())
+            artifact(sourceJar.get())
+            artifact(launchJar.get())
+            artifact(mixinsJar.get())
+            artifact(accessorsJar.get())
+            pom {
+                artifactId = project.name.toLowerCase()
+                this.name.set(project.name)
+                this.description.set(projectDescription)
+                this.url.set(projectUrl)
+
+                licenses {
+                    license {
+                        this.name.set("MIT")
+                        this.url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/SpongePowered/SpongeCommon.git")
+                    developerConnection.set("scm:git:ssh://github.com/SpongePowered/SpongeCommon.git")
+                    this.url.set(projectUrl)
+                }
+            }
+
+        }
+    }
 }
 
 allprojects {
@@ -313,6 +409,10 @@ project("SpongeVanilla") {
 
     description = "The SpongeAPI implementation for Vanilla Minecraft"
     version = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
+
+    base {
+        archivesBaseName = "spongevanilla"
+    }
 
     val vanillaMinecraftConfig by configurations.named("minecraft")
     val vanillaModLauncherConfig by configurations.register("modlauncher") {
