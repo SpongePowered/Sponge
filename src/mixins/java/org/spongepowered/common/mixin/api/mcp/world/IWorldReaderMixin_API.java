@@ -56,7 +56,7 @@ import java.util.function.Predicate;
 
 @Mixin(IWorldReader.class)
 @Implements(@Interface(iface = ReadableRegion.class, prefix = "readable$"))
-public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnvironmentBlockReaderMixin_API, ReadableRegion<R> {
+public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends ReadableRegion<R> {
 
     //@formatter:off
 
@@ -93,7 +93,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends IEnv
 
     @Override
     default boolean canSeeSky(final int x, final int y, final int z) {
-        return this.shadow$isSkyLightMax(new BlockPos(x, y, z));
+        return ((IWorldReader) this).isSkyLightMax(new BlockPos(x, y, z));
     }
 
     @Override

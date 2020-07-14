@@ -124,12 +124,12 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     // LocationCreator
 
     @Override
-    public ServerLocation getLocation(Vector3i position) {
+    public ServerLocation getLocation(final Vector3i position) {
         return ServerLocation.of(this, position);
     }
 
     @Override
-    public ServerLocation getLocation(Vector3d position) {
+    public ServerLocation getLocation(final Vector3d position) {
         return ServerLocation.of(this, position);
     }
 
@@ -146,7 +146,8 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(int cx, int cy, int cz, ChunkRegenerateFlag flag) {
+    public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(
+        final int cx, final int cy, final int cz, final ChunkRegenerateFlag flag) {
         return ChunkUtil.regenerateChunk(this, cx, cy, cz, flag);
     }
 
@@ -173,14 +174,14 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     public boolean save() throws IOException {
         try {
             this.shadow$save((IProgressUpdate) null, false, false);
-        } catch (SessionLockException e) {
+        } catch (final SessionLockException e) {
             throw new IOException(e);
         }
         return true;
     }
 
     @Override
-    public boolean unloadChunk(org.spongepowered.api.world.chunk.Chunk chunk) {
+    public boolean unloadChunk(final org.spongepowered.api.world.chunk.Chunk chunk) {
         this.shadow$onChunkUnloading((Chunk) chunk);
         return true;
     }
@@ -206,7 +207,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
         try {
             // Since we already have the API created implementation Explosion, let's use it.
             mcExplosion = (Explosion) explosion;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
                     .add("An explosion that was expected to be used for this implementation does not")
                     .add("originate from this implementation.")
@@ -249,15 +250,15 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    public Optional<org.spongepowered.api.raid.Raid> getRaidAt(Vector3i blockPosition) {
-        org.spongepowered.api.raid.Raid raid = (org.spongepowered.api.raid.Raid) this.shadow$findRaid(VecHelper.toBlockPos(blockPosition));
+    public Optional<org.spongepowered.api.raid.Raid> getRaidAt(final Vector3i blockPosition) {
+        final org.spongepowered.api.raid.Raid raid = (org.spongepowered.api.raid.Raid) this.shadow$findRaid(VecHelper.toBlockPos(blockPosition));
         return Optional.ofNullable(raid);
     }
 
     // ReadableEntityVolume
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> getEntity(UUID uuid) {
+    public Optional<org.spongepowered.api.entity.Entity> getEntity(final UUID uuid) {
         return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.shadow$getEntityByUuid(uuid));
     }
 

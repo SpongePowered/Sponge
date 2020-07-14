@@ -41,12 +41,12 @@ public interface IWorldGenerationBaseReaderMixin_API extends ReadableGenerationV
     @Shadow BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
 
     @Override
-    default boolean hasBlockState(int x, int y, int z, Predicate<? super BlockState> predicate) {
+    default boolean hasBlockState(final int x, final int y, final int z, final Predicate<? super BlockState> predicate) {
         return this.shadow$hasBlockState(new BlockPos(x, y, z), state -> predicate.test((BlockState) state));
     }
 
     @Override
-    default int getHeight(HeightType type, int x, int z) {
+    default int getHeight(final HeightType type, final int x, final int z) {
         return this.shadow$getHeight((Heightmap.Type) (Object) type, new BlockPos(x, 0, z)).getY();
     }
 }

@@ -101,7 +101,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @Mixin(net.minecraft.world.World.class)
-public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_API<W>, World<W>, IEnvironmentBlockReaderMixin_API, AutoCloseable {
+public abstract class WorldMixin_API<W extends World<W>> implements World<W>, AutoCloseable {
 
     @Shadow public @Final Random rand;
     @Shadow protected @Final WorldInfo worldInfo;
@@ -139,13 +139,13 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     // World
 
     @Override
-    public Optional<? extends Player> getClosestPlayer(int x, int y, int z, double distance, Predicate<? super Player> predicate) {
-        final PlayerEntity player = this.shadow$getClosestPlayer(x, y, z, distance, (Predicate) predicate);
+    public Optional<? extends Player> getClosestPlayer(final int x, final int y, final int z, final double distance, final Predicate<? super Player> predicate) {
+        final PlayerEntity player = ((net.minecraft.world.World) (Object) this).getClosestPlayer(x, y, z, distance, (Predicate) predicate);
         return Optional.ofNullable((Player) player);
     }
 
     @Override
-    public BlockSnapshot createSnapshot(int x, int y, int z) {
+    public BlockSnapshot createSnapshot(final int x, final int y, final int z) {
         if (!this.containsBlock(x, y, z)) {
             return BlockSnapshot.empty();
         }
@@ -173,22 +173,23 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     }
 
     @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
+    public boolean restoreSnapshot(final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
         return snapshot.restore(force, flag);
     }
 
     @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
+    public boolean restoreSnapshot(
+        final int x, final int y, final int z, final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
         return snapshot.withLocation(this.getLocation(x, y, z)).restore(force, flag);
     }
 
     @Override
-    public Chunk getChunk(int cx, int cy, int cz) {
-        return (Chunk) IWorldMixin_API.super.getChunk(cx, cy, cz);
+    public Chunk getChunk(final int cx, final int cy, final int cz) {
+        return (Chunk) ((net.minecraft.world.World) (Object) this).getChunk(cx >> 4, cz >> 4, ChunkStatus.EMPTY, true);
     }
 
     @Override
-    public Optional<Chunk> loadChunk(int cx, int cy, int cz, boolean shouldGenerate) {
+    public Optional<Chunk> loadChunk(final int cx, final int cy, final int cz, final boolean shouldGenerate) {
         if (!SpongeChunkLayout.instance.isValidChunk(cx, cy, cz)) {
             return Optional.empty();
         }
@@ -217,7 +218,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     // ReadableBlockVolume
 
     @Override
-    public int getHighestYAt(int x, int z) {
+    public int getHighestYAt(final int x, final int z) {
         return this.getHeight(HeightTypes.WORLD_SURFACE.get(), x, z);
     }
 
@@ -236,13 +237,6 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     @Override
     public Vector3i getBlockSize() {
         return Constants.World.BLOCK_SIZE;
-    }
-
-    // ReadableEntityVolume
-
-    @Override
-    public Collection<? extends Player> getPlayers() {
-        return IWorldMixin_API.super.getPlayers();
     }
 
     // WeatherUniverse
@@ -282,20 +276,20 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     }
 
     @Override
-    public void setWeather(Weather weather) {
+    public void setWeather(final Weather weather) {
         Preconditions.checkNotNull(weather);
         this.impl$setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
     }
 
     @Override
-    public void setWeather(Weather weather, Duration duration) {
+    public void setWeather(final Weather weather, final Duration duration) {
         Preconditions.checkNotNull(weather);
         ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
-        int ticks = (int) (duration.toMillis() / TemporalUnits.MINECRAFT_TICKS.getDuration().toMillis());
+        final int ticks = (int) (duration.toMillis() / TemporalUnits.MINECRAFT_TICKS.getDuration().toMillis());
         this.impl$setWeather(weather, ticks);
     }
 
-    public void impl$setWeather(Weather weather, int ticks) {
+    public void impl$setWeather(final Weather weather, final int ticks) {
         if (weather == Weathers.CLEAR.get()) {
             this.worldInfo.setClearWeatherTime(ticks);
             this.worldInfo.setRainTime(0);
@@ -336,7 +330,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     // Viewer
 
     @Override
-    public void spawnParticles(ParticleEffect particleEffect, Vector3d position, int radius) {
+    public void spawnParticles(final ParticleEffect particleEffect, final Vector3d position, final int radius) {
         Preconditions.checkNotNull(particleEffect, "The particle effect cannot be null!");
         Preconditions.checkNotNull(position, "The position cannot be null");
         Preconditions.checkArgument(radius > 0, "The radius has to be greater then zero!");
@@ -346,7 +340,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     }
 
     @Override
-    public void playSound(SoundType sound, org.spongepowered.api.effect.sound.SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
+    public void playSound(final SoundType sound, final org.spongepowered.api.effect.sound.SoundCategory category, final Vector3d position, final double volume, final double pitch, final double minVolume) {
         // Check if the event is registered (ie has an integer ID)
         final ResourceLocation soundKey = (ResourceLocation) (Object) sound.getKey();
         final Optional<SoundEvent> event = Registry.SOUND_EVENT.getValue(soundKey);
@@ -373,32 +367,32 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     }
 
     @Override
-    public void stopSounds(SoundType sound) {
+    public void stopSounds(final SoundType sound) {
         this.api$stopSounds(Preconditions.checkNotNull(sound, "sound"), null);
     }
 
     @Override
-    public void stopSoundTypes(Supplier<? extends SoundType> sound) {
+    public void stopSoundTypes(final Supplier<? extends SoundType> sound) {
         this.stopSounds(sound.get());
     }
 
     @Override
-    public void stopSounds(org.spongepowered.api.effect.sound.SoundCategory category) {
+    public void stopSounds(final org.spongepowered.api.effect.sound.SoundCategory category) {
         this.api$stopSounds(null, Preconditions.checkNotNull(category, "category"));
     }
 
     @Override
-    public void stopSoundCategoriess(Supplier<? extends org.spongepowered.api.effect.sound.SoundCategory> category) {
+    public void stopSoundCategoriess(final Supplier<? extends org.spongepowered.api.effect.sound.SoundCategory> category) {
         this.stopSounds(category.get());
     }
 
     @Override
-    public void stopSounds(SoundType sound, org.spongepowered.api.effect.sound.SoundCategory category) {
+    public void stopSounds(final SoundType sound, final org.spongepowered.api.effect.sound.SoundCategory category) {
         this.api$stopSounds(Preconditions.checkNotNull(sound, "sound"), Preconditions.checkNotNull(category, "category"));
     }
 
     @Override
-    public void stopSounds(Supplier<? extends SoundType> sound, Supplier<? extends org.spongepowered.api.effect.sound.SoundCategory> category) {
+    public void stopSounds(final Supplier<? extends SoundType> sound, final Supplier<? extends org.spongepowered.api.effect.sound.SoundCategory> category) {
         this.stopSounds(sound.get(), category.get());
     }
 
@@ -408,54 +402,54 @@ public abstract class WorldMixin_API<W extends World<W>> implements IWorldMixin_
     }
 
     @Override
-    public void playMusicDisc(Vector3i position, MusicDisc musicDiscType) {
+    public void playMusicDisc(final Vector3i position, final MusicDisc musicDiscType) {
         this.api$playRecord(position, Preconditions.checkNotNull(musicDiscType, "recordType"));
     }
 
     @Override
-    public void playMusicDisc(Vector3i position, Supplier<? extends MusicDisc> musicDiscType) {
+    public void playMusicDisc(final Vector3i position, final Supplier<? extends MusicDisc> musicDiscType) {
         this.playMusicDisc(position, musicDiscType.get());
     }
 
     @Override
-    public void stopMusicDisc(Vector3i position) {
+    public void stopMusicDisc(final Vector3i position) {
         this.api$playRecord(position, null);
     }
 
     @Override
-    public void sendTitle(Title title) {
+    public void sendTitle(final Title title) {
         Preconditions.checkNotNull(title, "title");
 
-        for (Player player : getPlayers()) {
+        for (final Player player : this.getPlayers()) {
             player.sendTitle(title);
         }
     }
 
     @Override
-    public void sendBookView(BookView bookView) {
+    public void sendBookView(final BookView bookView) {
         Preconditions.checkNotNull(bookView, "bookview");
 
         BookFaker.fakeBookView(bookView, this.getPlayers());
     }
 
     @Override
-    public void sendBlockChange(int x, int y, int z, org.spongepowered.api.block.BlockState state) {
+    public void sendBlockChange(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state) {
         Preconditions.checkNotNull(state, "state");
         final SChangeBlockPacket packet = new SChangeBlockPacket();
         ((SChangeBlockPacketAccessor) packet).accessor$setPos(new BlockPos(x, y, z));
         ((SChangeBlockPacketAccessor) packet).accessor$setState((BlockState) state);
 
-        this.shadow$getPlayers().stream()
+        ((net.minecraft.world.World) (Object) this).getPlayers().stream()
                 .filter(ServerPlayerEntity.class::isInstance)
                 .map(ServerPlayerEntity.class::cast)
                 .forEach(p -> p.connection.sendPacket(packet));
     }
 
     @Override
-    public void resetBlockChange(int x, int y, int z) {
-        SChangeBlockPacket packet = new SChangeBlockPacket((IWorldReader) this, new BlockPos(x, y, z));
+    public void resetBlockChange(final int x, final int y, final int z) {
+        final SChangeBlockPacket packet = new SChangeBlockPacket((IWorldReader) this, new BlockPos(x, y, z));
 
-        this.shadow$getPlayers().stream()
+        ((net.minecraft.world.World) (Object) this).getPlayers().stream()
                 .filter(ServerPlayerEntity.class::isInstance)
                 .map(ServerPlayerEntity.class::cast)
                 .forEach(p -> p.connection.sendPacket(packet));

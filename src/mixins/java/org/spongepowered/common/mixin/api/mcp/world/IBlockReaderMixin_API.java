@@ -32,6 +32,9 @@ import net.minecraft.world.IBlockReader;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.volume.game.PrimitiveGameVolume;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.math.vector.Vector3i;
@@ -42,6 +45,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Mixin(IBlockReader.class)
+@Implements(@Interface(iface = PrimitiveGameVolume.class, prefix = "primitive$"))
 public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
     @Shadow @Nullable TileEntity shadow$getTileEntity(BlockPos p_175625_1_);
     @Shadow BlockState shadow$getBlockState(BlockPos p_180495_1_);
@@ -56,17 +60,17 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
     }
 
     @Override
-    default int getEmittedLight(Vector3i pos) {
+    default int getEmittedLight(final Vector3i pos) {
         return this.shadow$getLightValue(new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     @Override
-    default int getEmittedLight(int x, int y, int z) {
+    default int getEmittedLight(final int x, final int y, final int z) {
         return this.shadow$getLightValue(new BlockPos(x, y, z));
     }
 
-    @Override
-    default int getHeight() {
+    @Intrinsic
+    default int primitive$getHeight() {
         return this.shadow$getHeight();
     }
 
@@ -76,22 +80,22 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
     }
 
     @Override
-    default Optional<? extends BlockEntity> getBlockEntity(int x, int y, int z) {
+    default Optional<? extends BlockEntity> getBlockEntity(final int x, final int y, final int z) {
         return Optional.ofNullable((BlockEntity) this.shadow$getTileEntity(new BlockPos(x, y, z)));
     }
 
     @Override
-    default org.spongepowered.api.block.BlockState getBlock(int x, int y, int z) {
+    default org.spongepowered.api.block.BlockState getBlock(final int x, final int y, final int z) {
         return (org.spongepowered.api.block.BlockState) this.shadow$getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
-    default FluidState getFluid(int x, int y, int z) {
+    default FluidState getFluid(final int x, final int y, final int z) {
         return (FluidState) this.shadow$getFluidState(new BlockPos(x, y, z));
     }
 
     @Override
-    default int getHighestYAt(int x, int z) {
+    default int getHighestYAt(final int x, final int z) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
     }
 
@@ -111,12 +115,12 @@ public interface IBlockReaderMixin_API extends PrimitiveGameVolume {
     }
 
     @Override
-    default boolean containsBlock(int x, int y, int z) {
+    default boolean containsBlock(final int x, final int y, final int z) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
     }
 
     @Override
-    default boolean isAreaAvailable(int x, int y, int z) {
+    default boolean isAreaAvailable(final int x, final int y, final int z) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
     }
 }

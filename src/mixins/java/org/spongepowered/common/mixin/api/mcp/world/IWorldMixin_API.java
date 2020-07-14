@@ -52,15 +52,11 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BoundedWorldView;
-import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.ProtoWorld;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
@@ -86,12 +82,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 @Mixin(IWorld.class)
-public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderMixin_API, IWorldReaderMixin_API<BoundedWorldView<T>>, IWorldGenerationReaderMixin_API, ProtoWorld<T> {
+public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> {
 
     @Shadow long shadow$getSeed();
     @Shadow net.minecraft.world.World shadow$getWorld();
@@ -105,7 +98,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
 
     @Override
     default boolean setBiome(final int x, final int y, final int z, final BiomeType biome) {
-        final IChunk iChunk = this.shadow$getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
+        final IChunk iChunk = ((IWorld) this).getChunk(x >> 4, z >> 4, ChunkStatus.BIOMES, true);
         if (iChunk == null) {
             return false;
         }
@@ -144,22 +137,6 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     @Override
     default Optional<Entity> getEntity(final UUID uuid) {
         return Optional.empty();
-    }
-
-    @Override
-    default Collection<? extends Player> getPlayers() {
-        return IEntityReaderMixin_API.super.getPlayers();
-    }
-
-    @Override
-    default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
-        return IEntityReaderMixin_API.super.getEntities(box, filter);
-    }
-
-    @Override
-    default <E extends Entity> Collection<? extends E> getEntities(final Class<? extends E> entityClass, final AABB box,
-                                                                   @Nullable final Predicate<? super E> predicate) {
-        return IEntityReaderMixin_API.super.getEntities(entityClass, box, predicate);
     }
 
     // RandomProvider
@@ -203,7 +180,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
         throw new UnsupportedOperationException("Implement me"); // TODO implement me
     }
 
-    default Entity impl$createEntity(EntityType<?> type, Vector3d position, boolean naturally) throws IllegalArgumentException, IllegalStateException {
+    default Entity impl$createEntity(final EntityType<?> type, final Vector3d position, final boolean naturally) throws IllegalArgumentException, IllegalStateException {
         checkNotNull(type, "The entity type cannot be null!");
         checkNotNull(position, "The position cannot be null!");
 
@@ -216,14 +193,14 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
         final double x = position.getX();
         final double y = position.getY();
         final double z = position.getZ();
-        World thisWorld = this.shadow$getWorld();
+        final World thisWorld = this.shadow$getWorld();
         // Not all entities have a single World parameter as their constructor
         if (type == net.minecraft.entity.EntityType.LIGHTNING_BOLT) {
             entity = new LightningBoltEntity(thisWorld, x, y, z, false);
         }
         // TODO - archetypes should solve the problem of calling the correct constructor
         if (type == net.minecraft.entity.EntityType.ENDER_PEARL) {
-            ArmorStandEntity tempEntity = new ArmorStandEntity(thisWorld, x, y, z);
+            final ArmorStandEntity tempEntity = new ArmorStandEntity(thisWorld, x, y, z);
             tempEntity.posY -= tempEntity.getEyeHeight();
             entity = new EnderPearlEntity(thisWorld, tempEntity);
             ((EnderPearl) entity).offer(Keys.SHOOTER, UnknownProjectileSource.UNKNOWN);
@@ -241,7 +218,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
             try {
                 entity = ((net.minecraft.entity.EntityType) type).create(thisWorld);
                 entity.setPosition(x, y, z);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new RuntimeException("There was an issue attempting to construct " + type.getKey(), e);
             }
         }
@@ -295,7 +272,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
     }
 
     @Override
-    default boolean spawnEntity(Entity entity) {
+    default boolean spawnEntity(final Entity entity) {
         // TODO Minecraft 1.14 - PhaseTracker for gabizou
         Preconditions.checkNotNull(entity, "The entity cannot be null!");
         if (PhaseTracker.isEntitySpawnInvalid(entity)) {
@@ -313,22 +290,11 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
         return phaseTracker.spawnEntityWithCause((org.spongepowered.api.world.World<?>) (Object) this, entity);
     }
 
-    // HeightAwareVolume
-
-    @Override
-    default int getHeight(final HeightType type, final int x, final int z) {
-        return IWorldReaderMixin_API.super.getHeight(type, x, z);
-    }
-
     // MutableBlockVolume
 
     @Override
-    default boolean removeBlock(int x, int y, int z) {
-        return IWorldGenerationReaderMixin_API.super.removeBlock(x, y, z);
-    }
-
-    @Override
-    default boolean setBlock(int x, int y, int z, org.spongepowered.api.block.BlockState blockState, BlockChangeFlag flag) {
+    default boolean setBlock(
+        final int x, final int y, final int z, final org.spongepowered.api.block.BlockState blockState, final BlockChangeFlag flag) {
         // TODO Minecraft 1.14 - PhaseTracker for gabizou
 
         if (!this.containsBlock(x, y, z)) {
@@ -345,14 +311,8 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends IEntityReaderM
             if (context != null) {
                 context.buildAndSwitch();
             }
-            return this.shadow$setBlockState(new BlockPos(x, y, z), (BlockState) blockState, ((SpongeBlockChangeFlag) flag).getRawFlag());
+            return ((IWorld) this).setBlockState(new BlockPos(x, y, z), (BlockState) blockState, ((SpongeBlockChangeFlag) flag).getRawFlag());
         }
     }
 
-    // ChunkVolume
-
-    @Override
-    default ProtoChunk<?> getChunk(final int x, final int y, final int z) {
-        return IWorldReaderMixin_API.super.getChunk(x, y, z);
-    }
 }
