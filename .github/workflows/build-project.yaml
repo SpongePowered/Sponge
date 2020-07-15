@@ -10,7 +10,7 @@ on:
     branches: [ api-8 ]
 
 jobs:
-  setup-gradle:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -32,16 +32,8 @@ jobs:
           java-version: 1.8
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-  build:
-    runs-on: ubuntu-latest
-    needs: setup-gradle
-    steps:
       - name: Build with Gradle
         run: ./gradlew build
-  publish:
-    runs-on: ubuntu-latest
-    needs: [setup-gradle, build]
-    steps:
       # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
       # the publishing section of your build.gradle
       - name: Publish to Sponge Maven & GitHub Packages
