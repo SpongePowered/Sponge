@@ -33,12 +33,12 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.query.SpongeOneParamQueryType;
 import org.spongepowered.common.inventory.query.SpongeTwoParamQueryType;
 import org.spongepowered.common.inventory.query.type.GridQuery;
-import org.spongepowered.common.inventory.query.type.KeyValueMatcherQuery;
 import org.spongepowered.common.inventory.query.type.InventoryTypeQuery;
 import org.spongepowered.common.inventory.query.type.ItemStackCustomQuery;
 import org.spongepowered.common.inventory.query.type.ItemStackExactQuery;
 import org.spongepowered.common.inventory.query.type.ItemStackIgnoreQuantityQuery;
 import org.spongepowered.common.inventory.query.type.ItemTypeQuery;
+import org.spongepowered.common.inventory.query.type.KeyValueMatcherQuery;
 import org.spongepowered.common.inventory.query.type.LensQuery;
 import org.spongepowered.common.inventory.query.type.PlayerPrimaryHotbarFirstQuery;
 import org.spongepowered.common.inventory.query.type.ReverseQuery;
@@ -56,19 +56,17 @@ public final class QueryTypeStreamGenerator {
     public static final QueryType.OneParam<Inventory> UNION = new SpongeOneParamQueryType<>(ResourceKey.sponge("union"), UnionQuery::new);
 
     public static Stream<QueryType> stream() {
-        // Thank you so much Faith for your catalogs in catalogs...
-        final SpongeOneParamQueryType<Class<? extends Inventory>> inventory_type = new SpongeOneParamQueryType<>(ResourceKey.sponge("inventory_type"), InventoryTypeQuery::new);
         return Stream.of(
-            inventory_type,
-            new SpongeOneParamQueryType<>(ResourceKey.sponge("item_stack_custom"), ItemStackCustomQuery::new),
-            new SpongeOneParamQueryType<>(ResourceKey.sponge("item_stack_exact"), ItemStackExactQuery::new),
-            new SpongeOneParamQueryType<>(ResourceKey.sponge("item_stack_ignore_quantity"), ItemStackIgnoreQuantityQuery::new),
-            new SpongeOneParamQueryType<>(ResourceKey.sponge("item_type"), ItemTypeQuery::new),
-            new SpongeOneParamQueryType<KeyValueMatcher<?>>(ResourceKey.sponge("key_value"), KeyValueMatcherQuery::new),
-            new SpongeOneParamQueryType<>(ResourceKey.sponge("type"), TypeQuery::new),
-            new PlayerPrimaryHotbarFirstQuery(ResourceKey.sponge("player_primary_hotbar_first"), inventory_type),
-            new ReverseQuery(ResourceKey.sponge("reverse")),
-            new SpongeTwoParamQueryType<>(ResourceKey.sponge("grid"), GridQuery::new)
+                new PlayerPrimaryHotbarFirstQuery(ResourceKey.sponge("player_primary_hotbar_first")),
+                new ReverseQuery(ResourceKey.sponge("reverse")),
+                new SpongeOneParamQueryType<>(ResourceKey.sponge("inventory_type"), InventoryTypeQuery::new),
+                new SpongeOneParamQueryType<>(ResourceKey.sponge("item_stack_custom"), ItemStackCustomQuery::new),
+                new SpongeOneParamQueryType<>(ResourceKey.sponge("item_stack_exact"), ItemStackExactQuery::new),
+                new SpongeOneParamQueryType<>(ResourceKey.sponge("item_stack_ignore_quantity"), ItemStackIgnoreQuantityQuery::new),
+                new SpongeOneParamQueryType<>(ResourceKey.sponge("item_type"), ItemTypeQuery::new),
+                new SpongeOneParamQueryType<KeyValueMatcher<?>>(ResourceKey.sponge("key_value"), KeyValueMatcherQuery::new),
+                new SpongeOneParamQueryType<>(ResourceKey.sponge("type"), TypeQuery::new),
+                new SpongeTwoParamQueryType<>(ResourceKey.sponge("grid"), GridQuery::new)
         );
     }
 

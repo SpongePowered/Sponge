@@ -25,12 +25,10 @@
 package org.spongepowered.common.inventory.query.type;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryType;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
 
 import java.util.Arrays;
 
@@ -38,8 +36,8 @@ public final class PlayerPrimaryHotbarFirstQuery extends AppendQuery implements 
 
     private final ResourceKey key;
 
-    public PlayerPrimaryHotbarFirstQuery(final ResourceKey key, final QueryType.OneParam<Class<? extends Inventory>> inventoryType) {
-        super(Arrays.asList(inventoryType.of(Hotbar.class), inventoryType.of(PrimaryPlayerInventory.class)));
+    public PlayerPrimaryHotbarFirstQuery(final ResourceKey key) {
+        super(Arrays.asList(new InventoryTypeQuery(Hotbar.class), new InventoryTypeQuery(PrimaryPlayerInventory.class)));
         this.key = key;
     }
 
