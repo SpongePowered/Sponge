@@ -10,27 +10,47 @@ on:
     branches: [ api-8 ]
 
 jobs:
+  setup-gradle:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ${{ github.workspace}}/buildSrc/.gradle/caches
+          ${{ github.workspace}}/build/fg_cache
+          ${{ github.workspace}}/forge/build/fg_cache
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
   build:
-
     runs-on: ubuntu-latest
-
+    needs: setup-gradle
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/buildSrc/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew build
+  publish:
+    runs-on: ubuntu-latest
+    needs: [setup-gradle, build]
+    steps:
+      # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
+      # the publishing section of your build.gradle
+      - name: Publish to Sponge Maven & GitHub Packages
+        if: github.events.push
+        run: ./gradlew publish
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORG_GRADLE_PROJECT_spongeSnapshotRepo: ${{ secrets.SPONGE_MAVEN_SNAPSHOT_REPO_URL }}
+          ORG_GRADLE_PROJECT_spongeReleaseRepo: ${{ secrets.SPONGE_MAVEN_RELEASE_REPO_URL }}
+          ORG_GRADLE_PROJECT_spongeUsername: ${{ secrets.SPONGE_MAVEN_REPO_USER }}
+          ORG_GRADLE_PROJECT_spongePassword: ${{ secrets.SPONGE_MAVEN_REPO_PASSWORD }}
+
+
