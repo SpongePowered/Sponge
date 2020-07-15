@@ -16,7 +16,16 @@ pluginManagement {
 }
 val testPlugins = file("testplugins.settings.gradle.kts")
 if (testPlugins.exists()) {
-    apply(from= testPlugins)
+    apply(from = testPlugins)
 } else {
     testPlugins.writeText("// Uncomment to enable client module for debugging\n//include(\":testplugins\")\n")
+}
+val spongeForge = file("spongeforge.settings.gradle.kts")
+if (spongeForge.exists()) {
+    apply(from = spongeForge)
+} else {
+    spongeForge.writeText("// Uncomment to enable SpongeForge module.\n" +
+            "// By default only SpongeCommon and SpongeVanilla are made available\n" +
+            "//include(\":SpongeForge\")\n" +
+            "//project(\":SpongeForge\").projectDir = file(\"forge\")\n")
 }
