@@ -33,7 +33,6 @@ import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 
 import java.util.function.Supplier;
 
-// Specialised logic is required for this.
 public final class ProvideServiceEventImpl<T> extends AbstractLifecycleEvent implements ProvideServiceEvent<T> {
 
     private final TypeToken<T> token;
