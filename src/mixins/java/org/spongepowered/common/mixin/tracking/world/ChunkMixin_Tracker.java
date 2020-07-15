@@ -49,7 +49,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.service.user.SpongeUserManager;
+import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 

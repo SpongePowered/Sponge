@@ -27,11 +27,13 @@ package org.spongepowered.common.mixin.core.server;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -41,13 +43,19 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
+import org.spongepowered.common.user.SpongeUserManager;
 
 import java.net.URISyntaxException;
 
@@ -68,18 +76,19 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Shadow public abstract CommandSource getCommandSource();
 
+    @Shadow @Final private PlayerProfileCache profileCache;
     @Nullable private ResourcePack impl$resourcePack;
     private boolean impl$enableSaving = true;
 
-    public MinecraftServerMixin(String name) {
+    public MinecraftServerMixin(final String name) {
         super(name);
     }
 
     @Inject(method = "startServerThread", at = @At("HEAD"))
-    private void impl$setThreadOnServerPhaseTracker(CallbackInfo ci) {
+    private void impl$setThreadOnServerPhaseTracker(final CallbackInfo ci) {
         try {
             PhaseTracker.SERVER.setThread(this.serverThread);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw new RuntimeException("Could not initialize the server PhaseTracker!");
         }
     }
@@ -90,7 +99,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     @Override
-    public Tristate bridge$permDefault(String permission) {
+    public Tristate bridge$permDefault(final String permission) {
         return Tristate.TRUE;
     }
 
@@ -112,13 +121,13 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 //    }
 
     @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )
-    private void impl$createSpongeResourcePackWrapper(String url, String hash, CallbackInfo ci) {
+    private void impl$createSpongeResourcePackWrapper(final String url, final String hash, final CallbackInfo ci) {
         if (url.length() == 0) {
             this.impl$resourcePack = null;
         } else {
             try {
                 this.impl$resourcePack = SpongeResourcePack.create(url, hash);
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 e.printStackTrace();
             }
         }
@@ -130,7 +139,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     @Override
-    public void bridge$setSaveEnabled(boolean enabled) {
+    public void bridge$setSaveEnabled(final boolean enabled) {
         this.impl$enableSaving = enabled;
     }
 
@@ -140,13 +149,33 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     @Inject(method = "tick", at = @At(value = "HEAD"))
-    private void impl$onServerTickStart(CallbackInfo ci) {
+    private void impl$onServerTickStart(final CallbackInfo ci) {
         TimingsManager.FULL_SERVER_TICK.startTiming();
+    }
+
+    @Redirect(method = "loadWorlds",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/server/management/PlayerList;func_212504_a(Lnet/minecraft/world/server/ServerWorld;)V"))
+    private void impl$onSaveHandlerBeingSetToPlayerList(final PlayerList playerList, final ServerWorld p_212504_1_) {
+        playerList.func_212504_a(p_212504_1_);
+        ((SpongeUserManager) ((Server) this).getUserManager()).init();
     }
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
         return this.getCommandSource();
+    }
+
+    // We want to save the username cache json, as we normally bypass it.
+    @Inject(method = "save", at = @At("RETURN"))
+    private void impl$saveUsernameCacheOnSave(
+            final boolean suppressLog,
+            final boolean flush,
+            final boolean forced,
+            final CallbackInfoReturnable<Boolean> cir) {
+        ((PlayerProfileCacheBridge) this.profileCache).bridge$setCanSave(true);
+        this.profileCache.save();
+        ((PlayerProfileCacheBridge) this.profileCache).bridge$setCanSave(false);
     }
 
 //    @Inject(method = "tick", at = @At(value = "RETURN"))

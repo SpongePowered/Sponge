@@ -55,6 +55,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Stream;
 
 @Mixin(PlayerProfileCache.class)
 public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
@@ -63,12 +64,12 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     @Shadow @Final private Map<UUID, PlayerProfileCache_ProfileEntryAccessor> uuidToProfileEntryMap;
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile shadow$getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void shadow$save();
-    @Shadow private void shadow$addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry) { }
+    @Shadow private void shadow$addEntry(final com.mojang.authlib.GameProfile profile, @Nullable final Date expiry) { }
     // Thread-safe queue
     private Queue<com.mojang.authlib.GameProfile> profiles = new ConcurrentLinkedQueue<>();
 
     @Override
-    public boolean add(GameProfile profile, boolean overwrite, @Nullable Instant expiry) {
+    public boolean add(final GameProfile profile, final boolean overwrite, @Nullable final Instant expiry) {
         checkNotNull(profile, "profile");
 
         // Don't attempt to overwrite entries if we aren't requested to do so
@@ -82,10 +83,10 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public boolean remove(GameProfile profile) {
+    public boolean remove(final GameProfile profile) {
         checkNotNull(profile, "profile");
 
-        UUID uniqueId = profile.getUniqueId();
+        final UUID uniqueId = profile.getUniqueId();
 
         if (this.uuidToProfileEntryMap.containsKey(uniqueId)) {
             this.uuidToProfileEntryMap.remove(uniqueId);
@@ -102,12 +103,12 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Collection<GameProfile> remove(Iterable<GameProfile> profiles) {
+    public Collection<GameProfile> remove(final Iterable<GameProfile> profiles) {
         checkNotNull(profiles, "profiles");
 
-        Collection<GameProfile> result = Lists.newArrayList();
+        final Collection<GameProfile> result = Lists.newArrayList();
 
-        for (GameProfile profile : profiles) {
+        for (final GameProfile profile : profiles) {
             if (this.remove(profile)) {
                 result.add(profile);
             }
@@ -125,17 +126,17 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> getById(UUID uniqueId) {
+    public Optional<GameProfile> getById(final UUID uniqueId) {
         return Optional.ofNullable((GameProfile) this.shadow$getProfileByUUID(checkNotNull(uniqueId, "unique id")));
     }
 
     @Override
-    public Map<UUID, Optional<GameProfile>> getByIds(Iterable<UUID> uniqueIds) {
+    public Map<UUID, Optional<GameProfile>> getByIds(final Iterable<UUID> uniqueIds) {
         checkNotNull(uniqueIds, "unique ids");
 
-        Map<UUID, Optional<GameProfile>> result = Maps.newHashMap();
+        final Map<UUID, Optional<GameProfile>> result = Maps.newHashMap();
 
-        for (UUID uniqueId : uniqueIds) {
+        for (final UUID uniqueId : uniqueIds) {
             result.put(uniqueId, Optional.ofNullable((GameProfile) this.shadow$getProfileByUUID(uniqueId)));
         }
 
@@ -143,10 +144,10 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> lookupById(UUID uniqueId) {
+    public Optional<GameProfile> lookupById(final UUID uniqueId) {
         checkNotNull(uniqueId, "unique id");
 
-        com.mojang.authlib.GameProfile profile = SpongeCommon.getServer().getMinecraftSessionService().fillProfileProperties(
+        final com.mojang.authlib.GameProfile profile = SpongeCommon.getServer().getMinecraftSessionService().fillProfileProperties(
                 new com.mojang.authlib.GameProfile(uniqueId, ""), true);
         if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
             this.shadow$addEntry(profile, null);
@@ -156,14 +157,14 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Map<UUID, Optional<GameProfile>> lookupByIds(Iterable<UUID> uniqueIds) {
+    public Map<UUID, Optional<GameProfile>> lookupByIds(final Iterable<UUID> uniqueIds) {
         checkNotNull(uniqueIds, "unique ids");
 
-        Map<UUID, Optional<GameProfile>> result = Maps.newHashMap();
+        final Map<UUID, Optional<GameProfile>> result = Maps.newHashMap();
 
-        MinecraftSessionService service = SpongeCommon.getServer().getMinecraftSessionService();
-        for (UUID uniqueId : uniqueIds) {
-            com.mojang.authlib.GameProfile profile = service.fillProfileProperties(new com.mojang.authlib.GameProfile(uniqueId, ""), true);
+        final MinecraftSessionService service = SpongeCommon.getServer().getMinecraftSessionService();
+        for (final UUID uniqueId : uniqueIds) {
+            final com.mojang.authlib.GameProfile profile = service.fillProfileProperties(new com.mojang.authlib.GameProfile(uniqueId, ""), true);
             if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
                 this.shadow$addEntry(profile, null);
                 result.put(uniqueId, Optional.of((GameProfile) profile));
@@ -179,8 +180,8 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> getOrLookupById(UUID uniqueId) {
-        Optional<GameProfile> profile = this.getById(uniqueId);
+    public Optional<GameProfile> getOrLookupById(final UUID uniqueId) {
+        final Optional<GameProfile> profile = this.getById(uniqueId);
         if (profile.isPresent()) {
             return profile;
         }
@@ -188,11 +189,11 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Map<UUID, Optional<GameProfile>> getOrLookupByIds(Iterable<UUID> uniqueIds) {
+    public Map<UUID, Optional<GameProfile>> getOrLookupByIds(final Iterable<UUID> uniqueIds) {
         checkNotNull(uniqueIds, "unique ids");
 
-        Collection<UUID> pending = Sets.newHashSet(uniqueIds);
-        Map<UUID, Optional<GameProfile>> result = Maps.newHashMap();
+        final Collection<UUID> pending = Sets.newHashSet(uniqueIds);
+        final Map<UUID, Optional<GameProfile>> result = Maps.newHashMap();
 
         result.putAll(this.getByIds(pending));
         result.forEach((uniqueId, profile) -> {
@@ -206,17 +207,17 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> getByName(String name) {
+    public Optional<GameProfile> getByName(final String name) {
         return Optional.ofNullable((GameProfile) this.getByNameNoLookup(checkNotNull(name, "name")));
     }
 
     @Override
-    public Map<String, Optional<GameProfile>> getByNames(Iterable<String> names) {
+    public Map<String, Optional<GameProfile>> getByNames(final Iterable<String> names) {
         checkNotNull(names, "names");
 
-        Map<String, Optional<GameProfile>> result = Maps.newHashMap();
+        final Map<String, Optional<GameProfile>> result = Maps.newHashMap();
 
-        for (String name : names) {
+        for (final String name : names) {
             result.put(name, Optional.ofNullable((GameProfile) this.getByNameNoLookup(name)));
         }
 
@@ -224,12 +225,12 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> lookupByName(String name) {
-        SingleProfileLookupCallback callback = new SingleProfileLookupCallback();
+    public Optional<GameProfile> lookupByName(final String name) {
+        final SingleProfileLookupCallback callback = new SingleProfileLookupCallback();
 
         SpongeCommon.getServer().getGameProfileRepository().findProfilesByNames(new String[]{name}, Agent.MINECRAFT, callback);
 
-        Optional<GameProfile> profile = callback.getResult();
+        final Optional<GameProfile> profile = callback.getResult();
         if (profile.isPresent()) {
             this.shadow$addEntry((com.mojang.authlib.GameProfile) profile.get(), null);
         }
@@ -238,16 +239,16 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Map<String, Optional<GameProfile>> lookupByNames(Iterable<String> names) {
+    public Map<String, Optional<GameProfile>> lookupByNames(final Iterable<String> names) {
         checkNotNull(names, "names");
 
-        Map<String, Optional<GameProfile>> result = Maps.newHashMap();
+        final Map<String, Optional<GameProfile>> result = Maps.newHashMap();
 
         SpongeCommon.getServer().getGameProfileRepository().findProfilesByNames(Iterables.toArray(names, String.class), Agent.MINECRAFT,
                 new MapProfileLookupCallback(result));
 
         if (!result.isEmpty()) {
-            for (Optional<GameProfile> entry : result.values()) {
+            for (final Optional<GameProfile> entry : result.values()) {
                 if (entry.isPresent()) {
                     this.shadow$addEntry((com.mojang.authlib.GameProfile) entry.get(), null);
                 }
@@ -258,8 +259,8 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> getOrLookupByName(String name) {
-        Optional<GameProfile> profile = this.getByName(name);
+    public Optional<GameProfile> getOrLookupByName(final String name) {
+        final Optional<GameProfile> profile = this.getByName(name);
         if (profile.isPresent()) {
             return profile;
         }
@@ -267,11 +268,11 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Map<String, Optional<GameProfile>> getOrLookupByNames(Iterable<String> names) {
+    public Map<String, Optional<GameProfile>> getOrLookupByNames(final Iterable<String> names) {
         checkNotNull(names, "names");
 
-        Collection<String> pending = Sets.newHashSet(names);
-        Map<String, Optional<GameProfile>> result = Maps.newHashMap();
+        final Collection<String> pending = Sets.newHashSet(names);
+        final Map<String, Optional<GameProfile>> result = Maps.newHashMap();
 
         result.putAll(this.getByNames(pending));
         result.forEach((name, profile) -> {
@@ -288,7 +289,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> fillProfile(GameProfile profile, boolean signed) {
+    public Optional<GameProfile> fillProfile(final GameProfile profile, final boolean signed) {
         checkNotNull(profile, "profile");
 
         return Optional.ofNullable((GameProfile) SpongeCommon.getServer().getMinecraftSessionService()
@@ -296,28 +297,35 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Collection<GameProfile> getProfiles() {
+    public Stream<GameProfile> streamProfiles() {
         return this.usernameToProfileEntryMap.values().stream()
-                .map(entry -> (GameProfile) entry.accessor$getGameProfile())
-                .collect(ImmutableSet.toImmutableSet());
+                .map(entry -> (GameProfile) entry.accessor$getGameProfile());
     }
 
     @Override
-    public Collection<GameProfile> match(String name) {
-        final String search = checkNotNull(name, "name").toLowerCase(Locale.ROOT);
+    public Collection<GameProfile> getProfiles() {
+        return this.streamProfiles().collect(ImmutableSet.toImmutableSet());
+    }
 
-        return this.getProfiles().stream()
+    @Override
+    public Stream<GameProfile> streamOfMatches(final String name) {
+        final String search = checkNotNull(name, "name").toLowerCase(Locale.ROOT);
+        return this.streamProfiles()
                 .filter(profile -> profile.getName().isPresent())
-                .filter(profile -> profile.getName().get().toLowerCase(Locale.ROOT).startsWith(search))
-                .collect(ImmutableSet.toImmutableSet());
+                .filter(profile -> profile.getName().get().toLowerCase(Locale.ROOT).startsWith(search));
+    }
+
+    @Override
+    public Collection<GameProfile> match(final String name) {
+        return this.streamOfMatches(name).collect(ImmutableSet.toImmutableSet());
     }
 
     @Nullable
-    private com.mojang.authlib.GameProfile getByNameNoLookup(String username) {
+    private com.mojang.authlib.GameProfile getByNameNoLookup(final String username) {
         @Nullable PlayerProfileCache_ProfileEntryAccessor entry = this.usernameToProfileEntryMap.get(username.toLowerCase(Locale.ROOT));
 
         if (entry != null && System.currentTimeMillis() >= entry.accessor$getExpirationDate().getTime()) {
-            com.mojang.authlib.GameProfile profile = entry.accessor$getGameProfile();
+            final com.mojang.authlib.GameProfile profile = entry.accessor$getGameProfile();
             this.uuidToProfileEntryMap.remove(profile.getId());
             this.usernameToProfileEntryMap.remove(profile.getName().toLowerCase(Locale.ROOT));
             this.profiles.remove(profile);
@@ -325,7 +333,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
         }
 
         if (entry != null) {
-            com.mojang.authlib.GameProfile profile = entry.accessor$getGameProfile();
+            final com.mojang.authlib.GameProfile profile = entry.accessor$getGameProfile();
             this.profiles.remove(profile);
             this.profiles.add(profile);
         }

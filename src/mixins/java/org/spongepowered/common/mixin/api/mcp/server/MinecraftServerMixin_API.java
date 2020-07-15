@@ -73,7 +73,7 @@ import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.service.user.SpongeUserManager;
+import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.UsernameCache;
 import org.spongepowered.common.world.server.SpongeWorldManager;

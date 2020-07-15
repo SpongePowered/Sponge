@@ -118,7 +118,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.accessor.network.play.client.CClientSettingsPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.mixin.core.entity.player.PlayerEntityMixin;
-import org.spongepowered.common.service.user.SpongeUserManager;
+import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.util.Constants;

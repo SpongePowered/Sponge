@@ -35,9 +35,11 @@ import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
 
 import java.io.File;
 
@@ -45,11 +47,19 @@ import java.io.File;
 public abstract class DedicatedServerMixin implements SpongeServer {
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$setServerOnGame(File p_i50720_1_, ServerPropertiesProvider p_i50720_2_, DataFixer dataFixerIn,
-        YggdrasilAuthenticationService p_i50720_4_, MinecraftSessionService p_i50720_5_, GameProfileRepository p_i50720_6_,
-        PlayerProfileCache p_i50720_7_, IChunkStatusListenerFactory p_i50720_8_, String p_i50720_9_, CallbackInfo ci) {
+    private void impl$setServerOnGame(final File p_i50720_1_, final ServerPropertiesProvider p_i50720_2_, final DataFixer dataFixerIn,
+        final YggdrasilAuthenticationService p_i50720_4_, final MinecraftSessionService p_i50720_5_, final GameProfileRepository p_i50720_6_,
+        final PlayerProfileCache p_i50720_7_, final IChunkStatusListenerFactory p_i50720_8_, final String p_i50720_9_, final CallbackInfo ci) {
 
         SpongeCommon.getGame().setServer(this);
         p_i50720_7_.load();
     }
+
+    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerProfileCache;save()V"))
+    private void onSave(final PlayerProfileCache cache) {
+        ((PlayerProfileCacheBridge) cache).bridge$setCanSave(true);
+        cache.save();
+        ((PlayerProfileCacheBridge) cache).bridge$setCanSave(false);
+    }
+
 }

@@ -45,7 +45,7 @@ public interface SpongeWorldManager extends WorldManager {
 
     boolean isDimensionTypeRegistered(DimensionType dimensionType);
 
-    default UUID getDimensionTypeUniqueId(DimensionType dimensionType) {
+    default UUID getDimensionTypeUniqueId(final DimensionType dimensionType) {
         final WorldInfo info = this.getInfo(dimensionType);
         if (info == null) {
             return null;
@@ -55,7 +55,7 @@ public interface SpongeWorldManager extends WorldManager {
     }
 
     @Nullable
-    default ServerWorld getWorld(DimensionType dimensionType) {
+    default ServerWorld getWorld(final DimensionType dimensionType) {
         return this.getServer().getWorld(dimensionType);
     }
 

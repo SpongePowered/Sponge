@@ -116,6 +116,7 @@
     "scoreboard.ScorePlayerTeamAccessor",
     "server.MinecraftServerAccessor",
     "server.management.IPBanListAccessor",
+    "server.management.PlayerListAccessor",
     "server.management.PlayerProfileCache_ProfileEntryAccessor",
     "server.management.PlayerProfileCacheAccessor",
     "tileentity.AbstractFurnaceTileEntityAccessor",
@@ -165,7 +166,6 @@
   ],
   "server": [
     "server.dedicated.DedicatedServerAccessor",
-    "server.management.PlayerListAccessor",
     "server.management.UserListAccessor",
     "server.management.UserListEntryAccessor"
   ]

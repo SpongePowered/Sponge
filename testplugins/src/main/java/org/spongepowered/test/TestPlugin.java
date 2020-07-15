@@ -48,9 +48,15 @@ import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
+
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Plugin("test")
 public final class TestPlugin {
@@ -111,6 +117,32 @@ public final class TestPlugin {
                         })
                         .build(),
                 "getplayer");
+
+        final Parameter.Value<String> playerParameterKey = Parameter.string().setKey("name").optional().build();
+        event.getRegistrar().register(
+                this.plugin,
+                Command.builder()
+                        .parameter(playerParameterKey)
+                        .setExecutor(context -> {
+                            final Optional<String> result = context.getOne(playerParameterKey);
+                            final Collection<GameProfile> collection;
+                            if (result.isPresent()) {
+                                // check to see if the string matches
+                                collection = Sponge.getGame().getServer().getUserManager()
+                                                .streamOfMatches(result.get().toLowerCase(Locale.ROOT))
+                                                .collect(Collectors.toList());
+                            } else {
+                                collection = Sponge.getGame().getServer().getUserManager()
+                                        .streamAll()
+                                        .collect(Collectors.toList());
+                            }
+                            collection.forEach(x -> this.logger.info(
+                                    "GameProfile - UUID: {}, Name - {}", x.getUniqueId().toString(), x.getName().orElse("---")));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "checkuser"
+        );
     }
 
     @Listener

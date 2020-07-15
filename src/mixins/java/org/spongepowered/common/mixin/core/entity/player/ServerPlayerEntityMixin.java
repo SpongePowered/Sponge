@@ -33,14 +33,10 @@ import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.service.user.SpongeUserManager;
+import org.spongepowered.common.user.SpongeUserManager;
 
 import java.util.Optional;
 
