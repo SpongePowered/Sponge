@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.vanilla.modlauncher.mixin;
 
 import org.spongepowered.common.launch.LaunchMixinConnector;
 
