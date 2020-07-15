@@ -24,35 +24,32 @@
  */
 package org.spongepowered.common.event.lifecycle;
 
-import com.google.common.reflect.TypeToken;
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
+import org.spongepowered.api.registry.DuplicateRegistrationException;
+import org.spongepowered.api.util.ResettableBuilder;
+import org.spongepowered.common.registry.SpongeBuilderRegistry;
 
-public final class RegisterCommandEventImpl<C extends CommandRegistrar<?>> extends AbstractLifecycleEvent implements RegisterCommandEvent<C> {
+import java.util.function.Supplier;
 
-    private final TypeToken<C> token;
-    private final C registrar;
+public final class RegisterBuilderEventImpl extends AbstractLifecycleEvent implements RegisterBuilderEvent {
 
-    public RegisterCommandEventImpl(final Cause cause, final Game game, final TypeToken<C> token, final C registrar) {
+    public RegisterBuilderEventImpl(final Cause cause, final Game game) {
         super(cause, game);
-        this.token = token;
-        this.registrar = registrar;
     }
 
     @Override
-    public TypeToken<C> getGenericType() {
-        return this.token;
-    }
+    public <T extends ResettableBuilder<?, ? super T>> void register(Class<T> builderClass, Supplier<? super T> supplier) throws DuplicateRegistrationException {
+        Preconditions.checkNotNull(supplier);
 
-    @Override
-    public C getRegistrar() {
-        return this.registrar;
+        ((SpongeBuilderRegistry) Sponge.getRegistry().getBuilderRegistry()).register(builderClass, (Supplier<T>) supplier);
     }
 
     @Override
     public String toString() {
-        return "RegisterCommandEvent{cause=" + this.getCause() + ", token=" + this.token + "}";
+        return "RegisterBuilderEvent{cause=" + this.getCause() + "}";
     }
 }

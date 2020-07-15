@@ -29,39 +29,15 @@ import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
-import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 
-public final class StartedEngineEventImpl<E extends Engine> implements StartedEngineEvent<E> {
+public final class StartedEngineEventImpl<E extends Engine> extends AbstractEngineLifecycleEvent<E> implements StartedEngineEvent<E> {
 
-    private final Cause cause;
-    private final TypeToken<E> genericType;
-    private final E engine;
-    private final Game game;
-
-    public StartedEngineEventImpl(final Cause cause, final TypeToken<E> genericType, final Game game, final E engine) {
-        this.cause = cause;
-        this.genericType = genericType;
-        this.game = game;
-        this.engine = engine;
+    public StartedEngineEventImpl(final Cause cause, final Game game, final E engine, final TypeToken<E> token) {
+        super(cause, game, engine, token);
     }
 
     @Override
-    public E getEngine() {
-        return this.engine;
-    }
-
-    @Override
-    public TypeToken<E> getGenericType() {
-        return this.genericType;
-    }
-
-    @Override
-    public Game getGame() {
-        return this.game;
-    }
-
-    @Override
-    public Cause getCause() {
-        return this.cause;
+    public String toString() {
+        return "StartedEngineEvent{cause=" + this.getCause() + ", engine=" + this.getEngine() + "}";
     }
 }

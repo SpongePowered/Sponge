@@ -25,34 +25,29 @@
 package org.spongepowered.common.event.lifecycle;
 
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.EngineLifecycleEvent;
 
-public final class RegisterCommandEventImpl<C extends CommandRegistrar<?>> extends AbstractLifecycleEvent implements RegisterCommandEvent<C> {
+public abstract class AbstractEngineLifecycleEvent<E extends Engine> extends AbstractLifecycleEvent implements EngineLifecycleEvent<E> {
 
-    private final TypeToken<C> token;
-    private final C registrar;
+    private final Engine engine;
+    private final TypeToken<E> token;
 
-    public RegisterCommandEventImpl(final Cause cause, final Game game, final TypeToken<C> token, final C registrar) {
+    public AbstractEngineLifecycleEvent(final Cause cause, final Game game, final Engine engine, final TypeToken<E> token) {
         super(cause, game);
+        this.engine = engine;
         this.token = token;
-        this.registrar = registrar;
     }
 
     @Override
-    public TypeToken<C> getGenericType() {
+    public final Engine getEngine() {
+        return this.engine;
+    }
+
+    @Override
+    public final TypeToken<E> getGenericType() {
         return this.token;
-    }
-
-    @Override
-    public C getRegistrar() {
-        return this.registrar;
-    }
-
-    @Override
-    public String toString() {
-        return "RegisterCommandEvent{cause=" + this.getCause() + ", token=" + this.token + "}";
     }
 }

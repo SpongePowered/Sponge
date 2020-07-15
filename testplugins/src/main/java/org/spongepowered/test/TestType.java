@@ -22,37 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.lifecycle;
+package org.spongepowered.test;
 
-import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.ResourceKey;
 
-public final class RegisterCommandEventImpl<C extends CommandRegistrar<?>> extends AbstractLifecycleEvent implements RegisterCommandEvent<C> {
+public final class TestType implements CatalogType {
 
-    private final TypeToken<C> token;
-    private final C registrar;
+    private final ResourceKey key;
 
-    public RegisterCommandEventImpl(final Cause cause, final Game game, final TypeToken<C> token, final C registrar) {
-        super(cause, game);
-        this.token = token;
-        this.registrar = registrar;
+    public TestType(final ResourceKey key) {
+        this.key = key;
     }
 
     @Override
-    public TypeToken<C> getGenericType() {
-        return this.token;
-    }
-
-    @Override
-    public C getRegistrar() {
-        return this.registrar;
-    }
-
-    @Override
-    public String toString() {
-        return "RegisterCommandEvent{cause=" + this.getCause() + ", token=" + this.token + "}";
+    public ResourceKey getKey() {
+        return this.key;
     }
 }

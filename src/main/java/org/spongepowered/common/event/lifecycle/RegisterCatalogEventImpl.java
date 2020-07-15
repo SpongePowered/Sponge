@@ -24,21 +24,23 @@
  */
 package org.spongepowered.common.event.lifecycle;
 
+import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
+import org.spongepowered.api.registry.DuplicateRegistrationException;
+import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
-public final class RegisterCommandEventImpl<C extends CommandRegistrar<?>> extends AbstractLifecycleEvent implements RegisterCommandEvent<C> {
+public final class RegisterCatalogEventImpl<C extends CatalogType> extends AbstractLifecycleEvent implements RegisterCatalogEvent<C> {
 
     private final TypeToken<C> token;
-    private final C registrar;
 
-    public RegisterCommandEventImpl(final Cause cause, final Game game, final TypeToken<C> token, final C registrar) {
+    public RegisterCatalogEventImpl(final Cause cause, final Game game, final TypeToken<C> token) {
         super(cause, game);
         this.token = token;
-        this.registrar = registrar;
     }
 
     @Override
@@ -47,12 +49,14 @@ public final class RegisterCommandEventImpl<C extends CommandRegistrar<?>> exten
     }
 
     @Override
-    public C getRegistrar() {
-        return this.registrar;
+    public C register(C catalog) throws DuplicateRegistrationException {
+        Preconditions.checkNotNull(catalog);
+
+        return ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerCatalog(catalog);
     }
 
     @Override
     public String toString() {
-        return "RegisterCommandEvent{cause=" + this.getCause() + ", token=" + this.token + "}";
+        return "RegisterCatalogEvent{cause=" + this.getCause() + ", type=" + this.token + "}";
     }
 }

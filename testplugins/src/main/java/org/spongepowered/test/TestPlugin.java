@@ -24,9 +24,11 @@
  */
 package org.spongepowered.test;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
@@ -37,16 +39,22 @@ import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
 import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.service.whitelist.WhitelistService;
+import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Plugin("test")
 public final class TestPlugin {
 
     private final Logger logger;
+    private final PluginContainer plugin;
 
     @Inject
-    public TestPlugin(final Logger logger) {
+    public TestPlugin(final Logger logger, final PluginContainer plugin) {
         this.logger = logger;
+        this.plugin = plugin;
     }
 
     @Listener
@@ -73,6 +81,7 @@ public final class TestPlugin {
     @Listener
     public void onRegisterCatalogRegistry(final RegisterCatalogRegistryEvent event) {
         this.logger.info(event);
+        event.register(TestType.class, ResourceKey.of(this.plugin, "test_type"), () -> Sets.newHashSet(new TestType(ResourceKey.of(this.plugin, "a"))));
     }
 
     @Listener

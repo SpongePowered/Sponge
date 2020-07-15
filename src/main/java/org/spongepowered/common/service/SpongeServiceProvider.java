@@ -34,6 +34,8 @@ import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.ServiceRegistration;
@@ -273,11 +275,7 @@ public final class SpongeServiceProvider implements ServiceProvider {
 
     @Nullable
     private <T> Registration<T> getSpecificRegistration(final PluginContainer container, final Service<T> service) {
-        final ProvideServiceEventImpl<T> event =
-                new ProvideServiceEventImpl<>(
-                        PhaseTracker.getCauseStackManager().getCurrentCause(),
-                        TypeToken.of(service.getServiceClass()),
-                        this.game);
+        final ProvideServiceEventImpl<T> event = new ProvideServiceEventImpl<>(Cause.of(EventContext.empty(), this.game), this.game, TypeToken.of(service.getServiceClass()));
 
         // This is the actual query - a generic event.
         try {

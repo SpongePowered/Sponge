@@ -34,17 +34,19 @@ import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import java.util.function.Supplier;
 
 // Specialised logic is required for this.
-public final class ProvideServiceEventImpl<T> implements ProvideServiceEvent<T> {
+public final class ProvideServiceEventImpl<T> extends AbstractLifecycleEvent implements ProvideServiceEvent<T> {
 
-    private final Cause cause;
-    private final TypeToken<T> genericType;
-    private final Game game;
+    private final TypeToken<T> token;
     @Nullable private Supplier<T> serviceFactory;
 
-    public ProvideServiceEventImpl(final Cause cause, final TypeToken<T> genericType, final Game game) {
-        this.cause = cause;
-        this.genericType = genericType;
-        this.game = game;
+    public ProvideServiceEventImpl(final Cause cause, final Game game, final TypeToken<T> token) {
+        super(cause, game);
+        this.token = token;
+    }
+
+    @Override
+    public TypeToken<T> getGenericType() {
+        return this.token;
     }
 
     @Override
@@ -63,24 +65,7 @@ public final class ProvideServiceEventImpl<T> implements ProvideServiceEvent<T> 
     }
 
     @Override
-    @NonNull
-    public TypeToken<T> getGenericType() {
-        return this.genericType;
-    }
-
-    @Override
-    @NonNull
-    public Cause getCause() {
-        return this.cause;
-    }
-
-    @Override
-    public Game getGame() {
-        return this.game;
-    }
-
-    @Override
     public String toString() {
-        return "ProvideServiceEvent{cause=" + this.cause + "}";
+        return "ProvideServiceEvent{cause=" + this.getCause() + ", type=" + this.token + "}";
     }
 }
