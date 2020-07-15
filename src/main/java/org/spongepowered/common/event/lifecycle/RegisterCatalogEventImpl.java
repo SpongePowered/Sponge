@@ -57,6 +57,6 @@ public final class RegisterCatalogEventImpl<C extends CatalogType> extends Abstr
 
     @Override
     public String toString() {
-        return "RegisterCatalogEvent{cause=" + this.getCause() + ", type=" + this.token + "}";
+        return "RegisterCatalogEvent{cause=" + this.cause + ", type=" + this.token + "}";
     }
 }

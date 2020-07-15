@@ -50,6 +50,6 @@ public final class RegisterBuilderEventImpl extends AbstractLifecycleEvent imple
 
     @Override
     public String toString() {
-        return "RegisterBuilderEvent{cause=" + this.getCause() + "}";
+        return "RegisterBuilderEvent{cause=" + this.cause + "}";
     }
 }

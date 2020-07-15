@@ -60,6 +60,6 @@ public final class RegisterCatalogRegistryEventImpl extends AbstractLifecycleEve
 
     @Override
     public String toString() {
-        return "RegisterCatalogRegistryEvent{cause=" + this.getCause() + "}";
+        return "RegisterCatalogRegistryEvent{cause=" + this.cause + "}";
     }
 }

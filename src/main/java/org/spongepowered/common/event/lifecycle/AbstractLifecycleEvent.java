@@ -30,8 +30,8 @@ import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 
 public abstract class AbstractLifecycleEvent implements LifecycleEvent {
 
-    private final Cause cause;
-    private final Game game;
+    protected final Cause cause;
+    protected final Game game;
 
     public AbstractLifecycleEvent(final Cause cause, final Game game) {
         this.cause = cause;

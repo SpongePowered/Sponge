@@ -38,6 +38,7 @@ public final class RegisterFactoryEventImpl extends AbstractLifecycleEvent imple
         super(cause, game);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T register(Class<T> factoryClass, T factory) throws DuplicateRegistrationException {
         Preconditions.checkNotNull(factory);
@@ -47,6 +48,6 @@ public final class RegisterFactoryEventImpl extends AbstractLifecycleEvent imple
 
     @Override
     public String toString() {
-        return "RegisterFactoryEvent{cause=" + this.getCause() + "}";
+        return "RegisterFactoryEvent{cause=" + this.cause + "}";
     }
 }

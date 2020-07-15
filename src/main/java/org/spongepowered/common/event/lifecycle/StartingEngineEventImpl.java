@@ -38,6 +38,6 @@ public final class StartingEngineEventImpl<E extends Engine> extends AbstractEng
 
     @Override
     public String toString() {
-        return "StartingEngineEvent{cause=" + this.getCause() + ", engine=" + this.getEngine() + "}";
+        return "StartingEngineEvent{cause=" + this.cause + ", engine=" + this.engine + "}";
     }
 }

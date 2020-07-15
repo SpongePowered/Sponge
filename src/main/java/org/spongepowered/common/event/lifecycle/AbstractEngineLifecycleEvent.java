@@ -32,17 +32,17 @@ import org.spongepowered.api.event.lifecycle.EngineLifecycleEvent;
 
 public abstract class AbstractEngineLifecycleEvent<E extends Engine> extends AbstractLifecycleEvent implements EngineLifecycleEvent<E> {
 
-    private final Engine engine;
-    private final TypeToken<E> token;
+    protected final E engine;
+    protected final TypeToken<E> token;
 
-    public AbstractEngineLifecycleEvent(final Cause cause, final Game game, final Engine engine, final TypeToken<E> token) {
+    public AbstractEngineLifecycleEvent(final Cause cause, final Game game, final E engine, final TypeToken<E> token) {
         super(cause, game);
         this.engine = engine;
         this.token = token;
     }
 
     @Override
-    public final Engine getEngine() {
+    public final E getEngine() {
         return this.engine;
     }
 

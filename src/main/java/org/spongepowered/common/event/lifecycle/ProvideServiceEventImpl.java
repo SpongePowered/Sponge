@@ -66,6 +66,6 @@ public final class ProvideServiceEventImpl<T> extends AbstractLifecycleEvent imp
 
     @Override
     public String toString() {
-        return "ProvideServiceEvent{cause=" + this.getCause() + ", type=" + this.token + "}";
+        return "ProvideServiceEvent{cause=" + this.cause + ", type=" + this.token + "}";
     }
 }

@@ -53,6 +53,6 @@ public final class RegisterCommandEventImpl<C extends CommandRegistrar<?>> exten
 
     @Override
     public String toString() {
-        return "RegisterCommandEvent{cause=" + this.getCause() + ", token=" + this.token + "}";
+        return "RegisterCommandEvent{cause=" + this.cause + ", token=" + this.token + "}";
     }
 }
