@@ -30,31 +30,34 @@ import org.spongepowered.api.Client;
 import org.spongepowered.api.Server;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.vanilla.launch.plugin.PluginLoader;
 
 import java.nio.file.Path;
 import java.util.List;
 
 public final class DedicatedServerLauncher extends VanillaLauncher {
 
-    protected DedicatedServerLauncher(final Stage injectionStage) {
-        super(injectionStage);
+    protected DedicatedServerLauncher(final PluginLoader pluginLoader, final Stage injectionStage) {
+        super(pluginLoader, injectionStage);
     }
 
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final Boolean isDeveloperEnvironment, final String[] args) {
-        final DedicatedServerLauncher launcher = new DedicatedServerLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
+    public static void launch(final PluginLoader pluginLoader, final Boolean isDeveloperEnvironment, final String[] args) {
+        final DedicatedServerLauncher launcher = new DedicatedServerLauncher(pluginLoader, isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
         Launcher.setInstance(launcher);
-        launcher.launchPlatform(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-    }
-
-    public void launchPlatform(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-        this.getLogger().info("Loading Sponge, please wait...");
-
-        SpongeBootstrap.perform("Server", () -> MinecraftServer.main(args));
+        launcher.onLaunch(args);
     }
 
     @Override
     public boolean isDedicatedServer() {
         return true;
     }
+
+    @Override
+    protected void onLaunch(final String[] args) {
+        super.onLaunch(args);
+        this.getLogger().info("Loading Minecraft Server, please wait...");
+
+        SpongeBootstrap.perform("Server", () -> MinecraftServer.main(args));
+    }
+
 }

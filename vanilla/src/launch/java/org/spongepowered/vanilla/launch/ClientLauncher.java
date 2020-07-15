@@ -28,20 +28,18 @@ import com.google.inject.Stage;
 import net.minecraft.client.main.Main;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launcher;
-
-import java.nio.file.Path;
-import java.util.List;
+import org.spongepowered.vanilla.launch.plugin.PluginLoader;
 
 public final class ClientLauncher extends VanillaLauncher {
 
-    protected ClientLauncher(final Stage injectionStage) {
-        super(injectionStage);
+    protected ClientLauncher(final PluginLoader pluginLoader, final Stage injectionStage) {
+        super(pluginLoader, injectionStage);
     }
 
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
+    public static void launch(final PluginLoader pluginLoader, final Boolean isDeveloperEnvironment, final String[] args) {
+        final ClientLauncher launcher = new ClientLauncher(pluginLoader, isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
         Launcher.setInstance(launcher);
-        launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
+        launcher.onLaunch(args);
     }
 
     @Override
@@ -50,10 +48,11 @@ public final class ClientLauncher extends VanillaLauncher {
     }
 
     @Override
-    public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
+    public void onLaunch(final String[] args) {
+        super.onLaunch(args);
         this.getLogger().info("Loading Minecraft Client, please wait...");
 
         SpongeBootstrap.perform("Client", () -> Main.main(args));
     }
+
 }
