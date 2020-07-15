@@ -1,0 +1,25 @@
+{
+  "plugins": [
+    {
+      "id": "spongeforge",
+      "name": "SpongeForge",
+      "version": "1.14.4-8.0.0",
+      "main-class": "org.spongepowered.forge.SpongeVanilla",
+      "description": "Minecraft Forge with Sponge",
+      "links": {
+        "homepage": "https://www.spongepowered.org",
+        "source": "https://www.spongepowered.org/source",
+        "issues": "https://www.spongepowered.org/issues"
+      },
+      "contributors": [{
+        "name": "SpongePowered",
+        "description": "Lead Developer"
+      }],
+      "dependencies": [{
+        "id": "sponge",
+        "version": "8.0.0"
+      }],
+      "extra": {}
+    }
+  ]
+}

@@ -559,15 +559,11 @@ if (spongeForge != null) {
             runs {
                 create("server") {
                     workingDirectory(forgeProject.file("./run"))
-                    args.addAll(listOf("nogui", "--launchTarget", "sponge_server_dev"))
-                    main = "org.spongepowered.forge.modlauncher.Main"
+                    args.addAll(listOf("nogui"))
                 }
 
                 create("client") {
-                    environment("target", "client")
                     workingDirectory(forgeProject.file("./run"))
-                    args.addAll(listOf("--launchTarget", "sponge_client_dev", "--version", "1.14.4", "--accessToken", "0"))
-                    main = "org.spongepowered.forge.modlauncher.Main"
                 }
             }
             commonProject.sourceSets["main"].resources

@@ -1,21 +1,6 @@
 {
     "plugins": [
         {
-            "id": "minecraft",
-            "name": "Minecraft",
-            "version": "1.14.4",
-            "main-class": "org.spongepowered.common.launcher.Launcher",
-            "links": {
-                "homepage": "https://www.minecraft.net"
-            },
-            "contributors": [{
-                "name": "Mojang AB",
-                "description": "Lead Developer"
-            }],
-            "dependencies": [],
-            "extra": {}
-        },
-        {
             "id": "spongeapi",
             "name": "Sponge API",
             "version": "8.0.0",
