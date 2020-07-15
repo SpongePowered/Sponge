@@ -33,4 +33,6 @@ public interface MerchantOfferAccessor {
 
     @Accessor("doesRewardEXP") void accessor$setRewardsExp(boolean allowsExperience);
 
+    @Accessor("demand") void accessor$setDemand(int demand);
+
 }
