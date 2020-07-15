@@ -22,31 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.api.mcp.entity.ai.attributes;
 
-import net.minecraft.inventory.EquipmentSlotType;
+import com.google.common.base.CaseFormat;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.IAttribute;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.api.entity.attribute.type.AttributeType;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 
-import java.util.Arrays;
+@Mixin(Attribute.class)
+public abstract class AttributeMixin_API implements AttributeType {
 
-public class SpongeEquipmentType extends SpongeCatalogType implements EquipmentType {
-
-    private EquipmentSlotType[] slots;
-
-    public SpongeEquipmentType(ResourceKey key, EquipmentSlotType... slots) {
-        super(key);
-        this.slots = slots;
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void api$setKey(IAttribute parentIn, String unlocalizedNameIn, double defaultValueIn, CallbackInfo ci) {
+        // Thankfully in 1.16, mojang does not use camelCase in attributes.
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, unlocalizedNameIn));
     }
 
-    public EquipmentSlotType[] getSlots() {
-        return this.slots;
-    }
+    // This is gonna break if someone extends IAttribute
+    private ResourceKey api$key;
 
     @Override
-    public boolean includes(EquipmentType other) {
-        throw new MissingImplementationException("SpongeEquipmentType", "includes");
+    public ResourceKey getKey() {
+        return this.api$key;
     }
 }

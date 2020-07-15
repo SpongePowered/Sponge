@@ -33,6 +33,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
+import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.registry.BuilderRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
@@ -43,6 +44,7 @@ import org.spongepowered.common.command.parameter.multi.SpongeFirstOfParameterBu
 import org.spongepowered.common.command.parameter.multi.SpongeSequenceParameterBuilder;
 import org.spongepowered.common.command.parameter.subcommand.SpongeSubcommandParameterBuilder;
 import org.spongepowered.common.command.result.SpongeCommandResultBuilder;
+import org.spongepowered.common.entity.attribute.SpongeAttributeModifierBuilder;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -148,6 +150,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
 //            .register(FilteredTrigger.Builder.class, SpongeFilteredTriggerBuilder::new)
 //            .register(Trigger.Builder.class, SpongeTriggerBuilder::new)
 //            .register(ResourceKey.Builder.class, SpongeCatalogKeyBuilder::new)
+            .register(AttributeModifier.Builder.class, SpongeAttributeModifierBuilder::new)
             .register(Command.Builder.class, SpongeParameterizedCommandBuilder::new)
             .register(Parameter.FirstOfBuilder.class, SpongeFirstOfParameterBuilder::new)
             .register(Parameter.SequenceBuilder.class, SpongeSequenceParameterBuilder::new)
