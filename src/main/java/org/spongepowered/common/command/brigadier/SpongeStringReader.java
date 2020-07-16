@@ -29,6 +29,7 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.*;
@@ -53,6 +54,14 @@ public class SpongeStringReader extends StringReader implements ArgumentReader.M
 
     public SpongeStringReader(final StringReader other) {
         super(other);
+    }
+
+    public void unskipWhitespace() {
+        if (this.getRemainingLength() >= 0) {
+            if (this.peek(-1) == CommandDispatcher.ARGUMENT_SEPARATOR_CHAR) {
+                this.setCursor(this.getCursor() - 1);
+            }
+        }
     }
 
     @Override

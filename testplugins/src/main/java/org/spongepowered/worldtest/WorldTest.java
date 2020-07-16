@@ -48,12 +48,16 @@ public final class WorldTest {
 
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<StandardCommandRegistrar> event) {
+        final Parameter.Value<ServerPlayer> serverPlayerParameter = Parameter.playerOrSource().setKey("player").build();
+        final Parameter.Value<WorldProperties> worldPropertiesParameter = Parameter.worldProperties().setKey("world").build();
         event.getRegistrar().register(this.plugin, Command
                 .builder()
+                .parameter(serverPlayerParameter)
+                .parameter(worldPropertiesParameter)
                 .setPermission(this.plugin.getMetadata().getId() + ".command.tpw")
                 .setExecutor(context -> {
-                    final ServerPlayer player = context.requireOne(Parameter.playerOrSource().setKey("player").build());
-                    final WorldProperties world = context.requireOne(Parameter.worldProperties().setKey("world").build());
+                    final ServerPlayer player = context.requireOne(serverPlayerParameter);
+                    final WorldProperties world = context.requireOne(worldPropertiesParameter);
 
                     world.getWorld().ifPresent(player::transferToWorld);
                     return CommandResult.success();

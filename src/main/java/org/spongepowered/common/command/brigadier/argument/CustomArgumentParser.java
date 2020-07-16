@@ -44,6 +44,7 @@ import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,29 +63,43 @@ public class CustomArgumentParser<T> implements ArgumentParser<T>, SuggestionPro
 
     private static final Pattern INTEGER_PATTERN = Pattern.compile("\\d+");
 
+    private final ImmutableList<ArgumentType<?>> types;
+
     private final Collection<ValueParser<? extends T>> parsers;
     private final ValueCompleter completer;
     private final boolean isHidden;
+    private final boolean containsDefault;
 
-    public CustomArgumentParser(final Collection<ValueParser<? extends T>> parsers, final ValueCompleter completer) {
+    public CustomArgumentParser(final Collection<ValueParser<? extends T>> parsers, final ValueCompleter completer, final boolean containsDefault) {
         this.parsers = parsers;
         this.completer = completer;
-        this.isHidden = parsers.stream().allMatch(x -> x.getClientCompletionType().contains(NONE_CLIENT_COMPLETION_TYPE));
+        this.isHidden = parsers.stream().allMatch(x -> x.getClientCompletionType().contains(CustomArgumentParser.NONE_CLIENT_COMPLETION_TYPE));
+        this.containsDefault = containsDefault || this.isHidden; // indicates that we should try to parse this even if there is nothing else to parse.
+        if (this.containsDefault && this.parsers.size() == 2) {
+            final ValueParser<? extends T> parser = this.parsers.iterator().next();
+            if (parser instanceof StandardArgumentParser) {
+                this.types = ImmutableList.copyOf(((StandardArgumentParser<?, ?>) parser).getClientCompletionArgumentType());
+            } else {
+                this.types = ImmutableList.of(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE);
+            }
+        } else {
+            this.types = ImmutableList.of(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE);
+        }
     }
 
     @Override
     public T parse(final Parameter.Key<? super T> key, final SpongeCommandContextBuilder contextBuilder, final SpongeStringReader reader)
             throws CommandSyntaxException {
-        List<ArgumentParseException> exceptions = null;
+        List<Exception> exceptions = null;
         final ArgumentReader.Immutable state = reader.getImmutable();
-        final org.spongepowered.api.command.parameter.CommandContext.Builder.Transaction transaction = contextBuilder.startTransaction();
         Optional<? extends T> value;
         for (final ValueParser<? extends T> parser : this.parsers) {
+            final org.spongepowered.api.command.parameter.CommandContext.Builder.Transaction transaction = contextBuilder.startTransaction();
             try {
                 value = parser.getValue(key, (ArgumentReader.Mutable) reader, contextBuilder);
                 contextBuilder.commit(transaction);
                 return value.orElse(null);
-            } catch (final ArgumentParseException e) {
+            } catch (final Exception e) {
                 if (exceptions == null) {
                     exceptions = new ArrayList<>();
                 }
@@ -98,8 +113,12 @@ public class CustomArgumentParser<T> implements ArgumentParser<T>, SuggestionPro
 
         if (exceptions != null) {
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
+                    .createWithContext(reader, exceptions);
+            /* throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
                     .createWithContext(reader,
-                            Text.joinWith(Text.newLine(), exceptions.stream().map(ArgumentParseException::getSuperText).collect(Collectors.toList())));
+                            Text.joinWith(Text.newLine(), exceptions.stream()
+                                    .map(ArgumentParseException::getSuperText)
+                                    .collect(Collectors.toList()))); */
         }
 
         // TODO: Check this - don't want Brig to blow up. If that happens, mandate everything returns an object.
@@ -111,7 +130,7 @@ public class CustomArgumentParser<T> implements ArgumentParser<T>, SuggestionPro
             final com.mojang.brigadier.context.CommandContext<?> context,
             final SuggestionsBuilder builder) {
         for (final String s : this.completer.complete((SpongeCommandContext) context)) {
-            if (INTEGER_PATTERN.matcher(s).matches()) {
+            if (CustomArgumentParser.INTEGER_PATTERN.matcher(s).matches()) {
                 try {
                     builder.suggest(Integer.parseInt(s));
                 } catch (final NumberFormatException ex) {
@@ -130,8 +149,18 @@ public class CustomArgumentParser<T> implements ArgumentParser<T>, SuggestionPro
     }
 
     @Override
+    public boolean canParseEmpty() {
+        return this.containsDefault;
+    }
+
+    @Override
     public Collection<String> getExamples() {
         return ImmutableList.of();
+    }
+
+    @Override
+    public List<ArgumentType<?>> getClientCompletionArgumentType() {
+        return this.types;
     }
 
     @Override

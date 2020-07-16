@@ -141,7 +141,8 @@ public class SpongeParameterValueBuilder<T> implements Parameter.Value.Builder<T
         Preconditions.checkState(!this.parsers.isEmpty(), "There must be parsers");
         final ImmutableList.Builder<ValueParser<? extends T>> parsersBuilder = ImmutableList.builder();
         parsersBuilder.addAll(this.parsers);
-        if (this.defaultValueFunction != null) {
+        final boolean containsDefault = this.defaultValueFunction != null;
+        if (containsDefault) {
             parsersBuilder.add((key, reader, context) -> Optional.of(this.defaultValueFunction.apply(context)));
         }
 
@@ -158,7 +159,7 @@ public class SpongeParameterValueBuilder<T> implements Parameter.Value.Builder<T
 
             final ImmutableList<ValueCompleter> completers = completersBuilder.build();
             if (completers.isEmpty()) {
-                completer = EMPTY_COMPLETER;
+                completer = SpongeParameterValueBuilder.EMPTY_COMPLETER;
             } else if (completers.size() == 1) {
                 completer = completers.get(0);
             } else {
@@ -179,9 +180,10 @@ public class SpongeParameterValueBuilder<T> implements Parameter.Value.Builder<T
                 this.usage,
                 this.executionRequirements == null ? commandCause -> true : this.executionRequirements,
                 this.key,
-                this.isOptional || this.defaultValueFunction != null, // if there is a default, it's optional.
+                this.isOptional,
                 this.consumesAll,
-                this.terminal
+                this.terminal,
+                containsDefault
         );
     }
 

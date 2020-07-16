@@ -57,4 +57,6 @@ public interface ArgumentParser<T> {
 
     boolean isHiddenFromClient();
 
+    boolean canParseEmpty();
+
 }

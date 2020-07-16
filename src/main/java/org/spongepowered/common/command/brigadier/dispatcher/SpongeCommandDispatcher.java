@@ -39,6 +39,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -96,15 +97,20 @@ public class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
             }
             // Sponge Start
             final SpongeCommandContextBuilder context = contextSoFar.copy();
+            final int currentCursorPosition = reader.getCursor();
             // Sponge End
             try {
                 try {
-                    child.parse(reader, context);
+                     child.parse(reader, context);
                 } catch (final RuntimeException ex) {
                     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().createWithContext(reader, ex.getMessage());
                 }
-                if (reader.canRead()) {
-                    if (reader.peek() != ARGUMENT_SEPARATOR_CHAR) {
+                // Sponge Start: if we didn't consume anything we don't want Brig to complain at us.
+                if (reader.getCursor() == currentCursorPosition) {
+                    reader.unskipWhitespace();
+                } else if (reader.canRead()) {
+                // Sponge End
+                    if (reader.peek() != CommandDispatcher.ARGUMENT_SEPARATOR_CHAR) {
                         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherExpectedArgumentSeparator().createWithContext(reader);
                     }
                 }
@@ -118,7 +124,12 @@ public class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
             }
 
             context.withCommand(child.getCommand());
-            if (reader.canRead(child.getRedirect() == null ? 2 : 1)) {
+            // Sponge Start: if we have a node that can parse an empty, we
+            // must let it do so.
+            if (reader.canRead(child.getRedirect() == null ? 2 : 1)
+                || child.getChildren().stream().anyMatch(x -> x instanceof SpongeArgumentCommandNode &&
+                    ((SpongeArgumentCommandNode<?>) x).getParser().canParseEmpty())) {
+            // Sponge End
                 reader.skip();
                 if (child.getRedirect() != null) {
                     // Sponge Start

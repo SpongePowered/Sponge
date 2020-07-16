@@ -37,10 +37,12 @@ import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.context.SuggestionContext;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 
 import java.util.ArrayDeque;
@@ -154,7 +156,41 @@ public class SpongeCommandContextBuilder extends CommandContextBuilder<CommandSo
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().findSuggestionContext(cursor);
         }
-        return super.findSuggestionContext(cursor);
+
+        // This is the orignal method, with field access swapped out for method calls
+        // where appropriate. There is one change marked below.
+        if (this.getRange().getStart() <= cursor) {
+            if (this.getRange().getEnd() < cursor) {
+                if (this.getChild() != null) {
+                    return this.getChild().findSuggestionContext(cursor);
+                } else if (!this.getNodes().isEmpty()) {
+                    final ParsedCommandNode<CommandSource> last = this.getNodes().get(this.getNodes().size() - 1);
+                    return new SuggestionContext<>(last.getNode(), last.getRange().getEnd() + 1);
+                } else {
+                    return new SuggestionContext<>(this.getRootNode(), this.getRange().getStart());
+                }
+            } else {
+                CommandNode<CommandSource> prev = this.getRootNode();
+                for (final ParsedCommandNode<CommandSource> node : this.getNodes()) {
+                    final StringRange nodeRange = node.getRange();
+                    // Sponge Start
+                    if (SpongeCommandContextBuilder.checkNodeCannotBeEmpty(node.getNode(), nodeRange)) {
+                        // Sponge End
+                        if (nodeRange.getStart() <= cursor && cursor <= nodeRange.getEnd()) {
+                            return new SuggestionContext<>(prev, nodeRange.getStart());
+                        }
+                        // Sponge Start: End if
+                    }
+                    // Sponge End
+                    prev = node.getNode();
+                }
+                if (prev == null) {
+                    throw new IllegalStateException("Can't find node before cursor");
+                }
+                return new SuggestionContext<>(prev, this.getRange().getStart());
+            }
+        }
+        throw new IllegalStateException("Can't find node before cursor");
     }
 
     @Override
@@ -363,6 +399,13 @@ public class SpongeCommandContextBuilder extends CommandContextBuilder<CommandSo
     @SuppressWarnings("unchecked")
     private <T> void addToArgumentMap(final Parameter.Key<T> key, final T value) {
         ((List<T>) this.arguments.computeIfAbsent(key, k -> new ArrayList<>())).add(value);
+    }
+
+    private static boolean checkNodeCannotBeEmpty(final CommandNode<CommandSource> node, final StringRange range) {
+        if (range.getStart() == range.getEnd()) {
+            return !(node instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) node).getParser().canParseEmpty());
+        }
+        return true;
     }
 
 }

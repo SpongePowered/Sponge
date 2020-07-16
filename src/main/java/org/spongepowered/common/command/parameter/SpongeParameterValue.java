@@ -63,6 +63,7 @@ public class SpongeParameterValue<T> implements Parameter.Value<T> {
     private final boolean isOptional;
     private final boolean consumeAll;
     private final boolean terminal;
+    private final boolean containsDefault;
 
     public SpongeParameterValue(
             final ImmutableList<ValueParser<? extends T>> parsers,
@@ -72,7 +73,8 @@ public class SpongeParameterValue<T> implements Parameter.Value<T> {
             final Key<T> key,
             final boolean isOptional,
             final boolean consumeAll,
-            final boolean terminal) {
+            final boolean terminal,
+            final boolean containsDefault) {
         this.parsers = parsers;
         this.completer = completer;
         this.requirement = requirement;
@@ -81,6 +83,7 @@ public class SpongeParameterValue<T> implements Parameter.Value<T> {
         this.isOptional = isOptional;
         this.consumeAll = consumeAll;
         this.terminal = consumeAll || terminal;
+        this.containsDefault = containsDefault;
     }
 
     @Override
@@ -195,6 +198,10 @@ public class SpongeParameterValue<T> implements Parameter.Value<T> {
     @Override
     public boolean isOptional() {
         return this.isOptional;
+    }
+
+    public boolean containsDefault() {
+        return this.containsDefault;
     }
 
     @Override

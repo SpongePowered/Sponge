@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.brigadier.tree;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
@@ -56,7 +57,7 @@ public class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<Command
 
     @Override
     public SpongeArgumentCommandNode<? extends T> build() {
-        return new SpongeArgumentCommandNode<>(
+        final SpongeArgumentCommandNode<? extends T> node = new SpongeArgumentCommandNode<>(
                 this.key,
                 this.type,
                 this.completer,
@@ -66,5 +67,9 @@ public class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<Command
                 this.getRedirectModifier(),
                 this.isFork()
         );
+        for (final CommandNode<CommandSource> child : this.getArguments()) {
+            node.addChild(child);
+        }
+        return node;
     }
 }

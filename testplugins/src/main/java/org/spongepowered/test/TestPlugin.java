@@ -31,6 +31,11 @@ import org.spongepowered.api.Client;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.registrar.StandardCommandRegistrar;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
@@ -38,6 +43,7 @@ import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCatalogRegistryEvent;
+import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
@@ -89,6 +95,22 @@ public final class TestPlugin {
     public void onRegisterTestType(final RegisterCatalogEvent<TestType> event) {
         this.logger.info(event);
         event.register(new TestType(ResourceKey.of(this.plugin, "b")));
+    }
+
+    @Listener
+    public void onRegisterSpongeCommand(final RegisterCommandEvent<StandardCommandRegistrar> event) {
+        final Parameter.Value<ServerPlayer> playerKey = Parameter.playerOrSource().setKey("player").build();
+        event.getRegistrar().register(
+                this.plugin,
+                Command.builder()
+                        .parameter(playerKey)
+                        .setExecutor(context -> {
+                            final ServerPlayer player = context.requireOne(playerKey);
+                            this.logger.info(player.getName());
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "getplayer");
     }
 
     @Listener

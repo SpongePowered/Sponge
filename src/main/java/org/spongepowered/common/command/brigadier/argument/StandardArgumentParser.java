@@ -105,6 +105,11 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
     }
 
     @Override
+    public boolean canParseEmpty() {
+        return false;
+    }
+
+    @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context) {
         final SuggestionsBuilder suggestionsBuilder = new SuggestionsBuilder("", 0);

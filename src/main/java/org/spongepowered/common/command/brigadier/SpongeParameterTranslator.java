@@ -67,8 +67,10 @@ public final class SpongeParameterTranslator {
 
         // If we have no parameters, or they are all optional, all literals will get an executor.
         final PassbackConsumer passbackConsumer = new PassbackConsumer();
-        final boolean isTerminal = createNode(parameterListIterator, executorWrapper, passbackConsumer, null, new ArrayList<>(), true);
-        return new TranslatedParameter(isTerminal, createSubcommands(subcommands), ImmutableList.copyOf(passbackConsumer.node));
+        final boolean isTerminal = SpongeParameterTranslator.createNode(
+                parameterListIterator, executorWrapper, passbackConsumer, null, new ArrayList<>(), true);
+        return new TranslatedParameter(isTerminal, SpongeParameterTranslator.createSubcommands(subcommands),
+                ImmutableList.copyOf(passbackConsumer.node));
     }
 
     // Returns true if all elements beyond this node are optional.
@@ -127,7 +129,7 @@ public final class SpongeParameterTranslator {
             final SpongeArgumentCommandNodeBuilder<?> currentNode = createNode(valueParameter);
             if (parameters.hasNext()) {
                 // We still need to execute createNode, so this order matters.
-                isInferredTermination = (createNode(
+                isInferredTermination = (SpongeParameterTranslator.createNode(
                         parameters,
                         executorWrapper,
                         currentNode::then,
@@ -183,7 +185,7 @@ public final class SpongeParameterTranslator {
 
         // Return true if all arguments are optional and so the preceding parameter should be treated as a termination,
         // false otherwise.
-        return canBeTerminal && isInferredTermination;
+        return canBeTerminal && isInferredTermination && currentParameter.isOptional();
     }
 
     private static List<LiteralCommandNode<CommandSource>> createSubcommands(final List<Parameter.Subcommand> parameters) {
@@ -215,7 +217,8 @@ public final class SpongeParameterTranslator {
         }
 
         if (type == null) {
-            type = new CustomArgumentParser<>(parameter.getParsers(), parameter.getCompleter());
+            final boolean containsDefault = parameter instanceof SpongeParameterValue && ((SpongeParameterValue<T>) parameter).containsDefault();
+            type = new CustomArgumentParser<>(parameter.getParsers(), parameter.getCompleter(), containsDefault);
         }
 
         final SpongeArgumentCommandNodeBuilder<T> argumentBuilder =
