@@ -82,6 +82,8 @@ public final class SpongeLifecycle {
         ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultSuppliers();
 
         this.game.getEventManager().post(new RegisterCatalogRegistryEventImpl(Cause.of(EventContext.empty(), this.game), this.game));
+
+        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
     }
 
     public void initTimings() {

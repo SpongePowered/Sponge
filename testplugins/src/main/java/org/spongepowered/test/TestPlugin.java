@@ -30,20 +30,21 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
+import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCatalogRegistryEvent;
 import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
+import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Plugin("test")
 public final class TestPlugin {
@@ -85,6 +86,12 @@ public final class TestPlugin {
     }
 
     @Listener
+    public void onRegisterTestType(final RegisterCatalogEvent<TestType> event) {
+        this.logger.info(event);
+        event.register(new TestType(ResourceKey.of(this.plugin, "b")));
+    }
+
+    @Listener
     public void onStartingServer(final StartingEngineEvent<Server> event) {
         this.logger.info("Starting engine '{}'", event.getEngine());
     }
@@ -92,6 +99,25 @@ public final class TestPlugin {
     @Listener
     public void onStartingClient(final StartingEngineEvent<Client> event) {
         this.logger.info("Starting engine '{}'", event.getEngine());
+    }
+
+    @Listener
+    public void onStartedServer(final StartedEngineEvent<Server> event) {
+        this.logger.info("Started engine '{}'", event.getEngine());
+    }
+
+    @Listener
+    public void onStartedClient(final StartedEngineEvent<Client> event) {
+        this.logger.info("Started engine '{}'", event.getEngine());
+    }
+
+    @Listener
+    public void onLoadedGame(final LoadedGameEvent event) {
+        this.logger.info(event);
+
+        for (final TestType testType : Sponge.getRegistry().getCatalogRegistry().getAllOf(TestType.class)) {
+            this.logger.info("TestType: '{}'", testType.getKey());
+        }
     }
 
     @Listener

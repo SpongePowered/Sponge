@@ -34,6 +34,9 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.vanilla.VanillaServer;
@@ -61,5 +64,11 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer impl
         // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
         lifecycle.callStartingEngineEvent(this);
         super.run();
+    }
+
+    @Inject(method = "init", at = @At("RETURN"))
+    private void vanilla$callEngineStartedAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
+        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        lifecycle.callStartedEngineEvent(this);
     }
 }

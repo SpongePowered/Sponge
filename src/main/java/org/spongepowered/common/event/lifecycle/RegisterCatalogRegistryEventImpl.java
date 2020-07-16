@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.lifecycle;
 
 import com.google.common.base.Preconditions;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
@@ -47,15 +48,14 @@ public final class RegisterCatalogRegistryEventImpl extends AbstractLifecycleEve
     public <T extends CatalogType> void register(Class<T> catalogClass, ResourceKey key) throws DuplicateRegistrationException {
         Preconditions.checkNotNull(key);
 
-        ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerRegistry(catalogClass, key);
+        ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerRegistry(catalogClass, key, true);
     }
 
     @Override
-    public <T extends CatalogType> void register(Class<T> catalogClass, ResourceKey key, Supplier<Set<T>> defaultsSupplier) throws DuplicateRegistrationException {
+    public <T extends CatalogType> void register(Class<T> catalogClass, ResourceKey key, @Nullable Supplier<Set<T>> defaultsSupplier) throws DuplicateRegistrationException {
         Preconditions.checkNotNull(key);
-        Preconditions.checkNotNull(defaultsSupplier);
 
-        ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerRegistry(catalogClass, key, defaultsSupplier, false);
+        ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerRegistry(catalogClass, key, defaultsSupplier, false, true);
     }
 
     @Override

@@ -33,13 +33,13 @@ import java.util.function.Predicate;
 import net.minecraft.entity.CreatureEntity;
 import org.spongepowered.api.entity.living.Living;
 
-public final class SpongeAvoidEntityGoalBuilder implements AvoidLivingGoal.Builder {
+public final class SpongeAvoidLivingGoalBuilder implements AvoidLivingGoal.Builder {
 
     private Predicate<Living> targetSelector;
     private float searchDistance;
     private double closeRangeSpeed, farRangeSpeed;
 
-    public SpongeAvoidEntityGoalBuilder() {
+    public SpongeAvoidLivingGoalBuilder() {
         this.reset();
     }
 

@@ -37,7 +37,7 @@ import org.spongepowered.vanilla.client.VanillaClient;
 public abstract class MinecraftMixin_Vanilla implements VanillaClient {
 
     @Inject(method = "run", at = @At("HEAD"))
-    private void vanilla$startEngineLifecycle(CallbackInfo ci) {
+    private void vanilla$establishRegistriesAndStartingEngine(CallbackInfo ci) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishRegistries();
 
@@ -48,5 +48,15 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
     @Inject(method = "shutdownMinecraftApplet", at = @At("HEAD"))
     private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {
         SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
+    }
+
+    @Inject(method = "init", at = @At("RETURN"))
+    private void vanilla$callStartedEngineAndLoadedGame(CallbackInfo ci) {
+        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        lifecycle.callStartedEngineEvent(this);
+
+        // TODO Minecraft 1.14 - For now, fire LoadedGameEvent right away but this may not be the best place..
+
+        lifecycle.callLoadedGameEvent();
     }
 }

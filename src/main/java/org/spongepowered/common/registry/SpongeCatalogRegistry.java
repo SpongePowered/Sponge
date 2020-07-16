@@ -26,6 +26,7 @@ package org.spongepowered.common.registry;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -57,6 +58,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.raid.Raid;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
@@ -106,6 +108,7 @@ import org.spongepowered.api.entity.attribute.AttributeOperation;
 import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
@@ -128,6 +131,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.data.persistence.DataSerializers;
+import org.spongepowered.common.event.lifecycle.RegisterCatalogEventImpl;
 import org.spongepowered.common.registry.builtin.sponge.QueryTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
@@ -194,11 +198,13 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     private final Map<Class<CatalogType>, Map<String, Supplier<CatalogType>>> suppliers;
     private final Map<ResourceKey, Registry<CatalogType>> registries;
     private final Map<Class<CatalogType>, Registry<CatalogType>> registriesByType;
+    private final List<Class<? extends CatalogType>> dynamicCatalogs;
 
     public SpongeCatalogRegistry() {
         this.suppliers = new IdentityHashMap<>();
         this.registries = new Object2ObjectOpenHashMap<>();
         this.registriesByType = new IdentityHashMap<>();
+        this.dynamicCatalogs = new ArrayList<>();
     }
 
     @Override
@@ -299,13 +305,14 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key) {
+    public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key, final boolean isDynamic) {
         Preconditions.checkNotNull(key);
 
-        return this.registerRegistry(catalogClass, key, null, false);
+        return this.registerRegistry(catalogClass, key, null, false, isDynamic);
     }
 
-    public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key, @Nullable final Supplier<Set<T>> defaultsSupplier, final boolean generateSuppliers) {
+    public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key,
+            @Nullable final Supplier<Set<T>> defaultsSupplier, final boolean generateSuppliers, final boolean isDynamic) {
         Preconditions.checkNotNull(key);
 
         if (this.registries.get(key) != null) {
@@ -325,6 +332,11 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
                 }
             });
         }
+
+        if (isDynamic) {
+            this.dynamicCatalogs.add(catalogClass);
+        }
+
         return this;
     }
 
@@ -349,7 +361,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    private <T extends CatalogType, U> SpongeCatalogRegistry registerMappedRegistry(Class<T> catalogClass, ResourceKey key, @Nullable Supplier<Set<Tuple<T, U>>> defaultsSupplier, boolean generateSuppliers) {
+    private <T extends CatalogType, U> SpongeCatalogRegistry registerMappedRegistry(final Class<T> catalogClass, final ResourceKey key,
+            @Nullable final Supplier<Set<Tuple<T, U>>> defaultsSupplier, final boolean generateSuppliers, final boolean isDynamic) {
         Preconditions.checkNotNull(key);
 
         if (this.registries.containsKey(key)) {
@@ -371,6 +384,11 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
                 }
             });
         }
+
+        if (isDynamic) {
+            this.dynamicCatalogs.add(catalogClass);
+        }
+
         return this;
     }
 
@@ -397,6 +415,13 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return ((SimpleRegistry<C>) registry).register((ResourceLocation) (Object) catalogType.getKey(), catalogType);
     }
 
+    public void callRegisterCatalogEvents(final Cause cause, final Game game) {
+        for (final Class<? extends CatalogType> dynamicCatalog : this.dynamicCatalogs) {
+            final TypeToken<? extends CatalogType> token = TypeToken.of(dynamicCatalog);
+            game.getEventManager().post(new RegisterCatalogEventImpl<>(cause, game, (TypeToken<CatalogType>) token));
+        }
+    }
+
     /**
      * Only specify lines of registries that are not found in {@link Registry}.
      */
@@ -413,76 +438,76 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 //        ;
 
         this
-            .generateRegistry(AccountDeletionResultType.class, ResourceKey.sponge("account_deletion_result_type"), AccountDeletionResultTypeStreamGenerator.stream(), true)
-            .registerRegistry(Advancement.class, ResourceKey.minecraft("advancement"))
-            .registerRegistry(AdvancementTree.class, ResourceKey.minecraft("advancement_tree"))
+            .generateRegistry(AccountDeletionResultType.class, ResourceKey.sponge("account_deletion_result_type"), AccountDeletionResultTypeStreamGenerator.stream(), true, false)
+            .registerRegistry(Advancement.class, ResourceKey.minecraft("advancement"), false)
+            .registerRegistry(AdvancementTree.class, ResourceKey.minecraft("advancement_tree"), false)
 //            .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
-            .generateRegistry(ArmorMaterial.class, ResourceKey.minecraft("armor_material"), Arrays.stream(net.minecraft.item.ArmorMaterial.values()), true)
-            .generateRegistry(AttributeOperation.class, ResourceKey.minecraft("attribute_operation"), Arrays.stream(AttributeModifier.Operation.values()), true)
-            .generateRegistry(AttributeType.class, ResourceKey.minecraft("attribute_type"), AttributeTypeStreamGenerator.stream(), true)
-            .generateRegistry(BanType.class, ResourceKey.minecraft("ban_type"), BanTypeStreamGenerator.stream(), true)
-            .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true)
+            .generateRegistry(ArmorMaterial.class, ResourceKey.minecraft("armor_material"), Arrays.stream(net.minecraft.item.ArmorMaterial.values()), true, false)
+            .generateRegistry(AttributeOperation.class, ResourceKey.minecraft("attribute_operation"), Arrays.stream(AttributeModifier.Operation.values()), true, false)
+            .generateRegistry(AttributeType.class, ResourceKey.minecraft("attribute_type"), AttributeTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(BanType.class, ResourceKey.minecraft("ban_type"), BanTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true, false)
 //            .generateRegistry(BossBarOverlay.class, ResourceKey.minecraft("boss_bar_overlay"), Arrays.stream(BossInfo.Overlay.values()), true)
 //            .generateRegistry(BossBarColor.class, ResourceKey.minecraft("boss_bar_color"), Arrays.stream(BossInfo.Color.values()), true)
-            .generateRegistry(BodyPart.class, ResourceKey.minecraft("body_part"), BodyPartStreamGenerator.stream(), true)
-            .generateRegistry(ClientCompletionType.class, ResourceKey.sponge("client_completion"), ClientCompletionTypeStreamGenerator.stream(), true)
+            .generateRegistry(BodyPart.class, ResourceKey.minecraft("body_part"), BodyPartStreamGenerator.stream(), true, false)
+            .generateRegistry(ClientCompletionType.class, ResourceKey.sponge("client_completion"), ClientCompletionTypeStreamGenerator.stream(), true, false)
 //            .generateRegistry(ChatType.class, ResourceKey.minecraft("chat_type"), Arrays.stream(net.minecraft.util.text.ChatType.values()), true)
-            .generateRegistry(ChatVisibility.class, ResourceKey.minecraft("chat_visibility"), Arrays.stream(net.minecraft.entity.player.ChatVisibility.values()), true)
-            .generateRegistry(ChestAttachmentType.class, ResourceKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true)
-            .generateRegistry(CollisionRule.class, ResourceKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true)
-            .generateRegistry(ComparatorMode.class, ResourceKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true)
-            .registerRegistry(Currency.class, ResourceKey.sponge("currency"))
-            .generateRegistry(DamageType.class, ResourceKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true)
-            .generateRegistry(Difficulty.class, ResourceKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true)
-            .generateRegistry(DismountType.class, ResourceKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true)
-            .generateRegistry(DragonPhaseType.class, ResourceKey.minecraft("dragon_phase_type"), DragonPhaseTypeStreamGenerator.stream(), true)
-            .generateRegistry(DyeColor.class, ResourceKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true)
-            .generateRegistry(CatalogedValueParameter.class, ResourceKey.sponge("value_parameter"), CatalogedValueParameterStreamGenerator.stream(), true)
-            .generateRegistry(CommandRegistrar.class, ResourceKey.sponge("command_registrar"), CommandRegistrarStreamGenerator.stream(), true)
-            .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true)
-            .generateRegistry(EventContextKey.class, ResourceKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true)
-            .generateRegistry(FoxType.class, ResourceKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true)
-            .generateRegistry(GameMode.class, ResourceKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true)
-            .generateRegistry(GoalExecutorType.class, ResourceKey.minecraft("goal_executor_type"), GoalExecutorTypeStreamGenerator.stream(), true)
-            .generateRegistry(HandPreference.class, ResourceKey.minecraft("hand_preference"), Arrays.stream(HandSide.values()), true)
-            .generateRegistry(HandType.class, ResourceKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true)
-            .generateRegistry(Hinge.class, ResourceKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true)
-            .generateRegistry(InstrumentType.class, ResourceKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true)
-            .generateRegistry(MooshroomType.class, ResourceKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true)
-            .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true)
-            .generateRegistry(PandaGene.class, ResourceKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true)
-            .generateRegistry(PhantomPhase.class, ResourceKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true)
-            .generateRegistry(PickupRule.class, ResourceKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true)
-            .generateRegistry(PistonType.class, ResourceKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true)
-            .generateRegistry(PortalAgentType.class, ResourceKey.minecraft("portal_agent_type"), PortalAgentTypeStreamGenerator.stream(), true)
-            .generateRegistry(PortionType.class, ResourceKey.minecraft("portion_type"), Arrays.stream(Half.values()), true)
-            .generateRegistry(QueryType.class, ResourceKey.sponge("query_type"), QueryTypeStreamGenerator.stream(), true)
-            .generateRegistry(RaidStatus.class, ResourceKey.minecraft("raid_status"), Arrays.stream(Raid.Status.values()), true)
-            .generateRegistry(RailDirection.class, ResourceKey.minecraft("rail_direction"), Arrays.stream(RailShape.values()), true)
-            .generateRegistry(SlabPortion.class, ResourceKey.minecraft("slab_portion"), Arrays.stream(SlabType.values()), true)
-            .generateRegistry(SpawnType.class, ResourceKey.sponge("spawn_type"), SpawnTypeStreamGenerator.stream(), true)
-            .generateRegistry(SpellType.class, ResourceKey.minecraft("spell_type"), Arrays.stream(SpellcastingIllagerEntity.SpellType.values()), true)
-            .generateRegistry(StairShape.class, ResourceKey.minecraft("stair_shape"), Arrays.stream(StairsShape.values()), true)
-            .generateRegistry(StructureMode.class, ResourceKey.minecraft("structure_mode"), Arrays.stream(net.minecraft.state.properties.StructureMode.values()), true)
-            .generateRegistry(ToolType.class, ResourceKey.minecraft("tool_type"), Arrays.stream(ItemTier.values()), true)
-            .generateRegistry(TropicalFishShape.class, ResourceKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true)
-            .generateRegistry(WireAttachmentType.class, ResourceKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true)
-            .generateRegistry(WoodType.class, ResourceKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true)
-            .generateRegistry(Visibility.class, ResourceKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true)
+            .generateRegistry(ChatVisibility.class, ResourceKey.minecraft("chat_visibility"), Arrays.stream(net.minecraft.entity.player.ChatVisibility.values()), true, false)
+            .generateRegistry(ChestAttachmentType.class, ResourceKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true, false)
+            .generateRegistry(CollisionRule.class, ResourceKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true, false)
+            .generateRegistry(ComparatorMode.class, ResourceKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true, false)
+            .registerRegistry(Currency.class, ResourceKey.sponge("currency"), true)
+            .generateRegistry(DamageType.class, ResourceKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true, true)
+            .generateRegistry(Difficulty.class, ResourceKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true, false)
+            .generateRegistry(DismountType.class, ResourceKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(DragonPhaseType.class, ResourceKey.minecraft("dragon_phase_type"), DragonPhaseTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(DyeColor.class, ResourceKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true, false)
+            .generateRegistry(CatalogedValueParameter.class, ResourceKey.sponge("value_parameter"), CatalogedValueParameterStreamGenerator.stream(), true, true)
+            .generateRegistry(CommandRegistrar.class, ResourceKey.sponge("command_registrar"), CommandRegistrarStreamGenerator.stream(), true, true)
+            .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(EventContextKey.class, ResourceKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true, true)
+            .generateRegistry(FoxType.class, ResourceKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true, false)
+            .generateRegistry(GameMode.class, ResourceKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true, false)
+            .generateRegistry(GoalExecutorType.class, ResourceKey.minecraft("goal_executor_type"), GoalExecutorTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(HandPreference.class, ResourceKey.minecraft("hand_preference"), Arrays.stream(HandSide.values()), true, false)
+            .generateRegistry(HandType.class, ResourceKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true, false)
+            .generateRegistry(Hinge.class, ResourceKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true, false)
+            .generateRegistry(InstrumentType.class, ResourceKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true, false)
+            .generateRegistry(MooshroomType.class, ResourceKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true, false)
+            .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true, false)
+            .generateRegistry(PandaGene.class, ResourceKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true, false)
+            .generateRegistry(PhantomPhase.class, ResourceKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true, false)
+            .generateRegistry(PickupRule.class, ResourceKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true, false)
+            .generateRegistry(PistonType.class, ResourceKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true, false)
+            .generateRegistry(PortalAgentType.class, ResourceKey.minecraft("portal_agent_type"), PortalAgentTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(PortionType.class, ResourceKey.minecraft("portion_type"), Arrays.stream(Half.values()), true, false)
+            .generateRegistry(QueryType.class, ResourceKey.sponge("query_type"), QueryTypeStreamGenerator.stream(), true, true)
+            .generateRegistry(RaidStatus.class, ResourceKey.minecraft("raid_status"), Arrays.stream(Raid.Status.values()), true, false)
+            .generateRegistry(RailDirection.class, ResourceKey.minecraft("rail_direction"), Arrays.stream(RailShape.values()), true, false)
+            .generateRegistry(SlabPortion.class, ResourceKey.minecraft("slab_portion"), Arrays.stream(SlabType.values()), true, false)
+            .generateRegistry(SpawnType.class, ResourceKey.sponge("spawn_type"), SpawnTypeStreamGenerator.stream(), true, true)
+            .generateRegistry(SpellType.class, ResourceKey.minecraft("spell_type"), Arrays.stream(SpellcastingIllagerEntity.SpellType.values()), true, false)
+            .generateRegistry(StairShape.class, ResourceKey.minecraft("stair_shape"), Arrays.stream(StairsShape.values()), true, false)
+            .generateRegistry(StructureMode.class, ResourceKey.minecraft("structure_mode"), Arrays.stream(net.minecraft.state.properties.StructureMode.values()), true, false)
+            .generateRegistry(ToolType.class, ResourceKey.minecraft("tool_type"), Arrays.stream(ItemTier.values()), true, false)
+            .generateRegistry(TropicalFishShape.class, ResourceKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true, false)
+            .generateRegistry(WireAttachmentType.class, ResourceKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true, false)
+            .generateRegistry(WoodType.class, ResourceKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(Visibility.class, ResourceKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true, false)
         ;
 
         this
-            .generateMappedRegistry(CatType.class, ResourceKey.minecraft("cat_type"), CatTypeStreamGenerator.stream(), true)
-            .generateMappedRegistry(FireworkShape.class, ResourceKey.minecraft("firework_shape"), FireworkShapeStreamGenerator.stream(), true)
-            .generateMappedRegistry(GoalType.class, ResourceKey.minecraft("goal_type"), GoalTypeStreamGenerator.stream(), true)
-            .generateMappedRegistry(HorseColor.class, ResourceKey.minecraft("horse_color"), HorseColorStreamGenerator.stream(), true)
-            .generateMappedRegistry(HorseStyle.class, ResourceKey.minecraft("horse_style"), HorseStyleStreamGenerator.stream(), true)
-            .generateMappedRegistry(LlamaType.class, ResourceKey.minecraft("llama_type"), LlamaTypeStreamGenerator.stream(), true)
-            .generateMappedRegistry(NotePitch.class, ResourceKey.minecraft("note_pitch"), NotePitchStreamGenerator.stream(), true)
-            .generateMappedRegistry(ParrotType.class, ResourceKey.minecraft("parrot_type"), ParrotTypeStreamGenerator.stream(), true)
-            .generateMappedRegistry(RabbitType.class, ResourceKey.minecraft("rabbit_type"), RabbitTypeStreamGenerator.stream(), true)
-            .generateMappedRegistry(DataTranslator.class, ResourceKey.sponge("data_translator"), DataSerializers.stream(), true)
-            .generateMappedRegistry(DisplaySlot.class, ResourceKey.minecraft("display_slot"), DisplaySlotStreamGenerator.stream(), true)
+            .generateMappedRegistry(CatType.class, ResourceKey.minecraft("cat_type"), CatTypeStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(FireworkShape.class, ResourceKey.minecraft("firework_shape"), FireworkShapeStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(GoalType.class, ResourceKey.minecraft("goal_type"), GoalTypeStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(HorseColor.class, ResourceKey.minecraft("horse_color"), HorseColorStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(HorseStyle.class, ResourceKey.minecraft("horse_style"), HorseStyleStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(LlamaType.class, ResourceKey.minecraft("llama_type"), LlamaTypeStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(NotePitch.class, ResourceKey.minecraft("note_pitch"), NotePitchStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(ParrotType.class, ResourceKey.minecraft("parrot_type"), ParrotTypeStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(RabbitType.class, ResourceKey.minecraft("rabbit_type"), RabbitTypeStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(DataTranslator.class, ResourceKey.sponge("data_translator"), DataSerializers.stream(), true, false)
+            .generateMappedRegistry(DisplaySlot.class, ResourceKey.minecraft("display_slot"), DisplaySlotStreamGenerator.stream(), true, false)
         ;
 //
 //        this.generateCallbackRegistry(DataRegistration.class, ResourceKey.sponge("data_registration"), (key, value) -> SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) value));
@@ -493,7 +518,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
      */
     public void registerDefaultSuppliers() {
 
-        // TODO 1.14 - This is not right but I don't want this forgotten so here for now
         // TODO 1.14 - Stats are stupid, need to handle them manually
 
         // Class based/Likely for mods to override
@@ -514,14 +538,15 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         VillagerProfessionSupplier.registerSuppliers(this);
     }
 
-    private <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(Class<T> catalogClass, ResourceKey key, Stream<E> valueStream, boolean generateSuppliers) {
-        this.registerRegistry(catalogClass, key, () -> valueStream.map(value -> (T) value).collect(Collectors.toSet()), generateSuppliers);
+    private <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(final Class<T> catalogClass, final ResourceKey key,
+            final Stream<E> valueStream, final boolean generateSuppliers, final boolean isDynamic) {
+        this.registerRegistry(catalogClass, key, () -> valueStream.map(value -> (T) value).collect(Collectors.toSet()), generateSuppliers, isDynamic);
         return this;
     }
 
-    private <T extends CatalogType, E> SpongeCatalogRegistry generateMappedRegistry(Class<T> catalogClass, ResourceKey key, Stream<Tuple<T, E>> valueStream, boolean generateSuppliers) {
-        this.registerMappedRegistry(catalogClass, key, () -> valueStream.collect(Collectors.toSet()), generateSuppliers);
+    private <T extends CatalogType, E> SpongeCatalogRegistry generateMappedRegistry(final Class<T> catalogClass, final ResourceKey key,
+            final Stream<Tuple<T, E>> valueStream, final boolean generateSuppliers, final boolean isDynamic) {
+        this.registerMappedRegistry(catalogClass, key, () -> valueStream.collect(Collectors.toSet()), generateSuppliers, isDynamic);
         return this;
     }
-
 }
