@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.Preconditions;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -72,6 +70,7 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
+import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
@@ -135,6 +134,7 @@ import org.spongepowered.common.event.damage.SpongeFallingBlockDamgeSourceBuilde
 import org.spongepowered.common.event.damage.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackSnapshotBuilder;
+import org.spongepowered.common.inventory.InventoryTransactionResultImpl;
 import org.spongepowered.common.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.inventory.custom.SpongeViewableInventoryBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
@@ -242,6 +242,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
             .register(Inventory.Builder.class, SpongeInventoryBuilder::new)
             .register(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
+            .register(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
             .register(SoundType.Builder.class, SpongeSoundBuilder::new)
             .register(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
             .register(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
