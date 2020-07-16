@@ -22,19 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.entity.player;
+package org.spongepowered.common.data.provider.entity.player;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
+import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 
-@Mixin(ServerPlayerEntity.class)
-public interface ServerPlayerEntityAccessor {
+import java.util.Optional;
 
-    @Accessor("enteredNetherPosition") Vec3d accessor$getEnteredNetherPosition();
+public class ServerPlayerEntityViewedCreditsProvider extends GenericMutableDataProvider<ServerPlayerEntity, Boolean> {
+    public ServerPlayerEntityViewedCreditsProvider() {
+        super(Keys.HAS_VIEWED_CREDITS);
+    }
 
-    @Accessor("seenCredits") boolean accessor$hasSeenCredits();
+    @Override
+    protected Optional<Boolean> getFrom(ServerPlayerEntity dataHolder) {
+        return Optional.of(((ServerPlayerEntityAccessor) dataHolder).accessor$hasSeenCredits());
+    }
 
-    @Accessor("seenCredits") void accessor$setHasSeenCredits(boolean value);
+    @Override
+    protected boolean set(ServerPlayerEntity dataHolder, Boolean value) {
+        ((ServerPlayerEntityAccessor) dataHolder).accessor$setHasSeenCredits(value);
+        return true;
+    }
 }

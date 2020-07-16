@@ -222,6 +222,7 @@ import org.spongepowered.common.data.provider.entity.player.PlayerEntityFoodLeve
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityIsFlyingProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntitySaturationProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityWalkingSpeedProvider;
+import org.spongepowered.common.data.provider.entity.player.ServerPlayerEntityViewedCreditsProvider;
 import org.spongepowered.common.data.provider.entity.user.UserFirstDateJoinedProvider;
 import org.spongepowered.common.data.provider.entity.user.UserLastDatePlayedProvider;
 import org.spongepowered.common.data.provider.entity.vanishable.VanishableEntityInvisibleProvider;
@@ -1014,6 +1015,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(new PlayerEntityIsFlyingProvider());
         register(new PlayerEntitySaturationProvider());
         register(new PlayerEntityWalkingSpeedProvider());
+        register(new ServerPlayerEntityViewedCreditsProvider());
 
         register(ServerPlayerEntity.class, Keys.SPECTATOR_TARGET,
                 p -> (org.spongepowered.api.entity.Entity) p.getSpectatingEntity(),
