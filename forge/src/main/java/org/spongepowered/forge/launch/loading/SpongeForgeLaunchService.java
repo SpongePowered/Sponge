@@ -43,8 +43,9 @@ public class SpongeForgeLaunchService implements ILaunchPluginService {
     private static final Logger log = LogManager.getLogger();
 
     protected static final List<String> EXCLUDED_PACKAGES = Arrays.asList(
-            "org.spongepowered.plugin.metadata.",
-            "org.spongepowered.forge.launch.loading."
+            "org.spongepowered.plugin.",
+            "org.spongepowered.forge.launch.loading.SpongeForgeLoader",
+            "org.spongepowered.forge.launch.loading.locating."
     );
 
     @Override

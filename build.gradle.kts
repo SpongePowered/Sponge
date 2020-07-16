@@ -625,7 +625,7 @@ if (spongeForge != null) {
                             "Specification-Vendor" to "SpongePowered",
                             "Specification-Version" to apiProject.version,
                             "Implementation-Title" to project.name,
-                            "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion, forgeVersion),
+                            "Implementation-Version" to "28", // todo: annoying versionrange things
                             "Implementation-Vendor" to "SpongePowered"
 //                            "Implementation-Timestamp" to Instant.now().format("yyyy-MM-dd'T'HH:mm:ssZ")
                     ))

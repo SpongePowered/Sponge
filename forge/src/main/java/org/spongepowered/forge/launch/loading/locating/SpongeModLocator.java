@@ -24,6 +24,7 @@
  */
 package org.spongepowered.forge.launch.loading.locating;
 
+import net.minecraftforge.fml.loading.LogMarkers;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
@@ -33,6 +34,9 @@ import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginLanguageService;
 
+import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,12 +45,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.zip.ZipError;
 
 public class SpongeModLocator implements IModLocator {
 
     private final static String NAME = "sponge plugin locator";
+
     private static final Logger log = LogManager.getLogger();
+
+    private final Map<SpongeModFile, FileSystem> fileSystems;
+
+    public SpongeModLocator() {
+        this.fileSystems = new HashMap<>();
+    }
 
     @Override
     public List<IModFile> scanMods() {
@@ -76,12 +89,8 @@ public class SpongeModLocator implements IModLocator {
     @Override
     public Path findPath(final IModFile modFile, final String... path) {
         final SpongeModFile pluginFile = (SpongeModFile) modFile;
-
-        Path resolved = pluginFile.getPlugin().getFile();
-        for (final String s : path) {
-            resolved = resolved.resolve(s);
-        }
-        return resolved;
+        final FileSystem fs = this.fileSystems.computeIfAbsent(pluginFile, SpongeModLocator::createFileSystem);
+        return fs.getPath("/", path);
     }
 
     @Override
@@ -90,7 +99,12 @@ public class SpongeModLocator implements IModLocator {
 
     @Override
     public Optional<Manifest> findManifest(final Path file) {
-        return Optional.empty();
+        try (final JarFile jf = new JarFile(file.toFile())) {
+            return Optional.ofNullable(jf.getManifest());
+        }
+        catch (final IOException ex) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -100,6 +114,16 @@ public class SpongeModLocator implements IModLocator {
     @Override
     public boolean isValid(final IModFile modFile) {
         return true;
+    }
+
+    private static FileSystem createFileSystem(final IModFile modFile) {
+        try {
+            return FileSystems.newFileSystem(modFile.getFilePath(), modFile.getClass().getClassLoader());
+        }
+        catch (final IOException | ZipError ex) {
+            log.debug(LogMarkers.SCAN, "Invalid JAR file {} - no filesystem created", modFile.getFilePath());
+            return null;
+        }
     }
 
     private static void discoverPluginResources() {

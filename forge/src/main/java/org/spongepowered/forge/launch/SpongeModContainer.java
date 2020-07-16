@@ -36,9 +36,13 @@ import org.spongepowered.plugin.PluginContainer;
  */
 public class SpongeModContainer extends ModContainer {
 
-    public SpongeModContainer(final IModInfo info, final ClassLoader loader) {
+    private final ClassLoader modClassLoader;
+
+    public SpongeModContainer(final IModInfo info, final ClassLoader modClassLoader) {
         super(info);
         this.contextExtension = () -> null;
+
+        this.modClassLoader = modClassLoader;
     }
 
     @Override
