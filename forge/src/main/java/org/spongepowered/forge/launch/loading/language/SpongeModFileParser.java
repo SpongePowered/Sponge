@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.loading.locating;
+package org.spongepowered.forge.launch.loading.language;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
@@ -65,7 +65,7 @@ public final class SpongeModFileParser {
         mods.add(modConfig);
 
         final Config properties = Config.inMemory();
-        properties.set("sponge-metadata", metadata);
+//        properties.set("sponge-metadata", metadata);
 
         final Config modProperties = Config.inMemory();
         modProperties.set(metadata.getId(), properties);

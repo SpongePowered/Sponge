@@ -22,7 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.loading.locating;
+package org.spongepowered.forge.launch.loading.discovery;
+
+import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
 import net.minecraftforge.fml.loading.LogMarkers;
 import net.minecraftforge.forgespi.locating.IModFile;
@@ -30,6 +32,7 @@ import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.forge.launch.loading.SpongeForgeLoader;
+import org.spongepowered.forge.launch.loading.language.SpongeModFile;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginLanguageService;
@@ -39,6 +42,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +59,8 @@ public class SpongeModLocator implements IModLocator {
 
     private static final Logger log = LogManager.getLogger();
 
-    private final Map<SpongeModFile, FileSystem> fileSystems;
+    private final Map<IModFile, FileSystem> fileSystems;
+    private Map<PluginLanguageService<PluginContainer>, List<PluginCandidate>> pluginCandidates;
 
     public SpongeModLocator() {
         this.fileSystems = new HashMap<>();
@@ -63,13 +68,9 @@ public class SpongeModLocator implements IModLocator {
 
     @Override
     public List<IModFile> scanMods() {
-        discoverPluginResources();
-
-        final Map<PluginLanguageService<PluginContainer>, List<PluginCandidate>> pluginCandidates = createPluginCandidates();
-
         final List<IModFile> mods = new ArrayList<>();
 
-        for (final Map.Entry<PluginLanguageService<PluginContainer>, List<PluginCandidate>> languageCandidates : pluginCandidates.entrySet()) {
+        for (final Map.Entry<PluginLanguageService<PluginContainer>, List<PluginCandidate>> languageCandidates : this.pluginCandidates.entrySet()) {
             final PluginLanguageService<PluginContainer> languageService = languageCandidates.getKey();
             final Collection<PluginCandidate> candidates = languageCandidates.getValue();
 
@@ -90,7 +91,7 @@ public class SpongeModLocator implements IModLocator {
     public Path findPath(final IModFile modFile, final String... path) {
         final SpongeModFile pluginFile = (SpongeModFile) modFile;
         final FileSystem fs = this.fileSystems.computeIfAbsent(pluginFile, SpongeModLocator::createFileSystem);
-        return fs.getPath("/", path);
+        return fs.getPath(path[0], Arrays.copyOfRange(path, 1, path.length));
     }
 
     @Override
@@ -109,11 +110,20 @@ public class SpongeModLocator implements IModLocator {
 
     @Override
     public void initArguments(final Map<String, ?> arguments) {
+        discoverPluginResources();
+
+        try {
+            this.pluginCandidates = createPluginCandidates();
+        }
+        catch (final Exception ex) {
+            log.fatal(CORE, "Error trying to find resources", ex);
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
     public boolean isValid(final IModFile modFile) {
-        return true;
+        return this.fileSystems.get(modFile) != null;
     }
 
     private static FileSystem createFileSystem(final IModFile modFile) {

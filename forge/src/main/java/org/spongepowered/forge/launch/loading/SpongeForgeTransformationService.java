@@ -72,9 +72,18 @@ public class SpongeForgeTransformationService implements ITransformationService 
         // Populate SpongeForge.pluginEnvironment
         // TODO: improve
         final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
-        SpongeForgeLoader.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
-        SpongeForgeLoader.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> Paths.get(""));
-        SpongeForgeLoader.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(Paths.get("mods")));
+        SpongeForgeLoader.pluginEnvironment.getBlackboard().getOrCreate(
+                PluginKeys.VERSION,
+                () -> implementationVersion == null ? "dev" : implementationVersion
+        );
+        SpongeForgeLoader.pluginEnvironment.getBlackboard().getOrCreate(
+                PluginKeys.BASE_DIRECTORY,
+                () -> Paths.get("")
+        );
+        SpongeForgeLoader.pluginEnvironment.getBlackboard().getOrCreate(
+                PluginKeys.PLUGIN_DIRECTORIES,
+                () -> Arrays.asList(Paths.get("mods"))
+        );
 
         log.info("SpongePowered PLUGIN Subsystem Version={} Service=FML", SpongeForgeLoader.pluginEnvironment.getBlackboard().get(PluginKeys.VERSION).get());
         this.discoverLanguageServices();

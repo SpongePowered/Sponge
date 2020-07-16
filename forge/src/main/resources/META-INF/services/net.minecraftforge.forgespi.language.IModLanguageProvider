@@ -1,1 +1,2 @@
 org.spongepowered.forge.launch.loading.language.SpongeModLanguageProvider
+org.spongepowered.forge.launch.loading.language.SpongePlatformLanguageProvider
