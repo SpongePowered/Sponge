@@ -116,7 +116,6 @@ public abstract class ExplosionMixin implements ExplosionBridge {
      * @reason Rewrites to use our own hooks that will patch with forge perfectly well,
      * and allows for maximal capability.
      */
-    @Final
     @Overwrite
     public void doExplosionA() {
         // Sponge Start - If the explosion should not break blocks, don't bother calculating it
