@@ -81,7 +81,6 @@ public class TranslatedParameter {
         nodes.add(built);
         while (iterable.hasNext()) {
             final LiteralArgumentBuilder<CommandSource> secondary = LiteralArgumentBuilder.literal(iterable.next());
-            this.sourceCommandNode.forEach(secondary::then);
             if (this.isTerminal) {
                 secondary.executes(new SpongeCommandExecutorWrapper(commandExecutorIfTerminal));
             }
