@@ -1,29 +1,52 @@
 {
-    "plugins": [{
-        "id": "test",
-        "name": "TestPlugin",
-        "version": "8.0.0",
-        "main-class": "org.spongepowered.test.TestPlugin",
-        "description": "Just testing things...",
-        "links": {
-            "homepage": "https://www.spongepowered.org",
-            "source": "https://www.spongepowered.org/source",
-            "issues": "https://www.spongepowered.org/issues"
+    "plugins": [
+        {
+            "id": "test",
+            "name": "TestPlugin",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.TestPlugin",
+            "description": "Just testing things...",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }],
+            "extra": {
+                "test": 1,
+                "test2": "Banana",
+                "test3": "banana123",
+                "test4": "apple_cider_mahogany_salmon",
+                "test5": 3
+            }
         },
-        "contributors": [{
-            "name": "SpongePowered",
-            "description": "Lead Developer"
-        }],
-        "dependencies": [{
-            "id": "spongeapi",
-            "version": "8.0.0"
-        }],
-        "extra": {
-            "test": 1,
-            "test2": "Banana",
-            "test3": "banana123",
-            "test4": "apple_cider_mahogany_salmon",
-            "test5": 3
+        {
+            "id": "worldtest",
+            "name": "WorldTest",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.worldtest.WorldTest",
+            "description": "Testing world changes",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }],
+            "extra": {}
         }
-    }]
+    ]
 }
