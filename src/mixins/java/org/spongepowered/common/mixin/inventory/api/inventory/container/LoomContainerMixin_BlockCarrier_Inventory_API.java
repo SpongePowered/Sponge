@@ -22,31 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.api.inventory.container;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import net.minecraft.inventory.container.LoomContainer;
+import net.minecraft.util.IWorldPosCallable;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
+import org.spongepowered.math.vector.Vector3i;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+@Mixin(LoomContainer.class)
+public abstract class LoomContainerMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {
 
-    private final ServerLocation loc;
-    private final Container container;
-
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
-    }
+    @Final @Shadow private IWorldPosCallable worldPos;
 
     @Override
     public ServerLocation getLocation() {
-        return this.loc;
+        return this.worldPos.apply((world, pos) ->
+                ServerLocation.of(((ServerWorld) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
+        ).orElse(null);
     }
 
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
+    public World<?> getWorld() {
+        return this.worldPos.apply((world, pos) -> (World<?>) world).orElse(null);
     }
 }

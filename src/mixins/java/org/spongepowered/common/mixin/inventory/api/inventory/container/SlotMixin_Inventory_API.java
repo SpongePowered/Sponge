@@ -22,31 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.api.inventory.container;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.container.Slot;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+@Mixin(Slot.class)
+public abstract class SlotMixin_Inventory_API implements org.spongepowered.api.item.inventory.Slot, DefaultImplementedAdapterInventory.WithClear {
 
-    private final ServerLocation loc;
-    private final Container container;
+    @Shadow @Final public IInventory inventory;
 
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
+    @Override
+    public Inventory parent() {
+        if (this.inventory instanceof Inventory) {
+            return (Inventory) this.inventory;
+        }
+        // In modded the inventory could be null
+        return this;
     }
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
+    public org.spongepowered.api.item.inventory.Slot viewedSlot() {
+        return this;
     }
 
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
-    }
 }

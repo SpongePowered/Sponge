@@ -22,31 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.api;
 
+import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.inventory.CarriedBridge;
+import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
+import org.spongepowered.common.inventory.custom.CustomInventory;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+import java.util.Optional;
 
-    private final ServerLocation loc;
-    private final Container container;
-
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
-    }
+/**
+ * Implements {@link CarriedInventory} using {@link CarriedBridge}
+ */
+@Mixin(value = {
+    Container.class,
+    CarriedWrapperInventory.class,
+    CustomInventory.class
+})
+public abstract class TraitMixin_Carried_Inventory_API implements CarriedInventory<Carrier> {
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
+    public Optional<Carrier> getCarrier() {
+        if (this instanceof CarriedBridge) {
+            return ((CarriedBridge) this).bridge$getCarrier();
+        }
+        return Optional.empty();
     }
 
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
-    }
 }

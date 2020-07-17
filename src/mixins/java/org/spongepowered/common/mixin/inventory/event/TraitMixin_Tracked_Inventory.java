@@ -22,31 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.event;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.tileentity.DropperTileEntity;
+import net.minecraft.tileentity.HopperTileEntity;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final ServerLocation loc;
-    private final Container container;
+@Mixin(value = {
+    DropperTileEntity.class,
+    HopperTileEntity.class,
+    PlayerInventory.class,
+    Container.class
+})
+public abstract class TraitMixin_Tracked_Inventory implements TrackedInventoryBridge {
 
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
+    private List<SlotTransaction> impl$capturedTransactions = new ArrayList<>();
+    private boolean impl$doCapture = false;
 
-        this.loc = loc;
-        this.container = container;
+    @Override
+    public List<SlotTransaction> bridge$getCapturedSlotTransactions() {
+        return this.impl$capturedTransactions;
     }
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
+    public void bridge$setCaptureInventory(final boolean doCapture) {
+        this.impl$doCapture = doCapture;
     }
 
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
+    public boolean bridge$capturingInventory() {
+        return this.impl$doCapture;
     }
+
 }

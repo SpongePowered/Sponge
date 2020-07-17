@@ -22,31 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.impl.entity.merchant.villager;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
+import net.minecraft.inventory.Inventory;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+@Mixin(value = AbstractVillagerEntity.class)
+public abstract class AbstractVillagerEntityMixin_Lens_Inventory implements LensGeneratorBridge {
 
-    private final ServerLocation loc;
-    private final Container container;
+    @Shadow @Final private Inventory villagerInventory;
 
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
+    @Override
+    public SlotLensProvider lensGeneratorBridge$generateSlotLensProvider() {
+        return new LensRegistrar.BasicSlotLensProvider(this.villagerInventory.getSizeInventory());
     }
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
+    public Lens lensGeneratorBridge$generateLens(SlotLensProvider slotLensProvider) {
+        return LensRegistrar.getLens(this, slotLensProvider, this.villagerInventory.getSizeInventory());
     }
 
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
-    }
 }

@@ -22,31 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.api.tileentity;
 
+import net.minecraft.tileentity.LockableTileEntity;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.item.inventory.type.BlockEntityInventory;
+import org.spongepowered.asm.mixin.Mixin;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+import java.util.Optional;
 
-    private final ServerLocation loc;
-    private final Container container;
+@Mixin(LockableTileEntity.class)
+public abstract class LockableTileEntityMixin_Carried_Inventory_API<T extends BlockEntity & Carrier> implements BlockEntityInventory<T> {
 
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
+    @Override
+    @SuppressWarnings("unchecked")
+    public Optional<T> getCarrier() {
+        return Optional.of((T) this);
     }
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
+    @SuppressWarnings("unchecked")
+    public Optional<T> getBlockEntity() {
+        return Optional.of((T) this);
     }
 
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
-    }
 }

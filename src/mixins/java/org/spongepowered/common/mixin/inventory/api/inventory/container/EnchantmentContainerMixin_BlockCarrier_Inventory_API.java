@@ -22,36 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.api.inventory.container;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import net.minecraft.inventory.container.EnchantmentContainer;
+import net.minecraft.util.IWorldPosCallable;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.SingleBlockCarrier;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
+import org.spongepowered.math.vector.Vector3i;
 
-public class SpongeTileEntityCarrier implements DefaultSingleBlockCarrier {
+/**
+ * Specifically to implement the {@link #getInventory()} and {@link #getLocation()}
+ * aspects of {@link SingleBlockCarrier} since the remainder of
+ * {@link Inventory} implementation is defaulted in {@link SingleBlockCarrier}
+ */
+@Mixin(EnchantmentContainer.class)
+public abstract class EnchantmentContainerMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {
 
-    private final Container container;
-    private final TileEntity inventory;
-
-    public SpongeTileEntityCarrier(Container container, TileEntity inventory) {
-
-        this.container = container;
-        this.inventory = inventory;
-    }
+    @Shadow @Final private IWorldPosCallable field_217006_g;
 
     @Override
     public ServerLocation getLocation() {
-        final BlockPos pos = this.inventory.getPos();
-        return ServerLocation.of(((ServerWorld) this.inventory.getWorld()), pos.getX(), pos.getY(), pos.getZ());
+        return this.field_217006_g.apply((world, pos) ->
+                ServerLocation.of(((ServerWorld) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
+        ).orElse(null);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory) this.container;
+    public World<?> getWorld() {
+        return this.field_217006_g.apply((world, pos) -> (World<?>) world).orElse(null);
     }
+
 }

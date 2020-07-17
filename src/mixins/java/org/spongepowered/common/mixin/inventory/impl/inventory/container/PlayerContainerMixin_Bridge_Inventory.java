@@ -22,31 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.impl.inventory.container;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.container.PlayerContainer;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
+import org.spongepowered.common.bridge.inventory.container.PlayerContainerBridge;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+@Mixin(PlayerContainer.class)
+public abstract class PlayerContainerMixin_Bridge_Inventory implements PlayerContainerBridge {
 
-    private final ServerLocation loc;
-    private final Container container;
-
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
-    }
+    @Shadow @Final private PlayerEntity player;
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
-    }
-
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
+    public void bridge$markClean() {
+        ((PlayerInventoryBridge) this.player.inventory).bridge$markClean();
     }
 }

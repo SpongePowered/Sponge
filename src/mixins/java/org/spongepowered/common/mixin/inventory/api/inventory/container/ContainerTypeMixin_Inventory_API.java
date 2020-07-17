@@ -22,31 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.api.inventory.container;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.asm.mixin.Mixin;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
-
-    private final ServerLocation loc;
-    private final Container container;
-
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
-    }
+@Mixin(ContainerType.class)
+public class ContainerTypeMixin_Inventory_API implements org.spongepowered.api.item.inventory.ContainerType {
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
-    }
-
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
+    public ResourceKey getKey() {
+        return (ResourceKey)(Object) Registry.MENU.getKey(((ContainerType) (Object) this));
     }
 }

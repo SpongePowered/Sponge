@@ -43,7 +43,8 @@ public abstract class LaunchMixinConnector implements IMixinConnector {
         return Lists.newArrayList(
             "mixins.common.accessors.json",
             "mixins.common.api.json",
-            "mixins.common.core.json"
+            "mixins.common.core.json",
+            "mixins.common.inventory.json"
         );
     }
 }

@@ -22,31 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.impl.common.inventory.custom;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
+import org.spongepowered.common.inventory.custom.CustomInventory;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+@Mixin(CustomInventory.class)
+public abstract class CustomInventoryMixin_Lens_Inventory implements LensGeneratorBridge {
 
-    private final ServerLocation loc;
-    private final Container container;
+    @Shadow(remap = false) private SlotLensProvider slotLensProvider;
+    @Shadow(remap = false) private Lens lens;
 
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
+    @Override
+    public SlotLensProvider lensGeneratorBridge$generateSlotLensProvider() {
+        return this.slotLensProvider;
     }
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
-    }
-
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
+    public Lens lensGeneratorBridge$generateLens(SlotLensProvider slotLensProvider) {
+        return this.lens;
     }
 }

@@ -26,13 +26,16 @@ package org.spongepowered.common.inventory;
 
 import net.minecraft.inventory.ISidedInventory;
 import org.spongepowered.api.item.inventory.BlockCarrier;
+import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.SingleBlockCarrier;
 import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.slot.SlotMatchers;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Arrays;
 
@@ -41,6 +44,15 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
     @Override
     default Inventory getInventory(Direction from) {
         return getInventory(from, this);
+    }
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Override
+    default CarriedInventory<? extends Carrier> getInventory() {
+        if (this instanceof CarriedInventory) {
+            return (CarriedInventory) this;
+        }
+        // override for non CarriedInventory
+        throw new MissingImplementationException("SingleBlockCarrier", "getInventory");
     }
 
     @SuppressWarnings("deprecation")

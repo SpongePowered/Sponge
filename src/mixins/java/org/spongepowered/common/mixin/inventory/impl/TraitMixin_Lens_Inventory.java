@@ -22,31 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.impl;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import net.minecraft.inventory.CraftResultInventory;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.DoubleSidedInventory;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.tileentity.LockableTileEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+@Mixin(value = {
+        LockableTileEntity.class,
+        DoubleSidedInventory.class,
+        CraftResultInventory.class,
+        CraftingInventory.class,
+        Inventory.class
+})
+public abstract class TraitMixin_Lens_Inventory implements IInventory, LensGeneratorBridge {
 
-    private final ServerLocation loc;
-    private final Container container;
-
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
+    @Override
+    public SlotLensProvider lensGeneratorBridge$generateSlotLensProvider() {
+        return new LensRegistrar.BasicSlotLensProvider(this.getSizeInventory());
     }
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
+    public Lens lensGeneratorBridge$generateLens(SlotLensProvider slotLensProvider) {
+        return LensRegistrar.getLens(this, slotLensProvider, this.getSizeInventory());
     }
 
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
-    }
 }

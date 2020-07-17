@@ -49,12 +49,12 @@ public class SpongeUserInventory implements IInventory {
     /** The index of the currently held item (0-8). */
     public int currentItem;
     /** The player whose inventory this is. */
-    public SpongeUser player;
+    public SpongeUser user;
     private boolean dirty = false;
 
     public SpongeUserInventory(SpongeUser playerIn) {
         this.allInventories = Arrays.asList(this.mainInventory, this.armorInventory, this.offHandInventory);
-        this.player = playerIn;
+        this.user = playerIn;
     }
 
     public ItemStack getCurrentItem() {
@@ -248,7 +248,7 @@ public class SpongeUserInventory implements IInventory {
     @Override
     public void markDirty() {
         this.dirty = true;
-        this.player.markDirty();
+        this.user.markDirty();
     }
 
     /**

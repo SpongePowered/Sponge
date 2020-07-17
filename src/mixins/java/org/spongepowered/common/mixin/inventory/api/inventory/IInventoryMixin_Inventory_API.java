@@ -22,31 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.api.inventory;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import net.minecraft.inventory.IInventory;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+@Mixin(IInventory.class)
+@Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
+public interface IInventoryMixin_Inventory_API extends DefaultImplementedAdapterInventory {
 
-    private final ServerLocation loc;
-    private final Container container;
-
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
+    // Soft implemented in development since the targets have the same method from IInventory
+    @Intrinsic
+    default void inventory$clear() {
+        ((InventoryBridge) this).bridge$getAdapter().inventoryAdapter$getFabric().fabric$clear();
     }
 
-    @Override
-    public ServerLocation getLocation() {
-        return this.loc;
-    }
-
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
-    }
 }

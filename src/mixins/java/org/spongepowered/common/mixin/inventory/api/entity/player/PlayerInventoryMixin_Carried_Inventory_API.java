@@ -22,31 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.api.entity.player;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
+import net.minecraft.entity.player.PlayerEntity;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+import java.util.Optional;
 
-    private final ServerLocation loc;
-    private final Container container;
-
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
-    }
+@Mixin(net.minecraft.entity.player.PlayerInventory.class)
+public abstract class PlayerInventoryMixin_Carried_Inventory_API implements CarriedInventory<Player> {
+    @Final @Shadow public PlayerEntity player;
 
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
+    public Optional<Player> getCarrier() {
+        return Optional.ofNullable((Player) this.player);
     }
 
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
-    }
 }

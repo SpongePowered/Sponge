@@ -22,31 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory;
+package org.spongepowered.common.mixin.inventory.api.entity.item.minecart;
 
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
+import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
+import org.spongepowered.api.entity.vehicle.minecart.carrier.CarrierMinecart;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.asm.mixin.Mixin;
 
-public class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
+import java.util.Optional;
 
-    private final ServerLocation loc;
-    private final Container container;
+@Mixin(ContainerMinecartEntity.class)
+public abstract class ContainerMinecartEntityMixin_Carried_Inventory_API<M extends CarrierMinecart<M>> implements CarriedInventory<M> {
 
-    public SpongeLocationCarrier(ServerLocation loc, Container container) {
-
-        this.loc = loc;
-        this.container = container;
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
-    public ServerLocation getLocation() {
-        return this.loc;
-    }
-
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return (CarriedInventory<? extends Carrier>) this.container;
+    public Optional<M> getCarrier() {
+        return Optional.of((M) this);
     }
 }
