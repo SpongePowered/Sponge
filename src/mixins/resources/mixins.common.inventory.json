@@ -24,6 +24,8 @@
     "api.inventory.DoubleSidedInventoryMixin_Carried_Inventory_API",
     "api.inventory.DoubleSidedInventoryMixin_Carrier_Inventory_API",
     "api.inventory.DoubleSidedInventoryMixin_Viewable_Inventory_API",
+    "api.inventory.EquipmentSlotType_GroupMixin_Inventory_API",
+    "api.inventory.EquipmentSlotTypeMixin_Inventory_API",
     "api.inventory.IInventoryMixin_Inventory_API",
     "api.inventory.container.ContainerMixin_Inventory_API",
     "api.inventory.container.ContainerTypeMixin_Inventory_API",

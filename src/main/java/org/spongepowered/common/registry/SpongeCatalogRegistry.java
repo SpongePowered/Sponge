@@ -38,6 +38,7 @@ import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.passive.PandaEntity;
 import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemTier;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.state.properties.ChestType;
@@ -63,11 +64,14 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.type.ArmorMaterial;
+import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.CatType;
@@ -90,6 +94,7 @@ import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.api.data.type.RailDirection;
@@ -99,13 +104,17 @@ import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.ToolType;
 import org.spongepowered.api.data.type.TropicalFishShape;
+import org.spongepowered.api.data.type.VillagerType;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
-import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.cause.Cause;
@@ -113,7 +122,10 @@ import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.api.item.inventory.ContainerType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.registry.CatalogRegistry;
@@ -127,7 +139,9 @@ import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.ban.BanType;
+import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.data.persistence.DataSerializers;
@@ -156,18 +170,16 @@ import org.spongepowered.common.registry.builtin.sponge.PortalAgentTypeStreamGen
 import org.spongepowered.common.registry.builtin.sponge.RabbitTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.vanilla.AttributeTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.IAttributeTypeRegistrar;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.CriteriaTriggersSupplier;
+import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
 import org.spongepowered.common.registry.builtin.vanilla.DimensionTypeSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.DragonPhaseTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.PhaseTypeRegistrar;
 import org.spongepowered.common.registry.builtin.vanilla.EffectSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.EnchantmentSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.EntityTypeSupplier;
-import org.spongepowered.common.registry.builtin.vanilla.EquipmentTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.vanilla.FireworkShapeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.FluidSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ItemSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.PaintingTypeSupplier;
@@ -205,6 +217,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         this.registries = new Object2ObjectOpenHashMap<>();
         this.registriesByType = new IdentityHashMap<>();
         this.dynamicCatalogs = new ArrayList<>();
+
+        this.registerVanillaRegistries();
     }
 
     @Override
@@ -292,13 +306,24 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return stream;
     }
 
+    public <T extends CatalogType, E extends T> SpongeCatalogRegistry registerCatalogAndSupplier(final Class<E> catalogClass, final String suggestedId, Supplier<E> supplier) {
+        Preconditions.checkNotNull(supplier);
+
+        // Typically this isn't safe but for fake vanilla registries we can do it
+        final E value = supplier.get();
+
+        final Registry<CatalogType> registry = this.registriesByType.get(catalogClass);
+        ((SimpleRegistry) registry).register((ResourceLocation) (Object) ((CatalogType) value).getKey(), value);
+
+        return this.registerSupplier(catalogClass, suggestedId, supplier);
+    }
+
     public <T extends CatalogType, E extends T> SpongeCatalogRegistry registerSupplier(final Class<E> catalogClass, final String suggestedId, Supplier<E> supplier) {
         Preconditions.checkNotNull(supplier);
 
         final Map<String, Supplier<CatalogType>> catalogSuppliers = this.suppliers.computeIfAbsent((Class<CatalogType>) (Object) catalogClass, k -> new Object2ObjectArrayMap<>());
         if (catalogSuppliers.containsKey(suggestedId)) {
-            throw new DuplicateRegistrationException(String.format("Catalog '%s' with id '%s' has a supplier already registered!", catalogClass,
-                suggestedId));
+            throw new DuplicateRegistrationException(String.format("Catalog '%s' with id '%s' has a supplier already registered!", catalogClass, suggestedId));
         }
 
         catalogSuppliers.put(suggestedId, (Supplier<CatalogType>) (Object) supplier);
@@ -340,12 +365,12 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    public SpongeCatalogRegistry registerRegistry(final Class<CatalogType> catalogClass, final ResourceKey key, final Registry<CatalogType> registry) {
+    public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key, final Registry<T> registry) {
         Preconditions.checkNotNull(key);
         Preconditions.checkNotNull(registry);
 
-        this.registries.put(key, registry);
-        this.registriesByType.put(catalogClass, registry);
+        this.registries.put(key, (Registry<CatalogType>) registry);
+        this.registriesByType.put((Class<CatalogType>) catalogClass, (Registry<CatalogType>) registry);
         return this;
     }
 
@@ -422,6 +447,28 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         }
     }
 
+    private void registerVanillaRegistries() {
+        this.registerRegistry(BiomeType.class, ResourceKey.minecraft("biome_type"), (Registry<BiomeType>) (Object) Registry.BIOME);
+        this.registerRegistry(BlockType.class, ResourceKey.minecraft("block_type"), (Registry<BlockType>) (Object) Registry.BLOCK);
+        this.registerRegistry(ContainerType.class, ResourceKey.minecraft("container_type"), (Registry<ContainerType>) (Object) Registry.MENU);
+        this.registerRegistry(DimensionType.class, ResourceKey.minecraft("dimension_type"), (Registry<DimensionType>) (Object) Registry.DIMENSION_TYPE);
+        this.registerRegistry(PotionEffectType.class, ResourceKey.minecraft("potion_effect_type"), (Registry<PotionEffectType>) (Object) Registry.EFFECTS);
+        this.registerRegistry(EnchantmentType.class, ResourceKey.minecraft("enchantment_type"), (Registry<EnchantmentType>) (Object) Registry.ENCHANTMENT);
+        this.registerRegistry(EntityType.class, ResourceKey.minecraft("entity_type"), (Registry<EntityType>) (Object) Registry.ENTITY_TYPE);
+        this.registerRegistry(FluidType.class, ResourceKey.minecraft("fluid_type"), (Registry<FluidType>) (Object) Registry.FLUID);
+        this.registerRegistry(ArtType.class, ResourceKey.minecraft("art_type"), (Registry<ArtType>) (Object) Registry.MOTIVE);
+        this.registerRegistry(ParticleType.class, ResourceKey.minecraft("particle_type"), (Registry<ParticleType>) (Object) Registry.PARTICLE_TYPE);
+        this.registerRegistry(SoundType.class, ResourceKey.minecraft("sound_type"), (Registry<SoundType>) (Object) Registry.SOUND_EVENT);
+        this.registerRegistry(BlockEntityType.class, ResourceKey.minecraft("block_entity_type"), (Registry<BlockEntityType>) (Object) Registry.BLOCK_ENTITY_TYPE);
+        this.registerRegistry(ProfessionType.class, ResourceKey.minecraft("profession_type"), (Registry<ProfessionType>) (Object) Registry.VILLAGER_PROFESSION);
+        this.registerRegistry(VillagerType.class, ResourceKey.minecraft("villager_type"), (Registry<VillagerType>) (Object) Registry.VILLAGER_TYPE);
+
+        // Que the "I'm Vanilla and I'm fucking stupid" music
+        CriteriaTriggersRegistrar.registerRegistry(this);
+        IAttributeTypeRegistrar.registerRegistry(this);
+        PhaseTypeRegistrar.registerRegistry(this);
+    }
+
     /**
      * Only specify lines of registries that are not found in {@link Registry}.
      */
@@ -444,7 +491,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 //            .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
             .generateRegistry(ArmorMaterial.class, ResourceKey.minecraft("armor_material"), Arrays.stream(net.minecraft.item.ArmorMaterial.values()), true, false)
             .generateRegistry(AttributeOperation.class, ResourceKey.minecraft("attribute_operation"), Arrays.stream(AttributeModifier.Operation.values()), true, false)
-            .generateRegistry(AttributeType.class, ResourceKey.minecraft("attribute_type"), AttributeTypeStreamGenerator.stream(), true, false)
             .generateRegistry(BanType.class, ResourceKey.minecraft("ban_type"), BanTypeStreamGenerator.stream(), true, false)
             .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true, false)
 //            .generateRegistry(BossBarOverlay.class, ResourceKey.minecraft("boss_bar_overlay"), Arrays.stream(BossInfo.Overlay.values()), true)
@@ -460,18 +506,18 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(DamageType.class, ResourceKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true, true)
             .generateRegistry(Difficulty.class, ResourceKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true, false)
             .generateRegistry(DismountType.class, ResourceKey.minecraft("dismount_type"), DismountTypeStreamGenerator.stream(), true, false)
-            .generateRegistry(DragonPhaseType.class, ResourceKey.minecraft("dragon_phase_type"), DragonPhaseTypeStreamGenerator.stream(), true, false)
             .generateRegistry(DyeColor.class, ResourceKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true, false)
             .generateRegistry(CatalogedValueParameter.class, ResourceKey.sponge("value_parameter"), CatalogedValueParameterStreamGenerator.stream(), true, true)
             .generateRegistry(CommandRegistrar.class, ResourceKey.sponge("command_registrar"), CommandRegistrarStreamGenerator.stream(), true, true)
-            .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(EquipmentGroup.class, ResourceKey.minecraft("equipment_group"), Arrays.stream(EquipmentSlotType.Group.values()), true, false)
+            .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), Arrays.stream(EquipmentSlotType.values()), true, false)
             .generateRegistry(EventContextKey.class, ResourceKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true, true)
             .generateRegistry(FoxType.class, ResourceKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true, false)
             .generateRegistry(GameMode.class, ResourceKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true, false)
             .generateRegistry(GoalExecutorType.class, ResourceKey.minecraft("goal_executor_type"), GoalExecutorTypeStreamGenerator.stream(), true, false)
             .generateRegistry(HandPreference.class, ResourceKey.minecraft("hand_preference"), Arrays.stream(HandSide.values()), true, false)
             .generateRegistry(HandType.class, ResourceKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true, false)
-            .generateRegistry(DoorHinge.class, ResourceKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true, false)
+            .generateRegistry(DoorHinge.class, ResourceKey.minecraft("door_hinge"), Arrays.stream(DoorHingeSide.values()), true, false)
             .generateRegistry(InstrumentType.class, ResourceKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true, false)
             .generateRegistry(MooshroomType.class, ResourceKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true, false)
             .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true, false)
@@ -498,7 +544,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         this
             .generateMappedRegistry(CatType.class, ResourceKey.minecraft("cat_type"), CatTypeStreamGenerator.stream(), true, false)
-            .generateMappedRegistry(FireworkShape.class, ResourceKey.minecraft("firework_shape"), FireworkShapeStreamGenerator.stream(), true, false)
             .generateMappedRegistry(GoalType.class, ResourceKey.minecraft("goal_type"), GoalTypeStreamGenerator.stream(), true, false)
             .generateMappedRegistry(HorseColor.class, ResourceKey.minecraft("horse_color"), HorseColorStreamGenerator.stream(), true, false)
             .generateMappedRegistry(HorseStyle.class, ResourceKey.minecraft("horse_style"), HorseStyleStreamGenerator.stream(), true, false)
@@ -524,28 +569,28 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         BiomeSupplier.registerSuppliers(this);
         BlockSupplier.registerSuppliers(this);
         ContainerTypeSupplier.registerSuppliers(this);
-        CriteriaTriggersSupplier.registerSuppliers(this);
+        CriteriaTriggersRegistrar.registerSuppliers(this);
         DimensionTypeSupplier.registerSuppliers(this);
         EffectSupplier.registerSuppliers(this);
         EnchantmentSupplier.registerSuppliers(this);
         EntityTypeSupplier.registerSuppliers(this);
         FluidSupplier.registerSuppliers(this);
+        IAttributeTypeRegistrar.registerSuppliers(this);
         ItemSupplier.registerSuppliers(this);
         PaintingTypeSupplier.registerSuppliers(this);
         ParticleTypeSupplier.registerSuppliers(this);
+        PhaseTypeRegistrar.registerSuppliers(this);
         SoundEventSupplier.registerSuppliers(this);
         TileEntityTypeSupplier.registerSuppliers(this);
         VillagerProfessionSupplier.registerSuppliers(this);
     }
 
-    private <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(final Class<T> catalogClass, final ResourceKey key,
-            final Stream<E> valueStream, final boolean generateSuppliers, final boolean isDynamic) {
+    public <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(final Class<T> catalogClass, final ResourceKey key, final Stream<E> valueStream, final boolean generateSuppliers, final boolean isDynamic) {
         this.registerRegistry(catalogClass, key, () -> valueStream.map(value -> (T) value).collect(Collectors.toSet()), generateSuppliers, isDynamic);
         return this;
     }
 
-    private <T extends CatalogType, E> SpongeCatalogRegistry generateMappedRegistry(final Class<T> catalogClass, final ResourceKey key,
-            final Stream<Tuple<T, E>> valueStream, final boolean generateSuppliers, final boolean isDynamic) {
+    private <T extends CatalogType, E> SpongeCatalogRegistry generateMappedRegistry(final Class<T> catalogClass, final ResourceKey key, final Stream<Tuple<T, E>> valueStream, final boolean generateSuppliers, final boolean isDynamic) {
         this.registerMappedRegistry(catalogClass, key, () -> valueStream.collect(Collectors.toSet()), generateSuppliers, isDynamic);
         return this;
     }

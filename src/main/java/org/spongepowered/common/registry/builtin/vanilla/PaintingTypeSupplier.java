@@ -33,7 +33,7 @@ public final class PaintingTypeSupplier {
     private PaintingTypeSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(ArtType.class, "kebab", () -> (ArtType) PaintingType.KEBAB)
             .registerSupplier(ArtType.class, "aztec", () -> (ArtType) PaintingType.AZTEC)

@@ -33,7 +33,7 @@ public final class EffectSupplier {
     private EffectSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(PotionEffectType.class, "speed", () -> (PotionEffectType) Effects.SPEED)
             .registerSupplier(PotionEffectType.class, "slowness", () -> (PotionEffectType) Effects.SLOWNESS)

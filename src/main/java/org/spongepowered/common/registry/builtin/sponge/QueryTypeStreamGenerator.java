@@ -50,6 +50,9 @@ import java.util.stream.Stream;
 
 public final class QueryTypeStreamGenerator {
 
+    private QueryTypeStreamGenerator() {
+    }
+
     // Internal only query types
     public static final QueryType.OneParam<Lens> LENS = new SpongeOneParamQueryType<>(ResourceKey.sponge("lens"), LensQuery::new);
     public static final QueryType.OneParam<ImmutableSet<Inventory>> SLOT_LENS = new SpongeOneParamQueryType<>(ResourceKey.sponge("slot_lens"), SlotLensQuery::new);
@@ -68,8 +71,5 @@ public final class QueryTypeStreamGenerator {
                 new SpongeOneParamQueryType<>(ResourceKey.sponge("type"), TypeQuery::new),
                 new SpongeTwoParamQueryType<>(ResourceKey.sponge("grid"), GridQuery::new)
         );
-    }
-
-    private QueryTypeStreamGenerator() {
     }
 }

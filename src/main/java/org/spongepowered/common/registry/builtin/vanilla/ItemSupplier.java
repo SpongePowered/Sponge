@@ -33,7 +33,7 @@ public final class ItemSupplier {
     private ItemSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(ItemType.class, "air", () -> (ItemType) Items.AIR)
             .registerSupplier(ItemType.class, "stone", () -> (ItemType) Items.STONE)

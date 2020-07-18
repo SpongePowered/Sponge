@@ -29,7 +29,6 @@ import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
@@ -48,15 +47,8 @@ public class EquipmentSlotLens extends FilteringSlotLens {
 
     private static FilteringSlotLens.ItemStackFilter equipmentTypeFilter(EquipmentType type) {
         return (fabric, item) -> {
-            EquipmentSlotType itemSlotType = MobEntity.getSlotForItemStack(ItemStackUtil.toNative(item));
-            if (type instanceof SpongeEquipmentType) {
-                for (EquipmentSlotType slotType : ((SpongeEquipmentType) type).getSlots()) {
-                    if (slotType == itemSlotType) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            final EquipmentSlotType itemSlotType = MobEntity.getSlotForItemStack(ItemStackUtil.toNative(item));
+            return itemSlotType == (Object) type;
         };
     }
 

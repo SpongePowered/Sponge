@@ -33,7 +33,7 @@ public final class EnchantmentSupplier {
     private EnchantmentSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(EnchantmentType.class, "protection", () -> (EnchantmentType) Enchantments.PROTECTION)
             .registerSupplier(EnchantmentType.class, "fire_protection", () -> (EnchantmentType) Enchantments.FIRE_PROTECTION)

@@ -43,7 +43,7 @@ public final class KeyStreamGenerator {
     // @formatter:off
     public static Stream<Key<?>> stream() {
         return Stream.of(
-                KeyStreamGenerator.key(ResourceKey.sponge("absorption"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("absorption"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, Double.MAX_VALUE),
                 KeyStreamGenerator.key(ResourceKey.sponge("acceleration"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("active_item"), TypeTokens.ITEM_STACK_SNAPSHOT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("affects_spawning"), TypeTokens.BOOLEAN_VALUE_TOKEN),

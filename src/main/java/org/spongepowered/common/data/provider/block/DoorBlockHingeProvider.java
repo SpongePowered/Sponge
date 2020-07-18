@@ -37,7 +37,7 @@ import java.util.Optional;
 public class DoorBlockHingeProvider extends BlockStateDataProvider<DoorHinge> {
 
     public DoorBlockHingeProvider() {
-        super(Keys.HINGE_POSITION, DoorBlock.class);
+        super(Keys.DOOR_HINGE, DoorBlock.class);
     }
 
     @Override

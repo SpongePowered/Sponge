@@ -33,7 +33,7 @@ public final class BiomeSupplier {
     private BiomeSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(BiomeType.class, "ocean", () -> (BiomeType) Biomes.OCEAN)
             .registerSupplier(BiomeType.class, "default", () -> (BiomeType) Biomes.DEFAULT)

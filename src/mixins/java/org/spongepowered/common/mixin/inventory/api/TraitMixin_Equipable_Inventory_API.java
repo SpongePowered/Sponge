@@ -33,7 +33,6 @@ import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Optional;

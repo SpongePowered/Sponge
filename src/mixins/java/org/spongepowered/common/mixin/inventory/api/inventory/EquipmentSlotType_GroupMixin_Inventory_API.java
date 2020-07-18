@@ -22,26 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.vanilla;
+package org.spongepowered.common.mixin.inventory.api.inventory;
 
-import net.minecraft.item.FireworkRocketItem;
-import org.spongepowered.api.item.FireworkShape;
-import org.spongepowered.api.util.Tuple;
+import net.minecraft.inventory.EquipmentSlotType;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 
-import java.util.stream.Stream;
+@Mixin(EquipmentSlotType.Group.class)
+public abstract class EquipmentSlotType_GroupMixin_Inventory_API implements EquipmentGroup {
 
-public final class FireworkShapeStreamGenerator {
+    private ResourceKey inventory_api$key;
 
-    private FireworkShapeStreamGenerator() {
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void inventory_api$setKey(String enumName, int ordinal, CallbackInfo ci) {
+        this.inventory_api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
     }
 
-    public static Stream<Tuple<FireworkShape, Integer>> stream() {
-        return Stream.of(
-            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.SMALL_BALL, 0),
-            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.LARGE_BALL, 1),
-            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.STAR, 2),
-            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.CREEPER, 3),
-            Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.BURST, 4)
-        );
+    @Override
+    public ResourceKey getKey() {
+        return this.inventory_api$key;
     }
 }

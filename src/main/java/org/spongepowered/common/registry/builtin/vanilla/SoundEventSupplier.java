@@ -33,7 +33,7 @@ public final class SoundEventSupplier {
     private SoundEventSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(SoundType.class, "ambient_cave", () -> (SoundType) SoundEvents.AMBIENT_CAVE)
             .registerSupplier(SoundType.class, "ambient_underwater_enter", () -> (SoundType) SoundEvents.AMBIENT_UNDERWATER_ENTER)

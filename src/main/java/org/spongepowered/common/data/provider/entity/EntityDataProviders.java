@@ -114,7 +114,7 @@ import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.api.data.type.ParrotType;
 import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.SpellType;
 import org.spongepowered.api.data.type.VillagerType;
@@ -189,9 +189,7 @@ import org.spongepowered.common.data.provider.commandblock.CommandBlockLogicData
 import org.spongepowered.common.data.provider.entity.ageable.AgeableEntityCanBreedProvider;
 import org.spongepowered.common.data.provider.entity.areaeffectcloud.AreaEffectCloudEntityParticleEffectProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityBodyRotationsProvider;
-import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityPlacingDisabledProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityRotationProvider;
-import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityTakingDisabledProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityFireDamageDelayProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityFireTicksProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityInvulnerabilityTicksProvider;
@@ -381,10 +379,10 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 (e, te) -> e.caughtEntity = (Entity)te);
 
         register(VillagerEntity.class, Keys.PROFESSION,
-                e -> (Profession) e.getVillagerData().getProfession(),
+                e -> (ProfessionType) e.getVillagerData().getProfession(),
                 (e, p) -> e.setVillagerData(e.getVillagerData().withProfession((VillagerProfession) p)));
         register(ZombieVillagerEntity.class, Keys.PROFESSION,
-                e -> (Profession) e.getVillagerData().getProfession(),
+                e -> (ProfessionType) e.getVillagerData().getProfession(),
                 (e, p) -> e.func_213792_a(e.getVillagerData().withProfession((VillagerProfession) p)));
 
         register(VillagerEntity.class, Keys.PROFESSION_LEVEL,
@@ -782,8 +780,6 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 ArmorStandEntity::setLeftLegRotation));
 
         register(new ArmorStandEntityBodyRotationsProvider());
-        register(new ArmorStandEntityPlacingDisabledProvider());
-        register(new ArmorStandEntityTakingDisabledProvider());
     }
 
     private void registerMinecartCommandBlockEntityData() {

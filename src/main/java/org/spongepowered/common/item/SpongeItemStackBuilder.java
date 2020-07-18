@@ -52,13 +52,10 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.item.inventory.equipment.WornEquipmentType;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.HashSet;
@@ -149,14 +146,14 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         final ListNBT attributeModifiers = compound.getList(Constants.ItemStack.ATTRIBUTE_MODIFIERS, Constants.NBT.TAG_COMPOUND);
 
         // The modifier will apply in any slot, equipable or not. Pass null for the slot
-        if (equipmentType.equals(EquipmentTypes.ANY.get()) || equipmentType.equals(EquipmentTypes.EQUIPPED.get())) {
-            this.writeAttributeModifier(attributeModifiers, (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, null);
-        } else {
-            // Write modifier to every applicable slot.
-            for (EquipmentSlotType slot : ((SpongeEquipmentType) equipmentType).getSlots()) {
-                this.writeAttributeModifier(attributeModifiers, (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, slot);
-            }
-        }
+//        if (equipmentType.equals(EquipmentTypes.ANY.get()) || equipmentType.equals(EquipmentTypes.EQUIPPED.get())) {
+//            this.writeAttributeModifier(attributeModifiers, (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, null);
+//        } else {
+//            // Write modifier to every applicable slot.
+//            for (EquipmentSlotType slot : ((SpongeEquipmentType) equipmentType).getSlots()) {
+//                this.writeAttributeModifier(attributeModifiers, (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, slot);
+//            }
+//        }
 
         return this;
     }

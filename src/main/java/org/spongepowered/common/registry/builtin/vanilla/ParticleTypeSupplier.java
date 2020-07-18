@@ -33,7 +33,7 @@ public final class ParticleTypeSupplier {
     private ParticleTypeSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(ParticleType.class, "ambient_entity_effect", () -> (ParticleType) ParticleTypes.AMBIENT_ENTITY_EFFECT)
             .registerSupplier(ParticleType.class, "angry_villager", () -> (ParticleType) ParticleTypes.ANGRY_VILLAGER)

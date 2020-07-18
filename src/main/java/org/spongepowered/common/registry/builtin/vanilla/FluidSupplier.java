@@ -33,7 +33,7 @@ public final class FluidSupplier {
     private FluidSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(FluidType.class, "empty", () -> (FluidType) Fluids.EMPTY)
             .registerSupplier(FluidType.class, "flowing_water", () -> (FluidType) Fluids.FLOWING_WATER)

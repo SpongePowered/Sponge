@@ -33,7 +33,7 @@ public final class DimensionTypeSupplier {
     private DimensionTypeSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(DimensionType.class, "overworld", ((DimensionTypeBridge) net.minecraft.world.dimension.DimensionType.OVERWORLD)::bridge$getSpongeDimensionType)
             .registerSupplier(DimensionType.class, "the_nether", ((DimensionTypeBridge) net.minecraft.world.dimension.DimensionType.THE_NETHER)::bridge$getSpongeDimensionType)

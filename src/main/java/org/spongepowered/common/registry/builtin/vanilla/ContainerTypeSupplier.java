@@ -32,7 +32,7 @@ public final class ContainerTypeSupplier {
     private ContainerTypeSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(ContainerType.class, "generic_9x1", () -> (ContainerType) net.minecraft.inventory.container.ContainerType.GENERIC_9X1)
             .registerSupplier(ContainerType.class, "generic_9x2", () -> (ContainerType) net.minecraft.inventory.container.ContainerType.GENERIC_9X2)

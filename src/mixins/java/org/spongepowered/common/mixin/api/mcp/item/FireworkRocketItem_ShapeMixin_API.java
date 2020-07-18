@@ -40,7 +40,7 @@ public abstract class FireworkRocketItem_ShapeMixin_API implements FireworkShape
 
     private ResourceKey api$key;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("TAIL"))
     private void api$setKey(String enumName, int ordinal, int p_i47931_3_, String name, CallbackInfo ci) {
         this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
     }

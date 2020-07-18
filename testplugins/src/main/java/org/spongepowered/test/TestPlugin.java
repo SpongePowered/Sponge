@@ -31,6 +31,7 @@ import org.spongepowered.api.Client;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -168,8 +169,8 @@ public final class TestPlugin {
     public void onLoadedGame(final LoadedGameEvent event) {
         this.logger.info(event);
 
-        for (final TestType testType : Sponge.getRegistry().getCatalogRegistry().getAllOf(TestType.class)) {
-            this.logger.info("TestType: '{}'", testType.getKey());
+        for (final BlockType type : Sponge.getRegistry().getCatalogRegistry().getAllOf(BlockType.class)) {
+            this.logger.info("BlockType: '{}'", type.getKey());
         }
     }
 

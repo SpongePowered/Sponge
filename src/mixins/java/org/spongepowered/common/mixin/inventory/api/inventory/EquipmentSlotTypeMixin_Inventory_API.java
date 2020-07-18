@@ -22,15 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.inventory.api.inventory;
 
 import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.equipment.WornEquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 
-public final class SpongeWornEquipmentType extends SpongeEquipmentType implements WornEquipmentType {
+@Mixin(EquipmentSlotType.class)
+public abstract class EquipmentSlotTypeMixin_Inventory_API implements EquipmentType {
 
-    public SpongeWornEquipmentType(ResourceKey key, EquipmentSlotType... slots) {
-        super(key, slots);
+    @Shadow @Final private EquipmentSlotType.Group slotType;
+    private ResourceKey inventory_api$key;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void inventory_api$setKey(String enumName, int ordinal, EquipmentSlotType.Group slotTypeIn, int indexIn, int slotIndexIn, String nameIn,
+            CallbackInfo ci) {
+        this.inventory_api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
+    }
+
+    @Override
+    public ResourceKey getKey() {
+        return this.inventory_api$key;
+    }
+
+    @Override
+    public EquipmentGroup getGroup() {
+        return (EquipmentGroup) (Object) this.slotType;
     }
 }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.builtin.vanilla;
 
 import net.minecraft.entity.merchant.villager.VillagerProfession;
-import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
 public final class VillagerProfessionSupplier {
@@ -33,23 +33,23 @@ public final class VillagerProfessionSupplier {
     private VillagerProfessionSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
-            .registerSupplier(Profession.class, "none", () -> (Profession) VillagerProfession.NONE)
-            .registerSupplier(Profession.class, "armorer", () -> (Profession) VillagerProfession.ARMORER)
-            .registerSupplier(Profession.class, "butcher", () -> (Profession) VillagerProfession.BUTCHER)
-            .registerSupplier(Profession.class, "cartographer", () -> (Profession) VillagerProfession.CARTOGRAPHER)
-            .registerSupplier(Profession.class, "cleric", () -> (Profession) VillagerProfession.CLERIC)
-            .registerSupplier(Profession.class, "farmer", () -> (Profession) VillagerProfession.FARMER)
-            .registerSupplier(Profession.class, "fisherman", () -> (Profession) VillagerProfession.FISHERMAN)
-            .registerSupplier(Profession.class, "fletcher", () -> (Profession) VillagerProfession.FLETCHER)
-            .registerSupplier(Profession.class, "leatherworker", () -> (Profession) VillagerProfession.LEATHERWORKER)
-            .registerSupplier(Profession.class, "librarian", () -> (Profession) VillagerProfession.LIBRARIAN)
-            .registerSupplier(Profession.class, "mason", () -> (Profession) VillagerProfession.MASON)
-            .registerSupplier(Profession.class, "nitwit", () -> (Profession) VillagerProfession.NITWIT)
-            .registerSupplier(Profession.class, "shepherd", () -> (Profession) VillagerProfession.SHEPHERD)
-            .registerSupplier(Profession.class, "toolsmith", () -> (Profession) VillagerProfession.TOOLSMITH)
-            .registerSupplier(Profession.class, "weaponsmith", () -> (Profession) VillagerProfession.WEAPONSMITH)
+            .registerSupplier(ProfessionType.class, "none", () -> (ProfessionType) VillagerProfession.NONE)
+            .registerSupplier(ProfessionType.class, "armorer", () -> (ProfessionType) VillagerProfession.ARMORER)
+            .registerSupplier(ProfessionType.class, "butcher", () -> (ProfessionType) VillagerProfession.BUTCHER)
+            .registerSupplier(ProfessionType.class, "cartographer", () -> (ProfessionType) VillagerProfession.CARTOGRAPHER)
+            .registerSupplier(ProfessionType.class, "cleric", () -> (ProfessionType) VillagerProfession.CLERIC)
+            .registerSupplier(ProfessionType.class, "farmer", () -> (ProfessionType) VillagerProfession.FARMER)
+            .registerSupplier(ProfessionType.class, "fisherman", () -> (ProfessionType) VillagerProfession.FISHERMAN)
+            .registerSupplier(ProfessionType.class, "fletcher", () -> (ProfessionType) VillagerProfession.FLETCHER)
+            .registerSupplier(ProfessionType.class, "leatherworker", () -> (ProfessionType) VillagerProfession.LEATHERWORKER)
+            .registerSupplier(ProfessionType.class, "librarian", () -> (ProfessionType) VillagerProfession.LIBRARIAN)
+            .registerSupplier(ProfessionType.class, "mason", () -> (ProfessionType) VillagerProfession.MASON)
+            .registerSupplier(ProfessionType.class, "nitwit", () -> (ProfessionType) VillagerProfession.NITWIT)
+            .registerSupplier(ProfessionType.class, "shepherd", () -> (ProfessionType) VillagerProfession.SHEPHERD)
+            .registerSupplier(ProfessionType.class, "toolsmith", () -> (ProfessionType) VillagerProfession.TOOLSMITH)
+            .registerSupplier(ProfessionType.class, "weaponsmith", () -> (ProfessionType) VillagerProfession.WEAPONSMITH)
         ;
     }
 }

@@ -38,14 +38,14 @@ import org.spongepowered.common.SpongeCommon;
 @Mixin(Attribute.class)
 public abstract class AttributeMixin_API implements AttributeType {
 
+    // This is gonna break if someone extends IAttribute
+    private ResourceKey api$key;
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void api$setKey(IAttribute parentIn, String unlocalizedNameIn, double defaultValueIn, CallbackInfo ci) {
         // Thankfully in 1.16, mojang does not use camelCase in attributes.
         this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, unlocalizedNameIn));
     }
-
-    // This is gonna break if someone extends IAttribute
-    private ResourceKey api$key;
 
     @Override
     public ResourceKey getKey() {

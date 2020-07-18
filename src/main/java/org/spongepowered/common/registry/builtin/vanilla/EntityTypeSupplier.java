@@ -50,7 +50,7 @@ public final class EntityTypeSupplier {
         return Registry.register(Registry.ENTITY_TYPE, (ResourceLocation) (Object) key, entityType);
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(EntityType.class, "area_effect_cloud", () -> (EntityType) net.minecraft.entity.EntityType.AREA_EFFECT_CLOUD)
             .registerSupplier(EntityType.class, "armor_stand", () -> (EntityType) net.minecraft.entity.EntityType.ARMOR_STAND)

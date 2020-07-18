@@ -31,7 +31,7 @@ import org.spongepowered.common.command.registrar.SpongeRawCommandRegistrar;
 
 import java.util.stream.Stream;
 
-public class CommandRegistrarStreamGenerator {
+public final class CommandRegistrarStreamGenerator {
 
     private CommandRegistrarStreamGenerator() {
     }

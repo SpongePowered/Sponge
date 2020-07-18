@@ -206,10 +206,8 @@ public final class DamageEventHandler {
             return EquipmentTypes.LEGGINGS.get();
         } else if (slot == 2) {
             return EquipmentTypes.CHESTPLATE.get();
-        } else if (slot == 3) {
-            return EquipmentTypes.HEADWEAR.get();
         } else {
-            return EquipmentTypes.WORN.get();
+            return EquipmentTypes.HEADWEAR.get();
         }
     }
 

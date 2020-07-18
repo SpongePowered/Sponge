@@ -33,7 +33,7 @@ public final class TileEntityTypeSupplier {
     private TileEntityTypeSupplier() {
     }
 
-    public static void registerSuppliers(SpongeCatalogRegistry registry) {
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerSupplier(BlockEntityType.class, "furnace", () -> (BlockEntityType) TileEntityType.FURNACE)
             .registerSupplier(BlockEntityType.class, "chest", () -> (BlockEntityType) TileEntityType.CHEST)

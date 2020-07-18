@@ -34,7 +34,7 @@ import org.spongepowered.common.command.parameter.managed.clientcompletion.Spong
 
 import java.util.stream.Stream;
 
-public class ClientCompletionTypeStreamGenerator {
+public final class ClientCompletionTypeStreamGenerator {
 
     private ClientCompletionTypeStreamGenerator() {
     }

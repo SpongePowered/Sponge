@@ -72,11 +72,11 @@ import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
-import org.spongepowered.common.data.type.SpongeEquipmentType;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.service.permission.SpongeBridgeSubject;
 import org.spongepowered.common.service.permission.SubjectHelper;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -539,16 +539,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
 
     @Override
     public Optional<ItemStack> getEquipped(final EquipmentType type) {
-        if (type instanceof SpongeEquipmentType) {
-            final EquipmentSlotType[] slots = ((SpongeEquipmentType) type).getSlots();
-            if (slots.length == 1) {
-                final net.minecraft.item.ItemStack nmsItem = this.getItemStackFromSlot(slots[0]);
-                if (!nmsItem.isEmpty()) {
-                    return Optional.of(ItemStackUtil.fromNative(nmsItem));
-                }
-            }
-        }
-        return Optional.empty();
+        throw new MissingImplementationException("SpongeUser", "getEquipped");
     }
 
     @Override
@@ -561,7 +552,6 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
         return false;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public UserInventory getInventory() {
         return this.loadInventory();
@@ -695,15 +685,7 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     }
 
     private void setEquippedItem(final EquipmentType type, @Nullable final ItemStack item) {
-        if (type instanceof SpongeEquipmentType) {
-            final EquipmentSlotType[] slots = ((SpongeEquipmentType) type).getSlots();
-            for (final EquipmentSlotType slot : slots) {
-                this.setItemStackToSlot(slot, ItemStackUtil.toNative(item));
-                // TODO check canequip
-                return
-                    ;
-            }
-        }
+        throw new MissingImplementationException("SpongeUser", "setEquippedItem");
     }
 
     private net.minecraft.item.ItemStack getItemStackFromSlot(final EquipmentSlotType slotIn) {
