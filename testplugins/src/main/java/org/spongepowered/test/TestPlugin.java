@@ -34,7 +34,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.registrar.StandardCommandRegistrar;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
@@ -104,9 +103,9 @@ public final class TestPlugin {
     }
 
     @Listener
-    public void onRegisterSpongeCommand(final RegisterCommandEvent<StandardCommandRegistrar> event) {
+    public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerPlayer> playerKey = Parameter.playerOrSource().setKey("player").build();
-        event.getRegistrar().register(
+        event.register(
                 this.plugin,
                 Command.builder()
                         .parameter(playerKey)
@@ -119,7 +118,7 @@ public final class TestPlugin {
                 "getplayer");
 
         final Parameter.Value<String> playerParameterKey = Parameter.string().setKey("name").optional().build();
-        event.getRegistrar().register(
+        event.register(
                 this.plugin,
                 Command.builder()
                         .parameter(playerParameterKey)

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.registrar;
 
+import com.google.common.reflect.TypeToken;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -33,18 +34,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
-import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
-import org.spongepowered.api.command.manager.CommandMapping;
-import org.spongepowered.api.command.registrar.StandardCommandRegistrar;
-import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -54,8 +49,9 @@ import java.util.concurrent.CompletableFuture;
  * <p>Note that to simplify things for the consumer, we allow redirection from this registrar to the
  * parameterised one.</p>
  */
-public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Command> implements StandardCommandRegistrar {
+public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Command.Raw> {
 
+    private static final TypeToken<Command.Raw> COMMAND_TYPE = TypeToken.of(Command.Raw.class);
     private static final String PARAMETER_NAME = "parameters";
     public static final ResourceKey CATALOG_KEY = ResourceKey.sponge("raw");
     public static final SpongeRawCommandRegistrar INSTANCE = new SpongeRawCommandRegistrar(CATALOG_KEY);
@@ -64,22 +60,15 @@ public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Comm
         super(catalogKey);
     }
 
+
     @Override
-    @NonNull
-    public CommandMapping register(@NonNull final PluginContainer container,
-            @NonNull final Command command,
-            @NonNull final String primaryAlias,
-            @NonNull final String @NonNull[] secondaryAliases) throws CommandFailedRegistrationException {
-        if (command instanceof SpongeParameterizedCommand) {
-            return SpongeParameterizedCommandRegistrar.INSTANCE
-                    .register(container, (SpongeParameterizedCommand) command, primaryAlias, secondaryAliases);
-        }
-        return super.register(container, command, primaryAlias, secondaryAliases);
+    public TypeToken<Command.Raw> handledType() {
+        return SpongeRawCommandRegistrar.COMMAND_TYPE;
     }
 
     // TODO: Support the tree builder.
     @Override
-    LiteralArgumentBuilder<CommandSource> createNode(final String primaryAlias, final Command command) {
+    LiteralArgumentBuilder<CommandSource> createNode(final String primaryAlias, final Command.Raw command) {
         final Executor executor = new Executor(command);
         return LiteralArgumentBuilder.<CommandSource>literal(primaryAlias)
                 .requires(x -> command.canExecute((CommandCause) x))
@@ -94,9 +83,9 @@ public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Comm
 
     private static class Executor implements com.mojang.brigadier.Command<CommandSource> {
 
-        private final Command command;
+        private final Command.Raw command;
 
-        private Executor(final Command command) {
+        private Executor(final Command.Raw command) {
             this.command = command;
         }
 
@@ -120,9 +109,9 @@ public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Comm
 
     private static class RawString implements ArgumentType<String> {
 
-        private final Command command;
+        private final Command.Raw command;
 
-        private RawString(final Command command) {
+        private RawString(final Command.Raw command) {
             this.command = command;
         }
 

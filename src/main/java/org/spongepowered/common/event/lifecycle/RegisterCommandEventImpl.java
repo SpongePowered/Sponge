@@ -26,29 +26,33 @@ package org.spongepowered.common.event.lifecycle;
 
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.plugin.PluginContainer;
 
-public final class RegisterCommandEventImpl<C extends CommandRegistrar<?>> extends AbstractLifecycleEvent implements RegisterCommandEvent<C> {
+public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> extends AbstractLifecycleEvent implements RegisterCommandEvent<C> {
 
     private final TypeToken<C> token;
-    private final C registrar;
+    private final R registrar;
 
-    public RegisterCommandEventImpl(final Cause cause, final Game game, final TypeToken<C> token, final C registrar) {
+    public RegisterCommandEventImpl(final Cause cause, final Game game, final R registrar) {
         super(cause, game);
-        this.token = token;
+        this.token = registrar.handledType();
         this.registrar = registrar;
+    }
+
+    @Override
+    public CommandMapping register(final PluginContainer container, final C command, final String alias, final String... aliases)
+            throws CommandFailedRegistrationException {
+        return this.registrar.register(container, command, alias, aliases);
     }
 
     @Override
     public TypeToken<C> getGenericType() {
         return this.token;
-    }
-
-    @Override
-    public C getRegistrar() {
-        return this.registrar;
     }
 
     @Override

@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.registrar;
 
 import com.google.common.base.Preconditions;
+import com.google.common.reflect.TypeToken;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.ResourceKey;
@@ -36,6 +37,7 @@ import org.spongepowered.common.command.SpongeParameterizedCommand;
  */
 public final class SpongeParameterizedCommandRegistrar extends SpongeCommandRegistrar<Command.Parameterized> {
 
+    private static final TypeToken<Command.Parameterized> COMMAND_TYPE = TypeToken.of(Command.Parameterized.class);
     public static final ResourceKey CATALOG_KEY = ResourceKey.sponge("managed");
     public static final SpongeParameterizedCommandRegistrar INSTANCE = new SpongeParameterizedCommandRegistrar(CATALOG_KEY);
 
@@ -47,6 +49,11 @@ public final class SpongeParameterizedCommandRegistrar extends SpongeCommandRegi
     LiteralArgumentBuilder<CommandSource> createNode(final String primaryAlias, final Command.Parameterized command) {
         Preconditions.checkArgument(command instanceof SpongeParameterizedCommand, "Command must be a SpongeParameterizedCommand!");
         return ((SpongeParameterizedCommand) command).getNode().buildWithAlias(command, primaryAlias);
+    }
+
+    @Override
+    public TypeToken<Command.Parameterized> handledType() {
+        return SpongeParameterizedCommandRegistrar.COMMAND_TYPE;
     }
 
 }

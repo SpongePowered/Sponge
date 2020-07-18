@@ -41,7 +41,6 @@ import net.minecraft.command.CommandSource;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -64,7 +63,6 @@ import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
-import org.spongepowered.common.command.registrar.SpongeRawCommandRegistrar;
 import org.spongepowered.common.command.registrar.tree.RootCommandTreeBuilder;
 import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.event.ShouldFire;
@@ -179,12 +177,6 @@ public final class SpongeCommandManager implements CommandManager {
         }
 
         return mapping;
-    }
-
-    @Override
-    @NonNull
-    public CommandRegistrar<Command> getStandardRegistrar() {
-        return SpongeRawCommandRegistrar.INSTANCE;
     }
 
     @NonNull
@@ -513,8 +505,20 @@ public final class SpongeCommandManager implements CommandManager {
         } catch (final CommandFailedRegistrationException ex) {
             throw new RuntimeException("Failed to create root Sponge command!", ex);
         }
+        final Set<TypeToken<?>> usedTokens = new HashSet<>();
         for (final CommandRegistrar<?> registrar : this.game.getRegistry().getCatalogRegistry().getAllOf(CommandRegistrar.class)) {
-            this.game.getEventManager().post(this.createEvent(cause, this.game, registrar));
+            // someone's gonna do it, let's not let them take us down.
+            final TypeToken<?> handledType = registrar.handledType();
+            if (handledType == null) {
+                SpongeCommon.getLogger().error("Registrar '{}' did not provide a handledType, skipping...", registrar.getClass());
+            } else if (usedTokens.add(handledType)) { // we haven't done it yet
+                this.game.getEventManager().post(this.createEvent(cause, this.game, registrar));
+            } else {
+                SpongeCommon.getLogger()
+                        .warn("Command type '{}' has already been collected, skipping request from {}",
+                                handledType.toString(),
+                                registrar.getClass());
+            }
         }
         BrigadierCommandRegistrar.INSTANCE.completeVanillaRegistration();
         this.hasStarted = true;
@@ -533,11 +537,10 @@ public final class SpongeCommandManager implements CommandManager {
         }
     }
 
-    private <T extends CommandRegistrar<?>> RegisterCommandEventImpl<T> createEvent(final Cause cause, final Game game, final T registrar) {
+    private <C, R extends CommandRegistrar<C>> RegisterCommandEventImpl<C, R> createEvent(final Cause cause, final Game game, final R registrar) {
         return new RegisterCommandEventImpl<>(
                 cause,
                 game,
-                TypeToken.of((Class<T>) registrar.getClass()),
                 registrar
         );
     }

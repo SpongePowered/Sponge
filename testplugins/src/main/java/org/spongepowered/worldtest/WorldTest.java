@@ -28,7 +28,6 @@ import com.google.inject.Inject;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.registrar.StandardCommandRegistrar;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
@@ -47,10 +46,10 @@ public final class WorldTest {
     }
 
     @Listener
-    public void onRegisterCommand(final RegisterCommandEvent<StandardCommandRegistrar> event) {
+    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerPlayer> serverPlayerParameter = Parameter.playerOrSource().setKey("player").build();
         final Parameter.Value<WorldProperties> worldPropertiesParameter = Parameter.worldProperties().setKey("world").build();
-        event.getRegistrar().register(this.plugin, Command
+        event.register(this.plugin, Command
                 .builder()
                 .parameter(serverPlayerParameter)
                 .parameter(worldPropertiesParameter)

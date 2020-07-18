@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.registrar;
 
+import com.google.common.reflect.TypeToken;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -69,6 +70,8 @@ import java.util.stream.Collectors;
  */
 public final class BrigadierCommandRegistrar implements CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
 
+    private static final TypeToken<LiteralArgumentBuilder<CommandSource>> COMMAND_TYPE = new TypeToken<LiteralArgumentBuilder<CommandSource>>() {};
+
     public static final BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
     public static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("brigadier");
 
@@ -111,6 +114,11 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
             }
         }
         this.vanilla.clear();
+    }
+
+    @Override
+    public TypeToken<LiteralArgumentBuilder<CommandSource>> handledType() {
+        return BrigadierCommandRegistrar.COMMAND_TYPE;
     }
 
     @Override
