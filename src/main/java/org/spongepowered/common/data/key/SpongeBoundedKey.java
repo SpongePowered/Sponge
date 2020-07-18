@@ -34,12 +34,12 @@ import java.util.Comparator;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
-public final class BoundedKey<V extends BoundedValue<E>, E> extends SpongeKey<V, E> {
+public final class SpongeBoundedKey<V extends BoundedValue<E>, E> extends SpongeKey<V, E> {
 
     private final Supplier<E> minimum;
     private final Supplier<E> maximum;
 
-    BoundedKey(final ResourceKey key, final TypeToken<V> valueToken,
+    public SpongeBoundedKey(final ResourceKey key, final TypeToken<V> valueToken,
         final TypeToken<E> elementToken, final Comparator<E> elementComparator,
         final BiPredicate<E, E> elementIncludesTester, final Supplier<E> minimum, final Supplier<E> maximum) {
         super(key, valueToken, elementToken, elementComparator, elementIncludesTester, () -> null);

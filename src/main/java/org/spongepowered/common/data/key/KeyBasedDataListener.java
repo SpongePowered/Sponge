@@ -32,17 +32,16 @@ import org.spongepowered.plugin.PluginContainer;
 
 public final class KeyBasedDataListener<E extends DataHolder> implements EventListener<ChangeDataHolderEvent.ValueChange> {
 
+    private final PluginContainer plugin;
     private final Class<E> holderType;
     private final Key<?> key;
     private final EventListener<ChangeDataHolderEvent.ValueChange> listener;
-    private final PluginContainer owner;
 
-    KeyBasedDataListener(final Class<E> holderFilter, final Key<?> key, final EventListener<ChangeDataHolderEvent.ValueChange> listener,
-            final PluginContainer currentContainer) {
+    KeyBasedDataListener(final PluginContainer plugin, final Class<E> holderFilter, final Key<?> key, final EventListener<ChangeDataHolderEvent.ValueChange> listener) {
+        this.plugin = plugin;
         this.holderType = holderFilter;
         this.key = key;
         this.listener = listener;
-        this.owner = currentContainer;
     }
 
     @Override
@@ -53,6 +52,6 @@ public final class KeyBasedDataListener<E extends DataHolder> implements EventLi
     }
 
     public PluginContainer getOwner() {
-        return this.owner;
+        return this.plugin;
     }
 }

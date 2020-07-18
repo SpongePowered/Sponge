@@ -77,7 +77,7 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.data.type.Hinge;
+import org.spongepowered.api.data.type.DoorHinge;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -471,7 +471,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(GoalExecutorType.class, ResourceKey.minecraft("goal_executor_type"), GoalExecutorTypeStreamGenerator.stream(), true, false)
             .generateRegistry(HandPreference.class, ResourceKey.minecraft("hand_preference"), Arrays.stream(HandSide.values()), true, false)
             .generateRegistry(HandType.class, ResourceKey.minecraft("hand_type"), Arrays.stream(Hand.values()), true, false)
-            .generateRegistry(Hinge.class, ResourceKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true, false)
+            .generateRegistry(DoorHinge.class, ResourceKey.minecraft("hinge"), Arrays.stream(DoorHingeSide.values()), true, false)
             .generateRegistry(InstrumentType.class, ResourceKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true, false)
             .generateRegistry(MooshroomType.class, ResourceKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true, false)
             .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true, false)

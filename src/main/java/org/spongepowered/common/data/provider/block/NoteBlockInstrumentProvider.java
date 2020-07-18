@@ -36,7 +36,7 @@ import java.util.Optional;
 public class NoteBlockInstrumentProvider extends BlockStateDataProvider<InstrumentType> {
 
     public NoteBlockInstrumentProvider() {
-        super(Keys.INSTRUMENT, NoteBlock.class);
+        super(Keys.INSTRUMENT_TYPE, NoteBlock.class);
     }
 
     @Override

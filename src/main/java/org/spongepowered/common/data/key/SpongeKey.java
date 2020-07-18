@@ -32,6 +32,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.EmptyDataProvider;
@@ -44,9 +45,8 @@ import java.util.Comparator;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
-public class SpongeKey<V extends Value<E>, E> implements Key<V> {
+public class SpongeKey<V extends Value<E>, E> extends SpongeCatalogType implements Key<V> {
 
-    private final ResourceKey key;
     private final TypeToken<V> valueToken;
     private final TypeToken<E> elementToken;
     private final Comparator<? super E> elementComparator;
@@ -55,10 +55,10 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
     private final Supplier<E> defaultValueSupplier;
     private final EmptyDataProvider<V, E> emptyDataProvider;
 
-    SpongeKey(final ResourceKey key, final TypeToken<V> valueToken, final TypeToken<E> elementToken,
-        final Comparator<? super E> elementComparator,
-        final BiPredicate<? super E, ? super E> elementIncludesTester, final Supplier<E> defaultValueSupplier) {
-        this.key = key;
+    public SpongeKey(final ResourceKey key, final TypeToken<V> valueToken, final TypeToken<E> elementToken,
+            final Comparator<? super E> elementComparator,
+            final BiPredicate<? super E, ? super E> elementIncludesTester, final Supplier<E> defaultValueSupplier) {
+        super(key);
         this.valueToken = valueToken;
         this.elementToken = elementToken;
         this.elementComparator = elementComparator;
@@ -66,11 +66,6 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
         this.defaultValueSupplier = defaultValueSupplier;
         this.emptyDataProvider = new EmptyDataProvider<>(this);
         this.valueConstructor = ValueConstructorFactory.getConstructor(this);
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
     }
 
     @Override
@@ -93,21 +88,15 @@ public class SpongeKey<V extends Value<E>, E> implements Key<V> {
         return this.elementIncludesTester;
     }
 
+    @Override
+    public <H extends DataHolder> void registerEvent(PluginContainer plugin, Class<H> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
+        SpongeDataManager.getInstance().registerKeyListener(new KeyBasedDataListener<>(plugin, holderFilter, this, listener));
+    }
+
+    @Override
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
-            .add("key", this.key)
-            .add("valueToken", this.valueToken);
-    }
-
-    @Override
-    public <E extends DataHolder> void registerEvent(Class<E> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
-        final PluginContainer currentContainer = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class).orElse(SpongeCommon.getMinecraftPlugin());
-        SpongeDataManager.getInstance().registerKeyListener(new KeyBasedDataListener<>(holderFilter, this, listener, currentContainer));
-    }
-
-    @Override
-    public String toString() {
-        return toStringHelper().toString();
+                .add("valueToken", this.valueToken);
     }
 
     public ValueConstructor<V, E> getValueConstructor() {

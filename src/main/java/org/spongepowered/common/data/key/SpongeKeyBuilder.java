@@ -50,7 +50,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>>
+public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>>
         implements Key.Builder.BoundedBuilder<E, V> {
 
     private static final TypeVariable<?> valueElementParameter = Value.class.getTypeParameters()[0];
@@ -65,8 +65,8 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
         setDefaultBounds(Short.class, Short.MIN_VALUE, Short.MAX_VALUE);
         setDefaultBounds(Integer.class, Integer.MIN_VALUE, Integer.MAX_VALUE);
         setDefaultBounds(Long.class, Long.MIN_VALUE, Long.MAX_VALUE);
-        setDefaultBounds(Float.class, -Float.MAX_VALUE, Float.MAX_VALUE);
-        setDefaultBounds(Double.class, -Double.MAX_VALUE, Double.MAX_VALUE);
+        setDefaultBounds(Float.class, Float.MIN_VALUE, Float.MAX_VALUE);
+        setDefaultBounds(Double.class, Double.MIN_VALUE, Double.MAX_VALUE);
     }
 
     @Nullable private TypeToken<V> valueToken;
@@ -178,7 +178,7 @@ public class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilde
             checkNotNull(minValueSupplier, "The minimum value supplier must be set");
             checkNotNull(maxValueSupplier, "The maximum value supplier must be set");
 
-            return new BoundedKey(key, this.valueToken, elementToken, comparator,
+            return new SpongeBoundedKey(key, this.valueToken, elementToken, comparator,
                     includesTester, minValueSupplier, maxValueSupplier);
         } else if (ListValue.class.isAssignableFrom(this.valueToken.getRawType())) {
             defaultValueSupplier = () -> (E) new ArrayList();

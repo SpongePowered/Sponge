@@ -28,24 +28,24 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFaceBlock;
 import net.minecraft.state.properties.AttachFace;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.Surface;
+import org.spongepowered.api.data.type.AttachmentSurface;
 import org.spongepowered.common.data.provider.BlockStateDataProvider;
 
 import java.util.Optional;
 
-public class BlockAttachmentSurfaceProvider extends BlockStateDataProvider<Surface> {
+public class BlockAttachmentSurfaceProvider extends BlockStateDataProvider<AttachmentSurface> {
 
     public BlockAttachmentSurfaceProvider() {
         super(Keys.ATTACHMENT_SURFACE, HorizontalFaceBlock.class);
     }
 
     @Override
-    protected Optional<Surface> getFrom(BlockState dataHolder) {
-        return Optional.of((Surface) (Object) dataHolder.get(HorizontalFaceBlock.FACE));
+    protected Optional<AttachmentSurface> getFrom(BlockState dataHolder) {
+        return Optional.of((AttachmentSurface) (Object) dataHolder.get(HorizontalFaceBlock.FACE));
     }
 
     @Override
-    protected Optional<BlockState> set(BlockState dataHolder, Surface value) {
+    protected Optional<BlockState> set(BlockState dataHolder, AttachmentSurface value) {
         return Optional.ofNullable(dataHolder.with(HorizontalFaceBlock.FACE, (AttachFace)(Object) value));
     }
 }

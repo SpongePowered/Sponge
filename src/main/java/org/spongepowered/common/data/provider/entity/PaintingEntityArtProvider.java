@@ -46,7 +46,7 @@ import java.util.Optional;
 public class PaintingEntityArtProvider extends GenericMutableDataProvider<PaintingEntity, ArtType> {
 
     public PaintingEntityArtProvider() {
-        super(Keys.ART);
+        super(Keys.ART_TYPE);
     }
 
     @Override

@@ -131,7 +131,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
-import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.accessor.entity.AreaEffectCloudEntityAccessor;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
@@ -358,8 +357,8 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(ShulkerEntityBridge.class, Keys.DIRECTION, ShulkerEntityBridge::bridge$getDirection, ShulkerEntityBridge::bridge$setDirection);
         register(new ShulkerEntityDyeColorProvider());
 
-        register(HumanEntity.class, Keys.SKIN, e -> (ProfileProperty) e.getSkinProperty(), (e, p) -> e.setSkinProperty((Property) p));
-        register(ServerPlayerEntity.class, Keys.SKIN, e -> (ProfileProperty) e.getGameProfile().getProperties().get(ProfileProperty.TEXTURES).iterator().next());
+        register(HumanEntity.class, Keys.SKIN_PROFILE_PROPERTY, e -> (ProfileProperty) e.getSkinProperty(), (e, p) -> e.setSkinProperty((Property) p));
+        register(ServerPlayerEntity.class, Keys.SKIN_PROFILE_PROPERTY, e -> (ProfileProperty) e.getGameProfile().getProperties().get(ProfileProperty.TEXTURES).iterator().next());
 
         register(Entity.class, Keys.PASSENGERS,
                 e -> e.getPassengers().stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toList()),
@@ -481,7 +480,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(GuardianEntity.class, Keys.BEAM_TARGET_ENTITY, e -> (Living) e.getTargetedEntity(), (e, t) -> ((GuardianEntityAccessor)e).accessor$setTargetedEntity(((LivingEntity) t).getEntityId()));
 
         register(WitherEntityAccessor.class, Keys.BOSS_BAR, e -> (ServerBossBar) e.accessor$getBossInfo());
-        register(WitherEntity.class, Keys.TARGET_ENTITIES,
+        register(WitherEntity.class, Keys.WITHER_TARGETS,
                 e -> Stream.of(e.getWatchedTargetId(0), e.getWatchedTargetId(1), e.getWatchedTargetId(2))
                         .map(id -> e.getEntityWorld().getEntityByID(id))
                         // TODO filter null?                    .filter(Objects::nonNull)
@@ -961,7 +960,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(new EntityInvulnerabilityTicksProvider());
         register(InvulnerableTrackedBridge.class, Keys.INVULNERABLE, InvulnerableTrackedBridge::bridge$getIsInvulnerable, InvulnerableTrackedBridge::bridge$setInvulnerable);
 
-        register(Entity.class, Keys.TAGS, Entity::getTags, (e, tags) -> {
+        register(Entity.class, Keys.SCOREBOARD_TAGS, Entity::getTags, (e, tags) -> {
             e.getTags().clear();
             e.getTags().addAll(tags);
         });

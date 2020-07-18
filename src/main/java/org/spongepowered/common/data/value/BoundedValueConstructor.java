@@ -26,16 +26,16 @@ package org.spongepowered.common.data.value;
 
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.copy.CopyHelper;
-import org.spongepowered.common.data.key.BoundedKey;
+import org.spongepowered.common.data.key.SpongeBoundedKey;
 
 import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
-public class BoundedValueConstructor<V extends BoundedValue<E>, E> implements ValueConstructor<V, E> {
+public final class BoundedValueConstructor<V extends BoundedValue<E>, E> implements ValueConstructor<V, E> {
 
-    private final BoundedKey<V, E> key;
+    private final SpongeBoundedKey<V, E> key;
 
-    BoundedValueConstructor(BoundedKey<V, E> key) {
+    BoundedValueConstructor(SpongeBoundedKey<V, E> key) {
         this.key = key;
     }
 

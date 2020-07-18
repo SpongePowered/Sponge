@@ -279,7 +279,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         register(new ChestBlockConnectedDirectionProvider(Keys.IS_CONNECTED_SOUTH, Direction.SOUTH));
         register(new ChestBlockConnectedDirectionProvider(Keys.IS_CONNECTED_WEST, Direction.WEST));
 
-        register(new BlockStateDataProvider<ChestAttachmentType>(Keys.CHEST_ATTACHMENT, ChestBlock.class) {
+        register(new BlockStateDataProvider<ChestAttachmentType>(Keys.CHEST_ATTACHMENT_TYPE, ChestBlock.class) {
             @Override
             protected Optional<ChestAttachmentType> getFrom(BlockState dataHolder) {
                 return Optional.of((ChestAttachmentType) (Object) dataHolder.get(ChestBlock.TYPE));

@@ -55,7 +55,7 @@ public class InventoryDataProviders extends DataProviderRegistryBuilder {
                 return Optional.of(((InventoryBridge)dataHolder).bridge$getAdapter().inventoryAdapter$getFabric().fabric$getMaxStackSize());
             }
         });
-        this.register(new GenericImmutableInventoryDataProvider<PluginContainer>(Keys.PLUGIN.get()) {
+        this.register(new GenericImmutableInventoryDataProvider<PluginContainer>(Keys.PLUGIN_CONTAINER.get()) {
             @Override protected Optional<PluginContainer> getFrom(Inventory dataHolder) {
                 return Optional.ofNullable(InventoryUtil.getPluginContainer(dataHolder));
             }

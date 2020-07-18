@@ -30,7 +30,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.raid.Raid;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.type.RaidStatus;
-import org.spongepowered.api.raid.Wave;
+import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -79,12 +79,12 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
     }
 
     @Override
-    public Optional<Wave> getCurrentWave() {
+    public Optional<RaidWave> getCurrentWave() {
         return Optional.ofNullable(((RaidBridge) this).bridge$getWaves().get(this.shadow$func_221315_l()));
     }
 
     @Override
-    public List<Wave> getWaves() {
+    public List<RaidWave> getWaves() {
         return new ArrayList<>(((RaidBridge) this).bridge$getWaves().values());
     }
 

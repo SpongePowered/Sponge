@@ -25,18 +25,15 @@
 package org.spongepowered.common.mixin.core.world.raid;
 
 import net.minecraft.entity.monster.AbstractRaiderEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.raid.Raid;
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.raid.Wave;
+import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.raid.RaidBridge;
-import org.spongepowered.common.raid.SpongeWave;
+import org.spongepowered.common.raid.SpongeRaidWave;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,18 +44,18 @@ public abstract class RaidMixin implements RaidBridge {
 
     @Shadow private Map<Integer, Set<AbstractRaiderEntity>> raiders;
 
-    private Map<Integer, Wave> impl$waves = new HashMap<>();
+    private Map<Integer, RaidWave> impl$waves = new HashMap<>();
 
     // Minecraft's raids have no real concept of a wave object but instead have two maps containing raiders. We make a Wave object for the API.
     @Inject(method = "<init>*", at = @At("TAIL"))
     private void impl$createWaves(CallbackInfo ci) {
         for (Map.Entry<Integer, Set<AbstractRaiderEntity>> entry : this.raiders.entrySet()) {
-            this.impl$waves.put(entry.getKey(), new SpongeWave((Raid) (Object) this, entry.getKey()));
+            this.impl$waves.put(entry.getKey(), new SpongeRaidWave((Raid) (Object) this, entry.getKey()));
         }
     }
 
     @Override
-    public Map<Integer, Wave> bridge$getWaves() {
+    public Map<Integer, RaidWave> bridge$getWaves() {
         return this.impl$waves;
     }
 }

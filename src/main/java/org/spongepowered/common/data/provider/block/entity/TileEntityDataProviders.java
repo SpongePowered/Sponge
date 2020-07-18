@@ -87,11 +87,11 @@ public class TileEntityDataProviders extends DataProviderRegistryBuilder {
         register(new BannerTileEntityBaseColorProvider());
         register(new BannerTileEntityPatternsProvider());
 
-        register(new BeaconTileEntityEffectProvider(Keys.PRIMARY_EFFECT.get(),
+        register(new BeaconTileEntityEffectProvider(Keys.PRIMARY_POTION_EFFECT_TYPE.get(),
                 BeaconTileEntityAccessor::accessor$getPrimaryEffect,
                 BeaconTileEntityAccessor::accessor$setPrimaryEffect));
 
-        register(new BeaconTileEntityEffectProvider(Keys.SECONDARY_EFFECT.get(),
+        register(new BeaconTileEntityEffectProvider(Keys.SECONDARY_POTION_EFFECT_TYPE.get(),
                 BeaconTileEntityAccessor::accessor$getSecondaryEffect,
                 BeaconTileEntityAccessor::accessor$setSecondaryEffect));
     }

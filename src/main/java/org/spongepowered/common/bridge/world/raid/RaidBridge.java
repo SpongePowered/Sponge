@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.bridge.world.raid;
 
-import org.spongepowered.api.raid.Wave;
+import org.spongepowered.api.raid.RaidWave;
 
 import java.util.Map;
 
 public interface RaidBridge {
 
-    Map<Integer, Wave> bridge$getWaves();
+    Map<Integer, RaidWave> bridge$getWaves();
 
 }

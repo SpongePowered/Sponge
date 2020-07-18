@@ -27,7 +27,7 @@ package org.spongepowered.common.data.value;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.common.data.copy.CopyHelper;
-import org.spongepowered.common.data.key.BoundedKey;
+import org.spongepowered.common.data.key.SpongeBoundedKey;
 
 import java.util.Comparator;
 import java.util.function.Function;
@@ -47,8 +47,8 @@ public final class MutableSpongeBoundedValue<E> extends AbstractMutableSpongeVal
 
     @Override
     @SuppressWarnings("unchecked")
-    public BoundedKey<? extends BoundedValue<E>, E> getKey() {
-        return (BoundedKey<? extends BoundedValue<E>, E>) super.getKey();
+    public SpongeBoundedKey<? extends BoundedValue<E>, E> getKey() {
+        return (SpongeBoundedKey<? extends BoundedValue<E>, E>) super.getKey();
     }
 
     @Override

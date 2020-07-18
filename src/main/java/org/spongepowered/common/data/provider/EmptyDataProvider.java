@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.Value;
 
 import java.util.Optional;
 
-public class EmptyDataProvider<V extends Value<E>, E> implements DataProvider<V, E> {
+public final class EmptyDataProvider<V extends Value<E>, E> implements DataProvider<V, E> {
 
     private final Key<V> key;
 

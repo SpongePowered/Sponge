@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.data.key.BoundedKey;
+import org.spongepowered.common.data.key.SpongeBoundedKey;
 import org.spongepowered.common.data.key.SpongeKey;
 
 import java.util.List;
@@ -42,8 +42,8 @@ import java.util.Set;
 public class ValueConstructorFactory {
 
     public static <V extends Value<E>, E> ValueConstructor<V, E> getConstructor(SpongeKey<V, E> key) {
-        if (key instanceof BoundedKey) {
-            return new BoundedValueConstructor((BoundedKey<?, E>) key);
+        if (key instanceof SpongeBoundedKey) {
+            return new BoundedValueConstructor((SpongeBoundedKey<?, E>) key);
         }
         final Class<?> valueType = key.getValueToken().getRawType();
         ValueConstructor<V, E> valueConstructor;

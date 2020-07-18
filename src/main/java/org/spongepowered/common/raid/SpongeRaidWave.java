@@ -30,7 +30,7 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.entity.monster.AbstractRaiderEntity;
 import org.spongepowered.api.entity.living.monster.raider.Raider;
 import org.spongepowered.api.raid.Raid;
-import org.spongepowered.api.raid.Wave;
+import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.common.accessor.world.raid.RaidAccessor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,12 +38,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /*
  * Since Minecraft's Wave doesn't explicitly split the Raid into an actual Raid and Wave object, we make our own Wave object.
  */
-public class SpongeWave implements Wave {
+public class SpongeRaidWave implements RaidWave {
 
     private final net.minecraft.world.raid.Raid raid;
     private final int waveId;
 
-    public SpongeWave(net.minecraft.world.raid.Raid raid, int waveId) {
+    public SpongeRaidWave(net.minecraft.world.raid.Raid raid, int waveId) {
         this.raid = raid;
         this.waveId = waveId;
     }
@@ -98,8 +98,8 @@ public class SpongeWave implements Wave {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof SpongeWave) {
-            SpongeWave other = (SpongeWave) obj;
+        if (obj instanceof SpongeRaidWave) {
+            SpongeRaidWave other = (SpongeRaidWave) obj;
             // Minecraft Tracks it's raids via an ID which is handled by the RaidManager.
             // Each world has it's own raid manager so we have to verify that the world the raids are in is also equal.
             if (this.waveId == other.waveId && this.raid.getWorld() == this.raid.getWorld() && this.raid.getId() == other.raid.getId()) {

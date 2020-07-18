@@ -35,7 +35,7 @@ import java.util.Optional;
 public class ItemStackMusicDiscProvider extends ItemStackDataProvider<MusicDisc> {
 
     public ItemStackMusicDiscProvider() {
-        super(Keys.MUSIC_DISK);
+        super(Keys.MUSIC_DISC);
     }
 
     @Override
