@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.event.entity.player;
+package org.spongepowered.common.mixin.tracker.entity.player;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -39,7 +39,7 @@ import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridg
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(net.minecraft.entity.player.PlayerInventory.class)
-public abstract class PlayerInventoryMixin_Inventory implements TrackedInventoryBridge {
+public abstract class PlayerInventoryMixin_Tracker implements TrackedInventoryBridge {
 
     @Shadow public abstract ItemStack shadow$getStackInSlot(int index);
     @Shadow protected abstract int shadow$addResource(int p_191973_1_, ItemStack p_191973_2_);

@@ -252,7 +252,7 @@ public final class PhasePrinter {
             }
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception occurred during a PhaseState").centre().hr()
-            .addWrapped("Sponge's tracking system makes a best effort to not throw exceptions randomly but sometimes it is inevitable. In most "
+            .add("Sponge's tracking system makes a best effort to not throw exceptions randomly but sometimes it is inevitable. In most "
                     + "cases, something else triggered this exception and Sponge prevented a crash by catching it. The following stacktrace can be "
                     + "used to help pinpoint the cause.").hr()
             .add("The PhaseState having an exception: %s", context.state)
@@ -299,11 +299,11 @@ public final class PhasePrinter {
         }
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add("Completing Phase").centre().hr();
-        printer.addWrapped(60, "Detecting a runaway phase! Potentially a problem "
+        printer.add("Detecting a runaway phase! Potentially a problem "
                                + "where something isn't completing a phase!!! Sponge will stop printing"
                                + "after three more times to avoid generating extra logs");
         printer.add();
-        printer.addWrapped(60, "%s : %s", "Completing phase", state);
+        printer.add("%s : %s", "Completing phase", state);
         printer.add(" Phases Remaining:");
         PhasePrinter.printPhaseStackWithException(stack, printer, new Exception("RunawayPhase"));
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
@@ -331,7 +331,7 @@ public final class PhasePrinter {
         }
 
         final PrettyPrinter printer = new PrettyPrinter(60).add("Completing incorrect phase").centre().hr()
-                .addWrapped("Sponge's tracking system is very dependent on knowing when"
+                .add("Sponge's tracking system is very dependent on knowing when"
                         + " a change to any world takes place, however, we are attempting"
                         + " to complete a \"phase\" other than the one we most recently entered."
                         + " This is an error usually on Sponge's part, so a report"

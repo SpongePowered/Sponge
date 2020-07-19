@@ -28,6 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.ITickableTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -39,9 +40,13 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
+import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -55,14 +60,11 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Shadow public abstract Chunk shadow$getChunkAt(BlockPos pos);
     @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
     @Shadow public abstract boolean setBlockState(BlockPos pos, BlockState state, int flags);
-    @Shadow public static boolean shadow$isOutsideBuildHeight(final BlockPos pos) {
-        throw new UnsupportedOperationException("Untransformed shadow");
-    }
 
     /**
      * @author gabizou - January 10th, 2020 - Minecraft 1.14.3
      * @reason We introduce the protected method to be overridden in
-     * {@code org.spongepowered.common.mixin.core.world.server.ServerWorldMixin#impl$wrapTileEntityTick(ITickableTileEntity)}
+     * {@code org.spongepowered.common.mixin.core.world.server.ServerWorldMixin#tracker$wrapTileEntityTick(ITickableTileEntity)}
      * to appropriately wrap where needed.
      *
      * @param tileEntity The tile entity
@@ -70,27 +72,20 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Redirect(method = "tickBlockEntities",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/tileentity/ITickableTileEntity;tick()V"))
-    protected void impl$wrapTileEntityTick(final ITickableTileEntity tileEntity) {
+    protected void tracker$wrapTileEntityTick(final ITickableTileEntity tileEntity) {
         tileEntity.tick();
     }
 
-    /**
-     * @author gabizou - August 4th, 2016
-     * @reason Rewrites the check to be inlined to {@link BlockPosBridge}.
-     *
-     * @param pos The position
-     * @return The block state at the desired position
-     */
-    @Overwrite
-    public BlockState getBlockState(final BlockPos pos) {
-        // Sponge - Replace with inlined method
-        // if (this.isOutsideBuildHeight(pos)) // Vanilla
-        if (((BlockPosBridge) pos).bridge$isInvalidYPosition()) {
-            // Sponge end
-            return Blocks.VOID_AIR.getDefaultState();
+    @Redirect(method = "addTileEntity",
+        at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false),
+        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;"),
+            to =   @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z")))
+    private boolean tracker$onlyAddTileEntitiesToTickIfEnabled(final List<? super TileEntity> list, final Object tile) {
+        if (!this.bridge$isFake() && !((TrackableBridge) tile).bridge$shouldTick()) {
+            return false;
         }
-        final IChunk chunk = this.shadow$getChunk(pos.getX() >> 4, pos.getZ() >> 4);
-        return chunk.getBlockState(pos);
+
+        return list.add((TileEntity) tile);
     }
 
 }

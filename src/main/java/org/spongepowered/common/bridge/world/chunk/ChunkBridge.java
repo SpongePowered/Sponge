@@ -78,8 +78,6 @@ public interface ChunkBridge {
 
     boolean bridge$isPersistedChunk();
 
-    void bridge$setPersistedChunk(boolean flag);
-
     void bridge$fill(ChunkPrimer primer);
 
     boolean bridge$isSpawning();

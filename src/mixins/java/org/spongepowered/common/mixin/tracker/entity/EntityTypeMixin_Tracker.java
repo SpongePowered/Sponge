@@ -22,32 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.server.management;
+package org.spongepowered.common.mixin.tracker.entity;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.util.Constants;
 
-@Mixin(PlayerList.class)
-public class PlayerListMixin_Tracker {
+@Mixin(EntityType.class)
+public abstract class EntityTypeMixin_Tracker {
 
-
-    @Redirect(method = "playerLoggedOut",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/server/ServerWorld;removePlayer(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
-    private void tracker$trackPlayerLogoutThroughPhaseTracker(ServerWorld world, ServerPlayerEntity player) {
-        try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT
-                .createPhaseContext(PhaseTracker.SERVER)
-                .source(player)) {
-            context.buildAndSwitch();
-            world.removePlayer(player);
+    /**
+     * @author gabizou - January 10th, 2020 - 1.14.3
+     * @reason Because the original method uses field instance checks in a big if statement, and
+     * Forge moves the original method into a new method and replaces it with a {@link java.util.function.IntSupplier},
+     * we have to basically inject at the head and say "fuck it" to check for our human cases.
+     * @param cir The return value for the player tracking range, or do nothing
+     */
+    @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "RedundantCast", "rawtypes"})
+    @Inject(method = "getTrackingRange", at = @At("HEAD"), cancellable = true)
+    private void tracker$getHumanTrackingRange(final CallbackInfoReturnable<Integer> cir) {
+        if (((EntityType) (Object) this) == EntityTypes.HUMAN.get()) {
+            cir.setReturnValue(Constants.Entity.Player.TRACKING_RANGE);
         }
     }
+
 
 }

@@ -50,7 +50,6 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
     Supplier<? extends Vector3i> position;
     Supplier<? extends WeakReference<ServerWorld>> worldReference;
 
-
     public SpongeLocatableBlockBuilder() {
         super(LocatableBlock.class, 1);
     }
@@ -109,7 +108,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
         Preconditions.checkNotNull(this.position, "Position cannot be null!");
         Preconditions.checkNotNull(this.world, "World UUID cannot be null!");
         Preconditions.checkNotNull(this.worldReference, "World reference cannot be null!");
-        throw new MissingImplementationException("SpongeLocatableBlockBuilder", "build");
+        return new SpongeLocatableBlock(this);
     }
 
     @Override

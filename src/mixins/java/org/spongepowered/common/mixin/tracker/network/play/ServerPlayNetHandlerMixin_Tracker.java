@@ -85,7 +85,7 @@ public class ServerPlayNetHandlerMixin_Tracker {
     @Redirect(method = "processTryUseItemOnBlock",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerInteractionManager;func_219441_a(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Hand;Lnet/minecraft/util/math/BlockRayTraceResult;)Lnet/minecraft/util/ActionResultType;"))
-    private ActionResultType impl$checkState(final PlayerInteractionManager interactionManager, final PlayerEntity playerIn,
+    private ActionResultType tracker$checkState(final PlayerInteractionManager interactionManager, final PlayerEntity playerIn,
              final net.minecraft.world.World worldIn, final ItemStack stack, final Hand hand, final BlockRayTraceResult rayTraceResult) {
         final ActionResultType actionResult = interactionManager.func_219441_a(this.player, worldIn, stack, hand, rayTraceResult);
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
@@ -115,7 +115,7 @@ public class ServerPlayNetHandlerMixin_Tracker {
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/player/ServerPlayerEntity;markPlayerActive()V"),
             cancellable = true)
-    private void impl$throwAnimationEvent(final CAnimateHandPacket packetIn, final CallbackInfo ci) {
+    private void tracker$throwAnimationEvent(final CAnimateHandPacket packetIn, final CallbackInfo ci) {
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return;
         }
@@ -149,7 +149,7 @@ public class ServerPlayNetHandlerMixin_Tracker {
     @Inject(method = "processPlayerDigging",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/play/client/CPlayerDiggingPacket;getPosition()Lnet/minecraft/util/math/BlockPos;"))
-    private void impl$updateLastPrimaryPacket(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {
+    private void tracker$updateLastPrimaryPacket(final CPlayerDiggingPacket packetIn, final CallbackInfo ci) {
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return;
         }

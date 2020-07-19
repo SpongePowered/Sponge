@@ -40,6 +40,7 @@ import java.util.Optional;
 @Mixin(value = ServerWorld.class, priority = 1500)
 public abstract class ServerWorldMixin_Optimization_Collision extends WorldMixin_Optimization_Collision {
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean isFlammableWithin(final AxisAlignedBB bb) {
         if (((WorldBridge) this).bridge$isFake()) {
@@ -59,7 +60,7 @@ public abstract class ServerWorldMixin_Optimization_Collision extends WorldMixin
             final int yEnd = MathHelper.ceil(bb.maxY);
             final int zStart = MathHelper.floor(bb.minZ);
             final int zEnd = MathHelper.ceil(bb.maxZ);
-            if (!((WorldBridge) this).bridge$isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd, true)) {
+            if (!((ServerWorld) (Object) this).isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd)) {
                 return false;
             }
         }

@@ -267,11 +267,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
 
     @Override
     default boolean spawnEntity(final Entity entity) {
-        // TODO Minecraft 1.14 - PhaseTracker for gabizou
         Preconditions.checkNotNull(entity, "The entity cannot be null!");
-        if (PhaseTracker.isEntitySpawnInvalid(entity)) {
-            return true;
-        }
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
         final IPhaseState<?> state = phaseTracker.getCurrentState();
         if (!state.alreadyCapturingEntitySpawns()) {

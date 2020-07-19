@@ -46,12 +46,14 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.tileentity.TrackableTileEntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -91,22 +93,22 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
     // @formatter:on
 
-    /**
-     * @param pos The position to set
-     * @param state The state to set
-     * @return The changed state
-     * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
-     * @reason Reroute outsdie calls to chunk.setBlockState to flow through
-     *         the tracker enhanced method.
-     */
-    @Nullable
-    @Overwrite
-    public BlockState setBlockState(final BlockPos pos, final BlockState state, final boolean isMoving) {
-        final BlockState iblockstate1 = this.getBlockState(pos);
-
-        // Sponge - reroute to new method that accepts snapshot to prevent a second snapshot from being created.
-        return this.bridge$setBlockState(pos, state, iblockstate1, BlockChangeFlags.ALL);
-    }
+//    /**
+//     * @param pos The position to set
+//     * @param state The state to set
+//     * @return The changed state
+//     * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
+//     * @reason Reroute outsdie calls to chunk.setBlockState to flow through
+//     *         the tracker enhanced method.
+//     */
+//    @Nullable
+//    @Overwrite
+//    public BlockState setBlockState(final BlockPos pos, final BlockState state, final boolean isMoving) {
+//        final BlockState iblockstate1 = this.getBlockState(pos);
+//
+//        // Sponge - reroute to new method that accepts snapshot to prevent a second snapshot from being created.
+//        return this.bridge$setBlockState(pos, state, iblockstate1, BlockChangeFlags.ALL);
+//    }
 
     /**
      * @param pos The position changing
@@ -205,7 +207,8 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             // Sponge - Redirect phase checks to use bridge$isFake in the event we have mods worlds doing silly things....
             // i.e. fake worlds. Likewise, avoid creating unnecessary snapshots/transactions
             // or triggering unprocessed captures when there are no events being thrown.
-            if (!isFake && ShouldFire.CHANGE_BLOCK_EVENT && snapshot != null) {
+//            if (!isFake && ShouldFire.CHANGE_BLOCK_EVENT && snapshot != null) {
+            if (snapshot != null) {
 
                 // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
                 // re-captured again.
@@ -231,7 +234,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
                         // Set tile to be captured, if it's showing up in removals later, it will
                         // be ignored since the transaction process will actually process
                         // the removal.
-                        ((TileEntityBridge) existing).bridge$setCaptured(true);
+                        ((TrackableTileEntityBridge) existing).bridge$setCaptured(true);
                         transaction.queuedRemoval = existing;
                         transaction.enqueueChanges(trackedWorld.bridge$getProxyAccess(), peek.getCapturedBlockSupplier());
                     } else {
@@ -345,7 +348,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
                     // Go ahead and log the tile being replaced, the tile being removed will be at least already notified of removal
                     transaction.queueTileSet = newTileEntity;
                     if (newTileEntity != null) {
-                        ((TileEntityBridge) newTileEntity).bridge$setCaptured(true);
+                        ((TrackableTileEntityBridge) newTileEntity).bridge$setCaptured(true);
                         newTileEntity.setWorld(this.world);
                         newTileEntity.setPos(pos);// Set the position
                     }
@@ -394,21 +397,37 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         return builder.build();
     }
 
-
-    @Override
-    public void bridge$removeTileEntity(final TileEntity removed) {
-        final TileEntity tileentity = this.tileEntities.remove(removed.getPos());
-        if (tileentity != removed && tileentity != null) {
-            // Because multiple requests to remove a tile entity could cause for checks
-            // without actually knowing if the chunk doesn't have the tile entity, this
-            // avoids storing nulls.
-            // Replace the pre-existing tile entity in case we remove a tile entity
-            // we don't want to be removing.
-            this.tileEntities.put(removed.getPos(), tileentity);
-        }
-        ((ActiveChunkReferantBridge) removed).bridge$setActiveChunk(null);
-        removed.remove();
+    @Inject(method = "addEntity", at = @At("RETURN"))
+    private void tracker$SetActiveChunkOnEntityAdd(final Entity entityIn, final CallbackInfo ci) {
+        ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(this);
     }
+
+    @Inject(method = "removeEntityAtIndex", at = @At("RETURN"))
+    private void tracker$ResetEntityActiveChunk(final Entity entityIn, final int index, final CallbackInfo ci) {
+        ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(null);
+    }
+//
+//    @Redirect(method = "removeTileEntity",
+//        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;remove()V"))
+//    private void tracker$resetTileEntityActiveChunk(final TileEntity tileEntityIn) {
+//        ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(null);
+//        tileEntityIn.remove();
+//    }
+//
+//    @Override
+//    public void bridge$removeTileEntity(final TileEntity removed) {
+//        final TileEntity tileentity = this.tileEntities.remove(removed.getPos());
+//        if (tileentity != removed && tileentity != null) {
+//            // Because multiple requests to remove a tile entity could cause for checks
+//            // without actually knowing if the chunk doesn't have the tile entity, this
+//            // avoids storing nulls.
+//            // Replace the pre-existing tile entity in case we remove a tile entity
+//            // we don't want to be removing.
+//            this.tileEntities.put(removed.getPos(), tileentity);
+//        }
+//        ((ActiveChunkReferantBridge) removed).bridge$setActiveChunk(null);
+//        removed.remove();
+//    }
 
     @Override
     public void bridge$setTileEntity(final BlockPos pos, final TileEntity added) {
@@ -421,7 +440,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             this.tileEntities.get(pos).remove();
         }
         added.validate();
-        ((ActiveChunkReferantBridge) added).bridge$setActiveChunk((ChunkBridge) this);
+        ((ActiveChunkReferantBridge) added).bridge$setActiveChunk(this);
         this.tileEntities.put(pos, added);
     }
 
@@ -429,16 +448,17 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
     private void tracker$SetActiveChunkOnTileEntityAdd(final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
-        ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk((ChunkBridge) this);
+        ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(this);
         // Make sure to set creator/notifier for TE if any chunk data exists
         // Failure to do this during chunk load will cause TE's to not have proper user tracking
-        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ChunkBridge) this).bridge$getBlockCreatorUUID(pos).orElse(null));
-        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, ((ChunkBridge) this).bridge$getBlockNotifierUUID(pos).orElse(null));
+        // TODO - Reimplement player uuid tracking.
+        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, null);
+        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, null);
     }
 
 
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At("RETURN"))
-    private void impl$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
+    private void tracker$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
             final java.util.function.Predicate<? super Entity> filter, final CallbackInfo ci) {
         if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
             return;
@@ -462,26 +482,26 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         }
     }
 
-    @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At("RETURN"))
-    private <T extends Entity> void tracker$throwCollsionEvent(final Class<? extends T> entityClass,
-            final AxisAlignedBB aabb, final List<T> listToFill, final Predicate<? super T> filter,
-            final CallbackInfo ci) {
-        if (((WorldBridge) this.world).bridge$isFake()
-                || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
-            return;
-        }
-
-        if (listToFill.isEmpty()) {
-            return;
-        }
-
-        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, null, listToFill);
-
-        if (event == null || event.isCancelled()) {
-            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
-                return;
-            }
-            listToFill.clear();
-        }
-    }
+//    @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At("RETURN"))
+//    private <T extends Entity> void tracker$throwCollsionEvent(final Class<? extends T> entityClass,
+//            final AxisAlignedBB aabb, final List<T> listToFill, final Predicate<? super T> filter,
+//            final CallbackInfo ci) {
+//        if (((WorldBridge) this.world).bridge$isFake()
+//                || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+//            return;
+//        }
+//
+//        if (listToFill.isEmpty()) {
+//            return;
+//        }
+//
+//        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, null, listToFill);
+//
+//        if (event == null || event.isCancelled()) {
+//            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
+//                return;
+//            }
+//            listToFill.clear();
+//        }
+//    }
 }

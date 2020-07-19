@@ -42,13 +42,9 @@ import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(TileEntityType.class)
-public abstract class TileEntityTypeMixin implements ResourceKeyBridge, TrackableBridge, TileEntityTypeBridge {
+public abstract class TileEntityTypeMixin implements ResourceKeyBridge, TileEntityTypeBridge {
 
     private ResourceKey impl$key;
-    private boolean impl$allowsBlockBulkCaptures = true;
-    private boolean impl$allowsBlockEventCreation = true;
-    private boolean impl$allowsEntityBulkCaptures = true;
-    private boolean impl$allowsEntityEventCreation = true;
     private boolean impl$canTick;
 
     @Redirect(method = "register",
@@ -108,46 +104,6 @@ public abstract class TileEntityTypeMixin implements ResourceKeyBridge, Trackabl
     @Override
     public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
-    }
-
-    @Override
-    public boolean bridge$allowsBlockBulkCaptures() {
-        return this.impl$allowsBlockBulkCaptures;
-    }
-
-    @Override
-    public void bridge$setAllowsBlockBulkCaptures(final boolean allowsBlockBulkCaptures) {
-        this.impl$allowsBlockBulkCaptures = allowsBlockBulkCaptures;
-    }
-
-    @Override
-    public boolean bridge$allowsBlockEventCreation() {
-        return this.impl$allowsBlockEventCreation;
-    }
-
-    @Override
-    public void bridge$setAllowsBlockEventCreation(final boolean allowsBlockEventCreation) {
-        this.impl$allowsBlockEventCreation = allowsBlockEventCreation;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityBulkCaptures() {
-        return this.impl$allowsEntityBulkCaptures;
-    }
-
-    @Override
-    public void bridge$setAllowsEntityBulkCaptures(final boolean allowsEntityBulkCaptures) {
-        this.impl$allowsEntityBulkCaptures = allowsEntityBulkCaptures;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityEventCreation() {
-        return this.impl$allowsEntityEventCreation;
-    }
-
-    @Override
-    public void bridge$setAllowsEntityEventCreation(final boolean allowsEntityEventCreation) {
-        this.impl$allowsEntityEventCreation = allowsEntityEventCreation;
     }
 
     @Override

@@ -62,7 +62,7 @@ public class DispenserBlockMixin_Tracker {
     private PhaseContext<?> tracker$context = PhaseContext.empty();
 
     @Inject(method = "dispense", at = @At(value = "HEAD"))
-    private void impl$createContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
+    private void tracker$createContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
         final net.minecraft.block.BlockState state = worldIn.getBlockState(pos);
         final SpongeBlockSnapshot spongeBlockSnapshot = ((TrackedWorldBridge) worldIn).bridge$createSnapshot(state, pos, BlockChangeFlags.ALL);
         final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunkAt(pos);
@@ -75,7 +75,7 @@ public class DispenserBlockMixin_Tracker {
 
 
     @Inject(method = "dispense", at = @At(value = "RETURN"))
-    private void impl$closeContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
+    private void tracker$closeContextOnDispensing(final World worldIn, final BlockPos pos, final CallbackInfo ci) {
         this.tracker$context.close();
         this.tracker$context = PhaseContext.empty();
     }
@@ -92,7 +92,7 @@ public class DispenserBlockMixin_Tracker {
             ),
             locals = LocalCapture.CAPTURE_FAILSOFT
     )
-    private void impl$storeOriginalItem(final World worldIn, final BlockPos pos, final CallbackInfo ci, final ProxyBlockSource source, final DispenserTileEntity dispenser, final int slotIndex, final ItemStack dispensedItem, final IDispenseItemBehavior behavior) {
+    private void tracker$storeOriginalItem(final World worldIn, final BlockPos pos, final CallbackInfo ci, final ProxyBlockSource source, final DispenserTileEntity dispenser, final int slotIndex, final ItemStack dispensedItem, final IDispenseItemBehavior behavior) {
         this.tracker$originalItem = ItemStackUtil.cloneDefensiveNative(dispensedItem);
     }
 
@@ -100,7 +100,7 @@ public class DispenserBlockMixin_Tracker {
     @Redirect(method = "dispense",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/tileentity/DispenserTileEntity;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
-    private void impl$setInventoryContentsCallEvent(final DispenserTileEntity dispenserTileEntity, final int index, final ItemStack stack) {
+    private void tracker$setInventoryContentsCallEvent(final DispenserTileEntity dispenserTileEntity, final int index, final ItemStack stack) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         // If we captured nothing, simply set the slot contents and return
         if (context.getCapturedItemsOrEmptyList().isEmpty()) {

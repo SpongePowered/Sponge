@@ -8,7 +8,15 @@
   "mixinPriority": 1100,
   "mixins": [
     "CreatorTrackedMixin_Tracker",
+    "TypedTrackerMixin",
+    "entity.EntityMixin_Tracker",
+    "entity.EntityTypeMixin_Tracker",
+    "entity.player.PlayerInventoryMixin_Tracker",
+    "event.TraitMixin_Tracked_Inventory",
     "server.management.PlayerInteractionManagerMixin_Tracker",
-    "world.WorldMixin_Tracker"
+    "tileentity.TileEntityMixin_Tracker",
+    "world.WorldMixin_Tracker",
+    "world.chunk.ChunkMixin_Tracker",
+    "world.server.ServerWorldMixin_Tracker"
   ]
 }

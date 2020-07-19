@@ -57,7 +57,7 @@ public abstract class ChunkManagerMixin_Tracker {
 
     @Redirect(method = "track(Lnet/minecraft/entity/Entity;)V",
         at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
-    private IllegalStateException impl$reportEntityAlreadyTrackedWithWorld(final String string, final Entity entityIn) {
+    private IllegalStateException tracker$reportEntityAlreadyTrackedWithWorld(final String string, final Entity entityIn) {
         final IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, this.world.getWorldInfo().getWorldName()));
         if (SpongeConfigs.getCommon().get().getPhaseTracker().verboseErrors()) {
             PhasePrinter.printMessageWithCaughtException(PhaseTracker.getInstance(), "Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
@@ -66,7 +66,7 @@ public abstract class ChunkManagerMixin_Tracker {
     }
 
     @Redirect(method = "func_219200_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setLoaded(Z)V"))
-    private void trackerImpl$startLoad(Chunk chunk, boolean loaded) {
+    private void trackertracker$startLoad(Chunk chunk, boolean loaded) {
         try {
             final boolean isFake = ((WorldBridge) chunk.getWorld()).bridge$isFake();
             if (isFake) {
@@ -100,7 +100,7 @@ public abstract class ChunkManagerMixin_Tracker {
 
     @Inject(method = "func_219200_b", at = @At(value = "RETURN", ordinal = 0),
             slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")))
-    private void trackerImpl$endLoad(ChunkHolder chunkHolder, final CallbackInfoReturnable<CompletableFuture<Either<IChunk, ChunkHolder.IChunkLoadingError>>> cir) {
+    private void trackertracker$endLoad(ChunkHolder chunkHolder, final CallbackInfoReturnable<CompletableFuture<Either<IChunk, ChunkHolder.IChunkLoadingError>>> cir) {
         if (!((WorldBridge) this.world).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;

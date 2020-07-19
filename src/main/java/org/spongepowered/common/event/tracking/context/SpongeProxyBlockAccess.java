@@ -37,6 +37,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.common.bridge.tileentity.TrackableTileEntityBridge;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
@@ -354,10 +355,10 @@ public final class SpongeProxyBlockAccess implements IBlockReader, AutoCloseable
         this.unmarkRemoval(targetPos, added);
         final TileEntity existing = this.affectedTileEntities.remove(targetPos);
         if (existing != null && existing != added) {
-            ((TileEntityBridge) existing).bridge$setCaptured(false);
+            ((TrackableTileEntityBridge) existing).bridge$setCaptured(false);
             existing.remove();
         }
-        ((TileEntityBridge) added).bridge$setCaptured(false);
+        ((TrackableTileEntityBridge) added).bridge$setCaptured(false);
         if (((WorldAccessor) this.processingWorld).accessor$getProcessingLoadedTiles()) {
             added.setPos(targetPos);
             if (added.getWorld() != this.processingWorld) {
