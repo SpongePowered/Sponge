@@ -46,7 +46,7 @@ import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
 
-@Mixin(value = {Entity.class, TileEntity.class}, priority = 1100)
+@Mixin({Entity.class, TileEntity.class})
 public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridge {
 
     @Nullable private UUID tracker$creator;
@@ -159,6 +159,7 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
 //        }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Nullable
     private UUID getTrackedUniqueId(final PlayerTracker.Type type) {
         if (this.tracker$creator != null && PlayerTracker.Type.CREATOR == type) {
