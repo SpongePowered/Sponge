@@ -612,15 +612,6 @@ public final class PhaseTracker implements CauseStackManager {
     @SuppressWarnings("rawtypes")
     public boolean setBlockState(final TrackedWorldBridge mixinWorld, final BlockPos pos,
                                  final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) {
-        if (!PhaseTracker.SERVER.onSidedThread()) {
-            try {
-                PhaseTracker.SERVER.proposeScheduledBlockChange(this.getPhaseContext().defensiveCopy(PhaseTracker.SERVER), mixinWorld, pos, newState, flag);
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
-            }
-            PhasePrinter.printAsyncBlockChange(mixinWorld, pos, newState);
-            return false;
-        }
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
         final ServerWorld world = (ServerWorld) mixinWorld;
 
@@ -965,7 +956,7 @@ public final class PhaseTracker implements CauseStackManager {
         final ServerWorld worldServer = (ServerWorld) world;
         // Sponge End - continue with vanilla mechanics
 
-        final IChunk ichunk = worldServer.getChunk(MathHelper.floor(minecraftEntity.posX / 16.0D), MathHelper.floor(minecraftEntity.posZ / 16.0D), ChunkStatus.FULL, minecraftEntity.forceSpawn);
+        @Nullable final IChunk ichunk = worldServer.getChunk(MathHelper.floor(minecraftEntity.posX / 16.0D), MathHelper.floor(minecraftEntity.posZ / 16.0D), ChunkStatus.FULL, minecraftEntity.forceSpawn);
         if (!(ichunk instanceof Chunk)) {
             return false;
         }
@@ -1148,7 +1139,7 @@ public final class PhaseTracker implements CauseStackManager {
     public void popCauseFrame(final StackFrame oldFrame) {
         checkNotNull(oldFrame, "oldFrame");
         this.enforceMainThread();
-        final CauseStackFrameImpl frame = this.frames.peek();
+        @Nullable final CauseStackFrameImpl frame = this.frames.peek();
         if (frame != oldFrame) {
             // If the given frame is not the top frame then some form of
             // corruption of the stack has occurred and we do our best to correct
@@ -1188,7 +1179,7 @@ public final class PhaseTracker implements CauseStackManager {
             }
 
             while (offset >= 0) {
-                final CauseStackFrameImpl f = this.frames.peek();
+                @Nullable final CauseStackFrameImpl f = this.frames.peek();
                 if (DEBUG_CAUSE_FRAMES && offset > 0) {
                     printer.add("   Stack frame in position %n :", offset);
                     printer.add(f.stack_debug);
@@ -1255,7 +1246,7 @@ public final class PhaseTracker implements CauseStackManager {
         checkNotNull(value, "value");
         this.enforceMainThread();
         this.cached_ctx = null;
-        final Object existing = this.ctx.put(key, value);
+        @Nullable final Object existing = this.ctx.put(key, value);
         if (!this.frames.isEmpty()) {
             this.frames.peek().storeOriginalContext(key, existing);
         }
@@ -1328,7 +1319,7 @@ public final class PhaseTracker implements CauseStackManager {
     }
 
     void popFrameMutator(final PhaseContext<?> context) {
-        final PhaseContext<?> peek = this.phaseContextProviders.peek();
+        @Nullable final PhaseContext<?> peek = this.phaseContextProviders.peek();
         if (peek == null) {
             return;
         }

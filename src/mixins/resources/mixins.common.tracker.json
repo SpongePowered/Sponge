@@ -7,6 +7,8 @@
   "compatibilityLevel": "JAVA_8",
   "mixinPriority": 1100,
   "mixins": [
-    "server.management.PlayerInteractionManagerMixin_Tracker"
+    "CreatorTrackedMixin_Tracker",
+    "server.management.PlayerInteractionManagerMixin_Tracker",
+    "world.WorldMixin_Tracker"
   ]
 }
