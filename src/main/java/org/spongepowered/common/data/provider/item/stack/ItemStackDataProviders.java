@@ -73,7 +73,7 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
     @Override
     public void register() {
         register(new ItemStackDisplayNameProvider());
-        register(new ItemStackDurabilityProvider());
+//        register(new ItemStackDurabilityProvider());
         register(new ItemStackIsUnbreakableProvider());
         register(new ItemStackLockTokenProvider());
         register(new ItemStackLoreProvider());
@@ -102,7 +102,7 @@ public class ItemStackDataProviders extends DataProviderRegistryBuilder {
         register(new ItemStackPlainBookPagesProvider());
 
         register(new ItemStackFireworkEffectsProvider());
-        register(new ItemStackFireworkFlightModifierProvider());
+//        register(new ItemStackFireworkFlightModifierProvider());
 
         register(new ItemStackPotionColorProvider());
         register(new ItemStackPotionEffectsProvider());

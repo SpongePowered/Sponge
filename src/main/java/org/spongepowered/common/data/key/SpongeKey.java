@@ -33,19 +33,17 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.EmptyDataProvider;
 import org.spongepowered.common.data.value.ValueConstructor;
 import org.spongepowered.common.data.value.ValueConstructorFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Comparator;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
-public class SpongeKey<V extends Value<E>, E> extends SpongeCatalogType implements Key<V> {
+public final class SpongeKey<V extends Value<E>, E> extends SpongeCatalogType implements Key<V> {
 
     private final TypeToken<V> valueToken;
     private final TypeToken<E> elementToken;
@@ -89,7 +87,8 @@ public class SpongeKey<V extends Value<E>, E> extends SpongeCatalogType implemen
     }
 
     @Override
-    public <H extends DataHolder> void registerEvent(PluginContainer plugin, Class<H> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
+    public <H extends DataHolder> void registerEvent(final PluginContainer plugin, final Class<H> holderFilter,
+            final EventListener<ChangeDataHolderEvent.ValueChange> listener) {
         SpongeDataManager.getInstance().registerKeyListener(new KeyBasedDataListener<>(plugin, holderFilter, this, listener));
     }
 

@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.builtin.sponge;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.common.data.key.SpongeKey;
@@ -44,25 +43,25 @@ public final class KeyStreamGenerator {
     public static Stream<Key> stream() {
         // Do not remove the explicit generic unless you like 40+ min compile times
         return Stream.<Key>of(
-                KeyStreamGenerator.key(ResourceKey.sponge("absorption"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, Double.MAX_VALUE),
+                KeyStreamGenerator.key(ResourceKey.sponge("absorption"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("acceleration"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("active_item"), TypeTokens.ITEM_STACK_SNAPSHOT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("affects_spawning"), TypeTokens.BOOLEAN_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("age"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("age"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("airborne_velocity_modifier"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("anger_level"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("anger_level"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("applicable_potion_effects"), TypeTokens.LIST_POTION_EFFECT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("applied_enchantments"), TypeTokens.LIST_ENCHANTMENT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("armor_material"), TypeTokens.ARMOR_MATERIAL_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("art_type"), TypeTokens.ART_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("attachment_surface"), TypeTokens.ATTACHMENT_SURFACE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("attack_damage"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("attack_damage"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("attack_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("author"), TypeTokens.TEXT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("axis"), TypeTokens.AXIS_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("baby_ticks"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("baby_ticks"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("banner_pattern_layers"), TypeTokens.LIST_BANNER_PATTERN_LAYER_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("base_size"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("base_size"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("base_vehicle"), TypeTokens.ENTITY_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("beam_target_entity"), TypeTokens.LIVING_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("biome_temperature"), TypeTokens.DOUBLE_VALUE_TOKEN),
@@ -94,58 +93,58 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("comparator_mode"), TypeTokens.COMPARATOR_MODE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("connected_directions"), TypeTokens.SET_DIRECTION_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("container_item"), TypeTokens.ITEM_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("cooldown"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("cooldown"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("creator"), TypeTokens.UUID_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("current_spell"), TypeTokens.SPELL_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("custom_attack_damage"), TypeTokens.MAP_ENTITY_TYPE_DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("damage_absorption"), TypeTokens.INTEGER_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("damage_per_block"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("decay_distance"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("damage_per_block"), TypeTokens.DOUBLE_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("decay_distance"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("derailed_velocity_modifier"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("despawn_delay"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("despawn_delay"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("detonator"), TypeTokens.LIVING_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("direction"), TypeTokens.DIRECTION_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("display_name"), TypeTokens.TEXT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("dominant_hand"), TypeTokens.HAND_PREFERENCE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("door_hinge"), TypeTokens.DOOR_HINGE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("do_exact_teleport"), TypeTokens.BOOLEAN_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("duration"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("duration_on_use"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("duration"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("duration_on_use"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("dye_color"), TypeTokens.DYE_COLOR_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("eating_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("efficiency"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("egg_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("end_gateway_age"), TypeTokens.LONG_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("equipment_type"), TypeTokens.EQUIPMENT_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("exhaustion"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("experience"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("experience_from_start_of_level"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("experience_level"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("experience_since_level"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("explosion_radius"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("exhaustion"), TypeTokens.DOUBLE_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("experience"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("experience_from_start_of_level"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("experience_level"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("experience_since_level"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("explosion_radius"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("eye_height"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("eye_position"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("fall_distance"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("fall_distance"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("fall_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("firework_effects"), TypeTokens.LIST_FIREWORK_EFFECT_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("firework_flight_modifier"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("fire_damage_delay"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("fire_ticks"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("firework_flight_modifier"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("fire_damage_delay"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("fire_ticks"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("first_date_joined"), TypeTokens.INSTANT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("first_trusted"), TypeTokens.UUID_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("fluid_item_stack"), TypeTokens.FLUID_STACK_SNAPSHOT_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("fluid_level"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("fluid_level"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("fluid_tank_contents"), TypeTokens.MAP_DIRECTION_FLUID_STACK_SNAPSHOT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("flying_speed"), TypeTokens.DOUBLE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("food_level"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("food_level"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("fox_type"), TypeTokens.FOX_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("fuel"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("fuel"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("fuse_duration"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("game_mode"), TypeTokens.GAME_MODE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("game_profile"), TypeTokens.GAME_PROFILE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("generation"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("growth_stage"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("hardness"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("generation"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("growth_stage"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("hardness"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("has_arms"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("has_base_plate"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("has_chest"), TypeTokens.BOOLEAN_VALUE_TOKEN),
@@ -161,9 +160,9 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("has_viewed_credits"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("head_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("healing_crystal"), TypeTokens.ENDER_CRYSTAL_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("health"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("health_scale"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("height"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("health"), TypeTokens.DOUBLE_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("health_scale"), TypeTokens.DOUBLE_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("height"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("held_item"), TypeTokens.ITEM_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("hidden_gene"), TypeTokens.PANDA_GENE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("hide_attributes"), TypeTokens.BOOLEAN_VALUE_TOKEN),
@@ -179,7 +178,7 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("infinite_pickup_delay"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("instrument_type"), TypeTokens.INSTRUMENT_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("inverted"), TypeTokens.BOOLEAN_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("invulnerability_ticks"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("invulnerability_ticks"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("invulnerable"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("in_wall"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("is_adult"), TypeTokens.BOOLEAN_VALUE_TOKEN),
@@ -268,16 +267,16 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("is_unhappy"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("is_waterlogged"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("is_wet"), TypeTokens.BOOLEAN_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("item_durability"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("item_durability"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("item_stack_snapshot"), TypeTokens.ITEM_STACK_SNAPSHOT_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("knockback_strength"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("knockback_strength"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("known_gene"), TypeTokens.PANDA_GENE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("last_attacker"), TypeTokens.ENTITY_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("last_command_output"), TypeTokens.TEXT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("last_damage_received"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("last_date_joined"), TypeTokens.INSTANT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("last_date_played"), TypeTokens.INSTANT_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("layer"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("layer"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("leash_holder"), TypeTokens.ENTITY_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("left_arm_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("left_leg_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
@@ -287,34 +286,34 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("lock_token"), TypeTokens.STRING_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("lore"), TypeTokens.LIST_TEXT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("matter_state"), TypeTokens.MATTER_STATE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("max_air"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("max_burn_time"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("max_cook_time"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("max_air"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("max_burn_time"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("max_cook_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("max_durability"), TypeTokens.INTEGER_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("max_fall_damage"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("max_health"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("max_nearby_entities"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("max_spawn_delay"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("max_speed"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("max_stack_size"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("max_fall_damage"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("max_health"), TypeTokens.DOUBLE_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("max_nearby_entities"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("max_spawn_delay"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("max_speed"), TypeTokens.DOUBLE_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("max_stack_size"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("minecart_block_offset"), TypeTokens.INTEGER_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("min_spawn_delay"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("moisture"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("min_spawn_delay"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("moisture"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("mooshroom_type"), TypeTokens.MOOSHROOM_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("music_disc"), TypeTokens.MUSIC_DISC_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("next_entity_to_spawn"), TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("note_pitch"), TypeTokens.NOTE_PITCH_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("notifier"), TypeTokens.UUID_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("occupied_deceleration"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("occupied_deceleration"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("on_ground"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("pages"), TypeTokens.LIST_TEXT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("parrot_type"), TypeTokens.PARROT_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("particle_effect"), TypeTokens.PARTICLE_EFFECT_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("passed_cook_time"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("passed_cook_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("passengers"), TypeTokens.LIST_ENTITY_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("pattern_color"), TypeTokens.DYE_COLOR_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("phantom_phase"), TypeTokens.PHANTOM_PHASE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("pickup_delay"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("pickup_delay"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("pickup_rule"), TypeTokens.PICKUP_RULE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("piston_type"), TypeTokens.PISTON_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("placeable_block_types"), TypeTokens.SET_BLOCK_TYPE_VALUE_TOKEN),
@@ -322,59 +321,59 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("plugin_container"), TypeTokens.PLUGIN_CONTAINER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("pores"), TypeTokens.SET_DIRECTION_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("portion_type"), TypeTokens.PORTION_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("potential_max_speed"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("potential_max_speed"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("potion_effects"), TypeTokens.LIST_POTION_EFFECT_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("potion_type"), TypeTokens.POTION_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("power"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("power"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("primary_potion_effect_type"), TypeTokens.POTION_EFFECT_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("profession_type"), TypeTokens.PROFESSION_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("profession_level"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("rabbit_type"), TypeTokens.RABBIT_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("radius"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("radius_on_use"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("radius_per_tick"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("radius"), TypeTokens.DOUBLE_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("radius_on_use"), TypeTokens.DOUBLE_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("radius_per_tick"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("raid_wave"), TypeTokens.RAID_WAVE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("rail_direction"), TypeTokens.RAIL_DIRECTION_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("reapplication_delay"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("redstone_delay"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("remaining_air"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("remaining_brew_time"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("remaining_spawn_delay"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("reapplication_delay"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("redstone_delay"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("remaining_air"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("remaining_brew_time"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("remaining_spawn_delay"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("replenished_food"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("replenished_saturation"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("represented_instrument"), TypeTokens.INSTRUMENT_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("required_player_range"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("required_player_range"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("respawn_locations"), TypeTokens.MAP_UUID_RESPAWN_LOCATION_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("right_arm_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("right_leg_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("roaring_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("rotation"), TypeTokens.ROTATION_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("saturation"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("scale"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("saturation"), TypeTokens.DOUBLE_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("scale"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("scoreboard_tags"), TypeTokens.SET_STRING_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("secondary_potion_effect_type"), TypeTokens.POTION_EFFECT_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("second_trusted"), TypeTokens.UUID_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("shooter"), TypeTokens.PROJECTILE_SOURCE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("show_bottom"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("sign_lines"), TypeTokens.LIST_TEXT_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("size"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("size"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("skin_profile_property"), TypeTokens.PROFILE_PROPERTY_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("skin_moisture"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("sky_light"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("slab_portion"), TypeTokens.SLAB_PORTION_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("slot_index"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("slot_index"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("slot_position"), TypeTokens.VECTOR_2I_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("slot_side"), TypeTokens.DIRECTION_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("slows_unoccupied"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("sneezing_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("spawnable_entities"), TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_COLLECTION_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("spawn_count"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
-                KeyStreamGenerator.key(ResourceKey.sponge("spawn_range"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("spawn_count"), TypeTokens.INTEGER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("spawn_range"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("spectator_target"), TypeTokens.ENTITY_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("stair_shape"), TypeTokens.STAIR_SHAPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("statistics"), TypeTokens.MAP_STATISTIC_LONG_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("stored_enchantments"), TypeTokens.LIST_ENCHANTMENT_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("strength"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("strength"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("structure_author"), TypeTokens.STRING_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("structure_ignore_entities"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("structure_integrity"), TypeTokens.DOUBLE_VALUE_TOKEN),
@@ -385,11 +384,11 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("structure_show_air"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("structure_show_bounding_box"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("structure_size"), TypeTokens.VECTOR_3I_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("stuck_arrows"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("stuck_arrows"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("stunned_time"), TypeTokens.INTEGER_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("success_count"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("success_count"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("suspended"), TypeTokens.BOOLEAN_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("swiftness"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("swiftness"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("tamer"), TypeTokens.UUID_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("target_entity"), TypeTokens.ENTITY_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("target_location"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
@@ -402,7 +401,7 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("tropical_fish_shape"), TypeTokens.TROPICAL_FISH_SHAPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("unhappy_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("unique_id"), TypeTokens.UUID_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("unoccupied_deceleration"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("unoccupied_deceleration"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("unstable"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("update_game_profile"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("vanish"), TypeTokens.BOOLEAN_VALUE_TOKEN),
@@ -411,7 +410,7 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("vehicle"), TypeTokens.ENTITY_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("velocity"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("villager_type"), TypeTokens.VILLAGER_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("wait_time"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
+                KeyStreamGenerator.key(ResourceKey.sponge("wait_time"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("walking_speed"), TypeTokens.DOUBLE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("will_shatter"), TypeTokens.BOOLEAN_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("wire_attachments"), TypeTokens.MAP_DIRECTION_WIRE_ATTACHMENT_VALUE_TOKEN),
@@ -431,36 +430,6 @@ public final class KeyStreamGenerator {
         return (SpongeKey<V, E>) builder
                 .key(key)
                 .type(token)
-                .build();
-    }
-
-    private static <V extends BoundedValue<Double>> SpongeKey<V, Double> key(ResourceKey key, TypeToken<V> token, double min, double max) {
-        final SpongeKeyBuilder<Double, V> builder = new SpongeKeyBuilder<>();
-        return (SpongeKey<V, Double>) builder
-                .key(key)
-                .boundedType(token)
-                .minValue(min)
-                .maxValue(max)
-                .build();
-    }
-
-    private static <V extends BoundedValue<Integer>> SpongeKey<V, Integer> key(ResourceKey key, TypeToken<V> token, int min, int max) {
-        final SpongeKeyBuilder<Integer, V> builder = new SpongeKeyBuilder<>();
-        return (SpongeKey<V, Integer>) builder
-                .key(key)
-                .boundedType(token)
-                .minValue(min)
-                .maxValue(max)
-                .build();
-    }
-
-    private static <E, V extends BoundedValue<E>> SpongeKey<V, E> key(ResourceKey key, TypeToken<V> token, E min, E max) {
-        final SpongeKeyBuilder<E, V> builder = new SpongeKeyBuilder<>();
-        return (SpongeKey<V, E>) builder
-                .key(key)
-                .boundedType(token)
-                .minValue(min)
-                .maxValue(max)
                 .build();
     }
 }

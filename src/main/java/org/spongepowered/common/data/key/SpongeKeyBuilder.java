@@ -24,105 +24,51 @@
  */
 package org.spongepowered.common.data.key;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.data.copy.CopyHelper;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>>
-        implements Key.Builder.BoundedBuilder<E, V> {
+public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>> implements Key.Builder<E, V> {
 
     private static final TypeVariable<?> valueElementParameter = Value.class.getTypeParameters()[0];
-    private static final Map<Class<?>, Tuple<Object, Object>> defaultBounds = new HashMap<>();
-
-    private static <T> void setDefaultBounds(final Class<T> type, final T min, final T max) {
-        defaultBounds.put(type, new Tuple<>(min, max));
-    }
-
-    static {
-        setDefaultBounds(Byte.class, Byte.MIN_VALUE, Byte.MAX_VALUE);
-        setDefaultBounds(Short.class, Short.MIN_VALUE, Short.MAX_VALUE);
-        setDefaultBounds(Integer.class, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        setDefaultBounds(Long.class, Long.MIN_VALUE, Long.MAX_VALUE);
-        setDefaultBounds(Float.class, Float.MIN_VALUE, Float.MAX_VALUE);
-        setDefaultBounds(Double.class, Double.MIN_VALUE, Double.MAX_VALUE);
-    }
 
     @Nullable private TypeToken<V> valueToken;
-    @Nullable private Supplier<? extends E> minValueSupplier;
-    @Nullable private Supplier<? extends E> maxValueSupplier;
     @Nullable private Comparator<? super E> comparator;
     @Nullable private BiPredicate<? super E, ? super E> includesTester;
 
     @Override
     public <T, B extends Value<T>> SpongeKeyBuilder<T, B> type(final TypeToken<B> token) {
-        checkNotNull(token, "token");
+        Preconditions.checkNotNull(token);
         this.valueToken = (TypeToken<V>) token;
         return (SpongeKeyBuilder<T, B>) this;
     }
 
     @Override
-    public <T, B extends BoundedValue<T>> SpongeKeyBuilder<T, B> boundedType(final TypeToken<B> token) {
-        return this.type(token);
-    }
-
-    @Override
-    public SpongeKeyBuilder<E, V> minValue(final E minValue) {
-        checkNotNull(minValue, "minValue");
-        return minValueSupplier(CopyHelper.createSupplier(minValue));
-    }
-
-    @Override
-    public SpongeKeyBuilder<E, V> minValueSupplier(final Supplier<? extends E> supplier) {
-        checkNotNull(supplier, "supplier");
-        this.minValueSupplier = supplier;
-        return this;
-    }
-
-    @Override
-    public SpongeKeyBuilder<E, V> maxValue(final E maxValue) {
-        checkNotNull(maxValue, "maxValue");
-        return maxValueSupplier(CopyHelper.createSupplier(maxValue));
-    }
-
-    @Override
-    public SpongeKeyBuilder<E, V> maxValueSupplier(final Supplier<? extends E> supplier) {
-        checkNotNull(supplier, "supplier");
-        this.maxValueSupplier = supplier;
-        return this;
-    }
-
-    @Override
     public SpongeKeyBuilder<E, V> comparator(final Comparator<? super E> comparator) {
-        checkNotNull(comparator, "comparator");
+        Preconditions.checkNotNull(comparator);
         this.comparator = comparator;
         return this;
     }
 
     @Override
     public SpongeKeyBuilder<E, V> includesTester(final BiPredicate<? super E, ? super E> predicate) {
-        checkNotNull(predicate, "predicate");
+        Preconditions.checkNotNull(predicate);
         this.includesTester = predicate;
         return this;
     }
@@ -135,7 +81,7 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
 
     @Override
     protected Key<V> build(final ResourceKey key) {
-        checkNotNull(this.valueToken, "The value token must be set");
+        Preconditions.checkNotNull(this.valueToken, "The value token must be set");
 
         final TypeToken<E> elementToken = (TypeToken<E>) this.valueToken.resolveType(valueElementParameter);
 
@@ -162,25 +108,7 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
         }
 
         Supplier<E> defaultValueSupplier = () -> null;
-        if (BoundedValue.class.isAssignableFrom(this.valueToken.getRawType())) {
-            @Nullable Supplier<? extends E> minValueSupplier = this.minValueSupplier;
-            @Nullable Supplier<? extends E> maxValueSupplier = this.maxValueSupplier;
-            @Nullable final Tuple<E, E> bounds = (Tuple<E, E>) defaultBounds.get(elementToken.getRawType());
-            if (minValueSupplier == null && bounds != null) {
-                final E minimum = bounds.getFirst();
-                minValueSupplier = () -> minimum;
-            }
-            if (maxValueSupplier == null && bounds != null) {
-                final E maximum = bounds.getSecond();
-                maxValueSupplier = () -> maximum;
-            }
-
-            checkNotNull(minValueSupplier, "The minimum value supplier must be set");
-            checkNotNull(maxValueSupplier, "The maximum value supplier must be set");
-
-            return new SpongeBoundedKey(key, this.valueToken, elementToken, comparator,
-                    includesTester, minValueSupplier, maxValueSupplier);
-        } else if (ListValue.class.isAssignableFrom(this.valueToken.getRawType())) {
+        if (ListValue.class.isAssignableFrom(this.valueToken.getRawType())) {
             defaultValueSupplier = () -> (E) new ArrayList();
         } else if (SetValue.class.isAssignableFrom(this.valueToken.getRawType())) {
             defaultValueSupplier = () -> (E) new HashSet();
@@ -195,8 +123,6 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
     public Key.Builder<E, V> reset() {
         this.valueToken = null;
         this.includesTester = null;
-        this.maxValueSupplier = null;
-        this.minValueSupplier = null;
         this.comparator = null;
         return super.reset();
     }

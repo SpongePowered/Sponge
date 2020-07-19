@@ -104,7 +104,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.InstrumentType;
-import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.accessor.block.BedBlockAccessor;
@@ -112,7 +111,6 @@ import org.spongepowered.common.accessor.block.BlockAccessor;
 import org.spongepowered.common.accessor.block.FireBlockAccessor;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.data.provider.BlockStateBooleanDataProvider;
-import org.spongepowered.common.data.provider.BlockStateBoundedIntDataProvider;
 import org.spongepowered.common.data.provider.BlockStateDataProvider;
 import org.spongepowered.common.data.provider.BlockStateDirectionDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
@@ -143,15 +141,6 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
 
     private void registerDirection(Class<? extends Block> blockType, DirectionProperty property) {
         register(new BlockStateDirectionDataProvider(blockType, property));
-    }
-
-    private void registerBoundedInt(Class<? extends Block> blockType, Supplier<? extends Key<? extends BoundedValue<Integer>>> key,
-            IntegerProperty property) {
-        registerBoundedInt(blockType, key.get(), property);
-    }
-
-    private void registerBoundedInt(Class<? extends Block> blockType, Key<? extends BoundedValue<Integer>> key, IntegerProperty property) {
-        register(new BlockStateBoundedIntDataProvider(key, blockType, property));
     }
 
     private void registerHorizontalConnectedSides(Class<? extends Block> blockType,
@@ -256,20 +245,20 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
                         .put(Direction.DOWN, HugeMushroomBlock.DOWN)
                         .build()));
 
-        // CactusBlock
-        registerBoundedInt(CactusBlock.class, Keys.GROWTH_STAGE, CactusBlock.AGE);
-
-        // CakeBlock
-        registerBoundedInt(CakeBlock.class, Keys.LAYER, CakeBlock.BITES);
-
-        // CocoaBlock
-        registerBoundedInt(CocoaBlock.class, Keys.GROWTH_STAGE, CocoaBlock.AGE);
+//        // CactusBlock
+//        registerBoundedInt(CactusBlock.class, Keys.GROWTH_STAGE, CactusBlock.AGE);
+//
+//        // CakeBlock
+//        registerBoundedInt(CakeBlock.class, Keys.LAYER, CakeBlock.BITES);
+//
+//        // CocoaBlock
+//        registerBoundedInt(CocoaBlock.class, Keys.GROWTH_STAGE, CocoaBlock.AGE);
 
         // ComparatorBlock
         register(new ComparatorBlockTypeProvider());
 
         // CropsBlock
-        register(new CropsBlockGrowthStageProvider());
+//        register(new CropsBlockGrowthStageProvider());
 
         // ChestBlock
         registerDirection(ChestBlock.class, ChestBlock.FACING);
@@ -293,7 +282,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         registerBoolean(ChestBlock.class, Keys.IS_WATERLOGGED, ChestBlock.WATERLOGGED);
 
         // DaylightDetectorBlock
-        registerBoundedInt(DaylightDetectorBlock.class, Keys.POWER, DaylightDetectorBlock.POWER);
+//        registerBoundedInt(DaylightDetectorBlock.class, Keys.POWER, DaylightDetectorBlock.POWER);
         registerBoolean(DaylightDetectorBlock.class, Keys.INVERTED, DaylightDetectorBlock.INVERTED);
 
         // DetectorRailBlock
@@ -325,7 +314,7 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         registerBoolean(EnderChestBlock.class, Keys.IS_WATERLOGGED, EnderChestBlock.WATERLOGGED);
 
         // FarmlandBlock
-        registerBoundedInt(FarmlandBlock.class, Keys.MOISTURE, FarmlandBlock.MOISTURE);
+//        registerBoundedInt(FarmlandBlock.class, Keys.MOISTURE, FarmlandBlock.MOISTURE);
 
         // FenceBlock
         registerHorizontalConnectedSides(FenceBlock.class,
@@ -375,13 +364,13 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         register(new AxisBlockAxisProvider(NetherPortalBlock.class, NetherPortalBlock.AXIS));
 
         // NetherWartBlock
-        registerBoundedInt(NetherWartBlock.class, Keys.GROWTH_STAGE, NetherWartBlock.AGE);
+//        registerBoundedInt(NetherWartBlock.class, Keys.GROWTH_STAGE, NetherWartBlock.AGE);
 
         // PoweredRailBlock
         registerBoolean(PoweredRailBlock.class, Keys.IS_POWERED, PoweredRailBlock.POWERED);
 
         // RedstoneWireBlock
-        registerBoundedInt(RedstoneWireBlock.class, Keys.POWER, RedstoneWireBlock.POWER);
+//        registerBoundedInt(RedstoneWireBlock.class, Keys.POWER, RedstoneWireBlock.POWER);
         final Map<Direction, EnumProperty<RedstoneSide>> redstoneSides = ImmutableMap.of(
                 Direction.EAST, RedstoneWireBlock.EAST,
                 Direction.WEST, RedstoneWireBlock.WEST,
@@ -409,19 +398,19 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         registerBoolean(CampfireBlock.class, Keys.IS_WATERLOGGED, CampfireBlock.WATERLOGGED);
 
         // RepeaterBlock
-        registerBoundedInt(RepeaterBlock.class, Keys.REDSTONE_DELAY, RepeaterBlock.DELAY);
+//        registerBoundedInt(RepeaterBlock.class, Keys.REDSTONE_DELAY, RepeaterBlock.DELAY);
 
         // RotatedPillarBlock
         register(new AxisBlockAxisProvider(RotatedPillarBlock.class, RotatedPillarBlock.AXIS));
 
         // SaplingBlock
-        registerBoundedInt(SaplingBlock.class, Keys.GROWTH_STAGE, SaplingBlock.STAGE);
+//        registerBoundedInt(SaplingBlock.class, Keys.GROWTH_STAGE, SaplingBlock.STAGE);
 
         // SugarCaneBlock
-        registerBoundedInt(SugarCaneBlock.class, Keys.GROWTH_STAGE, SugarCaneBlock.AGE);
+//        registerBoundedInt(SugarCaneBlock.class, Keys.GROWTH_STAGE, SugarCaneBlock.AGE);
 
         // SnowBlock
-        registerBoundedInt(SnowBlock.class, Keys.LAYER, SnowBlock.LAYERS);
+//        registerBoundedInt(SnowBlock.class, Keys.LAYER, SnowBlock.LAYERS);
 
         // SnowyDirtBlock
         registerBoolean(SnowyDirtBlock.class, Keys.IS_SNOWY, SnowyDirtBlock.SNOWY);
@@ -439,10 +428,10 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
         register(new StandingSignBlockDirectionProvider());
 
         // StemBlock
-        registerBoundedInt(StemBlock.class, Keys.GROWTH_STAGE, StemBlock.AGE);
+//        registerBoundedInt(StemBlock.class, Keys.GROWTH_STAGE, StemBlock.AGE);
 
         // BambooBlock
-        registerBoundedInt(BambooBlock.class, Keys.GROWTH_STAGE, BambooBlock.PROPERTY_STAGE);
+//        registerBoundedInt(BambooBlock.class, Keys.GROWTH_STAGE, BambooBlock.PROPERTY_STAGE);
 
         // SkullBlock
         register(new SkullBlockDirectionProvider());
@@ -501,10 +490,10 @@ public class BlockDataProviders extends DataProviderRegistryBuilder {
                 WallBlock.NORTH, WallBlock.SOUTH, WallBlock.EAST, WallBlock.WEST, WallBlock.UP);
 
         // WeightedPressurePlateBlock
-        registerBoundedInt(WeightedPressurePlateBlock.class, Keys.POWER, WeightedPressurePlateBlock.POWER);
+//        registerBoundedInt(WeightedPressurePlateBlock.class, Keys.POWER, WeightedPressurePlateBlock.POWER);
 
         // Leaves
-        registerBoundedInt(LeavesBlock.class, Keys.DECAY_DISTANCE, LeavesBlock.DISTANCE);
+//        registerBoundedInt(LeavesBlock.class, Keys.DECAY_DISTANCE, LeavesBlock.DISTANCE);
         registerBoolean(LeavesBlock.class, Keys.IS_PERSISTENT, LeavesBlock.PERSISTENT);
 
         register(new FluidLevelProvider());

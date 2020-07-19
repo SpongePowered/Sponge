@@ -191,7 +191,6 @@ import org.spongepowered.common.data.provider.entity.areaeffectcloud.AreaEffectC
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityBodyRotationsProvider;
 import org.spongepowered.common.data.provider.entity.armorstand.ArmorStandEntityRotationProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityFireDamageDelayProvider;
-import org.spongepowered.common.data.provider.entity.base.EntityFireTicksProvider;
 import org.spongepowered.common.data.provider.entity.base.EntityInvulnerabilityTicksProvider;
 import org.spongepowered.common.data.provider.entity.horse.AbstractHorseEntityTamedOwnerProvider;
 import org.spongepowered.common.data.provider.entity.horse.HorseEntityHorseColorProvider;
@@ -200,24 +199,19 @@ import org.spongepowered.common.data.provider.entity.living.LivingEntityActiveIt
 import org.spongepowered.common.data.provider.entity.living.LivingEntityBodyRotationsProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityChestRotationProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityHeadRotationProvider;
-import org.spongepowered.common.data.provider.entity.living.LivingEntityHealthProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityLastAttackerProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityMaxAirProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityMaxHealthProvider;
 import org.spongepowered.common.data.provider.entity.living.LivingEntityPotionEffectsProvider;
-import org.spongepowered.common.data.provider.entity.living.LivingEntityRemainingAirProvider;
 import org.spongepowered.common.data.provider.entity.minecart.AbstractMinecartEntityBlockOffsetProvider;
 import org.spongepowered.common.data.provider.entity.minecart.AbstractMinecartEntityBlockStateProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityCanFlyProvider;
-import org.spongepowered.common.data.provider.entity.player.PlayerEntityExhaustionProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityExperienceFromStartOfLevelValueProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityExperienceLevelProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityExperienceProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityExperienceSinceLevelProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityFlyingSpeedProvider;
-import org.spongepowered.common.data.provider.entity.player.PlayerEntityFoodLevelProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityIsFlyingProvider;
-import org.spongepowered.common.data.provider.entity.player.PlayerEntitySaturationProvider;
 import org.spongepowered.common.data.provider.entity.player.PlayerEntityWalkingSpeedProvider;
 import org.spongepowered.common.data.provider.entity.user.UserFirstDateJoinedProvider;
 import org.spongepowered.common.data.provider.entity.user.UserLastDatePlayedProvider;
@@ -496,7 +490,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
 
         register(EnderDragonEntity.class, Keys.HEALING_CRYSTAL, e -> (EnderCrystal) e.closestEnderCrystal, (e, c) -> e.closestEnderCrystal = (EnderCrystalEntity) c);
 
-        register(new EnderCrystalEntityHealthProvider());
+//        register(new EnderCrystalEntityHealthProvider());
 
         register(AnimalEntityAccessor.class, Keys.BREEDER, AnimalEntityAccessor::accessor$getPlayerInLove, AnimalEntityAccessor::accessor$setPlayerInLove);
 
@@ -898,12 +892,12 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
         register(new LivingEntityBodyRotationsProvider());
         register(new LivingEntityChestRotationProvider());
         register(new LivingEntityHeadRotationProvider());
-        register(new LivingEntityHealthProvider());
+//        register(new LivingEntityHealthProvider());
         register(new LivingEntityLastAttackerProvider());
         register(new LivingEntityMaxAirProvider());
         register(new LivingEntityMaxHealthProvider());
         register(new LivingEntityPotionEffectsProvider());
-        register(new LivingEntityRemainingAirProvider());
+//        register(new LivingEntityRemainingAirProvider());
 
         register(LivingEntity.class, Keys.WALKING_SPEED,
                 e -> e.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue(),
@@ -952,7 +946,7 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 EntityBridge::bridge$setDisplayName);
 
         register(new EntityFireDamageDelayProvider());
-        register(new EntityFireTicksProvider());
+//        register(new EntityFireTicksProvider());
         register(new EntityInvulnerabilityTicksProvider());
         register(InvulnerableTrackedBridge.class, Keys.INVULNERABLE, InvulnerableTrackedBridge::bridge$getIsInvulnerable, InvulnerableTrackedBridge::bridge$setInvulnerable);
 
@@ -999,15 +993,15 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 (accessor, value) -> accessor.setGameType((GameType) (Object) value));
 
         register(new PlayerEntityCanFlyProvider());
-        register(new PlayerEntityExhaustionProvider());
+//        register(new PlayerEntityExhaustionProvider());
         register(new PlayerEntityExperienceFromStartOfLevelValueProvider());
         register(new PlayerEntityExperienceLevelProvider());
         register(new PlayerEntityExperienceProvider());
         register(new PlayerEntityExperienceSinceLevelProvider());
         register(new PlayerEntityFlyingSpeedProvider());
-        register(new PlayerEntityFoodLevelProvider());
+//        register(new PlayerEntityFoodLevelProvider());
         register(new PlayerEntityIsFlyingProvider());
-        register(new PlayerEntitySaturationProvider());
+//        register(new PlayerEntitySaturationProvider());
         register(new PlayerEntityWalkingSpeedProvider());
 
         register(ServerPlayerEntity.class, Keys.SPECTATOR_TARGET,
