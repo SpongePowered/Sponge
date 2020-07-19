@@ -133,10 +133,10 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
         final ImmutableList.Builder<AttributeModifier> builder = ImmutableList.builder();
 
-        for (EquipmentSlotType equipmentSlotType : ((SpongeEquipmentType) equipmentType).getSlots()) {
-            final Multimap<String, net.minecraft.entity.ai.attributes.AttributeModifier> modifierMultimap = this.shadow$getAttributeModifiers(equipmentSlotType);
-            builder.addAll((Iterable) modifierMultimap.get(attributeType.getKey().getValue()));
-        }
+//        for (EquipmentSlotType equipmentSlotType : ((SpongeEquipmentType) equipmentType).getSlots()) {
+//            final Multimap<String, net.minecraft.entity.ai.attributes.AttributeModifier> modifierMultimap = this.shadow$getAttributeModifiers(equipmentSlotType);
+//            builder.addAll((Iterable) modifierMultimap.get(attributeType.getKey().getValue()));
+//        }
 
         return builder.build();
     }
@@ -146,16 +146,16 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         Preconditions.checkNotNull(modifier, "Attribute modifier cannot be null");
         Preconditions.checkNotNull(equipmentType, "Equipment type cannot be null");
 
-        if (equipmentType.equals(EquipmentTypes.ANY.get()) || equipmentType.equals(EquipmentTypes.EQUIPPED.get())) {
-            // Any equipment slot = null
-            this.shadow$addAttributeModifier(modifier.getName(), (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, null);
-            return;
-        }
-
-        // Get all slots this modifier applies to, and apply
-        for (EquipmentSlotType equipmentSlotType : ((SpongeEquipmentType) equipmentType).getSlots()) {
-            this.shadow$addAttributeModifier(modifier.getName(), (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, equipmentSlotType);
-        }
+//        if (equipmentType.equals(EquipmentTypes.ANY.get()) || equipmentType.equals(EquipmentTypes.EQUIPPED.get())) {
+//            // Any equipment slot = null
+//            this.shadow$addAttributeModifier(modifier.getName(), (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, null);
+//            return;
+//        }
+//
+//        // Get all slots this modifier applies to, and apply
+//        for (EquipmentSlotType equipmentSlotType : ((SpongeEquipmentType) equipmentType).getSlots()) {
+//            this.shadow$addAttributeModifier(modifier.getName(), (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, equipmentSlotType);
+//        }
     }
 
     @Override

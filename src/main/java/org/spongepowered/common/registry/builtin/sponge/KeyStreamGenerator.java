@@ -41,8 +41,9 @@ public final class KeyStreamGenerator {
     }
 
     // @formatter:off
-    public static Stream<Key<?>> stream() {
-        return Stream.of(
+    public static Stream<Key> stream() {
+        // Do not remove the explicit generic unless you like 40+ min compile times
+        return Stream.<Key>of(
                 KeyStreamGenerator.key(ResourceKey.sponge("absorption"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, Double.MAX_VALUE),
                 KeyStreamGenerator.key(ResourceKey.sponge("acceleration"), TypeTokens.VECTOR_3D_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("active_item"), TypeTokens.ITEM_STACK_SNAPSHOT_VALUE_TOKEN),
@@ -326,7 +327,7 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("potion_type"), TypeTokens.POTION_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("power"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
                 KeyStreamGenerator.key(ResourceKey.sponge("primary_potion_effect_type"), TypeTokens.POTION_EFFECT_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("profession"), TypeTokens.PROFESSION_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("profession_type"), TypeTokens.PROFESSION_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("profession_level"), TypeTokens.INTEGER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("rabbit_type"), TypeTokens.RABBIT_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("radius"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX

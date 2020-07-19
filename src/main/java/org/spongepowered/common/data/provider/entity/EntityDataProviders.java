@@ -378,10 +378,10 @@ public class EntityDataProviders extends DataProviderRegistryBuilder {
                 e -> (org.spongepowered.api.entity.Entity) e.caughtEntity,
                 (e, te) -> e.caughtEntity = (Entity)te);
 
-        register(VillagerEntity.class, Keys.PROFESSION,
+        register(VillagerEntity.class, Keys.PROFESSION_TYPE,
                 e -> (ProfessionType) e.getVillagerData().getProfession(),
                 (e, p) -> e.setVillagerData(e.getVillagerData().withProfession((VillagerProfession) p)));
-        register(ZombieVillagerEntity.class, Keys.PROFESSION,
+        register(ZombieVillagerEntity.class, Keys.PROFESSION_TYPE,
                 e -> (ProfessionType) e.getVillagerData().getProfession(),
                 (e, p) -> e.func_213792_a(e.getVillagerData().withProfession((VillagerProfession) p)));
 

@@ -217,8 +217,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         this.registries = new Object2ObjectOpenHashMap<>();
         this.registriesByType = new IdentityHashMap<>();
         this.dynamicCatalogs = new ArrayList<>();
-
-        this.registerVanillaRegistries();
     }
 
     @Override
@@ -447,32 +445,12 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         }
     }
 
-    private void registerVanillaRegistries() {
-        this.registerRegistry(BiomeType.class, ResourceKey.minecraft("biome_type"), (Registry<BiomeType>) (Object) Registry.BIOME);
-        this.registerRegistry(BlockType.class, ResourceKey.minecraft("block_type"), (Registry<BlockType>) (Object) Registry.BLOCK);
-        this.registerRegistry(ContainerType.class, ResourceKey.minecraft("container_type"), (Registry<ContainerType>) (Object) Registry.MENU);
-        this.registerRegistry(DimensionType.class, ResourceKey.minecraft("dimension_type"), (Registry<DimensionType>) (Object) Registry.DIMENSION_TYPE);
-        this.registerRegistry(PotionEffectType.class, ResourceKey.minecraft("potion_effect_type"), (Registry<PotionEffectType>) (Object) Registry.EFFECTS);
-        this.registerRegistry(EnchantmentType.class, ResourceKey.minecraft("enchantment_type"), (Registry<EnchantmentType>) (Object) Registry.ENCHANTMENT);
-        this.registerRegistry(EntityType.class, ResourceKey.minecraft("entity_type"), (Registry<EntityType>) (Object) Registry.ENTITY_TYPE);
-        this.registerRegistry(FluidType.class, ResourceKey.minecraft("fluid_type"), (Registry<FluidType>) (Object) Registry.FLUID);
-        this.registerRegistry(ArtType.class, ResourceKey.minecraft("art_type"), (Registry<ArtType>) (Object) Registry.MOTIVE);
-        this.registerRegistry(ParticleType.class, ResourceKey.minecraft("particle_type"), (Registry<ParticleType>) (Object) Registry.PARTICLE_TYPE);
-        this.registerRegistry(SoundType.class, ResourceKey.minecraft("sound_type"), (Registry<SoundType>) (Object) Registry.SOUND_EVENT);
-        this.registerRegistry(BlockEntityType.class, ResourceKey.minecraft("block_entity_type"), (Registry<BlockEntityType>) (Object) Registry.BLOCK_ENTITY_TYPE);
-        this.registerRegistry(ProfessionType.class, ResourceKey.minecraft("profession_type"), (Registry<ProfessionType>) (Object) Registry.VILLAGER_PROFESSION);
-        this.registerRegistry(VillagerType.class, ResourceKey.minecraft("villager_type"), (Registry<VillagerType>) (Object) Registry.VILLAGER_TYPE);
-
-        // Que the "I'm Vanilla and I'm fucking stupid" music
-        CriteriaTriggersRegistrar.registerRegistry(this);
-        IAttributeTypeRegistrar.registerRegistry(this);
-        PhaseTypeRegistrar.registerRegistry(this);
-    }
-
     /**
      * Only specify lines of registries that are not found in {@link Registry}.
      */
     public void registerDefaultRegistries() {
+
+        this.registerVanillaRegistries();
 
         // TODO 1.14 - We'll take on a case by case basis if any mods are extending/replacing Enum values and therefore breaks this. Otherwise it will
         // TODO 1.14 - get to the point of insanity if literally every enum in the game becomes hardcoded lines that we have to map out...
@@ -556,6 +534,28 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         ;
 //
 //        this.generateCallbackRegistry(DataRegistration.class, ResourceKey.sponge("data_registration"), (key, value) -> SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) value));
+    }
+
+    private void registerVanillaRegistries() {
+        this.registerRegistry(BiomeType.class, ResourceKey.minecraft("biome_type"), (Registry<BiomeType>) (Object) Registry.BIOME);
+        this.registerRegistry(BlockType.class, ResourceKey.minecraft("block_type"), (Registry<BlockType>) (Object) Registry.BLOCK);
+        this.registerRegistry(ContainerType.class, ResourceKey.minecraft("container_type"), (Registry<ContainerType>) (Object) Registry.MENU);
+        this.registerRegistry(DimensionType.class, ResourceKey.minecraft("dimension_type"), (Registry<DimensionType>) (Object) Registry.DIMENSION_TYPE);
+        this.registerRegistry(PotionEffectType.class, ResourceKey.minecraft("potion_effect_type"), (Registry<PotionEffectType>) (Object) Registry.EFFECTS);
+        this.registerRegistry(EnchantmentType.class, ResourceKey.minecraft("enchantment_type"), (Registry<EnchantmentType>) (Object) Registry.ENCHANTMENT);
+        this.registerRegistry(EntityType.class, ResourceKey.minecraft("entity_type"), (Registry<EntityType>) (Object) Registry.ENTITY_TYPE);
+        this.registerRegistry(FluidType.class, ResourceKey.minecraft("fluid_type"), (Registry<FluidType>) (Object) Registry.FLUID);
+        this.registerRegistry(ArtType.class, ResourceKey.minecraft("art_type"), (Registry<ArtType>) (Object) Registry.MOTIVE);
+        this.registerRegistry(ParticleType.class, ResourceKey.minecraft("particle_type"), (Registry<ParticleType>) (Object) Registry.PARTICLE_TYPE);
+        this.registerRegistry(SoundType.class, ResourceKey.minecraft("sound_type"), (Registry<SoundType>) (Object) Registry.SOUND_EVENT);
+        this.registerRegistry(BlockEntityType.class, ResourceKey.minecraft("block_entity_type"), (Registry<BlockEntityType>) (Object) Registry.BLOCK_ENTITY_TYPE);
+        this.registerRegistry(ProfessionType.class, ResourceKey.minecraft("profession_type"), (Registry<ProfessionType>) (Object) Registry.VILLAGER_PROFESSION);
+        this.registerRegistry(VillagerType.class, ResourceKey.minecraft("villager_type"), (Registry<VillagerType>) (Object) Registry.VILLAGER_TYPE);
+
+        // Que the "I'm Vanilla and I'm fucking stupid" music
+        CriteriaTriggersRegistrar.registerRegistry(this);
+        IAttributeTypeRegistrar.registerRegistry(this);
+        PhaseTypeRegistrar.registerRegistry(this);
     }
 
     /**
