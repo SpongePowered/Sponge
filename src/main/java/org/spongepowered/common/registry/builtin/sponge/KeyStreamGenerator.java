@@ -301,7 +301,7 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("min_spawn_delay"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
                 KeyStreamGenerator.key(ResourceKey.sponge("moisture"), TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, 0, 0), // TODO Determine MIN, MAX
                 KeyStreamGenerator.key(ResourceKey.sponge("mooshroom_type"), TypeTokens.MOOSHROOM_TYPE_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("music_disk"), TypeTokens.MUSIC_DISC_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("music_disc"), TypeTokens.MUSIC_DISC_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("next_entity_to_spawn"), TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("note_pitch"), TypeTokens.NOTE_PITCH_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("notifier"), TypeTokens.UUID_VALUE_TOKEN),
@@ -319,7 +319,7 @@ public final class KeyStreamGenerator {
                 KeyStreamGenerator.key(ResourceKey.sponge("piston_type"), TypeTokens.PISTON_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("placeable_block_types"), TypeTokens.SET_BLOCK_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("plain_pages"), TypeTokens.LIST_STRING_VALUE_TOKEN),
-                KeyStreamGenerator.key(ResourceKey.sponge("plugin"), TypeTokens.PLUGIN_CONTAINER_VALUE_TOKEN),
+                KeyStreamGenerator.key(ResourceKey.sponge("plugin_container"), TypeTokens.PLUGIN_CONTAINER_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("pores"), TypeTokens.SET_DIRECTION_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("portion_type"), TypeTokens.PORTION_TYPE_VALUE_TOKEN),
                 KeyStreamGenerator.key(ResourceKey.sponge("potential_max_speed"), TypeTokens.BOUNDED_DOUBLE_VALUE_TOKEN, 0.0, 0.0), // TODO Determine MIN, MAX

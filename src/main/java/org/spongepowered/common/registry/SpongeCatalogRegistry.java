@@ -59,9 +59,9 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.raid.Raid;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockType;
@@ -69,6 +69,7 @@ import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.type.ArmorMaterial;
 import org.spongepowered.api.data.type.ArtType;
@@ -77,11 +78,11 @@ import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.data.type.ComparatorMode;
+import org.spongepowered.api.data.type.DoorHinge;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.data.type.DoorHinge;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -115,7 +116,6 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
-import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKey;
@@ -146,7 +146,6 @@ import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogEventImpl;
-import org.spongepowered.common.registry.builtin.sponge.QueryTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
@@ -154,6 +153,7 @@ import org.spongepowered.common.registry.builtin.sponge.CatTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatalogedValueParameterStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DismountTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerator;
@@ -162,21 +162,22 @@ import org.spongepowered.common.registry.builtin.sponge.GoalExecutorTypeStreamGe
 import org.spongepowered.common.registry.builtin.sponge.GoalTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.HorseColorStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.HorseStyleStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.IAttributeTypeRegistrar;
+import org.spongepowered.common.registry.builtin.sponge.KeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.LlamaTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ParrotTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.PhaseTypeRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.PortalAgentTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.QueryTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.RabbitTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.IAttributeTypeRegistrar;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
-import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
 import org.spongepowered.common.registry.builtin.vanilla.DimensionTypeSupplier;
-import org.spongepowered.common.registry.builtin.sponge.PhaseTypeRegistrar;
 import org.spongepowered.common.registry.builtin.vanilla.EffectSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.EnchantmentSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.EntityTypeSupplier;
@@ -461,8 +462,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 //            .generateMappedRegistry(TextStyle.Type.class, ResourceKey.minecraft("text_style"), TextStyleTypeStreamGenerator.stream(), true)
 //            .generateRegistry(TextSerializer.class, ResourceKey.minecraft("text_serializer"), TextSerializerStreamGenerator.stream(), true)
 //        ;
-
-        this
+        this.generateRegistry(Key.class, ResourceKey.sponge("key"), KeyStreamGenerator.stream(), true, true)
             .generateRegistry(AccountDeletionResultType.class, ResourceKey.sponge("account_deletion_result_type"), AccountDeletionResultTypeStreamGenerator.stream(), true, false)
             .registerRegistry(Advancement.class, ResourceKey.minecraft("advancement"), false)
             .registerRegistry(AdvancementTree.class, ResourceKey.minecraft("advancement_tree"), false)
