@@ -22,43 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.event;
+package org.spongepowered.common.bridge.tileentity;
 
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.tileentity.DropperTileEntity;
-import net.minecraft.tileentity.HopperTileEntity;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+public interface TrackableTileEntityBridge {
 
-import java.util.ArrayList;
-import java.util.List;
+    boolean bridge$isCaptured();
 
-@Mixin(value = {
-    DropperTileEntity.class,
-    HopperTileEntity.class,
-    PlayerInventory.class,
-    Container.class
-})
-public abstract class TraitMixin_Tracked_Inventory implements TrackedInventoryBridge {
-
-    private List<SlotTransaction> impl$capturedTransactions = new ArrayList<>();
-    private boolean impl$doCapture = false;
-
-    @Override
-    public List<SlotTransaction> bridge$getCapturedSlotTransactions() {
-        return this.impl$capturedTransactions;
-    }
-
-    @Override
-    public void bridge$setCaptureInventory(final boolean doCapture) {
-        this.impl$doCapture = doCapture;
-    }
-
-    @Override
-    public boolean bridge$capturingInventory() {
-        return this.impl$doCapture;
-    }
+    void bridge$setCaptured(boolean captured);
 
 }

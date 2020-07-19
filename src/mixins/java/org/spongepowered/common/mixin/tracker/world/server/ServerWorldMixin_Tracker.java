@@ -51,6 +51,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingBridge;
+import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -78,8 +79,8 @@ import java.util.function.Consumer;
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implements TrackedWorldBridge {
 
-    private SpongeProxyBlockAccess tracker$proxyBlockAccess = new SpongeProxyBlockAccess(this);
-    private LinkedBlockingDeque<ScheduledBlockChange> tracker$scheduledChanges = new LinkedBlockingDeque<>();
+    private final SpongeProxyBlockAccess tracker$proxyBlockAccess = new SpongeProxyBlockAccess(this);
+    private final LinkedBlockingDeque<ScheduledBlockChange> tracker$scheduledChanges = new LinkedBlockingDeque<>();
 
     @Override
     public SpongeProxyBlockAccess bridge$getProxyAccess() {
@@ -90,16 +91,16 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     @Shadow public abstract ServerChunkProvider shadow$getChunkProvider();
 
     @Inject(method = "onEntityAdded", at = @At("TAIL"))
-    private void onEntityAddedToWorldMarkAsTracked(final net.minecraft.entity.Entity entityIn, final CallbackInfo ci) {
+    private void tracker$setEntityTrackedInWorld(final net.minecraft.entity.Entity entityIn, final CallbackInfo ci) {
         if (!this.bridge$isFake()) { // Only set the value if the entity is not fake
-            ((EntityBridge) entityIn).bridge$setWorldTracked(true);
+            ((TrackableBridge) entityIn).bridge$setWorldTracked(true);
         }
     }
 
     @Inject(method = "onEntityRemoved", at = @At("TAIL"))
-    private void onEntityRemovedFromWorldMarkAsUntracked(final net.minecraft.entity.Entity entityIn, final CallbackInfo ci) {
-        if (!this.bridge$isFake() || ((EntityBridge) entityIn).bridge$isWorldTracked()) {
-            ((EntityBridge) entityIn).bridge$setWorldTracked(false);
+    private void tracker$setEntityUntrackedInWorld(final net.minecraft.entity.Entity entityIn, final CallbackInfo ci) {
+        if (!this.bridge$isFake() || ((TrackableBridge) entityIn).bridge$isWorldTracked()) {
+            ((TrackableBridge) entityIn).bridge$setWorldTracked(false);
         }
     }
 
@@ -135,8 +136,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/server/ServerWorld;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/entity/Entity;)V"),
             slice = @Slice(
-                    from = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/IProfiler;startSection(Ljava/lang/String;)V", args = "stringValue=tick"),
-                    to = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/IProfiler;startSection(Ljava/lang/String;)V", args = "stringValue=remove")
+                    from = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/IProfiler;startSection(Ljava/lang/String;)V", args = "ldc=tick"),
+                    to = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/IProfiler;startSection(Ljava/lang/String;)V", args = "ldc=remove")
             )
     )
     private void tracker$wrapNormalEntityTick(final ServerWorld serverWorld, final Consumer<Entity> entityUpdateConsumer, final Entity entity) {
@@ -150,7 +151,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
 
 
     @Override
-    protected void impl$wrapTileEntityTick(final ITickableTileEntity tileEntity) {
+    protected void tracker$wrapTileEntityTick(final ITickableTileEntity tileEntity) {
         if (!SpongeImplHooks.shouldTickTile(tileEntity)) {
             return;
         }
@@ -179,7 +180,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     @Redirect(method = "tickBlock",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/block/BlockState;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
-    private void impl$wrapBlockTick(final BlockState blockState, final World worldIn, final BlockPos pos, final Random random) {
+    private void tracker$wrapBlockTick(final BlockState blockState, final World worldIn, final BlockPos pos, final Random random) {
         final PhaseContext<?> currentContext = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState currentState = currentContext.state;
         if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
@@ -205,7 +206,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     @Redirect(method = "tickEnvironment",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/block/BlockState;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
-    private void impl$wrapBlockRandomTick(final BlockState blockState, final World worldIn, final BlockPos pos, final Random random) {
+    private void tracker$wrapBlockRandomTick(final BlockState blockState, final World worldIn, final BlockPos pos, final Random random) {
         try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
@@ -317,7 +318,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      */
     @Override
     public boolean setBlockState(final BlockPos pos, final net.minecraft.block.BlockState newState, final int flags) {
-        if (!WorldMixin_Tracker.shadow$isOutsideBuildHeight(pos)) {
+        if (World.isOutsideBuildHeight(pos)) {
             return false;
         } else if (this.worldInfo.getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
             return false;

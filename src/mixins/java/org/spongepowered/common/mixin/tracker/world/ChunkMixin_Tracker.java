@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracking.world;
+package org.spongepowered.common.mixin.tracker.world;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
@@ -64,10 +65,10 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
 
-    @Shadow public abstract net.minecraft.world.World shadow$getWorld();
+    @Shadow public abstract World shadow$getWorld();
 
-    private Map<Integer, PlayerTracker> trackerImpl$trackedIntBlockPositions = new HashMap<>();
-    private Map<Short, PlayerTracker> trackerImpl$trackedShortBlockPositions = new HashMap<>();
+    private Map<Integer, PlayerTracker> trackertracker$trackedIntBlockPositions = new HashMap<>();
+    private Map<Short, PlayerTracker> trackertracker$trackedShortBlockPositions = new HashMap<>();
 
     @Override
     public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) {
@@ -117,7 +118,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         final int indexForUniqueId = worldInfo.bridge$getIndexForUniqueId(user.getUniqueId());
         if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
-            final PlayerTracker playerTracker = this.trackerImpl$trackedShortBlockPositions.get(blockPos);
+            final PlayerTracker playerTracker = this.trackertracker$trackedShortBlockPositions.get(blockPos);
             if (playerTracker != null) {
                 if (trackerType == PlayerTracker.Type.CREATOR) {
                     playerTracker.creatorindex = indexForUniqueId;
@@ -126,11 +127,11 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
                     playerTracker.notifierIndex = indexForUniqueId;
                 }
             } else {
-                this.trackerImpl$trackedShortBlockPositions.put(blockPos, new PlayerTracker(indexForUniqueId, trackerType));
+                this.trackertracker$trackedShortBlockPositions.put(blockPos, new PlayerTracker(indexForUniqueId, trackerType));
             }
         } else {
             final int blockPos = Constants.Sponge.blockPosToInt(pos);
-            final PlayerTracker playerTracker = this.trackerImpl$trackedIntBlockPositions.get(blockPos);
+            final PlayerTracker playerTracker = this.trackertracker$trackedIntBlockPositions.get(blockPos);
             if (playerTracker != null) {
                 if (trackerType == PlayerTracker.Type.CREATOR) {
                     playerTracker.creatorindex = indexForUniqueId;
@@ -139,19 +140,19 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
                     playerTracker.notifierIndex = indexForUniqueId;
                 }
             } else {
-                this.trackerImpl$trackedIntBlockPositions.put(blockPos, new PlayerTracker(indexForUniqueId, trackerType));
+                this.trackertracker$trackedIntBlockPositions.put(blockPos, new PlayerTracker(indexForUniqueId, trackerType));
             }
         }
     }
 
     @Override
     public Map<Integer, PlayerTracker> bridge$getTrackedIntPlayerPositions() {
-        return this.trackerImpl$trackedIntBlockPositions;
+        return this.trackertracker$trackedIntBlockPositions;
     }
 
     @Override
     public Map<Short, PlayerTracker> bridge$getTrackedShortPlayerPositions() {
-        return this.trackerImpl$trackedShortBlockPositions;
+        return this.trackertracker$trackedShortBlockPositions;
     }
 
     @Override
@@ -160,13 +161,13 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             return Optional.empty();
         }
         final int intKey = Constants.Sponge.blockPosToInt(pos);
-        final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(intKey);
+        final PlayerTracker intTracker = this.trackertracker$trackedIntBlockPositions.get(intKey);
         if (intTracker != null) {
             final int notifierIndex = intTracker.creatorindex;
             return this.tracker$getValidatedUser(intKey, notifierIndex);
         } else {
             final short shortKey = Constants.Sponge.blockPosToShort(pos);
-            final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(shortKey);
+            final PlayerTracker shortTracker = this.trackertracker$trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 final int notifierIndex = shortTracker.creatorindex;
                 return this.tracker$getValidatedUser(shortKey, notifierIndex);
@@ -182,13 +183,13 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             return Optional.empty();
         }
         final int key = Constants.Sponge.blockPosToInt(pos);
-        final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(key);
+        final PlayerTracker intTracker = this.trackertracker$trackedIntBlockPositions.get(key);
         if (intTracker != null) {
             final int creatorIndex = intTracker.creatorindex;
             return this.tracker$getValidatedUUID(key, creatorIndex);
         } else {
             final short shortKey = Constants.Sponge.blockPosToShort(pos);
-            final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(shortKey);
+            final PlayerTracker shortTracker = this.trackertracker$trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 final int creatorIndex = shortTracker.creatorindex;
                 return this.tracker$getValidatedUUID(shortKey, creatorIndex);
@@ -204,12 +205,12 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             return Optional.empty();
         }
         final int intKey = Constants.Sponge.blockPosToInt(pos);
-        final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(intKey);
+        final PlayerTracker intTracker = this.trackertracker$trackedIntBlockPositions.get(intKey);
         if (intTracker != null) {
             return this.tracker$getValidatedUser(intKey, intTracker.notifierIndex);
         } else {
             final short shortKey = Constants.Sponge.blockPosToShort(pos);
-            final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(shortKey);
+            final PlayerTracker shortTracker = this.trackertracker$trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 return this.tracker$getValidatedUser(shortKey, shortTracker.notifierIndex);
             }
@@ -224,12 +225,12 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             return Optional.empty();
         }
         final int key = Constants.Sponge.blockPosToInt(pos);
-        final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(key);
+        final PlayerTracker intTracker = this.trackertracker$trackedIntBlockPositions.get(key);
         if (intTracker != null) {
             return this.tracker$getValidatedUUID(key, intTracker.notifierIndex);
         } else {
             final short shortKey = Constants.Sponge.blockPosToShort(pos);
-            final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(shortKey);
+            final PlayerTracker shortTracker = this.trackertracker$trackedShortBlockPositions.get(shortKey);
             if (shortTracker != null) {
                 return this.tracker$getValidatedUUID(shortKey, shortTracker.notifierIndex);
             }
@@ -258,7 +259,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         if (uuid != null) {
             // Verify id is valid and not invalid
             if (SpongeConfigs.getCommon().get().getWorld().getInvalidLookupUuids().contains(uuid)) {
-                this.trackerImpl$trackedIntBlockPositions.remove(key);
+                this.trackertracker$trackedIntBlockPositions.remove(key);
                 return Optional.empty();
             }
             // player is not online, get or create user from storage
@@ -295,21 +296,21 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         }
         if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
-            final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(blockPos);
+            final PlayerTracker shortTracker = this.trackertracker$trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
                 shortTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
-                this.trackerImpl$trackedShortBlockPositions.put(blockPos,
+                this.trackertracker$trackedShortBlockPositions.put(blockPos,
                         new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
         } else {
             final int blockPos = Constants.Sponge.blockPosToInt(pos);
-            final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(blockPos);
+            final PlayerTracker intTracker = this.trackertracker$trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
                 intTracker.notifierIndex = uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
-                this.trackerImpl$trackedIntBlockPositions.put(blockPos,
+                this.trackertracker$trackedIntBlockPositions.put(blockPos,
                         new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid),
                                 PlayerTracker.Type.NOTIFIER));
             }
@@ -324,20 +325,20 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         }
         if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
-            final PlayerTracker shortTracker = this.trackerImpl$trackedShortBlockPositions.get(blockPos);
+            final PlayerTracker shortTracker = this.trackertracker$trackedShortBlockPositions.get(blockPos);
             if (shortTracker != null) {
                 shortTracker.creatorindex = uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
-                this.trackerImpl$trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo())
+                this.trackertracker$trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo())
                         .bridge$getIndexForUniqueId(uuid), PlayerTracker.Type.CREATOR));
             }
         } else {
             final int blockPos = Constants.Sponge.blockPosToInt(pos);
-            final PlayerTracker intTracker = this.trackerImpl$trackedIntBlockPositions.get(blockPos);
+            final PlayerTracker intTracker = this.trackertracker$trackedIntBlockPositions.get(blockPos);
             if (intTracker != null) {
                 intTracker.creatorindex = uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getIndexForUniqueId(uuid);
             } else {
-                this.trackerImpl$trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo())
+                this.trackertracker$trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo())
                         .bridge$getIndexForUniqueId(uuid), PlayerTracker.Type.CREATOR));
             }
         }
@@ -345,16 +346,16 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
     @Override
     public void bridge$setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) {
-        this.trackerImpl$trackedIntBlockPositions = trackedPositions;
+        this.trackertracker$trackedIntBlockPositions = trackedPositions;
     }
 
     @Override
     public void bridge$setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) {
-        this.trackerImpl$trackedShortBlockPositions = trackedPositions;
+        this.trackertracker$trackedShortBlockPositions = trackedPositions;
     }
 
     private SpongeUserManager getUserManager() {
-        final net.minecraft.world.World world = this.shadow$getWorld();
+        final World world = this.shadow$getWorld();
         if (world == null || ((WorldBridge) world).bridge$isFake()) {
             return null;
         }

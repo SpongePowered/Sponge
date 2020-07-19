@@ -54,7 +54,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
     @Redirect(method = "tick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
-    private boolean onUpdateDecayState(final net.minecraft.world.World worldIn, final BlockPos pos,
+    private boolean tracker$switchContextForDecay(final net.minecraft.world.World worldIn, final BlockPos pos,
                                        final net.minecraft.block.BlockState state, final int flags) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PhaseContext<?> currentContext = instance.getPhaseContext();

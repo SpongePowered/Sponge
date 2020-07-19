@@ -52,6 +52,8 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ChunkHolder;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -128,6 +130,7 @@ public final class PhaseTracker implements CauseStackManager {
 
     public static final PhaseTracker CLIENT = new PhaseTracker();
     public static final PhaseTracker SERVER = new PhaseTracker();
+    public static final Logger LOGGER = LogManager.getLogger();
     static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
     private static final Map<Thread, PhaseTracker> SPINOFF_TRACKERS = new MapMaker().weakKeys().concurrencyLevel(8).makeMap();
     private static final boolean DEBUG_CAUSE_FRAMES = Boolean.parseBoolean(System.getProperty("sponge.debugcauseframes", "false"));
@@ -217,24 +220,6 @@ public final class PhaseTracker implements CauseStackManager {
             }
         }
         return blockIn;
-    }
-
-    /**
-     * Validates the {@link Entity} being spawned is being spawned on the main server
-     * thread, if it is available. If the entity is NOT being spawned on the main server thread,
-     * well..... a mod (or plugin) is attempting to spawn an entity to the world
-     * <b>off thread</b>. The problem with doing this is that the PhaseTracker is
-     * <b>not</b> thread safe, and capturing entities off thread is always bad.
-     *
-     * @param entity The entity to spawn
-     * @return True if the entity spawn is on the main thread.
-     */
-    public static boolean isEntitySpawnInvalid(final Entity entity) {
-        if (Sponge.isServerAvailable() && (Sponge.getServer().onMainThread() || SpongeCommon.getServer().isServerStopped())) {
-            return false;
-        }
-        PhasePrinter.printAsyncEntitySpawn(entity);
-        return true;
     }
 
     static {
@@ -530,7 +515,7 @@ public final class PhaseTracker implements CauseStackManager {
     @SuppressWarnings("rawtypes")
     public void notifyBlockOfStateChange(final TrackedWorldBridge mixinWorld, final net.minecraft.block.BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos, final boolean isMoving) {
-        if (!PhaseTracker.SERVER.onSidedThread()) {
+        if (!this.onSidedThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
@@ -676,18 +661,19 @@ public final class PhaseTracker implements CauseStackManager {
 
         final PhaseContext<?> context = this.stack.peek();
         final IPhaseState<?> phaseState = context.state;
-        if (((IPhaseState) phaseState).doesBulkBlockCapture(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
-            // Basically at this point, there's nothing left for us to do since
-            // ChunkMixin will capture the block change, and submit it to be
-            // "captured". It's only when there's immediate block event
-            // processing that we need to actually create the event and process
-            // that transaction.
-            return true;
-        }
+//        if (((IPhaseState) phaseState).doesBulkBlockCapture(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
+//            // Basically at this point, there's nothing left for us to do since
+//            // ChunkMixin will capture the block change, and submit it to be
+//            // "captured". It's only when there's immediate block event
+//            // processing that we need to actually create the event and process
+//            // that transaction.
+//            return true;
+//        }
 
         // Since we don't do bulk capturing, we should also check if we are simply allowed to
         // throw an event, if we are, then we should do that process.
-        if (((IPhaseState) phaseState).doesBlockEventTracking(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
+//        if (((IPhaseState) phaseState).doesBlockEventTracking(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
+        if (true) {
             try {
                 // Fall back to performing a singular block capture and throwing an event with all the
                 // repercussions, such as neighbor notifications and whatnot. Entity spawns should also be

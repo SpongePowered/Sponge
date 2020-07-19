@@ -41,10 +41,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -108,20 +106,6 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     @Override
-    public void bridge$setPersistedChunk(final boolean flag) {
-        this.impl$persistedChunk = flag;
-        // update persisted status for entities and TE's
-        for (final TileEntity tileEntity : this.tileEntities.values()) {
-            ((ActiveChunkReferantBridge) tileEntity).bridge$setActiveChunk(this);
-        }
-        for (final ClassInheritanceMultiMap<Entity> entityList : this.entityLists) {
-            for (final Entity entity : entityList) {
-                ((ActiveChunkReferantBridge) entity).bridge$setActiveChunk(this);
-            }
-        }
-    }
-
-    @Override
     public boolean bridge$isSpawning() {
         return this.impl$isSpawning;
     }
@@ -131,22 +115,6 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
         this.impl$isSpawning = spawning;
     }
 
-    @Inject(method = "addEntity", at = @At("RETURN"))
-    private void impl$SetActiveChunkOnEntityAdd(final Entity entityIn, final CallbackInfo ci) {
-        ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(this);
-    }
-
-    @Inject(method = "removeEntityAtIndex", at = @At("RETURN"))
-    private void impl$ResetEntityActiveChunk(final Entity entityIn, final int index, final CallbackInfo ci) {
-        ((ActiveChunkReferantBridge) entityIn).bridge$setActiveChunk(null);
-    }
-
-    @Redirect(method = "removeTileEntity",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;remove()V"))
-    private void impl$resetTileEntityActiveChunk(final TileEntity tileEntityIn) {
-        ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(null);
-        tileEntityIn.remove();
-    }
 
     // These methods are enabled in ChunkMixin_CreatorTracked as a Mixin plugin
 

@@ -33,12 +33,6 @@ public interface TileEntityBridge {
         return SpawnTypes.BLOCK_SPAWNING.get();
     }
 
-    boolean bridge$shouldTick();
-
-    boolean bridge$isCaptured();
-
-    void bridge$setCaptured(boolean captured);
-
     default String bridge$getPrettyPrinterString() {
         return this.toString();
     }

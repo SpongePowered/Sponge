@@ -67,7 +67,7 @@ public abstract class BlockMixin_Tracker {
      * @param ci Callbackinfo to cancel if we're not on the main thread or we're restoring
      */
     @Inject(method = "spawnAsEntity", at = @At("HEAD"), cancellable = true)
-    private static void impl$checkMainThreadAndRestoring(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
+    private static void tracker$checkMainThreadAndRestoring(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
                                                          final CallbackInfo ci) {
         if (!PhaseTracker.SERVER.onSidedThread() || PhaseTracker.SERVER.getCurrentState().isRestoring()) {
             ci.cancel();
@@ -91,7 +91,7 @@ public abstract class BlockMixin_Tracker {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemEntity;setDefaultPickupDelay()V", shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILSOFT,
             cancellable = true)
-    private static void impl$attemptCaptureOrAllowSpawn(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
+    private static void tracker$attemptCaptureOrAllowSpawn(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
                                                         final CallbackInfo ci, final float unused, final double xOffset, final double yOffset, final double zOffset,
                                                         final ItemEntity toSpawn) {
         // Sponge Start - Tell the phase state to track this position, and then unset it.

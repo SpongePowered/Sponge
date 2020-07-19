@@ -22,34 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.tracker.event;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.tileentity.DropperTileEntity;
+import net.minecraft.tileentity.HopperTileEntity;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
+import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 
-import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.annotation.Nullable;
+@Mixin(value = {
+    DropperTileEntity.class,
+    HopperTileEntity.class,
+    PlayerInventory.class,
+    Container.class
+})
+public abstract class TraitMixin_Tracked_Inventory implements TrackedInventoryBridge {
 
-@Mixin({Entity.class, TileEntity.class})
-public abstract class ActiveChunkReferentMixin implements ActiveChunkReferantBridge {
-
-    private WeakReference<ChunkBridge> activeChunk$chunkReference = new WeakReference<>(null);
+    private List<SlotTransaction> impl$capturedTransactions = new ArrayList<>();
+    private boolean impl$doCapture = false;
 
     @Override
-    @Nullable
-    public ChunkBridge bridge$getActiveChunk() {
-        return this.activeChunk$chunkReference.get();
+    public List<SlotTransaction> bridge$getCapturedSlotTransactions() {
+        return this.impl$capturedTransactions;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void bridge$setActiveChunk(@Nullable final TrackedChunkBridge chunkBridge) {
-        this.activeChunk$chunkReference = new WeakReference(chunkBridge);
+    public void bridge$setCaptureInventory(final boolean doCapture) {
+        this.impl$doCapture = doCapture;
+    }
+
+    @Override
+    public boolean bridge$capturingInventory() {
+        return this.impl$doCapture;
     }
 
 }

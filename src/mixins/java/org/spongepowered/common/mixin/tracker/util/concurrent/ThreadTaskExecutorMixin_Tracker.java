@@ -41,7 +41,7 @@ public abstract class ThreadTaskExecutorMixin_Tracker<R extends Runnable> {
                     value = "INVOKE",
                     target = "Ljava/lang/Runnable;run()V",
                     remap = false))
-    private void impl$callOnMainThreadWithPhaseState(Runnable runnable) {
+    private void tracker$callOnMainThreadWithPhaseState(Runnable runnable) {
         // This method can be called async while server is stopping
         if (this.tracker$isServerAndIsServerStopped() && !SpongeImplHooks.onServerThread()) {
             runnable.run();

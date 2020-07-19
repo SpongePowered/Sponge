@@ -43,8 +43,6 @@ import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.util.Constants;
@@ -52,7 +50,7 @@ import org.spongepowered.common.util.Constants;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
-public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge, TrackableBridge {
+public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge {
 
     //@formatter:off
     @Shadow @Final private TileEntityType<?> type;
@@ -63,23 +61,8 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
     @Shadow public abstract BlockPos shadow$getPos();
     @Shadow public abstract BlockState shadow$getBlockState();
     @Shadow public abstract void shadow$markDirty();
-
     //@formatter:on
-
-
     @Nullable private Timing impl$timing;
-    private boolean impl$isTicking = false;
-    // Used by tracker config
-    private boolean impl$allowsBlockBulkCapture = true;
-    private boolean impl$allowsEntityBulkCapture = true;
-    private boolean impl$allowsBlockEventCreation = true;
-    private boolean impl$allowsEntityEventCreation = true;
-    private boolean impl$isCaptured = false;
-
-//    @Inject(method = "<init>*", at = @At("RETURN"))
-//    private void impl$RefreshTrackerStates(final CallbackInfo ci) {
-//        this.bridge$refreshTrackerStates();
-//    }
 
     @Override
     public Timing bridge$getTimingsHandler() {
@@ -142,63 +125,6 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
         }
     }
 
-    @Override
-    public boolean bridge$shouldTick() {
-        final ChunkBridge chunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
-        // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
-        // See https://github.com/SpongePowered/SpongeVanilla/issues/344
-        if (chunk == null) {
-            return false;
-        }
-        if (!chunk.bridge$isActive()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean bridge$allowsBlockBulkCaptures() {
-        return this.impl$allowsBlockBulkCapture;
-    }
-
-    @Override
-    public boolean bridge$allowsBlockEventCreation() {
-        return this.impl$allowsBlockEventCreation;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityBulkCaptures() {
-        return this.impl$allowsEntityBulkCapture;
-    }
-
-
-    @Override
-    public boolean bridge$allowsEntityEventCreation() {
-        return this.impl$allowsEntityEventCreation;
-    }
-
-    @Override
-    public boolean bridge$isCaptured() {
-        return this.impl$isCaptured;
-    }
-
-    @Override
-    public void bridge$setCaptured(final boolean captured) {
-        this.impl$isCaptured = captured;
-    }
-
-    @Override
-    public void bridge$refreshTrackerStates() {
-        if (((BlockEntity) this).getType() != null) {
-            this.impl$allowsBlockBulkCapture = ((TrackableBridge) this.type).bridge$allowsBlockBulkCaptures();
-            this.impl$allowsEntityBulkCapture = ((TrackableBridge) this.type).bridge$allowsEntityBulkCaptures();
-            this.impl$allowsBlockEventCreation = ((TrackableBridge) this.type).bridge$allowsBlockEventCreation();
-            this.impl$allowsEntityEventCreation = ((TrackableBridge) this.type).bridge$allowsEntityEventCreation();
-        }
-    }
-
-    @SuppressWarnings("ConstantConditions")
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
