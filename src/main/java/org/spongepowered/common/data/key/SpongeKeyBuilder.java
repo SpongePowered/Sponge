@@ -85,12 +85,12 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
 
         final TypeToken<E> elementToken = (TypeToken<E>) this.valueToken.resolveType(valueElementParameter);
 
-        @Nullable BiPredicate<? super E, ? super E> includesTester = this.includesTester;
+        BiPredicate<? super E, ? super E> includesTester = this.includesTester;
         if (includesTester == null) {
             includesTester = (e, e2) -> false;
         }
 
-        @Nullable Comparator<? super E> comparator = this.comparator;
+        Comparator<? super E> comparator = this.comparator;
         if (comparator == null) {
             if (Comparable.class.isAssignableFrom(elementToken.getRawType())) {
                 //noinspection unchecked
