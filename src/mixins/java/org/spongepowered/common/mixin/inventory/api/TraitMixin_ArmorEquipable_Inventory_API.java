@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.base.Preconditions;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
@@ -48,54 +47,54 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
 
     @Override
     public ItemStack getItemInHand(HandType handType) {
-        checkNotNull(handType, "HandType cannot be null!");
+        Preconditions.checkNotNull(handType);
         final net.minecraft.item.ItemStack nmsItem = ((LivingEntity) (Object)this).getHeldItem((Hand) (Object) handType);
         return ItemStackUtil.fromNative(nmsItem);
     }
 
     @Override
     public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
-        checkNotNull(handType, "HandType cannot be null!");
+        Preconditions.checkNotNull(handType);
         ((LivingEntity) (Object)this).setHeldItem((Hand) (Object) handType, ItemStackUtil.toNative(itemInHand).copy());
     }
 
     @Override
-    public ItemStack getHelmet() {
-        return this.getEquipped(EquipmentTypes.HEADWEAR).get();
+    public ItemStack getHead() {
+        return this.getEquipped(EquipmentTypes.HEAD).get();
     }
 
     @Override
-    public void setHelmet(ItemStack helmet) {
-        this.equip(EquipmentTypes.HEADWEAR, helmet);
+    public void setHead(ItemStack head) {
+        this.equip(EquipmentTypes.HEAD, head);
     }
 
     @Override
-    public ItemStack getChestplate() {
-        return this.getEquipped(EquipmentTypes.CHESTPLATE).get();
+    public ItemStack getChest() {
+        return this.getEquipped(EquipmentTypes.CHEST).get();
     }
 
     @Override
-    public void setChestplate(ItemStack chestplate) {
-        this.equip(EquipmentTypes.CHESTPLATE, chestplate);
+    public void setChest(ItemStack chest) {
+        this.equip(EquipmentTypes.CHEST, chest);
     }
 
     @Override
-    public ItemStack getLeggings() {
-        return this.getEquipped(EquipmentTypes.LEGGINGS).get();
+    public ItemStack getLegs() {
+        return this.getEquipped(EquipmentTypes.LEGS).get();
     }
 
     @Override
-    public void setLeggings(ItemStack leggings) {
-        this.equip(EquipmentTypes.LEGGINGS, leggings);
+    public void setLegs(ItemStack legs) {
+        this.equip(EquipmentTypes.LEGS, legs);
     }
 
     @Override
-    public ItemStack getBoots() {
-        return this.getEquipped(EquipmentTypes.BOOTS).get();
+    public ItemStack getFeet() {
+        return this.getEquipped(EquipmentTypes.FEET).get();
     }
 
     @Override
-    public void setBoots(ItemStack boots) {
-        this.equip(EquipmentTypes.BOOTS, boots);
+    public void setFeet(ItemStack feet) {
+        this.equip(EquipmentTypes.FEET, feet);
     }
 }

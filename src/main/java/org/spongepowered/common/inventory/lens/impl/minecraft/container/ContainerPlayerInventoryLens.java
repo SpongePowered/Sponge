@@ -58,11 +58,11 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
     protected void init(SlotLensProvider slots) {
         super.init(slots);
 
-        this.addChild(slots.getSlotLens(this.base + 0), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.HEADWEAR.get()));
-        this.addChild(slots.getSlotLens(this.base + 1), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.CHESTPLATE.get()));
-        this.addChild(slots.getSlotLens(this.base + 2), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.LEGGINGS.get()));
-        this.addChild(slots.getSlotLens(this.base + 3), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.BOOTS.get()));
-        this.addChild(slots.getSlotLens(this.base + 4 + 4 * 9), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.OFF_HAND.get()));
+        this.addChild(slots.getSlotLens(this.base + 0), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.HEAD.get()));
+        this.addChild(slots.getSlotLens(this.base + 1), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.CHEST.get()));
+        this.addChild(slots.getSlotLens(this.base + 2), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.LEGS.get()));
+        this.addChild(slots.getSlotLens(this.base + 3), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.FEET.get()));
+        this.addChild(slots.getSlotLens(this.base + 4 + 4 * 9), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.OFFHAND.get()));
     }
 
 }

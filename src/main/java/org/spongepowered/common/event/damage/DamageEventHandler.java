@@ -201,13 +201,13 @@ public final class DamageEventHandler {
 
     public static EquipmentType resolveEquipment(final int slot) {
         if (slot == 0) {
-            return EquipmentTypes.BOOTS.get();
+            return EquipmentTypes.FEET.get();
         } else if (slot == 1) {
-            return EquipmentTypes.LEGGINGS.get();
+            return EquipmentTypes.LEGS.get();
         } else if (slot == 2) {
-            return EquipmentTypes.CHESTPLATE.get();
+            return EquipmentTypes.CHEST.get();
         } else {
-            return EquipmentTypes.HEADWEAR.get();
+            return EquipmentTypes.HEAD.get();
         }
     }
 

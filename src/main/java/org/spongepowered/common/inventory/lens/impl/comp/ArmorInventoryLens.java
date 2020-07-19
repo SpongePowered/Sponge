@@ -51,24 +51,24 @@ public class ArmorInventoryLens extends SlotBasedLens {
     private void initInventory(SlotLensProvider slots) {
         int index = this.base;
 
-        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.BOOTS.get()));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.FEET.get()));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.LEGGINGS.get()));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.LEGS.get()));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.CHESTPLATE.get()));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.CHEST.get()));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.HEADWEAR.get()));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.HEAD.get()));
     }
 
     private void initContainer(SlotLensProvider slots) {
         int index = this.base;
-        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.HEADWEAR.get()));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.HEAD.get()));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.CHESTPLATE.get()));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.CHEST.get()));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.LEGGINGS.get()));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.LEGS.get()));
         index += this.stride;
-        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.BOOTS.get()));
+        this.addSpanningChild(slots.getSlotLens(index), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.FEET.get()));
     }
 
     @SuppressWarnings("rawtypes")

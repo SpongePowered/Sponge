@@ -560,59 +560,59 @@ public class SpongeUser implements User, DataSerializable, BedLocationHolderBrid
     @Override
     public ItemStack getItemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.getEquipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new);
+            this.getEquipped(EquipmentTypes.MAINHAND).orElseThrow(IllegalStateException::new);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.getEquipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new);
+            this.getEquipped(EquipmentTypes.OFFHAND).orElseThrow(IllegalStateException::new);
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
 
     @Override
-    public ItemStack getHelmet() {
-        return this.getEquipped(EquipmentTypes.HEADWEAR).orElseThrow(IllegalStateException::new);
+    public ItemStack getHead() {
+        return this.getEquipped(EquipmentTypes.HEAD).orElseThrow(IllegalStateException::new);
     }
 
     @Override
-    public void setHelmet(final ItemStack helmet) {
-        this.equip(EquipmentTypes.HEADWEAR, helmet);
+    public void setHead(final ItemStack helmet) {
+        this.equip(EquipmentTypes.HEAD, helmet);
     }
 
     @Override
-    public ItemStack getChestplate() {
-        return this.getEquipped(EquipmentTypes.CHESTPLATE).orElseThrow(IllegalStateException::new);
+    public ItemStack getChest() {
+        return this.getEquipped(EquipmentTypes.CHEST).orElseThrow(IllegalStateException::new);
     }
 
     @Override
-    public void setChestplate(final ItemStack chestplate) {
-        this.equip(EquipmentTypes.CHESTPLATE, chestplate);
+    public void setChest(final ItemStack chestplate) {
+        this.equip(EquipmentTypes.CHEST, chestplate);
     }
 
     @Override
-    public ItemStack getLeggings() {
-        return this.getEquipped(EquipmentTypes.LEGGINGS).orElseThrow(IllegalStateException::new);
+    public ItemStack getLegs() {
+        return this.getEquipped(EquipmentTypes.LEGS).orElseThrow(IllegalStateException::new);
     }
 
     @Override
-    public void setLeggings(final ItemStack leggings) {
-        this.equip(EquipmentTypes.LEGGINGS, leggings);
+    public void setLegs(final ItemStack leggings) {
+        this.equip(EquipmentTypes.LEGS, leggings);
     }
 
     @Override
-    public ItemStack getBoots() {
-        return this.getEquipped(EquipmentTypes.BOOTS).orElseThrow(IllegalStateException::new);
+    public ItemStack getFeet() {
+        return this.getEquipped(EquipmentTypes.FEET).orElseThrow(IllegalStateException::new);
     }
 
     @Override
-    public void setBoots(final ItemStack boots) {
-        this.equip(EquipmentTypes.BOOTS, boots);
+    public void setFeet(final ItemStack boots) {
+        this.equip(EquipmentTypes.FEET, boots);
     }
 
     @Override
     public void setItemInHand(final HandType handType, @Nullable final ItemStack itemInHand) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand);
+            this.setEquippedItem(EquipmentTypes.MAINHAND, itemInHand);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.setEquippedItem(EquipmentTypes.OFF_HAND, itemInHand);
+            this.setEquippedItem(EquipmentTypes.OFFHAND, itemInHand);
         } else {
             throw new IllegalArgumentException("Invalid hand " + handType);
         }

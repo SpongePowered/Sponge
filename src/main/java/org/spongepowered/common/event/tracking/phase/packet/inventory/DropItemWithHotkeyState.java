@@ -105,7 +105,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                             ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID
                             : 1;
                         slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(
-                            EquipmentTypes.MAIN_HAND).orElse(null);
+                            EquipmentTypes.MAINHAND).orElse(null);
                     } else {
                         final CClickWindowPacket packetIn = context.getPacket();
                         usedButton = packetIn.getUsedButton();
