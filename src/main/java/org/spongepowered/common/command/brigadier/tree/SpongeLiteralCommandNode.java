@@ -30,11 +30,8 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 
-public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> implements UnsortedChildrenNode {
+public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> implements SpongeNode {
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
@@ -56,7 +53,8 @@ public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> 
     }
 
     @Override
-    public Collection<CommandNode<CommandSource>> getUnsortedChildren() {
-        return this.nodeHolder.getChildren();
+    public final Collection<CommandNode<CommandSource>> getChildrenForSuggestions() {
+        return this.nodeHolder.getChildrenForSuggestions();
     }
+
 }

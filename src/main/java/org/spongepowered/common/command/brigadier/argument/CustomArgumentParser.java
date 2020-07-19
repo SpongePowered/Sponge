@@ -67,15 +67,15 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
 
     private final Collection<ValueParser<? extends T>> parsers;
     private final ValueCompleter completer;
-    private final boolean isHidden;
-    private final boolean containsDefault;
+    private final boolean doesNotRead;
 
-    public CustomArgumentParser(final Collection<ValueParser<? extends T>> parsers, final ValueCompleter completer, final boolean containsDefault) {
+    public CustomArgumentParser(final Collection<ValueParser<? extends T>> parsers, final ValueCompleter completer, final boolean doesNotRead) {
         this.parsers = parsers;
         this.completer = completer;
-        this.isHidden = parsers.stream().allMatch(x -> x.getClientCompletionType().contains(CustomArgumentParser.NONE_CLIENT_COMPLETION_TYPE));
-        this.containsDefault = containsDefault || this.isHidden; // indicates that we should try to parse this even if there is nothing else to parse.
-        if (this.containsDefault && this.parsers.size() == 2) {
+        this.doesNotRead =
+                doesNotRead || parsers.stream().allMatch(x -> x.getClientCompletionType().contains(CustomArgumentParser.NONE_CLIENT_COMPLETION_TYPE));
+        // indicates that we should try to parse this even if there is nothing else to parse.
+        if (this.parsers.size() == 1) {
             final ValueParser<? extends T> parser = this.parsers.iterator().next();
             if (parser instanceof StandardArgumentParser) {
                 this.types = ImmutableList.copyOf(((StandardArgumentParser<?, ?>) parser).getClientCompletionArgumentType());
@@ -144,13 +144,8 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
     }
 
     @Override
-    public boolean isHiddenFromClient() {
-        return this.isHidden;
-    }
-
-    @Override
-    public boolean canParseEmpty() {
-        return this.containsDefault;
+    public boolean doesNotRead() {
+        return this.doesNotRead;
     }
 
     @Override

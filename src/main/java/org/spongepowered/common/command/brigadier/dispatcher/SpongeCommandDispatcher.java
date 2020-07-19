@@ -91,7 +91,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
     private ParseResults<CommandSource> parseNodes(
             final boolean isRoot,
             final CommandNode<CommandSource> node,
-            final SpongeStringReader reader,
+            final SpongeStringReader originalReader,
             final SpongeCommandContextBuilder contextSoFar) {
 
         final CommandSource source = contextSoFar.getSource();
@@ -99,10 +99,16 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         Map<CommandNode<CommandSource>, CommandSyntaxException> errors = null;
         List<ParseResults<CommandSource>> potentials = null;
         // Sponge End
-        final int cursor = reader.getCursor();
+        final int cursor = originalReader.getCursor();
 
-        for (final CommandNode<CommandSource> child : node.getRelevantNodes(reader)) {
-            // Sponge Start: We need to do a little more scaffolding for permissions
+        for (final CommandNode<CommandSource> child : node.getRelevantNodes(originalReader)) {
+            // Sponge Start
+            // If we've got a potential result, don't try a default.
+            if (child instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) child).getParser().doesNotRead()
+                    && potentials != null) {
+                continue;
+            }
+            // We need to do a little more scaffolding for permissions
             // if (!child.canUse(source)) {
             if (!SpongeNodePermissionCache.canUse(isRoot, this, child, source)) {
             // Sponge End
@@ -110,7 +116,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             }
             // Sponge Start
             final SpongeCommandContextBuilder context = contextSoFar.copy();
-            final int currentCursorPosition = reader.getCursor();
+            final SpongeStringReader reader = new SpongeStringReader(originalReader);
             // Sponge End
             try {
                 try {
@@ -119,7 +125,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().createWithContext(reader, ex.getMessage());
                 }
                 // Sponge Start: if we didn't consume anything we don't want Brig to complain at us.
-                if (reader.getCursor() == currentCursorPosition) {
+                if (reader.getCursor() == cursor) {
                     reader.unskipWhitespace();
                 } else if (reader.canRead()) {
                 // Sponge End
@@ -141,7 +147,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             // must let it do so.
             if (reader.canRead(child.getRedirect() == null ? 2 : 1)
                 || child.getChildren().stream().anyMatch(x -> x instanceof SpongeArgumentCommandNode &&
-                    ((SpongeArgumentCommandNode<?>) x).getParser().canParseEmpty())) {
+                    ((SpongeArgumentCommandNode<?>) x).getParser().doesNotRead())) {
             // Sponge End
                 reader.skip();
                 // Sponge Start: redirect is now in a local variable as we use it a fair bit
@@ -192,7 +198,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             return potentials.get(0);
         }
 
-        return new ParseResults<>(contextSoFar, reader, errors == null ? Collections.emptyMap() : errors);
+        return new ParseResults<>(contextSoFar, originalReader, errors == null ? Collections.emptyMap() : errors);
     }
 
 }

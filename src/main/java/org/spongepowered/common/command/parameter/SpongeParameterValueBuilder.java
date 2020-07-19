@@ -38,7 +38,6 @@ import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -100,7 +99,8 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
         }
     }
 
-    @Override public Parameter.Value.@NonNull Builder<T> setRequirements(@Nullable final Predicate<CommandCause> executionRequirements) {
+    @Override
+    public Parameter.Value.@NonNull Builder<T> setRequirements(@Nullable final Predicate<CommandCause> executionRequirements) {
         this.executionRequirements = executionRequirements;
         return this;
     }
@@ -138,13 +138,9 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     @NonNull
     public SpongeParameterValue<T> build() throws IllegalStateException {
         Preconditions.checkState(this.key != null, "The command key may not be null");
-        Preconditions.checkState(!this.parsers.isEmpty(), "There must be parsers");
+        Preconditions.checkState(!this.parsers.isEmpty() || this.defaultValueFunction != null, "There must be parsers or a default");
         final ImmutableList.Builder<ValueParser<? extends T>> parsersBuilder = ImmutableList.builder();
         parsersBuilder.addAll(this.parsers);
-        final boolean containsDefault = this.defaultValueFunction != null;
-        if (containsDefault) {
-            parsersBuilder.add((key, reader, context) -> Optional.of(this.defaultValueFunction.apply(context)));
-        }
 
         final ValueCompleter completer;
         if (this.completer != null) {
@@ -176,14 +172,14 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
 
         return new SpongeParameterValue<>(
                 parsersBuilder.build(),
+                this.defaultValueFunction,
                 completer,
                 this.usage,
                 this.executionRequirements == null ? commandCause -> true : this.executionRequirements,
                 this.key,
                 this.isOptional,
                 this.consumesAll,
-                this.terminal,
-                containsDefault
+                this.terminal
         );
     }
 

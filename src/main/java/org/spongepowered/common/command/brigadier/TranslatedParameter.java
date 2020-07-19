@@ -32,6 +32,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
 import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
+import org.spongepowered.common.command.brigadier.tree.SpongeRootCommandNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,15 +47,15 @@ import java.util.function.Predicate;
 public final class TranslatedParameter {
 
     private final boolean isTerminal;
-    private final List<CommandNode<CommandSource>> sourceCommandNode;
+    private final SpongeRootCommandNode rootCommandNode;
     private final List<LiteralCommandNode<CommandSource>> subcommands;
 
     public TranslatedParameter(
             final boolean isTerminal,
             final List<LiteralCommandNode<CommandSource>> subcommands,
-            final List<CommandNode<CommandSource>> sourceCommandNode) {
+            final SpongeRootCommandNode rootCommandNode) {
         this.isTerminal = isTerminal;
-        this.sourceCommandNode = sourceCommandNode;
+        this.rootCommandNode = rootCommandNode;
         this.subcommands = subcommands;
     }
 
@@ -62,8 +63,8 @@ public final class TranslatedParameter {
         return this.isTerminal;
     }
 
-    public List<CommandNode<CommandSource>> getSourceCommandNode() {
-        return this.sourceCommandNode;
+    public SpongeRootCommandNode getSourceCommandNode() {
+        return this.rootCommandNode;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -71,9 +72,9 @@ public final class TranslatedParameter {
             final Command.Parameterized commandExecutorIfTerminal,
             final String primaryAlias) {
         final LiteralArgumentBuilder<CommandSource> primary = LiteralArgumentBuilder.literal(primaryAlias);
-        this.sourceCommandNode.forEach(primary::then);
         this.subcommands.forEach(primary::then);
-        if (this.isTerminal) {
+        this.rootCommandNode.getChildren().forEach(primary::then);
+        if (this.isTerminal || primary.getArguments().isEmpty()) {
             primary.executes(new SpongeCommandExecutorWrapper(commandExecutorIfTerminal));
         }
         primary.requires((Predicate) commandExecutorIfTerminal.getExecutionRequirements());

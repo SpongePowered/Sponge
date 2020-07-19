@@ -61,4 +61,27 @@ public final class UnsortedNodeHolder {
         return this.cachedResult;
     }
 
+    // Handles hidden nodes
+    public Collection<CommandNode<CommandSource>> getChildrenForSuggestions() {
+        final ImmutableList.Builder<CommandNode<CommandSource>> nodes = ImmutableList.builder();
+        for (final CommandNode<CommandSource> childNode : this.getChildren()) {
+            if (childNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<CommandSource>) childNode).getParser().doesNotRead()) {
+                final CommandNode<CommandSource> redirected = childNode.getRedirect();
+                if (redirected != null) {
+                    // get the nodes from the redirect
+                    if (redirected instanceof SpongeArgumentCommandNode) {
+                        nodes.addAll(((SpongeArgumentCommandNode<CommandSource>) redirected).getChildrenForSuggestions());
+                    } else {
+                        nodes.addAll(redirected.getChildren());
+                    }
+                } else {
+                    nodes.addAll(((SpongeArgumentCommandNode<CommandSource>) childNode).getChildrenForSuggestions());
+                }
+            } else {
+                nodes.add(childNode);
+            }
+        }
+        return nodes.build();
+    }
+
 }

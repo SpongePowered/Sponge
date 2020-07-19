@@ -29,8 +29,9 @@ import net.minecraft.command.CommandSource;
 
 import java.util.Collection;
 
-public interface UnsortedChildrenNode {
+public interface SpongeNode {
 
-    Collection<CommandNode<CommandSource>> getUnsortedChildren();
+    // Handles hidden nodes
+    Collection<CommandNode<CommandSource>> getChildrenForSuggestions();
 
 }

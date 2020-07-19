@@ -33,11 +33,14 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.CustomArgumentParser;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNodeBuilder;
 import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
+import org.spongepowered.common.command.brigadier.tree.SpongeRootCommandNode;
+import org.spongepowered.common.command.parameter.SpongeDefaultValueParser;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 import org.spongepowered.common.command.parameter.SpongeParameterValue;
 import org.spongepowered.common.command.parameter.multi.SpongeMultiParameter;
@@ -51,9 +54,11 @@ import java.util.function.Predicate;
 
 public final class SpongeParameterTranslator {
 
+    private static final ValueCompleter EMPTY_COMPLETER = context -> ImmutableList.of();
+
     @NonNull
     public static TranslatedParameter createCommandTreeWithSubcommandsOnly(@NonNull final List<Parameter.Subcommand> subcommands) {
-        return new TranslatedParameter(false, createSubcommands(subcommands), ImmutableList.of());
+        return new TranslatedParameter(false, SpongeParameterTranslator.createSubcommands(subcommands), new SpongeRootCommandNode());
     }
 
     @NonNull
@@ -66,11 +71,10 @@ public final class SpongeParameterTranslator {
         final ListIterator<Parameter> parameterListIterator = parameters.listIterator();
 
         // If we have no parameters, or they are all optional, all literals will get an executor.
-        final PassbackConsumer passbackConsumer = new PassbackConsumer();
+        final SpongeRootCommandNode rootNode = new SpongeRootCommandNode();
         final boolean isTerminal = SpongeParameterTranslator.createNode(
-                parameterListIterator, executorWrapper, passbackConsumer, null, new ArrayList<>(), true);
-        return new TranslatedParameter(isTerminal, SpongeParameterTranslator.createSubcommands(subcommands),
-                ImmutableList.copyOf(passbackConsumer.node));
+                parameterListIterator, executorWrapper, rootNode::addChild, null, new ArrayList<>(), true);
+        return new TranslatedParameter(isTerminal, SpongeParameterTranslator.createSubcommands(subcommands), rootNode);
     }
 
     // Returns true if all elements beyond this node are optional.
@@ -126,7 +130,8 @@ public final class SpongeParameterTranslator {
             }
 
             // Process the next element if it exists
-            final SpongeArgumentCommandNodeBuilder<?> currentNode = createNode(valueParameter);
+            final List<? extends SpongeArgumentCommandNodeBuilder<?>> currentNodes = SpongeParameterTranslator.createNode(valueParameter);
+            final SpongeArgumentCommandNodeBuilder<?> currentNode = currentNodes.get(0);
             if (parameters.hasNext()) {
                 // We still need to execute createNode, so this order matters.
                 isInferredTermination = (SpongeParameterTranslator.createNode(
@@ -139,11 +144,11 @@ public final class SpongeParameterTranslator {
             }
 
             if (isInferredTermination || valueParameter.isTerminal()) {
-                currentNode.executes(executorWrapper);
+                currentNodes.forEach(x -> x.executes(executorWrapper));
             }
 
             if (!hasNext && lastNodeCallback != null) {
-                lastNodeCallback.accept(currentNode);
+                currentNodes.forEach(lastNodeCallback);
             }
 
             // Add "then" to nodes that are optional ahead of it, but only if we're not terminating here.
@@ -173,6 +178,13 @@ public final class SpongeParameterTranslator {
                 // the built child will return to the previous node, which will allow this
                 // to be called again.
                 builtNode.addChild(currentNode.redirect(builtNode).build());
+            }
+
+            for (int i = 1; i < currentNodes.size(); ++i) {
+                final SpongeArgumentCommandNodeBuilder<?> secondaryBuilder = currentNodes.get(i);
+                secondaryBuilder.redirect(builtNode);
+                final CommandNode<CommandSource> secondaryNode = secondaryBuilder.build();
+                builtNodeConsumer.accept(secondaryNode);
             }
 
             if (currentParameter.isOptional() && hasNext) {
@@ -209,7 +221,7 @@ public final class SpongeParameterTranslator {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @NonNull
-    private static <T> SpongeArgumentCommandNodeBuilder<? extends T> createNode(final Parameter.@NonNull Value<T> parameter) {
+    private static <T> List<SpongeArgumentCommandNodeBuilder<? extends T>> createNode(final Parameter.@NonNull Value<T> parameter) {
 
         ArgumentParser<? extends T> type = null;
         if (parameter instanceof SpongeParameterValue<?>) {
@@ -217,29 +229,32 @@ public final class SpongeParameterTranslator {
         }
 
         if (type == null) {
-            final boolean containsDefault = parameter instanceof SpongeParameterValue && ((SpongeParameterValue<T>) parameter).containsDefault();
-            type = new CustomArgumentParser<>(parameter.getParsers(), parameter.getCompleter(), containsDefault);
+            type = new CustomArgumentParser<>(parameter.getParsers(), parameter.getCompleter(), false);
         }
 
-        final SpongeArgumentCommandNodeBuilder<T> argumentBuilder =
-                new SpongeArgumentCommandNodeBuilder<T>(
+        final SpongeArgumentCommandNodeBuilder<T> argumentBuilder = new SpongeArgumentCommandNodeBuilder<>(
                         SpongeParameterKey.getSpongeKey(parameter.getKey()),
                         type,
                         parameter.getCompleter());
-
         // CommandCause is mixed into CommandSource, so this is okay.
         argumentBuilder.requires((Predicate) parameter.getRequirement());
-        return argumentBuilder;
-    }
 
-    static final class PassbackConsumer implements Consumer<CommandNode<CommandSource>> {
-
-        final List<CommandNode<CommandSource>> node = new ArrayList<>();
-
-        @Override
-        public void accept(final CommandNode<CommandSource> sourceCommandNode) {
-            this.node.add(sourceCommandNode);
+        if (parameter instanceof SpongeParameterValue) {
+            final SpongeDefaultValueParser<? extends T> defaultValueParser = ((SpongeParameterValue<T>) parameter).getDefaultParser();
+            if (defaultValueParser != null) {
+                final SpongeArgumentCommandNodeBuilder<T> defaultBuilder = new SpongeArgumentCommandNodeBuilder<>(
+                                SpongeParameterKey.getSpongeKey(parameter.getKey()),
+                                new CustomArgumentParser<>(
+                                        ImmutableList.of(defaultValueParser),
+                                        SpongeParameterTranslator.EMPTY_COMPLETER,
+                                        true),
+                                SpongeParameterTranslator.EMPTY_COMPLETER,
+                                "default");
+                return ImmutableList.of(argumentBuilder, defaultBuilder);
+            }
         }
 
+        return ImmutableList.of(argumentBuilder);
     }
+
 }

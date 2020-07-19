@@ -100,12 +100,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
     }
 
     @Override
-    public boolean isHiddenFromClient() {
-        return false;
-    }
-
-    @Override
-    public boolean canParseEmpty() {
+    public boolean doesNotRead() {
         return false;
     }
 

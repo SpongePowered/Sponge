@@ -40,14 +40,24 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
     private final SpongeParameterKey<? super T> key;
     private final ArgumentParser<? extends T> type;
     @Nullable private final ValueCompleter completer;
+    @Nullable private final String suffix;
 
     public SpongeArgumentCommandNodeBuilder(
             final SpongeParameterKey<? super T> key,
             final ArgumentParser<? extends T> type,
             final ValueCompleter completer) {
+        this(key, type, completer, null);
+    }
+
+    public SpongeArgumentCommandNodeBuilder(
+            final SpongeParameterKey<? super T> key,
+            final ArgumentParser<? extends T> type,
+            final ValueCompleter completer,
+            @Nullable final String suffix) {
         this.key = key;
         this.type = type;
         this.completer = type == completer && type instanceof StandardCatalogedArgumentParser ? null : completer;
+        this.suffix = suffix;
     }
 
     @Override
@@ -65,7 +75,8 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
                 this.getRequirement(),
                 this.getRedirect(),
                 this.getRedirectModifier(),
-                this.isFork()
+                this.isFork(),
+                this.suffix == null ? this.key.key() : this.key.key() + "_" + this.suffix
         );
         for (final CommandNode<CommandSource> child : this.getArguments()) {
             node.addChild(child);

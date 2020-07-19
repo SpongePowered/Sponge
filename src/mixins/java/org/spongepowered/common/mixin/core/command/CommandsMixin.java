@@ -44,18 +44,25 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeNodePermissionCache;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
-import org.spongepowered.common.command.brigadier.tree.UnsortedChildrenNode;
+import org.spongepowered.common.command.brigadier.tree.SpongeNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @Mixin(Commands.class)
 public abstract class CommandsMixin {
 
     @Shadow public abstract CommandDispatcher<CommandSource> shadow$getDispatcher();
+    @Shadow private void shadow$commandSourceNodesToSuggestionNodes(final CommandNode<CommandSource> rootCommandSource,
+            final CommandNode<ISuggestionProvider> rootSuggestion,
+            final CommandSource source,
+            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode) {
+        throw new AssertionError("This shouldn't be callable");
+    }
 
     private CauseStackManager.StackFrame impl$initFrame = null;
 
@@ -95,14 +102,7 @@ public abstract class CommandsMixin {
             ),
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;getChildren()Ljava/util/Collection;", remap = false))
     private Collection<CommandNode<CommandSource>> impl$handleHiddenChildrenAndEnsureUnsortedLoop(final CommandNode<CommandSource> commandNode) {
-        if (commandNode instanceof SpongeArgumentCommandNode) {
-            return ((SpongeArgumentCommandNode<CommandSource>) commandNode).getChildrenForSuggestions();
-        }
-        // try to fix redirects.
-        if (commandNode instanceof UnsortedChildrenNode) {
-            return ((UnsortedChildrenNode) commandNode).getUnsortedChildren();
-        }
-        return commandNode.getChildren();
+        return this.impl$getChildrenFromNode(commandNode);
     }
 
     @Redirect(method = "commandSourceNodesToSuggestionNodes",
@@ -151,7 +151,7 @@ public abstract class CommandsMixin {
 
     @Redirect(method = "commandSourceNodesToSuggestionNodes",
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;canUse(Ljava/lang/Object;)Z", remap = false))
-    private boolean impl$testPermissionWhenSendingNodes(
+    private boolean impl$testPermissionAndPreventRecalculationWhenSendingNodes(
             final CommandNode<CommandSource> commandNode,
             final Object source,
             final CommandNode<CommandSource> rootCommandNode,
@@ -159,8 +159,26 @@ public abstract class CommandsMixin {
             final CommandSource sourceButTyped,
             final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode
     ) {
-        return SpongeNodePermissionCache.canUse(
-                rootCommandNode instanceof RootCommandNode, this.shadow$getDispatcher(), commandNode, sourceButTyped);
+        if (SpongeNodePermissionCache.canUse(
+                rootCommandNode instanceof RootCommandNode, this.shadow$getDispatcher(), commandNode, sourceButTyped)) {
+            final CommandNode<ISuggestionProvider> providerCommandNode = commandNodeToSuggestionNode.get(commandNode);
+            if (providerCommandNode != null) {
+                rootSuggestion.addChild(providerCommandNode);
+                if (!this.impl$getChildrenFromNode(commandNode).isEmpty()) {
+                    this.shadow$commandSourceNodesToSuggestionNodes(commandNode, providerCommandNode, sourceButTyped, commandNodeToSuggestionNode);
+                    return false; // short circuit the loop as we've done all we need to do here.
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private Collection<CommandNode<CommandSource>> impl$getChildrenFromNode(final CommandNode<CommandSource> parentNode) {
+        if (parentNode instanceof SpongeNode) {
+            return ((SpongeNode) parentNode).getChildrenForSuggestions();
+        }
+        return parentNode.getChildren();
     }
 
 }

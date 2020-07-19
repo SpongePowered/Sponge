@@ -43,6 +43,7 @@ import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -52,6 +53,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
    // private final static Text GENERIC_EXCEPTION_ERROR = t("Could not parse element");
 
     private final ImmutableList<ValueParser<? extends T>> parsers;
+    @Nullable private final SpongeDefaultValueParser<? extends T> defaultParser;
     private final ValueCompleter completer;
     private final Predicate<CommandCause> requirement;
     @Nullable private final ValueUsage usage;
@@ -59,19 +61,19 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     private final boolean isOptional;
     private final boolean consumeAll;
     private final boolean terminal;
-    private final boolean containsDefault;
 
     public SpongeParameterValue(
             final ImmutableList<ValueParser<? extends T>> parsers,
+            @Nullable final Function<CommandCause, ? extends T> defaultParser,
             final ValueCompleter completer,
             @Nullable final ValueUsage usage,
             final Predicate<CommandCause> requirement,
             final Key<T> key,
             final boolean isOptional,
             final boolean consumeAll,
-            final boolean terminal,
-            final boolean containsDefault) {
+            final boolean terminal) {
         this.parsers = parsers;
+        this.defaultParser = defaultParser == null ? null : new SpongeDefaultValueParser<>(defaultParser);
         this.completer = completer;
         this.requirement = requirement;
         this.usage = usage;
@@ -79,7 +81,6 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
         this.isOptional = isOptional;
         this.consumeAll = consumeAll;
         this.terminal = consumeAll || terminal;
-        this.containsDefault = containsDefault;
     }
 
     @Override
@@ -126,6 +127,17 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
                 args.setState(state);
                 context.rollback(transaction);
             }
+        }
+
+        try {
+            if (this.defaultParser != null) {
+                this.defaultParser.getValue(this.key, args, context);
+            }
+        } catch (final ArgumentParseException ex) {
+            if (currentExceptions == null) {
+                currentExceptions = new ArrayList<>();
+            }
+            currentExceptions.add(ex);
         }
 
         // If we get this far, we failed to parse, return the exceptions
@@ -196,8 +208,8 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
         return this.isOptional;
     }
 
-    public boolean containsDefault() {
-        return this.containsDefault;
+    public SpongeDefaultValueParser<? extends T> getDefaultParser() {
+        return this.defaultParser;
     }
 
     @Override

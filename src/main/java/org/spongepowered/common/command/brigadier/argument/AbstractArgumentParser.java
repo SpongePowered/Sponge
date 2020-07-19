@@ -101,12 +101,8 @@ public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, Su
     }
 
     @Override
-    public boolean isHiddenFromClient() {
+    public boolean doesNotRead() {
         return false;
     }
 
-    @Override
-    public boolean canParseEmpty() {
-        return false;
-    }
 }

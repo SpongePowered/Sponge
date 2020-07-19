@@ -53,7 +53,8 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getDirectoryName).collect(Collectors.toList());
+        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getDirectoryName)
+                .collect(Collectors.toList());
     }
 
     @Override

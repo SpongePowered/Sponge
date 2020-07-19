@@ -103,7 +103,8 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     @Override
     @NonNull
     public Text getUsage(@NonNull final CommandCause cause) {
-        return Text.of(this.associatedCommandNode.getSourceCommandNode().stream().map(CommandNode::getUsageText).collect(Collectors.joining("|")));
+        return Text.of(this.associatedCommandNode.getSourceCommandNode()
+                .getChildrenForSuggestions().stream().map(CommandNode::getUsageText).collect(Collectors.joining("|")));
     }
 
     @Override

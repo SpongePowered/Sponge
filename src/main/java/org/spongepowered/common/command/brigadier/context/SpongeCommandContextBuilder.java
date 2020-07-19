@@ -403,7 +403,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
 
     private static boolean checkNodeCannotBeEmpty(final CommandNode<CommandSource> node, final StringRange range) {
         if (range.getStart() == range.getEnd()) {
-            return !(node instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) node).getParser().canParseEmpty());
+            return !(node instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) node).getParser().doesNotRead());
         }
         return true;
     }

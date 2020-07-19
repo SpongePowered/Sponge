@@ -55,8 +55,6 @@ public interface ArgumentParser<T> {
         return ImmutableList.of(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE);
     }
 
-    boolean isHiddenFromClient();
-
-    boolean canParseEmpty();
+    boolean doesNotRead();
 
 }

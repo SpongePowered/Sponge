@@ -182,6 +182,11 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         return new ArgumentParseException(errorMessage, this.getInput(), this.getCursor());
     }
 
+    @NonNull
+    public ArgumentParseException createException(@NonNull final Text errorMessage, @NonNull Throwable inner) {
+        return new ArgumentParseException(errorMessage, inner, this.getInput(), this.getCursor());
+    }
+
     // JSON parsing. Mostly taken from JsonToNBT
     protected String readKey() throws ArgumentParseException {
         this.skipWhitespace();

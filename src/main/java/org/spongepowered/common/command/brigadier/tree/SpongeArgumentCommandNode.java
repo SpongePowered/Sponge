@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.StringReader;
@@ -43,22 +42,16 @@ import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
-import org.apache.logging.log4j.core.config.plugins.validation.constraints.Required;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
-import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -66,7 +59,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 // We have to extend ArgumentCommandNode for Brig to even use this...
-public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<CommandSource, T> implements UnsortedChildrenNode {
+public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<CommandSource, T> implements SpongeNode {
 
     @Nullable
     private static SuggestionProvider<CommandSource> createSuggestionProvider(@Nullable final ValueCompleter completer) {
@@ -95,8 +88,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             final Predicate<CommandSource> predicate,
             @Nullable final CommandNode<CommandSource> redirect,
             final RedirectModifier<CommandSource> modifier,
-            final boolean forks) {
-        super(key.key(),
+            final boolean forks,
+            final String keyName) {
+        super(keyName,
                 (ArgumentType<T>) Constants.Command.STANDARD_STRING_ARGUMENT_TYPE, // we can abuse generics, we're not actually going to use this.
                 command,
                 predicate,
@@ -108,17 +102,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         this.key = key;
     }
 
-    // Handles hidden nodes
+    @Override
     public final Collection<CommandNode<CommandSource>> getChildrenForSuggestions() {
-        final ImmutableList.Builder<CommandNode<CommandSource>> nodes = ImmutableList.builder();
-        for (final CommandNode<CommandSource> childNode : this.getChildren()) {
-            if (childNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<CommandSource>) childNode).getParser().isHiddenFromClient()) {
-                nodes.addAll(((SpongeArgumentCommandNode<CommandSource>) childNode).getChildrenForSuggestions());
-            } else {
-                nodes.add(childNode);
-            }
-        }
-        return nodes.build();
+        return this.nodeHolder.getChildrenForSuggestions();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -211,11 +197,6 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     public void addChild(final CommandNode<CommandSource> node) {
         super.addChild(node);
         this.nodeHolder.add(node);
-    }
-
-    @Override
-    public Collection<CommandNode<CommandSource>> getUnsortedChildren() {
-        return this.nodeHolder.getChildren();
     }
 
 }
