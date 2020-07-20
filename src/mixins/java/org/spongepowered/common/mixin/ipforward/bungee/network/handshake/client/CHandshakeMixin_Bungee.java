@@ -37,8 +37,7 @@ public abstract class CHandshakeMixin_Bungee {
     @Redirect(method = "readPacketData",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;readString(I)Ljava/lang/String;"))
     private String bungee$patchReadStringForPortForwarding(final PacketBuffer buf, final int value) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginBungeeCord()
-                || !SpongeCommon.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding()) {
+        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginBungeeCord()) {
             return buf.readString(255);
         }
         return buf.readString(Short.MAX_VALUE);

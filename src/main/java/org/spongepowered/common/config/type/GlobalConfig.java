@@ -57,9 +57,6 @@ public class GlobalConfig extends GeneralConfigBase {
     @Setting("ip-sets")
     private Map<String, List<IpSet>> ipSets = new HashMap<>();
 
-    @Setting(value = "bungeecord")
-    private BungeeCordCategory bungeeCord = new BungeeCordCategory();
-
     @Setting(value = "velocity")
     private VelocityCategory velocity = new VelocityCategory();
 
@@ -100,10 +97,6 @@ public class GlobalConfig extends GeneralConfigBase {
 
     public BrokenModCategory getBrokenMods() {
         return this.brokenMods;
-    }
-
-    public BungeeCordCategory getBungeeCord() {
-        return this.bungeeCord;
     }
 
     public VelocityCategory getVelocity() {
