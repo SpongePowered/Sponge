@@ -22,31 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.accessor.network.login.server;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.asm.mixin.connect.IMixinConnector;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.login.server.SCustomPayloadLoginPacket;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.List;
+@Mixin(SCustomPayloadLoginPacket.class)
+public interface SCustomPayloadLoginPacketAccessor {
 
-public abstract class LaunchMixinConnector implements IMixinConnector {
+    @Accessor("transaction") void accessor$setTransaction(int id);
 
-    @Override
-    public final void connect() {
-        for (final String config : this.getMixinConfigs()) {
-            Mixins.addConfiguration(config);
-        }
-    }
+    @Accessor("channel") void accessor$setChannel(ResourceLocation location);
 
-    public List<String> getMixinConfigs() {
-        return Lists.newArrayList(
-            "mixins.common.accessors.json",
-            "mixins.common.api.json",
-            "mixins.common.core.json",
-            "mixins.common.inventory.json",
-            "mixins.common.bungeecord.json",
-            "mixins.common.velocity.json"
-        );
-    }
+    @Accessor("payload") void accessor$setPayload(PacketBuffer buffer);
 }

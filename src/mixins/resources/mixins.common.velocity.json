@@ -1,0 +1,17 @@
+{
+    "minVersion": "0.8",
+    "package": "org.spongepowered.common.mixin.ipforward",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.VelocityPlugin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+    ],
+    "server": [
+        "velocity.network.ServerLoginNetHandlerMixin_Velocity",
+        "NetworkManagerMixin_IpForward"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

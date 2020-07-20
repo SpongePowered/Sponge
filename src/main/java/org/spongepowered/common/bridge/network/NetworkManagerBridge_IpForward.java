@@ -22,31 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.bridge.network;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.asm.mixin.connect.IMixinConnector;
+import com.mojang.authlib.properties.Property;
 
-import java.util.List;
+import java.net.SocketAddress;
+import java.util.UUID;
 
-public abstract class LaunchMixinConnector implements IMixinConnector {
+public interface NetworkManagerBridge_IpForward {
 
-    @Override
-    public final void connect() {
-        for (final String config : this.getMixinConfigs()) {
-            Mixins.addConfiguration(config);
-        }
-    }
+    UUID bungeeBridge$getSpoofedUUID();
 
-    public List<String> getMixinConfigs() {
-        return Lists.newArrayList(
-            "mixins.common.accessors.json",
-            "mixins.common.api.json",
-            "mixins.common.core.json",
-            "mixins.common.inventory.json",
-            "mixins.common.bungeecord.json",
-            "mixins.common.velocity.json"
-        );
-    }
+    void bungeeBridge$setSpoofedUUID(UUID uuid);
+
+    Property[] bungeeBridge$getSpoofedProfile();
+
+    void bungeeBridge$setSpoofedProfile(Property[] profile);
 }

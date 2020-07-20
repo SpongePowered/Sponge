@@ -32,7 +32,7 @@ import org.spongepowered.common.SpongeCommon;
 import java.util.List;
 import java.util.Set;
 
-public class BungeeCordPlugin implements IMixinConfigPlugin {
+public class VelocityPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -45,9 +45,9 @@ public class BungeeCordPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        final boolean useBungee = SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginBungeeCord();
-        final boolean contains = mixinClassName.contains("ipforward.bungee") || mixinClassName.endsWith("Mixin_IpForward");
-        return useBungee && contains;
+        final boolean useVelocity = SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().useVelocity();
+        final boolean contains = mixinClassName.contains("ipforward.velocity") || mixinClassName.endsWith("Mixin_IpForward");
+        return useVelocity && contains;
     }
 
     @Override

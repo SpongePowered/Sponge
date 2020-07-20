@@ -11,7 +11,7 @@
         "bungee.network.handshake.client.CHandshakeMixin_Bungee",
         "bungee.network.handshake.ServerHandshakeNetHandlerMixin_Bungee",
         "bungee.network.login.ServerLoginNetHandlerMixin_Bungee",
-        "NetworkManagerMixin_Bungee"
+        "NetworkManagerMixin_IpForward"
     ],
     "injectors": {
         "defaultRequire": 1

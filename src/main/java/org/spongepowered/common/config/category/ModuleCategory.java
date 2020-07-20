@@ -30,8 +30,13 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class ModuleCategory extends ConfigCategory {
 
-    @Setting(value = "bungeecord")
+    @Setting(value = "bungeecord", comment = "Enables support for legacy BungeeCord-style IP forwarding.  \n" +
+                                             "Its use is not recommended due to security problems.")
     private boolean pluginBungeeCord = false;
+
+    @Setting(value = "velocity", comment = "Enables support for modern Velocity player info forwarding.  \n" +
+                                           "Make sure to also configure the secret.")
+    private boolean pluginVelocity = false;
 
     @Setting(value = "entity-activation-range")
     private boolean pluginEntityActivation = true;
@@ -73,6 +78,10 @@ public class ModuleCategory extends ConfigCategory {
 
     public boolean usePluginBungeeCord() {
         return this.pluginBungeeCord;
+    }
+
+    public boolean useVelocity() {
+        return this.pluginVelocity;
     }
 
     public void setPluginBungeeCord(boolean state) {

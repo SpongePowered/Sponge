@@ -22,20 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network;
+package org.spongepowered.common.accessor.network.login.client;
 
-import com.mojang.authlib.properties.Property;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.login.client.CCustomPayloadLoginPacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.net.SocketAddress;
-import java.util.UUID;
+@Mixin(CCustomPayloadLoginPacket.class)
+public interface CCustomPayloadLoginPacketAccessor {
 
-public interface NetworkManagerBridge_Bungee {
+    @Accessor("transaction") int accessor$getTransaction();
 
-    UUID bungeeBridge$getSpoofedUUID();
-
-    void bungeeBridge$setSpoofedUUID(UUID uuid);
-
-    Property[] bungeeBridge$getSpoofedProfile();
-
-    void bungeeBridge$setSpoofedProfile(Property[] profile);
+    @Accessor("payload") PacketBuffer accessor$getPayload();
 }

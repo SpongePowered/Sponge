@@ -22,25 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.bungee.network.handshake.client;
+package org.spongepowered.common.config.category;
 
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.handshake.client.CHandshakePacket;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeCommon;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-@Mixin(CHandshakePacket.class)
-public abstract class CHandshakeMixin_Bungee {
+@ConfigSerializable
+public class VelocityCategory {
 
-    @Redirect(method = "readPacketData",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;readString(I)Ljava/lang/String;"))
-    private String bungee$patchReadStringForPortForwarding(final PacketBuffer buf, final int value) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginBungeeCord()
-                || !SpongeCommon.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding()) {
-            return buf.readString(255);
-        }
-        return buf.readString(Short.MAX_VALUE);
+    @Setting(value = "secret", comment = "Enter the player info forwarding secret from your Velocity configuration.")
+    private String secret = "";
+
+    public String getSecret() {
+        return secret;
     }
 }

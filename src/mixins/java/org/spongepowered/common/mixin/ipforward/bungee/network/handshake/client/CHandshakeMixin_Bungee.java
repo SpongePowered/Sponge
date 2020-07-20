@@ -22,31 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.mixin.ipforward.bungee.network.handshake.client;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.asm.mixin.connect.IMixinConnector;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.handshake.client.CHandshakePacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeCommon;
 
-import java.util.List;
+@Mixin(CHandshakePacket.class)
+public abstract class CHandshakeMixin_Bungee {
 
-public abstract class LaunchMixinConnector implements IMixinConnector {
-
-    @Override
-    public final void connect() {
-        for (final String config : this.getMixinConfigs()) {
-            Mixins.addConfiguration(config);
+    @Redirect(method = "readPacketData",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/PacketBuffer;readString(I)Ljava/lang/String;"))
+    private String bungee$patchReadStringForPortForwarding(final PacketBuffer buf, final int value) {
+        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginBungeeCord()
+                || !SpongeCommon.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding()) {
+            return buf.readString(255);
         }
-    }
-
-    public List<String> getMixinConfigs() {
-        return Lists.newArrayList(
-            "mixins.common.accessors.json",
-            "mixins.common.api.json",
-            "mixins.common.core.json",
-            "mixins.common.inventory.json",
-            "mixins.common.bungeecord.json",
-            "mixins.common.velocity.json"
-        );
+        return buf.readString(Short.MAX_VALUE);
     }
 }

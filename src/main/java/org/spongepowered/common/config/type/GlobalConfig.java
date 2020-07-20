@@ -30,21 +30,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import ninja.leaping.configurate.objectmapping.Setting;
-import org.spongepowered.common.config.category.BrokenModCategory;
-import org.spongepowered.common.config.category.BungeeCordCategory;
-import org.spongepowered.common.config.category.PhaseTrackerCategory;
-import org.spongepowered.common.config.category.CommandsCategory;
-import org.spongepowered.common.config.category.ExploitCategory;
-import org.spongepowered.common.config.category.GlobalGeneralCategory;
-import org.spongepowered.common.config.category.GlobalWorldCategory;
-import org.spongepowered.common.config.category.ModuleCategory;
-import org.spongepowered.common.config.category.MovementChecksCategory;
-import org.spongepowered.common.config.category.OptimizationCategory;
-import org.spongepowered.common.config.category.PermissionCategory;
-import org.spongepowered.common.config.category.ServicesCategory;
-import org.spongepowered.common.config.category.SqlCategory;
-import org.spongepowered.common.config.category.MetricsCategory;
-import org.spongepowered.common.config.category.TeleportHelperCategory;
+import org.spongepowered.common.config.category.*;
 import org.spongepowered.common.util.IpSet;
 
 import java.net.InetAddress;
@@ -73,6 +59,9 @@ public class GlobalConfig extends GeneralConfigBase {
 
     @Setting(value = "bungeecord")
     private BungeeCordCategory bungeeCord = new BungeeCordCategory();
+
+    @Setting(value = "velocity")
+    private VelocityCategory velocity = new VelocityCategory();
 
     @Setting
     private ExploitCategory exploits = new ExploitCategory();
@@ -115,6 +104,10 @@ public class GlobalConfig extends GeneralConfigBase {
 
     public BungeeCordCategory getBungeeCord() {
         return this.bungeeCord;
+    }
+
+    public VelocityCategory getVelocity() {
+        return velocity;
     }
 
     public SqlCategory getSql() {
