@@ -48,7 +48,7 @@ public final class SpongeBootstrap {
                 new SpongeModule(),
                 new SpongeCommonModule()
         );
-        final Injector bootstrapInjector = Guice.createInjector(modules);
+        final Injector bootstrapInjector = Guice.createInjector(stage, modules);
 
         Launcher.getInstance().getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.PARENT_INJECTOR, () -> bootstrapInjector);
         SpongeBootstrap.lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);

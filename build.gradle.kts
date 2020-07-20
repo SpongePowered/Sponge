@@ -124,7 +124,9 @@ dependencies {
 
     // api
     api(project(":SpongeAPI"))
-    api("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+    api("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
+        exclude(group = "com.google.inject", module = "guice") // We use our own version
+    }
 
     api("net.kyori:adventure-api:4.0.0-SNAPSHOT")
     api("net.kyori:adventure-text-serializer-gson:4.0.0-SNAPSHOT")
@@ -143,19 +145,21 @@ dependencies {
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig(project(":SpongeAPI"))
-    launchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+    launchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
+        exclude(group = "com.google.inject", module = "guice") // We use our own version
+    }
     launchConfig("org.spongepowered:mixin:0.8")
     launchConfig("org.checkerframework:checker-qual:2.8.1")
-    launchConfig("com.google.guava:guava:25.1-jre") {
+    launchConfig("com.google.guava:guava:21.0") {
         exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
         exclude(group = "com.google.j2objc", module = "j2objc-annotations")
         exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
-    launchConfig("com.google.inject:guice:4.0")
+    launchConfig("com.google.inject:guice:4.1.0")
 
-    launchConfig("com.google.code.gson:gson:2.2.4")
+    launchConfig("com.google.code.gson:gson:2.8.0")
     launchConfig("org.ow2.asm:asm-tree:6.2")
     launchConfig("org.ow2.asm:asm-util:6.2")
     launchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
@@ -441,7 +445,9 @@ project("SpongeVanilla") {
         vanillaModLauncherConfig("org.spongepowered:mixin:0.8")
         vanillaModLauncherConfig("org.ow2.asm:asm-util:6.2")
         vanillaModLauncherConfig("org.ow2.asm:asm-tree:6.2")
-        vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+        vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
+            exclude(group = "com.google.inject", module = "guice") // We use our own version
+        }
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.11.2")
         vanillaModLauncherRuntime("com.zaxxer:HikariCP:2.6.3")
@@ -612,7 +618,9 @@ if (spongeForge != null) {
             forgeLaunchConfig("org.spongepowered:mixin:0.8")
             forgeLaunchConfig("org.ow2.asm:asm-util:6.2")
             forgeLaunchConfig("org.ow2.asm:asm-tree:6.2")
-            forgeLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+            forgeLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
+                exclude(group = "com.google.inject", module = "guice") // We use our own version
+            }
             forgeLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
             runtime("com.zaxxer:HikariCP:2.6.3")
