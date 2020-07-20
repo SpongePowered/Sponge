@@ -28,10 +28,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 @RunWith(LaunchWrapperTestRunner.class)

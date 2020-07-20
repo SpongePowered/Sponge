@@ -29,7 +29,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.Constants;
 
 import net.minecraft.tileentity.CommandBlockLogic;
@@ -61,7 +61,7 @@ public abstract class CommandBlockTileEntityMixin_API extends TileEntityMixin_AP
         container.set(Constants.TileEntity.CUSTOM_NAME, this.getCommandBlockLogic().getName());
         container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.getCommandBlockLogic().shouldReceiveErrors());
         if (this.getCommandBlockLogic().shouldReceiveErrors()) {
-            container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeTexts.toLegacy(this.getCommandBlockLogic().getLastOutput()));
+            container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeAdventure.legacySection(SpongeAdventure.asAdventure(this.getCommandBlockLogic().getLastOutput())));
         }
         return container;
     }

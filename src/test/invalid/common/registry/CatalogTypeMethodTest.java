@@ -34,8 +34,6 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.text.translation.Translatable;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.InvocationTargetException;

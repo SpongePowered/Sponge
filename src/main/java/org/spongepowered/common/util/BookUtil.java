@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.util;
 
+import net.kyori.adventure.inventory.Book;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.ServerPlayNetHandler;
@@ -34,7 +35,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.BookView;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collection;
@@ -43,14 +43,14 @@ public final class BookUtil {
 
     public static final int WINDOW_PLAYER_INVENTORY = 0;
 
-    public static void fakeBookView(BookView bookView, Collection<? extends Player> players) {
+    public static void fakeBookView(Book book, Collection<? extends Player> players) {
 
         // First we need to send a fake a Book ItemStack with the BookView's
         // contents to the player's hand
         ItemStack item = ItemStack.of(ItemTypes.WRITTEN_BOOK, 1);
-        item.offer(Keys.DISPLAY_NAME, bookView.getTitle());
-        item.offer(Keys.AUTHOR, bookView.getAuthor());
-        item.offer(Keys.PAGES, bookView.getPages());
+        item.offer(Keys.DISPLAY_NAME, book.title());
+        item.offer(Keys.AUTHOR, book.author());
+        item.offer(Keys.PAGES, book.pages());
 
         for (Player player : players) {
             ServerPlayerEntity mcPlayer = (ServerPlayerEntity) player;

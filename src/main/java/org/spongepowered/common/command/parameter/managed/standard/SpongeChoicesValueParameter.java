@@ -25,12 +25,12 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 
 import java.util.*;
@@ -84,14 +84,14 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
         }
 
         if (this.showInUsage) {
-            throw reader.createException(Text.of(entry, " is not a valid choice!",
-                    Text.newLine(),
-                    Text.newLine(),
-                    "Valid choices include: ", this.choices.get().stream()
+            throw reader.createException(TextComponent.builder(entry + " is not a valid choice!")
+                    .append(TextComponent.newline())
+                    .append(TextComponent.newline())
+                    .append("Valid choices include: " + this.choices.get().stream()
                             .filter(x -> !x.equals(entry))
-                            .limit(5).collect(Collectors.joining(", "))));
+                            .limit(5).collect(Collectors.joining(", "))).build());
         }
-        throw reader.createException(Text.of(entry, " is not a valid choice!"));
+        throw reader.createException(TextComponent.of(entry + " is not a valid choice!"));
     }
 
 }

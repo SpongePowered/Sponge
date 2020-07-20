@@ -25,13 +25,13 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
 
 import java.time.Duration;
@@ -82,7 +82,7 @@ public final class SpongeDurationValueParameter extends CatalogedArgumentParser<
         try {
             return Optional.of(Duration.parse(s));
         } catch (final DateTimeParseException ex) {
-            throw reader.createException(Text.of("Invalid duration!"));
+            throw reader.createException(TextComponent.of("Invalid duration!"));
         }
     }
 

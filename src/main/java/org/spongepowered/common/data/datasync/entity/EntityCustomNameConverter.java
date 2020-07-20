@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 import java.util.Optional;
@@ -45,8 +45,8 @@ public class EntityCustomNameConverter extends DataParameterConverter<String> {
 
     @Override
     public Optional<DataTransactionResult> createTransaction(final Entity entity, final String currentValue, final String value) {
-        final Text currentText = SpongeTexts.fromLegacy(currentValue);
-        final Text newValue = SpongeTexts.fromLegacy(value);
+        final Component currentText = LegacyComponentSerializer.legacy().deserialize(currentValue);
+        final Component newValue = LegacyComponentSerializer.legacy().deserialize(value);
 
         return Optional.of(DataTransactionResult.builder()
                 .replace(Value.immutableOf(Keys.DISPLAY_NAME, currentText))
@@ -60,7 +60,7 @@ public class EntityCustomNameConverter extends DataParameterConverter<String> {
         for (final Immutable<?> value : immutableValues) {
             if (value.getKey() == Keys.DISPLAY_NAME.get()) {
                 try {
-                    return SpongeTexts.toLegacy((Text) value.get());
+                    return LegacyComponentSerializer.legacy().serialize((Component) value.get());
                 } catch (Exception e) {
                     return originalValue;
                 }

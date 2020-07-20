@@ -26,32 +26,32 @@ package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.ComponentSerializer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializer;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
 
-public final class SpongeTextValueParameter extends AbstractArgumentParser<Text> {
+public final class SpongeTextValueParameter extends AbstractArgumentParser<Component> {
 
-    private final TextSerializer textSerializer;
+    private final ComponentSerializer<Component, ? extends Component, String> textSerializer;
     private final boolean consumeAll;
     private final ArgumentType<?> clientCompletionType;
 
-    public SpongeTextValueParameter(final TextSerializer textSerializer, final boolean consumeAll) {
+    public SpongeTextValueParameter(final ComponentSerializer<Component, ? extends Component, String> textSerializer, final boolean consumeAll) {
         this.textSerializer = textSerializer;
         this.consumeAll = consumeAll;
         if (this.consumeAll) {
             this.clientCompletionType = Constants.Command.GREEDY_STRING_ARGUMENT_TYPE;
-        } else if (this.textSerializer == TextSerializers.JSON.get()) { // TODO: do it by class type instead?
+        } else if (this.textSerializer instanceof GsonComponentSerializer) {
             this.clientCompletionType = Constants.Command.NBT_ARGUMENT_TYPE;
         } else {
             this.clientCompletionType = Constants.Command.STANDARD_STRING_ARGUMENT_TYPE;
@@ -66,8 +66,8 @@ public final class SpongeTextValueParameter extends AbstractArgumentParser<Text>
 
     @Override
     @NonNull
-    public Optional<? extends Text> getValue(
-            final Parameter.@NonNull Key<? super Text> parameterKey,
+    public Optional<? extends Component> getValue(
+            final Parameter.@NonNull Key<? super Component> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 

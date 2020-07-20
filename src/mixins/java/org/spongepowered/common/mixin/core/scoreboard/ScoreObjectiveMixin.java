@@ -36,10 +36,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
-import org.spongepowered.common.text.SpongeTexts;
 
 import javax.annotation.Nullable;
 
@@ -73,7 +73,7 @@ public abstract class ScoreObjectiveMixin implements ScoreObjectiveBridge {
             ci.cancel();
             return;
         }
-        this.impl$spongeScoreboard.setDisplayName(SpongeTexts.toText(name));
+        this.impl$spongeScoreboard.setDisplayName(SpongeAdventure.asAdventure(name));
         ci.cancel();
     }
 

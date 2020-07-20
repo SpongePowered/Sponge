@@ -35,7 +35,7 @@ import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.message.MessageEvent.MessageFormatter;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.api.entity.living.player.chat.ChatTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.text.SpongeTexts;

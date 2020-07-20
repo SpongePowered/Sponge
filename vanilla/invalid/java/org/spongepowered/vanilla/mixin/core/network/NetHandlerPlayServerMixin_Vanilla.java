@@ -45,7 +45,7 @@ import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.api.entity.living.player.chat.ChatTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

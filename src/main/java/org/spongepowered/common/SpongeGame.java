@@ -45,6 +45,7 @@ import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.scheduler.AsyncScheduler;
+import org.spongepowered.common.server.ServerConsoleSystemSubject;
 import org.spongepowered.common.util.LocaleCache;
 
 import java.nio.file.Path;
@@ -69,6 +70,8 @@ public final class SpongeGame implements Game {
 
     private Client client;
     private Server server;
+
+    private SystemSubject systemSubject;
 
     @Inject
     public SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
@@ -97,7 +100,10 @@ public final class SpongeGame implements Game {
 
     @Override
     public SystemSubject getSystemSubject() {
-        return (SystemSubject) SpongeCommon.getServer();
+        if (this.systemSubject == null) {
+            this.systemSubject = new ServerConsoleSystemSubject();
+        }
+        return this.systemSubject;
     }
 
     @Override

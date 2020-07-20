@@ -26,17 +26,16 @@ package org.spongepowered.common.mixin.api.mcp.network;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.api.network.status.Favicon;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ServerStatusResponseBridge;
-import org.spongepowered.common.network.status.SpongeFavicon;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
@@ -52,14 +51,14 @@ public abstract class ServerStatusResponseMixin_API implements ClientPingServerE
 
 
     @Override
-    public Text getDescription() {
+    public Component getDescription() {
         return ((ServerStatusResponseBridge) this).bridge$getDescription();
     }
 
     @Override
-    public void setDescription(final Text description) {
+    public void setDescription(final Component description) {
         ((ServerStatusResponseBridge) this).bridge$setDescription(checkNotNull(description, "description"));
-        this.description = SpongeTexts.toComponent(description);
+        this.description = SpongeAdventure.asVanilla(description);
     }
 
     @Override

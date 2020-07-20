@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.bridge.advancements;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,10 +38,6 @@ import javax.annotation.Nullable;
 public interface AdvancementBridge {
 
     ResourceKey bridge$getKey();
-
-    Translation bridge$getTranslation();
-
-    void bridge$setTranslation(Translation translation);
 
     Optional<Advancement> bridge$getParent();
 
@@ -60,7 +55,7 @@ public interface AdvancementBridge {
 
     void bridge$setRegistered();
 
-    Text bridge$getText();
+    Component bridge$getText();
 
-    List<Text> bridge$getToastText();
+    List<Component> bridge$getToastText();
 }

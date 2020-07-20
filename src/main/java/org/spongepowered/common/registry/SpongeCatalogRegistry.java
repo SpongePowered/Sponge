@@ -136,7 +136,6 @@ import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
-import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -145,6 +144,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogEventImpl;
 import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTypeStreamGenerator;
@@ -240,7 +240,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     @Override
-    public <T extends CatalogType> Optional<T> get(final Class<T> typeClass, final ResourceKey key) {
+    public <T extends CatalogType> Optional<T> get(final Class<T> typeClass, final net.kyori.adventure.key.Key key) {
         Preconditions.checkNotNull(key);
 
         final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
@@ -248,7 +248,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             return Optional.empty();
         }
 
-        return (Optional<T>) registry.getValue((ResourceLocation) (Object) key);
+        return (Optional<T>) registry.getValue(SpongeAdventure.asVanilla(key));
     }
 
     @Override
@@ -319,7 +319,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this.registerSupplier(catalogClass, suggestedId, supplier);
     }
 
-    public <T extends CatalogType, E extends T> SpongeCatalogRegistry registerSupplier(final Class<E> catalogClass, final String suggestedId, Supplier<E> supplier) {
+    public <T extends CatalogType, E extends T> SpongeCatalogRegistry registerSupplier(final Class<E> catalogClass, final String suggestedId, final Supplier<E> supplier) {
         Preconditions.checkNotNull(supplier);
 
         final Map<String, Supplier<CatalogType>> catalogSuppliers = this.suppliers.computeIfAbsent((Class<CatalogType>) (Object) catalogClass, k -> new Object2ObjectArrayMap<>());
@@ -375,7 +375,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    private <T extends CatalogType> SpongeCatalogRegistry generateCallbackRegistry(Class<T> catalogClass, ResourceKey key, BiConsumer<ResourceLocation, T> callback) {
+    private <T extends CatalogType> SpongeCatalogRegistry generateCallbackRegistry(final Class<T> catalogClass, final ResourceKey key, final BiConsumer<ResourceLocation, T> callback) {
         Preconditions.checkNotNull(key);
 
         final Registry<CatalogType> registry = this.registries.putIfAbsent(key, (Registry<CatalogType>) new CallbackRegistry<>(callback));
@@ -418,11 +418,11 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    public <T extends CatalogType, R extends Registry<T>> @Nullable R getRegistry(Class<T> catalogClass) {
+    public <T extends CatalogType, R extends Registry<T>> @Nullable R getRegistry(final Class<T> catalogClass) {
         return (R) this.registriesByType.get(catalogClass);
     }
 
-    public <T extends CatalogType, R extends Registry<T>> @NonNull R requireRegistry(Class<T> catalogClass) {
+    public <T extends CatalogType, R extends Registry<T>> @NonNull R requireRegistry(final Class<T> catalogClass) {
         final R registry = this.getRegistry(catalogClass);
         if (registry == null) {
             throw new IllegalArgumentException("No registry is registered for " + catalogClass);
@@ -430,7 +430,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return registry;
     }
 
-    public <C extends CatalogType> C registerCatalog(C catalogType) {
+    public <C extends CatalogType> C registerCatalog(final C catalogType) {
         Preconditions.checkNotNull(catalogType);
 
         final Registry<C> registry = (Registry<C>) this.registriesByType.get(catalogType.getClass());
@@ -458,12 +458,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         // TODO 1.14 - We'll take on a case by case basis if any mods are extending/replacing Enum values and therefore breaks this. Otherwise it will
         // TODO 1.14 - get to the point of insanity if literally every enum in the game becomes hardcoded lines that we have to map out...
 
-        // TODO 1.14 - Text stuff needs to be registered as soon as possible in the engine, needed by BossBarOverlay (as an example)
-//        this
-//            .generateMappedRegistry(TextColor.class, ResourceKey.minecraft("text_color"), TextColorStreamGenerator.stream(), true)
-//            .generateMappedRegistry(TextStyle.Type.class, ResourceKey.minecraft("text_style"), TextStyleTypeStreamGenerator.stream(), true)
-//            .generateRegistry(TextSerializer.class, ResourceKey.minecraft("text_serializer"), TextSerializerStreamGenerator.stream(), true)
-//        ;
         this
             .generateRegistry(AccountDeletionResultType.class, ResourceKey.sponge("account_deletion_result_type"), AccountDeletionResultTypeStreamGenerator.stream(), true, false)
             .registerRegistry(Advancement.class, ResourceKey.minecraft("advancement"), false)
@@ -478,7 +472,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(BodyPart.class, ResourceKey.minecraft("body_part"), BodyPartStreamGenerator.stream(), true, false)
             .generateRegistry(ClientCompletionType.class, ResourceKey.sponge("client_completion"), ClientCompletionTypeStreamGenerator.stream(), true, false)
 //            .generateRegistry(ChatType.class, ResourceKey.minecraft("chat_type"), Arrays.stream(net.minecraft.util.text.ChatType.values()), true)
-            .generateRegistry(ChatVisibility.class, ResourceKey.minecraft("chat_visibility"), Arrays.stream(net.minecraft.entity.player.ChatVisibility.values()), true, false)
             .generateRegistry(ChestAttachmentType.class, ResourceKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true, false)
             .generateRegistry(CollisionRule.class, ResourceKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true, false)
             .generateRegistry(ComparatorMode.class, ResourceKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true, false)

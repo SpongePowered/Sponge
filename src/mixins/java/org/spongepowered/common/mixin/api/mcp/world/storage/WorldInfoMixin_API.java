@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.world.storage;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.gson.JsonParseException;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.key.KeyedValue;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Difficulty;
@@ -35,7 +37,6 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.boss.BossBar;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -373,13 +374,13 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public List<BossBar> getCustomBossBars() {
+    public List<KeyedValue<BossBar>> getCustomBossBars() {
         // TODO 1.14 - Fetch the boss bars if a live world instance, return dummies if they aren't?
         return null;
     }
 
     @Override
-    public void setCustomBossBars(@Nullable List<BossBar> bars) {
+    public void setCustomBossBars(@Nullable List<KeyedValue<BossBar>> bars) {
 
     }
 

@@ -28,16 +28,15 @@ import net.minecraft.block.Block;
 import net.minecraft.tags.Tag;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.WoodType;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.TagHolderCatalogType;
 
-public final class SpongeWoodType extends SpongeCatalogType.Translatable implements WoodType, TagHolderCatalogType<Block> {
+public final class SpongeWoodType extends SpongeCatalogType implements WoodType, TagHolderCatalogType<Block> {
 
     private final Tag<Block> tag;
 
-    public SpongeWoodType(ResourceKey key, Translation translation, Tag<Block> tag) {
-        super(key, translation);
+    public SpongeWoodType(ResourceKey key, Tag<Block> tag) {
+        super(key);
         this.tag = tag;
     }
 

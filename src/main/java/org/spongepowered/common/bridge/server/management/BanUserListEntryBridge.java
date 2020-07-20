@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.bridge.server.management;
 
-import org.spongepowered.api.text.Text;
+import net.kyori.adventure.text.Component;
 
 import java.util.Optional;
 
 public interface BanUserListEntryBridge {
 
-    Optional<Text> bridge$getReason();
+    Optional<Component> bridge$getReason();
 
-    Optional<Text> bridge$getSource();
+    Optional<Component> bridge$getSource();
 
 }

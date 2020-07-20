@@ -112,7 +112,12 @@ val mixins by sourceSets.registering {
 
 configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {}
 repositories {
+    mavenLocal()
     maven("https://files.minecraftforge.net/maven")
+    maven {
+        name = "Sonatype Snapshots"
+        setUrl("https://oss.sonatype.org/content/repositories/snapshots/")
+    }
 }
 dependencies {
     minecraft("net.minecraft:$minecraftDep:$minecraftVersion")
@@ -120,6 +125,10 @@ dependencies {
     // api
     api(project(":SpongeAPI"))
     api("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+
+    api("net.kyori:adventure-api:4.0.0-SNAPSHOT")
+    api("net.kyori:adventure-text-serializer-gson:4.0.0-SNAPSHOT")
+    api("net.kyori:adventure-text-serializer-legacy:4.0.0-SNAPSHOT")
 
     // Database stuffs... likely needs to be looked at
     implementation("com.zaxxer:HikariCP:2.6.3")
@@ -219,6 +228,10 @@ allprojects {
             setUrl("https://repo-new.spongepowered.org/repository/maven-public/")
         }
         maven("https://repo.spongepowered.org/maven")
+        maven {
+            name = "Sonatype Snapshots"
+            setUrl("https://oss.sonatype.org/content/repositories/snapshots/")
+        }
     }
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project

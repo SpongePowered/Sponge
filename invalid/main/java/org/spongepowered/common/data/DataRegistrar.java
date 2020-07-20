@@ -40,7 +40,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -137,7 +136,6 @@ public final class DataRegistrar {
 
         // Text stuff
         dataManager.registerBuilder(Text.class, new TextConfigSerializer());
-        dataManager.registerBuilder(BookView.class, new BookViewDataBuilder());
         dataManager.registerBuilder(FluidStackSnapshot.class, new SpongeFluidStackSnapshotBuilder());
 
         // Effects stuff

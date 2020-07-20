@@ -26,6 +26,8 @@ package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -34,7 +36,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
 
 import java.util.List;
@@ -67,8 +68,8 @@ public final class SpongeNoneValueParameter extends CatalogedArgumentParser<Void
 
     @Override
     @NonNull
-    public Text getUsage(@NonNull final Text key) {
-        return Text.of();
+    public Component getUsage(@NonNull final String key) {
+        return TextComponent.empty();
     }
 
     @Override

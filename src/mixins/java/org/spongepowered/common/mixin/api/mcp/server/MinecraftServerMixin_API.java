@@ -28,10 +28,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
+import java.util.Collections;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.command.Commands;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -43,18 +49,16 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.storage.ChunkLayout;
@@ -67,6 +71,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
@@ -74,7 +79,6 @@ import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.user.SpongeUserManager;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.UsernameCache;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -91,7 +95,7 @@ import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 @Implements(value = @Interface(iface = Server.class, prefix = "server$"))
-public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer, SystemSubject {
+public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer {
 
     @Shadow @Final public long[] tickTimeArray;
     @Shadow public abstract PlayerList shadow$getPlayerList();
@@ -103,15 +107,15 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
     @Shadow public abstract void shadow$sendMessage(ITextComponent p_145747_1_);
 
+    private Iterable<? extends Audience> audiences;
     private SpongeScheduler api$scheduler;
     private SpongeTeleportHelper api$teleportHelper;
     private SpongePlayerDataManager api$playerDataHandler;
     private UsernameCache api$usernameCache;
-    private MessageChannel api$broadcastChannel;
+    private Audience api$broadcastAudience;
     private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
     private SpongeUserManager api$userManager;
-    private MessageChannel api$messageChannel = null; //TODO: MessageChannel.toPlayersAndServer();
 
     public MinecraftServerMixin_API(String name) {
         super(name);
@@ -129,22 +133,30 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
+    public @NonNull Iterable<? extends Audience> audiences() {
+        if (this.audiences == null) {
+            this.audiences = Iterables.concat((List) this.shadow$getPlayerList().getPlayers(), Collections.singleton(Sponge.getGame().getSystemSubject()));
+        }
+        return this.audiences;
+    }
+
+    @Override
     public ChunkLayout getChunkLayout() {
         return SpongeChunkLayout.instance;
     }
 
     @Override
-    public MessageChannel getBroadcastChannel() {
-        if (this.api$broadcastChannel == null) {
-            this.api$broadcastChannel = MessageChannel.toPlayersAndServer();
+    public Audience getBroadcastAudience() {
+        if (this.api$broadcastAudience == null) {
+            this.api$broadcastAudience = this;
         }
 
-        return this.api$broadcastChannel;
+        return this.api$broadcastAudience;
     }
 
     @Override
-    public void setBroadcastChannel(final MessageChannel channel) {
-        this.api$broadcastChannel = checkNotNull(channel, "channel");
+    public void setBroadcastAudience(final Audience channel) {
+        this.api$broadcastAudience = checkNotNull(channel, "channel");
     }
 
     @Override
@@ -203,8 +215,8 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public Text getMotd() {
-        return SpongeTexts.fromLegacy(this.shadow$getMOTD());
+    public Component getMotd() {
+        return SpongeAdventure.legacy(LegacyComponentSerializer.SECTION_CHAR, this.shadow$getMOTD());
     }
 
     @Override
@@ -233,7 +245,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public void shutdown(final Text kickMessage) {
+    public void shutdown(final Component kickMessage) {
         Preconditions.checkNotNull(kickMessage);
         for (final ServerPlayer player : this.getOnlinePlayers()) {
             player.kick(kickMessage);
@@ -319,23 +331,8 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public void sendMessage(final Text message) {
-        this.shadow$sendMessage(SpongeTexts.toComponent(message));
-    }
-
-    @Override
-    public MessageChannel getMessageChannel() {
-        return this.api$messageChannel;
-    }
-
-    @Override
-    public void setMessageChannel(final MessageChannel channel) {
-        this.api$messageChannel = Preconditions.checkNotNull(channel);
-    }
-
-    @Override
-    public String getIdentifier() {
-        return this.getName(); // from superclass.
+    public void sendMessage(final Component message, final MessageType type) {
+        this.shadow$sendMessage(SpongeAdventure.asVanilla(message));
     }
 
 }

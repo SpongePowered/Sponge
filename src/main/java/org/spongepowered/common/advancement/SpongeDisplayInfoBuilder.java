@@ -27,20 +27,21 @@ package org.spongepowered.common.advancement;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
 
     private AdvancementType advancementType;
-    private Text description;
-    private Text title;
+    private Component description;
+    private Component title;
     private ItemStackSnapshot icon;
     private boolean showToast;
     private boolean announceToChat;
@@ -58,14 +59,14 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     }
 
     @Override
-    public DisplayInfo.Builder description(final Text description) {
+    public DisplayInfo.Builder description(final Component description) {
         checkNotNull(description, "description");
         this.description = description;
         return this;
     }
 
     @Override
-    public DisplayInfo.Builder title(final Text title) {
+    public DisplayInfo.Builder title(final Component title) {
         checkNotNull(title, "title");
         this.title = title;
         return this;
@@ -101,8 +102,8 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     public DisplayInfo build() {
         checkState(this.title != null, "Title has not been set");
         checkState(this.icon != null, "Icon has not been set");
-        final ITextComponent title = SpongeTexts.toComponent(this.title);
-        final ITextComponent description = SpongeTexts.toComponent(this.description);
+        final ITextComponent title = SpongeAdventure.asVanilla(this.title);
+        final ITextComponent description = SpongeAdventure.asVanilla(this.description);
         final FrameType frameType = (FrameType) (Object) this.advancementType;
         final net.minecraft.item.ItemStack icon = (net.minecraft.item.ItemStack) (Object) this.icon.createStack();
         return (DisplayInfo) new net.minecraft.advancements.DisplayInfo(icon, title, description, null,
@@ -124,7 +125,7 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     @Override
     public DisplayInfo.Builder reset() {
         this.icon = null;
-        this.description = Text.empty();
+        this.description = TextComponent.empty();
         this.advancementType = AdvancementTypes.TASK.get();
         this.announceToChat = true;
         this.hidden = false;

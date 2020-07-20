@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.item.Item;
@@ -34,12 +36,9 @@ import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Optional;
 
@@ -53,7 +52,6 @@ public abstract class BlockMixin_API implements BlockType {
     @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
 
     private ResourceKey api$key;
-    private SpongeTranslation api$translation;
 
     @Override
     public final ResourceKey getKey() {
@@ -93,11 +91,7 @@ public abstract class BlockMixin_API implements BlockType {
     }
 
     @Override
-    public Translation getTranslation() {
-        if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation(this.shadow$getTranslationKey());
-        }
-
-        return this.api$translation;
+    public Component asComponent() {
+        return TranslatableComponent.of(this.shadow$getTranslationKey());
     }
 }

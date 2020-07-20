@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.entity;
 
 import com.google.common.base.Preconditions;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -34,7 +36,6 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -49,8 +50,8 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     @Shadow public abstract IAttributeInstance shadow$getAttribute(IAttribute attribute);
 
     @Override
-    public Text getTeamRepresentation() {
-        return Text.of(this.shadow$getUniqueID().toString());
+    public Component getTeamRepresentation() {
+        return TextComponent.of(this.shadow$getUniqueID().toString());
     }
 
     @Override

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -31,14 +33,12 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.StringNBT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemStackBookAuthorProvider extends ItemStackDataProvider<Text> {
+public class ItemStackBookAuthorProvider extends ItemStackDataProvider<Component> {
 
     public ItemStackBookAuthorProvider() {
         super(Keys.AUTHOR);
@@ -50,18 +50,18 @@ public class ItemStackBookAuthorProvider extends ItemStackDataProvider<Text> {
     }
 
     @Override
-    protected Optional<Text> getFrom(final ItemStack dataHolder) {
+    protected Optional<Component> getFrom(final ItemStack dataHolder) {
         @Nullable final CompoundNBT tag = dataHolder.getTag();
         if (tag == null) {
             return Optional.empty();
         }
         final String legacy = tag.getString(Constants.Item.Book.ITEM_BOOK_AUTHOR);
-        return Optional.of(SpongeTexts.fromLegacy(legacy));
+        return Optional.of(LegacyComponentSerializer.legacy().deserialize(legacy));
     }
 
     @Override
-    protected boolean set(final ItemStack dataHolder, final Text value) {
-        dataHolder.setTagInfo(Constants.Item.Book.ITEM_BOOK_AUTHOR, new StringNBT(SpongeTexts.toLegacy(value)));
+    protected boolean set(final ItemStack dataHolder, final Component value) {
+        dataHolder.setTagInfo(Constants.Item.Book.ITEM_BOOK_AUTHOR, new StringNBT(LegacyComponentSerializer.legacy().serialize(value)));
         return true;
     }
 }

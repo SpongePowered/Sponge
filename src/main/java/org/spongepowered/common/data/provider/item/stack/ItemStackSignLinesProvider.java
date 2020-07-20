@@ -25,27 +25,27 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.Lists;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ItemStackSignLinesProvider extends ItemStackDataProvider<List<Text>> {
+public class ItemStackSignLinesProvider extends ItemStackDataProvider<List<Component>> {
 
     public ItemStackSignLinesProvider() {
         super(Keys.SIGN_LINES);
     }
 
     @Override
-    protected Optional<List<Text>> getFrom(ItemStack dataHolder) {
+    protected Optional<List<Component>> getFrom(ItemStack dataHolder) {
         @Nullable final CompoundNBT tag = dataHolder.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
         if (tag == null) {
             return Optional.empty();
@@ -54,23 +54,23 @@ public class ItemStackSignLinesProvider extends ItemStackDataProvider<List<Text>
         if (!id.equalsIgnoreCase(Constants.TileEntity.SIGN)) {
             return Optional.empty();
         }
-        final List<Text> texts = Lists.newArrayListWithCapacity(4);
+        final List<Component> texts = Lists.newArrayListWithCapacity(4);
         for (int i = 0; i < 4; i++) {
-            texts.add(SpongeTexts.fromLegacy(tag.getString("Text" + (i + 1))));
+            texts.add(SpongeAdventure.json(tag.getString("Text" + (i + 1))));
         }
         return Optional.of(texts);
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, List<Text> value) {
+    protected boolean set(ItemStack dataHolder, List<Component> value) {
         final CompoundNBT tag = dataHolder.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
         tag.putString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
         for (int i = 0; i < 4; i++) {
-            final Text line = value.size() > i ? value.get(i) : Text.empty();
+            final Component line = value.size() > i ? value.get(i) : TextComponent.empty();
             if (line == null) {
                 throw new IllegalArgumentException("A null line was given at index " + i);
             }
-            tag.putString("Text" + (i + 1), TextSerializers.JSON.get().serialize(line));
+            tag.putString("Text" + (i + 1), SpongeAdventure.json(line));
         }
         return true;
     }

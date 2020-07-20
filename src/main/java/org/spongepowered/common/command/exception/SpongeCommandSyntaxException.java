@@ -26,28 +26,28 @@ package org.spongepowered.common.command.exception;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import org.spongepowered.api.command.exception.ArgumentParseException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.exception.CommandException;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
-import org.spongepowered.common.text.SpongeTexts;
 
 public final class SpongeCommandSyntaxException extends CommandSyntaxException {
 
-    private static final Text ERROR_MESSAGE = Text.of(TextColors.RED, "Error running command: ");
+    private static final Component ERROR_MESSAGE = TextComponent.of("Error running command: ", NamedTextColor.RED);
 
     private final CommandException innerException;
     private final SpongeCommandContext commandContext;
 
     public SpongeCommandSyntaxException(final CommandException exception, final SpongeCommandContext commandContext) {
-        super(new SimpleCommandExceptionType(SpongeTexts.toComponent(exception.getText())), SpongeTexts.toComponent(exception.getText()));
+        super(new SimpleCommandExceptionType(SpongeAdventure.asVanilla(exception.getText())), SpongeAdventure.asVanilla(exception.getText()));
         this.innerException = exception;
         this.commandContext = commandContext;
     }
 
     public SpongeCommandSyntaxException(final CommandException exception, final SpongeCommandContext commandContext, final String command, final int cursor) {
-        super(new SimpleCommandExceptionType(SpongeTexts.toComponent(exception.getText())), SpongeTexts.toComponent(exception.getText()), command, cursor);
+        super(new SimpleCommandExceptionType(SpongeAdventure.asVanilla(exception.getText())), SpongeAdventure.asVanilla(exception.getText()), command, cursor);
         this.innerException = exception;
         this.commandContext = commandContext;
     }
@@ -61,13 +61,13 @@ public final class SpongeCommandSyntaxException extends CommandSyntaxException {
         return this.commandContext;
     }
 
-    public Text getTextMessage() {
-        return Text.of(ERROR_MESSAGE, this.innerException.getText());
+    public Component getTextMessage() {
+        return ERROR_MESSAGE.append(this.innerException.getText());
     }
 
     @Override
     public String getMessage() {
-        return this.getTextMessage().toPlain();
+        return SpongeAdventure.plain(this.getTextMessage());
     }
 
 }

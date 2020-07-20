@@ -50,7 +50,6 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactoryTest;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.PEBKACException;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.util.TypeTokenHelper;

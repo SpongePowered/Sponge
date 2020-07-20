@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.play.server.SDisplayObjectivePacket;
 import net.minecraft.network.play.server.SScoreboardObjectivePacket;
 import net.minecraft.scoreboard.Score;
@@ -36,11 +37,11 @@ import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
@@ -48,7 +49,6 @@ import org.spongepowered.common.accessor.scoreboard.ScorePlayerTeamAccessor;
 import org.spongepowered.common.accessor.scoreboard.ScoreboardAccessor;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -176,8 +176,8 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
     }
 
     @SuppressWarnings("deprecation")
-    public Optional<Team> scoreboard$getMemberTeam(final Text member) {
-        return Optional.ofNullable((Team) ((ScoreboardAccessor) this).accessor$getTeamMemberships().get(SpongeTexts.toLegacy(member)));
+    public Optional<Team> scoreboard$getMemberTeam(final Component member) {
+        return Optional.ofNullable((Team) ((ScoreboardAccessor) this).accessor$getTeamMemberships().get(SpongeAdventure.legacySection(member)));
     }
 
     // Add team
@@ -210,7 +210,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
         return scores;
     }
 
-    public Set<org.spongepowered.api.scoreboard.Score> scoreboard$getScores(final Text name) {
+    public Set<org.spongepowered.api.scoreboard.Score> scoreboard$getScores(final Component name) {
         final Set<org.spongepowered.api.scoreboard.Score> scores = new HashSet<>();
         for (final ScoreObjective objective: ((ScoreboardAccessor) this).accessor$getScoreObjectives().values()) {
             ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective().getScore(name).ifPresent(scores::add);
@@ -218,7 +218,7 @@ public abstract class ServerScoreboardMixin_API extends Scoreboard {
         return scores;
     }
 
-    public void scoreboard$removeScores(final Text name) {
+    public void scoreboard$removeScores(final Component name) {
         for (final ScoreObjective objective: ((ScoreboardAccessor) this).accessor$getScoreObjectives().values()) {
             final SpongeObjective spongeObjective = ((ScoreObjectiveBridge) objective).bridge$getSpongeObjective();
             spongeObjective.getScore(name).ifPresent(spongeObjective::removeScore);

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.custom;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Slot;
@@ -42,7 +43,6 @@ import org.spongepowered.api.item.inventory.menu.handler.KeySwapHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -58,7 +58,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
 
     private ViewableInventory inventory;
     private Map<Container, ServerPlayer> tracked = new HashMap<>();
-    private Text title;
+    private Component title;
 
     @Nullable
     private SlotClickHandler slotClickHandler;
@@ -95,7 +95,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         new ArrayList<>(this.tracked.values()).stream().distinct().forEach(this::open);
     }
 
-    public void setTitle(Text title) {
+    public void setTitle(Component title) {
         this.title = title;
         this.reopen();
     }

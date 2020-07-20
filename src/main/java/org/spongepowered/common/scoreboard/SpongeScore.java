@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.scoreboard;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
 import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 import org.spongepowered.common.accessor.scoreboard.ScoreAccessor;
 import org.spongepowered.common.accessor.scoreboard.ScoreObjectiveAccessor;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
@@ -42,22 +42,22 @@ import java.util.Set;
 
 public class SpongeScore implements Score {
 
-    private Text name;
+    private Component name;
     public String legacyName;
     private int score;
 
     private Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<>();
 
-    public SpongeScore(final Text name) {
+    public SpongeScore(final Component name) {
         this.name = name;
-        this.legacyName = SpongeTexts.toLegacy(name);
+        this.legacyName = SpongeAdventure.legacySection(name);
         if (this.legacyName.length() > Constants.Scoreboards.SCORE_NAME_LENGTH) {
             throw new IllegalArgumentException(String.format("The score name %s is too long! It must be at most %s characters.", this.legacyName, Constants.Scoreboards.SCORE_NAME_LENGTH));
         }
     }
 
     @Override
-    public Text getName() {
+    public Component getName() {
         return this.name;
     }
 

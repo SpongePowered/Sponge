@@ -30,6 +30,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
@@ -46,17 +47,17 @@ import java.util.function.Supplier;
  */
 class IterablePagination extends ActivePagination {
 
-    private final PeekingIterator<Map.Entry<Text, Integer>> countIterator;
+    private final PeekingIterator<Map.Entry<Component, Integer>> countIterator;
     private int lastPage;
 
-    public IterablePagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, Iterable<Map.Entry<Text, Integer>> counts,
-            @Nullable Text title, @Nullable Text header, @Nullable Text footer, Text padding) {
+    public IterablePagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, Iterable<Map.Entry<Component, Integer>> counts,
+            @Nullable Component title, @Nullable Component header, @Nullable Component footer, Component padding) {
         super(src, calc, title, header, footer, padding);
         this.countIterator = Iterators.peekingIterator(counts.iterator());
     }
 
     @Override
-    protected Iterable<Text> getLines(int page) throws CommandException {
+    protected Iterable<Component> getLines(int page) throws CommandException {
         if (!this.countIterator.hasNext()) {
             throw new CommandException(t("You're already at the end of the pagination list iterator."));
         }
@@ -73,17 +74,17 @@ class IterablePagination extends ActivePagination {
         this.lastPage = page;
 
         if (this.getMaxContentLinesPerPage() <= 0) {
-            return Lists.newArrayList(Iterators.transform(this.countIterator, new Function<Map.Entry<Text, Integer>, Text>() {
+            return Lists.newArrayList(Iterators.transform(this.countIterator, new Function<Map.Entry<Component, Integer>, Component>() {
 
                 @Nullable
                 @Override
-                public Text apply(Map.Entry<Text, Integer> input) {
+                public Component apply(Map.Entry<Component, Integer> input) {
                     return input.getKey();
                 }
             }));
         }
 
-        List<Text> ret = new ArrayList<>(this.getMaxContentLinesPerPage());
+        List<Component> ret = new ArrayList<>(this.getMaxContentLinesPerPage());
         int addedLines = 0;
         while (addedLines <= this.getMaxContentLinesPerPage()) {
             if (!this.countIterator.hasNext()) {
@@ -98,7 +99,7 @@ class IterablePagination extends ActivePagination {
                 this.padPage(ret, addedLines, true);
                 break;
             }
-            Map.Entry<Text, Integer> ent = this.countIterator.next();
+            Map.Entry<Component, Integer> ent = this.countIterator.next();
             ret.add(ent.getKey());
             addedLines += ent.getValue();
         }

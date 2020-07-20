@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.plugin.PluginContainer;
@@ -68,7 +68,7 @@ public final class SpongePluginContainerValueParameter extends CatalogedArgument
             return container;
         }
 
-        throw reader.createException(Text.of("Could not find plugin with ID \"" + id + "\""));
+        throw reader.createException(TextComponent.of("Could not find plugin with ID \"" + id + "\""));
     }
 
 }

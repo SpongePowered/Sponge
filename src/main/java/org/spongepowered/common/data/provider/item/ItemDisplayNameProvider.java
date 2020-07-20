@@ -24,30 +24,30 @@
  */
 package org.spongepowered.common.data.provider.item;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.GenericMutableDataProvider;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-public class ItemDisplayNameProvider extends GenericMutableDataProvider<Item, Text> {
+public class ItemDisplayNameProvider extends GenericMutableDataProvider<Item, Component> {
 
     public ItemDisplayNameProvider() {
         super(Keys.DISPLAY_NAME);
     }
 
     @Override
-    protected Optional<Text> getFrom(Item dataHolder) {
+    protected Optional<Component> getFrom(Item dataHolder) {
         final ITextComponent displayName = dataHolder.getDisplayName(new ItemStack(dataHolder));
-        return Optional.of(SpongeTexts.toText(displayName));
+        return Optional.of(SpongeAdventure.asAdventure(displayName));
     }
 
     @Override
-    protected boolean set(Item dataHolder, Text value) {
+    protected boolean set(Item dataHolder, Component value) {
         return false;
     }
 }

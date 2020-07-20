@@ -32,6 +32,8 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -42,7 +44,6 @@ import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
@@ -221,10 +222,10 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
 
     @Override
     @NonNull
-    public Optional<Text> help(@NonNull final CommandCause cause, @NonNull final String command) {
+    public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final String command) {
         final CommandNode<CommandSource> node = this.dispatcher.findNode(Collections.singletonList(command));
         if (node != null) {
-            return Optional.of(Text.of(this.dispatcher.getSmartUsage(node, (CommandSource) cause)));
+            return Optional.of(TextComponent.of(this.dispatcher.getSmartUsage(node, (CommandSource) cause).toString()));
         }
 
         return Optional.empty();

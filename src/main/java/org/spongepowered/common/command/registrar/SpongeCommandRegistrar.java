@@ -30,6 +30,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -40,7 +41,6 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.plugin.PluginContainer;
@@ -119,7 +119,7 @@ public abstract class SpongeCommandRegistrar<T extends Command> implements Comma
 
     @Override
     @NonNull
-    public Optional<Text> help(@NonNull final CommandCause cause, @NonNull final String command) {
+    public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final String command) {
         final T commandEntry = this.commandMap.get(command.toLowerCase());
         if (commandEntry == null) {
             throw new IllegalArgumentException(command + " is not a valid a valid command!");

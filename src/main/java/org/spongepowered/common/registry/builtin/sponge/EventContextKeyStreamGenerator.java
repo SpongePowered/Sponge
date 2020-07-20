@@ -36,6 +36,7 @@ public final class EventContextKeyStreamGenerator {
     public static Stream<EventContextKey<?>> stream() {
         // @formatter:off
         return Stream.of(
+            new SpongeEventContextKey<>(ResourceKey.sponge("audience"), TypeTokens.AUDIENCE),
             new SpongeEventContextKey<>(ResourceKey.sponge("block_event_process"), TypeTokens.LOCATABLE_BLOCK_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("block_event_queue"), TypeTokens.LOCATABLE_BLOCK_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("block_hit"), TypeTokens.BLOCK_SNAPSHOT_TOKEN),
@@ -58,7 +59,6 @@ public final class EventContextKeyStreamGenerator {
             new SpongeEventContextKey<>(ResourceKey.sponge("liquid_flow"), TypeTokens.SERVER_WORLD_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("liquid_mix"), TypeTokens.SERVER_WORLD_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("location"), TypeTokens.SERVER_LOCATION_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("message_channel"), TypeTokens.MESSAGE_CHANNEL_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("modify_event"), TypeTokens.CHANGE_BLOCK_EVENT_MODIFY_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("neighbor_notify_source"), TypeTokens.BLOCK_SNAPSHOT_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("notifier"), TypeTokens.USER_TOKEN),

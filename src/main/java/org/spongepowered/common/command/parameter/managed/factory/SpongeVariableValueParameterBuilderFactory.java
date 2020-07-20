@@ -26,14 +26,13 @@ package org.spongepowered.common.command.parameter.managed.factory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.util.text.StringTextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.brigadier.argument.StandardArgumentParser;
 import org.spongepowered.common.command.parameter.managed.builder.*;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeChoicesValueParameter;
@@ -106,7 +105,7 @@ public final class SpongeVariableValueParameterBuilderFactory implements Variabl
                 return input;
             }
             throw new SimpleCommandExceptionType(
-                    (Message) Text.of("Input \"", input, "\" does not match required pattern \"", pattern.pattern(), "\""))
+                    new StringTextComponent("Input \"" + input + "\" does not match required pattern \"" + pattern.pattern() + "\""))
                     .createWithContext(reader);
         });
     }

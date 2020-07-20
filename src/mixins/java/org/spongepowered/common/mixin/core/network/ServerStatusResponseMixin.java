@@ -24,20 +24,21 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.network.status.Favicon;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ServerStatusResponseBridge;
 import org.spongepowered.common.network.status.SpongeFavicon;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.io.IOException;
 
@@ -49,7 +50,7 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
     @Shadow @Nullable private ITextComponent description;
     @Shadow @Nullable private String favicon;
 
-    private Text impl$descriptionText = Text.of();
+    private Component impl$descriptionText = TextComponent.empty();
     @Nullable private ServerStatusResponse.Players impl$playerBackup;
     @Nullable private Favicon impl$faviconHandle;
 
@@ -68,10 +69,10 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
     public void setServerDescription(@Nullable final ITextComponent motd) {
         if (motd != null) {
             this.description = motd;
-            this.impl$descriptionText = SpongeTexts.toText(motd);
+            this.impl$descriptionText = SpongeAdventure.asAdventure(motd);
         } else {
             this.description = new StringTextComponent("");
-            this.impl$descriptionText = Text.of();
+            this.impl$descriptionText = TextComponent.empty();
         }
     }
 
@@ -97,13 +98,13 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
     }
 
     @Override
-    public Text bridge$getDescription() {
+    public Component bridge$getDescription() {
         return this.impl$descriptionText;
     }
 
     @Override
-    public void bridge$setDescription(@Nullable final Text text) {
-        this.impl$descriptionText = text == null ? Text.of() : text;
+    public void bridge$setDescription(@Nullable final Component text) {
+        this.impl$descriptionText = text == null ? TextComponent.empty() : text;
     }
 
     @Override

@@ -26,10 +26,12 @@ package org.spongepowered.common.registry;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.spongepowered.api.adventure.AdventureRegistry;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.GameRegistry;
+import org.spongepowered.common.adventure.AdventureRegistryImpl;
 
 @Singleton
 public final class SpongeGameRegistry implements GameRegistry {
@@ -49,6 +51,11 @@ public final class SpongeGameRegistry implements GameRegistry {
     @Override
     public SpongeCatalogRegistry getCatalogRegistry() {
         return this.catalogRegistry;
+    }
+
+    @Override
+    public AdventureRegistry getAdventureRegistry() {
+        return AdventureRegistryImpl.INSTANCE;
     }
 
     @Override

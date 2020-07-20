@@ -25,13 +25,13 @@
 package org.spongepowered.common.scoreboard;
 
 import com.google.common.base.MoreObjects;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.util.text.TextFormatting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
-import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.text.format.SpongeTextColor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -42,7 +42,7 @@ public final class SpongeDisplaySlot extends SpongeCatalogType implements Displa
     private final @Nullable TextFormatting formatting;
     private final @Nullable Function<TextFormatting, DisplaySlot> withColorFunction;
 
-    private @Nullable TextColor color;
+    private @Nullable NamedTextColor color;
 
     public SpongeDisplaySlot(ResourceKey key, int index) {
         this(key, index, null, null);
@@ -57,19 +57,19 @@ public final class SpongeDisplaySlot extends SpongeCatalogType implements Displa
     }
 
     @Override
-    public DisplaySlot withTeamColor(@Nullable TextColor color) {
+    public DisplaySlot withTeamColor(@Nullable NamedTextColor color) {
         if (this.withColorFunction == null) {
             return this;
         }
         final DisplaySlot slot = this.withColorFunction.apply(
-                color == null ? TextFormatting.RESET : SpongeTextColor.of(color));
+                color == null ? TextFormatting.RESET : SpongeAdventure.asVanilla(color));
         return slot == null ? this : slot;
     }
 
     @Override
-    public Optional<TextColor> getTeamColor() {
+    public Optional<NamedTextColor> getTeamColor() {
         if (this.color == null) {
-            this.color = SpongeTextColor.of(this.formatting);
+            this.color = SpongeAdventure.asAdventureNamed(this.formatting);
         }
         return Optional.ofNullable(this.color);
     }

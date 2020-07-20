@@ -24,19 +24,18 @@
  */
 package org.spongepowered.common.command.brigadier;
 
-import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.nbt.*;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.text.Text;
 
 import java.util.regex.Pattern;
 
@@ -80,7 +79,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         try {
             return this.readInt();
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(t("Could not parse an integer"), e, this.getString(), this.getCursor());
+            throw new ArgumentParseException(TextComponent.of("Could not parse an integer"), e, this.getString(), this.getCursor());
         }
     }
 
@@ -89,7 +88,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         try {
             return this.readDouble();
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(t("Could not parse a double"), e, this.getString(), this.getCursor());
+            throw new ArgumentParseException(TextComponent.of("Could not parse a double"), e, this.getString(), this.getCursor());
         }
     }
 
@@ -98,7 +97,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         try {
             return this.readFloat();
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(t("Could not parse a float"), e, this.getString(), this.getCursor());
+            throw new ArgumentParseException(TextComponent.of("Could not parse a float"), e, this.getString(), this.getCursor());
         }
     }
 
@@ -122,7 +121,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
                 return this.readUnquotedString();
             }
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(t("Could not parse string"), e, this.getString(), this.getCursor());
+            throw new ArgumentParseException(TextComponent.of("Could not parse string"), e, this.getString(), this.getCursor());
         }
     }
 
@@ -139,7 +138,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         try {
             return this.readBoolean();
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(t("Could not parse a boolean"), e, this.getString(), this.getCursor());
+            throw new ArgumentParseException(TextComponent.of("Could not parse a boolean"), e, this.getString(), this.getCursor());
         }
     }
 
@@ -178,12 +177,12 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
 
     @Override
     @NonNull
-    public ArgumentParseException createException(@NonNull final Text errorMessage) {
+    public ArgumentParseException createException(@NonNull final Component errorMessage) {
         return new ArgumentParseException(errorMessage, this.getInput(), this.getCursor());
     }
 
     @NonNull
-    public ArgumentParseException createException(@NonNull final Text errorMessage, @NonNull Throwable inner) {
+    public ArgumentParseException createException(@NonNull final Component errorMessage, @NonNull Throwable inner) {
         return new ArgumentParseException(errorMessage, inner, this.getInput(), this.getCursor());
     }
 
@@ -191,7 +190,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     protected String readKey() throws ArgumentParseException {
         this.skipWhitespace();
         if (!this.canRead()) {
-            throw this.createException(Text.of("Unable to read JSON key"));
+            throw this.createException(TextComponent.of("Unable to read JSON key"));
         } else {
             return this.getString();
         }
@@ -200,7 +199,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     public void readValue() throws ArgumentParseException {
         this.skipWhitespace();
         if (!this.canRead()) {
-            throw this.createException(Text.of("Unable to read JSON value"));
+            throw this.createException(TextComponent.of("Unable to read JSON value"));
         } else {
             final char c0 = this.peek();
             if (c0 == '{') {
@@ -230,20 +229,20 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         while(this.canRead() && this.peek() != '}') {
             final String s = this.readKey();
             if (s.isEmpty()) {
-                throw this.createException(Text.of("Unable to read JSON key"));
+                throw this.createException(TextComponent.of("Unable to read JSON key"));
             }
 
             try {
                 this.expect(':');
             } catch (final CommandSyntaxException e) {
-                throw this.createException(Text.of(e.getMessage()));
+                throw this.createException(TextComponent.of(e.getMessage()));
             }
             if (!this.hasElementSeparator()) {
                 break;
             }
 
             if (!this.canRead()) {
-                throw this.createException(Text.of("Unable to read JSON key"));
+                throw this.createException(TextComponent.of("Unable to read JSON key"));
             }
         }
 
@@ -254,7 +253,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         this.expectAfterWhitespace('[');
         this.skipWhitespace();
         if (!this.canRead()) {
-            throw this.createException(Text.of("Unable to read JSON list"));
+            throw this.createException(TextComponent.of("Unable to read JSON list"));
         } else {
             while(this.peek() != ']') {
                 this.readValue();
@@ -263,7 +262,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
                 }
 
                 if (!this.canRead()) {
-                    throw this.createException(Text.of("Unable to read JSON value"));
+                    throw this.createException(TextComponent.of("Unable to read JSON value"));
                 }
             }
 
@@ -277,7 +276,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         this.read();
         this.skipWhitespace();
         if (!this.canRead()) {
-            throw this.createException(Text.of("Unable to read JSON array"));
+            throw this.createException(TextComponent.of("Unable to read JSON array"));
         }
         this.readArray();
     }
@@ -288,7 +287,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
                 this.readValue();
                 if (this.hasElementSeparator()) {
                     if (!this.canRead()) {
-                        throw this.createException(Text.of("Unable to read JSON value"));
+                        throw this.createException(TextComponent.of("Unable to read JSON value"));
                     }
                     continue;
                 }
@@ -315,7 +314,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         try {
             this.expect(expected);
         } catch (final CommandSyntaxException e) {
-            throw this.createException(Text.of(e.getMessage()));
+            throw this.createException(TextComponent.of(e.getMessage()));
         }
     }
 }

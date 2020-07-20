@@ -43,7 +43,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -52,7 +51,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
@@ -195,10 +193,6 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
             e.printStackTrace();
         }
         return container;
-    }
-
-    public Translation itemStack$getTranslation() {
-        return new SpongeTranslation(this.shadow$getItem().getTranslationKey((net.minecraft.item.ItemStack) (Object) this) + ".name");
     }
 
     public ItemStackSnapshot itemStack$createSnapshot() {

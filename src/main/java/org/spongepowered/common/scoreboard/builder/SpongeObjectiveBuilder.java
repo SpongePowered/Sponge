@@ -28,10 +28,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
 import javax.annotation.Nullable;
@@ -41,7 +41,7 @@ public class SpongeObjectiveBuilder implements Objective.Builder {
 
     private static final int MAX_NAME_LENGTH = 16;
     @Nullable private String name;
-    @Nullable private Text displayName;
+    @Nullable private Component displayName;
     @Nullable private Criterion criterion;
     @Nullable private ObjectiveDisplayMode objectiveDisplayMode;
 
@@ -55,7 +55,7 @@ public class SpongeObjectiveBuilder implements Objective.Builder {
     }
 
     @Override
-    public Objective.Builder displayName(Text displayName) {
+    public Objective.Builder displayName(Component displayName) {
         checkNotNull(displayName, "DisplayName cannot be null");
         this.displayName = displayName;
         return this;

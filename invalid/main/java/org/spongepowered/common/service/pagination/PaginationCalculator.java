@@ -25,6 +25,8 @@
 package org.spongepowered.common.service.pagination;
 
 import com.google.common.annotations.VisibleForTesting;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -35,6 +37,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.loader.HeaderMode;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.math.GenericMath;
@@ -102,7 +105,7 @@ class PaginationCalculator {
      * @param text The text to calculate the number of lines for
      * @return The number of lines that this text flows into
      */
-    int getLines(Text text) {
+    int getLines(Component text) {
         //TODO: this needs fixing as well.
         return (int) Math.ceil((double) this.getWidth(text) / LINE_WIDTH);
     }
@@ -160,8 +163,8 @@ class PaginationCalculator {
      * @return The amount of character pixels/columns the text takes up
      */
     @VisibleForTesting
-    int getWidth(Text text) {
-        ITextComponent component = SpongeTexts.toComponent(text);
+    int getWidth(Component text) {
+        ITextComponent component = SpongeAdventure.vanilla(text);
         Iterable<ITextComponent> children = ((TextComponentBridge) component).bridge$withChildren();
         int total = 0;
 
@@ -212,26 +215,26 @@ class PaginationCalculator {
      */
     //TODO: Probably should completely rewrite this to not compute padding, but loop until the padding is done, unless
     //we can get accurate computation of padding ahead of time.
-    Text center(Text text, Text padding) {
+    Component center(Component text, Component padding) {
         int inputLength = this.getWidth(text);
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH, this seems most graceful way to fail
         if (inputLength >= LINE_WIDTH) {
             return text;
         }
-        final Text textWithSpaces = this.addSpaces(Text.of(" "), text);
+        final Component textWithSpaces = this.addSpaces(TextComponent.space(), text);
 
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH
         boolean addSpaces = this.getWidth(textWithSpaces) <= LINE_WIDTH;
 
         //TODO: suspect, why are we changing the style of the padding, they may want different styles on the padding.
-        Text styledPadding = this.withStyle(padding, text);
+        Component styledPadding = this.withStyle(padding, text);
         int paddingLength = this.getWidth(styledPadding);
-        final Text.Builder output = Text.builder();
+        final TextComponent.Builder output = TextComponent.builder();
 
         //Using 0 width unicode symbols as padding throws us into an unending loop, replace them with the default padding
         if(paddingLength < 1) {
-            padding = Text.of("=");
-            styledPadding = this.withColor(this.withStyle(padding, text), text);
+            padding = TextComponent.of("=");
+            styledPadding = this.withStyle(padding, text);
             paddingLength = this.getWidth(styledPadding);
         }
 
@@ -267,10 +270,8 @@ class PaginationCalculator {
      * @param styled The styled text
      * @return The original text now stylized
      */
-    private Text withStyle(Text text, Text styled) {
-        return text.toBuilder()
-                .style(styled.getStyle())
-                .build();
+    private Component withStyle(Component text, Component styled) {
+        return text.style(styled.style());
     }
 
     /**
@@ -280,10 +281,8 @@ class PaginationCalculator {
      * @param colored The colored text
      * @return The original text now colored
      */
-    private Text withColor(Text text, Text colored) {
-        return text.toBuilder()
-                .color(colored.getColor())
-                .build();
+    private Component withColor(Component text, Component colored) {
+        return text.color(colored.color());
     }
 
     /**
@@ -293,8 +292,8 @@ class PaginationCalculator {
      * @param build The work in progress text builder
      * @return The finalized, properly styled text.
      */
-    private Text finalizeBuilder(Text text, Text.Builder build) {
-        return build.style(text.getStyle()).build();
+    private Component finalizeBuilder(Component text,TextComponent.Builder build) {
+        return build.style(text.style()).build();
     }
 
     /**
@@ -307,13 +306,12 @@ class PaginationCalculator {
      * @param text The text to add to
      * @return The text with the added spaces
      */
-    private Text addSpaces(Text spaces, Text text) {
-        return Text.builder()
+    private Component addSpaces(Component spaces, Component text) {
+        return TextComponent.builder()
                 .append(spaces)
                 .append(text)
                 .append(spaces)
-                .color(text.getColor())
-                .style(text.getStyle())
+                .style(text.style())
                 .build();
     }
 
@@ -325,7 +323,7 @@ class PaginationCalculator {
      * @param build The work in progress text to add to
      * @param count The amount of padding to add
      */
-    private void addPadding(Text padding, Text.Builder build, int count) {
+    private void addPadding(Component padding, TextComponent.Builder build, int count) {
         if (count > 0) {
             build.append(Collections.nCopies(count, padding));
         }

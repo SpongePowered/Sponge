@@ -26,12 +26,14 @@ package org.spongepowered.common.service.pagination;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -45,45 +47,45 @@ import java.util.function.Supplier;
  */
 abstract class ActivePagination {
 
-    private static final Text SLASH_TEXT = Text.of("/");
-    private static final Text DIVIDER_TEXT = Text.of(" ");
-    private static final Text CONTINUATION_TEXT = t("...");
+    private static final Component SLASH_TEXT = TextComponent.of("/");
+    private static final Component DIVIDER_TEXT = TextComponent.space();
+    private static final Component CONTINUATION_TEXT = TextComponent.of("...");
     private final Supplier<Optional<MessageReceiver>> src;
     private final UUID id = UUID.randomUUID();
-    private final Text nextPageText;
-    private final Text prevPageText;
+    private final Component nextPageText;
+    private final Component prevPageText;
     @Nullable
-    private final Text title;
+    private final Component title;
     @Nullable
-    private final Text header;
+    private final Component header;
     @Nullable
-    private final Text footer;
+    private final Component footer;
     private int currentPage;
     private final int maxContentLinesPerPage;
     protected final PaginationCalculator calc;
-    private final Text padding;
+    private final Component padding;
 
-    public ActivePagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, @Nullable Text title,
-            @Nullable Text header, @Nullable Text footer, Text padding) {
+    public ActivePagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, @Nullable Component title,
+            @Nullable Component header, @Nullable Component footer, Component padding) {
         this.src = src;
         this.calc = calc;
         this.title = title;
         this.header = header;
         this.footer = footer;
         this.padding = padding;
-        this.nextPageText = t("»").toBuilder()
-                .color(TextColors.BLUE)
-                .style(TextStyles.UNDERLINE)
-                .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " next"))
-                .onHover(TextActions.showText(Text.of("/page next")))
-                .onShiftClick(TextActions.insertText("/page next"))
+        this.nextPageText = TextComponent.builder("»")
+                .color(NamedTextColor.BLUE)
+                .decoration(TextDecoration.UNDERLINED, true)
+                .clickEvent(ClickEvent.runCommand("/pagination " + this.id.toString() + " next"))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("/page next")))
+                .insertion("/page next")
                 .build();
-        this.prevPageText = t("«").toBuilder()
-                .color(TextColors.BLUE)
-                .style(TextStyles.UNDERLINE)
-                .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " prev"))
-                .onHover(TextActions.showText(Text.of("/page prev")))
-                .onShiftClick(TextActions.insertText("/page prev"))
+        this.prevPageText = TextComponent.builder("«")
+                .color(NamedTextColor.BLUE)
+                .decoration(TextDecoration.UNDERLINED, true)
+                .clickEvent(ClickEvent.runCommand("/pagination " + this.id.toString() + " prev"))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("/page prev")))
+                .insertion("/page prev")
                 .build();
         int maxContentLinesPerPage = calc.getLinesPerPage(src.get().get()) - 1;
         if (title != null) {
@@ -103,7 +105,7 @@ abstract class ActivePagination {
         return this.id;
     }
 
-    protected abstract Iterable<Text> getLines(int page) throws CommandException;
+    protected abstract Iterable<Component> getLines(int page) throws CommandException;
 
     protected abstract boolean hasPrevious(int page);
 
@@ -161,26 +163,28 @@ abstract class ActivePagination {
         boolean hasPrevious = this.hasPrevious(currentPage);
         boolean hasNext = this.hasNext(currentPage);
 
-        Text.Builder ret = Text.builder();
+        TextComponent.Builder ret = TextComponent.builder();
         if (hasPrevious) {
             ret.append(this.prevPageText).append(DIVIDER_TEXT);
         } else {
-            ret.append(Text.of("«")).append(DIVIDER_TEXT);
+            ret.append(TextComponent.of("«")).append(DIVIDER_TEXT);
         }
         boolean needsDiv = false;
         int totalPages = this.getTotalPages();
         if (totalPages > 1) {
-            ret.append(Text.of(
-                    TextActions.showText(Text.of("/page " + currentPage)),
-                    TextActions.runCommand("/pagination " + this.id + ' ' + currentPage),
-                    TextActions.insertText("/page " + currentPage),
-                    currentPage
-            )).append(SLASH_TEXT).append(Text.of(
-                    TextActions.showText(Text.of("/page " + totalPages)),
-                    TextActions.runCommand("/pagination " + this.id + ' ' + totalPages),
-                    TextActions.insertText("/page " + totalPages),
-                    totalPages
-            ));
+            ret.append(TextComponent.builder()
+                    .content(String.valueOf(currentPage))
+                    .clickEvent(ClickEvent.runCommand("/pagination " + this.id + ' ' + currentPage))
+                    .hoverEvent(HoverEvent.showText(TextComponent.of("/page " + currentPage)))
+                    .insertion("/page " + currentPage)
+                    .build());
+            ret.append(SLASH_TEXT);
+            ret.append(TextComponent.builder()
+                    .content(String.valueOf(currentPage))
+                    .clickEvent(ClickEvent.runCommand("/pagination " + this.id + ' ' + totalPages))
+                    .hoverEvent(HoverEvent.showText(TextComponent.of("/page " + totalPages)))
+                    .insertion("/page " + totalPages)
+                    .build());
             needsDiv = true;
         }
         if (hasNext) {
@@ -192,7 +196,7 @@ abstract class ActivePagination {
             if (needsDiv) {
                 ret.append(DIVIDER_TEXT);
             }
-            ret.append(Text.of("»"));
+            ret.append(TextComponent.of("»"));
         }
 
         ret.color(this.padding.getColor());
@@ -202,13 +206,13 @@ abstract class ActivePagination {
         return ret.build();
     }
 
-    protected void padPage(final List<Text> currentPage, final int currentPageLines, final boolean addContinuation) {
+    protected void padPage(final List<Component> currentPage, final int currentPageLines, final boolean addContinuation) {
         final int maxContentLinesPerPage = this.getMaxContentLinesPerPage();
         for (int i = currentPageLines; i < maxContentLinesPerPage; i++) {
             if (addContinuation && i == maxContentLinesPerPage - 1) {
                 currentPage.add(CONTINUATION_TEXT);
             } else {
-                currentPage.add(0, Text.EMPTY);
+                currentPage.add(0, TextComponent.empty());
             }
         }
     }

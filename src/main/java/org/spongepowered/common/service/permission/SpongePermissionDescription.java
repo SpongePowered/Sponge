@@ -29,13 +29,13 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.SubjectReference;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -54,10 +54,10 @@ class SpongePermissionDescription implements PermissionDescription {
 
     private final SpongePermissionService permissionService;
     private final String id;
-    @Nullable private final Text description;
+    @Nullable private final Component description;
     private final PluginContainer owner;
 
-    SpongePermissionDescription(SpongePermissionService permissionService, String id, @Nullable Text description, PluginContainer owner) {
+    SpongePermissionDescription(SpongePermissionService permissionService, String id, @Nullable Component description, PluginContainer owner) {
         super();
         this.permissionService = checkNotNull(permissionService, "permissionService");
         this.id = checkNotNull(id, "id");
@@ -71,7 +71,7 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public Optional<Text> getDescription() {
+    public Optional<Component> getDescription() {
         return Optional.ofNullable(this.description);
     }
 
@@ -125,7 +125,7 @@ class SpongePermissionDescription implements PermissionDescription {
         private final SpongePermissionService permissionService;
         private final PluginContainer owner;
         private String id;
-        @Nullable private Text description;
+        @Nullable private Component description;
         private final Map<String, Tristate> roleAssignments = new LinkedHashMap<>();
 
         Builder(SpongePermissionService permissionService, PluginContainer owner) {
@@ -141,7 +141,7 @@ class SpongePermissionDescription implements PermissionDescription {
         }
 
         @Override
-        public org.spongepowered.common.service.permission.SpongePermissionDescription.Builder description(@Nullable Text description) {
+        public org.spongepowered.common.service.permission.SpongePermissionDescription.Builder description(@Nullable Component description) {
             this.description = description;
             return this;
         }

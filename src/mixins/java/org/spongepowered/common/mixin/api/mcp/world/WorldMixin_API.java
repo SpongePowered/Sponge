@@ -25,13 +25,13 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import com.google.common.base.Preconditions;
+import net.kyori.adventure.sound.Sound;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SChangeBlockPacket;
 import net.minecraft.network.play.server.SPlaySoundPacket;
-import net.minecraft.network.play.server.SStopSoundPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
@@ -39,6 +39,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.GameType;
@@ -58,12 +59,9 @@ import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.text.BookView;
-import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -77,15 +75,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.util.BookUtil;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -338,101 +335,28 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
                 this.shadow$getDimension().getType(), this.shadow$getServer().getPlayerList());
     }
 
-    @Override
-    public void playSound(final SoundType sound, final org.spongepowered.api.effect.sound.SoundCategory category, final Vector3d position, final double volume, final double pitch, final double minVolume) {
-        // Check if the event is registered (ie has an integer ID)
-        final ResourceLocation soundKey = (ResourceLocation) (Object) sound.getKey();
-        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getValue(soundKey);
-        final SoundCategory soundCategory = (SoundCategory) (Object) category;
-        final float soundVolume = (float) Math.max(minVolume, volume);
-        if (event.isPresent()) {
-            this.shadow$playSound(null, position.getX(), position.getY(), position.getZ(), event.get(), soundCategory, soundVolume, (float) pitch);
-        } else {
-            // Otherwise send it as a custom sound
-            final double radius = volume > 1.0F ? (16.0F * volume) : 16.0D;
-            final SPlaySoundPacket packet = new SPlaySoundPacket(soundKey, soundCategory, VecHelper.toVec3d(position), soundVolume, (float) pitch);
-            this.shadow$getServer().getPlayerList().sendToAllNearExcept(null, position.getX(), position.getY(), position.getZ(), radius,
-                    this.shadow$getDimension().getType(), packet);
-        }
-    }
-
-    private void api$stopSounds(@Nullable final SoundType sound, final org.spongepowered.api.effect.sound.SoundCategory category) {
-        this.shadow$getServer().getPlayerList().sendPacketToAllPlayersInDimension(new SStopSoundPacket((ResourceLocation) (Object) sound.getKey(), (net.minecraft.util.SoundCategory) (Object) category), this.shadow$getDimension().getType());
-    }
-
-    @Override
-    public void stopSounds() {
-        this.api$stopSounds(null, null);
-    }
-
-    @Override
-    public void stopSounds(final SoundType sound) {
-        this.api$stopSounds(Preconditions.checkNotNull(sound, "sound"), null);
-    }
-
-    @Override
-    public void stopSoundTypes(final Supplier<? extends SoundType> sound) {
-        this.stopSounds(sound.get());
-    }
-
-    @Override
-    public void stopSounds(final org.spongepowered.api.effect.sound.SoundCategory category) {
-        this.api$stopSounds(null, Preconditions.checkNotNull(category, "category"));
-    }
-
-    @Override
-    public void stopSoundCategoriess(final Supplier<? extends org.spongepowered.api.effect.sound.SoundCategory> category) {
-        this.stopSounds(category.get());
-    }
-
-    @Override
-    public void stopSounds(final SoundType sound, final org.spongepowered.api.effect.sound.SoundCategory category) {
-        this.api$stopSounds(Preconditions.checkNotNull(sound, "sound"), Preconditions.checkNotNull(category, "category"));
-    }
-
-    @Override
-    public void stopSounds(final Supplier<? extends SoundType> sound, final Supplier<? extends org.spongepowered.api.effect.sound.SoundCategory> category) {
-        this.stopSounds(sound.get(), category.get());
-    }
-
     private void api$playRecord(final Vector3i position, @javax.annotation.Nullable final MusicDisc recordType) {
         this.shadow$getServer().getPlayerList().sendPacketToAllPlayersInDimension(
                 SpongeRecordType.createPacket(position, recordType), this.shadow$getDimension().getType());
     }
 
     @Override
-    public void playMusicDisc(final Vector3i position, final MusicDisc musicDiscType) {
+    public void playMusicDisc(Vector3i position, MusicDisc musicDiscType) {
         this.api$playRecord(position, Preconditions.checkNotNull(musicDiscType, "recordType"));
     }
 
     @Override
-    public void playMusicDisc(final Vector3i position, final Supplier<? extends MusicDisc> musicDiscType) {
+    public void playMusicDisc(Vector3i position, Supplier<? extends MusicDisc> musicDiscType) {
         this.playMusicDisc(position, musicDiscType.get());
     }
 
     @Override
-    public void stopMusicDisc(final Vector3i position) {
+    public void stopMusicDisc(Vector3i position) {
         this.api$playRecord(position, null);
     }
 
     @Override
-    public void sendTitle(final Title title) {
-        Preconditions.checkNotNull(title, "title");
-
-        for (final Player player : this.getPlayers()) {
-            player.sendTitle(title);
-        }
-    }
-
-    @Override
-    public void sendBookView(final BookView bookView) {
-        Preconditions.checkNotNull(bookView, "bookview");
-
-        BookUtil.fakeBookView(bookView, this.getPlayers());
-    }
-
-    @Override
-    public void sendBlockChange(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState state) {
+    public void sendBlockChange(int x, int y, int z, org.spongepowered.api.block.BlockState state) {
         Preconditions.checkNotNull(state, "state");
         final SChangeBlockPacket packet = new SChangeBlockPacket();
         ((SChangeBlockPacketAccessor) packet).accessor$setPos(new BlockPos(x, y, z));
@@ -445,8 +369,8 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     }
 
     @Override
-    public void resetBlockChange(final int x, final int y, final int z) {
-        final SChangeBlockPacket packet = new SChangeBlockPacket((IWorldReader) this, new BlockPos(x, y, z));
+    public void resetBlockChange(int x, int y, int z) {
+        SChangeBlockPacket packet = new SChangeBlockPacket((IWorldReader) this, new BlockPos(x, y, z));
 
         ((net.minecraft.world.World) (Object) this).getPlayers().stream()
                 .filter(ServerPlayerEntity.class::isInstance)
@@ -455,4 +379,24 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     }
 
     // ArchetypeVolumeCreator
+
+    // Audience
+
+    @Override
+    public void playSound(final Sound sound, final double x, final double y, final double z) {
+        // Check if the event is registered (ie has an integer ID)
+        final ResourceLocation soundKey = SpongeAdventure.asVanilla(sound.name());
+        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getValue(soundKey);
+        final SoundCategory soundCategory = SpongeAdventure.asVanilla(sound.source());
+        if (event.isPresent()) {
+            this.shadow$playSound(null,x, y, z, event.get(), soundCategory, sound.volume(), sound.pitch());
+        } else {
+            // Otherwise send it as a custom sound
+            final float volume = sound.volume();
+            final double radius = volume > 1.0f ? (16.0f * volume) : 16.0d;
+            final SPlaySoundPacket packet = new SPlaySoundPacket(soundKey, soundCategory, new Vec3d(x, y, z), volume, sound.pitch());
+            this.shadow$getServer().getPlayerList().sendToAllNearExcept(null, x, y, z, radius,
+              this.shadow$getDimension().getType(), packet);
+        }
+    }
 }

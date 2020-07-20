@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.management;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.management.BanEntry;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +43,7 @@ public abstract class BanEntryMixin_API<T> extends UserListEntryMixin_API<T> imp
     @Shadow @Final protected Date banEndDate;
 
     @Override
-    public Optional<Text> getReason() {
+    public Optional<Component> getReason() {
         return ((BanUserListEntryBridge) this).bridge$getReason();
     }
 
@@ -53,7 +53,7 @@ public abstract class BanEntryMixin_API<T> extends UserListEntryMixin_API<T> imp
     }
 
     @Override
-    public Optional<Text> getBanSource() {
+    public Optional<Component> getBanSource() {
         return ((BanUserListEntryBridge) this).bridge$getSource();
     }
 

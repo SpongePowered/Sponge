@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.persistence;
 
 import com.google.common.reflect.TypeToken;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -66,6 +67,7 @@ import java.util.stream.Stream;
 
 public final class DataSerializers {
 
+    public static final DataTranslator<Component> COMPONENT_DATA_SERIALIZER;
     public static final DataTranslator<UUID> UUID_DATA_SERIALIZER;
     public static final DataTranslator<Vector2d> VECTOR_2_D_DATA_SERIALIZER;
     public static final DataTranslator<Vector2f> VECTOR_2_F_DATA_SERIALIZER;
@@ -91,6 +93,30 @@ public final class DataSerializers {
     public static final DataTranslator<Month> MONTH_DATA_SERIALIZER;
 
     static {
+        COMPONENT_DATA_SERIALIZER = new DataTranslator<Component>() {
+            final ResourceKey key = ResourceKey.sponge("component");
+            final TypeToken<Component> token = TypeToken.of(Component.class);
+
+            @Override
+            public ResourceKey getKey() {
+                return this.key;
+            }
+
+            @Override
+            public TypeToken<Component> getToken() {
+                return this.token;
+            }
+
+            @Override
+            public Component translate(final DataView view) throws InvalidDataException {
+                throw new UnsupportedOperationException("TODO"); // TODO(adventure)
+            }
+
+            @Override
+            public DataContainer translate(final Component obj) throws InvalidDataException {
+                throw new UnsupportedOperationException("TODO"); // TODO(adventure)
+            }
+        };
         UUID_DATA_SERIALIZER = new DataTranslator<UUID>() {
 
             final ResourceKey key = ResourceKey.sponge("uuid");
@@ -1101,6 +1127,7 @@ public final class DataSerializers {
 
     public static Stream<Tuple<DataTranslator, Class>> stream() {
         return Stream.of(
+            Tuple.of(COMPONENT_DATA_SERIALIZER, Component.class),
             Tuple.of(UUID_DATA_SERIALIZER, UUID.class),
             Tuple.of(VECTOR_2_D_DATA_SERIALIZER, Vector2d.class),
             Tuple.of(VECTOR_2_F_DATA_SERIALIZER, Vector2f.class),

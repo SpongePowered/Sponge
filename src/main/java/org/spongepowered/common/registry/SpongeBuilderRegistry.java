@@ -36,7 +36,6 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -103,7 +102,6 @@ import org.spongepowered.common.advancement.SpongeTriggerBuilder;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
-import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.command.SpongeParameterizedCommandBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeTextParameterBuilder;
 import org.spongepowered.common.command.parameter.multi.SpongeFirstOfParameterBuilder;
@@ -235,7 +233,6 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(TabListEntry.Builder.class, TabListEntryBuilder::new)
             .register(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .register(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
-            .register(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
 //            .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
 //            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
 //            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)

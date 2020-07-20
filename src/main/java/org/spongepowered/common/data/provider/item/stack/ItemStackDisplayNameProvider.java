@@ -24,32 +24,33 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.StringNBT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class ItemStackDisplayNameProvider extends ItemStackDataProvider<Text> {
+public class ItemStackDisplayNameProvider extends ItemStackDataProvider<Component> {
 
     public ItemStackDisplayNameProvider() {
         super(Keys.DISPLAY_NAME);
     }
 
     @Override
-    protected Optional<Text> getFrom(ItemStack dataHolder) {
+    protected Optional<Component> getFrom(ItemStack dataHolder) {
         if (dataHolder.getItem() == Items.WRITTEN_BOOK) {
             @Nullable final CompoundNBT tag = dataHolder.getTag();
             if (tag != null) {
                 final String title = tag.getString(Constants.Item.Book.ITEM_BOOK_TITLE);
-                return Optional.of(SpongeTexts.fromLegacy(title));
+                return Optional.of(LegacyComponentSerializer.legacy().deserialize(title));
             }
         }
 
@@ -60,16 +61,16 @@ public class ItemStackDisplayNameProvider extends ItemStackDataProvider<Text> {
         }
         */
 
-        return Optional.of(SpongeTexts.toText(dataHolder.getDisplayName()));
+        return Optional.of(SpongeAdventure.asAdventure(dataHolder.getDisplayName()));
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, Text value) {
+    protected boolean set(ItemStack dataHolder, Component value) {
         if (dataHolder.getItem() == Items.WRITTEN_BOOK) {
-            final String legacy = SpongeTexts.toLegacy(value);
+            final String legacy = LegacyComponentSerializer.legacy().serialize(value);
             dataHolder.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, new StringNBT(legacy));
         } else {
-            dataHolder.setDisplayName(SpongeTexts.toComponent(value));
+            dataHolder.setDisplayName(SpongeAdventure.asVanilla(value));
         }
         return true;
     }

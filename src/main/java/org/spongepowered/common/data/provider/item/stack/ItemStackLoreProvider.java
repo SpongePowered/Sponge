@@ -24,28 +24,28 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.data.util.NbtCollectors;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ItemStackLoreProvider extends ItemStackDataProvider<List<Text>> {
+public class ItemStackLoreProvider extends ItemStackDataProvider<List<Component>> {
 
     public ItemStackLoreProvider() {
         super(Keys.LORE);
     }
 
     @Override
-    protected Optional<List<Text>> getFrom(ItemStack dataHolder) {
+    protected Optional<List<Component>> getFrom(ItemStack dataHolder) {
         @Nullable final CompoundNBT tag = dataHolder.getTag();
         if (tag == null || tag.contains(Constants.Item.ITEM_DISPLAY)) {
             return Optional.empty();
@@ -54,15 +54,15 @@ public class ItemStackLoreProvider extends ItemStackDataProvider<List<Text>> {
         if (list.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(SpongeTexts.fromJson(list.stream().collect(NbtCollectors.toStringList())));
+        return Optional.of(SpongeAdventure.json(list.stream().collect(NbtCollectors.toStringList())));
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, List<Text> value) {
+    protected boolean set(ItemStack dataHolder, List<Component> value) {
         if (value.isEmpty()) {
             delete(dataHolder);
         } else {
-            final ListNBT list = SpongeTexts.asJsonNBT(value);
+            final ListNBT list = SpongeAdventure.listTagJson(value);
             dataHolder.getOrCreateChildTag(Constants.Item.ITEM_DISPLAY).put(Constants.Item.ITEM_LORE, list);
         }
         return true;

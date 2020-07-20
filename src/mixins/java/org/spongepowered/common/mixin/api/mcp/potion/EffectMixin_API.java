@@ -25,22 +25,20 @@
 package org.spongepowered.common.mixin.api.mcp.potion;
 
 import com.google.common.collect.ImmutableMap;
+import net.kyori.adventure.text.Component;
 import net.minecraft.potion.Effect;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 @Mixin(Effect.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potionEffectType$"))
@@ -64,11 +62,9 @@ public abstract class EffectMixin_API implements PotionEffectType {
             .build();
 
 
-    @Shadow public abstract String shadow$getName();
     @Shadow public abstract boolean shadow$isInstant();
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
 
-    @Nullable private Translation api$translation;
-    @Nullable private Translation api$potionTranslation;
     private ResourceKey api$key;
 
     @Override
@@ -85,23 +81,8 @@ public abstract class EffectMixin_API implements PotionEffectType {
     }
 
     @Override
-    public Translation getTranslation() {
-        if (this.api$translation == null) {
-            this.api$translation = new SpongeTranslation(this.shadow$getName());
-        }
-        return this.api$translation;
-    }
-
-    // TODO: Minecraft 1.14 - Remove this from the API or change return type to Optional
-    // TODO: potionMapping is not up to date
-    @Override
-    public Translation getPotionTranslation() {
-        if (this.api$potionTranslation == null) {
-            String name = this.shadow$getName();
-            final String potionId = "potion." + potionMapping.getOrDefault(name, "effect.missing");
-            this.api$potionTranslation = new SpongeTranslation(potionId);
-        }
-        return this.api$potionTranslation;
+    public Component asComponent() {
+        return SpongeAdventure.asAdventure(this.shadow$getDisplayName());
     }
 
 }

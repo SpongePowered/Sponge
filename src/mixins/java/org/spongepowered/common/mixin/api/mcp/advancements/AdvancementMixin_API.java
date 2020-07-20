@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.DisplayInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -77,7 +77,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     }
 
     @Override
-    public List<Text> toToastText() {
+    public List<Component> toToastText() {
         return ((AdvancementBridge) this).bridge$getToastText();
     }
 
@@ -88,11 +88,11 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
 
     @Override
     public String getName() {
-        return ((AdvancementBridge) this).bridge$getTranslation().get();
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Text toText() {
+    public Component asComponent() {
         return ((AdvancementBridge) this).bridge$getText();
     }
 }

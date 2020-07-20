@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.network.status;
 
-import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
-
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.MinecraftVersion;
@@ -37,8 +35,7 @@ import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.api.network.status.StatusClient;
 import org.spongepowered.api.network.status.StatusResponse;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.text.serializer.LegacyTexts;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.NetworkUtil;
 
 import java.net.InetSocketAddress;
@@ -109,11 +106,11 @@ public final class SpongeStatusResponse {
     }
 
     public static String getMotd(ServerStatusResponse response) {
-        return getFirstLine(SpongeTexts.toLegacy(response.getServerDescription()));
+        return getFirstLine(SpongeAdventure.legacySection(SpongeAdventure.asAdventure(response.getServerDescription())));
     }
 
     public static String getUnformattedMotd(ServerStatusResponse response) {
-        return getFirstLine(LegacyTexts.stripAll(response.getServerDescription().getUnformattedComponentText(), COLOR_CHAR));
+        return getFirstLine(SpongeAdventure.plain(SpongeAdventure.asAdventure(response.getServerDescription())));
     }
 
     private static String getFirstLine(String s) {

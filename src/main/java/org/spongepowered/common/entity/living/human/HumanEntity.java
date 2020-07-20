@@ -30,6 +30,8 @@ import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.CreatureEntity;
@@ -61,7 +63,6 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
@@ -143,8 +144,8 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     @Override
-    public Text getTeamRepresentation() {
-        return Text.of(this.fakeProfile.getName());
+    public Component getTeamRepresentation() {
+        return TextComponent.of(this.fakeProfile.getName());
     }
 
     @Override

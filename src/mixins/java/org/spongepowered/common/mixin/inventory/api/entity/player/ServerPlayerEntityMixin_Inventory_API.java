@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.inventory.api.entity.player;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -35,7 +36,6 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
@@ -63,7 +63,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API implements ServerPla
 
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
     @Override
-    public Optional<Container> openInventory(final Inventory inventory, final Text displayName) {
+    public Optional<Container> openInventory(final Inventory inventory, final Component displayName) {
         ContainerBridge openContainer = (ContainerBridge) ((PlayerEntity) (Object) this).openContainer;
         if (openContainer.bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();

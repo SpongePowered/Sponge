@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.command.manager;
 
-import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
@@ -37,6 +35,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.command.CommandSource;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -55,12 +57,9 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.command.ExecuteCommandEvent;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
 import org.spongepowered.common.command.registrar.tree.RootCommandTreeBuilder;
@@ -69,7 +68,6 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -153,7 +151,7 @@ public final class SpongeCommandManager implements CommandManager {
             try {
                 return registrar.process(spongeContext, command1[0], command1.length == 2 ? command1[1] : "").getResult();
             } catch (final CommandException e) {
-                throw new SimpleCommandExceptionType(SpongeTexts.toComponent(e.getText())).create();
+                throw new SimpleCommandExceptionType(SpongeAdventure.asVanilla(e.getText())).create();
             }
         };
 
@@ -264,7 +262,7 @@ public final class SpongeCommandManager implements CommandManager {
             frame.addContext(EventContextKeys.COMMAND.get(), arguments);
             return this.process(CommandCause.create(), arguments);
         } catch (final CommandSyntaxException commandSyntaxException) {
-            throw new CommandException(Text.of(commandSyntaxException), commandSyntaxException);
+            throw new CommandException(TextComponent.of(commandSyntaxException.getMessage()), commandSyntaxException);
         }
     }
 
@@ -299,7 +297,7 @@ public final class SpongeCommandManager implements CommandManager {
         if (mapping == null) {
             // no command.
             // TextColors.RED,
-            throw new CommandException(Text.of("Unknown command. Type /help for a list of commands."));
+            throw new CommandException(TextComponent.of("Unknown command. Type /help for a list of commands."));
         }
         // For when the phase tracker comes back online
         // final Object source = cause.getCause().root();
@@ -349,22 +347,22 @@ public final class SpongeCommandManager implements CommandManager {
             }
             this.prettyPrintThrowableError(thr, command, fullString, cause);
 
-            final Text.Builder excBuilder;
+            Component excBuilder;
             if (thr instanceof TextMessageException) {
-                final Text text = ((TextMessageException) thr).getText();
-                excBuilder = text == null ? Text.builder("null") : text.toBuilder();
+                final Component text = ((TextMessageException) thr).getText();
+                excBuilder = text == null ? TextComponent.of("null") : text;
             } else {
-                excBuilder = Text.builder(String.valueOf(thr.getMessage()));
+                excBuilder = TextComponent.of(String.valueOf(thr.getMessage()));
             }
             if (cause.hasPermission("sponge.debug.hover-stacktrace")) {
                 final StringWriter writer = new StringWriter();
                 thr.printStackTrace(new PrintWriter(writer));
-                excBuilder.onHover(TextActions.showText(Text.of(writer.toString()
+                excBuilder = excBuilder.hoverEvent(HoverEvent.showText(TextComponent.of(writer.toString()
                         .replace("\t", "    ")
                         .replace("\r\n", "\n")
                         .replace("\r", "\n")))); // I mean I guess somebody could be running this on like OS 9?
             }
-            final Text error = t("Unexpected error occurred while executing command: %s", excBuilder.build());
+            final Component error = TextComponent.builder("Unexpected error occurred while executing command: ").append(excBuilder).build();
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, CommandResult.error(error));
             throw new CommandException(error, thr);
         }
@@ -376,12 +374,12 @@ public final class SpongeCommandManager implements CommandManager {
 
     @Override
     @NonNull
-    public <T extends Subject & MessageReceiver> CommandResult process(
+    public <T extends Subject & Audience> CommandResult process(
             @NonNull final T subjectReceiver,
             @NonNull final String arguments) throws CommandException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT.get(), subjectReceiver);
-            frame.addContext(EventContextKeys.MESSAGE_CHANNEL.get(), MessageChannel.to(subjectReceiver));
+            frame.addContext(EventContextKeys.AUDIENCE.get(), subjectReceiver);
             return this.process(arguments);
         }
     }
@@ -390,11 +388,11 @@ public final class SpongeCommandManager implements CommandManager {
     @NonNull
     public CommandResult process(
             @NonNull final Subject subject,
-            @NonNull final MessageChannel receiver,
+            @NonNull final Audience receiver,
             @NonNull final String arguments) throws CommandException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT.get(), subject);
-            frame.addContext(EventContextKeys.MESSAGE_CHANNEL.get(), receiver);
+            frame.addContext(EventContextKeys.AUDIENCE.get(), receiver);
             return this.process(arguments);
         }
     }
@@ -471,12 +469,12 @@ public final class SpongeCommandManager implements CommandManager {
 
     @Override
     @NonNull
-    public <T extends Subject & MessageReceiver> List<String> suggest(
+    public <T extends Subject & Audience> List<String> suggest(
             @NonNull final T subjectReceiver,
             @NonNull final String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT.get(), subjectReceiver);
-            frame.addContext(EventContextKeys.MESSAGE_CHANNEL.get(), MessageChannel.to(subjectReceiver));
+            frame.addContext(EventContextKeys.AUDIENCE.get(), subjectReceiver);
             return this.suggest(arguments);
         }
     }
@@ -485,11 +483,11 @@ public final class SpongeCommandManager implements CommandManager {
     @NonNull
     public List<String> suggest(
             @NonNull final Subject subject,
-            @NonNull final MessageChannel receiver,
+            @NonNull final Audience receiver,
             @NonNull final String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT.get(), subject);
-            frame.addContext(EventContextKeys.MESSAGE_CHANNEL.get(), receiver);
+            frame.addContext(EventContextKeys.AUDIENCE.get(), receiver);
             return this.suggest(arguments);
         }
     }

@@ -25,26 +25,15 @@
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Item;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
 
 import java.util.Set;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin_API extends EntityMixin_API implements Item {
-
-    @Shadow public abstract ItemStack shadow$getItem();
-
-    @Override
-    public Translation getTranslation() {
-        return ((org.spongepowered.api.item.inventory.ItemStack) (Object) this.shadow$getItem()).getTranslation();
-    }
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

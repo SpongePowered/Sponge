@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
+import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
@@ -71,7 +71,7 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
             return worldProperties;
         }
 
-        throw reader.createException(Text.of("Could not find world with identifier \"" + name + "\""));
+        throw reader.createException(TextComponent.of("Could not find world with identifier \"" + name + "\""));
     }
 
     static Optional<WorldProperties> getWorldProperties(final String name) {

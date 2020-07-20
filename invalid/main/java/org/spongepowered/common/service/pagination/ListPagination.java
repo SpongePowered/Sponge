@@ -27,6 +27,7 @@ package org.spongepowered.common.service.pagination;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
@@ -42,16 +43,16 @@ import java.util.function.Supplier;
  * Pagination working with a list of values.
  */
 class ListPagination extends ActivePagination {
-    private final List<List<Text>> pages;
+    private final List<List<Component>> pages;
 
-    public ListPagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, List<Map.Entry<Text, Integer>> lines,
-            @Nullable Text title, @Nullable Text header, @Nullable Text footer, Text padding) {
+    public ListPagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, List<Map.Entry<Component, Integer>> lines,
+            @Nullable Component title, @Nullable Component header, @Nullable Component footer, Component padding) {
         super(src, calc, title, header, footer, padding);
-        List<List<Text>> pages = new ArrayList<>();
-        List<Text> currentPage = new ArrayList<>();
+        List<List<Component>> pages = new ArrayList<>();
+        List<Component> currentPage = new ArrayList<>();
         int currentPageLines = 0;
 
-        for (Map.Entry<Text, Integer> ent : lines) {
+        for (Map.Entry<Component, Integer> ent : lines) {
             final boolean finiteLinesPerPage  = this.getMaxContentLinesPerPage() > 0;
             final boolean willExceedPageLength = ent.getValue() + currentPageLines > this.getMaxContentLinesPerPage();
             final boolean currentPageNotEmpty = currentPageLines != 0;
@@ -78,7 +79,7 @@ class ListPagination extends ActivePagination {
     }
 
     @Override
-    protected Iterable<Text> getLines(int page) throws CommandException {
+    protected Iterable<Component> getLines(int page) throws CommandException {
         final int size = this.pages.size();
         if (size == 0) {
             return ImmutableList.of();
