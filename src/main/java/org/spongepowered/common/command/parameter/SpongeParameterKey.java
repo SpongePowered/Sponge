@@ -91,18 +91,4 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
         return "Key: " + this.key + ", Class " + this.typeToken.getType().getTypeName();
     }
 
-    public static class Builder implements Parameter.Key.Builder {
-
-        @Override
-        public <T> Parameter.@NonNull Key<T> build(@NonNull final String key, @NonNull final TypeToken<T> typeToken) {
-            return new SpongeParameterKey<>(key, typeToken);
-        }
-
-        @Override
-        public Parameter.Key.@NonNull Builder reset() {
-            return this;
-        }
-
-    }
-
 }

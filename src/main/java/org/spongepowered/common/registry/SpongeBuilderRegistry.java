@@ -103,6 +103,7 @@ import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.command.SpongeParameterizedCommandBuilder;
+import org.spongepowered.common.command.parameter.SpongeParameterKeyBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeTextParameterBuilder;
 import org.spongepowered.common.command.parameter.multi.SpongeFirstOfParameterBuilder;
 import org.spongepowered.common.command.parameter.multi.SpongeSequenceParameterBuilder;
@@ -268,6 +269,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(Parameter.Subcommand.Builder.class, SpongeSubcommandParameterBuilder::new)
             .register(VariableValueParameters.TextBuilder.class, SpongeTextParameterBuilder::new)
             .register(CommandResult.Builder.class, SpongeCommandResultBuilder::new)
+            .register(Parameter.Key.Builder.class, SpongeParameterKeyBuilder::new)
         ;
     }
 }
