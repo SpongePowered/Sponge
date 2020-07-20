@@ -37,7 +37,6 @@ import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.context.SuggestionContext;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -281,7 +280,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     @Override
     @NonNull
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> getOne(final Parameter.@NonNull Key<? super T> key) {
+    public <T> Optional<T> getOne(final Parameter.@NonNull Key<T> key) {
         final SpongeParameterKey<T> spongeParameterKey = SpongeParameterKey.getSpongeKey(key);
         final Collection<?> collection = this.getFrom(spongeParameterKey);
         if (collection.size() > 1) {
@@ -294,7 +293,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     @Override
     @NonNull
     @SuppressWarnings("unchecked")
-    public <T> T requireOne(final Parameter.@NonNull Key<? super T> key) throws NoSuchElementException, IllegalArgumentException {
+    public <T> T requireOne(final Parameter.@NonNull Key<T> key) throws NoSuchElementException, IllegalArgumentException {
         final SpongeParameterKey<T> spongeParameterKey = SpongeParameterKey.getSpongeKey(key);
         final Collection<?> collection = this.getFrom(spongeParameterKey);
         if (collection.size() > 1) {
@@ -309,7 +308,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     @Override
     @NonNull
     @SuppressWarnings("unchecked")
-    public <T> Collection<? extends T> getAll(final Parameter.@NonNull Key<? super T> key) {
+    public <T> Collection<? extends T> getAll(final Parameter.@NonNull Key<T> key) {
         return (Collection<? extends T>) this.getFrom(SpongeParameterKey.getSpongeKey(key));
     }
 
@@ -326,7 +325,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public <T> void putEntry(final Parameter.@NonNull Key<? super T> key, @NonNull final T object) {
+    public <T> void putEntry(final Parameter.@NonNull Key<T> key, @NonNull final T object) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             this.transaction.peek().putEntry(key, object);
         } else {

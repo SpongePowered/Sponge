@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -91,6 +92,7 @@ import java.util.stream.Collectors;
 public final class SpongeCommandManager implements CommandManager {
 
     private final Game game;
+    private final Provider<SpongeCommand> spongeCommand;
     private final Map<String, SpongeCommandMapping> commandMappings = new HashMap<>();
     private final Multimap<SpongeCommandMapping, String> inverseCommandMappings = HashMultimap.create();
     private final Multimap<PluginContainer, SpongeCommandMapping> pluginToCommandMap = HashMultimap.create();
@@ -98,8 +100,14 @@ public final class SpongeCommandManager implements CommandManager {
     private boolean hasStarted = false;
 
     @Inject
-    public SpongeCommandManager(final Game game) {
+    public SpongeCommandManager(final Game game, final Provider<SpongeCommand> spongeCommand) {
         this.game = game;
+        this.spongeCommand = spongeCommand;
+    }
+
+    @Override
+    public Set<String> getKnownAliases() {
+        return ImmutableSet.copyOf(this.commandMappings.keySet());
     }
 
     @NonNull
@@ -497,7 +505,7 @@ public final class SpongeCommandManager implements CommandManager {
         try {
             SpongeParameterizedCommandRegistrar.INSTANCE.register(
                     Launcher.getInstance().getCommonPlugin(),
-                    SpongeCommand.createSpongeCommand(),
+                    this.spongeCommand.get().createSpongeCommand(),
                     "sponge"
             );
         } catch (final CommandFailedRegistrationException ex) {

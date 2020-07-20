@@ -219,11 +219,11 @@ public class SpongeCommandFactory {
         nonFlagChildren.register(createSpongeVersionCommand(), "version");
         nonFlagChildren.register(createSpongeBlockInfoCommand(), "blockInfo");
         nonFlagChildren.register(createSpongeEntityInfoCommand(), "entityInfo");
-        nonFlagChildren.register(createSpongeAuditCommand(), "audit");
-        nonFlagChildren.register(createSpongeHeapCommand(), "heap");
-        nonFlagChildren.register(createSpongePluginsCommand(), "plugins");
-        nonFlagChildren.register(createSpongeTimingsCommand(), "timings");
-        nonFlagChildren.register(createSpongeWhichCommand(), "which");
+       // nonFlagChildren.register(createSpongeAuditCommand(), "audit");
+       // nonFlagChildren.register(createSpongeHeapCommand(), "heap");
+       // nonFlagChildren.register(createSpongePluginsCommand(), "plugins");
+       // nonFlagChildren.register(createSpongeTimingsCommand(), "timings");
+       // nonFlagChildren.register(createSpongeWhichCommand(), "which");
         nonFlagChildren.register(createSpongeMetricsCommand(), "metrics");
         flagChildren.register(createSpongeChunksCommand(), "chunks");
         flagChildren.register(createSpongeTPSCommand(), "tps");
@@ -525,6 +525,7 @@ public class SpongeCommandFactory {
             .build();
     }
 
+    // need ray equivalent
     private static CommandSpec createSpongeBlockInfoCommand() {
         return CommandSpec.builder()
             .description(Text.of("Display the tracked information of the Block you are looking at."))

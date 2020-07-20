@@ -43,6 +43,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -83,7 +84,7 @@ public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, Su
                 } catch (final NumberFormatException ex) {
                     builder.suggest(s);
                 }
-            } else {
+            } else if (s.toLowerCase(Locale.ROOT).startsWith(builder.getRemaining())) {
                 builder.suggest(s);
             }
         }

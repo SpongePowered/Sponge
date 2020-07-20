@@ -112,13 +112,13 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
 
     @Override
     @NonNull
-    public <T> Optional<T> getOne(final Parameter.@NonNull Key<? super T> key) {
+    public <T> Optional<T> getOne(final Parameter.@NonNull Key<T> key) {
         return Optional.ofNullable(this.getValue(key));
     }
 
     @Override
     @NonNull
-    public <T> T requireOne(final Parameter.@NonNull Key<? super T> key) throws NoSuchElementException {
+    public <T> T requireOne(final Parameter.@NonNull Key<T> key) throws NoSuchElementException {
         final T value = this.getValue(key);
         if (value == null) {
             throw new NoSuchElementException("No value exists for key " + key.key());
@@ -130,7 +130,7 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
     @Override
     @NonNull
     @SuppressWarnings("unchecked")
-    public <T> Collection<? extends T> getAll(final Parameter.@NonNull Key<? super T> key) {
+    public <T> Collection<? extends T> getAll(final Parameter.@NonNull Key<T> key) {
         final Collection<? extends T> values = (Collection<? extends T>) this.argumentMap.get(key);
         if (values == null) {
             return ImmutableList.of();
