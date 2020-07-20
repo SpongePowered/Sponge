@@ -88,7 +88,7 @@ public class SpongeCommand {
         // /sponge plugins
         final Command.Parameterized pluginsReloadCommand = Command.builder()
                 .setPermission("sponge.command.plugins.refresh")
-                .setShortDescription(TextComponent.of("Refreshes supported plugin, typically causing plugin configuration reloads."))
+                .setShortDescription(TextComponent.of("Refreshes supported plugins, typically causing plugin configuration reloads."))
                 .parameter(Parameter.builder(PluginContainer.class)
                         .optional()
                         .parser(new FilteredPluginContainerParameter())
@@ -96,12 +96,22 @@ public class SpongeCommand {
                         .build())
                 .setExecutor(this::pluginsRefreshSubcommandExecutor)
                 .build();
-        final Command.Parameterized pluginsCommand = Command.builder()
-                .setPermission("sponge.command.plugins.root")
+        final Command.Parameterized pluginsListCommand = Command.builder()
+                .setPermission("sponge.command.plugins.list")
                 .setShortDescription(TextComponent.of("Lists all currently installed plugins."))
+                .setExecutor(this::pluginsListSubcommand)
+                .build();
+        final Command.Parameterized pluginsInfoCommand = Command.builder()
+                .setPermission("sponge.command.plugins.info")
+                .setShortDescription(TextComponent.of("Displays information about a specific plugin."))
+                .parameter(Parameter.plugin().setKey(this.pluginContainerKey).build())
+                .setExecutor(this::pluginsInfoSubcommand)
+                .build();
+
+        final Command.Parameterized pluginsCommand = Command.builder()
                 .child(pluginsReloadCommand, "refresh")
-                .parameter(Parameter.plugin().setKey(this.pluginContainerKey).optional().build())
-                .setExecutor(this::pluginsSubcommand)
+                .child(pluginsListCommand, "list")
+                .child(pluginsInfoCommand, "info")
                 .build();
 
         // /sponge timings
@@ -179,23 +189,25 @@ public class SpongeCommand {
     }
 
     @NonNull
-    private CommandResult pluginsSubcommand(final CommandContext context) {
-        final Optional<PluginContainer> pluginContainer = context.getOne(this.pluginContainerKey);
-        if (pluginContainer.isPresent()) {
-            context.sendMessage(this.createContainerMeta(pluginContainer.get().getMetadata()));
-        } else {
-            final Collection<PluginContainer> plugins = Launcher.getInstance().getPluginManager().getPlugins();
-            context.sendMessage(this.title("Plugins (" + plugins.size() + ")"));
-            for (final PluginContainer specificContainer : plugins) {
-                final PluginMetadata metadata = specificContainer.getMetadata();
-                final TextComponent.Builder builder = TextComponent.builder();
-                this.createShortContainerMeta(builder.append(INDENT_COMPONENT), metadata);
-               // builder.clickEvent(SpongeComponents.executeCallback(cause ->
-               //         cause.sendMessage(this.createContainerMeta(metadata))));
-                context.sendMessage(builder.build());
-            }
+    private CommandResult pluginsListSubcommand(final CommandContext context) {
+        final Collection<PluginContainer> plugins = Launcher.getInstance().getPluginManager().getPlugins();
+        context.sendMessage(this.title("Plugins (" + plugins.size() + ")"));
+        for (final PluginContainer specificContainer : plugins) {
+            final PluginMetadata metadata = specificContainer.getMetadata();
+            final TextComponent.Builder builder = TextComponent.builder();
+            this.createShortContainerMeta(builder.append(INDENT_COMPONENT), metadata);
+            // builder.clickEvent(SpongeComponents.executeCallback(cause ->
+            //         cause.sendMessage(this.createContainerMeta(metadata))));
+            context.sendMessage(builder.build());
         }
 
+        return CommandResult.success();
+    }
+
+    @NonNull
+    private CommandResult pluginsInfoSubcommand(final CommandContext context) {
+        final PluginContainer pluginContainer = context.requireOne(this.pluginContainerKey);
+        context.sendMessage(this.createContainerMeta(pluginContainer.getMetadata()));
         return CommandResult.success();
     }
 
@@ -208,15 +220,14 @@ public class SpongeCommand {
         );
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
-            // src.sendMessage(Text.of("Sending reload event to " + pluginContainer.get().getMetadata().getId() + ". Please wait."));
-            SpongeCommon.getLogger().info("Sending refresh event to {}, please wait...", pluginContainer.get().getMetadata().getId());
+            context.sendMessage(TextComponent.of("Sending refresh event to" + pluginContainer.get().getMetadata().getId() + ", please wait...")), );
             ((SpongeEventManager) SpongeCommon.getGame().getEventManager()).post(event, pluginContainer.get());
         } else {
-            SpongeCommon.getLogger().info("Sending refresh event to all plugins, please wait...");
+            context.sendMessage(TextComponent.of("Sending refresh event to all plugins, please wait..."));
             SpongeCommon.getGame().getEventManager().post(event);
         }
 
-        SpongeCommon.getLogger().info("Completed plugin refresh.");
+        context.sendMessage(TextComponent.of("Completed plugin refresh."));
         return CommandResult.success();
     }
 
