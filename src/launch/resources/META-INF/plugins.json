@@ -17,7 +17,7 @@
         },
         {
             "id": "spongeapi",
-            "name": "Sponge API",
+            "name": "SpongeAPI",
             "version": "8.0.0",
             "main-class": "org.spongepowered.api.Sponge",
             "description": "The Minecraft API specification",

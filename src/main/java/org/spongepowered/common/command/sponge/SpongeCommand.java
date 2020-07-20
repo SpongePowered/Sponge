@@ -26,6 +26,9 @@ package org.spongepowered.common.command.sponge;
 
 import co.aikar.timings.Timings;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -104,16 +107,15 @@ public final class SpongeCommand {
         final PluginContainer apiPlugin = Launcher.getInstance().getApiPlugin();
         final PluginContainer minecraftPlugin = Launcher.getInstance().getMinecraftPlugin();
 
-        context.sendMessage(TextComponent.of(
-                "SpongePowered Minecraft Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"));
-        context.sendMessage(TextComponent.builder("SpongeAPI: ").append(
-            TextComponent.of(apiPlugin.getMetadata().getName().get()),
-            TextComponent.space(),
-            TextComponent.of(apiPlugin.getMetadata().getVersion())).build());
-        context.sendMessage(TextComponent.builder("Implementation: ").append(
-            TextComponent.of(platformPlugin.getMetadata().getName().get()),
-            TextComponent.space(),
-            TextComponent.of(platformPlugin.getMetadata().getVersion())).build());
+        context.sendMessage(TextComponent.builder().append(
+                TextComponent.of("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(TextComponent.space()),
+                TextComponent.of("Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"),
+                TextComponent.newline(),
+                TextComponent.of(apiPlugin.getMetadata().getName().get() + ": " + apiPlugin.getMetadata().getVersion()),
+                TextComponent.newline(),
+                TextComponent.of(platformPlugin.getMetadata().getName().get() + ": " + platformPlugin.getMetadata().getVersion())
+            ).build()
+        );
         return CommandResult.success();
     }
 
