@@ -34,6 +34,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
@@ -101,8 +102,13 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     private int impl$trackedUniqueIdCount = 0;
     private boolean impl$hasCustomDifficulty = false;
 
-    @Redirect(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;populateFromWorldSettings(Lnet/minecraft/world/WorldSettings;)V"))
-    private void impl$setupBeforeSettingsPopulation(WorldInfo info, WorldSettings settings, WorldSettings settingsB, String levelName) {
+    @Redirect(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/storage/WorldInfo;populateFromWorldSettings(Lnet/minecraft/world/WorldSettings;)V"
+        )
+    )
+    private void impl$setupBeforeSettingsPopulation(final WorldInfo info, final WorldSettings settings,
+        final WorldSettings settingsB, final String levelName) {
         this.levelName = levelName;
         this.shadow$populateFromWorldSettings(settings);
     }
@@ -227,7 +233,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setEnabled(boolean state) {
+    public void bridge$setEnabled(final boolean state) {
         this.bridge$getConfigAdapter().get().getWorld().setWorldEnabled(state);
     }
 
@@ -237,7 +243,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setPVPEnabled(boolean state) {
+    public void bridge$setPVPEnabled(final boolean state) {
         this.bridge$getConfigAdapter().get().getWorld().setPVPEnabled(state);
     }
 
@@ -247,7 +253,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setGenerateBonusChest(boolean state) {
+    public void bridge$setGenerateBonusChest(final boolean state) {
         this.impl$generateBonusChest = state;
     }
 
@@ -257,7 +263,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setLoadOnStartup(boolean state) {
+    public void bridge$setLoadOnStartup(final boolean state) {
         this.bridge$getConfigAdapter().get().getWorld().setLoadOnStartup(state);
     }
 
@@ -267,7 +273,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setKeepSpawnLoaded(boolean state) {
+    public void bridge$setKeepSpawnLoaded(final boolean state) {
         this.bridge$getConfigAdapter().get().getWorld().setKeepSpawnLoaded(state);
     }
 
@@ -277,7 +283,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setGenerateSpawnOnLoad(boolean state) {
+    public void bridge$setGenerateSpawnOnLoad(final boolean state) {
         this.bridge$getConfigAdapter().get().getWorld().setGenerateSpawnOnLoad(state);
     }
 
@@ -287,7 +293,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setSerializationBehavior(SerializationBehavior behavior) {
+    public void bridge$setSerializationBehavior(final SerializationBehavior behavior) {
         this.impl$serializationBehavior = behavior;
     }
 
@@ -297,7 +303,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setModCreated(boolean state) {
+    public void bridge$setModCreated(final boolean state) {
         this.impl$modCreated = state;
     }
 
@@ -381,7 +387,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public void bridge$readSpongeLevelData(final CompoundNBT compound) {
-
         if (!compound.contains(Constants.Sponge.SPONGE_DATA)) {
             // TODO 1.14 - Bad Sponge level data...warn/crash?
             return;
