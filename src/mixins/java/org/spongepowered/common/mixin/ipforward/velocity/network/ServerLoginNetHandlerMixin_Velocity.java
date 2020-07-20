@@ -59,6 +59,8 @@ public abstract class ServerLoginNetHandlerMixin_Velocity {
     @Shadow private ServerLoginNetHandler.State currentLoginState;
     private int velocityInfoId = Integer.MAX_VALUE;
 
+    @Shadow public abstract void shadow$disconnect(ITextComponent reason);
+
     @Inject(method = "processLoginStart", at = @At(value = "HEAD"), cancellable = true)
     private void velocity$sendVelocityIndicator(final CallbackInfo info) {
         if (!this.server.isServerInOnlineMode()) {
@@ -82,13 +84,13 @@ public abstract class ServerLoginNetHandlerMixin_Velocity {
         if (packetAccessor.accessor$getTransaction() == this.velocityInfoId) {
             PacketBuffer buf = packetAccessor.accessor$getPayload();
             if (buf == null) {
-                this.disconnect(new StringTextComponent("This server requires you to connect with Velocity."));
+                this.shadow$disconnect(new StringTextComponent("This server requires you to connect with Velocity."));
                 info.cancel();
                 return;
             }
 
             if (!VelocityForwardingInfo.checkIntegrity(buf)) {
-                this.disconnect(new StringTextComponent("Unable to verify player details"));
+                this.shadow$disconnect(new StringTextComponent("Unable to verify player details"));
                 info.cancel();
                 return;
             }
@@ -102,5 +104,4 @@ public abstract class ServerLoginNetHandlerMixin_Velocity {
         }
     }
 
-    @Shadow public abstract void disconnect(ITextComponent reason);
 }
