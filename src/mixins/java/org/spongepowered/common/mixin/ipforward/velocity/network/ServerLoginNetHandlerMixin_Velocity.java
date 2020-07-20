@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.network.NetworkManagerAccessor;
 import org.spongepowered.common.accessor.network.login.client.CCustomPayloadLoginPacketAccessor;
 import org.spongepowered.common.accessor.network.login.server.SCustomPayloadLoginPacketAccessor;
-import org.spongepowered.common.mixin.ipforward.velocity.VelocityForwardingInfo;
+import org.spongepowered.common.ipforward.velocity.VelocityForwardingInfo;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadLocalRandom;
@@ -68,7 +68,7 @@ public abstract class ServerLoginNetHandlerMixin_Velocity {
             SCustomPayloadLoginPacket playerInfoRequest = new SCustomPayloadLoginPacket();
             SCustomPayloadLoginPacketAccessor accessor = (SCustomPayloadLoginPacketAccessor) playerInfoRequest;
             accessor.accessor$setChannel(VelocityForwardingInfo.PLAYER_INFO_CHANNEL);
-            accessor.accessor$setTransaction(this.velocityInfoId );
+            accessor.accessor$setTransaction(this.velocityInfoId);
             accessor.accessor$setPayload(new PacketBuffer(Unpooled.EMPTY_BUFFER));
 
             networkManager.sendPacket(playerInfoRequest);

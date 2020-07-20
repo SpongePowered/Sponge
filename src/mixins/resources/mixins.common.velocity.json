@@ -6,11 +6,10 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-    ],
-    "server": [
         "velocity.network.ServerLoginNetHandlerMixin_Velocity",
         "NetworkManagerMixin_IpForward"
     ],
+    "server": [],
     "injectors": {
         "defaultRequire": 1
     }

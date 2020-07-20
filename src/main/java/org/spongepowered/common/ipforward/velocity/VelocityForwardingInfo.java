@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.ipforward.velocity;
+package org.spongepowered.common.ipforward.velocity;
 
 import com.google.common.net.InetAddresses;
 import com.mojang.authlib.GameProfile;

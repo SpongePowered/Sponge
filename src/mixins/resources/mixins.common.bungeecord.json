@@ -6,13 +6,12 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-    ],
-    "server": [
         "bungee.network.handshake.client.CHandshakeMixin_Bungee",
         "bungee.network.handshake.ServerHandshakeNetHandlerMixin_Bungee",
         "bungee.network.login.ServerLoginNetHandlerMixin_Bungee",
         "NetworkManagerMixin_IpForward"
     ],
+    "server": [],
     "injectors": {
         "defaultRequire": 1
     }
