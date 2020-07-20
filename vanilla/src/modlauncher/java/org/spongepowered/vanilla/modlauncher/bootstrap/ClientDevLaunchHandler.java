@@ -24,30 +24,15 @@
  */
 package org.spongepowered.vanilla.modlauncher.bootstrap;
 
-import cpw.mods.gross.Java9ClassLoaderUtil;
-import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.vanilla.modlauncher.Main;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
+import org.spongepowered.vanilla.modlauncher.Main;
 
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.Callable;
 
-public final class ClientDevLaunchHandler implements ILaunchHandlerService {
-
-    private final Logger logger;
-
-    public ClientDevLaunchHandler() {
-        this.logger = LogManager.getLogger("Sponge");
-    }
+public final class ClientDevLaunchHandler extends AbstractSpongeDevLaunchHandler {
 
     @Override
     public String name() {
@@ -55,35 +40,15 @@ public final class ClientDevLaunchHandler implements ILaunchHandlerService {
     }
 
     @Override
-    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        // TODO Minecraft 1.14 - Very much not correct...
-        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
-            if (url.toString().contains("mixin") && url.toString().endsWith(".jar")) {
-                continue;
-            }
-
-            try {
-                builder.addTransformationPath(Paths.get(url.toURI()));
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public Callable<Void> launchService(final String[] arguments, final ITransformingClassLoader launchClassLoader) {
-        this.logger.info("Transitioning to Sponge launcher, please wait...");
-
-        return () -> {
-            final PluginEnvironment launchPluginEnvironment = Main.getLaunchPluginEnvironment();
-            Class.forName("org.spongepowered.vanilla.launch.ClientLauncher", true, launchClassLoader.getInstance()).getMethod("launch", String.class,
+    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
+        final PluginEnvironment launchPluginEnvironment = Main.getLaunchPluginEnvironment();
+        Class.forName("org.spongepowered.vanilla.launch.ClientLauncher", true, launchClassLoader.getInstance()).getMethod("launch", String.class,
                 Path.class, List.class, Boolean.class, String[].class).invoke(null,
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.VERSION).orElse(null),
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElse(null),
                 launchPluginEnvironment.getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElse(null),
                 Boolean.TRUE,
                 arguments);
-            return null;
-        };
     }
+
 }

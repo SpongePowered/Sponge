@@ -24,31 +24,37 @@
  */
 package org.spongepowered.vanilla.modlauncher.bootstrap;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginKeys;
-import org.spongepowered.vanilla.modlauncher.Main;
+import cpw.mods.gross.Java9ClassLoaderUtil;
+import cpw.mods.modlauncher.api.ILaunchHandlerService;
+import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 
-import java.nio.file.Path;
-import java.util.List;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 
-public final class ServerDevLaunchHandler extends AbstractSpongeDevLaunchHandler {
+/**
+ * The Sponge {@link ILaunchHandlerService launch handler} for development
+ * environments.
+ *
+ * @author Jamie Mansfield
+ */
+public abstract class AbstractSpongeDevLaunchHandler extends AbstractSpongeLaunchHandler {
 
     @Override
-    public String name() {
-        return "sponge_server_dev";
-    }
+    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        // TODO Minecraft 1.14 - Very much not correct...
+        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
+            if (url.toString().contains("mixin") && url.toString().endsWith(".jar")) {
+                continue;
+            }
 
-    @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        final PluginEnvironment launchPluginEnvironment = Main.getLaunchPluginEnvironment();
-        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance()).getMethod("launch", String.class,
-                Path.class, List.class, Boolean.class, String[].class).invoke(null,
-                launchPluginEnvironment.getBlackboard().get(PluginKeys.VERSION).orElse(null),
-                launchPluginEnvironment.getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElse(null),
-                launchPluginEnvironment.getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElse(null),
-                Boolean.TRUE,
-                arguments);
+            try {
+                builder.addTransformationPath(Paths.get(url.toURI()));
+            }
+            catch (final URISyntaxException ex) {
+                log.error("Failed to add Mixin transformation path", ex);
+            }
+        }
     }
 
 }
