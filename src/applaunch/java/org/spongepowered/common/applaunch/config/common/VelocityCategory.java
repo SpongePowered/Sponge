@@ -22,40 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.bungee.network;
+package org.spongepowered.common.applaunch.config.common;
 
-import com.mojang.authlib.properties.Property;
-import io.netty.channel.SimpleChannelInboundHandler;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import java.util.UUID;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.Packet;
+@ConfigSerializable
+public class VelocityCategory {
 
-@Mixin(Connection.class)
-public abstract class ConnectionMixin_Bungee extends SimpleChannelInboundHandler<Packet<?>> implements NetworkManagerBridge_Bungee {
+    @Setting
+    @Comment("Enter the player info forwarding secret from your Velocity configuration.")
+    public String secret = "";
 
-    private UUID bungee$spoofedUUID;
-    private Property[] bungee$spoofedProfile;
-
-    @Override
-    public UUID bungeeBridge$getSpoofedUUID() {
-        return this.bungee$spoofedUUID;
-    }
-
-    @Override
-    public void bungeeBridge$setSpoofedUUID(final UUID uuid) {
-        this.bungee$spoofedUUID = uuid;
-    }
-
-    @Override
-    public Property[] bungeeBridge$getSpoofedProfile() {
-        return this.bungee$spoofedProfile;
-    }
-
-    @Override
-    public void bungeeBridge$setSpoofedProfile(final Property[] profile) {
-        this.bungee$spoofedProfile = profile;
-    }
 }

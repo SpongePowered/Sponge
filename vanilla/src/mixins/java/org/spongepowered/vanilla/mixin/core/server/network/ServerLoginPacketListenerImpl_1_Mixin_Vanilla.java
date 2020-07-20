@@ -22,25 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.bungee.network.protocol.handshake;
+package org.spongepowered.vanilla.mixin.core.server.network;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.server.network.ServerLoginPacketListenerImplAccessor;
 
-@Mixin(ClientIntentionPacket.class)
-public abstract class ClientIntentionPacketMixin_Bungee {
+@Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
+public abstract class ServerLoginPacketListenerImpl_1_Mixin_Vanilla extends Thread {
 
-    @Redirect(method = "read",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readUtf(I)Ljava/lang/String;"))
-    private String bungee$patchReadStringForPortForwarding(final FriendlyByteBuf buf, final int value) {
-        if (!SpongeConfigs.getCommon().get().modules.bungeecord
-                || !SpongeConfigs.getCommon().get().bungeecord.ipForwarding) {
-            return buf.readUtf(255);
+    // @formatter:off
+    @Shadow(aliases="this$0",remap=false) @Final private ServerLoginPacketListenerImpl handler;
+    // @formatter:on
+
+    @Inject(method = "run()V", at = @At("RETURN"), remap = false)
+    private void impl$onReadyToAccept(final CallbackInfo ci) {
+        final ServerLoginPacketListenerImplAccessor accessor = (ServerLoginPacketListenerImplAccessor) this.handler;
+        if (accessor.accessor$state() == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
+            accessor.accessor$state(ServerLoginPacketListenerImpl.State.NEGOTIATING);
         }
-        return buf.readUtf(Short.MAX_VALUE);
     }
 }

@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public interface ServerLoginPacketListenerImplAccessor {
 
-    @Accessor("state") ServerLoginPacketListenerImpl.State accessor$getState();
+    @Accessor("state") ServerLoginPacketListenerImpl.State accessor$state();
 
-    @Accessor("state") void accessor$setState(ServerLoginPacketListenerImpl.State state);
+    @Accessor("state") void accessor$state(ServerLoginPacketListenerImpl.State state);
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.bungee.server.network;
+package org.spongepowered.common.mixin.ipforward.bungee.server.network;
 
 import com.google.common.base.Charsets;
 import com.mojang.authlib.GameProfile;
@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
+import org.spongepowered.common.bridge.network.NetworkManagerBridge_IpForward;
 
 import java.util.UUID;
 
@@ -58,16 +58,16 @@ public abstract class ServerLoginPacketListenerImplMixin_Bungee {
     private void bungee$initUuid(final CallbackInfo ci) {
         if (!this.server.usesAuthentication()) {
             final UUID uuid;
-            if (((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$getSpoofedUUID() != null) {
-                uuid = ((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$getSpoofedUUID();
+            if (((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID() != null) {
+                uuid = ((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID();
             } else {
                 uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.gameProfile.getName()).getBytes(Charsets.UTF_8));
             }
 
             this.gameProfile = new GameProfile(uuid, this.gameProfile.getName());
 
-            if (((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$getSpoofedProfile() != null) {
-                for (final Property property : ((NetworkManagerBridge_Bungee) this.connection).bungeeBridge$getSpoofedProfile()) {
+            if (((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile() != null) {
+                for (final Property property : ((NetworkManagerBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile()) {
                     this.gameProfile.getProperties().put(property.getName(), property);
                 }
             }

@@ -22,20 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network;
+package org.spongepowered.common.mixin.ipforward.network;
 
 import com.mojang.authlib.properties.Property;
+import io.netty.channel.SimpleChannelInboundHandler;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.network.NetworkManagerBridge_IpForward;
 
-import java.net.SocketAddress;
 import java.util.UUID;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
 
-public interface NetworkManagerBridge_Bungee {
+@Mixin(Connection.class)
+public abstract class ConnectionMixin_IpForward extends SimpleChannelInboundHandler<Packet<?>> implements NetworkManagerBridge_IpForward {
 
-    UUID bungeeBridge$getSpoofedUUID();
+    private UUID ipForward$spoofedUUID;
+    private Property[] ipForward$spoofedProfile;
 
-    void bungeeBridge$setSpoofedUUID(UUID uuid);
+    @Override
+    public UUID bungeeBridge$getSpoofedUUID() {
+        return this.ipForward$spoofedUUID;
+    }
 
-    Property[] bungeeBridge$getSpoofedProfile();
+    @Override
+    public void bungeeBridge$setSpoofedUUID(final UUID uuid) {
+        this.ipForward$spoofedUUID = uuid;
+    }
 
-    void bungeeBridge$setSpoofedProfile(Property[] profile);
+    @Override
+    public Property[] bungeeBridge$getSpoofedProfile() {
+        return this.ipForward$spoofedProfile;
+    }
+
+    @Override
+    public void bungeeBridge$setSpoofedProfile(final Property[] profile) {
+        this.ipForward$spoofedProfile = profile;
+    }
 }

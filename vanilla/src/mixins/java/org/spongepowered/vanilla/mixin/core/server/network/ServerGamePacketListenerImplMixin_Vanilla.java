@@ -65,7 +65,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
 
     @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"))
     private void onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
-        // For some reason, "CCustomPayloadPacket" is released in the processPacket
+        // For some reason, "ServerboundCustomPayloadPacket" is released in the processPacket
         // method of its class, only applicable to this packet, so just retain here.
         ((ServerboundCustomPayloadPacketAccessor) packet).accessor$data().retain();
 

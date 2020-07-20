@@ -66,6 +66,9 @@ public final class CommonConfig implements Config {
     public final Map<String, List<String>> ipSets = new HashMap<>();
 
     @Setting
+    public final VelocityCategory velocity = new VelocityCategory();
+
+    @Setting
     public final BungeeCordCategory bungeecord = new BungeeCordCategory();
 
     @Setting

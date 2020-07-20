@@ -22,29 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.network.loginnet.minecraft.server.network;
+package org.spongepowered.common.mixin.ipforward.bungee.network.protocol.handshake;
 
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.accessor.server.network.ServerLoginPacketListenerImplAccessor;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
-@Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
-public abstract class ServerLoginPacketListenerImpl_Mixin_Vanilla extends Thread {
+@Mixin(ClientIntentionPacket.class)
+public abstract class ClientIntentionPacketMixin_Bungee {
 
-    // @formatter:off
-    @Shadow(aliases = {"this$0", "field_151292_a"}, remap = false) @Final private ServerLoginPacketListenerImpl handler;
-    // @formatter:on
-
-    @Inject(method = "run()V", at = @At(value = "RETURN"), remap = false)
-    private void impl$onReadyToAccept(final CallbackInfo ci) {
-        final ServerLoginPacketListenerImplAccessor accessor = (ServerLoginPacketListenerImplAccessor) this.handler;
-        if (accessor.accessor$getState() == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
-            accessor.accessor$setState(ServerLoginPacketListenerImpl.State.NEGOTIATING);
+    @Redirect(method = "read",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readUtf(I)Ljava/lang/String;"))
+    private String bungee$patchReadStringForPortForwarding(final FriendlyByteBuf buf, final int value) {
+        if (!SpongeConfigs.getCommon().get().modules.bungeecord) {
+            return buf.readUtf(255);
         }
+        return buf.readUtf(Short.MAX_VALUE);
     }
 }
