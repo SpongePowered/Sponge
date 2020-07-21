@@ -102,7 +102,7 @@ public final class LegacyTexts {
                         if (current != null) {
                             if (reset) {
                                 parsed.add(current);
-                                current.getStyle().setParentStyle(component.getStyle());
+                                setParentIfNotSame(current.getStyle(), component.getStyle());
                                 reset = false;
                                 current = new StringTextComponent("");
                             } else {
@@ -128,7 +128,7 @@ public final class LegacyTexts {
 
             if (current != null) {
                 parsed.add(current);
-                current.getStyle().setParentStyle(component.getStyle());
+                setParentIfNotSame(current.getStyle(), component.getStyle());
             }
 
             Collections.reverse(parsed);
@@ -159,6 +159,12 @@ public final class LegacyTexts {
         }
 
         return newComponent;
+    }
+
+    private static void setParentIfNotSame(final Style child, final Style parent) {
+        if (parent != child) {
+            child.setParentStyle(parent);
+        }
     }
 
     private static boolean applyStyle(final Style style, final TextFormatting formatting) {
