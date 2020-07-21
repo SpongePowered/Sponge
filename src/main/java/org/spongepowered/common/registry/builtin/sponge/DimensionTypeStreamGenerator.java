@@ -22,22 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.vanilla;
+package org.spongepowered.common.registry.builtin.sponge;
 
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-import org.spongepowered.common.registry.SpongeCatalogRegistry;
+import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
-public final class DimensionTypeSupplier {
+import java.util.stream.Stream;
 
-    private DimensionTypeSupplier() {
+public final class DimensionTypeStreamGenerator {
+
+    private DimensionTypeStreamGenerator() {
     }
 
-    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
-        registry
-            .registerSupplier(DimensionType.class, "overworld", ((DimensionTypeBridge) net.minecraft.world.dimension.DimensionType.OVERWORLD)::bridge$getSpongeDimensionType)
-            .registerSupplier(DimensionType.class, "the_nether", ((DimensionTypeBridge) net.minecraft.world.dimension.DimensionType.THE_NETHER)::bridge$getSpongeDimensionType)
-            .registerSupplier(DimensionType.class, "the_end", ((DimensionTypeBridge) net.minecraft.world.dimension.DimensionType.THE_END)::bridge$getSpongeDimensionType)
-        ;
+    public static Stream<DimensionType> stream() {
+        return Stream.of(
+            new SpongeDimensionType(ResourceKey.minecraft("overworld"),
+                ((DimensionTypeAccessor) net.minecraft.world.dimension.DimensionType.OVERWORLD)::accessor$getFactory,
+                net.minecraft.world.dimension.DimensionType.OVERWORLD::hasSkyLight),
+            new SpongeDimensionType(ResourceKey.minecraft("the_nether"),
+                ((DimensionTypeAccessor) net.minecraft.world.dimension.DimensionType.THE_NETHER)::accessor$getFactory,
+                net.minecraft.world.dimension.DimensionType.THE_NETHER::hasSkyLight),
+            new SpongeDimensionType(ResourceKey.minecraft("the_end"),
+                ((DimensionTypeAccessor) net.minecraft.world.dimension.DimensionType.THE_END)::accessor$getFactory,
+                net.minecraft.world.dimension.DimensionType.THE_END::hasSkyLight)
+        );
     }
 }

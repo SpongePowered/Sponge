@@ -24,10 +24,19 @@
  */
 package org.spongepowered.vanilla.mixin.core.server;
 
+import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.IProgressUpdate;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.SessionLockException;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -39,10 +48,16 @@ import org.spongepowered.vanilla.VanillaServer;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
 
+    @Shadow @Final private static Logger LOGGER;
+
+    @Shadow public abstract Iterable<ServerWorld> shadow$getWorlds();
+    @Shadow public abstract PlayerList shadow$getPlayerList();
+    @Shadow public abstract CustomServerBossInfoManager shadow$getCustomBossEvents();
+
     @Redirect(method = "loadWorlds",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerList;func_212504_a(Lnet/minecraft/world/server/ServerWorld;)V"))
-    private void impl$onSaveHandlerBeingSetToPlayerList(final PlayerList playerList, final ServerWorld p_212504_1_) {
+    private void vanilla$onSaveHandlerBeingSetToPlayerList(final PlayerList playerList, final ServerWorld p_212504_1_) {
         playerList.func_212504_a(p_212504_1_);
         ((SpongeUserManager) this.getUserManager()).init();
     }
@@ -50,5 +65,38 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
     private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {
         SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
+    }
+
+    /**
+     * @author Zidane
+     * @reason Per-world saving
+     */
+    @Overwrite
+    public boolean save(boolean suppressLog, boolean flush, boolean forced) {
+        for (ServerWorld serverworld : this.shadow$getWorlds()) {
+            if (!suppressLog) {
+                LOGGER.info("Saving chunks for world '{}'/{}", ((org.spongepowered.api.world.server.ServerWorld) serverworld).getKey(),
+                    Registry.DIMENSION_TYPE.getKey(serverworld.getDimension().getType()));
+            }
+
+            try {
+                serverworld.save((IProgressUpdate)null, flush, serverworld.disableLevelSaving && !forced);
+            } catch (SessionLockException sessionlockexception) {
+                LOGGER.warn(sessionlockexception.getMessage());
+            }
+
+            // Sponge Start - per-world world border
+            serverworld.getWorldBorder().copyTo(serverworld.getWorldInfo());
+
+            // TODO Minecraft 1.14 - Per-world boss events
+            if (serverworld.getDimension().getType() == DimensionType.OVERWORLD) {
+                serverworld.getWorldInfo().setCustomBossEvents(this.shadow$getCustomBossEvents().write());
+            }
+
+            // Sponge Start - Save our NBT compound with each world
+            serverworld.getSaveHandler().saveWorldInfoWithPlayer(serverworld.getWorldInfo(), this.shadow$getPlayerList().getHostPlayerData());
+        }
+
+        return true;
     }
 }

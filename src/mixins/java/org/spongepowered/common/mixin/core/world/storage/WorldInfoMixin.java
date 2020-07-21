@@ -64,7 +64,6 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.registry.builtin.vanilla.DimensionTypeSupplier;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
@@ -97,9 +96,9 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     private SpongeConfig<WorldConfig> impl$configAdapter;
     private boolean impl$enabled;
     private boolean impl$pvp;
-    private boolean impl$loadOnStartup;
+    private boolean impl$loadOnStartup = true;
     private boolean impl$keepSpawnLoaded;
-    private boolean impl$generateSpawnOnLoad;
+    private boolean impl$generateSpawnOnLoad = true;
     private boolean impl$generateBonusChest;
     private boolean impl$modCreated;
     @Nullable private PortalAgentType impl$portalAgentType;
@@ -184,6 +183,11 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     @Override
     public void bridge$setLogicType(final org.spongepowered.api.world.dimension.DimensionType type) {
         this.impl$logicType = (SpongeDimensionType) type;
+    }
+
+    @Override
+    public void bridge$setUniqueId(UUID uniqueId) {
+        this.impl$uniqueId = uniqueId;
     }
 
     @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
@@ -371,7 +375,9 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public void bridge$writeSpongeLevelData(final CompoundNBT compound) {
-        if (!this.bridge$isValid()) {
+        final boolean isValid = this.bridge$isValid();
+        System.err.println(isValid);
+        if (!isValid) {
             return;
         }
 
@@ -382,10 +388,10 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE, this.impl$logicType.getKey().toString());
         spongeDataCompound.putUniqueId(Constants.Sponge.World.UNIQUE_ID, this.impl$uniqueId);
         spongeDataCompound.putBoolean(Constants.World.GENERATE_BONUS_CHEST, this.impl$generateBonusChest);
-        if (this.impl$portalAgentType == null) {
-            this.impl$portalAgentType = PortalAgentTypes.DEFAULT.get();
-        }
-        spongeDataCompound.putString(Constants.Sponge.World.PORTAL_AGENT_TYPE, this.impl$portalAgentType.getPortalAgentClass().getName());
+//        if (this.impl$portalAgentType == null) {
+//            this.impl$portalAgentType = PortalAgentTypes.DEFAULT.get();
+//        }
+//        spongeDataCompound.putString(Constants.Sponge.World.PORTAL_AGENT_TYPE, this.impl$portalAgentType.getPortalAgentClass().getName());
         short saveBehavior = 1;
         if (this.impl$serializationBehavior == SerializationBehaviors.NONE.get()) {
             saveBehavior = -1;

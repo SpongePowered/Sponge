@@ -83,7 +83,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         checkState(this.priorContext != null, "Prior context is null");
         checkState(this.world != null, "World is null");
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
-            .world(((ServerWorld) this.world).getProperties().getKey())
+            .world(((ServerWorld) this.world).getKey())
             .position(VecHelper.toVector3i(this.pos))
             .blockState(this.blockState)
             .flag(BlockChangeFlags.PHYSICS_OBSERVER);

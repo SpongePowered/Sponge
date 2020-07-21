@@ -96,8 +96,6 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
             final CompoundNBT spongeLevelCompound = new CompoundNBT();
             ((WorldInfoBridge) info).bridge$writeSpongeLevelData(spongeLevelCompound);
 
-            final DimensionType dimensionType = ((WorldInfoBridge) info).bridge$getDimensionType();
-
             // If the returned compound is empty then we should warn the user.
             if (spongeLevelCompound.isEmpty()) {
                 new PrettyPrinter().add("Sponge Level NBT for world %s is empty!", info.getWorldName()).centre().hr()

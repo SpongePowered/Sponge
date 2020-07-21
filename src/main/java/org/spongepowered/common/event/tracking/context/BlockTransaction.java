@@ -536,7 +536,7 @@ public abstract class BlockTransaction {
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                .add("world", ((org.spongepowered.api.world.server.ServerWorld) this.worldBridge).getProperties().getKey())
+                .add("world", ((org.spongepowered.api.world.server.ServerWorld) this.worldBridge).getKey())
                 .add("notifyState", this.notifyState)
                 .add("notifyPos", this.notifyPos)
                 .add("sourceBlock", this.sourceBlock)

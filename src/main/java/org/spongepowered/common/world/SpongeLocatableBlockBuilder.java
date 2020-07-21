@@ -36,6 +36,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
@@ -66,7 +67,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
         Preconditions.checkNotNull(location, "LocationBridge cannot be null!");
         this.blockState = location::getBlock;
         this.position = location::getBlockPosition;
-        this.world = () -> location.getWorld().getProperties().getKey();
+        this.world = () -> location.getWorld().getKey();
         this.worldReference = () -> new WeakReference<>(location.getWorld());
         return this;
     }
@@ -90,7 +91,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
         Preconditions.checkNotNull(world, "World cannot be null!");
         final WeakReference<ServerWorld> reference = new WeakReference<>(world);
         this.worldReference = () -> reference;
-        this.world = () -> this.worldReference.get().get().getProperties().getKey();
+        this.world = () -> this.worldReference.get().get().getKey();
         return this;
     }
 
@@ -98,7 +99,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
     public SpongeLocatableBlockBuilder from(final LocatableBlock value) {
         Preconditions.checkNotNull(value, "LocatableBlock cannot be null!");
         this.position = value::getBlockPosition;
-        this.world = () -> value.getServerLocation().getWorld().getProperties().getKey();
+        this.world = () -> value.getServerLocation().getWorld().getKey();
         this.worldReference = () -> new WeakReference<>(value.getServerLocation().getWorld());
         return this;
     }
@@ -108,7 +109,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
         Preconditions.checkNotNull(this.position, "Position cannot be null!");
         Preconditions.checkNotNull(this.world, "World UUID cannot be null!");
         Preconditions.checkNotNull(this.worldReference, "World reference cannot be null!");
-        throw new UnsupportedOperationException("implement me");
+        throw new MissingImplementationException("SpongeLocatableBlockBuilder", "build");
     }
 
     @Override

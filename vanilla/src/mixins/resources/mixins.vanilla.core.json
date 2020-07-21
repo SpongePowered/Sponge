@@ -18,7 +18,8 @@
     "mixins": [
         "crash.CrashReportMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
-        "util.registry.BootstrapMixin_Vanilla"
+        "util.registry.BootstrapMixin_Vanilla",
+        "world.server.ServerChunkProviderMixin_Vanilla"
     ],
     "injectors": {
         "defaultRequire": 1

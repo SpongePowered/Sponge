@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.dedicated;
 
+import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
@@ -32,6 +33,7 @@ import net.minecraft.command.Commands;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -53,6 +55,11 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
         PlayerProfileCache p_i50590_8_, IChunkStatusListenerFactory p_i50590_9_,
         String p_i50590_10_) {
         super(p_i50590_1_, p_i50590_2_, dataFixerIn, p_i50590_4_, p_i50590_5_, p_i50590_6_, p_i50590_7_, p_i50590_8_, p_i50590_9_, p_i50590_10_);
+    }
+
+    @Override
+    protected void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, JsonElement generatorOptions) {
+        this.getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions);
     }
 
     @Override

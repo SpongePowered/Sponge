@@ -41,6 +41,10 @@ import java.util.UUID;
 
 public interface SpongeWorldManager extends WorldManager {
 
+    ResourceKey VANILLA_OVERWORLD = ResourceKey.minecraft("overworld");
+    ResourceKey VANILLA_THE_NETHER = ResourceKey.minecraft("the_nether");
+    ResourceKey VANILLA_THE_END = ResourceKey.minecraft("the_end");
+
     Path getSavesDirectory();
 
     boolean isDimensionTypeRegistered(DimensionType dimensionType);
@@ -67,4 +71,17 @@ public interface SpongeWorldManager extends WorldManager {
     void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions);
 
     void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean isCustom);
+
+    default String getDirectoryName(final ResourceKey key) {
+        if (SpongeWorldManager.VANILLA_OVERWORLD.equals(key)) {
+            return "";
+        }
+        if (SpongeWorldManager.VANILLA_THE_NETHER.equals(key)) {
+            return "DIM-1";
+        }
+        if (SpongeWorldManager.VANILLA_THE_END.equals(key)) {
+            return "DIM1";
+        }
+        return key.getValue();
+    }
 }
