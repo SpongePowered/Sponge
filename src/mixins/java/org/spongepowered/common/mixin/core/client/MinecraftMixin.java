@@ -47,6 +47,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
@@ -56,12 +57,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin implements SpongeClient {
+public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     @Shadow @Final private Thread thread;
     @Shadow @Nullable private IntegratedServer integratedServer;
     @Shadow @Final private AtomicReference<TrackingChunkStatusListener> field_213277_ad;
     @Shadow @Final private Queue<Runnable> field_213275_aU;
+
+    private IntegratedServer impl$temporaryIntegratedServer;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$setClientOnGame(GameConfiguration gameConfig, CallbackInfo ci) {
@@ -96,5 +99,15 @@ public abstract class MinecraftMixin implements SpongeClient {
         GameProfileRepository p_i50895_7_, PlayerProfileCache p_i50895_8_, IChunkStatusListenerFactory p_i50895_9_) {
         ((MinecraftServerAccessor) this.integratedServer).accessor$setProfileCache(p_i50895_8_);
         return this.integratedServer;
+    }
+
+    @Override
+    public IntegratedServer bridge$getTemporaryIntegratedServer() {
+        return impl$temporaryIntegratedServer;
+    }
+
+    @Override
+    public void bridge$setTemporaryIntegratedServer(IntegratedServer server) {
+        this.impl$temporaryIntegratedServer = server;
     }
 }

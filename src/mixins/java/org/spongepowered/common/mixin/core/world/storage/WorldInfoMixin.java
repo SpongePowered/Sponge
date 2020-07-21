@@ -115,9 +115,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         this.levelName = levelName;
         this.impl$isConstructing = true;
 
-        if (this.bridge$isValid()) {
-            this.shadow$populateFromWorldSettings(settings);
-        }
+        this.shadow$populateFromWorldSettings(settings);
 
         this.impl$isConstructing = false;
     }

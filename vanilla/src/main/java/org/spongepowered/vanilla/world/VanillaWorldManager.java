@@ -377,6 +377,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             }
 
             this.infoByType.put(dimensionType, worldInfo);
+            this.allInfos.add(worldInfo);
 
             if (!isDefaultWorld && !((WorldProperties) worldInfo).doesLoadOnStartup()) {
                 MinecraftServerAccessor_Vanilla.accessor$getLogger().warn("World '{}' ({}/{}) has been set to not load on startup in the "
@@ -445,9 +446,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     private void loadSpawnChunks(final ServerWorld serverWorld, final IChunkStatusListener chunkStatusListener) {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setUserMessage(new TranslationTextComponent("menu.generatingTerrain"));
-        MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Preparing start region for world '{}' ({}/{})", serverWorld
-            .getWorldInfo().getWorldName(), ((DimensionTypeBridge) serverWorld.getDimension().getType()).bridge$getSpongeDimensionType()
-            .getKey().getFormatted(), serverWorld.getDimension().getType().getId());
+        final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) serverWorld;
+        MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Preparing start region for world '{}' ({}/{})", apiWorld.getKey(),
+            apiWorld.getDimension().getType().getKey(), serverWorld.getDimension().getType().getId());
         final BlockPos spawnPoint = serverWorld.getSpawnPoint();
         final ChunkPos spawnChunkPos = new ChunkPos(spawnPoint);
         chunkStatusListener.start(spawnChunkPos);

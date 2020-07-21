@@ -542,7 +542,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             if (!"minecraft".equals(key.getNamespace())) {
                 continue;
             }
-            
+
             switch (key.getPath()) {
                 case "overworld":
                     ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType((SpongeDimensionType) DimensionTypes.OVERWORLD.get());
@@ -561,7 +561,6 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         this.registerRegistry(BiomeType.class, ResourceKey.minecraft("biome_type"), (Registry<BiomeType>) (Object) Registry.BIOME);
         this.registerRegistry(BlockType.class, ResourceKey.minecraft("block_type"), (Registry<BlockType>) (Object) Registry.BLOCK);
         this.registerRegistry(ContainerType.class, ResourceKey.minecraft("container_type"), (Registry<ContainerType>) (Object) Registry.MENU);
-        this.registerRegistry(DimensionType.class, ResourceKey.minecraft("registered_dimension"), (Registry<DimensionType>) (Object) Registry.DIMENSION_TYPE);
         this.registerRegistry(PotionEffectType.class, ResourceKey.minecraft("potion_effect_type"), (Registry<PotionEffectType>) (Object) Registry.EFFECTS);
         this.registerRegistry(EnchantmentType.class, ResourceKey.minecraft("enchantment_type"), (Registry<EnchantmentType>) (Object) Registry.ENCHANTMENT);
         this.registerRegistry(EntityType.class, ResourceKey.minecraft("entity_type"), (Registry<EntityType>) (Object) Registry.ENTITY_TYPE);

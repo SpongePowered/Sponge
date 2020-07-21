@@ -37,6 +37,7 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.world.client.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.scheduler.ClientScheduler;
@@ -51,6 +52,7 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
 
     @Shadow public net.minecraft.client.world.ClientWorld world;
     @Shadow public ClientPlayerEntity player;
+
     @Shadow @Nullable public abstract IntegratedServer shadow$getIntegratedServer();
 
     private final SpongeScheduler api$scheduler = new ClientScheduler();
@@ -66,7 +68,13 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
 
     @Override
     public Optional<LocalServer> getServer() {
-        return Optional.ofNullable((LocalServer) this.shadow$getIntegratedServer());
+        final MinecraftBridge minecraftBridge = (MinecraftBridge) (this);
+        final IntegratedServer integratedServer = minecraftBridge.bridge$getTemporaryIntegratedServer();
+        if (integratedServer != null) {
+            return (Optional<LocalServer>) (Object) Optional.ofNullable(integratedServer);
+        }
+
+        return (Optional<LocalServer>) (Object) Optional.ofNullable(this.shadow$getIntegratedServer());
     }
 
     @Override

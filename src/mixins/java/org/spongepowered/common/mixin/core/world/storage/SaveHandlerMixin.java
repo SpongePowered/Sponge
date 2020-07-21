@@ -88,7 +88,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
     private void impl$saveSpongeLevelData(WorldInfo info, CompoundNBT compound, CallbackInfo ci) {
-        if (!((WorldInfoBridge) info).bridge$isValid()) {
+        if (!Sponge.isServerAvailable() || !((WorldInfoBridge) info).bridge$isValid()) {
             return;
         }
 
@@ -162,6 +162,10 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
 
     @Inject(method = "loadWorldInfo", at = @At("RETURN"))
     private void impl$loadSpongeLevelDataBeforeVanilla(CallbackInfoReturnable<WorldInfo> cir) {
+        if (!Sponge.isServerAvailable()) {
+            return;
+        }
+
         final WorldInfo info = cir.getReturnValue();
 
         final File spongeFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT);

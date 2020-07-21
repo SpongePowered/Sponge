@@ -91,6 +91,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -313,11 +314,16 @@ public final class PhaseTracker implements CauseStackManager {
                 }
 
             })
-            .plugin(SpongeCommon.getPlugin())
+            .plugin(Launcher.getInstance().getCommonPlugin())
             .build();
     }
 
     public void setThread(@Nullable final Thread thread) throws IllegalAccessException {
+        if ((this == PhaseTracker.SERVER || this == PhaseTracker.CLIENT) && thread == null) {
+            this.sidedThread = new WeakReference<>(null);
+            return;
+        }
+
         final StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         if ((stackTrace.length < 3)) {
             throw new IllegalAccessException("Cannot call directly to change thread.");

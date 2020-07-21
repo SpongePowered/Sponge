@@ -25,16 +25,27 @@
 package org.spongepowered.vanilla.mixin.core.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.server.integrated.IntegratedServer;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.bridge.client.MinecraftBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.vanilla.client.VanillaClient;
+
+import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin_Vanilla implements VanillaClient {
+
+    @Shadow @Nullable private IntegratedServer integratedServer;
 
     @Inject(method = "run", at = @At("HEAD"))
     private void vanilla$establishRegistriesAndStartingEngine(CallbackInfo ci) {
@@ -58,5 +69,21 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         // TODO Minecraft 1.14 - For now, fire LoadedGameEvent right away but this may not be the best place..
 
         lifecycle.callLoadedGameEvent();
+    }
+
+    @Redirect(method = "func_213231_b", at = @At(value = "FIELD", target = ("Lnet/minecraft/client/Minecraft;"
+        + "integratedServer:Lnet/minecraft/server/integrated/IntegratedServer;"), opcode = Opcodes.PUTFIELD))
+    private void vanilla$storeTemporaryServerRed(Minecraft minecraft, IntegratedServer server) {
+        ((MinecraftBridge) minecraft).bridge$setTemporaryIntegratedServer(this.integratedServer);
+        this.integratedServer = null;
+    }
+
+    @Inject(method = "func_213231_b", at = @At("TAIL"))
+    private void vanilla$nullServerRefAndPhaseTracker(Screen screenIn, CallbackInfo ci) {
+        ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
+        try {
+            PhaseTracker.SERVER.setThread(null);
+        } catch (IllegalAccessException ignore) {
+        }
     }
 }
