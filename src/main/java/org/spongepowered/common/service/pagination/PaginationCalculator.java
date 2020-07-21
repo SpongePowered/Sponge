@@ -25,7 +25,6 @@
 package org.spongepowered.common.service.pagination;
 
 import com.google.common.annotations.VisibleForTesting;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -92,7 +91,7 @@ class PaginationCalculator {
         }
     }
 
-    int getLinesPerPage(Audience source) {
+    int getLinesPerPage() {
         return this.linesPerPage;
     }
 
@@ -222,16 +221,13 @@ class PaginationCalculator {
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH
         boolean addSpaces = this.getWidth(textWithSpaces) <= LINE_WIDTH;
 
-        //TODO: suspect, why are we changing the style of the padding, they may want different styles on the padding.
-        Component styledPadding = this.withStyle(padding, text);
-        int paddingLength = this.getWidth(styledPadding);
+        int paddingLength = this.getWidth(padding);
         final TextComponent.Builder output = TextComponent.builder();
 
         //Using 0 width unicode symbols as padding throws us into an unending loop, replace them with the default padding
         if (paddingLength < 1) {
             padding = TextComponent.of("=");
-            styledPadding = this.withStyle(padding, text);
-            paddingLength = this.getWidth(styledPadding);
+            paddingLength = this.getWidth(padding);
         }
 
         //if we only need padding
@@ -249,36 +245,14 @@ class PaginationCalculator {
             //pick a halfway point
             int beforePadding = GenericMath.floor(paddingCount / 2.0);
             //Do not use ceil, this prevents floating point errors.
-            int afterPadding = paddingCount - beforePadding;
+            int afterPadding = paddingCount - beforePadding - 1;
 
-            this.addPadding(styledPadding, output, beforePadding);
+            this.addPadding(padding, output, beforePadding);
             output.append(text);
-            this.addPadding(styledPadding, output, afterPadding);
+            this.addPadding(padding, output, afterPadding);
         }
 
         return this.finalizeBuilder(text, output);
-    }
-
-    /**
-     * Gives the first text argument the style of the second.
-     *
-     * @param text The text to stylize
-     * @param styled The styled text
-     * @return The original text now stylized
-     */
-    private Component withStyle(Component text, Component styled) {
-        return text.style(styled.style());
-    }
-
-    /**
-     * Gives the first text argument the color of the second.
-     *
-     * @param text The text to color
-     * @param colored The colored text
-     * @return The original text now colored
-     */
-    private Component withColor(Component text, Component colored) {
-        return text.color(colored.color());
     }
 
     /**
@@ -289,7 +263,7 @@ class PaginationCalculator {
      * @return The finalized, properly styled text.
      */
     private Component finalizeBuilder(Component text, TextComponent.Builder build) {
-        return build.style(text.style()).build();
+        return build.style(text.style().toBuilder().build()).build();
     }
 
     /**
@@ -307,7 +281,7 @@ class PaginationCalculator {
                 .append(spaces)
                 .append(text)
                 .append(spaces)
-                .style(text.style())
+                .style(text.style().toBuilder().build())
                 .build();
     }
 

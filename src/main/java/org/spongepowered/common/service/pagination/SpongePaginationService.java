@@ -33,7 +33,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.TextComponent;
@@ -149,7 +148,7 @@ public final class SpongePaginationService implements PaginationService {
     }
 
     private Command.Parameterized buildPaginationCommand() {
-        Parameter.Value<ActivePagination> paginationIdParameter = Parameter.builder(TypeToken.of(ActivePagination.class))
+        Parameter.Value<ActivePagination> paginationIdParameter = Parameter.builder(ActivePagination.class)
                 .parser(new ActivePaginationParser())
                 .setSuggestions(new ActivePaginationCompleter())
                 .setKey("pagination-id")
@@ -185,9 +184,10 @@ public final class SpongePaginationService implements PaginationService {
         //We create the child manually in order to force that paginationElement is required for all children + fallback
         //https://github.com/SpongePowered/SpongeAPI/issues/1272
         return Command.builder()
-                .parameters(paginationIdParameter, firstOf(pageParameter, subcommand(page, "page")))
-                .child(next, "next", "n")
-                .child(prev, "prev", "p", "previous")
+                .parameters(paginationIdParameter, firstOf(pageParameter,
+                        subcommand(next, "next", "n"),
+                        subcommand(prev, "prev", "p", "previous"),
+                        subcommand(page, "page")))
                 .child(page, "page")
                 .setExecutor(page)
                 .setShortDescription(TextComponent.of("Helper command for paginations occurring"))

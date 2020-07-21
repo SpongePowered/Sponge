@@ -76,17 +76,17 @@ abstract class ActivePagination {
                 .color(NamedTextColor.BLUE)
                 .decoration(TextDecoration.UNDERLINED, true)
                 .clickEvent(ClickEvent.runCommand("/sponge:pagination " + this.id.toString() + " next"))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("/sponge:page next")))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("/page next")))
                 .insertion("/sponge:page next")
                 .build();
         this.prevPageText = TextComponent.builder("«")
                 .color(NamedTextColor.BLUE)
                 .decoration(TextDecoration.UNDERLINED, true)
                 .clickEvent(ClickEvent.runCommand("/sponge:pagination " + this.id.toString() + " prev"))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("/sponge:page prev")))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("/page prev")))
                 .insertion("/sponge:page prev")
                 .build();
-        int maxContentLinesPerPage = calc.getLinesPerPage(src.get().get()) - 1;
+        int maxContentLinesPerPage = calc.getLinesPerPage() - 1;
         if (title != null) {
             maxContentLinesPerPage -= calc.getLines(title);
         }
@@ -118,10 +118,6 @@ abstract class ActivePagination {
 
     public void previousPage() throws CommandException {
         this.specificPage(this.currentPage - 1);
-    }
-
-    public void currentPage() throws CommandException {
-        this.specificPage(this.currentPage);
     }
 
     protected int getCurrentPage() {
@@ -177,27 +173,26 @@ abstract class ActivePagination {
             ret.append(TextComponent.builder()
                     .content(String.valueOf(currentPage))
                     .clickEvent(ClickEvent.runCommand("/sponge:pagination " + this.id + ' ' + currentPage))
-                    .hoverEvent(HoverEvent.showText(TextComponent.of("/sponge:page " + currentPage)))
+                    .hoverEvent(HoverEvent.showText(TextComponent.of("/page " + currentPage)))
                     .insertion("/sponge:page " + currentPage)
                     .build());
             ret.append(SLASH_TEXT);
             ret.append(TextComponent.builder()
-                    .content(String.valueOf(currentPage))
+                    .content(String.valueOf(totalPages))
                     .clickEvent(ClickEvent.runCommand("/sponge:pagination " + this.id + ' ' + totalPages))
-                    .hoverEvent(HoverEvent.showText(TextComponent.of("/sponge:page " + totalPages)))
+                    .hoverEvent(HoverEvent.showText(TextComponent.of("/page " + totalPages)))
                     .insertion("/sponge:page " + totalPages)
                     .build());
             needsDiv = true;
         }
+
+        if (needsDiv) {
+            ret.append(DIVIDER_TEXT);
+        }
+
         if (hasNext) {
-            if (needsDiv) {
-                ret.append(DIVIDER_TEXT);
-            }
             ret.append(this.nextPageText);
         } else {
-            if (needsDiv) {
-                ret.append(DIVIDER_TEXT);
-            }
             ret.append(TextComponent.of("»"));
         }
 
