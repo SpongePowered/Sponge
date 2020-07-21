@@ -30,6 +30,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.util.PathConverter;
 import joptsimple.util.PathProperties;
+import org.spongepowered.vanilla.launch.plugin.PluginLoader;
 import org.spongepowered.vanilla.modlauncher.util.ArgumentList;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
@@ -42,7 +43,15 @@ import java.util.Arrays;
 
 public final class Main {
 
-    private static PluginEnvironment pluginEnvironment;
+    /**
+     * The {@link PluginEnvironment environment} plugins are running in.
+     */
+    public static final PluginEnvironment pluginEnvironment = new PluginEnvironment();
+
+    /**
+     * The {@link PluginLoader loader} plugins are loaded by.
+     */
+    public static final PluginLoader pluginLoader = new PluginLoader(Main.pluginEnvironment);
 
     public static void main(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();
@@ -51,7 +60,6 @@ public final class Main {
         final OptionSet optionSet = parser.parse(args);
 
         final Path gameDirectory = optionSet.valueOf(gameDir);
-        Main.pluginEnvironment = new PluginEnvironment();
         final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
         Main.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
         Main.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> gameDirectory);
@@ -66,7 +74,4 @@ public final class Main {
         Launcher.main(lst.getArguments());
     }
 
-    public static PluginEnvironment getLaunchPluginEnvironment() {
-        return Main.pluginEnvironment;
-    }
 }

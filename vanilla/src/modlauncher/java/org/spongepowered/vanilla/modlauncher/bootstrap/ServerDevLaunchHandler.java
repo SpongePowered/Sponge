@@ -25,12 +25,8 @@
 package org.spongepowered.vanilla.modlauncher.bootstrap;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginKeys;
+import org.spongepowered.vanilla.launch.plugin.PluginLoader;
 import org.spongepowered.vanilla.modlauncher.Main;
-
-import java.nio.file.Path;
-import java.util.List;
 
 public final class ServerDevLaunchHandler extends AbstractSpongeDevLaunchHandler {
 
@@ -41,14 +37,13 @@ public final class ServerDevLaunchHandler extends AbstractSpongeDevLaunchHandler
 
     @Override
     protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        final PluginEnvironment launchPluginEnvironment = Main.getLaunchPluginEnvironment();
-        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance()).getMethod("launch", String.class,
-                Path.class, List.class, Boolean.class, String[].class).invoke(null,
-                launchPluginEnvironment.getBlackboard().get(PluginKeys.VERSION).orElse(null),
-                launchPluginEnvironment.getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElse(null),
-                launchPluginEnvironment.getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElse(null),
-                Boolean.TRUE,
-                arguments);
+        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance())
+                .getMethod("launch", PluginLoader.class, Boolean.class, String[].class)
+                .invoke(null,
+                        Main.pluginLoader,
+                        Boolean.TRUE,
+                        arguments
+                );
     }
 
 }

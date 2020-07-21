@@ -57,6 +57,12 @@ public abstract class AbstractSpongeLaunchHandler implements ILaunchHandlerServi
      * be to exclude {@code "org.neptune."}.
      */
     protected static final List<String> EXCLUDED_PACKAGES = Arrays.asList(
+            // Libraries
+            "org.spongepowered.plugin.Blackboard",
+            "org.spongepowered.plugin.PluginEnvironment",
+
+            // Implementation
+            "org.spongepowered.vanilla.launch.plugin.PluginLoader"
     );
 
     @Override
