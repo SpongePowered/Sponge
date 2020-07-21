@@ -55,6 +55,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -153,19 +154,26 @@ public class SpongeCommand {
 
     @NonNull
     private CommandResult rootCommand(final CommandContext context) {
-        final PluginContainer platformPlugin = Launcher.getInstance().getPlatformPlugin();
-        final PluginContainer apiPlugin = Launcher.getInstance().getApiPlugin();
         final PluginContainer minecraftPlugin = Launcher.getInstance().getMinecraftPlugin();
 
-        context.sendMessage(TextComponent.builder().append(
-                TextComponent.of("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(TextComponent.space()),
-                TextComponent.of("Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"),
-                TextComponent.newline(),
-                TextComponent.of(apiPlugin.getMetadata().getName().get() + ": " + apiPlugin.getMetadata().getVersion()),
-                TextComponent.newline(),
-                TextComponent.of(platformPlugin.getMetadata().getName().get() + ": " + platformPlugin.getMetadata().getVersion())
-            ).build()
-        );
+        final TextComponent.Builder msg = TextComponent.builder()
+                .append("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(TextComponent.space())
+                .append("Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")");
+
+        for (final PluginContainer plugin : Launcher.getInstance().getLauncherPlugins()) {
+            if (Objects.equals(plugin.getMetadata().getId(), "minecraft")) {
+                // We've already included the Minecraft version, no need to duplicate information
+                continue;
+            }
+
+            // fallback to the plugin's ID if the display name isn't present
+            final String name = plugin.getMetadata().getName().orElse(plugin.getMetadata().getId());
+
+            msg.append(TextComponent.newline())
+                    .append(name + ": " + plugin.getMetadata().getVersion());
+        }
+
+        context.sendMessage(msg.build());
         return CommandResult.success();
     }
 
