@@ -30,8 +30,9 @@ import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.config.category.OptimizationCategory;
-import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.common.OptimizationCategory;
+import org.spongepowered.common.config.common.CommonConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +52,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        final GlobalConfig globalConfig = SpongeCommon.getGlobalConfigAdapter().getConfig();
+        final CommonConfig globalConfig = SpongeConfigs.getCommon().get();
         if (globalConfig.getModules().useOptimizations()) {
             final Function<OptimizationCategory, Boolean> optimizationCategoryBooleanFunction = mixinEnabledMappings.get(mixinClassName);
             if (optimizationCategoryBooleanFunction == null) {
@@ -97,7 +98,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
         return optimization.usePandaRedstone() && !optimization.useEigenRedstone();
     };
     // So that any additional optimizations can be added in succession.
-    private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean >> builder()
+    private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean>> builder()
             .put("org.spongepowered.common.mixin.optimization.SpongeImplHooksMixin_Item_Pre_Merge",
                     OptimizationCategory::doDropsPreMergeItemDrops)
             .put("org.spongepowered.common.mixin.optimization.mcp.enchantment.EnchantmentHelperMixin_No_Source_Leak",

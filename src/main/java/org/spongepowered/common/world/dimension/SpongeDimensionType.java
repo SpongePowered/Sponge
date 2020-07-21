@@ -31,19 +31,13 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
 
-import java.nio.file.Path;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 public final class SpongeDimensionType extends SpongeCatalogType implements DimensionType {
 
-    private final Path configPath;
-    private final SpongeConfig<DimensionConfig> config;
     private final Context context;
     private final Supplier<BiFunction<World, net.minecraft.world.dimension.DimensionType, ? extends Dimension>> dimensionFactory;
     private final BooleanSupplier hasSkyLight;
@@ -53,9 +47,6 @@ public final class SpongeDimensionType extends SpongeCatalogType implements Dime
         Preconditions.checkNotNull(dimensionFactory);
         Preconditions.checkNotNull(hasSkyLight);
 
-        this.configPath = SpongeCommon.getSpongeConfigDirectory().resolve("worlds").resolve(key.getNamespace()).resolve(key.getValue());
-        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"),
-            SpongeCommon.ECOSYSTEM_ID, SpongeCommon.getGlobalConfigAdapter(), false);
         this.context = new Context(Context.DIMENSION_KEY, key.getNamespace() + "." + key.getValue());
         this.dimensionFactory = dimensionFactory;
         this.hasSkyLight = hasSkyLight;
@@ -69,14 +60,6 @@ public final class SpongeDimensionType extends SpongeCatalogType implements Dime
     @Override
     public Context getContext() {
         return this.context;
-    }
-
-    public Path getConfigPath() {
-        return this.configPath;
-    }
-
-    public SpongeConfig<DimensionConfig> getConfigAdapter() {
-        return this.config;
     }
 
     public BiFunction<World, net.minecraft.world.dimension.DimensionType, ? extends Dimension> getDimensionFactory() {

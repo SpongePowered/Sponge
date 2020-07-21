@@ -33,7 +33,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
@@ -60,15 +59,16 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.WorldCategory;
-import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.config.InheritableConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -92,12 +92,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     private UUID impl$uniqueId;
     private SpongeDimensionType impl$logicType;
-    private SpongeConfig<WorldConfig> impl$configAdapter;
-    private boolean impl$enabled;
-    private boolean impl$pvp;
-    private boolean impl$loadOnStartup = true;
-    private boolean impl$keepSpawnLoaded;
-    private boolean impl$generateSpawnOnLoad;
+    private InheritableConfigHandle<WorldConfig> impl$configAdapter;
     private boolean impl$generateBonusChest;
     private boolean impl$modCreated;
     @Nullable private PortalAgentType impl$portalAgentType;
@@ -122,27 +117,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     @Override
     public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
-    }
-
-    @Override
-    public boolean bridge$createWorldConfig() {
-        if (this.impl$configAdapter != null) {
-             return false;
-        }
-
-        if (this.bridge$isValid()) {
-            this.impl$configAdapter =
-                    new SpongeConfig<>(SpongeConfig.Type.WORLD, ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType().getConfigPath()
-                            .resolve(this.levelName)
-                            .resolve("world.conf"),
-                            SpongeCommon.ECOSYSTEM_ID,
-                            ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType().getConfigAdapter(),
-                            false);
-        } else {
-            this.impl$configAdapter = SpongeConfig.newDummyConfig(SpongeConfig.Type.WORLD);
-        }
-
-        return true;
     }
 
     @Override
@@ -210,7 +184,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     public void bridge$updatePlayersForDifficulty() {
         ServerWorld serverWorld = null;
         for (final org.spongepowered.api.world.server.ServerWorld world : Sponge.getServer().getWorldManager().getWorlds()) {
-            final World mcWorld = (World) world;
+            final net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
             if (!((WorldBridge) mcWorld).bridge$isFake() && mcWorld.getWorldInfo() == (Object) this) {
                 serverWorld = (ServerWorld) world;
                 break;
@@ -228,22 +202,22 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public boolean bridge$isEnabled() {
-        return this.impl$enabled;
+        return this.bridge$getConfigAdapter().get().getWorld().isWorldEnabled();
     }
 
     @Override
     public void bridge$setEnabled(boolean state) {
-        this.impl$enabled = state;
+        this.bridge$getConfigAdapter().get().getWorld().setWorldEnabled(state);
     }
 
     @Override
     public boolean bridge$isPVPEnabled() {
-        return this.impl$pvp;
+        return this.bridge$getConfigAdapter().get().getWorld().getPVPEnabled();
     }
 
     @Override
     public void bridge$setPVPEnabled(boolean state) {
-        this.impl$pvp = state;
+        this.bridge$getConfigAdapter().get().getWorld().setPVPEnabled(state);
     }
 
     @Override
@@ -258,32 +232,32 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public boolean bridge$doesLoadOnStartup() {
-        return this.impl$loadOnStartup;
+        return this.bridge$getConfigAdapter().get().getWorld().getLoadOnStartup();
     }
 
     @Override
     public void bridge$setLoadOnStartup(boolean state) {
-        this.impl$loadOnStartup = state;
+        this.bridge$getConfigAdapter().get().getWorld().setLoadOnStartup(state);
     }
 
     @Override
     public boolean bridge$doesKeepSpawnLoaded() {
-        return this.impl$keepSpawnLoaded;
+        return this.bridge$getConfigAdapter().get().getWorld().getKeepSpawnLoaded();
     }
 
     @Override
     public void bridge$setKeepSpawnLoaded(boolean state) {
-        this.impl$keepSpawnLoaded = state;
+        this.bridge$getConfigAdapter().get().getWorld().setKeepSpawnLoaded(state);
     }
 
     @Override
     public boolean bridge$doesGenerateSpawnOnLoad() {
-        return this.impl$generateSpawnOnLoad;
+        return this.bridge$getConfigAdapter().get().getWorld().getGenerateSpawnOnLoad();
     }
 
     @Override
     public void bridge$setGenerateSpawnOnLoad(boolean state) {
-        this.impl$generateSpawnOnLoad = state;
+        this.bridge$getConfigAdapter().get().getWorld().setGenerateSpawnOnLoad(state);
     }
 
     @Override
@@ -315,11 +289,20 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public SpongeConfig<WorldConfig> bridge$getConfigAdapter() {
+    public InheritableConfigHandle<WorldConfig> bridge$getConfigAdapter() {
         if (this.impl$configAdapter == null) {
-            this.bridge$createWorldConfig();
+            if (this.bridge$isValid()) {
+                return SpongeConfigs.createWorld(this.bridge$getLogicType(), this.bridge$getKey());
+            } else {
+                return SpongeConfigs.createDetached();
+            }
         }
         return this.impl$configAdapter;
+    }
+
+    @Override
+    public void bridge$setConfigAdapter(InheritableConfigHandle<WorldConfig> adapter) {
+        this.impl$configAdapter = Objects.requireNonNull(adapter, "adapter");
     }
 
     @Override
@@ -346,14 +329,9 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public void bridge$saveConfig() {
-        final WorldCategory worldCat = this.impl$configAdapter.getConfig().getWorld();
-        // TODO 1.14 - Set the properties on the config adapter
-        worldCat.setWorldEnabled(this.impl$enabled);
-        worldCat.setLoadOnStartup(this.impl$loadOnStartup);
-        worldCat.setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
-        worldCat.setKeepSpawnLoaded(this.impl$keepSpawnLoaded);
-        worldCat.setPVPEnabled(this.impl$pvp);
-        this.impl$configAdapter.save();
+        if (this.impl$configAdapter != null) {
+            this.impl$configAdapter.save();
+        }
     }
 
     @Override

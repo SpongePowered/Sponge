@@ -37,6 +37,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
+import org.spongepowered.common.config.ConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.vanilla.client.VanillaClient;
 
@@ -63,6 +65,9 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
 
     @Inject(method = "init", at = @At("RETURN"))
     private void vanilla$callStartedEngineAndLoadedGame(CallbackInfo ci) {
+        // Save config now that registries have been initialized
+        ConfigHandle.setSaveSuppressed(false);
+
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.callStartedEngineEvent(this);
 

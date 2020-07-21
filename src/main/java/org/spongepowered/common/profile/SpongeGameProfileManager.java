@@ -34,6 +34,7 @@ import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.profile.query.GameProfileQuery;
 import org.spongepowered.common.profile.query.NameQuery;
 import org.spongepowered.common.profile.query.UniqueIdQuery;
@@ -51,7 +52,6 @@ import javax.annotation.Nullable;
 
 public final class SpongeGameProfileManager implements GameProfileManager {
 
-    private static final int LOOKUP_INTERVAL = SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getGameProfileQueryTaskInterval();
     private final Server server;
     private final GameProfileCache defaultCache;
     private final ExecutorService gameLookupExecutorService;
@@ -79,7 +79,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
             }
 
             try {
-                Thread.sleep(LOOKUP_INTERVAL * 1000);
+                Thread.sleep(SpongeConfigs.getCommon().get().getWorld().getGameProfileQueryTaskInterval() * 1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.plugin;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.config.SpongeConfigs;
 
 import java.util.List;
 import java.util.Set;
@@ -47,9 +47,9 @@ public class ConcurrentCheckPlugin implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if ("org.spongepowered.common.mixin.concurrentchecks.ClassInheritanceMultiMapMixin".equals(mixinClassName)) {
-            return SpongeCommon.getGlobalConfigAdapter().getConfig().getDebug().doConcurrentEntityChecks();
+            return SpongeConfigs.getCommon().get().getDebug().doConcurrentEntityChecks();
         } else if ("org.spongepowered.common.mixin.invalid.concurrentchecks.PlayerChunkMapMixin_ConcurrentChecks".equals(mixinClassName)) {
-            return SpongeCommon.getGlobalConfigAdapter().getConfig().getDebug().doConcurrentChunkMapChecks();
+            return SpongeConfigs.getCommon().get().getDebug().doConcurrentChunkMapChecks();
         }
         return true;
     }

@@ -64,14 +64,14 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.GeneralConfigBase;
+import org.spongepowered.common.config.InheritableConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.server.WorldRegistration;
@@ -138,12 +138,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     public Optional<org.spongepowered.api.world.server.ServerWorld> getWorld(final ResourceKey key) {
         Preconditions.checkNotNull(key);
 
-        return (Optional< org.spongepowered.api.world.server.ServerWorld>) (Object) Optional.ofNullable(this.worlds.get(key));
+        return (Optional<org.spongepowered.api.world.server.ServerWorld>) (Object) Optional.ofNullable(this.worlds.get(key));
     }
 
     @Override
     public Collection<org.spongepowered.api.world.server.ServerWorld> getWorlds() {
-        return Collections.unmodifiableCollection((Collection< org.spongepowered.api.world.server.ServerWorld>) (Object) this.worldsByType.values());
+        return Collections.unmodifiableCollection((Collection<org.spongepowered.api.world.server.ServerWorld>) (Object) this.worldsByType.values());
     }
 
     @Override
@@ -315,10 +315,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
 
+            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeConfigs.createWorld(logicType, key);
             if (!isDefaultWorld) {
-                final SpongeConfig<? extends GeneralConfigBase> configAdapter = SpongeHooks.getOrLoadConfigAdapter(logicType.getConfigPath(), key);
-                if (!configAdapter.getConfig().getWorld().isWorldEnabled()) {
-                    SpongeCommon.getLogger().warn("World '{}' ({}/{}) has been disabled in the configuration. "
+                if (!configAdapter.get().getWorld().isWorldEnabled()) {
+                    MinecraftServerAccessor_Vanilla.accessor$getLogger().warn("World '{}' ({}/{}) has been disabled in the configuration. "
                         + "World will not be loaded...", key, logicType.getKey().getFormatted(), dimensionType.getId());
                     continue;
                 }
@@ -358,6 +358,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     }
                     worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? saveName : this.getDirectoryName(key));
                 }
+                ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
 
                 ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
                 ((WorldInfoBridge) worldInfo).bridge$setDimensionType(dimensionType);
@@ -367,6 +368,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     PhaseTracker.getCauseStackManager().getCurrentCause(),
                     (WorldArchetype) (Object) defaultSettings, (WorldProperties) worldInfo));
             } else {
+                ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
                 worldInfo.setWorldName(isDefaultWorld ? saveName : this.getDirectoryName(key));
 
                 // This may be an existing world created before Sponge was installed, handle accordingly
@@ -395,7 +397,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 continue;
             }
 
-            infoBridge.bridge$createWorldConfig();
 
             final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
 

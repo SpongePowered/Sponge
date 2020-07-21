@@ -57,6 +57,11 @@ public abstract class AbstractSpongeLaunchHandler implements ILaunchHandlerServi
      * be to exclude {@code "org.neptune."}.
      */
     protected static final List<String> EXCLUDED_PACKAGES = Arrays.asList(
+            // Libraries
+            //"ninja.leaping.configurate.",
+
+            // Implementation
+            //"org.spongepowered.vanilla.launch."
     );
 
     @Override

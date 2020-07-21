@@ -84,7 +84,8 @@ import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
-import org.spongepowered.common.config.category.PhaseTrackerCategory;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
@@ -164,7 +165,7 @@ public final class PhaseTracker implements CauseStackManager {
         if (blockIn == null) {
             // If the block is null, check with the PhaseState to see if it can perform a safe way
             final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
-            final PhaseTrackerCategory trackerConfig = SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker();
+            final PhaseTrackerCategory trackerConfig = SpongeConfigs.getCommon().get().getPhaseTracker();
 
             if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
                 // Try to save ourselves
@@ -392,7 +393,7 @@ public final class PhaseTracker implements CauseStackManager {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             if (this.stack.size() > 6) {
                 if (this.stack.checkForRunaways(state, phaseContext)) {
                     PhasePrinter.printRunawayPhase(this.stack, state, phaseContext);
@@ -438,7 +439,7 @@ public final class PhaseTracker implements CauseStackManager {
             return;
         }
 
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING, null)) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
@@ -489,7 +490,7 @@ public final class PhaseTracker implements CauseStackManager {
     }
 
     private void checkPhaseContextProcessed(final IPhaseState<?> state, final PhaseContext<?> context) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && PhasePrinter.printedExceptionsForUnprocessedState.contains(state)) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && PhasePrinter.printedExceptionsForUnprocessedState.contains(state)) {
             return;
         }
 

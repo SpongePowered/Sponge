@@ -38,10 +38,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge_Bungee;
 import org.spongepowered.common.accessor.network.NetworkManagerAccessor;
 import org.spongepowered.common.accessor.network.handshake.client.CHandshakePacketAccessor;
+import org.spongepowered.common.config.SpongeConfigs;
 
 import java.net.InetSocketAddress;
 
@@ -54,7 +54,7 @@ public abstract class ServerHandshakeNetHandlerMixin_Bungee {
 
     @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
     private void bungee$patchHandshake(CHandshakePacket packet, CallbackInfo ci) {
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getBungeeCord().getIpForwarding() && packet.getRequestedState().equals(ProtocolType.LOGIN)) {
+        if (SpongeConfigs.getCommon().get().getBungeeCord().getIpForwarding() && packet.getRequestedState().equals(ProtocolType.LOGIN)) {
             final String ip = ((CHandshakePacketAccessor) packet).accessor$getIp();
             final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 

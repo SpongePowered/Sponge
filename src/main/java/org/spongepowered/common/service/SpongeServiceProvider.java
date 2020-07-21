@@ -45,7 +45,8 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.config.category.ServicesCategory;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.common.ServicesCategory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
 import org.spongepowered.common.launch.Launcher;
@@ -172,7 +173,8 @@ public final class SpongeServiceProvider implements ServiceProvider {
             throw new IllegalStateException("Services have already been initialised");
         }
 
-        final ServicesCategory.ServicePluginSubCategory servicePluginSubCategory = SpongeCommon.getGlobalConfigAdapter().getConfig().getServicesCategory().getServicePlugin();
+        final ServicesCategory.ServicePluginSubCategory servicePluginSubCategory =
+                SpongeConfigs.getCommon().get().getServicesCategory().getServicePlugin();
 
         // We loop over all available services and try to discover each one.
         // This does NOT support third party service interfaces, only impls.

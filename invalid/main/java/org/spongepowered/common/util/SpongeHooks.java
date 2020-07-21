@@ -40,7 +40,7 @@ import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
 
 import java.util.stream.Collectors;

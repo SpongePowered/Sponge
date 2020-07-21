@@ -55,6 +55,8 @@ public final class Main {
         final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
         Main.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
         Main.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> gameDirectory);
+        // Pass sponge base directory to SpongeConfigs
+        System.setProperty("org.spongepowered.common.baseDir", gameDirectory.toString());
         final Path modsDirectory = gameDirectory.resolve("mods");
         if (Files.notExists(modsDirectory)) {
             Files.createDirectories(modsDirectory);

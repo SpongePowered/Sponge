@@ -38,7 +38,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -52,15 +51,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.BlockTrackerCategory;
-import org.spongepowered.common.config.category.BlockTrackerModCategory;
-import org.spongepowered.common.config.type.TrackerConfig;
+import org.spongepowered.common.config.ConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.tracker.BlockTrackerCategory;
+import org.spongepowered.common.config.tracker.BlockTrackerModCategory;
+import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
@@ -193,8 +192,8 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @SuppressWarnings("ConstantConditions")
     @Override
     public void bridge$initializeTrackerState() {
-        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeCommon.getTrackerConfigAdapter();
-        final BlockTrackerCategory blockTrackerCat = trackerConfigAdapter.getConfig().getBlockTracker();
+        final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeConfigs.getTracker();
+        final BlockTrackerCategory blockTrackerCat = trackerConfigAdapter.get().getBlockTracker();
         final ResourceLocation key = Registry.BLOCK.getKey((Block) (Object) this);
         final String modId = key.getNamespace();
         final String name = key.getPath();

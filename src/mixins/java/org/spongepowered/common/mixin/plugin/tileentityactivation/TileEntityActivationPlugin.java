@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.plugin.tileentityactivation;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.config.SpongeConfigs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class TileEntityActivationPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginTileEntityActivation();
+        return SpongeConfigs.getCommon().get().getModules().usePluginTileEntityActivation();
     }
 
     @Override

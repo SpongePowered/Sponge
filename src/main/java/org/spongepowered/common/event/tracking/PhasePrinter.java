@@ -32,12 +32,13 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.config.ConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.common.CommonConfig;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.PhaseTrackerCategory;
-import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -108,7 +109,7 @@ public final class PhasePrinter {
 
     static void printUnexpectedBlockChange(final ServerWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.block.BlockState currentState,
                                             final net.minecraft.block.BlockState newState) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             return;
         }
         new PrettyPrinter(60).add("Unexpected World Change Detected!").centre().hr()
@@ -130,7 +131,7 @@ public final class PhasePrinter {
 
 
     static void printExceptionSpawningEntity(final PhaseTracker tracker, final PhaseContext<?> context, final Throwable e) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && !PhasePrinter.printedExceptionsForEntities.isEmpty()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && !PhasePrinter.printedExceptionsForEntities.isEmpty()) {
             if (PhasePrinter.printedExceptionsForEntities.contains(context.state)) {
                 return;
             }
@@ -138,7 +139,7 @@ public final class PhasePrinter {
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
         PhasePrinter.printPhasestack(tracker, context, e, printer);
         printer.log(SpongeCommon.getLogger(), Level.ERROR);
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             PhasePrinter.printedExceptionsForEntities.add(context.state);
         }
     }
@@ -196,7 +197,7 @@ public final class PhasePrinter {
     }
 
     static void printBlockTrackingException(final PhaseTracker tracker, final PhaseContext<?> phaseData, final IPhaseState<?> phaseState, final Throwable e) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && !PhasePrinter.printedExceptionsForBlocks.isEmpty()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && !PhasePrinter.printedExceptionsForBlocks.isEmpty()) {
             if (PhasePrinter.printedExceptionsForBlocks.contains(phaseState)) {
                 return;
             }
@@ -204,7 +205,7 @@ public final class PhasePrinter {
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
         PhasePrinter.printPhasestack(tracker, phaseData, e, printer);
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             PhasePrinter.printedExceptionsForBlocks.add(phaseState);
         }
     }
@@ -243,7 +244,7 @@ public final class PhasePrinter {
     }
 
     static void printExceptionFromPhase(final PhaseStack stack, final Throwable e, final PhaseContext<?> context) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && !PhasePrinter.printedExceptionsForState.isEmpty()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && !PhasePrinter.printedExceptionsForState.isEmpty()) {
             for (final IPhaseState<?> iPhaseState : PhasePrinter.printedExceptionsForState) {
                 if (context.state == iPhaseState) {
                     return;
@@ -262,7 +263,7 @@ public final class PhasePrinter {
         PhasePrinter.printPhaseStackWithException(stack, printer, e);
 
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             PhasePrinter.printedExceptionsForState.add(context.state);
         }
     }
@@ -274,7 +275,7 @@ public final class PhasePrinter {
     }
 
     static void printRunawayPhase(final PhaseStack stack, final IPhaseState<?> state, final PhaseContext<?> context) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && !PhasePrinter.hasPrintedAboutRunnawayPhases) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && !PhasePrinter.hasPrintedAboutRunnawayPhases) {
             // Avoiding spam logs.
             return;
         }
@@ -286,13 +287,13 @@ public final class PhasePrinter {
         printer.addWrapped(60, "%s :", "Phases remaining");
         PhasePrinter.printPhaseStackWithException(stack, printer, new Exception("RunawayPhase"));
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && PhasePrinter.printRunawayCount++ > SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().getMaximumRunawayCount()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && PhasePrinter.printRunawayCount++ > SpongeConfigs.getCommon().get().getPhaseTracker().getMaximumRunawayCount()) {
             PhasePrinter.hasPrintedAboutRunnawayPhases = true;
         }
     }
 
     static void printRunnawayPhaseCompletion(final PhaseStack stack, final IPhaseState<?> state) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && !PhasePrinter.hasPrintedAboutRunnawayPhases) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && !PhasePrinter.hasPrintedAboutRunnawayPhases) {
             // Avoiding spam logs.
             return;
         }
@@ -306,7 +307,7 @@ public final class PhasePrinter {
         printer.add(" Phases Remaining:");
         PhasePrinter.printPhaseStackWithException(stack, printer, new Exception("RunawayPhase"));
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && PhasePrinter.printRunawayCount++ > 3) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && PhasePrinter.printRunawayCount++ > 3) {
             PhasePrinter.hasPrintedAboutRunnawayPhases = true;
         }
     }
@@ -318,7 +319,7 @@ public final class PhasePrinter {
     }
 
     static void printIncorrectPhaseCompletion(final PhaseStack stack, final IPhaseState<?> prevState, final IPhaseState<?> state) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose() && !PhasePrinter.completedIncorrectStates.isEmpty()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && !PhasePrinter.completedIncorrectStates.isEmpty()) {
             for (final Tuple<IPhaseState<?>, IPhaseState<?>> tuple : PhasePrinter.completedIncorrectStates) {
                 if ((tuple.getFirst().equals(prevState)
                         && tuple.getSecond().equals(state))) {
@@ -342,7 +343,7 @@ public final class PhasePrinter {
         printer.add(" Phases Remaining:");
         PhasePrinter.printPhaseStackWithException(stack, printer, new Exception("Incorrect Phase Completion"));
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             PhasePrinter.completedIncorrectStates.add(new Tuple<>(prevState, state));
         }
     }
@@ -368,7 +369,7 @@ public final class PhasePrinter {
         printer.add();
         PhasePrinter.generateVersionInfo(printer);
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             PhasePrinter.hasPrintedEmptyOnce = true;
         }
     }
@@ -402,14 +403,14 @@ public final class PhasePrinter {
     static void printAsyncEntitySpawn(final Entity entity) {
         // We aren't in the server thread at this point, and an entity is spawning on the server....
         // We will DEFINITELY be doing bad things otherwise. We need to artificially capture here.
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().captureEntitiesAsync()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().captureEntitiesAsync()) {
             // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
-            if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+            if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
                 return;
             }
             // Just checking if we've already printed once about it.
             // If we have, we don't want to print any more times.
-            if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors() && PhasePrinter.hasPrintedAsyncEntities) {
+            if (!SpongeConfigs.getCommon().get().getPhaseTracker().verboseErrors() && PhasePrinter.hasPrintedAsyncEntities) {
                 return;
             }
             // Otherwise, let's print out either the first time, or several more times.
@@ -435,12 +436,12 @@ public final class PhasePrinter {
         PhaseTracker.ASYNC_CAPTURED_ENTITIES.add((net.minecraft.entity.Entity) entity);
         // At this point we can print an exception about it, if we are told to.
         // Print a pretty warning about not capturing an async spawned entity, but don't care about spawning.
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().isVerbose()) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             return;
         }
         // Just checking if we've already printed once about it.
         // If we have, we don't want to print any more times.
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors() && PhasePrinter.hasPrintedAsyncEntities) {
+        if (!SpongeConfigs.getCommon().get().getPhaseTracker().verboseErrors() && PhasePrinter.hasPrintedAsyncEntities) {
             return;
         }
         // Otherwise, let's print out either the first time, or several more times.
@@ -463,8 +464,8 @@ public final class PhasePrinter {
     }
 
     static boolean checkMaxBlockProcessingDepth(final IPhaseState<?> state, final PhaseContext<?> context, final int currentDepth) {
-        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeCommon.getGlobalConfigAdapter();
-        final PhaseTrackerCategory trackerConfig = globalConfigAdapter.getConfig().getPhaseTracker();
+        final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
+        final PhaseTrackerCategory trackerConfig = globalConfigAdapter.get().getPhaseTracker();
         int maxDepth = trackerConfig.getMaxBlockProcessingDepth();
         if (maxDepth == 100 && state == TickPhase.Tick.NEIGHBOR_NOTIFY) {
             maxDepth = 1000;

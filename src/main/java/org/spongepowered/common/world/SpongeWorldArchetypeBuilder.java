@@ -46,7 +46,6 @@ import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import javax.annotation.Nullable;
@@ -266,7 +265,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.enabled = true;
         this.loadOnStartup = true;
         this.keepSpawnLoaded = null;
-        this.generateSpawnOnLoad = this.dimensionType.getConfigAdapter().getConfig().getWorld().getGenerateSpawnOnLoad();
+        this.generateSpawnOnLoad = true;
         this.generatorSettings = DataContainer.createNew();
         this.pvpEnabled = true;
         this.commandsEnabled = true;

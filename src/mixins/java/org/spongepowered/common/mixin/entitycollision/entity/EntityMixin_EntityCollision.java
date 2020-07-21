@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.entitycollision.entity;
 
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,27 +33,28 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.CollisionModCategory;
-import org.spongepowered.common.config.category.EntityCollisionCategory;
-import org.spongepowered.common.config.type.GlobalConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.config.ConfigHandle;
+import org.spongepowered.common.config.InheritableConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.common.CommonConfig;
+import org.spongepowered.common.config.inheritable.CollisionModCategory;
+import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
 public abstract class EntityMixin_EntityCollision implements CollisionCapabilityBridge {
 
-    @Shadow public abstract World shadow$getEntityWorld();
+    @Shadow public abstract net.minecraft.world.World shadow$getEntityWorld();
 
     private ResourceKey entityCollision$key;
     private int entityCollision$maxCollisions = 8;
     private boolean entityCollision$refreshCache = false;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void collisions$InjectActivationInformation(net.minecraft.entity.EntityType<?> type, World world, CallbackInfo ci) {
+    private void collisions$InjectActivationInformation(net.minecraft.entity.EntityType<?> type, net.minecraft.world.World world, CallbackInfo ci) {
         if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
             if ((net.minecraft.entity.Entity) (Object) this instanceof ItemEntity) {
                 final ItemEntity item = (ItemEntity) (Object) this;
@@ -87,24 +87,23 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
     }
 
     @Override
-    public void collision$initializeCollisionState(final World world) {
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeCommon.getGlobalConfigAdapter();
-        final EntityCollisionCategory worldCollCat = worldConfigAdapter.getConfig().getEntityCollisionCategory();
-        final EntityCollisionCategory globalCollCat = globalConfigAdapter.getConfig().getEntityCollisionCategory();
+    public void collision$initializeCollisionState(final net.minecraft.world.World world) {
+        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
+        final CollisionModCategory worldCollMod =
+                worldConfigAdapter.getOrCreateValue(s -> s.getEntityCollisionCategory().getModList().get(this.entityCollision$key.getNamespace()),
+                c -> {
+                    // TODO: save after populating?
+                    final CollisionModCategory globalCollision = new CollisionModCategory(this.entityCollision$key.getNamespace());
+                    c.getEntityCollisionCategory().getModList().put(this.entityCollision$key.getNamespace(), globalCollision);
+                    globalCollision.getEntityList().put(this.entityCollision$key.getNamespace(), this.collision$getMaxCollisions());
+                }, worldConfigAdapter.get().getEntityCollisionCategory().autoPopulateData());
+        final EntityCollisionCategory worldCollCat = worldConfigAdapter.get().getEntityCollisionCategory();
 
         this.collision$setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
 
         boolean requiresSave = false;
-        final CollisionModCategory worldCollMod = worldCollCat.getModList().get(this.entityCollision$key.getNamespace());
-        CollisionModCategory globalCollMod = globalCollCat.getModList().get(this.entityCollision$key.getNamespace());
-        if (worldCollMod == null && worldCollCat.autoPopulateData()) {
-            globalCollMod = new CollisionModCategory(this.entityCollision$key.getNamespace());
-            globalCollCat.getModList().put(this.entityCollision$key.getNamespace(), globalCollMod);
-            globalCollMod.getEntityList().put(this.entityCollision$key.getValue(), this.collision$getMaxCollisions());
-            globalConfigAdapter.save();
-            return;
-        } else if (worldCollMod != null) {
+        if (worldCollMod != null) {
             if (!worldCollMod.isEnabled()) {
                 this.collision$setMaxCollisions(-1);
                 return;
@@ -127,7 +126,8 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
 
             // entity overrides
             if (entityMaxCollision == null && worldCollCat.autoPopulateData()) {
-                globalCollMod.getEntityList().put(this.entityCollision$key.getValue(), this.collision$getMaxCollisions());
+                // TODO(zml): Populate better
+                //globalCollMod.getEntityList().put(this.entityCollision$key.getValue(), this.collision$getMaxCollisions());
                 requiresSave = true;
             } else if (entityMaxCollision != null) {
                 this.collision$setMaxCollisions(entityMaxCollision);

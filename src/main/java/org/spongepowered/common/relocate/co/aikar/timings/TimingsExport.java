@@ -44,6 +44,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.network.RconConnection;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
 
@@ -170,14 +171,14 @@ class TimingsExport extends Thread {
         }
 
         builder.add("idmap", JSONUtil.objectBuilder()
-                .add("groups", JSONUtil.mapArrayToObject(TimingIdentifier.GROUP_MAP.values(), (group) -> 
+                .add("groups", JSONUtil.mapArrayToObject(TimingIdentifier.GROUP_MAP.values(), (group) ->
                         JSONUtil.singleObjectPair(group.id, group.name)))
                 .add("handlers", handlersBuilder)
-                .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(), (entry) -> 
+                .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(), (entry) ->
                         JSONUtil.singleObjectPair(entry.getValue(), entry.getKey())))
-                .add("tileentity", JSONUtil.mapArrayToObject(tileEntityTypeSet, (tileEntityType) -> 
+                .add("tileentity", JSONUtil.mapArrayToObject(tileEntityTypeSet, (tileEntityType) ->
                         JSONUtil.singleObjectPair(TimingsPls.getTileEntityId(tileEntityType), tileEntityType.getKey().toString())))
-                .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) -> 
+                .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) ->
                         JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getKey().toString()))));
 
         // Information about loaded plugins
@@ -194,7 +195,7 @@ class TimingsExport extends Thread {
         // Information on the users Config
 
         builder.add("config", JSONUtil.objectBuilder()
-                .add("sponge", serializeConfigNode(SpongeCommon.getGlobalConfigAdapter().getRootNode())));
+                .add("sponge", serializeConfigNode(SpongeConfigs.getCommon().getNode())));
 
         new TimingsExport(listeners, builder.build(), history).start();
     }

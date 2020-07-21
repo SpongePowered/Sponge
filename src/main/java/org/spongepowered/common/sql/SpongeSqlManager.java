@@ -35,7 +35,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.sql.SqlManager;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -268,7 +268,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
 
     @Override
     public Optional<String> getConnectionUrlFromAlias(final String alias) {
-        return Optional.ofNullable(SpongeCommon.getGlobalConfigAdapter().getConfig().getSql().getAliases().get(alias));
+        return Optional.ofNullable(SpongeConfigs.getCommon().get().getSql().getAliases().get(alias));
     }
 
 }

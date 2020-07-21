@@ -30,7 +30,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
@@ -49,8 +48,9 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.config.InheritableConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -67,8 +67,8 @@ import java.util.UUID;
 
 @Mixin(value = net.minecraft.world.chunk.Chunk.class)
 public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
-    
-    @Shadow public abstract World shadow$getWorld();
+
+    @Shadow public abstract net.minecraft.world.World shadow$getWorld();
     @Shadow public abstract ChunkPos shadow$getPos();
     @Shadow public abstract Map<BlockPos, TileEntity> shadow$getTileEntityMap();
 
@@ -90,7 +90,7 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
         }
         // Update TE tracking cache
         // We must always check for a TE as a mod block may not implement ITileEntityProvider if a TE exists
-        // Note: We do not check SpongeImplHooks.hasBlockTileEntity(block, state) as neighbor notifications do not 
+        // Note: We do not check SpongeImplHooks.hasBlockTileEntity(block, state) as neighbor notifications do not
         //       include blockstate.
         final TileEntity tileEntity = this.shadow$getTileEntityMap().get(pos);
         if (tileEntity != null) {
@@ -110,9 +110,9 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
             }
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().blockTrackLogging()) {
-            if (!configAdapter.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getKey().toString())) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().blockTrackLogging()) {
+            if (!configAdapter.get().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getKey().getFormatted())) {
                 SpongeHooks.logBlockTrack(this.shadow$getWorld(), block, pos, user, true);
             } else {
                 SpongeHooks.logBlockTrack(this.shadow$getWorld(), block, pos, user, false);
@@ -263,7 +263,7 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
         final UUID uuid = (((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getUniqueIdForIndex(creatorIndex)).orElse(null);
         if (uuid != null) {
             // Verify id is valid and not invalid
-            if (SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+            if (SpongeConfigs.getCommon().get().getWorld().getInvalidLookupUuids().contains(uuid)) {
                 this.tracker$trackedIntBlockPositions.remove(key);
                 return Optional.empty();
             }
@@ -401,7 +401,7 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
     }
 
     private SpongeUserManager getUserManager() {
-        final World world = this.shadow$getWorld();
+        final net.minecraft.world.World world = this.shadow$getWorld();
         if (world == null || ((WorldBridge) world).bridge$isFake()) {
             return null;
         }

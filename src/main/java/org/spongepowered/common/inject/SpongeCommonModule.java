@@ -47,7 +47,7 @@ import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongePlatform;
 import org.spongepowered.common.asset.SpongeAssetManager;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.config.SpongeConfigManager;
+import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.Launcher;
@@ -56,7 +56,7 @@ import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.sql.SpongeSqlManager;
-import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
+import org.spongepowered.common.util.SpongeMetricsConfigManager;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
@@ -75,7 +75,7 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(PluginManager.class).toInstance(Launcher.getInstance().getPluginManager());
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
-        this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);
+        this.bindAndExpose(ConfigManager.class).to(PluginConfigManager.class);
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
         this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
         this.bindAndExpose(ServiceProvider.class).to(SpongeServiceProvider.class);

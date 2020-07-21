@@ -33,7 +33,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.common.config.category.LoggingCategory;
+import org.spongepowered.common.config.inheritable.LoggingCategory;
 
 public enum BlockChange {
 
