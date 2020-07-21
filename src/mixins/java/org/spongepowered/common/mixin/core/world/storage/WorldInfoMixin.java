@@ -108,21 +108,16 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     private final List<UUID> impl$pendingUniqueIds = new ArrayList<>();
     private int impl$trackedUniqueIdCount = 0;
     private boolean impl$hasCustomDifficulty = false;
-    private boolean impl$isConstructing = false;
 
     @Redirect(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;populateFromWorldSettings(Lnet/minecraft/world/WorldSettings;)V"))
     private void impl$setupBeforeSettingsPopulation(WorldInfo info, WorldSettings settings, WorldSettings settingsB, String levelName) {
         this.levelName = levelName;
-        this.impl$isConstructing = true;
-
         this.shadow$populateFromWorldSettings(settings);
-
-        this.impl$isConstructing = false;
     }
 
     @Inject(method = "populateFromWorldSettings", at = @At("RETURN"))
     private void populatePropertiesFromArchetype(WorldSettings settings, CallbackInfo ci) {
-        if (!this.bridge$isValid() || this.impl$isConstructing) {
+        if (!this.bridge$isValid()) {
             return;
         }
 

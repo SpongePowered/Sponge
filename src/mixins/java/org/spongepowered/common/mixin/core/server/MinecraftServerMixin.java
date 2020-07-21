@@ -57,13 +57,6 @@ import javax.annotation.Nullable;
 public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements MinecraftServerBridge,
         CommandSourceProviderBridge {
 
-    @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final protected IChunkStatusListenerFactory chunkStatusListenerFactory;
-    @Shadow private int tickCounter;
-    @Shadow public abstract boolean shadow$isDedicatedServer();
-    @Shadow public abstract boolean shadow$isServerRunning();
-    @Shadow public abstract PlayerList shadow$getPlayerList();
-    @Shadow public abstract Iterable<ServerWorld> shadow$getWorlds();
     @Shadow public abstract CommandSource shadow$getCommandSource();
     @Shadow @Final protected Thread serverThread;
     @Shadow @Final private PlayerProfileCache profileCache;
