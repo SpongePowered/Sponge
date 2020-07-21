@@ -150,12 +150,8 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         return this.registerInternal(this, container, this.applyNamespace(container, command, true), secondaryAliases, false);
     }
 
-    Tuple<CommandMapping, LiteralCommandNode<CommandSource>> registerFromSpongeRegistrar(
-            final CommandRegistrar<?> registrar,
-            final PluginContainer container,
-            final String[] secondaryAliases,
-            final LiteralArgumentBuilder<CommandSource> command) {
-        return this.registerInternal(registrar, container, this.applyNamespace(container, command, true), secondaryAliases, false);
+    void registerFromSpongeRegistrar(final LiteralCommandNode<CommandSource> command) {
+        this.dispatcher.register(command);
     }
 
     private Tuple<CommandMapping, LiteralCommandNode<CommandSource>> registerInternal(
@@ -201,7 +197,11 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
 
     @Override
     @NonNull
-    public CommandResult process(@NonNull final CommandCause cause, @NonNull final String command, @NonNull final String arguments) throws CommandException {
+    public CommandResult process(
+            @NonNull final CommandCause cause,
+            @NonNull final CommandMapping mapping,
+            @NonNull final String command,
+            @NonNull final String arguments) throws CommandException {
         try {
             final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
             return CommandResult.builder().setResult(result).build();
@@ -213,7 +213,11 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
 
     @Override
     @NonNull
-    public List<String> suggestions(@NonNull final CommandCause cause, @NonNull final String command, @NonNull final String arguments) {
+    public List<String> suggestions(
+            @NonNull final CommandCause cause,
+            @NonNull final CommandMapping mapping,
+            @NonNull final String command,
+            @NonNull final String arguments) {
         final CompletableFuture<Suggestions> suggestionsCompletableFuture =
                 this.dispatcher.getCompletionSuggestions(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
         // TODO: Fix so that we keep suggestions in the Mojang format?
@@ -222,8 +226,8 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
 
     @Override
     @NonNull
-    public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final String command) {
-        final CommandNode<CommandSource> node = this.dispatcher.findNode(Collections.singletonList(command));
+    public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final CommandMapping mapping) {
+        final CommandNode<CommandSource> node = this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias()));
         if (node != null) {
             return Optional.of(TextComponent.of(this.dispatcher.getSmartUsage(node, (CommandSource) cause).toString()));
         }

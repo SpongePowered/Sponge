@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.command.registrar;
 
-import com.google.common.reflect.TypeToken;
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -41,12 +40,14 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -61,38 +62,34 @@ public abstract class SpongeCommandRegistrar<T extends Command> implements Comma
         this.catalogKey = catalogKey;
     }
 
-    /**
-     * <strong>Do not call this directly.</strong> This must ONLY be called from
-     * {@link SpongeCommandManager}, else the manager won't know to redirect
-     * to here!
-     *
-     * @param container The {@link PluginContainer} of the owning plugin
-     * @param command The command to register
-     * @param primaryAlias The primary alias
-     * @param secondaryAliases The secondary aliases, for the mapping
-     * @return The mapping
-     * @throws CommandFailedRegistrationException If no mapping could be created.
-     */
     @Override
     @NonNull
     public CommandMapping register(@NonNull final PluginContainer container,
             @NonNull final T command,
             @NonNull final String primaryAlias,
             @NonNull final String @NonNull... secondaryAliases) throws CommandFailedRegistrationException {
-        if (this.getDispatcher().findNode(Collections.singletonList(primaryAlias.toLowerCase())) != null) {
-            // we have a problem
-            throw new CommandFailedRegistrationException("The primary alias " + primaryAlias + " has already been registered.");
-        }
+        // Get the builder and the first literal.
+        final String namespacedCommand = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
 
-        final Tuple<CommandMapping, LiteralCommandNode<CommandSource>> mappingResult =
-                BrigadierCommandRegistrar.INSTANCE
-                        .registerFromSpongeRegistrar(this, container, secondaryAliases, this.createNode(primaryAlias.toLowerCase(), command));
-        return mappingResult.getFirst();
+        // This will throw an error if there is an issue.
+        final CommandMapping mapping = ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).registerAliasWithNamespacing(
+                this,
+                container,
+                namespacedCommand,
+                ImmutableList.<String>builder().add(primaryAlias).add(secondaryAliases).build()
+        );
+
+        this.createNode(mapping, command).forEach(BrigadierCommandRegistrar.INSTANCE::registerFromSpongeRegistrar);
+        return mapping;
     }
 
     @NonNull
     @Override
-    public CommandResult process(@NonNull final CommandCause cause, @NonNull final String command, @NonNull final String arguments) throws CommandException {
+    public CommandResult process(
+            @NonNull final CommandCause cause,
+            @NonNull final CommandMapping mapping,
+            @NonNull final String command,
+            @NonNull final String arguments) throws CommandException {
         try {
             return CommandResult.builder().setResult(
                     this.getDispatcher().execute(
@@ -107,7 +104,11 @@ public abstract class SpongeCommandRegistrar<T extends Command> implements Comma
 
     @Override
     @NonNull
-    public List<String> suggestions(@NonNull final CommandCause cause, @NonNull final String command, @NonNull final String arguments) {
+    public List<String> suggestions(
+            @NonNull final CommandCause cause,
+            @NonNull final CommandMapping mapping,
+            @NonNull final String command,
+            @NonNull final String arguments) {
         try {
             return this.getDispatcher().getCompletionSuggestions(
                     this.getDispatcher().parse(this.createCommandString(command, arguments), (CommandSource) cause)
@@ -119,8 +120,8 @@ public abstract class SpongeCommandRegistrar<T extends Command> implements Comma
 
     @Override
     @NonNull
-    public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final String command) {
-        final T commandEntry = this.commandMap.get(command.toLowerCase());
+    public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final CommandMapping command) {
+        final T commandEntry = this.commandMap.get(command.getPrimaryAlias().toLowerCase());
         if (commandEntry == null) {
             throw new IllegalArgumentException(command + " is not a valid a valid command!");
         }
@@ -146,7 +147,7 @@ public abstract class SpongeCommandRegistrar<T extends Command> implements Comma
         return command + " " + argument;
     }
 
-    abstract LiteralArgumentBuilder<CommandSource> createNode(final String primaryAlias, final T command);
+    abstract Collection<LiteralCommandNode<CommandSource>> createNode(final CommandMapping mapping, final T command);
 
     protected CommandDispatcher<CommandSource> getDispatcher() {
         return BrigadierCommandRegistrar.INSTANCE.getDispatcher();

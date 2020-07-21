@@ -28,6 +28,8 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.arguments.NBTCompoundTagArgument;
+import net.minecraft.command.arguments.ResourceLocationArgument;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.common.command.brigadier.argument.CustomArgumentParser;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
@@ -44,6 +46,7 @@ public final class ClientCompletionTypeStreamGenerator {
                 new SpongeClientCompletionType("decimal_number", DoubleArgumentType.doubleArg()),
                 new SpongeClientCompletionType("json", NBTCompoundTagArgument.nbt()),
                 CustomArgumentParser.NONE_CLIENT_COMPLETION_TYPE,
+                new SpongeClientCompletionType("resource_key", ResourceLocationArgument.resourceLocation()),
                 new SpongeClientCompletionType("string", StringArgumentType.string()),
                 new SpongeClientCompletionType("whole_number", LongArgumentType.longArg())
         );

@@ -25,13 +25,11 @@
 package org.spongepowered.common.command.registrar.tree;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.Map;

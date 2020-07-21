@@ -71,12 +71,7 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
-        final ResourceLocation resourceLocation;
-        try {
-             resourceLocation = ResourceLocation.read((StringReader) reader);
-        } catch (final CommandSyntaxException commandSyntaxException) {
-            throw ((SpongeStringReader) reader).createException(TextComponent.of("Could not read world location"), commandSyntaxException);
-        }
+        final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
         final Optional<WorldProperties> worldProperties = SpongeWorldPropertiesValueParameter.getWorldProperties(resourceLocation);
 
         if (worldProperties.isPresent()) {
@@ -91,9 +86,9 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
         return ImmutableList.of(Constants.Command.RESOURCE_LOCATION_TYPE);
     }
 
-    static Optional<WorldProperties> getWorldProperties(final ResourceLocation name) {
+    static Optional<WorldProperties> getWorldProperties(final ResourceKey name) {
         try {
-            return SpongeCommon.getGame().getServer().getWorldManager().getProperties((ResourceKey) (Object) name);
+            return SpongeCommon.getGame().getServer().getWorldManager().getProperties(name);
         } catch (final Exception ignored) {
             return Optional.empty();
         }

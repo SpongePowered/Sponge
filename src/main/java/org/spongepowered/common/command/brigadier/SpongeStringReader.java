@@ -26,18 +26,19 @@ package org.spongepowered.common.command.brigadier;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.minecraft.nbt.*;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.minecraft.command.arguments.ResourceLocationArgument;
+import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-
-import java.util.regex.Pattern;
 
 // ArgumentReader.Mutable specifies a non null getRead() method, StringReader suggests its
 // nullable - but it isn't. So we just need to suppress the warning.
@@ -99,6 +100,16 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         } catch (final CommandSyntaxException e) {
             throw new ArgumentParseException(TextComponent.of("Could not parse a float"), e, this.getString(), this.getCursor());
         }
+    }
+
+    @Override
+    public ResourceKey parseResourceKey() throws ArgumentParseException {
+        return this.readResourceLocation(null);
+    }
+
+    @Override
+    public ResourceKey parseResourceKey(@NonNull final String defaultNamespace) throws ArgumentParseException {
+        return this.readResourceLocation(defaultNamespace);
     }
 
     @Override
@@ -317,4 +328,24 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
             throw this.createException(TextComponent.of(e.getMessage()));
         }
     }
+
+    private ResourceKey readResourceLocation(@Nullable final String defaultNamespace) throws ArgumentParseException {
+        final int i = this.getCursor();
+
+        while (this.canRead() && ResourceLocation.isValidPathCharacter(this.peek())) {
+            this.skip();
+        }
+
+        final String s = this.getString().substring(i, this.getCursor());
+        if (s.contains(":")) {
+            return ResourceKey.resolve(s);
+        }
+
+        if (defaultNamespace == null) {
+            this.setCursor(i);
+            throw this.createException(TranslatableComponent.of("argument.id.invalid"));
+        }
+        return ResourceKey.of(defaultNamespace, s);
+    }
+
 }

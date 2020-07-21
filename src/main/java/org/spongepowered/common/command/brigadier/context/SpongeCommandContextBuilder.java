@@ -36,10 +36,12 @@ import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.context.SuggestionContext;
 import com.mojang.brigadier.tree.CommandNode;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
@@ -62,6 +64,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     private final boolean isTransactionCopy;
 
     // The Sponge system allows for multiple arguments to be put under the same key.
+    private final Object2IntOpenHashMap<String> flagMap = new Object2IntOpenHashMap<>();
     private final Map<Parameter.Key<?>, Collection<?>> arguments = new HashMap<>();
     private RedirectModifier<CommandSource> modifier;
     private boolean forks;
@@ -91,7 +94,18 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         for (final Map.Entry<Parameter.Key<?>, Collection<?>> arg : original.arguments.entrySet()) {
             this.arguments.put(arg.getKey(), new ArrayList<>(arg.getValue()));
         }
+        original.flagMap.object2IntEntrySet().fastForEach(x -> this.flagMap.put(x.getKey(), x.getIntValue()));
         this.isTransactionCopy = isTransactionCopy;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void applySpongeElementsTo(final SpongeCommandContextBuilder builder, final boolean clear) {
+        if (clear) {
+            this.flagMap.clear();
+            this.arguments.clear();
+        }
+        this.flagMap.object2IntEntrySet().fastForEach(x -> builder.flagMap.put(x.getKey(), x.getIntValue()));
+        this.arguments.forEach((key, values) -> builder.arguments.computeIfAbsent(key, k -> new ArrayList<>()).addAll((Collection) values));
     }
 
     @Override
@@ -270,6 +284,26 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
+    public boolean hasFlag(@NonNull final String flagAlias) {
+        return this.flagMap.containsKey(flagAlias);
+    }
+
+    @Override
+    public boolean hasFlag(@NonNull final Flag flag) {
+        return this.flagMap.containsKey(flag.getUnprefixedAliases().iterator().next());
+    }
+
+    @Override
+    public int getFlagInvocationCount(@NonNull final String flagKey) {
+        return this.flagMap.getOrDefault(flagKey, 0);
+    }
+
+    @Override
+    public int getFlagInvocationCount(@NonNull final Flag flag) {
+        return this.flagMap.getOrDefault(flag.getUnprefixedAliases().iterator().next(), 0);
+    }
+
+    @Override
     public boolean hasAny(final Parameter.@NonNull Key<?> key) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().hasAny(key);
@@ -324,6 +358,19 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         return collection;
     }
 
+    void addFlagInvocation(@NonNull final String key, final int count) {
+        this.flagMap.addTo(key, count);
+    }
+
+    @Override
+    public void addFlagInvocation(@NonNull final Flag flag) {
+        if (this.transaction != null && !this.transaction.isEmpty()) {
+            this.transaction.peek().addFlagInvocation(flag);
+        } else {
+            flag.getAliases().forEach(x -> this.flagMap.addTo(x, 1));
+        }
+    }
+
     @Override
     public <T> void putEntry(final Parameter.@NonNull Key<T> key, @NonNull final T object) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
@@ -361,6 +408,8 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
                 input,
                 this.getArguments(),
                 ImmutableMap.copyOf(this.arguments),
+                this.getRootNode(),
+                this.flagMap,
                 this.getCommand(),
                 this.getNodes(),
                 this.getRange(),

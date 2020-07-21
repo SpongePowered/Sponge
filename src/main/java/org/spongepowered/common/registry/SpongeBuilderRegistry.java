@@ -39,6 +39,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
@@ -104,6 +105,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.command.SpongeParameterizedCommandBuilder;
 import org.spongepowered.common.command.parameter.SpongeParameterKeyBuilder;
+import org.spongepowered.common.command.parameter.flag.SpongeFlagBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeTextParameterBuilder;
 import org.spongepowered.common.command.parameter.multi.SpongeFirstOfParameterBuilder;
 import org.spongepowered.common.command.parameter.multi.SpongeSequenceParameterBuilder;
@@ -270,6 +272,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(VariableValueParameters.TextBuilder.class, SpongeTextParameterBuilder::new)
             .register(CommandResult.Builder.class, SpongeCommandResultBuilder::new)
             .register(Parameter.Key.Builder.class, SpongeParameterKeyBuilder::new)
+            .register(Flag.Builder.class, SpongeFlagBuilder::new)
         ;
     }
 }

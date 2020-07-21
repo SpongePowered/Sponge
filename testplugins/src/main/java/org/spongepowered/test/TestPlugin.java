@@ -25,7 +25,10 @@
 package org.spongepowered.test;
 
 import com.google.common.collect.Sets;
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.ResourceKey;
@@ -34,6 +37,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
@@ -142,6 +146,26 @@ public final class TestPlugin {
                         .build(),
                 "checkuser"
         );
+
+        final Parameter.Key<String> testKey = Parameter.key("testKey", TypeToken.of(String.class));
+        final Parameter.Key<Component> requiredKey = Parameter.key("requiredKey", TypeToken.of(Component.class));
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .flag(Flag.builder().alias("f").alias("flag").build())
+                        .flag(Flag.builder().alias("t").alias("text").setParameter(Parameter.string().setKey(testKey).build()).build())
+                        .parameter(Parameter.formattingCodeText().setKey(requiredKey).build())
+                        .setExecutor(context -> {
+                            context.sendMessage(TextComponent.of(context.getFlagInvocationCount("flag")));
+                            context.sendMessage(TextComponent.of(context.getFlagInvocationCount("t")));
+                            context.getAll(testKey).forEach(x -> context.sendMessage(TextComponent.of(x)));
+                            context.sendMessage(context.requireOne(requiredKey));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "flagtest"
+        );
+
     }
 
     @Listener

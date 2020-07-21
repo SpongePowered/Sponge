@@ -25,16 +25,16 @@
 package org.spongepowered.common.command;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandExecutor;
@@ -42,8 +42,15 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.TranslatedParameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
+import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -52,33 +59,36 @@ import java.util.stream.Collectors;
 
 public final class SpongeParameterizedCommand implements Command.Parameterized {
 
-    private final TranslatedParameter associatedCommandNode;
+    private final List<Parameter.Subcommand> subcommands;
     private final List<Parameter> parameters;
+    private final List<Flag> flags;
     private final Function<CommandCause, Optional<Component>> shortDescription;
     private final Function<CommandCause, Optional<Component>> extendedDescription;
     private final Predicate<CommandCause> executionRequirements;
     private final CommandExecutor executor;
+    @Nullable private SpongeCommandDispatcher cachedDispatcher;
 
     SpongeParameterizedCommand(
-            final TranslatedParameter associatedCommandNode,
+            final List<Parameter.Subcommand> subcommands,
             final List<Parameter> parameters,
             final Function<CommandCause, Optional<Component>> shortDescription,
             final Function<CommandCause, Optional<Component>> extendedDescription,
             final Predicate<CommandCause> executionRequirements,
-            final CommandExecutor executor) {
-        this.associatedCommandNode = associatedCommandNode;
+            final CommandExecutor executor,
+            final List<Flag> flags) {
+        this.subcommands = subcommands;
         this.parameters = parameters;
         this.shortDescription = shortDescription;
         this.extendedDescription = extendedDescription;
         this.executionRequirements = executionRequirements;
         this.executor = executor;
+        this.flags = flags;
     }
 
     @Override
     @NonNull
     public List<String> getSuggestions(@NonNull final CommandCause cause, @NonNull final String arguments) {
-        final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
-        dispatcher.register(this.createNode());
+        final SpongeCommandDispatcher dispatcher = this.getCachedDispatcher();
         final ParseResults<CommandSource> parseResults = dispatcher.parse(arguments, (CommandSource) cause);
         final Suggestions suggestions = dispatcher.getCompletionSuggestions(parseResults).join();
         return suggestions.getList().stream().map(x -> x.apply(arguments)).collect(Collectors.toList());
@@ -103,8 +113,15 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     @Override
     public @NonNull Component getUsage(final @NonNull CommandCause cause) {
-        return TextComponent.of(this.associatedCommandNode.getSourceCommandNode()
-                .getChildrenForSuggestions().stream().map(CommandNode::getUsageText).collect(Collectors.joining("|")));
+        final Collection<TextComponent> usage =
+                Arrays.stream(this.getCachedDispatcher().getAllUsage(this.getCachedDispatcher().getRoot(), (CommandSource) cause, true))
+                    .map(TextComponent::of).collect(Collectors.toList());
+        return TextComponent.join(TextComponent.newline(), usage);
+    }
+
+    @Override
+    public List<Flag> flags() {
+        return ImmutableList.copyOf(this.flags);
     }
 
     @Override
@@ -122,9 +139,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     @Override
     @NonNull
     public CommandContext parseArguments(@NonNull final CommandCause cause, @NonNull final String arguments) {
-        final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
-        dispatcher.register(this.createNode());
-        final ParseResults<CommandSource> results = dispatcher.parse(new StringReader(arguments), (CommandSource) cause);
+        final ParseResults<CommandSource> results = this.getCachedDispatcher().parse(new StringReader(arguments), (CommandSource) cause);
         return (CommandContext) results.getContext().build(arguments);
     }
 
@@ -134,12 +149,43 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         return this.executor.execute(context);
     }
 
-    public TranslatedParameter getNode() {
-        return this.associatedCommandNode;
+    private SpongeCommandDispatcher getCachedDispatcher() {
+        if (this.cachedDispatcher == null) {
+            this.cachedDispatcher = new SpongeCommandDispatcher();
+            this.cachedDispatcher.register(this.buildWithAlias("command"));
+        }
+        return this.cachedDispatcher;
     }
 
-    private LiteralArgumentBuilder<CommandSource> createNode() {
-        return this.associatedCommandNode.buildWithAlias(this, "command");
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public LiteralCommandNode<CommandSource> buildWithAlias(final String primaryAlias) {
+        final LiteralArgumentBuilder<CommandSource> primary = LiteralArgumentBuilder.literal(primaryAlias);
+        primary.requires((Predicate) this.getExecutionRequirements());
+        if (this.executor == null) {
+            return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTreeWithSubcommandsOnly(primary, this.subcommands);
+        } else {
+            return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTree(
+                    primary,
+                    this.flags,
+                    this.parameters,
+                    this.subcommands,
+                    this
+            );
+        }
     }
 
+    public Collection<LiteralCommandNode<CommandSource>> buildWithAliases(final Iterable<String> aliases) {
+        final Iterator<String> iterable = aliases.iterator();
+        final LiteralCommandNode<CommandSource> built = this.buildWithAlias(iterable.next());
+        final List<LiteralCommandNode<CommandSource>> nodes = new ArrayList<>();
+        nodes.add(built);
+        while (iterable.hasNext()) {
+            final LiteralArgumentBuilder<CommandSource> secondary = LiteralArgumentBuilder.literal(iterable.next());
+            secondary.executes(built.getCommand());
+            secondary.requires(built.getRequirement());
+            nodes.add(new SpongeLiteralCommandNode(secondary.redirect(built)));
+        }
+
+        return nodes;
+    }
 }

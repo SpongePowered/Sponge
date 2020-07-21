@@ -26,11 +26,14 @@ package org.spongepowered.common.command.registrar;
 
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.TypeToken;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
+
+import java.util.Collection;
 
 /**
  * For use with {@link org.spongepowered.api.command.Command.Parameterized}
@@ -46,9 +49,9 @@ public final class SpongeParameterizedCommandRegistrar extends SpongeCommandRegi
     }
 
     @Override
-    LiteralArgumentBuilder<CommandSource> createNode(final String primaryAlias, final Command.Parameterized command) {
+    Collection<LiteralCommandNode<CommandSource>> createNode(final CommandMapping mapping, final Command.Parameterized command) {
         Preconditions.checkArgument(command instanceof SpongeParameterizedCommand, "Command must be a SpongeParameterizedCommand!");
-        return ((SpongeParameterizedCommand) command).getNode().buildWithAlias(command, primaryAlias);
+        return ((SpongeParameterizedCommand) command).buildWithAliases(mapping.getAllAliases());
     }
 
     @Override

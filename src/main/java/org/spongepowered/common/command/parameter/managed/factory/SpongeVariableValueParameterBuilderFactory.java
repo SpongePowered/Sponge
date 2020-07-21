@@ -34,7 +34,11 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.common.command.brigadier.argument.StandardArgumentParser;
-import org.spongepowered.common.command.parameter.managed.builder.*;
+import org.spongepowered.common.command.parameter.managed.builder.SpongeCatalogedElementParameterBuilder;
+import org.spongepowered.common.command.parameter.managed.builder.SpongeDynamicChoicesBuilder;
+import org.spongepowered.common.command.parameter.managed.builder.SpongeLiteralBuilder;
+import org.spongepowered.common.command.parameter.managed.builder.SpongeNumberRangeBuilder;
+import org.spongepowered.common.command.parameter.managed.builder.SpongeStaticChoicesBuilder;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeChoicesValueParameter;
 
 import java.util.function.Supplier;

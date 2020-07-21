@@ -157,7 +157,7 @@ public final class SpongeCommandManager implements CommandManager {
                     (org.spongepowered.api.command.parameter.CommandContext) context;
             final String[] command1 = context.getInput().split(" ", 2);
             try {
-                return registrar.process(spongeContext, command1[0], command1.length == 2 ? command1[1] : "").getResult();
+                return registrar.process(spongeContext, mapping, command1[0], command1.length == 2 ? command1[1] : "").getResult();
             } catch (final CommandException e) {
                 throw new SimpleCommandExceptionType(SpongeAdventure.asVanilla(e.getText())).create();
             }
@@ -186,7 +186,7 @@ public final class SpongeCommandManager implements CommandManager {
     }
 
     @NonNull
-    private CommandMapping registerAliasWithNamespacing(
+    public CommandMapping registerAliasWithNamespacing(
             @NonNull final CommandRegistrar<?> registrar,
             @NonNull final PluginContainer container,
             @NonNull final String namespacedAlias,
@@ -329,7 +329,7 @@ public final class SpongeCommandManager implements CommandManager {
             //}
             context.buildAndSwitch(); */
         try {
-            result = mapping.getRegistrar().process(cause, mapping.getPrimaryAlias(), args);
+            result = mapping.getRegistrar().process(cause, mapping, command, args);
         } catch (final CommandException exception) {
             final CommandResult errorResult = CommandResult.builder().setResult(0).error(exception.getText()).build();
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
@@ -462,8 +462,7 @@ public final class SpongeCommandManager implements CommandManager {
                     return Collections.emptyList();
                 }
 
-                return mapping.getRegistrar().suggestions(
-                        CommandCause.create(), mapping.getPrimaryAlias(), splitArg[1]);
+                return mapping.getRegistrar().suggestions(CommandCause.create(), mapping, command, splitArg[1]);
             }
 
             return this.commandMappings.keySet()

@@ -31,7 +31,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.arguments.Vec3Argument;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -43,7 +42,6 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
 import org.spongepowered.common.util.Constants;
 
@@ -74,12 +72,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
             final Parameter.@NonNull Key<? super ServerLocation> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
-        final ResourceLocation resourceLocation;
-        try {
-            resourceLocation = ResourceLocation.read((StringReader) reader);
-        } catch (final CommandSyntaxException commandSyntaxException) {
-            throw ((SpongeStringReader) reader).createException(TextComponent.of("Could not read world location"), commandSyntaxException);
-        }
+        final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
         final ServerWorld world =
                 SpongeWorldPropertiesValueParameter.getWorldProperties(resourceLocation)
                         .flatMap(x -> SpongeCommon.getGame().getServer().getWorldManager().getWorld(x.getKey()))

@@ -25,18 +25,21 @@
 package org.spongepowered.common.command.brigadier.context;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.context.StringRange;
-import com.mojang.brigadier.tree.RootCommandNode;
+import com.mojang.brigadier.tree.CommandNode;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.ServerLocation;
@@ -52,12 +55,16 @@ import javax.annotation.Nullable;
 public final class SpongeCommandContext extends CommandContext<CommandSource> implements org.spongepowered.api.command.parameter.CommandContext {
 
     private final Map<Parameter.Key<?>, Collection<?>> argumentMap;
+    private final Object2IntOpenHashMap<String> flagMap;
+    private final Map<String, ParsedArgument<CommandSource, ?>> brigArguments;
 
     public SpongeCommandContext(
             final CommandSource source,
             final String input,
             final Map<String, ParsedArgument<CommandSource, ?>> brigArguments,
             final Map<Parameter.Key<?>, Collection<?>> arguments,
+            final CommandNode<CommandSource> rootNode,
+            final Object2IntOpenHashMap<String> flags,
             final Command<CommandSource> command,
             final List<ParsedCommandNode<CommandSource>> nodes,
             final StringRange range,
@@ -68,13 +75,15 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
                 input,
                 brigArguments,
                 command,
-                new RootCommandNode<>(),
+                rootNode,
                 nodes,
                 range,
                 child,
                 modifier,
                 forks);
+        this.brigArguments = brigArguments;
         this.argumentMap = arguments;
+        this.flagMap = flags.clone();
     }
 
     @Override
@@ -99,6 +108,26 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
     @NonNull
     public Optional<BlockSnapshot> getTargetBlock() {
         return this.getCommandCause().getTargetBlock();
+    }
+
+    @Override
+    public boolean hasFlag(@NonNull final String flagAlias) {
+        return this.flagMap.containsKey(flagAlias);
+    }
+
+    @Override
+    public boolean hasFlag(@NonNull final Flag flag) {
+        return this.flagMap.containsKey(flag.getUnprefixedAliases().iterator().next());
+    }
+
+    @Override
+    public int getFlagInvocationCount(@NonNull final String flagKey) {
+        return this.flagMap.getOrDefault(flagKey, 0);
+    }
+
+    @Override
+    public int getFlagInvocationCount(@NonNull final Flag flag) {
+        return this.flagMap.getOrDefault(flag.getUnprefixedAliases().iterator().next(), 0);
     }
 
     @Override
@@ -137,6 +166,25 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
         } else {
             return ImmutableList.copyOf(values);
         }
+    }
+
+    @Override
+    public CommandContext<CommandSource> copyFor(final CommandSource source) {
+        if (this.getSource() == source) {
+            return this;
+        }
+        return new SpongeCommandContext(source,
+                this.getInput(),
+                this.brigArguments,
+                ImmutableMap.copyOf(this.argumentMap),
+                this.getRootNode(),
+                this.flagMap.clone(),
+                this.getCommand(),
+                this.getNodes(),
+                this.getRange(),
+                this.getChild(),
+                this.getRedirectModifier(),
+                this.isForked());
     }
 
     @Nullable

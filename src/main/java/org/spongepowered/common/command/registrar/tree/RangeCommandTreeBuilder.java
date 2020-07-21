@@ -25,14 +25,12 @@
 package org.spongepowered.common.command.registrar.tree;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.network.PacketBuffer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
 
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 public final class RangeCommandTreeBuilder<T extends Number>
         extends ArgumentCommandTreeBuilder<CommandTreeBuilder.Range<T>> implements CommandTreeBuilder.Range<T> {

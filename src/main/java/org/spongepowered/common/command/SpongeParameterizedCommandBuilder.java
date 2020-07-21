@@ -33,8 +33,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
-import org.spongepowered.common.command.brigadier.TranslatedParameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.common.command.parameter.subcommand.SpongeSubcommandParameterBuilder;
 
 import java.util.ArrayList;
@@ -53,6 +52,8 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     private final Set<String> claimedSubcommands = new HashSet<>();
     private final Map<Command.Parameterized, List<String>> subcommands = new HashMap<>();
     private final List<Parameter> parameters = new ArrayList<>();
+    private final List<Flag> flags = new ArrayList<>();
+    private final Set<String> flagAliases = new HashSet<>();
     @Nullable private CommandExecutor commandExecutor;
     @Nullable private Function<CommandCause, Optional<Component>> extendedDescription;
     @Nullable private Function<CommandCause, Optional<Component>> shortDescription;
@@ -70,6 +71,19 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
         aliases.forEach(x -> s.add(x.toLowerCase()));
         this.claimedSubcommands.addAll(s);
         this.subcommands.put(child, s);
+        return this;
+    }
+
+    @Override
+    public Command.@NonNull Builder flag(@NonNull final Flag flag) {
+        for (final String alias : flag.getAliases()) {
+            if (this.flagAliases.contains(alias)) {
+                throw new IllegalArgumentException("The alias " + alias + " is already in use.");
+            }
+        }
+
+        this.flags.add(flag);
+        this.flagAliases.addAll(flag.getAliases());
         return this;
     }
 
@@ -127,21 +141,14 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
                         .collect(Collectors.toList());
 
         // build the node.
-        final TranslatedParameter translatedParameter;
-        if (this.commandExecutor == null) {
-            translatedParameter = SpongeParameterTranslator.createCommandTreeWithSubcommandsOnly(subcommands);
-        } else {
-            translatedParameter = SpongeParameterTranslator.createCommandTree(this.parameters, subcommands, this.commandExecutor);
-        }
-
         return new SpongeParameterizedCommand(
-                translatedParameter,
+                subcommands,
                 ImmutableList.copyOf(this.parameters),
                 this.shortDescription,
                 this.extendedDescription,
                 requirements,
-                this.commandExecutor
-        );
+                this.commandExecutor,
+                this.flags);
     }
 
     @Override
@@ -150,6 +157,8 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
         this.claimedSubcommands.clear();
         this.commandExecutor = null;
         this.parameters.clear();
+        this.flagAliases.clear();
+        this.flags.clear();
         this.executionRequirements = null;
         this.extendedDescription = null;
         this.shortDescription = null;

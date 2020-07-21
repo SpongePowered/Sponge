@@ -22,56 +22,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.parameter.flag;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.EntityArgument;
+import com.google.common.collect.ImmutableSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
 
-// TODO
-public final class EntityCommandTreeBuilder
-        extends ArgumentCommandTreeBuilder<CommandTreeBuilder.EntitySelection>
-        implements CommandTreeBuilder.EntitySelection {
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Predicate;
 
-    private boolean playersOnly = false;
-    private boolean oneOnly = false;
+public final class SpongeFlag implements Flag {
 
-    public EntityCommandTreeBuilder(@Nullable final ClientCompletionKey<EntitySelection> parameterType) {
-        super(parameterType);
-    }
+    private final Set<String> keys;
+    private final Set<String> aliases;
+    private final Predicate<CommandCause> requirement;
+    @Nullable private final Parameter associatedParameter;
 
-    @Override
-    protected ArgumentType<?> getArgumentType() {
-        if (this.playersOnly) {
-            if (this.oneOnly) {
-                return EntityArgument.players();
-            }
-            return EntityArgument.player();
-        } else {
-            if (this.oneOnly) {
-                return EntityArgument.entities();
-            }
-            return EntityArgument.entity();
-        }
+    public SpongeFlag(
+            final Set<String> keys,
+            final Set<String> aliases,
+            final Predicate<CommandCause> requirement,
+            @Nullable final Parameter associatedParameter) {
+        this.keys = keys;
+        this.aliases = aliases;
+        this.requirement = requirement;
+        this.associatedParameter = associatedParameter;
     }
 
     @Override
     @NonNull
-    public EntitySelection playersOnly() {
-        this.playersOnly = true;
-        return this;
-    }
-
-    public boolean isPlayersOnly() {
-        return this.playersOnly;
+    public Collection<String> getUnprefixedAliases() {
+        return ImmutableSet.copyOf(this.keys);
     }
 
     @Override
-    public EntitySelection single() {
-        this.oneOnly = true;
-        return this;
+    @NonNull
+    public Collection<String> getAliases() {
+        return ImmutableSet.copyOf(this.aliases);
     }
+
+    @Override
+    @NonNull
+    public Predicate<CommandCause> getRequirement() {
+        return this.requirement;
+    }
+
+    @Override
+    @NonNull
+    public Optional<Parameter> getAssociatedParameter() {
+        return Optional.ofNullable(this.associatedParameter);
+    }
+
 }

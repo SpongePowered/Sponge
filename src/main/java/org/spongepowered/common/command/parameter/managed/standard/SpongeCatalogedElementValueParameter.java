@@ -25,17 +25,19 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.arguments.ArgumentType;
 import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.List;
@@ -60,29 +62,30 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
     public Optional<? extends T> getValue(final Parameter.@NonNull Key<? super T> parameterKey,
                                           final ArgumentReader.@NonNull Mutable reader,
                                           final CommandContext.@NonNull Builder context) throws ArgumentParseException {
-        final String check = reader.parseString();
-        Optional<T> result = Optional.empty();
-        if (check.contains(":")) {
-            result = SpongeCommon.getRegistry().getCatalogRegistry().get(this.catalogType, ResourceKey.resolve(check));
+        try {
+            final ResourceKey resourceKey = reader.parseResourceKey();
+            final Optional<T> result = SpongeCommon.getRegistry().getCatalogRegistry().get(this.catalogType, resourceKey);
             if (!result.isPresent()) {
-                throw reader.createException(TextComponent.of("No " + this.catalogType.getSimpleName() + " with ID " + check + "exists"));
+                throw reader.createException(TextComponent.of("No " + this.catalogType.getSimpleName() + " with ID " + resourceKey.asString() + "exists"));
             }
-        } else {
+            return result;
+        } catch (final ArgumentParseException ex) {
+            if (this.prefixes.isEmpty()) {
+                throw ex;
+            }
+
+            final String check = reader.parseUnquotedString();
             for (final String prefix : this.prefixes) {
-                result = SpongeCommon.getRegistry().getCatalogRegistry().get(this.catalogType, ResourceKey.of(prefix, check));
+                final Optional<T> result = SpongeCommon.getRegistry().getCatalogRegistry().get(this.catalogType, ResourceKey.of(prefix, check));
                 if (result.isPresent()) {
-                    break;
+                    return result;
                 }
             }
 
-            if (!result.isPresent()) {
-                final String ids = this.prefixes.stream().map(x -> x + ":" + check).collect(Collectors.joining(", "));
-                throw reader.createException(
-                        TextComponent.of("No " + this.catalogType.getSimpleName() + " with any of the following IDs exist: " + ids));
-            }
+            final String ids = this.prefixes.stream().map(x -> x + ":" + check).collect(Collectors.joining(", "));
+            throw reader.createException(
+                    TextComponent.of("No " + this.catalogType.getSimpleName() + " with any of the following IDs exist: " + ids));
         }
-
-        return result;
     }
 
     @NonNull
@@ -102,4 +105,8 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
         return this.completions;
     }
 
+    @Override
+    public List<ArgumentType<?>> getClientCompletionArgumentType() {
+        return ImmutableList.of(Constants.Command.RESOURCE_LOCATION_TYPE);
+    }
 }

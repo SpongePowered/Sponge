@@ -32,7 +32,6 @@ import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
-import org.spongepowered.common.util.Constants;
 
 public abstract class ArgumentCommandTreeBuilder<T extends CommandTreeBuilder<T>>
         extends AbstractCommandTreeBuilder<T, CommandNode<CommandSource>> {

@@ -33,14 +33,21 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.WorldAccessor;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
@@ -52,6 +59,7 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.io.File;
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -67,6 +75,7 @@ public class SpongeCommand {
 
     private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", TypeTokens.PLUGIN_CONTAINER_TOKEN);
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", TypeTokens.COMMAND_MAPPING);
+    private final Parameter.Key<WorldProperties> worldPropertiesKey = Parameter.key("world", TypeTokens.WORLD_PROPERTIES_TOKEN);
 
     @Nullable private TextComponent versionText = null;
 
@@ -77,6 +86,9 @@ public class SpongeCommand {
                 .setShortDescription(TextComponent.of("Audit mixin classes for implementation"))
                 .setExecutor(this::auditSubcommandExecutor)
                 .build();
+
+        // /sponge chunks
+        final Command.Parameterized chunksCommand = this.chunksSubcommand();
 
         // /sponge heap
         final Command.Parameterized heapCommand = Command.builder()
@@ -137,6 +149,7 @@ public class SpongeCommand {
                 .setPermission("sponge.command.root")
                 .setExecutor(this::rootCommand)
                 .child(auditCommand, "audit")
+                .child(chunksCommand, "chunks")
                 .child(heapCommand, "heap")
                 .child(pluginsCommand, "plugins")
                 .child(timingsCommand, "timings")
@@ -174,6 +187,51 @@ public class SpongeCommand {
         SpongeCommon.getLogger().info("Starting Mixin Audit");
         Launcher.getInstance().auditMixins();
         return CommandResult.success();
+    }
+
+    private Command.Parameterized chunksSubcommand() {
+        final Command.Parameterized globalCommand = Command.builder()
+                .setExecutor(context -> {
+                    for (final ServerWorld world : SpongeCommon.getGame().getServer().getWorldManager().getWorlds()) {
+                        context.sendMessage(TextComponent.builder("World ")
+                                        .append(TextComponent.of(world.getKey().toString(), Style.of(TextDecoration.BOLD)))
+                                        .append(this.getChunksInfo(world))
+                                        .build());
+                    }
+                    return CommandResult.success();
+                })
+                .build();
+        final Command.Parameterized worldCommand = Command.builder()
+                .parameter(Parameter.worldProperties().setKey(this.worldPropertiesKey).build())
+                .setExecutor(context -> {
+                    final WorldProperties properties = context.requireOne(this.worldPropertiesKey);
+                    final ServerWorld world = properties.getWorld()
+                            .orElseThrow(() -> new CommandException(TextComponent.of("The world " + properties.getKey().toString() + " is not loaded!")));
+                    context.sendMessage(TextComponent.builder("World ")
+                            .append(TextComponent.of(world.getKey().toString(), Style.of(TextDecoration.BOLD)))
+                            .append(this.getChunksInfo(world))
+                            .build());
+                    return CommandResult.success();
+                })
+                .build();
+        final Parameter.Key<Boolean> dumpAllKey = Parameter.key("dumpAll", TypeTokens.BOOLEAN_TOKEN);
+        final Command.Parameterized dumpCommand = Command.builder()
+                .parameter(Parameter.literal(Boolean.class, true, "all").optional().setKey(dumpAllKey).build())
+                .setExecutor(context -> {
+                    final File file = new File(new File(new File("."), "chunk-dumps"),
+                            "chunk-info-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.txt");
+                    context.sendMessage(TextComponent.of("Writing chunk info to: " + file.getAbsolutePath()));
+                    // ChunkSaveHelper.writeChunks(file, context.hasAny(dumpAllKey));
+                    context.sendMessage(TextComponent.of("Chunk info complete"));
+                    return CommandResult.success();
+                })
+                .build();
+        return Command.builder()
+                .child(globalCommand, "global")
+                .child(worldCommand, "world")
+                .child(dumpCommand, "dump")
+                .setPermission("sponge.command.chunk")
+                .build();
     }
 
     @NonNull
@@ -370,6 +428,29 @@ public class SpongeCommand {
     }
 
     // --
+
+    protected TextComponent getChunksInfo(final ServerWorld worldserver) {
+        if (((WorldBridge) worldserver).bridge$isFake() || worldserver.getWorldStorage().getWorldProperties() == null) {
+            return TextComponent.builder().append(TextComponent.newline(), TextComponent.of("Fake world")).build();
+        }
+        return TextComponent.builder().append(TextComponent.newline(), TextComponent.of("chunk stuff here")).build();
+        /*
+                key("DimensionId: "), value(((WorldServerBridge) worldserver).bridge$getDimensionId()), TextComponent.newline(),
+                key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), TextComponent.newline(),
+                key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), TextComponent.newline(),
+                key("Entities: "), value(worldserver.loadedEntityList.size()), TextComponent.newline(),
+                key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), TextComponent.newline(),
+                key("Removed Entities:"), value(((WorldAccessor) worldserver).accessor$getUnloadedEntityList().size()), TextComponent.newline(),
+                key("Removed Tile Entities: "), value(((WorldAccessor) worldserver).accessor$getTileEntitiesToBeRemoved()), TextComponent.newline()*/
+    }
+
+    protected TextComponent key(final String text) {
+        return TextComponent.of(text, NamedTextColor.GOLD);
+    }
+
+    protected TextComponent value(final String text) {
+        return TextComponent.of(text, NamedTextColor.GRAY);
+    }
 
     private TextComponent title(final String title) {
         return TextComponent.of(title, NamedTextColor.GREEN);

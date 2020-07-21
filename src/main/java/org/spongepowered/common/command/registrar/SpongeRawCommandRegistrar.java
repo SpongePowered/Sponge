@@ -33,21 +33,24 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
+import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * For use with {@link org.spongepowered.api.command.Command}
- *
- * <p>Note that to simplify things for the consumer, we allow redirection from this registrar to the
- * parameterised one.</p>
+ * For use with {@link org.spongepowered.api.command.Command.Raw}
  */
 public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Command.Raw> {
 
@@ -68,9 +71,11 @@ public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Comm
 
     // TODO: Support the tree builder.
     @Override
-    LiteralArgumentBuilder<CommandSource> createNode(final String primaryAlias, final Command.Raw command) {
+    Collection<LiteralCommandNode<CommandSource>> createNode(final CommandMapping mapping, final Command.Raw command) {
         final Executor executor = new Executor(command);
-        return LiteralArgumentBuilder.<CommandSource>literal(primaryAlias)
+        final List<LiteralCommandNode<CommandSource>> result = new ArrayList<>();
+        final LiteralCommandNode<CommandSource> primary =
+                new SpongeLiteralCommandNode(LiteralArgumentBuilder.<CommandSource>literal(mapping.getPrimaryAlias())
                 .requires(x -> command.canExecute((CommandCause) x))
                 .executes(executor)
                 .then(
@@ -78,7 +83,17 @@ public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Comm
                                 .<CommandSource, String>argument(PARAMETER_NAME, new RawString(command))
                                 .executes(executor)
                                 .build()
-                );
+                ));
+        result.add(primary);
+        for (final String alias : mapping.getAllAliases()) {
+            if (!alias.equalsIgnoreCase(mapping.getPrimaryAlias())) {
+                result.add(new SpongeLiteralCommandNode(LiteralArgumentBuilder.<CommandSource>literal(mapping.getPrimaryAlias())
+                        .requires(x -> command.canExecute((CommandCause) x))
+                        .executes(executor)
+                        .redirect(primary)));
+            }
+        }
+        return result;
     }
 
     private static class Executor implements com.mojang.brigadier.Command<CommandSource> {
