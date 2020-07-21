@@ -539,6 +539,10 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         // Find a home for this somewhere...a post registries callback
         for (final net.minecraft.world.dimension.DimensionType dimensionType : net.minecraft.world.dimension.DimensionType.getAll()) {
             final ResourceLocation key = Registry.DIMENSION_TYPE.getKey(dimensionType);
+            if (!"minecraft".equals(key.getNamespace())) {
+                continue;
+            }
+            
             switch (key.getPath()) {
                 case "overworld":
                     ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType((SpongeDimensionType) DimensionTypes.OVERWORLD.get());
