@@ -24,28 +24,28 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
-
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageReceiver;
+import net.kyori.adventure.text.TextComponent;
+import org.spongepowered.api.command.exception.CommandException;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 /**
  * Pagination working with a list of values.
  */
 class ListPagination extends ActivePagination {
+
     private final List<List<Component>> pages;
 
-    public ListPagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, List<Map.Entry<Component, Integer>> lines,
+    public ListPagination(Supplier<Optional<? extends Audience>> src, PaginationCalculator calc, List<Map.Entry<Component, Integer>> lines,
             @Nullable Component title, @Nullable Component header, @Nullable Component footer, Component padding) {
         super(src, calc, title, header, footer, padding);
         List<List<Component>> pages = new ArrayList<>();
@@ -53,7 +53,7 @@ class ListPagination extends ActivePagination {
         int currentPageLines = 0;
 
         for (Map.Entry<Component, Integer> ent : lines) {
-            final boolean finiteLinesPerPage  = this.getMaxContentLinesPerPage() > 0;
+            final boolean finiteLinesPerPage = this.getMaxContentLinesPerPage() > 0;
             final boolean willExceedPageLength = ent.getValue() + currentPageLines > this.getMaxContentLinesPerPage();
             final boolean currentPageNotEmpty = currentPageLines != 0;
             final boolean spillToNextPage = finiteLinesPerPage && willExceedPageLength && currentPageNotEmpty;
@@ -84,9 +84,9 @@ class ListPagination extends ActivePagination {
         if (size == 0) {
             return ImmutableList.of();
         } else if (page < 1) {
-            throw new CommandException(t("Page %s does not exist!", page));
+            throw new CommandException(TextComponent.of(String.format("Page %s does not exist!", page)));
         } else if (page > size) {
-            throw new CommandException(t("Page %s is greater than the max of %s!", page, size));
+            throw new CommandException(TextComponent.of(String.format("Page %s is greater than the max of %s!", page, size)));
         }
         return this.pages.get(page - 1);
     }

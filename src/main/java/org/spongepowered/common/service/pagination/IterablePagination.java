@@ -24,23 +24,22 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageReceiver;
+import net.kyori.adventure.text.TextComponent;
+import org.spongepowered.api.command.exception.CommandException;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 /**
  * Pagination occurring for an iterable -- we don't know its size.
@@ -50,7 +49,7 @@ class IterablePagination extends ActivePagination {
     private final PeekingIterator<Map.Entry<Component, Integer>> countIterator;
     private int lastPage;
 
-    public IterablePagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, Iterable<Map.Entry<Component, Integer>> counts,
+    public IterablePagination(Supplier<Optional<? extends Audience>> src, PaginationCalculator calc, Iterable<Map.Entry<Component, Integer>> counts,
             @Nullable Component title, @Nullable Component header, @Nullable Component footer, Component padding) {
         super(src, calc, title, header, footer, padding);
         this.countIterator = Iterators.peekingIterator(counts.iterator());
@@ -59,15 +58,15 @@ class IterablePagination extends ActivePagination {
     @Override
     protected Iterable<Component> getLines(int page) throws CommandException {
         if (!this.countIterator.hasNext()) {
-            throw new CommandException(t("You're already at the end of the pagination list iterator."));
+            throw new CommandException(TextComponent.of("You're already at the end of the pagination list iterator."));
         }
 
         if (page < 1) {
-            throw new CommandException(t("Page %s does not exist!", page));
+            throw new CommandException(TextComponent.of("Page " + page + " does not exist!"));
         }
 
         if (page <= this.lastPage) {
-            throw new CommandException(t("You cannot go to previous pages in an iterable pagination."));
+            throw new CommandException(TextComponent.of("You cannot go to previous pages in an iterable pagination."));
         } else if (page > this.lastPage + 1) {
             this.getLines(page - 1);
         }
@@ -123,6 +122,6 @@ class IterablePagination extends ActivePagination {
 
     @Override
     public void previousPage() throws CommandException {
-        throw new CommandException(t("You cannot go to previous pages in an iterable pagination."));
+        throw new CommandException(TextComponent.of("You cannot go to previous pages in an iterable pagination."));
     }
 }

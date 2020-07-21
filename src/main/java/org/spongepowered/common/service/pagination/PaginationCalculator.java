@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.pagination;
 
 import com.google.common.annotations.VisibleForTesting;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -35,11 +36,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.loader.HeaderMode;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.util.text.TextComponentBridge;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.math.GenericMath;
 
 import java.io.IOException;
@@ -95,7 +92,7 @@ class PaginationCalculator {
         }
     }
 
-    int getLinesPerPage(MessageReceiver source) {
+    int getLinesPerPage(Audience source) {
         return this.linesPerPage;
     }
 
@@ -148,7 +145,7 @@ class PaginationCalculator {
             width = 0;
         }
         //if bolded width gets 1 added.
-        if(isBold && width > 0) {
+        if (isBold && width > 0) {
             width = width + 1;
         }
 
@@ -164,13 +161,12 @@ class PaginationCalculator {
      */
     @VisibleForTesting
     int getWidth(Component text) {
-        ITextComponent component = SpongeAdventure.vanilla(text);
-        Iterable<ITextComponent> children = ((TextComponentBridge) component).bridge$withChildren();
+        Iterable<ITextComponent> children = SpongeAdventure.asVanilla(text);
         int total = 0;
 
-        for(ITextComponent child : children) {
+        for (ITextComponent child : children) {
             PrimitiveIterator.OfInt i_it;
-            if(child instanceof StringTextComponent || child instanceof TranslationTextComponent) {
+            if (child instanceof StringTextComponent || child instanceof TranslationTextComponent) {
                 i_it = child.getUnformattedComponentText().codePoints().iterator();
             } else {
                 continue;
@@ -180,7 +176,7 @@ class PaginationCalculator {
 
             Integer cp;
             boolean newLine = false;
-            while(i_it.hasNext()){
+            while (i_it.hasNext()) {
                 cp = i_it.next();
                 if (cp == '\n') {
                     // if the previous character is a '\n'
@@ -232,7 +228,7 @@ class PaginationCalculator {
         final TextComponent.Builder output = TextComponent.builder();
 
         //Using 0 width unicode symbols as padding throws us into an unending loop, replace them with the default padding
-        if(paddingLength < 1) {
+        if (paddingLength < 1) {
             padding = TextComponent.of("=");
             styledPadding = this.withStyle(padding, text);
             paddingLength = this.getWidth(styledPadding);
@@ -242,7 +238,7 @@ class PaginationCalculator {
         if (inputLength == 0) {
             this.addPadding(padding, output, GenericMath.floor((double) LINE_WIDTH / paddingLength));
         } else {
-            if(addSpaces) {
+            if (addSpaces) {
                 text = textWithSpaces;
                 inputLength = this.getWidth(textWithSpaces);
             }
@@ -292,7 +288,7 @@ class PaginationCalculator {
      * @param build The work in progress text builder
      * @return The finalized, properly styled text.
      */
-    private Component finalizeBuilder(Component text,TextComponent.Builder build) {
+    private Component finalizeBuilder(Component text, TextComponent.Builder build) {
         return build.style(text.style()).build();
     }
 

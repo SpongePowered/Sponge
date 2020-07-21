@@ -24,23 +24,22 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
-
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.api.command.exception.CommandException;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 /**
  * Holds logic for an active pagination that is occurring.
@@ -50,7 +49,7 @@ abstract class ActivePagination {
     private static final Component SLASH_TEXT = TextComponent.of("/");
     private static final Component DIVIDER_TEXT = TextComponent.space();
     private static final Component CONTINUATION_TEXT = TextComponent.of("...");
-    private final Supplier<Optional<MessageReceiver>> src;
+    private final Supplier<Optional<? extends Audience>> src;
     private final UUID id = UUID.randomUUID();
     private final Component nextPageText;
     private final Component prevPageText;
@@ -65,7 +64,7 @@ abstract class ActivePagination {
     protected final PaginationCalculator calc;
     private final Component padding;
 
-    public ActivePagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, @Nullable Component title,
+    public ActivePagination(Supplier<Optional<? extends Audience>> src, PaginationCalculator calc, @Nullable Component title,
             @Nullable Component header, @Nullable Component footer, Component padding) {
         this.src = src;
         this.calc = calc;
@@ -76,16 +75,16 @@ abstract class ActivePagination {
         this.nextPageText = TextComponent.builder("»")
                 .color(NamedTextColor.BLUE)
                 .decoration(TextDecoration.UNDERLINED, true)
-                .clickEvent(ClickEvent.runCommand("/pagination " + this.id.toString() + " next"))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("/page next")))
-                .insertion("/page next")
+                .clickEvent(ClickEvent.runCommand("/sponge:pagination " + this.id.toString() + " next"))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("/sponge:page next")))
+                .insertion("/sponge:page next")
                 .build();
         this.prevPageText = TextComponent.builder("«")
                 .color(NamedTextColor.BLUE)
                 .decoration(TextDecoration.UNDERLINED, true)
-                .clickEvent(ClickEvent.runCommand("/pagination " + this.id.toString() + " prev"))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("/page prev")))
-                .insertion("/page prev")
+                .clickEvent(ClickEvent.runCommand("/sponge:pagination " + this.id.toString() + " prev"))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("/sponge:page prev")))
+                .insertion("/sponge:page prev")
                 .build();
         int maxContentLinesPerPage = calc.getLinesPerPage(src.get().get()) - 1;
         if (title != null) {
@@ -134,12 +133,12 @@ abstract class ActivePagination {
     }
 
     public void specificPage(int page) throws CommandException {
-        MessageReceiver src = this.src.get()
-                .orElseThrow(() -> new CommandException(t("Source for pagination %s is no longer active!", this.getId())));
+        Audience src = this.src.get()
+                .orElseThrow(() -> new CommandException(TextComponent.of("Source for pagination " + this.getId() + " is no longer active!")));
         this.currentPage = page;
 
-        List<Text> toSend = new ArrayList<>();
-        Text title = this.title;
+        List<Component> toSend = new ArrayList<>();
+        Component title = this.title;
         if (title != null) {
             toSend.add(title);
         }
@@ -147,19 +146,22 @@ abstract class ActivePagination {
             toSend.add(this.header);
         }
 
-        for (Text line : this.getLines(page)) {
+        for (Component line : this.getLines(page)) {
             toSend.add(line);
         }
 
-        Text footer = this.calculateFooter(page);
+        Component footer = this.calculateFooter(page);
         toSend.add(this.calc.center(footer, this.padding));
         if (this.footer != null) {
             toSend.add(this.footer);
         }
-        src.sendMessages(toSend);
+
+        for (Component line : toSend) {
+            src.sendMessage(line);
+        }
     }
 
-    protected Text calculateFooter(int currentPage) {
+    protected Component calculateFooter(int currentPage) {
         boolean hasPrevious = this.hasPrevious(currentPage);
         boolean hasNext = this.hasNext(currentPage);
 
@@ -174,16 +176,16 @@ abstract class ActivePagination {
         if (totalPages > 1) {
             ret.append(TextComponent.builder()
                     .content(String.valueOf(currentPage))
-                    .clickEvent(ClickEvent.runCommand("/pagination " + this.id + ' ' + currentPage))
-                    .hoverEvent(HoverEvent.showText(TextComponent.of("/page " + currentPage)))
-                    .insertion("/page " + currentPage)
+                    .clickEvent(ClickEvent.runCommand("/sponge:pagination " + this.id + ' ' + currentPage))
+                    .hoverEvent(HoverEvent.showText(TextComponent.of("/sponge:page " + currentPage)))
+                    .insertion("/sponge:page " + currentPage)
                     .build());
             ret.append(SLASH_TEXT);
             ret.append(TextComponent.builder()
                     .content(String.valueOf(currentPage))
-                    .clickEvent(ClickEvent.runCommand("/pagination " + this.id + ' ' + totalPages))
-                    .hoverEvent(HoverEvent.showText(TextComponent.of("/page " + totalPages)))
-                    .insertion("/page " + totalPages)
+                    .clickEvent(ClickEvent.runCommand("/sponge:pagination " + this.id + ' ' + totalPages))
+                    .hoverEvent(HoverEvent.showText(TextComponent.of("/sponge:page " + totalPages)))
+                    .insertion("/sponge:page " + totalPages)
                     .build());
             needsDiv = true;
         }
@@ -199,9 +201,9 @@ abstract class ActivePagination {
             ret.append(TextComponent.of("»"));
         }
 
-        ret.color(this.padding.getColor());
+        ret.color(this.padding.color());
         if (this.title != null) {
-            ret.style(this.title.getStyle());
+            ret.style(this.title.style());
         }
         return ret.build();
     }
