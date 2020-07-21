@@ -220,7 +220,7 @@ public class SpongeCommand {
         );
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
-            context.sendMessage(TextComponent.of("Sending refresh event to" + pluginContainer.get().getMetadata().getId() + ", please wait...")), );
+            context.sendMessage(TextComponent.of("Sending refresh event to" + pluginContainer.get().getMetadata().getId() + ", please wait..."));
             ((SpongeEventManager) SpongeCommon.getGame().getEventManager()).post(event, pluginContainer.get());
         } else {
             context.sendMessage(TextComponent.of("Sending refresh event to all plugins, please wait..."));

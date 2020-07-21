@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.storage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonParseException;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.KeyedValue;
@@ -37,6 +36,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -57,11 +57,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.GameRules_RuleValueAccessor;
-import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
@@ -113,7 +111,6 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow public abstract int shadow$getWanderingTraderSpawnDelay();
     @Shadow public abstract void shadow$setWanderingTraderSpawnDelay(int delay);
     @Shadow public abstract void shadow$setWanderingTraderId(UUID uniqueId);
-    @Shadow public abstract String shadow$getWorldName();
     @Shadow public abstract boolean shadow$isRaining();
     @Shadow public abstract void shadow$setRaining(boolean state);
     @Shadow public abstract int shadow$getRainTime();
@@ -124,10 +121,10 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow public abstract void shadow$setThunderTime(int time);
     @Shadow public abstract void shadow$setClearWeatherTime(int time);
     @Shadow public abstract int shadow$getClearWeatherTime();
-
+    
     @Override
-    public String getDirectoryName() {
-        return this.shadow$getWorldName();
+    public ResourceKey getKey() {
+        return ((ResourceKeyBridge) this).bridge$getKey();
     }
 
     @Override
@@ -137,7 +134,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public void setSpawnPosition(Vector3i position) {
-        checkNotNull(position);
+        Preconditions.checkNotNull(position);
         this.shadow$setSpawn(VecHelper.toBlockPos(position));
     }
 
@@ -148,7 +145,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public void setGeneratorType(final GeneratorType type) {
-        checkNotNull(type);
+        Preconditions.checkNotNull(type);
         this.shadow$setGenerator((WorldType) type);
     }
 
@@ -328,19 +325,13 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public WorldBorder getWorldBorder() {
-        // TODO Minecraft 1.14 - Fetch the WorldBorder if a live world instance, return a dummy if it isn't?
-        throw new MissingImplementationException("WorldInfoMixin_API", "getWorldBorder");
-    }
-
-    @Override
     public SerializationBehavior getSerializationBehavior() {
         return ((WorldInfoBridge) this).bridge$getSerializationBehavior();
     }
 
     @Override
     public void setSerializationBehavior(SerializationBehavior behavior) {
-        ((WorldInfoBridge) this).bridge$setSerializationBehavior(checkNotNull(behavior));
+        ((WorldInfoBridge) this).bridge$setSerializationBehavior(Preconditions.checkNotNull(behavior));
     }
 
     @Intrinsic
@@ -371,17 +362,6 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Override
     public void setWanderingTrader(@Nullable WanderingTrader trader) {
         this.shadow$setWanderingTraderId(trader == null ? null : trader.getUniqueId());
-    }
-
-    @Override
-    public List<KeyedValue<BossBar>> getCustomBossBars() {
-        // TODO 1.14 - Fetch the boss bars if a live world instance, return dummies if they aren't?
-        return null;
-    }
-
-    @Override
-    public void setCustomBossBars(@Nullable List<KeyedValue<BossBar>> bars) {
-
     }
 
     @Override
@@ -486,15 +466,5 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         }
 
         return apiRules;
-    }
-
-    @Override
-    public int getViewDistance() {
-        throw new MissingImplementationException("WorldInfoMixin_API", "getViewDistance");
-    }
-
-    @Override
-    public void setViewDistance(int viewDistance) {
-        throw new MissingImplementationException("WorldInfoMixin_API", "setViewDistance");
     }
 }

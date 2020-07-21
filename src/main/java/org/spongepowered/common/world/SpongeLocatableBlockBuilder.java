@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.google.common.base.Preconditions;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -40,14 +40,13 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 
-public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBlock> implements LocatableBlock.Builder {
+public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBlock> implements LocatableBlock.Builder {
 
     Supplier<? extends BlockState> blockState;
+    Supplier<? extends ResourceKey> world;
     Supplier<? extends Vector3i> position;
-    Supplier<? extends UUID> worldId;
     Supplier<? extends WeakReference<ServerWorld>> worldReference;
 
 
@@ -57,24 +56,24 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
 
     @Override
     public SpongeLocatableBlockBuilder state(final BlockState blockState) {
-        checkNotNull(blockState, "BlockState cannot be null!");
+        Preconditions.checkNotNull(blockState, "BlockState cannot be null!");
         this.blockState = () -> blockState;
         return this;
     }
 
     @Override
     public SpongeLocatableBlockBuilder location(final ServerLocation location) {
-        checkNotNull(location, "LocationBridge cannot be null!");
+        Preconditions.checkNotNull(location, "LocationBridge cannot be null!");
         this.blockState = location::getBlock;
         this.position = location::getBlockPosition;
-        this.worldId = () -> location.getWorld().getProperties().getUniqueId();
+        this.world = () -> location.getWorld().getProperties().getKey();
         this.worldReference = () -> new WeakReference<>(location.getWorld());
         return this;
     }
 
     @Override
     public SpongeLocatableBlockBuilder position(final Vector3i position) {
-        checkNotNull(position, "Position cannot be null!");
+        Preconditions.checkNotNull(position, "Position cannot be null!");
         this.position = () -> position;
         return this;
     }
@@ -88,34 +87,34 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
 
     @Override
     public SpongeLocatableBlockBuilder world(final ServerWorld world) {
-        checkNotNull(world, "World cannot be null!");
+        Preconditions.checkNotNull(world, "World cannot be null!");
         final WeakReference<ServerWorld> reference = new WeakReference<>(world);
         this.worldReference = () -> reference;
-        this.worldId = () -> this.worldReference.get().get().getProperties().getUniqueId();
+        this.world = () -> this.worldReference.get().get().getProperties().getKey();
         return this;
     }
 
     @Override
     public SpongeLocatableBlockBuilder from(final LocatableBlock value) {
-        checkNotNull(value, "LocatableBlock cannot be null!");
+        Preconditions.checkNotNull(value, "LocatableBlock cannot be null!");
         this.position = value::getBlockPosition;
-        this.worldId = () -> value.getServerLocation().getWorld().getProperties().getUniqueId();
+        this.world = () -> value.getServerLocation().getWorld().getProperties().getKey();
         this.worldReference = () -> new WeakReference<>(value.getServerLocation().getWorld());
         return this;
     }
 
     @Override
     public LocatableBlock build() {
-        checkNotNull(this.position, "Position cannot be null!");
-        checkNotNull(this.worldId, "World UUID cannot be null!");
-        checkNotNull(this.worldReference, "World reference cannot be null!");
+        Preconditions.checkNotNull(this.position, "Position cannot be null!");
+        Preconditions.checkNotNull(this.world, "World UUID cannot be null!");
+        Preconditions.checkNotNull(this.worldReference, "World reference cannot be null!");
         throw new UnsupportedOperationException("implement me");
     }
 
     @Override
     public SpongeLocatableBlockBuilder reset() {
         this.position = null;
-        this.worldId = null;
+        this.world = null;
         this.worldReference = null;
         this.blockState = null;
         return this;
@@ -123,6 +122,8 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
 
     @Override
     protected Optional<LocatableBlock> buildContent(final DataView container) throws InvalidDataException {
+        final ResourceKey worldKey = container.getKey(Queries.WORLD_KEY)
+            .orElseThrow(() -> new InvalidDataException("Could not locate a world key"));
         final int x = container.getInt(Queries.POSITION_X)
                 .orElseThrow(() -> new InvalidDataException("Could not locate an \"x\" coordinate in the container!"));
         final int y = container.getInt(Queries.POSITION_Y)
@@ -131,9 +132,7 @@ public class SpongeLocatableBlockBuilder extends AbstractDataBuilder<LocatableBl
                 .orElseThrow(() -> new InvalidDataException("Could not locate an \"z\" coordinate in the container!"));
         final BlockState blockState = container.getCatalogType(Constants.Block.BLOCK_STATE, BlockState.class)
                 .orElseThrow(() -> new InvalidDataException("Could not locate a BlockState"));
-        final UUID worldId = container.getObject(Queries.WORLD_ID, UUID.class)
-                .orElseThrow(() -> new InvalidDataException("Could not locate a UUID"));
-        return Sponge.getServer().getWorldManager().getWorld(worldId)
+        return Sponge.getServer().getWorldManager().getWorld(worldKey)
                 .map(world -> new SpongeLocatableBlockBuilder()
                         .position(x, y, z)
                         .world(world)

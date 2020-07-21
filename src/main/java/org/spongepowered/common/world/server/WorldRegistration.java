@@ -24,27 +24,27 @@
  */
 package org.spongepowered.common.world.server;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Preconditions;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 
 public final class WorldRegistration {
 
-    private final String directoryName;
+    private final ResourceKey key;
     private final DimensionType dimensionType;
     private WorldSettings defaultSettings;
 
-    public WorldRegistration(String directoryName, DimensionType dimensionType, @Nullable WorldSettings defaultSettings) {
-        this.directoryName = checkNotNull(directoryName);
-        this.dimensionType = checkNotNull(dimensionType);
+    public WorldRegistration(final ResourceKey key, final DimensionType dimensionType, @Nullable final WorldSettings defaultSettings) {
+        this.key = Preconditions.checkNotNull(key);
+        this.dimensionType = Preconditions.checkNotNull(dimensionType);
         this.defaultSettings = defaultSettings;
     }
 
-    public String getDirectoryName() {
-        return this.directoryName;
+    public ResourceKey getKey() {
+        return this.key;
     }
 
     public DimensionType getDimensionType() {
@@ -68,18 +68,19 @@ public final class WorldRegistration {
             return false;
         }
         final WorldRegistration that = (WorldRegistration) o;
-        return this.directoryName.equals(that.directoryName);
+        return this.key.equals(that.key);
     }
 
     @Override
     public int hashCode() {
-        return this.directoryName.hashCode();
+        return this.key.hashCode();
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("directoryName", this.directoryName)
+            .add("key", this.key)
+            .add("dimensionType", this.dimensionType)
             .toString();
     }
 }

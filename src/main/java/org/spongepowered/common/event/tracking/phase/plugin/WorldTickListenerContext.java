@@ -57,7 +57,7 @@ public class WorldTickListenerContext extends ListenerPhaseContext<WorldTickList
         final String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent);
         if (!((WorldBridge) this.getWorld()).bridge$isFake()) {
-            printer.add(s + "- %s: %s", "TickingWorld", ((ServerWorld) this.getWorld()).getProperties().getDirectoryName());
+            printer.add(s + "- %s: %s", "TickingWorld", ((ServerWorld) this.getWorld()).getProperties().getKey());
         } else {
             printer.add(s + "- %s: %s", "Ticking World", "Pseudo Fake World?" + this.tickingWorld);
         }

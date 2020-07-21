@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.inventory.api.common.entity.player;
 
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,13 +34,13 @@ import org.spongepowered.common.entity.player.SpongeUserInventory;
 import java.util.Optional;
 
 @Mixin(value = SpongeUserInventory.class, remap = false)
-public abstract class SpongeUserInventoryMixin_Carried_Inventory_API implements CarriedInventory<Player> {
+public abstract class SpongeUserInventoryMixin_Carried_Inventory_API implements CarriedInventory<ServerPlayer> {
 
     @Shadow public SpongeUser user;
 
     @Override
-    public Optional<Player> getCarrier() {
-        return Optional.ofNullable((Player) this.user);
+    public Optional<ServerPlayer> getCarrier() {
+        return this.user.getPlayer();
     }
 
 }

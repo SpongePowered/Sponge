@@ -181,7 +181,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
                 boolean isTeleporting = true;
                 boolean isChangingDimension = false;
-                if (location.getWorld().getProperties().getUniqueId() != ((World) this.shadow$getEntityWorld()).getUniqueId()) {
+                if (!location.getWorld().getKey().equals(((org.spongepowered.api.world.server.ServerWorld) this.shadow$getEntityWorld()).getKey())) {
                     if ((Entity) (Object) this instanceof ServerPlayerEntity) {
                         // Close open containers
                         final ServerPlayerEntity entityPlayerMP = (ServerPlayerEntity) (Object) this;
@@ -230,7 +230,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 if (isTeleporting || isChangingDimension) {
                     // Re-attach passengers
                     for (final Entity passenger : passengers) {
-                        if (((World) passenger.getEntityWorld()).getUniqueId() != ((World) this.shadow$getEntityWorld()).getUniqueId()) {
+                        if (!((org.spongepowered.api.world.server.ServerWorld) passenger.getEntityWorld()).getKey().equals(((org.spongepowered.api.world.server.ServerWorld) this.shadow$getEntityWorld()).getKey())) {
                             ((org.spongepowered.api.entity.Entity) passenger).setLocation(location);
                         }
                         passenger.startRiding((Entity) (Object) this, true);
@@ -452,7 +452,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
                 .set(Constants.Entity.CLASS, this.getClass().getName())
-                .set(Queries.WORLD_ID, this.getWorld().getUniqueId().toString())
+                .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.getWorld()).getKey().getFormatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, transform.getPosition().getX())
                 .set(Queries.POSITION_Y, transform.getPosition().getY())

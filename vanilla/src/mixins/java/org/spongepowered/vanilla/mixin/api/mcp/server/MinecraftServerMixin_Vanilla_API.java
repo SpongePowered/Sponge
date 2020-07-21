@@ -52,7 +52,7 @@ public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer 
         YggdrasilAuthenticationService p_i50590_5_, MinecraftSessionService p_i50590_6_, GameProfileRepository p_i50590_7_,
         PlayerProfileCache p_i50590_8_, IChunkStatusListenerFactory p_i50590_9_, String p_i50590_10_, CallbackInfo ci) {
 
-        this.vanilla_api$worldManager = new VanillaWorldManager(this);
+        this.vanilla_api$worldManager = new VanillaWorldManager((MinecraftServer) (Object) this);
     }
 
     @Override

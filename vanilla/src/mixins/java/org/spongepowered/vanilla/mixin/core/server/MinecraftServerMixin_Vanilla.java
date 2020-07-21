@@ -25,15 +25,27 @@
 package org.spongepowered.vanilla.mixin.core.server;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
+import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.vanilla.VanillaServer;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
+
+    @Redirect(method = "loadWorlds",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/PlayerList;func_212504_a(Lnet/minecraft/world/server/ServerWorld;)V"))
+    private void impl$onSaveHandlerBeingSetToPlayerList(final PlayerList playerList, final ServerWorld p_212504_1_) {
+        playerList.func_212504_a(p_212504_1_);
+        ((SpongeUserManager) this.getUserManager()).init();
+    }
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
     private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {

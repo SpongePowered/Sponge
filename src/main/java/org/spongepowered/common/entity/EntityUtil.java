@@ -75,6 +75,7 @@ import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
@@ -517,33 +518,31 @@ public final class EntityUtil {
 
         final Map<String, String> portalAgents =
             ((WorldInfoBridge) fromWorld.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getPortalAgents();
-        final String worldName;
+        final ResourceKey worldKey;
 
         // Check if we're to use a different teleporter for this world
         if (teleporter.getClass().getName().equals("net.minecraft.world.Teleporter")) {
-            final ResourceKey key = ((DimensionTypeBridge) toWorld.dimension.getType()).bridge$getKey();
-            worldName = portalAgents.get("minecraft:default_" + key.getValue().toLowerCase(Locale.ENGLISH));
+            final ResourceKey key = ((ResourceKeyBridge) toWorld.dimension.getType()).bridge$getKey();
+            worldKey = ResourceKey.resolve(portalAgents.get("minecraft:default_" + key.getValue().toLowerCase(Locale.ENGLISH)));
         } else {
-            worldName = portalAgents.get("minecraft:" + teleporter.getClass().getSimpleName());
+            worldKey = ResourceKey.resolve(portalAgents.get("minecraft:" + teleporter.getClass().getSimpleName()));
         }
 
-        if (worldName != null) {
-            for (final WorldProperties properties : Sponge.getServer().getWorldManager().getAllProperties()) {
-                if (properties.getDirectoryName().equalsIgnoreCase(worldName)) {
-                    Optional<org.spongepowered.api.world.server.ServerWorld> spongeWorld;
-                    try {
-                        spongeWorld = Sponge.getServer().getWorldManager().loadWorld(properties).join();
-                    } catch (IOException e) {
-                        SpongeCommon.getLogger().error("Error while loading target world " + worldName, e);
-                        spongeWorld = Optional.empty();
-                    }
-                    if (spongeWorld.isPresent()) {
-                        toWorld = (ServerWorld) spongeWorld.get();
-                        teleporter = (ForgeITeleporterBridge) toWorld.getDefaultTeleporter();
-                        if (teleporter instanceof TeleporterBridge) {
-                            if (!((fromWorld.dimension.isNether() || toWorld.dimension.isNether()))) {
-                                ((TeleporterBridge) teleporter).bridge$setNetherPortalType(false);
-                            }
+        for (final WorldProperties properties : Sponge.getServer().getWorldManager().getAllProperties()) {
+            if (properties.getKey().equals(worldKey)) {
+                Optional<org.spongepowered.api.world.server.ServerWorld> spongeWorld;
+                try {
+                    spongeWorld = Sponge.getServer().getWorldManager().loadWorld(properties).join();
+                } catch (IOException e) {
+                    SpongeCommon.getLogger().error("Error while loading target world '" + worldKey + "'!", e);
+                    spongeWorld = Optional.empty();
+                }
+                if (spongeWorld.isPresent()) {
+                    toWorld = (ServerWorld) spongeWorld.get();
+                    teleporter = (ForgeITeleporterBridge) toWorld.getDefaultTeleporter();
+                    if (teleporter instanceof TeleporterBridge) {
+                        if (!((fromWorld.dimension.isNether() || toWorld.dimension.isNether()))) {
+                            ((TeleporterBridge) teleporter).bridge$setNetherPortalType(false);
                         }
                     }
                 }

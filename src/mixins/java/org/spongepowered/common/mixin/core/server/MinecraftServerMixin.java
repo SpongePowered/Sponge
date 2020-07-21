@@ -33,7 +33,6 @@ import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Final;
@@ -41,18 +40,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
-import org.spongepowered.common.user.SpongeUserManager;
 
 import java.net.URISyntaxException;
 
@@ -88,23 +83,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         }
     }
 
-
-
-//    /**
-//     * @author Zidane - Minecraft 1.14.4
-//     * @reason Sponge rewrites the method to use the Sponge {@link WorldManager} to load worlds,
-//     * migrating old worlds, upgrading worlds to our standard, and configuration loading.
-//     */
-//    @Overwrite
-//    public void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions) {
-//        SpongeCommon.getWorldManager().loadAllWorlds((MinecraftServer) (Object) this, directoryName, levelName, seed, type, generatorOptions);
-//    }
-
-//    @Inject(method = "loadInitialChunks", at = @At("HEAD"), cancellable = true)
-//    private void impl$cancelLoadInitialChunks(IChunkStatusListener p_213186_1_, CallbackInfo ci) {
-//        ci.cancel();
-//    }
-
     @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )
     private void impl$createSpongeResourcePackWrapper(final String url, final String hash, final CallbackInfo ci) {
         if (url.length() == 0) {
@@ -136,14 +114,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Inject(method = "tick", at = @At(value = "HEAD"))
     private void impl$onServerTickStart(final CallbackInfo ci) {
         TimingsManager.FULL_SERVER_TICK.startTiming();
-    }
-
-    @Redirect(method = "loadWorlds",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/server/management/PlayerList;func_212504_a(Lnet/minecraft/world/server/ServerWorld;)V"))
-    private void impl$onSaveHandlerBeingSetToPlayerList(final PlayerList playerList, final ServerWorld p_212504_1_) {
-        playerList.func_212504_a(p_212504_1_);
-        ((SpongeUserManager) ((Server) this).getUserManager()).init();
     }
 
     @Override

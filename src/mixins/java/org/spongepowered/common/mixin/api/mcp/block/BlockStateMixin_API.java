@@ -90,7 +90,7 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
                 .blockState((net.minecraft.block.BlockState) (Object) this)
                 .position(location.getBlockPosition())
-                .worldId(location.getWorld().getProperties().getUniqueId());
+                .world(location.getWorld().getKey());
         if (this.shadow$getBlock().hasTileEntity() && location.getBlock().getType().equals(this.shadow$getBlock())) {
             final BlockEntity tileEntity = location.getBlockEntity()
                     .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));

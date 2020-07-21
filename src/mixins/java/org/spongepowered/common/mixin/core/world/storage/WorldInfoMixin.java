@@ -41,13 +41,14 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
+import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -55,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
@@ -62,6 +64,7 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.WorldCategory;
 import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.registry.builtin.vanilla.DimensionTypeSupplier;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
@@ -72,7 +75,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(WorldInfo.class)
-public abstract class WorldInfoMixin implements WorldInfoBridge {
+public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBridge {
 
     @Shadow private String levelName;
     @Shadow private Difficulty difficulty;
@@ -86,10 +89,12 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Shadow public abstract Difficulty shadow$getDifficulty();
     @Shadow public abstract void shadow$populateFromWorldSettings(WorldSettings p_176127_1_);
 
+    @Nullable private ResourceKey impl$key;
     @Nullable private DimensionType impl$dimensionType;
-    @Nullable private SpongeDimensionType impl$logicType;
-    @Nullable private UUID impl$uniqueId;
-    @Nullable private SpongeConfig<WorldConfig> impl$configAdapter;
+
+    private UUID impl$uniqueId;
+    private SpongeDimensionType impl$logicType;
+    private SpongeConfig<WorldConfig> impl$configAdapter;
     private boolean impl$enabled;
     private boolean impl$pvp;
     private boolean impl$loadOnStartup;
@@ -107,7 +112,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     private boolean impl$isConstructing = false;
 
     @Redirect(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;populateFromWorldSettings(Lnet/minecraft/world/WorldSettings;)V"))
-    private void impl$setupBeforeSettingsPopulation(WorldInfo info, WorldSettings settings, String levelName) {
+    private void impl$setupBeforeSettingsPopulation(WorldInfo info, WorldSettings settings, WorldSettings settingsB, String levelName) {
         this.levelName = levelName;
         this.impl$isConstructing = true;
 
@@ -125,6 +130,16 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         }
 
         ((WorldSettingsBridge) (Object) settings).bridge$populateInfo((WorldInfo) (Object) this);
+    }
+
+    @Override
+    public ResourceKey bridge$getKey() {
+        return this.impl$key;
+    }
+
+    @Override
+    public void bridge$setKey(final ResourceKey key) {
+        this.impl$key = key;
     }
 
     @Override
@@ -152,7 +167,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     public boolean bridge$isValid() {
         final String levelName = this.shadow$getWorldName();
 
-        return !(levelName == null || levelName.equals("") || levelName.equals("MpServer") || levelName.equals("sponge$dummy_world"));
+        return this.impl$key != null && this.impl$dimensionType != null && !(levelName == null || levelName.equals("") || levelName.equals("MpServer") || levelName.equals("sponge$dummy_world"));
     }
 
     @Override
@@ -189,7 +204,7 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         this.impl$hasCustomDifficulty = true;
         this.difficulty = newDifficulty;
 
-        this.bridge$updatePlayersForDifficulty();
+        //this.bridge$updatePlayersForDifficulty();
     }
 
     @Override
@@ -225,11 +240,6 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
-    public void bridge$setUniqueId(final UUID uniqueId) {
-        this.impl$uniqueId = uniqueId;
-    }
-
-    @Override
     public boolean bridge$isEnabled() {
         return this.impl$enabled;
     }
@@ -247,11 +257,6 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     @Override
     public void bridge$setPVPEnabled(boolean state) {
         this.impl$pvp = state;
-    }
-
-    @Override
-    public UUID bridge$getUniqueId() {
-        return this.impl$uniqueId;
     }
 
     @Override
@@ -365,22 +370,17 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
-    public void bridge$writeSpongeLevelData(CompoundNBT compound) {
-
-        if (!this.bridge$isValid() || this.impl$uniqueId == null) {
+    public void bridge$writeSpongeLevelData(final CompoundNBT compound) {
+        if (!this.bridge$isValid()) {
             return;
         }
 
         final CompoundNBT spongeDataCompound = new CompoundNBT();
         spongeDataCompound.putInt(Constants.Sponge.DATA_VERSION, Constants.Sponge.SPONGE_DATA_VERSION);
-        spongeDataCompound.putUniqueId(Constants.UUID, this.impl$uniqueId);
-        if (this.impl$dimensionType != null) {
-            spongeDataCompound.putInt(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionType.getId());
-        }
-        if (this.impl$logicType != null) {
-            spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE,
-                ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType().getKey().toString());
-        }
+        spongeDataCompound.putString(Constants.Sponge.World.KEY, this.impl$key.getFormatted());
+        spongeDataCompound.putInt(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionType.getId());
+        spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE, this.impl$logicType.getKey().toString());
+        spongeDataCompound.putUniqueId(Constants.Sponge.World.UNIQUE_ID, this.impl$uniqueId);
         spongeDataCompound.putBoolean(Constants.World.GENERATE_BONUS_CHEST, this.impl$generateBonusChest);
         if (this.impl$portalAgentType == null) {
             this.impl$portalAgentType = PortalAgentTypes.DEFAULT.get();
@@ -409,7 +409,8 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
     }
 
     @Override
-    public void bridge$readSpongeLevelData(CompoundNBT compound) {
+    public void bridge$readSpongeLevelData(final CompoundNBT compound) {
+
         if (!compound.contains(Constants.Sponge.SPONGE_DATA)) {
             // TODO 1.14 - Bad Sponge level data...warn/crash?
             return;
@@ -418,6 +419,11 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         // TODO 1.14 - Run DataFixer on the SpongeData compound
 
         final CompoundNBT spongeDataCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
+
+        if (!spongeDataCompound.contains(Constants.Sponge.World.KEY)) {
+            // TODO 1.14 - Bad Sponge level data...warn/crash?
+            return;
+        }
 
         if (!spongeDataCompound.contains(Constants.Sponge.World.DIMENSION_ID)) {
             // TODO 1.14 - Bad Sponge level data...warn/crash?
@@ -429,9 +435,17 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
             return;
         }
 
+        // Ha ha, Vanilla!
+        this.impl$dimensionType = DimensionType.getById(spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID) + 1);
+        final String rawDimensionType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
+        this.impl$logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.spongepowered.api.world.dimension
+                .DimensionType.class, ResourceKey.resolve(rawDimensionType)).orElseGet(() -> {
+                SpongeCommon.getLogger().warn("WorldProperties '{}' specifies dimension type '{}' which does not exist, defaulting to '{}'",
+                    this.shadow$getWorldName(), rawDimensionType, DimensionTypes.OVERWORLD.get().getKey());
+
+                return DimensionTypes.OVERWORLD.get();
+        });
         this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
-        this.impl$dimensionType = net.minecraft.world.dimension.DimensionType.getById(spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID));
-        this.impl$logicType = ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType();
         this.impl$generateBonusChest = spongeDataCompound.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
         // TODO - Zidane.
 //        this.impl$portalAgentType = PortalAgentRegistryModule.getInstance()
@@ -465,28 +479,10 @@ public abstract class WorldInfoMixin implements WorldInfoBridge {
         }
     }
 
-    /**
-     * @reason Some mods set a null levelName, which is incompatible with Sponge's policy
-     * of never returning null from our API. Since this method has the same deobfuscated
-     * name as an API method, I'm choosing to overwrite it to keep development and production
-     * consistent. If we end up breaking mods because of this, we'll probably need to switch
-     * to using a wrapepr type for WorldInfo
-     *
-     * @author Aaron1011 - August 9th, 2018
-     */
-    @Overwrite
-    public String getWorldName() {
-        if (this.levelName == null) {
-            this.levelName = "";
-        }
-        return this.levelName;
-    }
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("directoryName", this.shadow$getWorldName())
-            .add("uniqueId", this.impl$uniqueId)
+            .add("key", this.impl$key)
             .add("dimensionType", this.impl$logicType)
             .add("generator", this.shadow$getGenerator())
             .add("modCreated", this.impl$modCreated)

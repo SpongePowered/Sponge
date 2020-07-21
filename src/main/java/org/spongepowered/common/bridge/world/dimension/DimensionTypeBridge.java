@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.world.dimension;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface DimensionTypeBridge {
@@ -32,8 +31,4 @@ public interface DimensionTypeBridge {
     SpongeDimensionType bridge$getSpongeDimensionType();
 
     void bridge$setSpongeDimensionType(SpongeDimensionType dimensionType);
-
-    default ResourceKey bridge$getKey() {
-        return this.bridge$getSpongeDimensionType().getKey();
-    }
 }

@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -45,24 +46,23 @@ import org.spongepowered.math.vector.Vector3i;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class SpongeLocatableBlock implements LocatableBlock {
+public final class SpongeLocatableBlock implements LocatableBlock {
 
     private final BlockState blockState;
+    private final ResourceKey world;
     private final Vector3i position;
-    private final UUID worldId;
-    private final WeakReference<ServerWorld> worldReference;
+    private final WeakReference<ServerWorld> worldRef;
     @Nullable private ServerLocation location;
 
     SpongeLocatableBlock(SpongeLocatableBlockBuilder builder) {
         this.blockState = checkNotNull(builder.blockState.get(), "blockstate");
         this.position = checkNotNull(builder.position.get(), "position");
-        this.worldId = checkNotNull(builder.worldId.get(), "worldid");
-        this.worldReference = checkNotNull(builder.worldReference.get(), "reference");
+        this.world = checkNotNull(builder.world.get(), "world");
+        this.worldRef = checkNotNull(builder.worldReference.get(), "reference");
     }
 
     @Override
@@ -73,7 +73,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     @Override
     public ServerLocation getLocation() {
         if (this.location == null) {
-            this.location = ServerLocation.of(this.worldReference.get(), this.position);
+            this.location = ServerLocation.of(this.worldRef.get(), this.position);
         }
         return this.location;
     }
@@ -87,7 +87,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, 1)
-                .set(Queries.WORLD_ID, this.worldId)
+                .set(Queries.WORLD_KEY, this.world)
                 .set(Queries.POSITION_X, this.position.getX())
                 .set(Queries.POSITION_Y, this.position.getY())
                 .set(Queries.POSITION_Z, this.position.getZ())
@@ -161,15 +161,6 @@ public class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("blockState", this.blockState)
-                .add("position", this.position)
-                .add("worldReference", this.worldReference.get() == null ? "null" : this.worldReference.get().getProperties().getDirectoryName())
-                .toString();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -177,15 +168,23 @@ public class SpongeLocatableBlock implements LocatableBlock {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        SpongeLocatableBlock that = (SpongeLocatableBlock) o;
+        final SpongeLocatableBlock that = (SpongeLocatableBlock) o;
         return Objects.equal(this.blockState, that.blockState) &&
                Objects.equal(this.position, that.position) &&
-               Objects.equal(this.worldId, that.worldId) &&
-               Objects.equal(this.worldReference, that.worldReference);
+               Objects.equal(this.world, that.world);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.blockState, this.position, this.worldId, this.worldReference);
+        return Objects.hashCode(this.blockState, this.position, this.world);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("blockState", this.blockState)
+            .add("world", this.world)
+            .add("position", this.position)
+            .toString();
     }
 }

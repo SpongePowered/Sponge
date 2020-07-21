@@ -41,6 +41,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameRules;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
@@ -279,6 +280,7 @@ public final class Constants {
             public static final String LEVEL_SPONGE_DAT_OLD = "level_sponge.dat_old";
             public static final String LEVEL_SPONGE_DAT_NEW = "level_sponge.dat_new";
             public static final String UNIQUE_ID = "UUID";
+            public static final String KEY = "Key";
         }
 
         public static final class Schematic {
@@ -423,7 +425,7 @@ public final class Constants {
         public static final EnumSet<net.minecraft.util.Direction> NOTIFY_DIRECTION_SET = EnumSet
             .of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN,
                 net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
-        public static final UUID INVALID_WORLD_UUID = java.util.UUID.fromString("00000000-0000-0000-0000-000000000000");
+        public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
         public static final int DEFAULT_CHUNK_UNLOAD_DELAY = 15000;
         public static final int MAX_CHUNK_UNLOADS = 100;
         public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";

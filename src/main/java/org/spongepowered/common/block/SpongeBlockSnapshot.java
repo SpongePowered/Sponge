@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
@@ -55,10 +55,10 @@ import java.util.UUID;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
-public class SpongeBlockSnapshot implements BlockSnapshot {
+public final class SpongeBlockSnapshot implements BlockSnapshot {
 
     private final BlockState blockState;
-    private final UUID worldUniqueId;
+    private final ResourceKey worldKey;
     private final Vector3i pos;
     @Nullable final CompoundNBT compound;
     // Internal use only
@@ -68,9 +68,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public BlockChange blockChange; // used for post event
 
     SpongeBlockSnapshot(final SpongeBlockSnapshotBuilder builder) {
-        this.blockState = checkNotNull(builder.blockState, "The block state was null!");
-        this.worldUniqueId = checkNotNull(builder.worldUuid, "The world UUID was null");
-        this.pos = checkNotNull(builder.coords);
+        this.blockState = Preconditions.checkNotNull(builder.blockState);
+        this.worldKey = Preconditions.checkNotNull(builder.worldKey);
+        this.pos = Preconditions.checkNotNull(builder.coordinates);
         this.blockPos = VecHelper.toBlockPos(this.pos);
         this.compound = builder.compound;
         this.changeFlag = builder.flag;
@@ -92,8 +92,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public UUID getWorldUniqueId() {
-        return this.worldUniqueId;
+    public ResourceKey getWorld() {
+        return this.worldKey;
     }
 
     @Override
@@ -221,7 +221,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState(this.blockState)
             .position(this.pos)
-            .worldId(this.worldUniqueId);
+            .world(this.worldKey);
         if (this.compound != null) {
             builder.unsafeNbt(this.compound);
         }
@@ -239,15 +239,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("worldUniqueId", this.worldUniqueId)
-                .add("position", this.pos)
-                .add("blockState", this.blockState)
-                .toString();
-    }
-
-    @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -257,7 +248,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
         final SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;
         return this.changeFlag == that.changeFlag &&
-               Objects.equal(this.worldUniqueId, that.worldUniqueId) &&
+               Objects.equal(this.worldKey, that.worldKey) &&
                Objects.equal(this.pos, that.pos) &&
                Objects.equal(this.compound, that.compound);
     }
@@ -266,10 +257,18 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public int hashCode() {
         return Objects
             .hashCode(this.blockState,
-                this.worldUniqueId,
+                this.worldKey,
                 this.pos,
                 this.changeFlag,
                 this.compound);
     }
 
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("world", this.worldKey)
+            .add("position", this.pos)
+            .add("blockState", this.blockState)
+            .toString();
+    }
 }

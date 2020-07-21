@@ -33,6 +33,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -66,7 +67,7 @@ public final class SpongePlayerDataManager {
 
     public void load() {
         try {
-            this.playersDirectory = this.server.getWorldManager().getSavesDirectory().resolve("data").resolve(SPONGE_DATA);
+            this.playersDirectory = ((SpongeWorldManager) this.server.getWorldManager()).getSavesDirectory().resolve("data").resolve(SPONGE_DATA);
             Files.createDirectories(this.playersDirectory);
 
             final List<Path> playerFiles = new ArrayList<>();

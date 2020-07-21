@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.entity.player;
 
 import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.RespawnLocation;
 
 import java.util.Map;
@@ -32,9 +33,9 @@ import java.util.UUID;
 
 public interface BedLocationHolderBridge {
 
-    boolean bridge$setBedLocations(Map<UUID, RespawnLocation> value);
+    boolean bridge$setBedLocations(Map<ResourceKey, RespawnLocation> value);
 
-    Map<UUID, RespawnLocation> bridge$getBedlocations();
+    Map<ResourceKey, RespawnLocation> bridge$getBedlocations();
 
-    ImmutableMap<UUID, RespawnLocation> bridge$removeAllBeds();
+    ImmutableMap<ResourceKey, RespawnLocation> bridge$removeAllBeds();
 }

@@ -662,7 +662,7 @@ public final class TrackingUtil {
         if (!worldServer.isPresent()) {
             // Emit a log warning about a missing world
             final String transactionForLogging = MoreObjects.toStringHelper("Transaction")
-                .add("World", oldBlockSnapshot.getWorldUniqueId())
+                .add("World", oldBlockSnapshot.getWorld())
                 .add("Position", oldBlockSnapshot.getBlockPos())
                 .add("Original State", oldBlockSnapshot.getState())
                 .add("Changed State", newBlockSnapshot.getState())

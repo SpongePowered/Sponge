@@ -37,7 +37,6 @@ import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentPars
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class SpongeWorldPropertiesValueParameter extends CatalogedArgumentParser<WorldProperties> {
@@ -53,8 +52,7 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getDirectoryName)
-                .collect(Collectors.toList());
+        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getKey).map(ResourceKey::getFormatted).collect(Collectors.toList());
     }
 
     @Override
@@ -76,11 +74,9 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
 
     static Optional<WorldProperties> getWorldProperties(final String name) {
         try {
-            final UUID uuid = UUID.fromString(name);
-            return SpongeCommon.getGame().getServer().getWorldManager().getProperties(uuid);
+            return SpongeCommon.getGame().getServer().getWorldManager().getProperties(ResourceKey.resolve(name));
         } catch (final Exception ignored) {
-            return SpongeCommon.getGame().getServer().getWorldManager().getProperties(name);
+            return Optional.empty();
         }
     }
-
 }

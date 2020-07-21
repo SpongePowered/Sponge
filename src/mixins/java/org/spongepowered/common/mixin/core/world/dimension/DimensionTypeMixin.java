@@ -32,11 +32,13 @@ import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 
 import net.minecraft.world.dimension.DimensionType;
@@ -48,12 +50,12 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import javax.annotation.Nullable;
 
 @Mixin(DimensionType.class)
-public abstract class DimensionTypeMixin implements DimensionTypeBridge {
+public abstract class DimensionTypeMixin implements DimensionTypeBridge, ResourceKeyBridge {
 
     @Nullable private SpongeDimensionType impl$spongeDimensionType;
 
     @Inject(method = "register", at = @At("RETURN"))
-    private static void impl$setupBridgeFields(String id, final DimensionType dimensionType, CallbackInfoReturnable<DimensionType> cir) {
+    private static void impl$setupBridgeFields(final String id, final DimensionType dimensionType, final CallbackInfoReturnable<DimensionType> cir) {
         // Commence hackery to get the dimension class this type is meant to make
         // TODO Minecraft 1.14 - Yeah this isn't going to work, too early.
 //        final MinecraftServer server = SpongeCommon.getServer();
@@ -81,5 +83,10 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
     @Override
     public void bridge$setSpongeDimensionType(SpongeDimensionType dimensionType) {
         this.impl$spongeDimensionType = dimensionType;
+    }
+
+    @Override
+    public ResourceKey bridge$getKey() {
+        return this.bridge$getSpongeDimensionType().getKey();
     }
 }

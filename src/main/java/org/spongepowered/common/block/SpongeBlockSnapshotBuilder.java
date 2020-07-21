@@ -24,12 +24,10 @@
  */
 package org.spongepowered.common.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
-
+import com.google.common.base.Preconditions;
 import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator;
@@ -73,10 +71,10 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     }
 
     BlockState blockState;
-    UUID worldUuid;
-    @Nullable UUID creatorUuid;
-    @Nullable UUID notifierUuid;
-    Vector3i coords;
+    ResourceKey worldKey;
+    @Nullable UUID creatorUniqueId;
+    @Nullable UUID notifierUniqueId;
+    Vector3i coordinates;
     @Nullable List<DataManipulator.Immutable> manipulators;
     @Nullable CompoundNBT compound;
     SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
@@ -90,30 +88,30 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshotBuilder world(final WorldProperties worldProperties) {
-        this.worldUuid = checkNotNull(worldProperties).getUniqueId();
+        this.worldKey = Preconditions.checkNotNull(worldProperties).getKey();
         return this;
     }
 
-    public SpongeBlockSnapshotBuilder worldId(final UUID worldUuid) {
-        this.worldUuid = checkNotNull(worldUuid);
+    public SpongeBlockSnapshotBuilder world(final ResourceKey key) {
+        this.worldKey = Preconditions.checkNotNull(key);
         return this;
     }
 
     @Override
     public SpongeBlockSnapshotBuilder blockState(final BlockState blockState) {
-        this.blockState = checkNotNull(blockState);
+        this.blockState = Preconditions.checkNotNull(blockState);
         return this;
     }
 
     public SpongeBlockSnapshotBuilder blockState(final net.minecraft.block.BlockState blockState) {
-        this.blockState = checkNotNull((BlockState) blockState);
+        this.blockState = Preconditions.checkNotNull((BlockState) blockState);
         return this;
     }
 
 
     @Override
     public SpongeBlockSnapshotBuilder position(final Vector3i position) {
-        this.coords = checkNotNull(position);
+        this.coordinates = Preconditions.checkNotNull(position);
         if (this.compound != null) {
             this.compound.putInt(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X, position.getX());
             this.compound.putInt(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y, position.getY());
@@ -134,14 +132,14 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshotBuilder notifier(final UUID uuid) {
-        this.notifierUuid = uuid;
+        this.notifierUniqueId = uuid;
         return this;
     }
 
     @Override
     public BlockSnapshot empty() {
         return SpongeBlockSnapshotBuilder.pooled()
-                .worldId(Constants.World.INVALID_WORLD_UUID)
+                .world(Constants.World.INVALID_WORLD_KEY)
                 .position(new Vector3i(0, 0, 0))
                 .blockState(Blocks.AIR.getDefaultState())
                 .build();
@@ -166,24 +164,24 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     @Override
     public SpongeBlockSnapshotBuilder from(final BlockSnapshot holder) {
         this.blockState = holder.getState();
-        this.worldUuid = holder.getWorldUniqueId();
+        this.worldKey = holder.getWorld();
         if (holder.getCreator().isPresent()) {
-            this.creatorUuid = holder.getCreator().get();
+            this.creatorUniqueId = holder.getCreator().get();
         }
         if (holder.getNotifier().isPresent()) {
-            this.notifierUuid = holder.getNotifier().get();
+            this.notifierUniqueId = holder.getNotifier().get();
         }
-        this.coords = holder.getPosition();
+        this.coordinates = holder.getPosition();
         return this;
     }
 
     @Override
     public SpongeBlockSnapshotBuilder reset() {
         this.blockState = (BlockState) Blocks.AIR.getDefaultState();
-        this.worldUuid = null;
-        this.creatorUuid = null;
-        this.notifierUuid = null;
-        this.coords = null;
+        this.worldKey = Constants.World.INVALID_WORLD_KEY;
+        this.creatorUniqueId = null;
+        this.notifierUniqueId = null;
+        this.coordinates = null;
         this.manipulators = null;
         this.compound = null;
         this.flag = null;
@@ -192,7 +190,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshot build() {
-        checkState(this.blockState != null);
+        Preconditions.checkState(this.blockState != null);
         final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this);
         this.reset();
         if (this.pooled) {
@@ -203,13 +201,13 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     protected Optional<BlockSnapshot> buildContent(final DataView container) throws InvalidDataException {
-        if (!container.contains(Constants.Block.BLOCK_STATE, Queries.WORLD_ID, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
+        if (!container.contains(Constants.Block.BLOCK_STATE, Queries.WORLD_KEY, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
             return Optional.empty();
         }
-        checkDataExists(container, Constants.Block.BLOCK_STATE);
-        checkDataExists(container, Queries.WORLD_ID);
+        DataUtil.checkDataExists(container, Constants.Block.BLOCK_STATE);
+        DataUtil.checkDataExists(container, Queries.WORLD_KEY);
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
-        final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
+        final ResourceKey worldKey = container.getKey(Queries.WORLD_KEY).get();
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         final Optional<String> creatorUuid = container.getString(Queries.CREATOR_ID);
         final Optional<String> notifierUuid = container.getString(Queries.NOTIFIER_ID);
@@ -217,9 +215,12 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         // We now reconstruct the custom data and all extra data.
         final BlockState blockState = container.getSerializable(Constants.Block.BLOCK_STATE, BlockState.class).get();
 
-        builder.blockState(blockState)
-                .position(coordinate)
-                .worldId(worldUuid);
+        builder
+            .blockState(blockState)
+            .world(worldKey)
+            .position(coordinate)
+        ;
+
         creatorUuid.ifPresent(s -> builder.creator(UUID.fromString(s)));
         notifierUuid.ifPresent(s -> builder.notifier(UUID.fromString(s)));
         container.getView(Constants.Sponge.UNSAFE_NBT)

@@ -166,7 +166,7 @@ public abstract class BlockTransaction {
             if (!maybeWorld.isPresent()) {
                 // Emit a log warning about a missing world
                 final String transactionForLogging = MoreObjects.toStringHelper("Tile Added")
-                    .add("World", this.addedSnapshot.getWorldUniqueId())
+                    .add("World", this.addedSnapshot.getWorld())
                     .add("Position", this.addedSnapshot.getBlockPos())
                     .add("Original State", this.addedSnapshot.getState())
                     .add("Tile Entity", this.added)
@@ -245,7 +245,7 @@ public abstract class BlockTransaction {
             if (!maybeWorld.isPresent()) {
                 // Emit a log warning about a missing world
                 final String transactionForLogging = MoreObjects.toStringHelper("Tile Removed")
-                    .add("World", this.tileSnapshot.getWorldUniqueId())
+                    .add("World", this.tileSnapshot.getWorld())
                     .add("Position", this.tileSnapshot.getBlockPos())
                     .add("Original State", this.tileSnapshot.getState())
                     .add("Tile Entity", this.removed)
@@ -422,7 +422,7 @@ public abstract class BlockTransaction {
             if (!maybeWorld.isPresent()) {
                 // Emit a log warning about a missing world
                 final String transactionForLogging = MoreObjects.toStringHelper("Transaction")
-                    .add("World", this.original.getWorldUniqueId())
+                    .add("World", this.original.getWorld())
                     .add("Position", this.original.getBlockPos())
                     .add("Original State", this.original.getState())
                     .add("Changed State", this.newState)
@@ -536,7 +536,7 @@ public abstract class BlockTransaction {
         @Override
         public String toString() {
             return MoreObjects.toStringHelper(this)
-                .add("world", ((org.spongepowered.api.world.server.ServerWorld) this.worldBridge).getProperties().getDirectoryName())
+                .add("world", ((org.spongepowered.api.world.server.ServerWorld) this.worldBridge).getProperties().getKey())
                 .add("notifyState", this.notifyState)
                 .add("notifyPos", this.notifyPos)
                 .add("sourceBlock", this.sourceBlock)

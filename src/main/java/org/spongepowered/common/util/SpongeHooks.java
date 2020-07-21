@@ -45,6 +45,7 @@ import net.minecraft.world.dimension.DimensionType;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
@@ -415,9 +416,9 @@ public final class SpongeHooks {
     }
 
     public static SpongeConfig<? extends GeneralConfigBase> getOrLoadConfigAdapter(@Nullable final Path dimensionPath, @Nullable
-    final String worldDirectory) {
-        if (worldDirectory != null) {
-            final org.spongepowered.api.world.server.ServerWorld apiWorld = SpongeCommon.getGame().getServer().getWorldManager().getWorld(worldDirectory)
+    final ResourceKey worldKey) {
+        if (worldKey != null) {
+            final org.spongepowered.api.world.server.ServerWorld apiWorld = SpongeCommon.getGame().getServer().getWorldManager().getWorld(worldKey)
                     .orElse(null);
             if (apiWorld != null) {
                 return ((WorldInfoBridge) apiWorld.getProperties()).bridge$getConfigAdapter();
@@ -433,9 +434,10 @@ public final class SpongeHooks {
         final SpongeConfig<DimensionConfig> dimensionConfigAdapter = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimensionPath
             .resolve("dimension.conf"), SpongeCommon.ECOSYSTEM_ID, SpongeCommon.getGlobalConfigAdapter(), false);
 
-        if (worldDirectory != null) {
-            return new SpongeConfig<>(SpongeConfig.Type.WORLD, dimensionPath.resolve(worldDirectory).resolve("world.conf"), SpongeCommon.ECOSYSTEM_ID,
-                dimensionConfigAdapter, false);
+        if (worldKey != null) {
+            // TODO Minecraft 1.14 - Should drill it down by namespace zml..
+            return new SpongeConfig<>(SpongeConfig.Type.WORLD, dimensionPath.resolve(worldKey.getValue()).resolve("world.conf"),
+                SpongeCommon.ECOSYSTEM_ID, dimensionConfigAdapter, false);
         }
 
         return dimensionConfigAdapter;

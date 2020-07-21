@@ -25,11 +25,16 @@
 package org.spongepowered.vanilla.accessor.world.storage;
 
 import com.mojang.datafixers.DataFixer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.storage.SaveFormat;
+import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.nio.file.Path;
+
+import javax.annotation.Nullable;
 
 @Mixin(SaveFormat.class)
 public interface SaveFormatAccessor_Vanilla {
@@ -37,4 +42,8 @@ public interface SaveFormatAccessor_Vanilla {
     @Accessor("savesDir") Path accessor$getSavesDir();
 
     @Accessor("dataFixer") DataFixer accessor$getDataFixer();
+
+    @Invoker("func_215783_a") static SaveHandler accessor$func_215783_a(Path parentDirectory, DataFixer dataFixer, String worldDirectory, @Nullable MinecraftServer server) {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
 }

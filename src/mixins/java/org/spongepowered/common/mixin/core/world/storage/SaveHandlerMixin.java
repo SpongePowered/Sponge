@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.storage.SaveHandlerBridge;
 import org.spongepowered.common.SpongeServer;
@@ -96,7 +97,6 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
             ((WorldInfoBridge) info).bridge$writeSpongeLevelData(spongeLevelCompound);
 
             final DimensionType dimensionType = ((WorldInfoBridge) info).bridge$getDimensionType();
-            final ResourceLocation dimensionTypeKey = DimensionType.getKey(dimensionType);
 
             // If the returned compound is empty then we should warn the user.
             if (spongeLevelCompound.isEmpty()) {
@@ -106,8 +106,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
-                        .add("UUID: ", ((WorldInfoBridge) info).bridge$getUniqueId())
-                        .add("World: '%s'/%s", dimensionTypeKey.getPath(), dimensionType.getId())
+                        .add("World: %s", ((ResourceKeyBridge) info).bridge$getKey())
                         .add("Is Mod Created: ", ((WorldInfoBridge) info).bridge$isModCreated())
                         .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
                         .add()
@@ -133,8 +132,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
                         .add()
                         .add("The following information may be useful in debugging:")
                         .add()
-                        .add("UUID: ", ((WorldInfoBridge) info).bridge$getUniqueId())
-                        .add("World: '%s'/%s", dimensionTypeKey.getPath(), dimensionType.getId())
+                        .add("World: %s", ((ResourceKeyBridge) info).bridge$getKey())
                         .add("Is Mod Created: ", ((WorldInfoBridge) info).bridge$isModCreated())
                         .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
                         .add()
@@ -305,8 +303,8 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
         try (final FileInputStream stream = new FileInputStream(file)) {
             compound = CompressedStreamTools.readCompressed(stream);
         } catch (Exception ex) {
-            PrettyPrinter errorPrinter = new PrettyPrinter()
-                    .add("Unable to load level data from world [%s] for file [%s]!", info.getWorldName(), file.getName())
+            final PrettyPrinter errorPrinter = new PrettyPrinter()
+                    .add("Unable to load level data from world '%s' for file [%s]!", ((ResourceKeyBridge) info).bridge$getKey(), file.getName())
                     .centre()
                     .hr();
             // We can't read it - but let's copy the file so we can ask for it to inspect what it looks like later.

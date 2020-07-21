@@ -63,7 +63,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getDirectoryName).collect(Collectors.toList());
+        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getKey).map(ResourceKey::getFormatted).collect(Collectors.toList());
     }
 
     @Override
@@ -75,7 +75,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
         final String name = reader.parseString();
         final ServerWorld world =
                 SpongeWorldPropertiesValueParameter.getWorldProperties(name)
-                        .flatMap(x -> SpongeCommon.getGame().getServer().getWorldManager().getWorld(x.getDirectoryName()))
+                        .flatMap(x -> SpongeCommon.getGame().getServer().getWorldManager().getWorld(x.getKey()))
                         .orElseThrow(() -> reader.createException(TextComponent.of("Could not get world with name \"" + name + "\"")));
 
         try {

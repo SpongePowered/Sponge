@@ -381,7 +381,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.reset();
         builder.blockState(state)
-                .worldId(((WorldProperties) this.world.getWorldInfo()).getUniqueId())
+                .world(((WorldProperties) this.world.getWorldInfo()).getKey())
                 .position(VecHelper.toVector3i(pos));
         final Optional<UUID> creator = ((ChunkBridge) this).bridge$getBlockCreatorUUID(pos);
         final Optional<UUID> notifier = ((ChunkBridge) this).bridge$getBlockNotifierUUID(pos);

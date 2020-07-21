@@ -81,7 +81,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Queries.WORLD_ID, ((ServerWorld) this.world).getProperties().getUniqueId().toString())
+            .set(Queries.WORLD_KEY, ((ServerWorld) this.world).getKey())
             .set(Queries.POSITION_X, this.shadow$getPos().getX())
             .set(Queries.POSITION_Y, this.shadow$getPos().getY())
             .set(Queries.POSITION_Z, this.shadow$getPos().getZ())
@@ -99,7 +99,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
 
     @Override
     public boolean validateRawData(final DataView container) {
-        return container.contains(Queries.WORLD_ID)
+        return container.contains(Queries.WORLD_KEY)
             && container.contains(Queries.POSITION_X)
             && container.contains(Queries.POSITION_Y)
             && container.contains(Queries.POSITION_Z)

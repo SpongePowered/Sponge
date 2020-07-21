@@ -26,6 +26,7 @@ package org.spongepowered.common.data.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -38,7 +39,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-@SuppressWarnings({"UnstableApiUsage"})
 public final class DataUtil {
 
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
@@ -49,18 +49,19 @@ public final class DataUtil {
     }
 
     public static ServerLocation getLocation(final DataView view, final boolean castToInt) {
-        final UUID worldUuid = UUID.fromString(view.getString(Queries.WORLD_ID).orElseThrow(dataNotFound()));
+        final ResourceKey world = view.getKey(Queries.WORLD_KEY).orElseThrow(dataNotFound());
         final double x = view.getDouble(Queries.POSITION_X).orElseThrow(dataNotFound());
         final double y = view.getDouble(Queries.POSITION_Y).orElseThrow(dataNotFound());
         final double z = view.getDouble(Queries.POSITION_Z).orElseThrow(dataNotFound());
         if (castToInt) {
-            return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), (int) x, (int) y, (int) z);
+            return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(world).orElseThrow(dataNotFound()), (int) x, (int) y
+                , (int) z);
         }
-        return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(worldUuid).orElseThrow(dataNotFound()), x, y, z);
+        return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(world).orElseThrow(dataNotFound()), x, y, z);
     }
 
     public static Vector3i getPosition3i(final DataView view) {
-        checkDataExists(view, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
+        DataUtil.checkDataExists(view, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
         final DataView internal = view.getView(Constants.Sponge.SNAPSHOT_WORLD_POSITION).orElseThrow(dataNotFound());
         final int x = internal.getInt(Queries.POSITION_X).orElseThrow(dataNotFound());
         final int y = internal.getInt(Queries.POSITION_Y).orElseThrow(dataNotFound());
@@ -71,6 +72,4 @@ public final class DataUtil {
     private static Supplier<InvalidDataException> dataNotFound() {
         return () -> new InvalidDataException("not found");
     }
-
-
 }
