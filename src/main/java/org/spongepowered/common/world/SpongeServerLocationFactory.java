@@ -33,11 +33,11 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 
-public class SpongeServerLocationFactory implements ServerLocation.Factory {
+public final class SpongeServerLocationFactory implements ServerLocation.Factory {
 
     public static final SpongeServerLocationFactory INSTANCE = new SpongeServerLocationFactory();
 
-    private SpongeServerLocationFactory() { }
+    private SpongeServerLocationFactory() {}
 
     @Override
     public ServerLocation create(ServerWorld world, Vector3d position) {

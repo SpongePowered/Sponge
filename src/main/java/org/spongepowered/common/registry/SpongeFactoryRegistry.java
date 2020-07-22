@@ -95,19 +95,18 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
     public void registerDefaultFactories() {
         this
             .registerFactory(Audiences.Factory.class, new AudienceFactory())
-            .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory());
-
-        this
-            .registerFactory(TimingsFactory.class, SpongeTimingsFactory.INSTANCE)
             .registerFactory(AdvancementCriterion.Factory.class, SpongeAdvancementCriterionFactory.INSTANCE)
-            .registerFactory(ResourcePack.Factory.class, SpongeResourcePackFactory.INSTANCE)
             .registerFactory(CommandCause.Factory.class, SpongeCommandCauseFactory.INSTANCE)
-            .registerFactory(Parameter.Value.Factory.class, SpongeParameterValueFactory.INSTANCE)
             .registerFactory(CommandTreeBuilder.RootNodeFactory.class, SpongeRootCommandTreeBuilderFactory.INSTANCE)
-            .registerFactory(VariableValueParameters.Factory.class, SpongeVariableValueParameterBuilderFactory.INSTANCE)
             .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
-            .registerFactory(Transform.Factory.class, SpongeTransformFactory.INSTANCE);
-        this.registerFactory(ServerLocation.Factory.class, SpongeServerLocationFactory.INSTANCE);
+            .registerFactory(Parameter.Value.Factory.class, SpongeParameterValueFactory.INSTANCE)
+            .registerFactory(ResourcePack.Factory.class, SpongeResourcePackFactory.INSTANCE)
+            .registerFactory(ServerLocation.Factory.class, SpongeServerLocationFactory.INSTANCE)
+            .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
+            .registerFactory(TimingsFactory.class, SpongeTimingsFactory.INSTANCE)
+            .registerFactory(Transform.Factory.class, SpongeTransformFactory.INSTANCE)
+            .registerFactory(VariableValueParameters.Factory.class, SpongeVariableValueParameterBuilderFactory.INSTANCE)
+        ;
     }
 
 }

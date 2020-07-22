@@ -64,7 +64,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
-public class SpongeServerLocation extends SpongeLocation<ServerWorld> implements ServerLocation {
+public final class SpongeServerLocation extends SpongeLocation<ServerWorld> implements ServerLocation {
 
     SpongeServerLocation(final ServerWorld world, final ChunkLayout chunkLayout, final Vector3d position) {
         super(world, chunkLayout, position);
@@ -145,22 +145,22 @@ public class SpongeServerLocation extends SpongeLocation<ServerWorld> implements
 
     @Override
     public <T> T map(final BiFunction<ServerWorld, Vector3d, T> mapper) {
-        throw new MissingImplementationException("Nope", "map");
+        throw new MissingImplementationException("ServerLocation", "map");
     }
 
     @Override
     public <T> T mapBlock(final BiFunction<ServerWorld, Vector3i, T> mapper) {
-        throw new MissingImplementationException("Nope", "mapBlock");
+        throw new MissingImplementationException("ServerLocation", "mapBlock");
     }
 
     @Override
     public <T> T mapChunk(final BiFunction<ServerWorld, Vector3i, T> mapper) {
-        throw new MissingImplementationException("Nope", "mapChunk");
+        throw new MissingImplementationException("ServerLocation", "mapChunk");
     }
 
     @Override
     public <T> T mapBiome(final BiFunction<ServerWorld, Vector3i, T> mapper) {
-        throw new MissingImplementationException("Nope", "mapBiome");
+        throw new MissingImplementationException("ServerLocation", "mapBiome");
     }
 
     @Override
@@ -208,24 +208,24 @@ public class SpongeServerLocation extends SpongeLocation<ServerWorld> implements
 
     @Override
     public ScheduledUpdate<BlockType> scheduleBlockUpdate(final int delay, final TemporalUnit temporalUnit) {
-        throw new MissingImplementationException("Nope", "scheduleBlockUpdate");
+        throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
     }
 
     @Override
     public ScheduledUpdate<BlockType> scheduleBlockUpdate(final int delay, final TemporalUnit temporalUnit,
         final TaskPriority priority
     ) {
-        throw new MissingImplementationException("Nope", "scheduleBlockUpdate");
+        throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
     }
 
     @Override
     public ScheduledUpdate<BlockType> scheduleBlockUpdate(final Duration delay) {
-        throw new MissingImplementationException("Nope", "scheduleBlockUpdate");
+        throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
     }
 
     @Override
     public ScheduledUpdate<BlockType> scheduleBlockUpdate(final Duration delay, final TaskPriority priority) {
-        throw new MissingImplementationException("Nope", "scheduleBlockUpdate");
+        throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
     }
 
     @Override
@@ -235,23 +235,23 @@ public class SpongeServerLocation extends SpongeLocation<ServerWorld> implements
 
     @Override
     public ScheduledUpdate<FluidType> scheduleFluidUpdate(final int delay, final TemporalUnit temporalUnit) {
-        throw new MissingImplementationException("Nope", "scheduleFluidUpdate");
+        throw new MissingImplementationException("ServerLocation", "scheduleFluidUpdate");
     }
 
     @Override
     public ScheduledUpdate<FluidType> scheduleFluidUpdate(final int delay, final TemporalUnit temporalUnit,
         final TaskPriority priority) {
-        throw new MissingImplementationException("Nope", "scheduleFluidUpdate");
+        throw new MissingImplementationException("ServerLocation", "scheduleFluidUpdate");
     }
 
     @Override
     public ScheduledUpdate<FluidType> scheduleFluidUpdate(final Duration delay) {
-        throw new MissingImplementationException("Nope", "scheduleFluidUpdate");
+        throw new MissingImplementationException("ServerLocation", "scheduleFluidUpdate");
     }
 
     @Override
     public ScheduledUpdate<FluidType> scheduleFluidUpdate(final Duration delay, final TaskPriority priority) {
-        throw new MissingImplementationException("Nope", "scheduleFluidUpdate");
+        throw new MissingImplementationException("ServerLocation", "scheduleFluidUpdate");
     }
 
     @Override
