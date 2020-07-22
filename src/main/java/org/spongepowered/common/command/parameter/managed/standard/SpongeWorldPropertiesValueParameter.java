@@ -24,7 +24,13 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.TextComponent;
+import net.minecraft.command.arguments.ResourceLocationArgument;
+import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -33,7 +39,9 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +60,8 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getKey).map(ResourceKey::getFormatted).collect(Collectors.toList());
+        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getKey)
+                .map(ResourceKey::getFormatted).collect(Collectors.toList());
     }
 
     @Override
@@ -62,19 +71,29 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
-        final String name = reader.parseString();
-        final Optional<WorldProperties> worldProperties = SpongeWorldPropertiesValueParameter.getWorldProperties(name);
+        final ResourceLocation resourceLocation;
+        try {
+             resourceLocation = ResourceLocation.read((StringReader) reader);
+        } catch (final CommandSyntaxException commandSyntaxException) {
+            throw ((SpongeStringReader) reader).createException(TextComponent.of("Could not read world location"), commandSyntaxException);
+        }
+        final Optional<WorldProperties> worldProperties = SpongeWorldPropertiesValueParameter.getWorldProperties(resourceLocation);
 
         if (worldProperties.isPresent()) {
             return worldProperties;
         }
 
-        throw reader.createException(TextComponent.of("Could not find world with identifier \"" + name + "\""));
+        throw reader.createException(TextComponent.of("Could not find world with identifier \"" + resourceLocation.toString() + "\""));
     }
 
-    static Optional<WorldProperties> getWorldProperties(final String name) {
+    @Override
+    public List<ArgumentType<?>> getClientCompletionArgumentType() {
+        return ImmutableList.of(Constants.Command.RESOURCE_LOCATION_TYPE);
+    }
+
+    static Optional<WorldProperties> getWorldProperties(final ResourceLocation name) {
         try {
-            return SpongeCommon.getGame().getServer().getWorldManager().getProperties(ResourceKey.resolve(name));
+            return SpongeCommon.getGame().getServer().getWorldManager().getProperties((ResourceKey) (Object) name);
         } catch (final Exception ignored) {
             return Optional.empty();
         }

@@ -104,7 +104,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 redirect,
                 modifier,
                 forks,
-                createSuggestionProvider(valueCompleter));
+                SpongeArgumentCommandNode.createSuggestionProvider(valueCompleter));
         this.parser = parser;
         this.key = key;
     }

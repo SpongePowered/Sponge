@@ -32,6 +32,7 @@ import com.google.common.collect.Lists;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.command.arguments.NBTCompoundTagArgument;
+import net.minecraft.command.arguments.ResourceLocationArgument;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.nbt.CompoundNBT;
@@ -1328,6 +1329,7 @@ public final class Constants {
         public static final ArgumentType<?> STANDARD_STRING_ARGUMENT_TYPE = StringArgumentType.string();
         public static final ArgumentType<?> GREEDY_STRING_ARGUMENT_TYPE = StringArgumentType.greedyString();
         public static final ArgumentType<?> NBT_ARGUMENT_TYPE = NBTCompoundTagArgument.nbt();
+        public static final ResourceLocationArgument RESOURCE_LOCATION_TYPE = ResourceLocationArgument.resourceLocation();
         public static final String COMMAND_BLOCK_COMMAND = "";
         public static final String SELECTOR_COMMAND = "@";
         public static final String SPONGE_HELP_COMMAND = "sponge:help";

@@ -29,7 +29,6 @@ import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
-import org.spongepowered.api.entity.selector.ArgumentType;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;

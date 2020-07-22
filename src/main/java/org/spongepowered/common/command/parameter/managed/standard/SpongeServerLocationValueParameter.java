@@ -31,6 +31,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.arguments.Vec3Argument;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -42,6 +43,7 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
 import org.spongepowered.common.util.Constants;
 
@@ -72,11 +74,17 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
             final Parameter.@NonNull Key<? super ServerLocation> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
-        final String name = reader.parseString();
+        final ResourceLocation resourceLocation;
+        try {
+            resourceLocation = ResourceLocation.read((StringReader) reader);
+        } catch (final CommandSyntaxException commandSyntaxException) {
+            throw ((SpongeStringReader) reader).createException(TextComponent.of("Could not read world location"), commandSyntaxException);
+        }
         final ServerWorld world =
-                SpongeWorldPropertiesValueParameter.getWorldProperties(name)
+                SpongeWorldPropertiesValueParameter.getWorldProperties(resourceLocation)
                         .flatMap(x -> SpongeCommon.getGame().getServer().getWorldManager().getWorld(x.getKey()))
-                        .orElseThrow(() -> reader.createException(TextComponent.of("Could not get world with name \"" + name + "\"")));
+                        .orElseThrow(() -> reader.createException(
+                                TextComponent.of("Could not get world with name \"" + resourceLocation.toString() + "\"")));
 
         try {
             final Vec3d vec3d = VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context);
@@ -88,7 +96,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
     @Override
     public List<ArgumentType<?>> getClientCompletionArgumentType() {
-        return ImmutableList.of(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE, Vec3Argument.vec3());
+        return ImmutableList.of(Constants.Command.RESOURCE_LOCATION_TYPE, Vec3Argument.vec3());
     }
 
 }
