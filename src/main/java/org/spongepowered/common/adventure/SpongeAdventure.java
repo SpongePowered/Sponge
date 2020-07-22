@@ -96,16 +96,24 @@ public final class SpongeAdventure {
         return LegacyComponentSerializer.legacy(character).deserialize(string);
     }
 
-    public static String legacySection(final Component component) {
-        return legacy(LegacyComponentSerializer.SECTION_CHAR, component);
-    }
-
     public static String legacy(final char character, final Component component) {
         return LegacyComponentSerializer.legacy(character).serialize(component);
     }
 
+    public static String legacySection(final Component component) {
+        return LegacyComponentSerializer.legacySection().serialize(component);
+    }
+
     public static Component legacySection(final String string) {
-        return legacy(LegacyComponentSerializer.SECTION_CHAR, string);
+        return LegacyComponentSerializer.legacySection().deserialize(string);
+    }
+
+    public static String legacyAmpersand(final Component component) {
+        return LegacyComponentSerializer.legacyAmpersand().serialize(component);
+    }
+
+    public static Component legacyAmpersand(final String string) {
+        return LegacyComponentSerializer.legacyAmpersand().deserialize(string);
     }
 
     public static Component json(final String string) {

@@ -26,7 +26,6 @@ package org.spongepowered.common.registry.builtin.sponge;
 
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.command.arguments.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
@@ -100,11 +99,11 @@ public final class CatalogedValueParameterStreamGenerator {
                 StandardCatalogedArgumentParser.createConverter(
                         "text_formatting_code",
                         StringArgumentType.string(),
-                        (reader, cause, result) -> SpongeAdventure.legacy(LegacyComponentSerializer.AMPERSAND_CHAR, result)),
+                        (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)),
                 StandardCatalogedArgumentParser.createConverter(
                         "text_formatting_code_all",
                         StringArgumentType.greedyString(),
-                        (reader, cause, result) -> SpongeAdventure.legacy(LegacyComponentSerializer.AMPERSAND_CHAR, result)),
+                        (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)),
                 StandardCatalogedArgumentParser.createConverter("text_json", ComponentArgument.component(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)),
                 StandardCatalogedArgumentParser.createConverter(
                         "text_json_all",

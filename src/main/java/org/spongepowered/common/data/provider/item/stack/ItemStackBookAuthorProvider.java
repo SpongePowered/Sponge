@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -33,6 +32,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.StringNBT;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.item.ItemStackDataProvider;
 import org.spongepowered.common.util.Constants;
 
@@ -56,12 +56,12 @@ public class ItemStackBookAuthorProvider extends ItemStackDataProvider<Component
             return Optional.empty();
         }
         final String legacy = tag.getString(Constants.Item.Book.ITEM_BOOK_AUTHOR);
-        return Optional.of(LegacyComponentSerializer.legacy().deserialize(legacy));
+        return Optional.of(SpongeAdventure.legacySection(legacy));
     }
 
     @Override
     protected boolean set(final ItemStack dataHolder, final Component value) {
-        dataHolder.setTagInfo(Constants.Item.Book.ITEM_BOOK_AUTHOR, new StringNBT(LegacyComponentSerializer.legacy().serialize(value)));
+        dataHolder.setTagInfo(Constants.Item.Book.ITEM_BOOK_AUTHOR, new StringNBT(SpongeAdventure.legacySection(value)));
         return true;
     }
 }

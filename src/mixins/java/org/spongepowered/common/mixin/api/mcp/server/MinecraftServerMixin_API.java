@@ -37,7 +37,6 @@ import java.util.Collections;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.command.Commands;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
@@ -216,7 +215,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public Component getMotd() {
-        return SpongeAdventure.legacy(LegacyComponentSerializer.SECTION_CHAR, this.shadow$getMOTD());
+        return SpongeAdventure.legacySection(this.shadow$getMOTD());
     }
 
     @Override

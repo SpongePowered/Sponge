@@ -26,7 +26,6 @@ package org.spongepowered.common.scoreboard;
 
 import com.google.common.collect.Maps;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
@@ -59,7 +58,7 @@ public class SpongeObjective implements Objective {
 
     public SpongeObjective(final String name, final Criterion criterion) {
         this.name = name;
-        this.displayName = SpongeAdventure.legacy(LegacyComponentSerializer.SECTION_CHAR, name);
+        this.displayName = SpongeAdventure.legacySection(name);
         this.displayMode = ObjectiveDisplayModes.INTEGER.get();
         this.criterion = criterion;
     }
