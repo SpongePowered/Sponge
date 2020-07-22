@@ -93,7 +93,8 @@ public final class SpongePlayerDataManager {
                     }
 
                     final DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
-                    final SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
+                    // TODO Minecraft 1.14 - Data Registration in the lifecycle
+//                    final SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
 //                    this.playerDataByUniqueId.put(data.uuid, data);
                 }
             }
