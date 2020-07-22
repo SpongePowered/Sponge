@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.launch.plugin;
 
+import com.google.common.base.Preconditions;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
@@ -44,13 +45,14 @@ import java.util.ServiceLoader;
 public final class PluginLoader {
 
     private final PluginEnvironment pluginEnvironment;
-    private SpongePluginManager pluginManager;
+    private final SpongePluginManager pluginManager;
     private final Map<String, PluginLanguageService<PluginContainer>> languageServices;
     private final Map<String, List<Path>> pluginFiles;
     private final Map<PluginLanguageService<PluginContainer>, List<PluginCandidate>> pluginCandidates;
 
-    public PluginLoader(final PluginEnvironment pluginEnvironment) {
+    public PluginLoader(final PluginEnvironment pluginEnvironment, final SpongePluginManager pluginManager) {
         this.pluginEnvironment = pluginEnvironment;
+        this.pluginManager = pluginManager;
         this.languageServices = new HashMap<>();
         this.pluginFiles = new HashMap<>();
         this.pluginCandidates = new HashMap<>();
@@ -58,10 +60,6 @@ public final class PluginLoader {
 
     public PluginEnvironment getEnvironment() {
         return this.pluginEnvironment;
-    }
-
-    public void setPluginManager(final SpongePluginManager pluginManager) {
-        this.pluginManager = pluginManager;
     }
 
     public Map<String, PluginLanguageService<?>> getServices() {
@@ -116,9 +114,7 @@ public final class PluginLoader {
     }
 
     public void createPlugins() {
-        if (this.pluginManager == null) {
-            throw new RuntimeException("Attempted to create plugins before the PluginManager was created!");
-        }
+        Preconditions.checkNotNull(this.pluginManager, "Attempt made to create containers outside the game classloader!");
 
         for (final Map.Entry<PluginLanguageService<PluginContainer>, List<PluginCandidate>> languageCandidates : this.pluginCandidates.entrySet()) {
             final PluginLanguageService<PluginContainer> languageService = languageCandidates.getKey();

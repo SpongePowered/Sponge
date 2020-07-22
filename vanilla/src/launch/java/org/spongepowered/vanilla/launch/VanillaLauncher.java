@@ -39,13 +39,11 @@ import java.util.Collection;
 
 public abstract class VanillaLauncher extends Launcher {
 
-    private final PluginLoader pluginLoader;
     private final Stage injectionStage;
     private PluginContainer vanillaPlugin;
 
-    protected VanillaLauncher(final PluginLoader pluginLoader, final Stage injectionStage) {
-        super(pluginLoader.getEnvironment(), new VanillaPluginManager());
-        this.pluginLoader = pluginLoader;
+    protected VanillaLauncher(Stage injectionStage) {
+        super(new VanillaPluginManager());
         this.injectionStage = injectionStage;
     }
 
@@ -61,9 +59,12 @@ public abstract class VanillaLauncher extends Launcher {
 
     @Override
     public final void loadPlugins() {
-        this.pluginLoader.setPluginManager(this.getPluginManager());
-        this.pluginLoader.createPluginCandidates();
-        this.pluginLoader.createPlugins();
+        final PluginLoader pluginLoader = new PluginLoader(this.getPluginEnvironment(), this.getPluginManager());
+        pluginLoader.discoverLanguageServices();
+        pluginLoader.initialize();
+        pluginLoader.discoverPluginResources();
+        pluginLoader.createPluginCandidates();
+        pluginLoader.createPlugins();
     }
 
     @Override

@@ -55,9 +55,9 @@ public abstract class Launcher {
     private final List<PluginContainer> launcherPlugins;
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
 
-    protected Launcher(final PluginEnvironment pluginEnvironment, final SpongePluginManager pluginManager) {
+    protected Launcher(final SpongePluginManager pluginManager) {
         this.logger = LogManager.getLogger("Sponge");
-        this.pluginEnvironment = pluginEnvironment;
+        this.pluginEnvironment = new PluginEnvironment();
         this.pluginManager = pluginManager;
         this.launcherPlugins = new ArrayList<>();
     }
@@ -150,8 +150,16 @@ public abstract class Launcher {
         return this.launcherPlugins;
     }
 
-    protected void onLaunch(final String[] args) {
+    protected void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
+        this.populateBlackboard(pluginSpiVersion, baseDirectory, pluginDirectories);
         this.createInternalPlugins();
+    }
+
+    protected void populateBlackboard(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories) {
+        final Blackboard blackboard = this.getPluginEnvironment().getBlackboard();
+        blackboard.getOrCreate(PluginKeys.VERSION, () -> pluginSpiVersion);
+        blackboard.getOrCreate(PluginKeys.BASE_DIRECTORY, () -> baseDirectory);
+        blackboard.getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
     }
 
     private void createInternalPlugins() {

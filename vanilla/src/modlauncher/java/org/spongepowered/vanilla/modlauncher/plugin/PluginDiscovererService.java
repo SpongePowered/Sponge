@@ -34,7 +34,6 @@ import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.vanilla.launch.plugin.PluginLoader;
 import org.spongepowered.vanilla.modlauncher.Main;
 
-import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,16 +42,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 public final class PluginDiscovererService implements ITransformationService {
 
     private static final String NAME = "plugin_discoverer";
-
     private final PluginEnvironment pluginEnvironment;
-    private final PluginLoader pluginLoader;
+
+    private PluginLoader pluginLoader;
 
     public PluginDiscovererService() {
-        this.pluginEnvironment = Main.pluginEnvironment;
-        this.pluginLoader = Main.pluginLoader;
+        this.pluginEnvironment = Main.getLaunchPluginEnvironment();
     }
 
     @Nonnull
@@ -93,8 +93,9 @@ public final class PluginDiscovererService implements ITransformationService {
     @Override
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
         this.pluginEnvironment.getLogger().info("SpongePowered PLUGIN Subsystem Version={} Service=ModLauncher", this.pluginEnvironment.getBlackboard().get(PluginKeys.VERSION).get());
+        this.pluginLoader = new PluginLoader(this.pluginEnvironment, null);
         this.pluginLoader.discoverLanguageServices();
-        this.pluginLoader.getServices().forEach((k, v) -> this.pluginEnvironment.getLogger().info("Plugin language loader '{}' found.", k));
+        this.pluginLoader.getServices().forEach((k, v) -> this.pluginLoader.getEnvironment().getLogger().info("Plugin language loader '{}' found.", k));
     }
 
     @Nonnull
@@ -102,5 +103,4 @@ public final class PluginDiscovererService implements ITransformationService {
     public List<ITransformer> transformers() {
         return ImmutableList.of();
     }
-
 }
