@@ -376,9 +376,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             throw new IllegalArgumentException(String.format(
                     "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, Constants.Sponge.Schematic.MAX_SIZE));
         }
-        data.set(Constants.Sponge.Schematic.WIDTH, width);
-        data.set(Constants.Sponge.Schematic.HEIGHT, height);
-        data.set(Constants.Sponge.Schematic.LENGTH, length);
+        data.set(Constants.Sponge.Schematic.WIDTH, (short) width);
+        data.set(Constants.Sponge.Schematic.HEIGHT, (short) height);
+        data.set(Constants.Sponge.Schematic.LENGTH, (short) length);
 
         data.set(Constants.Sponge.Schematic.VERSION, Constants.Sponge.Schematic.CURRENT_VERSION);
         data.set(Constants.Sponge.Schematic.DATA_VERSION, Constants.MINECRAFT_DATA_VERSION);
