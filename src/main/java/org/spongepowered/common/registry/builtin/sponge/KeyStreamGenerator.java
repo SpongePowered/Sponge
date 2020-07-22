@@ -45,6 +45,7 @@ public final class KeyStreamGenerator {
     public static Stream<Key> stream() {
         // Do not remove the explicit generic unless you like 40+ min compile times
         final List<Key> keys = new ArrayList<>();
+        // @formatter:off
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("absorption"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("acceleration"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("active_item"), TypeTokens.ITEM_STACK_SNAPSHOT_VALUE_TOKEN));
@@ -136,10 +137,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("first_trusted"), TypeTokens.UUID_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fluid_item_stack"), TypeTokens.FLUID_STACK_SNAPSHOT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fluid_level"), TypeTokens.INTEGER_VALUE_TOKEN));
-        keys.add(KeyStreamGenerator.key(
-            ResourceKey.sponge("fluid_tank_contents"),
-            TypeTokens.MAP_DIRECTION_FLUID_STACK_SNAPSHOT_VALUE_TOKEN
-        ));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fluid_tank_contents"), TypeTokens.MAP_DIRECTION_FLUID_STACK_SNAPSHOT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("flying_speed"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("food_level"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fox_type"), TypeTokens.FOX_TYPE_VALUE_TOKEN));
@@ -371,10 +369,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("slot_side"), TypeTokens.DIRECTION_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("slows_unoccupied"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("sneezing_time"), TypeTokens.INTEGER_VALUE_TOKEN));
-        keys.add(KeyStreamGenerator.key(
-            ResourceKey.sponge("spawnable_entities"),
-            TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_COLLECTION_VALUE_TOKEN
-        ));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("spawnable_entities"), TypeTokens.WEIGHTED_ENTITY_ARCHETYPE_COLLECTION_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("spawn_count"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("spawn_range"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("spectator_target"), TypeTokens.ENTITY_VALUE_TOKEN));
@@ -429,6 +424,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("wither_targets"), TypeTokens.LIST_ENTITY_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("wololo_target"), TypeTokens.SHEEP_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("wood_type"), TypeTokens.WOOD_TYPE_VALUE_TOKEN));
+        // @formatter:on
         return keys.stream();
     }
 
