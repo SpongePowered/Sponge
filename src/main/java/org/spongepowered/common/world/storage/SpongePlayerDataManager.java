@@ -94,7 +94,7 @@ public final class SpongePlayerDataManager {
 
                     final DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
                     final SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
-                    this.playerDataByUniqueId.put(data.uuid, data);
+//                    this.playerDataByUniqueId.put(data.uuid, data);
                 }
             }
             playerFiles.clear();

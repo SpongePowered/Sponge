@@ -106,7 +106,6 @@ public final class SpongeDataManager implements DataManager {
     // Builders
     private final Map<Class<?>, DataBuilder<?>> builders = new IdentityHashMap<>();
 
-
     private final Map<Class<? extends DataHolder.Immutable<?>>, DataHolderBuilder.Immutable<?, ?>> immutableDataBuilderMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
