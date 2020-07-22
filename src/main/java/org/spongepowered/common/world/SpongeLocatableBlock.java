@@ -58,7 +58,7 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     private final WeakReference<ServerWorld> worldRef;
     @Nullable private ServerLocation location;
 
-    SpongeLocatableBlock(SpongeLocatableBlockBuilder builder) {
+    SpongeLocatableBlock(final SpongeLocatableBlockBuilder builder) {
         this.blockState = checkNotNull(builder.blockState.get(), "blockstate");
         this.position = checkNotNull(builder.position.get(), "position");
         this.world = checkNotNull(builder.world.get(), "world");
@@ -95,17 +95,17 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public <E> Optional<E> get(Key<? extends Value<E>> key) {
+    public <E> Optional<E> get(final Key<? extends Value<E>> key) {
         return this.blockState.get(key);
     }
 
     @Override
-    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
+    public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
         return this.blockState.getValue(key);
     }
 
     @Override
-    public boolean supports(Key<?> key) {
+    public boolean supports(final Key<?> key) {
         return this.blockState.supports(key);
     }
 
@@ -125,43 +125,43 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public <E> Optional<LocatableBlock> transform(Key<? extends Value<E>> key, Function<E, E> function) {
+    public <E> Optional<LocatableBlock> transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
         return this.blockState.transform(key, function).map(state -> LocatableBlock.builder().from(this).state(state).build());
     }
 
     @Override
-    public <E> Optional<LocatableBlock> with(Key<? extends Value<E>> key, E value) {
+    public <E> Optional<LocatableBlock> with(final Key<? extends Value<E>> key, final E value) {
         return this.blockState.with(key, value).map(state -> LocatableBlock.builder().from(this).state(state).build());
     }
 
     @Override
-    public Optional<LocatableBlock> with(Value<?> value) {
+    public Optional<LocatableBlock> with(final Value<?> value) {
         return this.blockState.with(value).map(state -> LocatableBlock.builder().from(this).state(state).build());
     }
 
     @Override
-    public Optional<LocatableBlock> without(Key<?> key) {
+    public Optional<LocatableBlock> without(final Key<?> key) {
         return this.blockState.without(key).map(state -> LocatableBlock.builder().from(this).state(state).build());
     }
 
     @Override
-    public LocatableBlock withRawData(DataView container) throws InvalidDataException {
+    public LocatableBlock withRawData(final DataView container) throws InvalidDataException {
         return LocatableBlock.builder().from(this).state(this.blockState.withRawData(container)).build();
     }
 
     @Override
-    public LocatableBlock mergeWith(LocatableBlock that, MergeFunction function) {
+    public LocatableBlock mergeWith(final LocatableBlock that, final MergeFunction function) {
 
         return LocatableBlock.builder().from(this).state(this.blockState.mergeWith(that.getBlockState(), function)).build();
     }
 
     @Override
-    public boolean validateRawData(DataView container) {
+    public boolean validateRawData(final DataView container) {
         return this.blockState.validateRawData(container);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }

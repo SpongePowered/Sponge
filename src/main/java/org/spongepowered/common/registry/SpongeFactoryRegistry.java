@@ -43,6 +43,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.common.adventure.AudienceFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.command.parameter.SpongeParameterValueFactory;
 import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParameterBuilderFactory;
 import org.spongepowered.common.command.registrar.tree.SpongeRootCommandTreeBuilderFactory;
@@ -53,6 +54,7 @@ import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
 import org.spongepowered.common.util.SpongeTransformFactory;
+import org.spongepowered.common.world.SpongeServerLocationFactory;
 
 import java.util.Map;
 
@@ -105,6 +107,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(VariableValueParameters.Factory.class, SpongeVariableValueParameterBuilderFactory.INSTANCE)
             .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
             .registerFactory(Transform.Factory.class, SpongeTransformFactory.INSTANCE);
+        this.registerFactory(ServerLocation.Factory.class, SpongeServerLocationFactory.INSTANCE);
     }
 
 }

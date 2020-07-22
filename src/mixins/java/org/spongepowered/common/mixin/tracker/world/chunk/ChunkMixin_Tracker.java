@@ -463,7 +463,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     }
 
     @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At("RETURN"))
-    private <T extends Entity> void impl$throwCollsionEvent(final Class<? extends T> entityClass,
+    private <T extends Entity> void tracker$throwCollsionEvent(final Class<? extends T> entityClass,
             final AxisAlignedBB aabb, final List<T> listToFill, final Predicate<? super T> filter,
             final CallbackInfo ci) {
         if (((WorldBridge) this.world).bridge$isFake()
