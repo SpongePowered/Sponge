@@ -58,7 +58,6 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.SpongeConfig;
@@ -98,7 +97,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     private boolean impl$pvp;
     private boolean impl$loadOnStartup = true;
     private boolean impl$keepSpawnLoaded;
-    private boolean impl$generateSpawnOnLoad = true;
+    private boolean impl$generateSpawnOnLoad;
     private boolean impl$generateBonusChest;
     private boolean impl$modCreated;
     @Nullable private PortalAgentType impl$portalAgentType;
@@ -113,15 +112,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     private void impl$setupBeforeSettingsPopulation(WorldInfo info, WorldSettings settings, WorldSettings settingsB, String levelName) {
         this.levelName = levelName;
         this.shadow$populateFromWorldSettings(settings);
-    }
-
-    @Inject(method = "populateFromWorldSettings", at = @At("RETURN"))
-    private void populatePropertiesFromArchetype(WorldSettings settings, CallbackInfo ci) {
-        if (!this.bridge$isValid()) {
-            return;
-        }
-
-        ((WorldSettingsBridge) (Object) settings).bridge$populateInfo((WorldInfo) (Object) this);
     }
 
     @Override
@@ -368,9 +358,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public void bridge$writeSpongeLevelData(final CompoundNBT compound) {
-        final boolean isValid = this.bridge$isValid();
-        System.err.println(isValid);
-        if (!isValid) {
+        if (!this.bridge$isValid()) {
             return;
         }
 

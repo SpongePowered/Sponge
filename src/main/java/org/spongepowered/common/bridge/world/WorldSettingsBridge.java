@@ -36,8 +36,6 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface WorldSettingsBridge {
 
-    ResourceKey bridge$getKey();
-
     SpongeDimensionType bridge$getLogicType();
 
     Difficulty bridge$getDifficulty();
@@ -60,9 +58,7 @@ public interface WorldSettingsBridge {
 
     boolean bridge$isPVPEnabled();
 
-    void bridge$setKey(ResourceKey key);
-
-    void bridge$setDimensionType(DimensionType dimensionType);
+    void bridge$setLogicType(SpongeDimensionType dimensionType);
 
     void bridge$setDifficulty(Difficulty difficulty);
 

@@ -29,62 +29,61 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.SerializationBehaviors;
-import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.teleport.PortalAgentType;
-import org.spongepowered.api.world.teleport.PortalAgentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
+import java.util.function.Supplier;
+
 import javax.annotation.Nullable;
 
 @Mixin(WorldSettings.class)
-public abstract class WorldSettingsMixin implements WorldSettingsBridge {
+public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSettingsBridge {
 
     @Shadow private boolean commandsAllowed;
     @Shadow private boolean bonusChestEnabled;
 
     @Nullable private ResourceKey key;
-    @Nullable private SpongeDimensionType dimensionType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
-    @Nullable private Difficulty difficulty = Difficulties.NORMAL.get();
-    @Nullable private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
-    private boolean isEnabled = true;
-    private boolean loadOnStartup = true;
-    @Nullable private Boolean keepSpawnLoaded = null;
-    private boolean generateSpawnOnLoad = false;
-    private boolean pvpEnabled = true;
+    @Nullable private SpongeDimensionType impl$logicType;
+    @Nullable private Difficulty impl$difficulty;
+    @Nullable private SerializationBehavior impl$serializationBehavior;
+    private boolean impl$isEnabled = true;
+    private boolean impl$loadOnStartup = true;
+    @Nullable private Boolean impl$keepSpawnLoaded = null;
+    private boolean impl$generateSpawnOnLoad = false;
+    private boolean impl$pvpEnabled = true;
     @Nullable private PortalAgentType portalAgentType;
     private boolean seedRandomized = false;
-    @Nullable private DataContainer generatorSettings;
+    @Nullable private DataContainer impl$generatorSettings;
 
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
     private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
         final WorldProperties properties = (WorldProperties) info;
-        if (((WorldInfoBridge) info).bridge$isValid()) {
-            this.dimensionType = (SpongeDimensionType) properties.getDimensionType();
-            this.difficulty = properties.getDifficulty();
-            this.serializationBehavior = properties.getSerializationBehavior();
-            this.isEnabled = properties.isEnabled();
-            this.loadOnStartup = properties.doesLoadOnStartup();
-            this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
-            this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
-            this.pvpEnabled = properties.isPVPEnabled();
-            this.bonusChestEnabled = properties.doesGenerateBonusChest();
-            this.generatorSettings = properties.getGeneratorSettings();
+        if (!((WorldInfoBridge) info).bridge$isValid()) {
+            return;
         }
+
+        this.impl$logicType = (SpongeDimensionType) properties.getDimensionType();
+        this.impl$difficulty = properties.getDifficulty();
+        this.impl$serializationBehavior = properties.getSerializationBehavior();
+        this.impl$isEnabled = properties.isEnabled();
+        this.impl$loadOnStartup = properties.doesLoadOnStartup();
+        this.impl$keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+        this.impl$generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
+        this.impl$pvpEnabled = properties.isPVPEnabled();
+        this.bonusChestEnabled = properties.doesGenerateBonusChest();
+        this.impl$generatorSettings = properties.getGeneratorSettings();
     }
 
     @Override
@@ -109,19 +108,16 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
 
     @Override
     public SpongeDimensionType bridge$getLogicType() {
-        return this.dimensionType;
+        return this.impl$logicType;
     }
 
     @Override
     public Difficulty bridge$getDifficulty() {
-        return this.difficulty;
+        return this.impl$difficulty;
     }
 
     @Override
     public PortalAgentType bridge$getPortalAgentType() {
-        if (this.portalAgentType == null) {
-            this.portalAgentType = PortalAgentTypes.DEFAULT.get();
-        }
         return this.portalAgentType;
     }
 
@@ -132,40 +128,37 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
 
     @Override
     public DataContainer bridge$getGeneratorSettings() {
-        return this.generatorSettings;
+        return this.impl$generatorSettings;
     }
 
     @Override
     public SerializationBehavior bridge$getSerializationBehavior() {
-        return this.serializationBehavior;
+        return this.impl$serializationBehavior;
     }
 
     @Override
     public boolean bridge$isEnabled() {
-        return this.isEnabled;
+        return this.impl$isEnabled;
     }
 
     @Override
     public boolean bridge$loadOnStartup() {
-        return this.loadOnStartup;
+        return this.impl$loadOnStartup;
     }
 
     @Override
     public boolean bridge$doesKeepSpawnLoaded() {
-        if (this.keepSpawnLoaded == null) {
-            this.keepSpawnLoaded = this.dimensionType == DimensionTypes.OVERWORLD.get();
-        }
-        return this.keepSpawnLoaded;
+        return this.impl$keepSpawnLoaded;
     }
 
     @Override
     public boolean bridge$generateSpawnOnLoad() {
-        return this.generateSpawnOnLoad;
+        return this.impl$generateSpawnOnLoad;
     }
 
     @Override
     public boolean bridge$isPVPEnabled() {
-        return this.pvpEnabled;
+        return this.impl$pvpEnabled;
     }
 
     @Override
@@ -174,18 +167,18 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
     }
 
     @Override
-    public void bridge$setDimensionType(DimensionType dimensionType) {
-        this.dimensionType = (SpongeDimensionType) dimensionType;
+    public void bridge$setLogicType(SpongeDimensionType dimensionType) {
+        this.impl$logicType = dimensionType;
     }
 
     @Override
     public void bridge$setDifficulty(Difficulty difficulty) {
-        this.difficulty = difficulty;
+        this.impl$difficulty = difficulty;
     }
 
     @Override
     public void bridge$setSerializationBehavior(SerializationBehavior behavior) {
-        this.serializationBehavior = behavior;
+        this.impl$serializationBehavior = behavior;
     }
 
     @Override
@@ -195,27 +188,27 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
 
     @Override
     public void bridge$setEnabled(boolean state) {
-        this.isEnabled = state;
+        this.impl$isEnabled = state;
     }
 
     @Override
     public void bridge$setLoadOnStartup(boolean state) {
-        this.loadOnStartup = state;
+        this.impl$loadOnStartup = state;
     }
 
     @Override
     public void bridge$setKeepSpawnLoaded(@Nullable Boolean state) {
-        this.keepSpawnLoaded = state;
+        this.impl$keepSpawnLoaded = state;
     }
 
     @Override
     public void bridge$setGenerateSpawnOnLoad(boolean state) {
-        this.generateSpawnOnLoad = state;
+        this.impl$generateSpawnOnLoad = state;
     }
 
     @Override
     public void bridge$setPVPEnabled(boolean state) {
-        this.pvpEnabled = state;
+        this.impl$pvpEnabled = state;
     }
 
     @Override
@@ -230,22 +223,21 @@ public abstract class WorldSettingsMixin implements WorldSettingsBridge {
 
     @Override
     public Boolean bridge$internalKeepSpawnLoaded() {
-        return this.keepSpawnLoaded;
+        return this.impl$keepSpawnLoaded;
     }
 
     @Override
     public void bridge$populateInfo(WorldInfo info) {
-        final WorldArchetype this$ = (WorldArchetype) (Object) this;
         final WorldInfoBridge infoBridge = (WorldInfoBridge) info;
 
         // TODO 1.14 - Add all the property setters
-        infoBridge.bridge$setEnabled(this$.isEnabled());
-        infoBridge.bridge$setLogicType(this$.getDimensionType());
-        infoBridge.bridge$setLoadOnStartup(this$.doesLoadOnStartup());
-        infoBridge.bridge$setGenerateSpawnOnLoad(this$.doesGenerateSpawnOnLoad());
-        infoBridge.bridge$setKeepSpawnLoaded(this$.doesKeepSpawnLoaded());
-        infoBridge.bridge$setGenerateBonusChest(this$.doesGenerateBonusChest());
-        infoBridge.bridge$setSerializationBehavior(this$.getSerializationBehavior());
-        infoBridge.bridge$forceSetDifficulty((net.minecraft.world.Difficulty) (Object) this$.getDifficulty());
+        infoBridge.bridge$setEnabled(this.impl$isEnabled);
+        infoBridge.bridge$setLogicType(this.impl$logicType);
+        infoBridge.bridge$setLoadOnStartup(this.impl$loadOnStartup);
+        infoBridge.bridge$setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
+        infoBridge.bridge$setKeepSpawnLoaded(this.impl$keepSpawnLoaded);
+        infoBridge.bridge$setGenerateBonusChest(this.bonusChestEnabled);
+        infoBridge.bridge$setSerializationBehavior(this.impl$serializationBehavior);
+        infoBridge.bridge$forceSetDifficulty((net.minecraft.world.Difficulty) (Object) this.impl$difficulty);
     }
 }

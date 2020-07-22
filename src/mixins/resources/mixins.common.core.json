@@ -33,9 +33,14 @@
         "util.text.TextComponentMixin",
         "world.BossInfoMixin",
         "world.ServerBossInfoMixin",
+        "world.WorldSettingsMixin",
+        "world.dimension.EndDimensionMixin",
+        "world.dimension.DimensionMixin",
         "world.dimension.DimensionTypeMixin",
+        "world.dimension.NetherDimensionMixin",
+        "world.dimension.OverworldDimensionMixin",
         "world.storage.SaveHandlerMixin",
-        "world.storage.WorldInfoMixin"
+        "world.storage.WorldInfoMixin",
     ],
     "client": [
         "client.MinecraftMixin"

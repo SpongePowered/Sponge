@@ -76,7 +76,7 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
         for (ServerWorld serverworld : this.shadow$getWorlds()) {
             if (!suppressLog) {
                 LOGGER.info("Saving chunks for world '{}'/{}", ((org.spongepowered.api.world.server.ServerWorld) serverworld).getKey(),
-                    Registry.DIMENSION_TYPE.getKey(serverworld.getDimension().getType()));
+                    ((org.spongepowered.api.world.server.ServerWorld) serverworld).getDimension().getType().getKey());
             }
 
             try {
