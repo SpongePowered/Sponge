@@ -277,15 +277,15 @@ public class EntityActivationRange {
                 }
 
                 if (currentTick > spongeEntity.activation$getActivatedTick()) {
-                    if (spongeEntity.activation$getDefaultActivationState()) {
-                        spongeEntity.activation$setActivatedTick(currentTick);
-                        continue;
-                    }
-
                     // check if activation cache needs to be updated
                     if (spongeEntity.activation$requiresActivationCacheRefresh()) {
                         EntityActivationRange.initializeEntityActivationState(entity);
                         spongeEntity.activation$requiresActivationCacheRefresh(false);
+                    }
+
+                    if (spongeEntity.activation$getDefaultActivationState()) {
+                        spongeEntity.activation$setActivatedTick(currentTick);
+                        continue;
                     }
                     // check for entity type overrides
                     final byte activationType = spongeEntity.activation$getActivationType();
