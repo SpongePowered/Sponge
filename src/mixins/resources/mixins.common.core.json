@@ -12,6 +12,7 @@
         "adventure.text.AbstractComponentMixin",
         "adventure.text.format.StyleMixin",
         "block.BlockMixin",
+        "block.BlockStateMixin",
         "command.CommandsMixin",
         "command.CommandSourceMixin",
         "command.arguments.EntitySelectorParserMixin",
