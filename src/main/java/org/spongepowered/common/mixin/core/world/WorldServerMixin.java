@@ -1515,6 +1515,14 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(pos), pos, used, otherPos);
     }
 
+    @Override
+    public void observedNeighborChanged(BlockPos pos, final Block changedBlock, BlockPos changedBlockPos) {
+        if (this.impl$denyNeighborNotificationsUnloadedChunks && isChunkAvailable(pos)) {
+            return;
+        }
+        super.observedNeighborChanged(pos, changedBlock, changedBlockPos);
+    }
+
     /**
      * @author gabizou - March 12th, 2016
      *

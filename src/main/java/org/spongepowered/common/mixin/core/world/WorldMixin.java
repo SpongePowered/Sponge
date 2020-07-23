@@ -164,6 +164,7 @@ public abstract class WorldMixin implements WorldBridge {
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
     @Shadow public abstract void neighborChanged(BlockPos pos, final Block blockIn, BlockPos otherPos);
+    @Shadow public void observedNeighborChanged(BlockPos pos, final Block changedBlock, BlockPos changedBlockPos) {};
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
     @Shadow public abstract void updateObservingBlocksAt(BlockPos pos, Block blockType);
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType, boolean updateObserverBlocks);
