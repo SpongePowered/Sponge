@@ -152,9 +152,6 @@ public class SpongeImplHooks {
         return state.getBlock() instanceof ITileEntityProvider;
     }
 
-    public static boolean shouldRefresh(final TileEntity tileEntity, final World world, final BlockPos pos, final BlockState oldState, final BlockState newState) {
-        return oldState.getBlock() != newState.getBlock();
-    }
 
     public static void onTileChunkUnload(final TileEntity tileEntity) {
         // Overwritten in SpongeForge
