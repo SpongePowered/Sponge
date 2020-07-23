@@ -158,6 +158,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkProviderBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.inventory.UpdateAnvilEventCost;
@@ -730,6 +731,13 @@ public class SpongeCommonEventFactory {
             for (final EnumFacing notificationSide : notifiedSides) {
                 final BlockPos offset = sourcePos.offset(notificationSide);
                 final Direction direction = DirectionFacingProvider.getInstance().getKey(notificationSide).get();
+
+
+                if (((WorldServerBridge) world).bridge$getDenyNeighborNotificationsUnloadedChunks() &&
+                        ((ChunkProviderBridge) ((net.minecraft.world.World) world).getChunkProvider())
+                                .bridge$getLoadedChunkWithoutMarkingActive(offset.getX() >> 4, offset.getZ() >> 4) == null) {
+                    continue;
+                }
                 final IBlockState notificationState = ((WorldServer) world).getBlockState(offset);
                 neighbors.put(direction, (BlockState) notificationState);
             }

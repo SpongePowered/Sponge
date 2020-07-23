@@ -218,6 +218,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     private int impl$dimensionId;
     @Nullable private NextTickListEntry impl$tmpScheduledObj;
     @Nullable private GenericGenerationContext impl$spawnGenerationContext;
+    private boolean impl$denyNeighborNotificationsUnloadedChunks = false;
 
     @Shadow @Final private MinecraftServer server;
     @Shadow @Final private PlayerChunkMap playerChunkMap;
@@ -281,6 +282,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         this.impl$chunkGCTickInterval = worldCategory.getTickInterval();
         this.impl$weatherIceAndSnowEnabled = worldCategory.getWeatherIceAndSnow();
         this.impl$weatherThunderEnabled = worldCategory.getWeatherThunder();
+        this.impl$denyNeighborNotificationsUnloadedChunks = worldCategory.getDenyNeighborNotificationUnloadedChunks();
         this.updateEntityTick = 0;
         this.setMemoryViewDistance(this.chooseViewDistanceValue(worldCategory.getViewDistance()));
     }
@@ -371,6 +373,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         this.impl$weatherIceAndSnowEnabled = worldCategory.getWeatherIceAndSnow();
         this.impl$weatherThunderEnabled = worldCategory.getWeatherThunder();
         this.impl$chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
+        this.impl$denyNeighborNotificationsUnloadedChunks = worldCategory.getDenyNeighborNotificationUnloadedChunks();
         if (this.getChunkProvider() != null) {
             final int maxChunkUnloads = worldCategory.getMaxChunkUnloads();
             ((ChunkProviderBridge) this.getChunkProvider()).bridge$setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
@@ -1504,9 +1507,20 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         if (chunk == null) {
             return;
         }
+        if (this.impl$denyNeighborNotificationsUnloadedChunks && isChunkAvailable(pos)) {
+            return;
+        }
         final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, pos, blockIn, otherPos, chunk);
 
         PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(pos), pos, used, otherPos);
+    }
+
+    @Override
+    public void observedNeighborChanged(BlockPos pos, final Block changedBlock, BlockPos changedBlockPos) {
+        if (this.impl$denyNeighborNotificationsUnloadedChunks && isChunkAvailable(pos)) {
+            return;
+        }
+        super.observedNeighborChanged(pos, changedBlock, changedBlockPos);
     }
 
     /**
@@ -1534,6 +1548,9 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
                 continue;
             }
             final BlockPos offset = pos.offset(direction);
+            if (this.impl$denyNeighborNotificationsUnloadedChunks && isChunkAvailable(offset)) {
+                continue;
+            }
             final Chunk chunk = this.getChunk(pos);
             final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, pos, blockType, offset, chunk);
             PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(offset), offset, used, pos);
@@ -1558,6 +1575,9 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             // Else, we just do vanilla. If there's no listeners, we don't want to spam the notification event
             for (final EnumFacing direction : Constants.World.NOTIFY_DIRECTIONS) {
                 final BlockPos notifyPos = sourcePos.offset(direction);
+                if (this.impl$denyNeighborNotificationsUnloadedChunks && isChunkAvailable(notifyPos)) {
+                    continue;
+                }
                 final Chunk chunk = this.getChunk(sourcePos);
                 final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
                 PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, used, sourcePos);
@@ -1576,12 +1596,15 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
             for (final EnumFacing facing : Constants.World.NOTIFY_DIRECTIONS) {
                 if (event != null) {
                     final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                    if (!event.getNeighbors().keySet().contains(direction)) {
+                    if (!event.getNeighbors().containsKey(direction)) {
                         continue;
                     }
                 }
 
                 final BlockPos notifyPos = sourcePos.offset(facing);
+                if (this.impl$denyNeighborNotificationsUnloadedChunks && isChunkAvailable(notifyPos)) {
+                    continue;
+                }
                 final Chunk chunk = this.getChunk(sourcePos);
                 final Block used = PhaseTracker.validateBlockForNeighborNotification((WorldServer) (Object) this, sourcePos, sourceBlock, notifyPos, chunk);
                 PhaseTracker.getInstance().notifyBlockOfStateChange(this, this.getBlockState(notifyPos), notifyPos, used, sourcePos);
@@ -2491,6 +2514,11 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
     @Override
     public long bridge$getChunkUnloadDelay() {
         return this.impl$chunkUnloadDelay;
+    }
+
+    @Override
+    public boolean bridge$getDenyNeighborNotificationsUnloadedChunks() {
+        return this.impl$denyNeighborNotificationsUnloadedChunks;
     }
 
     private void setMemoryViewDistance(final int viewDistance) {

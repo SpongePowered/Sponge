@@ -75,6 +75,12 @@ public class WorldCategory extends ConfigCategory {
             + "if you encounter any issues then we recommend disabling it.")
     private boolean denyChunkRequests = false;
 
+    @Setting(value = "deny-neighbor-notification-chunk-requests", comment = ""
+            + "If 'true', any neighbour notification for a chunk not currently loaded will be denied\n"
+            + "Warning: As this is an experimental setting for performance gain,\n"
+            + "if you encounter any issues then we recommend disabling it.")
+    private boolean denyNeighborNotificationUnloadedChunks = false;
+
     @Setting(value = "chunk-gc-tick-interval", comment = ""
             + "The tick interval used to cleanup all inactive chunks that have leaked in a world.\n"
             + "Set to 0 to disable which restores vanilla handling. (Default: 600)")
@@ -204,6 +210,10 @@ public class WorldCategory extends ConfigCategory {
 
     public boolean getDenyChunkRequests() {
         return this.denyChunkRequests;
+    }
+
+    public boolean getDenyNeighborNotificationUnloadedChunks() {
+        return this.denyNeighborNotificationUnloadedChunks;
     }
 
     public int getTickInterval() {

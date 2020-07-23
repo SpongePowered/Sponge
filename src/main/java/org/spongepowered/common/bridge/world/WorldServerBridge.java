@@ -129,6 +129,8 @@ public interface WorldServerBridge {
 
     long bridge$getChunkUnloadDelay();
 
+    boolean bridge$getDenyNeighborNotificationsUnloadedChunks();
+
     net.minecraft.world.Explosion bridge$triggerInternalExplosion(Explosion explosion, Function<? super net.minecraft.world.Explosion, ? extends PhaseContext<?>> contextCreator);
 
     void bridge$doChunkGC();
