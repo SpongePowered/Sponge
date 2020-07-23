@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
@@ -86,4 +88,19 @@ public interface TrackedChunkBridge {
      * @param added
      */
     void bridge$setTileEntity(BlockPos targetPos, TileEntity added);
+
+    /**
+     * Forge compatibility method
+     * @param originalBlock
+     * @param replacingBlock
+     * @param replacingState
+     * @return
+     */
+    default boolean bridge$replacingBlockHasTile(Block originalBlock, Block replacingBlock, BlockState replacingState) {
+        return originalBlock != replacingBlock && originalBlock instanceof ITileEntityProvider;
+    }
+
+    default boolean bridge$shouldRefreshTile(Block oldBlock, Block newBlock, BlockState oldState, BlockState newState) {
+        return oldBlock != newBlock && oldBlock instanceof ITileEntityProvider;
+    }
 }

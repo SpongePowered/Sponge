@@ -49,6 +49,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -66,6 +67,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
@@ -111,6 +113,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -951,5 +954,25 @@ public final class TrackingUtil {
         } else {
             return type + "{" + name + ":" + extra + "}";
         }
+    }
+
+    public static SpongeBlockSnapshot createPooledSnapshot(final net.minecraft.block.BlockState state, final BlockPos pos,
+        final BlockChangeFlag updateFlag, @Nullable final TileEntity existing,
+        final Supplier<ResourceKey> worldKeySupplier,
+        final Supplier<Optional<UUID>> creatorSupplier,
+        final Supplier<Optional<UUID>> notifierSupplier
+    ) {
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+        builder.reset();
+        builder.blockState(state)
+                .world(worldKeySupplier.get())
+                .position(VecHelper.toVector3i(pos));
+        creatorSupplier.get().ifPresent(builder::creator);
+        notifierSupplier.get().ifPresent(builder::notifier);
+        if (existing != null) {
+            addTileEntityToBuilder(existing, builder);
+        }
+        builder.flag(updateFlag);
+        return builder.build();
     }
 }

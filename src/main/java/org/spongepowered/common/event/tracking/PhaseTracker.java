@@ -83,6 +83,7 @@ import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
@@ -632,6 +633,10 @@ public final class PhaseTracker implements CauseStackManager {
 
         final TrackedChunkBridge mixinChunk = (TrackedChunkBridge) chunk;
         // Sponge - Use our mixin method that allows using the BlockChangeFlag.
+        // Forge - Adds the old light check before the chunk changes
+        final int oldLight = ((BlockStateBridge) currentState).bridge$getLightValue(world, pos);
+        final int oldOpacity = currentState.getOpacity(world, pos);
+
 
         // Up until this point, we've been setting up sponge stuff, this next line is from vanilla
         // where it tells the chunk to set the new state, but we have to call our custom method
@@ -645,7 +650,9 @@ public final class PhaseTracker implements CauseStackManager {
 
         // blockstate1 -> newWorldState
         final net.minecraft.block.BlockState newWorldState = world.getBlockState(pos);
-        if (newWorldState != originalState && (newWorldState.getOpacity(world, pos) != originalState.getOpacity(world, pos) || newWorldState.getLightValue() != originalState.getLightValue() || newWorldState.func_215691_g() || originalState.func_215691_g())) {
+        // vanilla4
+        // if (newWorldState != originalState && (newWorldState.getOpacity(world, pos) != originalState.getOpacity(world, pos) || newWorldState.getLightValue() != originalState.getLightValue() || newWorldState.func_215691_g() || originalState.func_215691_g())) {
+        if (newWorldState != originalState && (newWorldState.getOpacity(world, pos) != oldOpacity || ((BlockStateBridge) newWorldState).bridge$getLightValue(world, pos) != oldLight || newWorldState.func_215691_g() || originalState.func_215691_g())) {
             // this.profiler.startSection("queueCheckLight");
             world.getProfiler().startSection("queueCheckLight");
             // this.getChunkProvider().getLightManager().checkBlock(pos);
@@ -661,19 +668,18 @@ public final class PhaseTracker implements CauseStackManager {
 
         final PhaseContext<?> context = this.stack.peek();
         final IPhaseState<?> phaseState = context.state;
-//        if (((IPhaseState) phaseState).doesBulkBlockCapture(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
-//            // Basically at this point, there's nothing left for us to do since
-//            // ChunkMixin will capture the block change, and submit it to be
-//            // "captured". It's only when there's immediate block event
-//            // processing that we need to actually create the event and process
-//            // that transaction.
-//            return true;
-//        }
+        if (((IPhaseState) phaseState).doesBulkBlockCapture(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
+            // Basically at this point, there's nothing left for us to do since
+            // ChunkMixin will capture the block change, and submit it to be
+            // "captured". It's only when there's immediate block event
+            // processing that we need to actually create the event and process
+            // that transaction.
+            return true;
+        }
 
         // Since we don't do bulk capturing, we should also check if we are simply allowed to
         // throw an event, if we are, then we should do that process.
-//        if (((IPhaseState) phaseState).doesBlockEventTracking(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
-        if (true) {
+        if (((IPhaseState) phaseState).doesBlockEventTracking(context) && ShouldFire.CHANGE_BLOCK_EVENT) {
             try {
                 // Fall back to performing a singular block capture and throwing an event with all the
                 // repercussions, such as neighbor notifications and whatnot. Entity spawns should also be
