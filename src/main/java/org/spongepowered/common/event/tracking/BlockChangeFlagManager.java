@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking;
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -40,21 +41,39 @@ import java.util.StringJoiner;
 
 public final class BlockChangeFlagManager {
 
+    public static final class BlockChangeFlagFactory implements BlockChangeFlag.Factory {
+        @Nullable private BlockChangeFlag none;
+        @Override
+        public BlockChangeFlag empty() {
+            if (this.none == null) {
+                this.none = BlockChangeFlagManager.getInstance().maskedFlags.get(0);
+            }
+            return this.none;
+        }
+        BlockChangeFlagFactory() {}
+    }
+
     private final Map<String, SpongeBlockChangeFlag> flags = new LinkedHashMap<>();
     private final Int2ObjectMap<SpongeBlockChangeFlag> maskedFlags = new Int2ObjectLinkedOpenHashMap<>(70);
     private static BlockChangeFlagManager INSTANCE = new BlockChangeFlagManager();
+    private final BlockChangeFlagFactory FACTORY = new BlockChangeFlagFactory();
+    private static final SpongeBlockChangeFlag PHYSICS_OBSERVER = new SpongeBlockChangeFlag("PHYSICS_OBSERVER", Constants.BlockChangeFlags.PHYSICS_OBSERVER);
+    private static final SpongeBlockChangeFlag DEFAULT = new SpongeBlockChangeFlag("PHYSICS_OBSERVER", Constants.BlockChangeFlags.DEFAULT);
 
     public static BlockChangeFlagManager getInstance() {
         return BlockChangeFlagManager.INSTANCE;
     }
 
+    public BlockChangeFlagFactory getFactory() {
+        return this.FACTORY;
+    }
 
-    public static SpongeBlockChangeFlag fromNativeInt(int flag) {
-        if (flag == Constants.BlockChangeFlags.NEIGHBOR) {
-            return (SpongeBlockChangeFlag) org.spongepowered.api.world.BlockChangeFlags.ALL;
+    public static SpongeBlockChangeFlag fromNativeInt(final int flag) {
+        if (flag == Constants.BlockChangeFlags.DEFAULT) {
+            return BlockChangeFlagManager.DEFAULT;
         }
         if (flag == 2) {
-            return (SpongeBlockChangeFlag) org.spongepowered.api.world.BlockChangeFlags.PHYSICS_OBSERVER;
+            return BlockChangeFlagManager.PHYSICS_OBSERVER;
         }
         final SpongeBlockChangeFlag spongeBlockChangeFlag = BlockChangeFlagManager.getInstance().maskedFlags.get(flag);
         if (spongeBlockChangeFlag != null) {
@@ -63,7 +82,7 @@ public final class BlockChangeFlagManager {
         return (SpongeBlockChangeFlag) org.spongepowered.api.world.BlockChangeFlags.ALL;
     }
 
-    public static BlockChangeFlag andNotifyClients(BlockChangeFlag flag) {
+    public static BlockChangeFlag andNotifyClients(final BlockChangeFlag flag) {
         final int rawFlag = ((SpongeBlockChangeFlag) flag).getRawFlag();
         if ((rawFlag & Constants.BlockChangeFlags.NOTIFY_CLIENTS) != 0){
             return flag; // We don't need to rerun the flag
@@ -143,7 +162,7 @@ public final class BlockChangeFlagManager {
 
     }
 
-    private void register(SpongeBlockChangeFlag flag) {
+    private void register(final SpongeBlockChangeFlag flag) {
         this.maskedFlags.put(flag.getRawFlag(), flag);
         this.flags.put(flag.getName(), flag);
     }
@@ -170,7 +189,7 @@ public final class BlockChangeFlagManager {
             return Flag.flags;
         }
 
-        private Flag(String name, int mask) {
+        private Flag(final String name, final int mask) {
             this.name = name;
             this.mask = mask;
         }
