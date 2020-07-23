@@ -2508,6 +2508,11 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
         return this.impl$chunkUnloadDelay;
     }
 
+    @Override
+    public boolean bridge$getDenyNeighborNotificationsUnloadedChunks() {
+        return this.impl$denyNeighborNotificationsUnloadedChunks;
+    }
+
     private void setMemoryViewDistance(final int viewDistance) {
         this.playerChunkMap.setPlayerViewRadius(viewDistance);
     }
