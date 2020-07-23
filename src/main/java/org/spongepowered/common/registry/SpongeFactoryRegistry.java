@@ -125,6 +125,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(Value.Factory.class, SpongeValueFactory.INSTANCE)
             .registerFactory(DataManipulator.Mutable.Factory.class, MutableDataManipulatorFactory.INSTANCE)
             .registerFactory(DataManipulator.Immutable.Factory.class, ImmutableDataManipulatorFactory.INSTANCE)
+            .registerFactory(BlockChangeFlag.Factory.class, BlockChangeFlagManager.getInstance().getFactory())
         ;
     }
 

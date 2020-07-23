@@ -1056,8 +1056,6 @@ public final class Constants {
             | Constants.BlockChangeFlags.NEIGHBOR_MASK
             | Constants.BlockChangeFlags.PHYSICS_MASK;
 
-        public static final int NEIGHBOR_PHYSICS_OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.NEIGHBOR_MASK;
         public static final int PHYSICS_OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS;
 
     }
