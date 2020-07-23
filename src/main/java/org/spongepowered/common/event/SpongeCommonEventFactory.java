@@ -735,7 +735,7 @@ public class SpongeCommonEventFactory {
 
                 if (((WorldServerBridge) world).bridge$getDenyNeighborNotificationsUnloadedChunks() &&
                         ((ChunkProviderBridge) ((net.minecraft.world.World) world).getChunkProvider())
-                                .bridge$getLoadedChunkWithoutMarkingActive(sourcePos.getX() >> 4, sourcePos.getZ() >> 4) == null) {
+                                .bridge$getLoadedChunkWithoutMarkingActive(offset.getX() >> 4, offset.getZ() >> 4) == null) {
                     continue;
                 }
                 final IBlockState notificationState = ((WorldServer) world).getBlockState(offset);
