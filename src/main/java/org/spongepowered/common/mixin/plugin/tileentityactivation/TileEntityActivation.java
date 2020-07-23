@@ -164,15 +164,15 @@ public class TileEntityActivation {
 
             final Vector3i tilePos = VecHelper.toVector3i(tileEntity.getPos());
             if (currentTick > ((ActivationCapability) tileEntity).activation$getActivatedTick()) {
-                if (spongeTileEntity.activation$getDefaultActivationState()) {
-                    ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
-                    continue;
-                }
-
                 // check if activation cache needs to be updated
                 if (spongeTileEntity.activation$requiresActivationCacheRefresh()) {
                     TileEntityActivation.initializeTileEntityActivationState(tileEntity);
                     spongeTileEntity.activation$requiresActivationCacheRefresh(false);
+                }
+
+                if (spongeTileEntity.activation$getDefaultActivationState()) {
+                    ((ActivationCapability) tileEntity).activation$setActivatedTick(currentTick);
+                    continue;
                 }
 
                 final int activationRange = ((ActivationCapability) tileEntity).activation$getActivationRange();
