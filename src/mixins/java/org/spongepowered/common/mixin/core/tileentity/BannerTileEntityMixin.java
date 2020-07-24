@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.tileentity.BannerTileEntityAccessor;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
-import org.spongepowered.common.data.provider.item.stack.ItemStackShieldBannerPatternsProvider;
+import org.spongepowered.common.data.provider.item.stack.ShieldItemStackData;
 import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
         this.impl$patternLayers.clear();
         if (this.patterns != null) {
             for (INBT pattern : this.patterns) {
-                this.impl$patternLayers.add(ItemStackShieldBannerPatternsProvider.layerFromNbt((CompoundNBT) pattern));
+                this.impl$patternLayers.add(ShieldItemStackData.layerFromNbt((CompoundNBT) pattern));
             }
         }
         this.impl$markDirtyAndUpdate();
@@ -95,7 +95,7 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
         this.impl$patternLayers.addAll(layers);
         this.patterns = new ListNBT();
         for (final BannerPatternLayer layer : this.impl$patternLayers) {
-            this.patterns.add(ItemStackShieldBannerPatternsProvider.layerToNbt(layer));
+            this.patterns.add(ShieldItemStackData.layerToNbt(layer));
         }
         this.impl$markDirtyAndUpdate();
     }

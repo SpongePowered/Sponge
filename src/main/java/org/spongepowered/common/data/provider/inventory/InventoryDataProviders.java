@@ -24,49 +24,18 @@
  */
 package org.spongepowered.common.data.provider.inventory;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
-import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
-import org.spongepowered.common.inventory.custom.CustomInventory;
-import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.plugin.PluginContainer;
 
-import java.util.Optional;
-import java.util.UUID;
+public final class InventoryDataProviders extends DataProviderRegistratorBuilder {
 
-public class InventoryDataProviders extends DataProviderRegistryBuilder {
-
-    public InventoryDataProviders(DataProviderRegistry registry) {
+    public InventoryDataProviders(final DataProviderRegistry registry) {
         super(registry);
     }
 
     @Override
     public void register() {
-        // Lens Providers
-        this.register(new GenericSlotLensDataProvider<>(Keys.EQUIPMENT_TYPE));
-        this.register(new GenericSlotLensDataProvider<>(Keys.SLOT_INDEX));
-        this.register(new GenericSlotLensDataProvider<>(Keys.SLOT_POSITION));
-        this.register(new GenericSlotLensDataProvider<>(Keys.SLOT_SIDE));
-
-        this.register(new GenericImmutableInventoryDataProvider<Integer>(Keys.MAX_STACK_SIZE.get()) {
-            @Override protected Optional<Integer> getFrom(Inventory dataHolder) {
-                return Optional.of(((InventoryBridge)dataHolder).bridge$getAdapter().inventoryAdapter$getFabric().fabric$getMaxStackSize());
-            }
-        });
-        this.register(new GenericImmutableInventoryDataProvider<PluginContainer>(Keys.PLUGIN_CONTAINER.get()) {
-            @Override protected Optional<PluginContainer> getFrom(Inventory dataHolder) {
-                return Optional.ofNullable(InventoryUtil.getPluginContainer(dataHolder));
-            }
-        });
-        this.register(new GenericImmutableInventoryDataProvider<UUID>(Keys.UNIQUE_ID.get()) {
-            @Override protected Optional<UUID> getFrom(Inventory dataHolder) {
-                if (dataHolder instanceof CustomInventory) {
-                    return Optional.ofNullable(((CustomInventory) dataHolder).getIdentity());
-                }
-                return Optional.empty();
-            }
-        });
+        InventoryData.register(this.registrator);
+        SlotData.register(this.registrator);
     }
 }

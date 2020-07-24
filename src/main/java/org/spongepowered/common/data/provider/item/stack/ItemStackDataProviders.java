@@ -24,123 +24,32 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import com.google.common.collect.ImmutableSet;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
-import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
-import org.spongepowered.common.data.provider.generic.INameableDisplayNameProvider;
-import org.spongepowered.common.data.provider.item.ItemDisplayNameProvider;
-import org.spongepowered.common.data.provider.util.BreakablePlaceableUtils;
-import org.spongepowered.common.util.Constants;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+public final class ItemStackDataProviders extends DataProviderRegistratorBuilder {
 
-public class ItemStackDataProviders extends DataProviderRegistryBuilder {
-
-    public ItemStackDataProviders(DataProviderRegistry registry) {
+    public ItemStackDataProviders(final DataProviderRegistry registry) {
         super(registry);
-    }
-
-    protected <E> void register(Key<? extends Value<E>> key, Function<ItemStack, E> getter) {
-        this.register(ItemStack.class, key, getter);
-    }
-
-    protected <E> void register(Supplier<? extends Key<? extends Value<E>>> key, Function<ItemStack, E> getter) {
-        this.register(ItemStack.class, key, getter);
-    }
-
-    protected <E> void register(Key<? extends Value<E>> key, Function<ItemStack, E> getter, BiConsumer<ItemStack, E> setter) {
-        this.register(ItemStack.class, key, getter, setter);
-    }
-
-    protected <E> void register(Supplier<? extends Key<? extends Value<E>>> key, Function<ItemStack, E> getter, BiConsumer<ItemStack, E> setter) {
-        this.register(ItemStack.class, key, getter, setter);
-    }
-
-    protected <E> void register(Key<? extends Value<E>> key, E defaultValue, Function<ItemStack, E> getter, BiConsumer<ItemStack, E> setter) {
-        this.register(ItemStack.class, key, defaultValue, getter, setter);
-    }
-
-    protected <E> void register(Supplier<? extends Key<? extends Value<E>>> key, E defaultValue, Function<ItemStack, E> getter, BiConsumer<ItemStack, E> setter) {
-        this.register(ItemStack.class, key, defaultValue, getter, setter);
     }
 
     @Override
     public void register() {
-        register(new ItemStackDisplayNameProvider());
-//        register(new ItemStackDurabilityProvider());
-        register(new ItemStackIsUnbreakableProvider());
-        register(new ItemStackLockTokenProvider());
-        register(new ItemStackLoreProvider());
-        register(new ItemStackAppliedEnchantmentsProvider());
-        register(new ItemStackStoredEnchantmentsProvider());
-        register(new ItemStackApplicablePotionEffectsProvider());
-
-        register(Keys.PLACEABLE_BLOCK_TYPES, ImmutableSet.of(),
-                (accessor) -> BreakablePlaceableUtils.get(accessor, Constants.Item.ITEM_PLACEABLE_BLOCKS),
-                (accessor, value) -> BreakablePlaceableUtils.set(accessor, Constants.Item.ITEM_PLACEABLE_BLOCKS, value));
-
-        register(Keys.BREAKABLE_BLOCK_TYPES, ImmutableSet.of(),
-                (accessor) -> BreakablePlaceableUtils.get(accessor, Constants.Item.ITEM_BREAKABLE_BLOCKS),
-                (accessor, value) -> BreakablePlaceableUtils.set(accessor, Constants.Item.ITEM_BREAKABLE_BLOCKS, value));
-
-        register(new ItemStackHideFlagsValueProvider(Keys.HIDE_ATTRIBUTES, Constants.Item.HIDE_ATTRIBUTES_FLAG));
-        register(new ItemStackHideFlagsValueProvider(Keys.HIDE_CAN_DESTROY, Constants.Item.HIDE_CAN_DESTROY_FLAG));
-        register(new ItemStackHideFlagsValueProvider(Keys.HIDE_CAN_PLACE, Constants.Item.HIDE_CAN_PLACE_FLAG));
-        register(new ItemStackHideFlagsValueProvider(Keys.HIDE_ENCHANTMENTS, Constants.Item.HIDE_ENCHANTMENTS_FLAG));
-        register(new ItemStackHideFlagsValueProvider(Keys.HIDE_MISCELLANEOUS, Constants.Item.HIDE_MISCELLANEOUS_FLAG));
-        register(new ItemStackHideFlagsValueProvider(Keys.HIDE_UNBREAKABLE, Constants.Item.HIDE_UNBREAKABLE_FLAG));
-
-        register(new ItemStackBookAuthorProvider());
-        register(new ItemStackBookGenerationProvider());
-        register(new ItemStackBookPagesProvider());
-        register(new ItemStackPlainBookPagesProvider());
-
-        register(new ItemStackFireworkEffectsProvider());
-//        register(new ItemStackFireworkFlightModifierProvider());
-
-        register(new ItemStackPotionColorProvider());
-        register(new ItemStackPotionEffectsProvider());
-        register(new ItemStackPotionTypeProvider());
-
-        register(new ItemStackShieldBannerBaseColorProvider());
-        register(new ItemStackShieldBannerPatternsProvider());
-
-        register(new ItemStackSignLinesProvider());
-
-        // TODO ItemType Data? a bunch of the providers here actually operate on the ItemType instead of Stack
-        register(new ItemStackFuelBurnTimeProvider());
-        register(new ItemStackEfficiencyProvider());
-        register(new ItemStackReplenishedFoodProvider());
-        register(new ItemStackReplenishedSaturationProvider());
-        register(new ItemStackHarvestingProvider());
-        register(new ItemStackMusicDiscProvider());
-        register(new ItemStackMaxDurabilityProvider());
-        register(new ItemStackToolTypeProvider());
-        register(new ItemStackArmorMaterialProvider());
-        register(new ItemStackEquipmentTypeProvider());
-        register(new ItemStackDamageAbsorptionProvider());
-        register(new ItemStackContainerProvider());
-
-
-//        register(new ItemStackFluidProvider());
-
-        register(new ItemStackColorProvider());
-        register(new ItemStackDyeColorProvider());
-
-        register(new ItemStackGameProfileProvider());
-
-
-        // TODO not actually ItemStack but ItemType
-        register(new ItemDisplayNameProvider());
-
-        // TODO generic DataProviderRegistryBuilder?
-        register(new INameableDisplayNameProvider());
-
+        ArmorItemStackData.register(this.registrator);
+        BlockItemStackData.register(this.registrator);
+        BlockTypeItemStackData.register(this.registrator);
+        BookItemStackData.register(this.registrator);
+        BookPagesItemStackData.register(this.registrator);
+        FireworkItemStackData.register(this.registrator);
+        HideFlagsItemStackData.register(this.registrator);
+        IDyeableArmorItemStackData.register(this.registrator);
+        ItemStackData.register(this.registrator);
+        MusicDiscItemStackData.register(this.registrator);
+        PotionItemStackData.register(this.registrator);
+        ShieldItemStackData.register(this.registrator);
+        SignItemStackData.register(this.registrator);
+        SkullItemStackData.register(this.registrator);
+        TieredItemStackData.register(this.registrator);
+        ToolItemStackData.register(this.registrator);
     }
 }
