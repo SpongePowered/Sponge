@@ -22,44 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.server;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.common.world.portal.EndPortalType;
+import org.spongepowered.common.world.portal.NetherPortalType;
 
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
-public final class SpongeWorldRegistrationBuilder implements WorldRegistration.Builder {
+public final class PortalTypeStreamGenerator {
 
-    @Nullable private ResourceKey key;
-    @Nullable private String directoryName;
-
-    @Override
-    public WorldRegistration.Builder key(ResourceKey key) {
-        this.key = checkNotNull(key);
-        return this;
+    private PortalTypeStreamGenerator() {
     }
 
-    @Override
-    public WorldRegistration.Builder directoryName(String name) {
-        this.directoryName = checkNotNull(name);
-        return this;
-    }
-
-    @Override
-    public WorldRegistration.Builder reset() {
-        this.directoryName = "World A";
-        return this;
-    }
-
-    @Override
-    public WorldRegistration build() throws IllegalStateException {
-        checkNotNull(this.key);
-        checkNotNull(this.directoryName);
-        checkState(!this.directoryName.isEmpty(), "Directory name cannot be empty!");
-
-        return new WorldRegistration(this.key, this.directoryName);
+    public static Stream<PortalType> stream() {
+        return Stream.of(
+            new EndPortalType(ResourceKey.minecraft("end")),
+            new NetherPortalType(ResourceKey.minecraft("nether"))
+        );
     }
 }

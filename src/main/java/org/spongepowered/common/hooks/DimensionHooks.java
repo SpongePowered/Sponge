@@ -22,24 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.hooks;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.Teleporter;
-import net.minecraft.world.World;
+import net.minecraft.world.dimension.DimensionType;
+import org.spongepowered.api.world.dimension.DimensionTypes;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 /**
- * Compatibility interface to handle Forge binary patching {@link Teleporter} to implement their ITeleporter
+ * Dimension hooks to handle differences in logic between Sponge's Multi-World system
+ * and a platform's version of it.
  */
-public interface ForgeITeleporterBridge {
+public interface DimensionHooks {
 
-    // Copied from Forge to match their teleporter methods, this allows
-    // the forge mod provided teleporters to still work with common
-    // code.
-    void bridge$placeEntity(World world, Entity entity, float yaw);
-
-    // used internally to handle vanilla hardcoding
-    default boolean bridge$isVanilla() {
-        return this.getClass().equals(Teleporter.class);
+    /**
+     * Asks the platform if the provided {@link SpongeDimensionType dimension type} should
+     * generate a spawn on load as a default (typically a specific world's config file will
+     * veto this post initial world creation)
+     *
+     * <p>Sponge's DimensionType is not a 1:1 mapping to Mojang's {@link DimensionType} and
+     * it is left up to the platform to calculate the correlation between the two and determine
+     * the appropriate return value</p>
+     *
+     * @param dimensionType The type
+     * @return True to generate spawn on load as a default
+     */
+    default boolean doesGenerateSpawnOnLoad(SpongeDimensionType dimensionType) {
+        return DimensionTypes.OVERWORLD.get() == dimensionType;
     }
 }

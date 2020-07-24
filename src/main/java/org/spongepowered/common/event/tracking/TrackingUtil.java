@@ -146,8 +146,7 @@ public final class TrackingUtil {
     public static void tickEntity(final Consumer<net.minecraft.entity.Entity> consumer, final net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final EntityBridge mixinEntity = (EntityBridge) entity;
-        if (!mixinEntity.bridge$shouldTick()) {
+        if (!((EntityBridge) entity).bridge$shouldTick()) {
             return;
         }
 
@@ -164,25 +163,23 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             entityTiming.startTiming();
             consumer.accept(entity);
-            if (ShouldFire.MOVE_ENTITY_EVENT_POSITION || ShouldFire.ROTATE_ENTITY_EVENT) {
-                SpongeCommonEventFactory.callMoveEntityEvent(entity, context);
-            }
-        } catch (Exception | NoClassDefFoundError e) {
+            SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
+            SpongeCommonEventFactory.callRotateEntityEvent(entity);
+        } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
         }
     }
 
-    public static void tickkGlobalEntity(final Consumer<net.minecraft.entity.Entity> consumer, final net.minecraft.entity.Entity entity) {
+    public static void tickGlobalEntity(final Consumer<net.minecraft.entity.Entity> consumer, final net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final EntityBridge mixinEntity = (EntityBridge) entity;
-        if (!mixinEntity.bridge$shouldTick()) {
+        if (!((EntityBridge) entity).bridge$shouldTick()) {
             return;
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
         try (final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
+            final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
         ) {
             if (entity instanceof CreatorTrackedBridge) {
                 ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
@@ -193,10 +190,9 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             entityTiming.startTiming();
             consumer.accept(entity);
-            if (ShouldFire.MOVE_ENTITY_EVENT_POSITION || ShouldFire.ROTATE_ENTITY_EVENT) {
-                SpongeCommonEventFactory.callMoveEntityEvent(entity, context);
-            }
-        } catch (Exception | NoClassDefFoundError e) {
+            SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
+            SpongeCommonEventFactory.callRotateEntityEvent(entity);
+        } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
         }
     }
@@ -204,8 +200,7 @@ public final class TrackingUtil {
     public static void tickRidingEntity(final net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final EntityBridge mixinEntity = (EntityBridge) entity;
-        if (!mixinEntity.bridge$shouldTick()) {
+        if (!((EntityBridge) entity).bridge$shouldTick()) {
             return;
         }
 
@@ -223,10 +218,9 @@ public final class TrackingUtil {
             }
             context.buildAndSwitch();
             entity.updateRidden();
-            if (ShouldFire.MOVE_ENTITY_EVENT_POSITION || ShouldFire.ROTATE_ENTITY_EVENT) {
-                SpongeCommonEventFactory.callMoveEntityEvent(entity, context);
-            }
-        } catch (Exception | NoClassDefFoundError e) {
+            SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
+            SpongeCommonEventFactory.callRotateEntityEvent(entity);
+        } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
         }
     }

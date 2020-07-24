@@ -60,6 +60,7 @@ public final class EventContextKeyStreamGenerator {
             new SpongeEventContextKey<>(ResourceKey.sponge("liquid_mix"), TypeTokens.SERVER_WORLD_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("location"), TypeTokens.SERVER_LOCATION_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("modify_event"), TypeTokens.CHANGE_BLOCK_EVENT_MODIFY_TOKEN),
+            new SpongeEventContextKey<>(ResourceKey.sponge("movement_type"), TypeTokens.MOVEMENT_TYPE_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("neighbor_notify_source"), TypeTokens.BLOCK_SNAPSHOT_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("notifier"), TypeTokens.USER_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("piston_extend"), TypeTokens.SERVER_WORLD_TOKEN),
@@ -74,7 +75,6 @@ public final class EventContextKeyStreamGenerator {
             new SpongeEventContextKey<>(ResourceKey.sponge("simulated_player"), TypeTokens.GAME_PROFILE_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("spawn_type"), TypeTokens.SPAWN_TYPE_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("subject"), TypeTokens.SUBJECT_TOKEN),
-            new SpongeEventContextKey<>(ResourceKey.sponge("teleport_type"), TypeTokens.TELEPORT_TYPE_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("used_hand"), TypeTokens.HAND_TYPE_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("used_item"), TypeTokens.ITEM_STACK_SNAPSHOT_TOKEN),
             new SpongeEventContextKey<>(ResourceKey.sponge("weapon"), TypeTokens.ITEM_STACK_SNAPSHOT_TOKEN)

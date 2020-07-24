@@ -32,7 +32,7 @@ import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
 
 @Mixin(targets = "net.kyori.adventure.bossbar.BossBarImpl")
-public class BossBarImplMixin implements BossBarBridge {
+public abstract class BossBarImplMixin implements BossBarBridge {
     private ServerBossInfo bridge$vanillaServerBar;
 
     @Override

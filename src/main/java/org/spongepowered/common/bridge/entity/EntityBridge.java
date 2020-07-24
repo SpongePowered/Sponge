@@ -30,6 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -73,6 +74,8 @@ public interface EntityBridge {
     default void bridge$clearWrappedCaptureList() {
 
     }
+
+    boolean bridge$setLocation(ServerLocation location);
 
     /**
      * @author gabizou - July 26th, 2018

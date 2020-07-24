@@ -26,12 +26,9 @@ package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface WorldSettingsBridge {
@@ -41,8 +38,6 @@ public interface WorldSettingsBridge {
     Difficulty bridge$getDifficulty();
 
     boolean bridge$isSeedRandomized();
-
-    PortalAgentType bridge$getPortalAgentType();
 
     DataContainer bridge$getGeneratorSettings();
 
@@ -79,8 +74,6 @@ public interface WorldSettingsBridge {
     void bridge$setCommandsEnabled(boolean state);
 
     void bridge$setGenerateBonusChest(boolean state);
-
-    void bridge$setPortalAgentType(PortalAgentType type);
 
     void bridge$setRandomSeed(boolean state);
 

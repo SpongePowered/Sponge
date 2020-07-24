@@ -59,7 +59,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.user.UserManager;
-import org.spongepowered.api.world.TeleportHelper;
+import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;

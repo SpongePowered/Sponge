@@ -72,7 +72,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
+import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
@@ -157,12 +157,6 @@ public class SpongeImplHooks {
     }
 
     public static void onTileChunkUnload(final TileEntity tileEntity) {
-        // Overwritten in SpongeForge
-    }
-
-    // World
-
-    public static void registerPortalAgentType(@Nullable final ForgeITeleporterBridge teleporter) {
         // Overwritten in SpongeForge
     }
 

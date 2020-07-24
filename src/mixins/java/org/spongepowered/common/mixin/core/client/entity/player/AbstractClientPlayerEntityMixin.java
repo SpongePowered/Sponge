@@ -22,15 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.core.client.entity.player;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
-import org.spongepowered.common.SpongeCatalogType;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.core.entity.player.PlayerEntityMixin;
 
-public final class SpongeTeleportType extends SpongeCatalogType implements TeleportType {
+@Mixin(AbstractClientPlayerEntity.class)
+public abstract class AbstractClientPlayerEntityMixin extends PlayerEntityMixin {
 
-    public SpongeTeleportType(ResourceKey key) {
-        super(key);
+    @Override
+    public boolean bridge$isInvisible() {
+        return false;
+    }
+
+    @Override
+    public void bridge$setInvisible(boolean invisible) {
+
+    }
+
+    @Override
+    public boolean bridge$isVanished() {
+        return false;
+    }
+
+    @Override
+    public void bridge$setVanished(boolean vanished) {
+
+    }
+
+    @Override
+    public boolean bridge$isUncollideable() {
+        return false;
+    }
+
+    @Override
+    public void bridge$setUncollideable(boolean uncollideable) {
+
+    }
+
+    @Override
+    public boolean bridge$isUntargetable() {
+        return false;
+    }
+
+    @Override
+    public void bridge$setUntargetable(boolean untargetable) {
+
     }
 }

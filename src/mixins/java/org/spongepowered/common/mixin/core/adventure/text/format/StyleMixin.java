@@ -42,7 +42,7 @@ import static org.spongepowered.common.adventure.SpongeAdventure.asVanilla;
 import java.io.IOException;
 
 @Mixin(net.kyori.adventure.text.format.Style.class)
-public class StyleMixin implements StyleBridge {
+public abstract class StyleMixin implements StyleBridge {
     private Style bridge$vanilla;
 
     @Override

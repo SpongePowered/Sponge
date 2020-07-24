@@ -32,7 +32,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,8 +43,6 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
-
-import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -63,7 +61,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Nullable private Boolean impl$keepSpawnLoaded = null;
     private boolean impl$generateSpawnOnLoad = false;
     private boolean impl$pvpEnabled = true;
-    @Nullable private PortalAgentType portalAgentType;
     private boolean seedRandomized = false;
     @Nullable private DataContainer impl$generatorSettings;
 
@@ -114,16 +111,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Override
     public Difficulty bridge$getDifficulty() {
         return this.impl$difficulty;
-    }
-
-    @Override
-    public PortalAgentType bridge$getPortalAgentType() {
-        return this.portalAgentType;
-    }
-
-    @Override
-    public void bridge$setPortalAgentType(PortalAgentType type) {
-        this.portalAgentType = type;
     }
 
     @Override

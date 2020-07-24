@@ -52,7 +52,7 @@ public final class ClientLauncher extends VanillaLauncher {
     @Override
     public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
         super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-        this.getLogger().info("Loading Minecraft Client, please wait...");
+        this.getLogger().info("Loading Sponge, please wait...");
 
         SpongeBootstrap.perform("Client", () -> Main.main(args));
     }

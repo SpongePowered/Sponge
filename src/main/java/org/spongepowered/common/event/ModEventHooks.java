@@ -22,17 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.event;
 
-import org.spongepowered.api.world.teleport.PortalAgentType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.dimension.DimensionType;
 
-public interface TeleporterBridge extends ForgeITeleporterBridge {
+/**
+ * Static methods for events where Forge would have called them in common code we overwrite of Forge's.
+ *
+ * Only to be used if there is no equivalent Sponge event for the particular Forge event
+ *
+ * It is expected that SpongeForge (or another implementation) will overwrite these methods to call their specific event
+ */
+public final class ModEventHooks {
 
-    void bridge$removePortalPositionFromCache(Long portalLocation);
-
-    void bridge$setPortalAgentType(PortalAgentType type);
-
-    void bridge$setNetherPortalType(boolean isNetherPortal);
-
-    PortalAgentType bridge$getPortalAgentType();
+    public static void firePlayerChangedDimensionEvent(final PlayerEntity player, final DimensionType fromDimensionType,
+            final DimensionType toDimensionType) {
+    }
 }

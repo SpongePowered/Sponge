@@ -100,7 +100,6 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
     @Override
     public boolean bridge$fireAuthEvent() {
         final Component disconnectMessage = TextComponent.of("You are not allowed to log in to this server.");
-        // Cause is created directly as we can't access the cause stack manager from off the main thread
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
                 cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this, false);

@@ -50,6 +50,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
+import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.net.Proxy;
@@ -129,5 +130,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     @Override
     public void bridge$setTemporaryIntegratedServer(final IntegratedServer server) {
         this.impl$temporaryIntegratedServer = server;
+    }
+
+    @Override
+    public ClientType bridge$getClientType() {
+        return ClientType.SPONGE_VANILLA;
     }
 }

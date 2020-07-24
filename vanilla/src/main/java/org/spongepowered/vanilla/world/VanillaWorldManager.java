@@ -88,6 +88,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -136,7 +137,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public Optional<org.spongepowered.api.world.server.ServerWorld> getWorld(final ResourceKey key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         return (Optional<org.spongepowered.api.world.server.ServerWorld>) (Object) Optional.ofNullable(this.worlds.get(key));
     }
@@ -472,7 +473,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setUserMessage(new TranslationTextComponent("menu.generatingTerrain"));
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) serverWorld;
         MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Preparing start region for world '{}' ({}/{})", apiWorld.getKey(),
-            apiWorld.getDimension().getType().getKey(), serverWorld.getDimension().getType().getId());
+            apiWorld.getProperties().getDimensionType().getKey(), serverWorld.getDimension().getType().getId());
         final BlockPos spawnPoint = serverWorld.getSpawnPoint();
         final ChunkPos spawnChunkPos = new ChunkPos(spawnPoint);
         chunkStatusListener.start(spawnChunkPos);

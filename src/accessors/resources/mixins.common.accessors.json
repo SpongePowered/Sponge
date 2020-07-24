@@ -173,6 +173,7 @@
         "world.raid.RaidManagerAccessor",
         "world.server.ChunkManagerAccessor",
         "world.server.EntityTrackerAccessor",
+        "world.server.ServerChunkProviderAccessor",
         "world.server.ServerWorldAccessor",
         "world.spawner.AbstractSpawnerAccessor",
         "world.storage.SaveHandlerAccessor"

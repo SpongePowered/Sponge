@@ -35,27 +35,18 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -63,27 +54,19 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
+import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.TeleporterBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -146,180 +129,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public boolean setLocation(ServerLocation location) {
         Preconditions.checkNotNull(location, "The location was null!");
-        if (this.isRemoved()) {
-            return false;
-        }
-
-        // Don't allow setting locations to dimensions we have zero idea about
-        if (!((SpongeWorldManager) Sponge.getServer().getWorldManager()).isDimensionTypeRegistered(((ServerWorld) location.getWorld()).getDimension().getType())) {
-            return false;
-        }
-
-        try (final BasicPluginContext context = PluginPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
-            context.buildAndSwitch();
-
-            final MoveEntityEvent.Teleport event;
-
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                if (!frame.getCurrentContext().containsKey(EventContextKeys.TELEPORT_TYPE)) {
-                    frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.PLUGIN);
-                }
-
-                event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, location);
-                if (event.isCancelled()) {
-                    return false;
-                }
-
-                location = ServerLocation.of(event.getToWorld(), event.getToPosition());
-            }
-
-            final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge) ((ServerWorld) this.shadow$getEntityWorld()).getChunkProvider();
-            final boolean previous = chunkProviderServer.bridge$getForceChunkRequests();
-            chunkProviderServer.bridge$setForceChunkRequests(true);
-            try {
-                final List<Entity> passengers = ((Entity) (Object) this).getPassengers();
-
-                boolean isTeleporting = true;
-                boolean isChangingDimension = false;
-                if (!location.getWorld().getKey().equals(((org.spongepowered.api.world.server.ServerWorld) this.shadow$getEntityWorld()).getKey())) {
-                    if ((Entity) (Object) this instanceof ServerPlayerEntity) {
-                        // Close open containers
-                        final ServerPlayerEntity entityPlayerMP = (ServerPlayerEntity) (Object) this;
-                        if (entityPlayerMP.openContainer != entityPlayerMP.container) {
-                            ((ServerPlayer) entityPlayerMP).closeInventory(); // Call API method to make sure we capture it
-                        }
-
-                        EntityUtil.transferPlayerToWorld(entityPlayerMP, event, (ServerWorld) location.getWorld(),
-                                (TeleporterBridge) ((ServerWorld) location.getWorld()).getDefaultTeleporter());
-                    } else {
-                        EntityUtil.transferEntityToWorld((Entity) (Object) this, event, (ServerWorld) location.getWorld(),
-                                (TeleporterBridge) ((ServerWorld) location.getWorld()).getDefaultTeleporter(), false);
-                    }
-
-                    isChangingDimension = true;
-                }
-
-                final double distance = location.getPosition().distance(this.getPosition());
-
-                if (distance <= 4) {
-                    isTeleporting = false;
-                }
-
-                if ((Entity) (Object) this instanceof ServerPlayerEntity && ((ServerPlayerEntity) (Entity) (Object) this).connection != null) {
-                    final ServerPlayerEntity player = (ServerPlayerEntity) (Entity) (Object) this;
-
-                    // No reason to attempt to load chunks unless we're teleporting
-                    if (isTeleporting || isChangingDimension) {
-                        // Close open containers
-                        if (player.openContainer != player.container) {
-                            ((ServerPlayer) player).closeInventory(); // Call API method to make sure we capture it
-                        }
-
-                        // TODO - determine if this is right.
-                        ((ServerWorld) location.getWorld()).getChunkProvider()
-                                .forceChunk(new ChunkPos(location.getChunkPosition().getX(), location.getChunkPosition().getZ()), true);
-                    }
-                    player.connection
-                            .setPlayerLocation(location.getX(), location.getY(), location.getZ(), ((Entity) (Object) this).rotationYaw,
-                                    ((Entity) (Object) this).rotationPitch);
-                    ((ServerPlayNetHandlerBridge) player.connection).bridge$setLastMoveLocation(null); // Set last move to teleport target
-                } else {
-                    this.shadow$setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
-                }
-
-                if (isTeleporting || isChangingDimension) {
-                    // Re-attach passengers
-                    for (final Entity passenger : passengers) {
-                        if (!((org.spongepowered.api.world.server.ServerWorld) passenger.getEntityWorld()).getKey().equals(((org.spongepowered.api.world.server.ServerWorld) this.shadow$getEntityWorld()).getKey())) {
-                            ((org.spongepowered.api.entity.Entity) passenger).setLocation(location);
-                        }
-                        passenger.startRiding((Entity) (Object) this, true);
-                    }
-                }
-                return true;
-            } finally {
-                chunkProviderServer.bridge$setForceChunkRequests(previous);
-            }
-
-        }
-    }
-
-    @Override
-    public boolean setLocationAndRotation(final ServerLocation location, final Vector3d rotation, final EnumSet<RelativePositions> relativePositions) {
-        boolean relocated = true;
-
-        if (relativePositions.isEmpty()) {
-            // This is just a normal teleport that happens to set both.
-            relocated = this.setLocation(location);
-            this.setRotation(rotation);
-        } else {
-            if (((Entity) (Object) this) instanceof ServerPlayerEntity && ((ServerPlayerEntity) (Entity) (Object) this).connection != null) {
-                // Players use different logic, as they support real relative movement.
-                final EnumSet<SPlayerPositionLookPacket.Flags> relativeFlags = EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class);
-
-                if (relativePositions.contains(RelativePositions.X)) {
-                    relativeFlags.add(SPlayerPositionLookPacket.Flags.X);
-                }
-
-                if (relativePositions.contains(RelativePositions.Y)) {
-                    relativeFlags.add(SPlayerPositionLookPacket.Flags.Y);
-                }
-
-                if (relativePositions.contains(RelativePositions.Z)) {
-                    relativeFlags.add(SPlayerPositionLookPacket.Flags.Z);
-                }
-
-                if (relativePositions.contains(RelativePositions.PITCH)) {
-                    relativeFlags.add(SPlayerPositionLookPacket.Flags.X_ROT);
-                }
-
-                if (relativePositions.contains(RelativePositions.YAW)) {
-                    relativeFlags.add(SPlayerPositionLookPacket.Flags.Y_ROT);
-                }
-
-                ((ServerPlayerEntity) ((Entity) (Object) this)).connection.setPlayerLocation(location.getPosition().getX(), location.getPosition()
-                        .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
-            } else {
-                ServerLocation resultantLocation = this.getLocation();
-                Vector3d resultantRotation = this.getRotation();
-
-                if (relativePositions.contains(RelativePositions.X)) {
-                    resultantLocation = resultantLocation.add(location.getPosition().getX(), 0, 0);
-                }
-
-                if (relativePositions.contains(RelativePositions.Y)) {
-                    resultantLocation = resultantLocation.add(0, location.getPosition().getY(), 0);
-                }
-
-                if (relativePositions.contains(RelativePositions.Z)) {
-                    resultantLocation = resultantLocation.add(0, 0, location.getPosition().getZ());
-                }
-
-                if (relativePositions.contains(RelativePositions.PITCH)) {
-                    resultantRotation = resultantRotation.add(rotation.getX(), 0, 0);
-                }
-
-                if (relativePositions.contains(RelativePositions.YAW)) {
-                    resultantRotation = resultantRotation.add(0, rotation.getY(), 0);
-                }
-
-                // From here just a normal teleport is needed.
-                relocated = this.setLocation(resultantLocation);
-                this.setRotation(resultantRotation);
-            }
-        }
-        return relocated;
-    }
-
-    @Override
-    public boolean setLocationAndRotation(final ServerLocation location, final Vector3d rotation) {
-        final boolean result = this.setLocation(location);
-        if (result) {
-            this.setRotation(rotation);
-            return true;
-        }
-
-        return false;
+        return ((EntityBridge) this).bridge$setLocation(location);
     }
 
     @Override
@@ -376,7 +186,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         if (((Entity) (Object) this) instanceof ServerPlayerEntity && ((ServerPlayerEntity) (Entity) (Object) this).connection != null) {
             // Force an update, this also set the rotation in this entity
             ((ServerPlayerEntity) (Entity) (Object) this).connection.setPlayerLocation(this.getPosition().getX(), this.getPosition().getY(),
-                    this.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
+                    this.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(SPlayerPositionLookPacket.Flags.class));
         } else {
             if (!this.shadow$getEntityWorld().isRemote) { // We can't set the rotation update on client worlds.
                 ((ServerWorldBridge) this.getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);

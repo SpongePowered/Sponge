@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.server;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ChunkHolder;
 import net.minecraft.world.server.ChunkManager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,6 +37,7 @@ public interface ChunkManagerAccessor {
 
     @Accessor("entities") Int2ObjectMap<EntityTrackerAccessor> accessor$getEntityTrackers();
 
-    @Invoker("getLoadedChunksIterable") Iterable<ChunkHolder> accessor$getLoadedChunksIterable();
+    @Accessor("generator") void accessor$setChunkGenerator(ChunkGenerator<?> chunkGenerator);
 
+    @Invoker("getLoadedChunksIterable") Iterable<ChunkHolder> accessor$getLoadedChunksIterable();
 }

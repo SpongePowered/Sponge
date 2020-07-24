@@ -22,20 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.entity;
+package org.spongepowered.common.world;
 
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import net.minecraft.entity.Entity;
 
-final class LeavingDimensionState extends EntityPhaseState<BasicEntityContext> {
+public final class DimensionChangeResult<E extends Entity> {
 
-    @Override
-    public BasicEntityContext createNewContext(final PhaseTracker tracker) {
-        return new BasicEntityContext(this, tracker);
+    private final E entity;
+    private final boolean success;
+    private final boolean remove;
+
+    public DimensionChangeResult(final E entity, final boolean success, final boolean remove) {
+        this.entity = entity;
+        this.success = success;
+        this.remove = remove;
     }
 
-    @Override
-    public boolean doesDenyChunkRequests() {
-        return false;
+    public E getEntity() {
+        return this.entity;
     }
 
+    public boolean isSuccess() {
+        return this.success;
+    }
+
+    public boolean shouldRemove() {
+        return !this.success && this.remove;
+    }
 }

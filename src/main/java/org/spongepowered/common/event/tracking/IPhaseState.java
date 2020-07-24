@@ -467,7 +467,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @return Whether this state denies chunk requests, usually false
      */
-    default boolean doesDenyChunkRequests() {
+    default boolean doesDenyChunkRequests(final C context) {
         return false;
     }
 

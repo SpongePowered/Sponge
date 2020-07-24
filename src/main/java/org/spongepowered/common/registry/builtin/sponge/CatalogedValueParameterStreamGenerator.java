@@ -32,7 +32,7 @@ import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.world.dimension.Dimension;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigDecimalValueParameter;
@@ -71,7 +71,6 @@ public final class CatalogedValueParameterStreamGenerator {
                 new SpongeColorValueParameter(), // Includes ColorArgumentParser.color(), but does more. TODO: what does 1.16 do?
                 new SpongeDataContainerValueParameter(),
                 new SpongeDateTimeValueParameter(),
-                StandardCatalogedArgumentParser.createCast("dimension", DimensionArgument.getDimension(), Dimension.class),
                 StandardCatalogedArgumentParser.createIdentity("double", DoubleArgumentType.doubleArg()),
                 new SpongeDurationValueParameter(),
                 // This is for a single entity. We'll have a separate one for multiple.

@@ -26,6 +26,9 @@ package org.spongepowered.common.accessor.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -70,11 +73,15 @@ public interface EntityAccessor {
 
     @Accessor("fire") void accessor$setFire(int fire);
 
-    @Invoker("copyDataFromOld") void accessor$copyDataFromOld(Entity entity);
+    @Accessor("inPortal") void accessor$setInPortal(boolean value);
 
     @Invoker("setFlag") void accessor$setFlag(int flag, boolean set);
 
     @Invoker("getFireImmuneTicks") int accessor$getFireImmuneTicks();
 
     @Invoker("getPermissionLevel") int accessor$getPermissionLevel();
+
+    @Accessor("lastPortalPos") void accessor$setLastPortalPos(BlockPos value);
+
+    @Accessor("timeUntilPortal") void accessor$setTimeUntilPortal(int value);
 }

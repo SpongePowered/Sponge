@@ -54,8 +54,6 @@ public abstract class NetherDimensionMixin extends DimensionMixin {
      */
     @Overwrite
     public DimensionType getType() {
-        // Ha ha, fuck you Vanilla
-        // return DimensionType.THE_NETHER;
         return ((DimensionAccessor) this).accessor$getType();
     }
 }

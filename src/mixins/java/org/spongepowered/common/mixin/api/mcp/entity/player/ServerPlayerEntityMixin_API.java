@@ -77,6 +77,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -98,6 +99,9 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
+import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.common.util.BookUtil;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
@@ -186,6 +190,11 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public Set<SkinPart> getDisplayedSkinParts() {
         return ((ServerPlayerEntityBridge) this).bridge$getSkinParts();
+    }
+
+    @Override
+    public void sendEnvironment(final DimensionType dimensionType) {
+        ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment(dimensionType);
     }
 
     @Override

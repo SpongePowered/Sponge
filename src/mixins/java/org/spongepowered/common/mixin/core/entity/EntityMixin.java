@@ -31,24 +31,37 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.server.TicketType;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
+import org.spongepowered.api.event.cause.entity.teleport.MovementTypes;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
@@ -56,18 +69,33 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
+import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.DimensionChangeResult;
+import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge,
-        CommandSourceProviderBridge, DataCompoundHolder {
+public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge,
+        TimingBridge, CommandSourceProviderBridge, DataCompoundHolder {
 
     // @formatter:off
+
     @Shadow @Nullable private Entity ridingEntity;
     @Shadow @Final private List<Entity> passengers;
     @Shadow public net.minecraft.world.World world;
@@ -92,14 +120,17 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public float prevRotationYaw;
     @Shadow protected int portalCounter;
     @Shadow public boolean forceSpawn;
+    @Shadow public boolean collided;
+    @Shadow public boolean collidedHorizontally;
+    @Shadow public boolean collidedVertically;
 
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
     @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
-    @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
+    @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int shadow$getEntityId();
     @Shadow public abstract boolean shadow$isBeingRidden();
-    @Shadow public abstract Entity getRidingEntity();
+    @Shadow public abstract Entity shadow$getRidingEntity();
     @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow protected abstract void shadow$removePassenger(Entity passenger);
     @Shadow @Nullable public Entity shadow$changeDimension(final DimensionType dimension) { return null; } // Shadow
@@ -119,21 +150,181 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow public abstract int shadow$getMaxAir();
     @Shadow protected abstract void shadow$applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract CommandSource shadow$getCommandSource();
+    @Shadow public abstract World shadow$getEntityWorld();
+    @Shadow public abstract Vec3d shadow$getPositionVector();
+    @Shadow public abstract MinecraftServer shadow$getServer();
+    @Shadow public abstract void shadow$setWorld(World worldIn);
+
+    // @formatter:on
+
+    @Shadow public abstract void shadow$setLocationAndAngles(double p_70012_1_, double p_70012_3_, double p_70012_5_, float p_70012_7_, float p_70012_8_);
 
     private boolean impl$isConstructing = true;
     @Nullable private Component impl$displayName;
     @Nullable private BlockPos impl$lastCollidedBlockPos;
     private boolean impl$trackedInWorld = false;
-    private boolean vanish$collision = false;
-    private boolean vanish$untargetable = false;
-    private boolean vanish$isVanished = false;
-    private boolean vanish$pendingVisibilityUpdate = false;
+    private boolean impl$collision = false;
+    private boolean impl$untargetable = false;
+    private boolean impl$isVanished = false;
+    private boolean impl$pendingVisibilityUpdate = false;
     @Nullable private Cause impl$destructCause;
     private int impl$customFireImmuneTicks = this.shadow$getFireImmuneTicks();
     private boolean impl$skipSettingCustomNameTag = false;
-    private int vanish$visibilityTicks = 0;
+    private int impl$visibilityTicks = 0;
 
     // @formatter:on
+
+    @Override
+    public boolean bridge$setLocation(final ServerLocation location) {
+        if (this.removed || ((WorldBridge) location.getWorld()).bridge$isFake()) {
+            return false;
+        }
+
+        try (final TeleportContext context = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
+            context.buildAndSwitch();
+
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(SpongeCommon.getActivePlugin());
+                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+
+                final Vec3d originalPosition = this.shadow$getPositionVector();
+
+                net.minecraft.world.server.ServerWorld destinationWorld = (net.minecraft.world.server.ServerWorld) location.getWorld();
+
+                if (this.shadow$getEntityWorld() != destinationWorld) {
+                    final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(), location.getWorld(),
+                            location.getWorld());
+                    if (SpongeCommon.postEvent(event) && ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
+                        return false;
+                    }
+
+                    final ChangeEntityWorldEvent.Reposition repositionEvent =
+                            SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
+                                    (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(),
+                                    VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition(), event.getOriginalDestinationWorld(),
+                                    location.getPosition(), event.getDestinationWorld());
+
+                    if (SpongeCommon.postEvent(event)) {
+                        return false;
+                    }
+
+                    destinationWorld = (net.minecraft.world.server.ServerWorld) event.getDestinationWorld();
+
+                    this.posX = repositionEvent.getDestinationPosition().getX();
+                    this.posY = repositionEvent.getDestinationPosition().getY();
+                    this.posZ = repositionEvent.getDestinationPosition().getZ();
+                } else {
+                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()),
+                            location.getPosition(), location.getPosition());
+                    if (SpongeCommon.postEvent(event)) {
+                        return false;
+                    }
+
+                    this.posX = event.getDestinationPosition().getX();
+                    this.posY = event.getDestinationPosition().getY();
+                    this.posZ = event.getDestinationPosition().getZ();
+                }
+
+                if (!destinationWorld.getChunkProvider().chunkExists((int) this.posX >> 4, (int) this.posZ >> 4)) {
+                    // Roll back the position
+                    this.posX = originalPosition.x;
+                    this.posY = originalPosition.y;
+                    this.posZ = originalPosition.z;
+                    return false;
+                }
+
+                ((Entity) (Object) this).detach();
+
+                net.minecraft.world.server.ServerWorld originalWorld = (net.minecraft.world.server.ServerWorld) this.shadow$getEntityWorld();
+                ((PlatformServerWorldBridge) this.shadow$getEntityWorld()).bridge$removeEntity((Entity) (Object) this, true);
+                this.bridge$revive();
+                this.shadow$setWorld(destinationWorld);
+                destinationWorld.func_217460_e((Entity) (Object) this);
+
+                originalWorld.resetUpdateEntityTick();
+                destinationWorld.resetUpdateEntityTick();
+
+                final ChunkPos chunkPos = new ChunkPos((int) this.posX >> 4, (int) this.posZ >> 4);
+                destinationWorld.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((Entity) (Object) this).getEntityId());
+            }
+
+            return true;
+        }
+    }
+
+    /**
+     * @author Zidane
+     * @reason This is a catch-all method to ensure MoveEntityEvent is fired with
+     *         useful information
+     */
+    @Overwrite
+    public final void teleportKeepLoaded(double x, double y, double z) {
+        if (this.world instanceof net.minecraft.world.server.ServerWorld) {
+            final PhaseTracker server = PhaseTracker.SERVER;
+            boolean hasMovementContext = true;
+            if (!server.getCurrentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
+                hasMovementContext = false;
+                server.pushCause(SpongeCommon.getActivePlugin());
+                server.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+            }
+
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(server.getCurrentCause(),
+                    (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()), new Vector3d(x, y, z),
+                    new Vector3d(x, y, z));
+
+            if (!hasMovementContext) {
+                server.popCause();
+                server.removeContext(EventContextKeys.MOVEMENT_TYPE);
+            }
+
+            if (SpongeCommon.postEvent(event)) {
+                return;
+            }
+
+            final Vector3d destinationPosition = event.getDestinationPosition();
+            ChunkPos chunkpos = new ChunkPos(new BlockPos(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ()));
+            ((net.minecraft.world.server.ServerWorld)this.world).getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkpos, 0,
+                    this.shadow$getEntityId());
+            this.world.getChunk(chunkpos.x, chunkpos.z);
+            this.shadow$setPositionAndUpdate(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ());
+        }
+    }
+
+    /**
+     * @author Zidane
+     * @reason Call to EntityUtil to handle dimension changes
+     */
+    @Nullable
+    @Overwrite
+    public Entity changeDimension(DimensionType destination) {
+        if (this.shadow$getEntityWorld().isRemote || this.removed) {
+            return null;
+        }
+
+        try (final TeleportContext context = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
+            context
+                .worldChange()
+                .buildAndSwitch();
+
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(this);
+                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
+
+                final DimensionChangeResult<Entity> result = EntityUtil.invokePortalTo((Entity) (Object) this, new WrappedITeleporterPortalType(
+                    (PlatformITeleporterBridge) this.shadow$getServer().getWorld(destination).getDefaultTeleporter(), null), destination);
+
+                if (!result.isSuccess() && result.shouldRemove()) {
+                    return null;
+                }
+
+                return result.getEntity();
+            }
+        }
+    }
+/*
+>>>>>>> Implement the Portal API.
 
     @Override
     public boolean bridge$isConstructing() {
@@ -852,6 +1043,4 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             this.data$setCompound(null); // No data? No need to keep the nbt
         }
     }
-
-
 }

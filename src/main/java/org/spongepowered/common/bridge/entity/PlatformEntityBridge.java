@@ -22,25 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.bridge.entity;
 
-import net.minecraft.world.Teleporter;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.teleport.PortalAgentType;
-import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
-import org.spongepowered.common.world.SpongePortalAgentType;
+import net.minecraft.entity.Entity;
 
-import java.util.stream.Stream;
+/**
+ * Bridge methods designed as hooks for various methods called on an {@link Entity}
+ * where a platform would want to adjust logic
+ */
+public interface PlatformEntityBridge {
 
-public final class PortalAgentTypeStreamGenerator {
-
-    private PortalAgentTypeStreamGenerator() {
+    /**
+     * Called when the {@link Entity} is to be not marked as removed.
+     */
+    default void bridge$revive() {
+        ((Entity) this).removed = false;
     }
 
-    public static Stream<PortalAgentType> stream() {
-        return Stream.of(
-                new SpongePortalAgentType(ResourceKey.minecraft("default_the_nether"), (Class<ForgeITeleporterBridge>) (Object) Teleporter.class),
-                new SpongePortalAgentType(ResourceKey.minecraft("default_the_end"), (Class<ForgeITeleporterBridge>) (Object) Teleporter.class)
-        );
+    /**
+     * Called when the {@link Entity} is to be marked to be removed.
+     *
+     * @param keepData Specify to the platform that it should keep any specific
+     * data added to this entity when removing
+     */
+    default void bridge$remove(boolean keepData) {
+        ((Entity) this).remove();
     }
 }

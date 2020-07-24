@@ -39,7 +39,7 @@ public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericG
     }
 
     @Override
-    public boolean doesDenyChunkRequests() {
+    public boolean doesDenyChunkRequests(final GenericGenerationContext context) {
         return true;
     }
 

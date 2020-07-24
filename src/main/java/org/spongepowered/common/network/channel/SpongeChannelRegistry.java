@@ -26,6 +26,7 @@ package org.spongepowered.common.network.channel;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.IPacket;
+import net.minecraft.network.login.ServerLoginNetHandler;
 import net.minecraft.network.login.client.CCustomPayloadLoginPacket;
 import net.minecraft.network.login.server.SCustomPayloadLoginPacket;
 import net.minecraft.network.play.client.CCustomPayloadPacket;
@@ -52,6 +53,10 @@ import org.spongepowered.common.accessor.network.login.client.CCustomPayloadLogi
 import org.spongepowered.common.accessor.network.login.server.SCustomPayloadLoginPacketAccessor;
 import org.spongepowered.common.accessor.network.play.client.CCustomPayloadPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SCustomPayloadPlayPacketAccessor;
+import org.spongepowered.common.bridge.client.MinecraftBridge;
+import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.network.channel.packet.SpongeBasicPacketChannel;
 import org.spongepowered.common.network.channel.packet.SpongePacketChannel;
 import org.spongepowered.common.network.channel.raw.SpongeRawDataChannel;
@@ -147,6 +152,15 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         }
     }
 
+    private static final class ClientTypeSyncFuture {
+
+        private final CompletableFuture<Void> future;
+
+        private ClientTypeSyncFuture(final CompletableFuture<Void> future) {
+            this.future = future;
+        }
+    }
+
     public void postRegistryEvent() {
         final Cause cause = Cause.of(EventContext.empty(), this);
         final RegisterChannelEvent event = new RegisterChannelEvent() {
@@ -167,6 +181,35 @@ public class SpongeChannelRegistry implements ChannelRegistry {
             }
         };
         Sponge.getEventManager().post(event);
+    }
+
+    public CompletableFuture<Void> requestClientType(final EngineConnection connection) {
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+
+        final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
+        final int transactionId = store.nextId();
+
+        store.put(transactionId, null, new ClientTypeSyncFuture(future));
+
+        final ChannelBuf payload = this.bufferAllocator.buffer();
+        final IPacket<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.SPONGE_CLIENT_TYPE, payload, transactionId);
+        PacketSender.sendTo(connection, mcPacket, sendFuture -> {
+            if (!sendFuture.isSuccess()) {
+                future.completeExceptionally(sendFuture.cause());
+            }
+        });
+
+        return future;
+    }
+
+    private void handleClientType(final EngineConnection connection, final ChannelBuf payload) {
+        final ClientType clientType = ClientType.from(payload.readString());
+        if (clientType == null) {
+            // TODO This shouldn't happen...what do? Terminate them?
+            return;
+        }
+
+        ((NetworkManagerBridge) ((ServerLoginNetHandler) connection).networkManager).bridge$setClientType(clientType);
     }
 
     /**
@@ -266,7 +309,10 @@ public class SpongeChannelRegistry implements ChannelRegistry {
     }
 
     private boolean handlePlayPayload(final EngineConnection connection, final ResourceKey channelKey, final ChannelBuf payload) {
-        if (channelKey.equals(Constants.Channels.SPONGE_CHANNEL_REGISTRY)) {
+        if (channelKey.equals(Constants.Channels.SPONGE_CLIENT_TYPE)) {
+            this.handleClientType(connection, payload);
+            return true;
+        } else if (channelKey.equals(Constants.Channels.SPONGE_CHANNEL_REGISTRY)) {
             this.handleChannelRegistry(connection, payload);
             return true;
         } else if (channelKey.equals(Constants.Channels.REGISTER_KEY)) {
@@ -306,6 +352,14 @@ public class SpongeChannelRegistry implements ChannelRegistry {
 
     private boolean handleLoginRequestPayload(final EngineConnection connection, final ResourceKey channelKey,
             final int transactionId, final ChannelBuf payload) {
+        if (channelKey.equals(Constants.Channels.SPONGE_CLIENT_TYPE)) {
+            final ClientType clientType = ((MinecraftBridge) Sponge.getClient()).bridge$getClientType();
+            final ChannelBuf responsePayload = this.bufferAllocator.buffer();
+            responsePayload.writeString(clientType.getName());
+            final IPacket<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
+            PacketSender.sendTo(connection, mcPacket);
+            return true;
+        }
         if (channelKey.equals(Constants.Channels.SPONGE_CHANNEL_REGISTRY)) {
             this.handleChannelRegistry(connection, payload);
             // Respond with registered channels
@@ -361,6 +415,13 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         final TransactionStore transactionStore = ConnectionUtil.getTransactionStore(connection);
         final TransactionStore.Entry entry = transactionStore.remove(transactionId);
         if (entry == null) {
+            return;
+        }
+        if (entry.getData() instanceof ClientTypeSyncFuture) {
+            if (payload != null) {
+                this.handleClientType(connection, payload);
+            }
+            ((ClientTypeSyncFuture) entry.getData()).future.complete(null);
             return;
         }
         if (entry.getData() instanceof ChannelRegistrySyncFuture) {
