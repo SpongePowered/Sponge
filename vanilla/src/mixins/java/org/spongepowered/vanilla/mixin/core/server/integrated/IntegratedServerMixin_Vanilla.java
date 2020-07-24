@@ -24,16 +24,22 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.integrated;
 
+import com.google.gson.JsonElement;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.Commands;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.world.WorldSettings;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -46,6 +52,9 @@ import java.net.Proxy;
 
 @Mixin(IntegratedServer.class)
 public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer implements VanillaServer  {
+
+    @Shadow @Final private Minecraft mc;
+    @Shadow @Final private WorldSettings worldSettings;
 
     public IntegratedServerMixin_Vanilla(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn,
         Commands p_i50590_4_, YggdrasilAuthenticationService p_i50590_5_,
@@ -70,5 +79,10 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer impl
     private void vanilla$callEngineStartedAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.callStartedEngineEvent(this);
+    }
+
+    @Override
+    public void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, JsonElement generatorOptions) {
+        this.getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions, true, this.worldSettings, this.mc.gameSettings.difficulty);
     }
 }

@@ -52,6 +52,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -91,8 +92,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class VanillaWorldManager implements SpongeWorldManager {
 
@@ -241,15 +240,15 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public @org.checkerframework.checker.nullness.qual.Nullable ServerWorld getWorld(DimensionType dimensionType) {
+    public @Nullable ServerWorld getWorld(DimensionType dimensionType) {
         Preconditions.checkNotNull(dimensionType);
 
         return this.worldsByType.get(dimensionType);
     }
 
     @Override
-    public @org.checkerframework.checker.nullness.qual.Nullable ServerWorld getDefaultWorld() {
-        return this.worldsByType.get(VanillaWorldManager.VANILLA_OVERWORLD);
+    public @Nullable ServerWorld getDefaultWorld() {
+        return this.worlds.get(VanillaWorldManager.VANILLA_OVERWORLD);
     }
 
     @Override
@@ -258,7 +257,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public void loadAllWorlds(final String saveName, final String levelName, final long seed, final WorldType type, final JsonElement generatorOptions) {
+    public void loadAllWorlds(final String saveName, final String levelName, final long seed, final WorldType type, final JsonElement generatorOptions,
+            final boolean isSinglePlayer, @Nullable WorldSettings defaultSettings, final Difficulty defaultDifficulty) {
 
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$convertMapIfNeeded(saveName);
 
@@ -273,25 +273,27 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final Path worldsDirectory = saveName.equals(levelName) ? savesDirectory : savesDirectory.resolve(levelName);
 
-        // Symlink needs special handling
-        try {
-            if (Files.isSymbolicLink(worldsDirectory)) {
-                final Path actualPathLink = Files.readSymbolicLink(worldsDirectory);
-                if (Files.notExists(actualPathLink)) {
-                    Files.createDirectories(actualPathLink);
-                } else if (!Files.isDirectory(actualPathLink)) {
-                    throw new IOException("Worlds directory '" + worldsDirectory + "' symlink to '" + actualPathLink + "' is not a directory!");
+        if (!isSinglePlayer) {
+            // Symlink needs special handling
+            try {
+                if (Files.isSymbolicLink(worldsDirectory)) {
+                    final Path actualPathLink = Files.readSymbolicLink(worldsDirectory);
+                    if (Files.notExists(actualPathLink)) {
+                        Files.createDirectories(actualPathLink);
+                    } else if (!Files.isDirectory(actualPathLink)) {
+                        throw new IOException("Worlds directory '" + worldsDirectory + "' symlink to '" + actualPathLink + "' is not a directory!");
+                    }
+                } else {
+                    Files.createDirectories(worldsDirectory);
                 }
-            } else {
-                Files.createDirectories(worldsDirectory);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
-        } catch (IOException ioe) {
-            throw new RuntimeException(ioe);
-        }
 
-        if (!this.server.getAllowNether()) {
-            SpongeCommon.getLogger().warn("The option 'allow-nether' has been set to 'false' in the server.properties. "
-                + "Multi-World support has been disabled and no worlds besides the default world will be loaded.");
+            if (!this.server.getAllowNether()) {
+                SpongeCommon.getLogger().warn("The option 'allow-nether' has been set to 'false' in the server.properties. "
+                        + "Multi-World support has been disabled and no worlds besides the default world will be loaded.");
+            }
         }
 
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setUserMessage(new TranslationTextComponent("menu.loadingLevel"));
@@ -305,7 +307,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             final boolean isDefaultWorld = VanillaWorldManager.VANILLA_OVERWORLD.equals(key);
 
-            if (!isDefaultWorld && !this.server.getAllowNether()) {
+            if (!isDefaultWorld && !isSinglePlayer && !this.server.getAllowNether()) {
                 continue;
             }
 
@@ -329,26 +331,34 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             }
 
             WorldInfo worldInfo = saveHandler.loadWorldInfo();
-            WorldSettings defaultSettings = worldRegistration.getDefaultSettings();
+            if (defaultSettings == null) {
+                defaultSettings = worldRegistration.getDefaultSettings();
+            }
 
-            boolean isNewWorld;
             if (worldInfo == null) {
-                isNewWorld = true;
-                // Pure fresh Vanilla worlds situation (plugins registering worlds to load before now *must* give us an archetype)
-                if (defaultSettings == null) {
-                    if (this.server.isDemo()) {
-                        defaultSettings = MinecraftServer.DEMO_WORLD_SETTINGS;
-                    } else {
-                        defaultSettings = new WorldSettings(seed, this.server.getGameType(), this.server.canStructuresSpawn(), this.server.isHardcore(), type);
-                        if (isDefaultWorld) {
-                            defaultSettings.setGeneratorOptions(generatorOptions);
-                            if (((MinecraftServerAccessor_Vanilla) this.server).accessor$getEnableBonusChest()) {
-                                defaultSettings.enableBonusChest();
+                // Demo code does not run on SinglePlayer
+                if (isSinglePlayer) {
+                    worldInfo = new WorldInfo(defaultSettings, levelName);
+                } else {
+                    // Pure fresh Vanilla worlds situation (plugins registering worlds to load before now *must* give us an archetype)
+                    if (defaultSettings == null) {
+                        if (this.server.isDemo()) {
+                            defaultSettings = MinecraftServer.DEMO_WORLD_SETTINGS;
+                        } else {
+                            defaultSettings =
+                                    new WorldSettings(seed, this.server.getGameType(), this.server.canStructuresSpawn(), this.server.isHardcore(),
+                                            type);
+                            if (isDefaultWorld) {
+                                defaultSettings.setGeneratorOptions(generatorOptions);
+                                if (((MinecraftServerAccessor_Vanilla) this.server).accessor$getEnableBonusChest()) {
+                                    defaultSettings.enableBonusChest();
+                                }
                             }
                         }
                     }
+                    worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? saveName : this.getDirectoryName(key));
                 }
-                worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? saveName : this.getDirectoryName(key));
+
                 ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
                 ((WorldInfoBridge) worldInfo).bridge$setDimensionType(dimensionType);
                 ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
@@ -432,8 +442,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 }
             }
 
-            this.server.setDifficultyForAllWorlds(this.server.getDifficulty(), true);
-
             SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(
                 PhaseTracker.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.server.ServerWorld) serverWorld));
@@ -444,6 +452,16 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         this.pendingWorlds.clear();
+
+        if (!isSinglePlayer) {
+            this.server.setDifficultyForAllWorlds(this.server.getDifficulty(), true);
+        } else {
+            this.worldsByType.forEach((k, v) -> {
+                if (v.getWorldInfo().getDifficulty() == null) {
+                    v.getWorldInfo().setDifficulty(defaultDifficulty);
+                }
+            });
+        }
 
         // TODO May not be the best spot for this...
         ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();

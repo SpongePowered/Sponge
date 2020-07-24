@@ -26,6 +26,7 @@ package org.spongepowered.common.world.server;
 
 import com.google.gson.JsonElement;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
@@ -68,7 +69,8 @@ public interface SpongeWorldManager extends WorldManager {
 
     WorldInfo getInfo(DimensionType dimensionType);
 
-    void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions);
+    void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions, boolean isSinglePlayer, @Nullable
+            WorldSettings defaultSettings, Difficulty defaultDifficulty);
 
     void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean isCustom);
 

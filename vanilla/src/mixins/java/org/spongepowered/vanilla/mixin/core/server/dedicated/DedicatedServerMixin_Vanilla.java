@@ -33,6 +33,7 @@ import net.minecraft.command.Commands;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,11 +59,6 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
     }
 
     @Override
-    protected void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, JsonElement generatorOptions) {
-        this.getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions);
-    }
-
-    @Override
     public void run() {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishRegistries();
@@ -83,5 +79,10 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
         // TODO Minecraft 1.14 - For now, fire LoadedGameEvent right away but this may not be the best place..
 
         lifecycle.callLoadedGameEvent();
+    }
+
+    @Override
+    protected void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, JsonElement generatorOptions) {
+        this.getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions, false, null, Difficulty.NORMAL);
     }
 }
