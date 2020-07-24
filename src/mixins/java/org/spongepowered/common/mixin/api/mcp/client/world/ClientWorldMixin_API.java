@@ -34,10 +34,6 @@ public abstract class ClientWorldMixin_API implements org.spongepowered.api.worl
 
     @Override
     public boolean isLoaded() {
-        if (((WorldBridge) this).bridge$isFake()) {
-            return false;
-        }
-
         return Minecraft.getInstance().world == (Object) this;
     }
 }

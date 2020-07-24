@@ -24,65 +24,33 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.teleport.PortalAgent;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-public final class InvokingTeleporterContext extends EntityContext<InvokingTeleporterContext> {
+public final class TeleportContext extends EntityContext<TeleportContext> {
 
-    private ServerWorld world;
-    private PortalAgent agent;
-    private Transform transform;
-    private boolean didPort = false;
+    private boolean isPlayer;
+    private boolean isWorldChange;
 
-    InvokingTeleporterContext(final IPhaseState<? extends InvokingTeleporterContext> state, PhaseTracker tracker) {
+    public TeleportContext(final IPhaseState<? extends TeleportContext> state, PhaseTracker tracker) {
         super(state, tracker);
     }
 
-    @Override
-    protected void reset() {
-        super.reset();
-        this.world = null;
-        this.agent = null;
-        this.transform = null;
-        this.didPort = false;
+    public boolean isPlayer() {
+        return this.isPlayer;
     }
 
-    public InvokingTeleporterContext setTargetWorld(final ServerWorld world) {
-        this.world = world;
+    public TeleportContext player() {
+        this.isPlayer = true;
         return this;
     }
 
-    public ServerWorld getTargetWorld() {
-        return this.world;
+    public boolean isWorldChange() {
+        return this.isWorldChange;
     }
 
-    public InvokingTeleporterContext setTeleporter(final PortalAgent agent) {
-        this.agent = agent;
+    public TeleportContext worldChange() {
+        this.isWorldChange = true;
         return this;
-    }
-
-    public PortalAgent getTeleporter() {
-        return this.agent;
-    }
-
-    public InvokingTeleporterContext setExitTransform(final Transform transform) {
-        this.transform = transform;
-        return this;
-    }
-
-    public Transform getExitTransform() {
-        return this.transform;
-    }
-
-    public InvokingTeleporterContext setDidPort(final boolean didPort) {
-        this.didPort = didPort;
-        return this;
-    }
-
-    public boolean getDidPort() {
-        return this.didPort;
     }
 }

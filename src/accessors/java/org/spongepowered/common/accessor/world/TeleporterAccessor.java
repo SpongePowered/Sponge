@@ -22,41 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.entity;
+package org.spongepowered.common.accessor.world;
 
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-final class ChangingToDimensionState extends EntityPhaseState<DimensionChangeContext> {
+@Mixin(Teleporter.class)
+public interface TeleporterAccessor {
 
-    @Override
-    public DimensionChangeContext createNewContext(final PhaseTracker tracker) {
-        return new DimensionChangeContext(this, tracker)
-            .addBlockCaptures()
-            .addEntityCaptures();
-    }
-
-    @Override
-    public boolean tracksBlockSpecificDrops(final DimensionChangeContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final DimensionChangeContext context, final Entity entity) {
-        final ServerWorld worldServer = context.getTargetWorld();
-        // Allowed to use the force spawn because it's the same "entity"
-        // This is the same "forceAddEntity" method that the TeleportCommand uses
-        worldServer.func_217460_e((net.minecraft.entity.Entity) entity);
-        return true;
-    }
-
-    @Override
-    public boolean doesDenyChunkRequests() {
-        return false;
-    }
-
-
-
+    @Accessor("world") ServerWorld accessor$getWorld();
 }

@@ -31,36 +31,58 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
+import org.spongepowered.api.event.cause.entity.teleport.MovementTypes;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.DimensionChangeResult;
+import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge,
-        CommandSourceProviderBridge {
+public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge,
+        TimingBridge, CommandSourceProviderBridge {
 
     // @formatter:off
     @Shadow @Nullable private Entity ridingEntity;
@@ -115,6 +137,15 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     @Shadow protected abstract void shadow$applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract CommandSource shadow$getCommandSource();
 
+    @Shadow public boolean collided;
+    @Shadow public abstract World shadow$getEntityWorld();
+    @Shadow public abstract Vec3d shadow$getPositionVector();
+    @Shadow public abstract MinecraftServer shadow$getServer();
+
+    // @formatter:on
+
+    @Shadow public boolean collidedHorizontally;
+    @Shadow public boolean collidedVertically;
     private boolean impl$isConstructing = true;
     @Nullable private Component impl$displayName;
     @Nullable private BlockPos impl$lastCollidedBlockPos;
@@ -129,6 +160,71 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private int vanish$visibilityTicks = 0;
 
     // @formatter:on
+
+    @Override
+    public boolean bridge$setLocation(final ServerLocation location) {
+        if (this.removed || ((WorldBridge) location.getWorld()).bridge$isFake()) {
+            return false;
+        }
+
+        try (final TeleportContext context = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
+
+            if (!(((ServerWorld) this.shadow$getEntityWorld()).getKey().equals(location.getWorldKey()))) {
+                context.worldChange().buildAndSwitch();
+
+
+                return true;
+            }
+
+            context.buildAndSwitch();
+
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+
+                final MoveEntityEvent.Position.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(frame.getCurrentCause(),
+                    (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(), location.getWorld(), location.getWorld(),
+                        VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition());
+
+                if (SpongeCommon.postEvent(event)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @author Zidane
+     * @reason Call to EntityUtil to handle dimension changes
+     */
+    @Nullable
+    @Overwrite
+    public Entity changeDimension(DimensionType destination) {
+        if (this.shadow$getEntityWorld().isRemote || this.removed) {
+            return null;
+        }
+
+        try (final TeleportContext context = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
+            context
+                .worldChange()
+                .buildAndSwitch();
+
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(this);
+                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
+
+                final DimensionChangeResult<Entity> result = EntityUtil.invokePortalTo((Entity) (Object) this, new WrappedITeleporterPortalType(
+                    (PlatformITeleporterBridge) this.shadow$getServer().getWorld(destination).getDefaultTeleporter(), null), destination);
+
+                if (!result.isSuccess() && result.shouldRemove()) {
+                    return null;
+                }
+
+                return result.getEntity();
+            }
+        }
+    }
 /*
 
     @Override
@@ -792,5 +888,4 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     public CommandSource bridge$getCommandSource(final Cause cause) {
         return this.shadow$getCommandSource();
     }
-
 }

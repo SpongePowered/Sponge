@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.network;
 
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.network.channel.TransactionStore;
 
 import java.net.InetSocketAddress;
@@ -46,4 +47,8 @@ public interface NetworkManagerBridge {
     void bridge$setVersion(int version);
 
     Set<ResourceKey> bridge$getRegisteredChannels();
+
+    ClientType bridge$getClientType();
+
+    void bridge$setClientType(ClientType clientType);
 }

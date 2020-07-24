@@ -125,6 +125,7 @@ import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
+import org.spongepowered.api.event.cause.entity.teleport.MovementType;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ContainerType;
@@ -147,7 +148,7 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
-import org.spongepowered.api.world.teleport.PortalAgentType;
+import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
@@ -180,13 +181,14 @@ import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ParrotTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.PhaseTypeRegistrar;
-import org.spongepowered.common.registry.builtin.sponge.PortalAgentTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.PortalTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.QueryTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.RabbitTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SelectorSortAlgorithmStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SelectorTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SerializationBehaviorStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.MovementTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
@@ -510,12 +512,13 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(InstrumentType.class, ResourceKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true, false)
             .generateRegistry(Key.class, ResourceKey.sponge("key"), KeyStreamGenerator.stream(), true, true)
             .generateRegistry(MooshroomType.class, ResourceKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true, false)
+            .generateRegistry(MovementType.class, ResourceKey.sponge("movement_type"), MovementTypeStreamGenerator.stream(), true, true)
             .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true, false)
             .generateRegistry(PandaGene.class, ResourceKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true, false)
             .generateRegistry(PhantomPhase.class, ResourceKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true, false)
             .generateRegistry(PickupRule.class, ResourceKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true, false)
             .generateRegistry(PistonType.class, ResourceKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true, false)
-            .generateRegistry(PortalAgentType.class, ResourceKey.minecraft("portal_agent_type"), PortalAgentTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(PortalType.class, ResourceKey.minecraft("portal_type"), PortalTypeStreamGenerator.stream(), true, true)
             .generateRegistry(PortionType.class, ResourceKey.minecraft("portion_type"), Arrays.stream(Half.values()), true, false)
             .generateRegistry(QueryType.class, ResourceKey.sponge("query_type"), QueryTypeStreamGenerator.stream(), true, true)
             .generateRegistry(RaidStatus.class, ResourceKey.minecraft("raid_status"), Arrays.stream(Raid.Status.values()), true, false)

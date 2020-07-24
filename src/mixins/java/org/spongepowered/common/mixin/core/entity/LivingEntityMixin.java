@@ -24,76 +24,31 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.Effect;
-import net.minecraft.potion.Effects;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import org.apache.logging.log4j.Level;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
-import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
-import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.damage.DamageEventHandler;
-import org.spongepowered.common.event.damage.DamageObject;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -148,6 +103,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected abstract void shadow$addItemParticles(ItemStack stack, int count);
     @Shadow public abstract void shadow$wakeUp();
     // @formatter:on
+
+    @Shadow public abstract boolean shadow$attemptTeleport(double p_213373_1_, double p_213373_3_, double p_213373_5_, boolean p_213373_7_);
 
     private int impl$maxAir = this.shadow$getMaxAir();
     @Nullable private ItemStack impl$activeItemStackCopy;
@@ -569,101 +526,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             }
         }
         return false;
-    }
-
-    *//**
-     * @author Aaron1011 - August 15, 2016
-     * @author i509VCB - Minecraft 1.14.4
-     * @reason An overwrite avoids the need for a local-capture inject and two redirects
-     */
-    // TODO: Investigate mixing into setPositionAndUpdate to catch more teleports
-    @SuppressWarnings("ConstantConditions")
-    @Overwrite
-    public boolean attemptTeleport(final double x, final double y, final double z, final boolean particleEffects) {
-        final double initialX = this.posX;
-        final double initialY = this.posY;
-        final double initialZ = this.posZ;
-        this.posX = x;
-        this.posY = y;
-        this.posZ = z;
-        boolean flag = false;
-        BlockPos blockpos = new BlockPos((Entity) (Object) this);
-        final World world = this.world;
-
-        if (world.isBlockLoaded(blockpos)) {
-            boolean blocking = false;
-
-            while (!blocking && blockpos.getY() > 0) {
-                final BlockPos blockpos1 = blockpos.down();
-                final BlockState blockState = world.getBlockState(blockpos1);
-
-                if (blockState.getMaterial().blocksMovement()) {
-                    blocking = true;
-                } else {
-                    --this.posY;
-                    blockpos = blockpos1;
-                }
-            }
-
-            if (blocking) {
-                // Sponge start
-                if (!world.isRemote) {
-                    final Transform fromTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(initialX, initialY, initialZ));
-                    final Transform toTransform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(this.posX, this.posY, this.posZ));
-                    org.spongepowered.api.world.server.ServerWorld spongeWorld = (org.spongepowered.api.world.server.ServerWorld) world;
-                    final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, spongeWorld, spongeWorld);
-                    if (event.isCancelled()) {
-                        this.posX = initialX;
-                        this.posY = initialY;
-                        this.posZ = initialZ;
-                        return false;
-                    }
-                    final Vector3d position = event.getToPosition();
-//                    this.rotationYaw = (float) event.getToTransform().getYaw();
-//                    this.rotationPitch = (float) event.getToTransform().getPitch();
-                    this.shadow$setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
-                } else {
-                    this.shadow$setPositionAndUpdate(this.posX, this.posY, this.posZ);
-                }
-                // Sponge end
-
-                if (world.areCollisionShapesEmpty((Entity) (Object) this) && !world.containsAnyLiquid(this.shadow$getBoundingBox()))
-                {
-                    flag = true;
-                }
-            }
-        }
-
-        if (!flag) {
-            // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
-            if (!world.isRemote) {
-                final Transform transform = ((org.spongepowered.api.entity.Entity) this).getTransform().withPosition(new Vector3d(initialX, initialY, initialZ));
-                org.spongepowered.api.world.server.ServerWorld spongeWorld = (org.spongepowered.api.world.server.ServerWorld) world;
-                final MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, spongeWorld, spongeWorld);
-                if (event.isCancelled()) {
-                    return false;
-                }
-                final Vector3d position = event.getToPosition();
-//                this.rotationYaw = (float) event.getToTransform().getYaw();
-//                this.rotationPitch = (float) event.getToTransform().getPitch();
-                this.shadow$setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
-            } else {
-                this.shadow$setPositionAndUpdate(initialX, initialY, initialZ);
-            }
-            // Sponge end
-
-            return false;
-        } else {
-            if (particleEffects) {
-                world.setEntityState((Entity) (Object) this, (byte) 46);
-            }
-
-            if ((LivingEntity) (Object) this instanceof CreatureEntity) {
-                ((CreatureEntity) (Object) this).getNavigator().clearPath();
-            }
-
-            return true;
-        }
     }
 /*
     @Override

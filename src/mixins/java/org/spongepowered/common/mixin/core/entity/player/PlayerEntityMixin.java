@@ -32,6 +32,7 @@ import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.scoreboard.Scoreboard;
@@ -55,6 +56,7 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -108,6 +110,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     }
     @Shadow public abstract String shadow$getScoreboardName();
 
+    @Shadow @Final public PlayerContainer container;
     private boolean impl$affectsSpawning = true;
     private Vector3d impl$targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
     private boolean impl$dontRecalculateExperience;

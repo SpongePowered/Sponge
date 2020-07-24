@@ -127,7 +127,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             this.shadow$guardEntityTick(consumer, entity);
             return;
         }
-        TrackingUtil.tickkGlobalEntity(consumer, entity);
+        TrackingUtil.tickGlobalEntity(consumer, entity);
         // TODO - determine if updating rotation is needed.
     }
 

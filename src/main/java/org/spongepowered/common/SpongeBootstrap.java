@@ -29,10 +29,13 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.plugin.PluginKeys;
 
 import java.util.List;
@@ -62,6 +65,8 @@ public final class SpongeBootstrap {
         SpongeBootstrap.lifecycle.callRegisterBuilderEvent();
         SpongeBootstrap.lifecycle.callRegisterChannelEvent();
         SpongeBootstrap.lifecycle.establishServices();
+
+        SpongePacketHandler.init((SpongeChannelRegistry) Sponge.getChannelRegistry());
 
         Launcher.getInstance().getLogger().info("Loading Minecraft '{}', please wait...", engineName);
         engineStart.run();

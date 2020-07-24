@@ -71,7 +71,7 @@ final class ServerTickListenerState extends ListenerPhaseState<ServerTickListene
     }
 
     @Override
-    public boolean doesDenyChunkRequests() {
+    public boolean doesDenyChunkRequests(final ServerTickListenerContext context) {
         return true;
     }
 

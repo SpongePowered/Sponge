@@ -25,10 +25,15 @@
 package org.spongepowered.common.bridge.client;
 
 import net.minecraft.server.integrated.IntegratedServer;
+import org.spongepowered.common.entity.player.ClientType;
 
 public interface MinecraftBridge {
 
     IntegratedServer bridge$getTemporaryIntegratedServer();
     
     void bridge$setTemporaryIntegratedServer(IntegratedServer server);
+
+    default ClientType bridge$getClientType() {
+        return ClientType.VANILLA;
+    }
 }

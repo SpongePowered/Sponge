@@ -29,14 +29,28 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SRespawnPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameType;
+import net.minecraft.world.WorldType;
+import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scoreboard.Scoreboard;
+import org.spongepowered.api.world.dimension.DimensionTypes;
+import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
+import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
+import org.spongepowered.common.network.packet.RegisterDimensionTypePacket;
+import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Collection;
@@ -45,8 +59,13 @@ import java.util.Set;
 
 public interface ServerPlayerEntityBridge {
 
-    default boolean bridge$usesCustomClient() {
-        return false;
+    default ClientType bridge$getClientType() {
+        final ServerPlayerEntity mPlayer = (ServerPlayerEntity) this;
+        if (mPlayer.connection == null) {
+            return ClientType.VANILLA;
+        }
+
+        return ((NetworkManagerBridge) mPlayer.connection.netManager).bridge$getClientType();
     }
 
     int bridge$getViewDistance();
@@ -110,4 +129,32 @@ public interface ServerPlayerEntityBridge {
     @Nullable GameProfile bridge$getPreviousGameProfile();
 
     void bridge$setPreviousGameProfile(@Nullable GameProfile gameProfile);
+
+    default void bridge$sendDimensionData(final NetworkManager manager, final DimensionType dimensionType) {
+    }
+
+    default void bridge$sendChangeDimension(final DimensionType type, final WorldType generator, final GameType gameType) {
+
+        final SpongeDimensionType logicType = ((DimensionTypeBridge) type).bridge$getSpongeDimensionType();
+        if (logicType == DimensionTypes.OVERWORLD.get()) {
+            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, generator, gameType));
+        } else if (logicType == DimensionTypes.THE_NETHER.get()) {
+            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, generator, gameType));
+        } else {
+            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.THE_END, generator, gameType));
+        }
+    }
+
+    default void bridge$sendViewerEnvironment(final org.spongepowered.api.world.dimension.DimensionType dimensionType) {
+
+        final WorldType generator = ((ServerPlayerEntity) this).getEntityWorld().getWorldInfo().getGenerator();
+        final GameType gameType = ((ServerPlayerEntity) this).interactionManager.getGameType();
+        if (dimensionType == DimensionTypes.OVERWORLD.get()) {
+            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, generator, gameType));
+        } else if (dimensionType == DimensionTypes.THE_NETHER.get()) {
+            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, generator, gameType));
+        } else {
+            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.THE_END, generator, gameType));
+        }
+    }
 }

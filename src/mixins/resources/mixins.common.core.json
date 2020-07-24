@@ -40,12 +40,15 @@
         "util.text.TranslationTextComponentMixin",
         "world.BossInfoMixin",
         "world.ServerBossInfoMixin",
+        "world.TeleporterMixin",
+        "world.WorldMixin",
         "world.WorldSettingsMixin",
         "world.dimension.EndDimensionMixin",
         "world.dimension.DimensionMixin",
         "world.dimension.DimensionTypeMixin",
         "world.dimension.NetherDimensionMixin",
         "world.dimension.OverworldDimensionMixin",
+        "world.server.ServerWorldMixin",
         "world.storage.SaveHandlerMixin",
         "world.storage.WorldInfoMixin"
     ],
@@ -53,6 +56,7 @@
         "client.network.handshake.ClientHandshakeNetHandlerMixin",
         "client.network.login.ClientLoginNetHandlerMixin",
         "client.network.play.ClientPlayNetHandlerMixin",
+        "client.world.ClientWorldMixin",
         "client.MinecraftMixin"
     ],
     "server": [

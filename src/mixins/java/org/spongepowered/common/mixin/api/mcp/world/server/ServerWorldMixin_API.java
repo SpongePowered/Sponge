@@ -40,6 +40,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.ServerTickList;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.raid.Raid;
 import net.minecraft.world.raid.RaidManager;
@@ -49,7 +50,6 @@ import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -84,6 +84,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -92,6 +93,11 @@ import javax.annotation.Nullable;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowered.api.world.server.ServerWorld> implements org.spongepowered.api.world.server.ServerWorld {
+
+    @Shadow @Final private ServerTickList<Block> pendingBlockTicks;
+    @Shadow @Final private ServerTickList<Fluid> pendingFluidTicks;
+    @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
+    @Shadow private boolean insideTick;
 
     @Shadow public abstract void shadow$save(@Nullable IProgressUpdate p_217445_1_, boolean p_217445_2_, boolean p_217445_3_) throws SessionLockException;
     @Shadow public abstract boolean shadow$addEntity(Entity p_217376_1_);
@@ -104,11 +110,6 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
     @Shadow public abstract RaidManager shadow$getRaids();
     @Nullable @Shadow public abstract Raid shadow$findRaid(BlockPos p_217475_1_);
-
-    @Shadow @Final private ServerTickList<Block> pendingBlockTicks;
-    @Shadow @Final private ServerTickList<Fluid> pendingFluidTicks;
-
-    @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
 
     // World
     @Override

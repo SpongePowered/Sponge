@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.world.storage;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonParseException;
-import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.key.KeyedValue;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Difficulty;
@@ -42,12 +40,10 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.gen.GeneratorType;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Implements;
@@ -178,8 +174,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public PortalAgentType getPortalAgentType() {
-        return ((WorldInfoBridge) this).bridge$getPortalAgent();
+    public void setDimensionType(DimensionType dimensionType) {
+        ((WorldInfoBridge) this).bridge$changeDimensionLogicType(dimensionType);
     }
 
     @Override

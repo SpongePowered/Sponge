@@ -38,7 +38,6 @@ import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.config.ConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.vanilla.client.VanillaClient;
 

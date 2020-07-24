@@ -24,20 +24,34 @@
  */
 package org.spongepowered.common.network.packet;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnectionTypes;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.WorldAccessor;
+import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class SpongePacketHandler {
@@ -84,6 +98,37 @@ public final class SpongePacketHandler {
 
                     response.success(createTrackerDataResponse(owner, notifier));
                 });
+        channel.register(RegisterDimensionTypePacket.class, 2).addHandler(ClientSideConnection.class,
+                (packet, connection) -> {
+
+                    if (Registry.DIMENSION_TYPE.containsKey(packet.actualDimension)) {
+                        return;
+                    }
+
+                    final SpongeDimensionType logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.
+                                    spongepowered.api.world.dimension.DimensionType.class, (ResourceKey) (Object) packet.dimensionLogic)
+                            .orElse(null);
+
+                    final DimensionType registeredType = DimensionTypeAccessor.accessor$construct(packet.dimensionId, "", packet.actualDimension.getPath(),
+                            logicType.getDimensionFactory(),
+                            logicType.hasSkylight());
+                    DimensionTypeAccessor.accessor$register(packet.actualDimension.toString(), registeredType);
+
+                    ((DimensionTypeBridge) registeredType).bridge$setSpongeDimensionType(logicType);
+                }
+        );
+        channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientSideConnection.class,
+                (packet, connection) -> {
+                    final ClientWorld world = Minecraft.getInstance().world;
+                    if (world == null) {
+                        return;
+                    }
+
+                    final SpongeDimensionType dimensionType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.
+                            spongepowered.api.world.dimension.DimensionType.class, (ResourceKey) (Object) packet.dimensionLogic).orElse(null);
+                    ((WorldBridge) world).bridge$changeDimension(dimensionType);
+                }
+        );
     }
 
     private static TrackerDataResponsePacket createTrackerDataResponse(
@@ -96,6 +141,6 @@ public final class SpongePacketHandler {
     }
 
     public static PacketChannel getChannel() {
-        return Objects.requireNonNull(channel);
+        return Objects.requireNonNull(SpongePacketHandler.channel);
     }
 }

@@ -59,8 +59,9 @@ public abstract class ServerLoginNetHandlerMixin_Vanilla implements IServerLogin
     // 3. Wait until the client responded for each of the plugin' requests
 
     private static final int HANDSHAKE_NOT_STARTED = 0;
-    private static final int HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS = 1;
-    private static final int HANDSHAKE_SYNC_PLUGIN_DATA = 2;
+    private static final int HANDSHAKE_CLIENT_TYPE = 1;
+    private static final int HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS = 2;
+    private static final int HANDSHAKE_SYNC_PLUGIN_DATA = 3;
 
     private int impl$handshakeState = HANDSHAKE_NOT_STARTED;
 
@@ -77,7 +78,13 @@ public abstract class ServerLoginNetHandlerMixin_Vanilla implements IServerLogin
         if (this.currentLoginState == ServerLoginNetHandler.State.NEGOTIATING) {
             final ServerSideConnection connection = (ServerSideConnection) this;
             if (this.impl$handshakeState == HANDSHAKE_NOT_STARTED) {
-                this.impl$handshakeState = HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS;
+                this.impl$handshakeState = HANDSHAKE_CLIENT_TYPE;
+
+                ((SpongeChannelRegistry) Sponge.getChannelRegistry()).requestClientType(connection).thenAccept(result -> {
+                    this.impl$handshakeState = HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS;
+                });
+
+            } else if (this.impl$handshakeState == HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS) {
                 ((SpongeChannelRegistry) Sponge.getChannelRegistry()).sendLoginChannelRegistry(connection).thenAccept(result -> {
                     final Cause cause = Cause.of(EventContext.empty(), this);
                     final ServerSideConnectionEvent.Handshake event =

@@ -22,27 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
+package org.spongepowered.common.bridge.world;
 
-import com.google.common.base.Preconditions;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.teleport.PortalAgent;
-import org.spongepowered.api.world.teleport.PortalAgentType;
-import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.bridge.world.ForgeITeleporterBridge;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.world.server.ServerWorld;
 
-public final class SpongePortalAgentType extends SpongeCatalogType implements PortalAgentType {
-
-    private final Class<? extends ForgeITeleporterBridge> portalAgentClass;
-
-    public SpongePortalAgentType(ResourceKey key, Class<? extends ForgeITeleporterBridge> portalAgentClass) {
-        super(key);
-        this.portalAgentClass = Preconditions.checkNotNull(portalAgentClass, "The class was null for '" + this.getKey() + ".");
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<? extends PortalAgent> getPortalAgentClass() {
-        return (Class<? extends PortalAgent>) this.portalAgentClass;
+public interface PlatformServerWorldBridge {
+    default void bridge$removeEntity(Entity entity, boolean keepData) {
+        if (entity instanceof ServerPlayerEntity) {
+            ((ServerWorld) this).removePlayer((ServerPlayerEntity) entity);
+        } else {
+            ((ServerWorld) this).removeEntity(entity);
+        }
     }
 }

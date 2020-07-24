@@ -102,7 +102,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
     }
 
     @Override
-    public boolean doesDenyChunkRequests() {
+    public boolean doesDenyChunkRequests(final PlayerTickContext context) {
         return false;
     }
 }

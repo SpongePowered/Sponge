@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
+import org.spongepowered.api.event.cause.entity.teleport.MovementTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -53,8 +52,8 @@ public abstract class EndermanEntityMixin extends MonsterEntityMixin {
         }
         
         try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
-            return this.attemptTeleport(x, y, z, particles);
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
+            return this.shadow$attemptTeleport(x, y, z, particles);
         }
     }
 

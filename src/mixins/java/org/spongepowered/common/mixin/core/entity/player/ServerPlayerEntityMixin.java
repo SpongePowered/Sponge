@@ -24,29 +24,53 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.ServerPlayNetHandler;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.TicketType;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.teleport.MovementTypes;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.user.SpongeUserManager;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 // See also: SubjectMixin_API and SubjectMixin
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, ServerPlayerEntityBridge {
 
     @Shadow public ServerPlayNetHandler connection;
+
+    @Shadow public abstract net.minecraft.world.server.ServerWorld shadow$getServerWorld();
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private @Nullable GameProfile impl$previousGameProfile;
@@ -115,5 +139,83 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public void bridge$setPacketItem(final ItemStack itemstack) {
         this.impl$packetItem = itemstack;
+    }
+
+    @Override
+    public boolean bridge$setLocation(final ServerLocation location) {
+        if (this.removed || ((WorldBridge) location.getWorld()).bridge$isFake()) {
+            return false;
+        }
+
+        try (final TeleportContext context = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
+            context.player().buildAndSwitch();
+
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(SpongeCommon.getActivePlugin());
+                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+
+                final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
+                        (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getServerWorld(), location.getWorld(),
+                        location.getWorld());
+                if (SpongeCommon.postEvent(event) && ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
+                    return false;
+                }
+
+                final MoveEntityEvent.Position.Teleport teleportEvent = SpongeEventFactory.createMoveEntityEventTeleport(frame.getCurrentCause(),
+                        (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getServerWorld(), event.getDestinationWorld(),
+                        location.getWorld(), VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition());
+
+                if (SpongeCommon.postEvent(event)) {
+                    return false;
+                }
+
+                final ChunkPos chunkPos = new ChunkPos((int) location.getX() >> 4, (int) location.getY() >> 4);
+                ((net.minecraft.world.server.ServerWorld) teleportEvent.getDestinationWorld()).getChunkProvider().registerTicket(TicketType
+                        .POST_TELEPORT, chunkPos, 1, ((ServerPlayerEntity) (Object) this).getEntityId());
+                ((ServerPlayerEntity) (Object) this).stopRiding();
+
+                this.posX = location.getX();
+                this.posY = location.getY();
+                this.posZ = location.getZ();
+
+                if (!(((ServerWorld) this.shadow$getServerWorld()).getKey().equals(teleportEvent.getDestinationWorld().getKey()))) {
+                    EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) (Object) this, this.shadow$getServerWorld(),
+                            (net.minecraft.world.server.ServerWorld) location.getWorld(), (net.minecraft.world.server.ServerWorld) teleportEvent
+                                    .getDestinationWorld());
+                } else {
+                    this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
+                    this.connection.captureCurrentPosition();
+                }
+            }
+
+            return true;
+        }
+    }
+
+    /**
+     * @author Zidane
+     * @reason Call to EntityUtil to handle dimension changes
+     */
+    @Nullable
+    @Overwrite
+    public Entity changeDimension(DimensionType destination) {
+        if (this.shadow$getEntityWorld().isRemote || this.removed) {
+            return (ServerPlayerEntity) (Object) this;
+        }
+
+        try (final TeleportContext ignored = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER).player().worldChange().buildAndSwitch()) {
+
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                final WrappedITeleporterPortalType portalType = new WrappedITeleporterPortalType((PlatformITeleporterBridge) this.shadow$getServer()
+                        .getWorld(destination).getDefaultTeleporter(), null);
+
+                frame.pushCause(this);
+                frame.pushCause(portalType);
+                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
+
+                EntityUtil.invokePortalTo((ServerPlayerEntity) (Object) this, portalType, destination);
+                return (ServerPlayerEntity) (Object) this;
+            }
+        }
     }
 }

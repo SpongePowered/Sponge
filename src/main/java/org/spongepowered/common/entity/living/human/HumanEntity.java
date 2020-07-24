@@ -210,7 +210,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
 
     @Override
     public int getMaxInPortalTime() {
-        return 80;
+        return 1;
     }
 
     @Override

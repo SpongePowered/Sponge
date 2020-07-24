@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 
 public abstract class EntityPhaseState<E extends EntityContext<E>> extends PooledPhaseState<E> implements IPhaseState<E> {
 
-    private final String desc = TrackingUtil.phaseStateToString("Block", this);
+    private final String desc = TrackingUtil.phaseStateToString("Entity", this);
 
     @Override
     public boolean doesCaptureEntityDrops(final E context) {
@@ -85,10 +85,9 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
     }
 
     @Override
-    public boolean doesDenyChunkRequests() {
+    public boolean doesDenyChunkRequests(E context) {
         return true;
     }
-
 }
 
 

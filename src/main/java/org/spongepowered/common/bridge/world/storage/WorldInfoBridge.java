@@ -27,9 +27,8 @@ package org.spongepowered.common.bridge.world.storage;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.dimension.DimensionType;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.config.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
@@ -37,7 +36,12 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 public interface WorldInfoBridge {
+
+    @Nullable
+    ServerWorld bridge$getWorld();
 
     @Nullable
     DimensionType bridge$getDimensionType();
@@ -80,8 +84,6 @@ public interface WorldInfoBridge {
 
     void bridge$setSerializationBehavior(SerializationBehavior behavior);
 
-    PortalAgentType bridge$getPortalAgent();
-
     boolean bridge$isModCreated();
 
     void bridge$setModCreated(boolean state);
@@ -110,4 +112,6 @@ public interface WorldInfoBridge {
     void bridge$setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter);
 
     void bridge$saveConfig();
+
+    void bridge$changeDimensionLogicType(org.spongepowered.api.world.dimension.DimensionType dimensionType);
 }

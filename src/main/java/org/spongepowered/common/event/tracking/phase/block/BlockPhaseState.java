@@ -71,7 +71,7 @@ public class BlockPhaseState extends PooledPhaseState<GeneralizedContext> implem
     }
 
     @Override
-    public boolean doesDenyChunkRequests() {
+    public boolean doesDenyChunkRequests(final GeneralizedContext context) {
         return true;
     }
 

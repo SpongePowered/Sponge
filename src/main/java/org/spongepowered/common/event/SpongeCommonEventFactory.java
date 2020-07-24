@@ -639,73 +639,68 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    @Nullable
-    public static Event callMoveEntityEvent(final net.minecraft.entity.Entity entity,
-        final EntityTickContext context) {
-        // Ignore movement event if entity is dead, a projectile, or item.
-        // Note: Projectiles are handled with CollideBlockEvent.Impact
-        if (entity.removed || (!ShouldFire.MOVE_ENTITY_EVENT && !ShouldFire.MOVE_ENTITY_EVENT_POSITION && !ShouldFire.ROTATE_ENTITY_EVENT)) {
-            return null;
+    /**
+     * Performs the logic necessary to post the {@link MoveEntityEvent.Position position event} for an {@link Entity}.
+     *
+     * @param entity The event
+     */
+    public static void callMoveEntityEventPosition(final net.minecraft.entity.Entity entity) {
+        if (entity.removed || (!ShouldFire.MOVE_ENTITY_EVENT || !ShouldFire.MOVE_ENTITY_EVENT_POSITION)) {
+            return;
         }
 
-        final Entity spongeEntity = (Entity) entity;
-        final double deltaX = context.prevX - entity.posX;
-        final double deltaY = context.prevY - entity.posY;
-        final double deltaZ = context.prevZ - entity.posZ;
+        final double deltaX = entity.prevPosX - entity.posX;
+        final double deltaY = entity.prevPosY - entity.posY;
+        final double deltaZ = entity.prevPosZ - entity.posZ;
         final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
+        if (deltaChange < 1f / 256) {
+            return;
+        }
 
-        if (deltaChange > 1f / 256 // Micro-optimization, avoids almost negligible position movement from floating point differences.
-            || entity.rotationPitch != entity.prevRotationPitch
-            || entity.rotationYaw != entity.prevRotationYaw) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(entity);
-                // yes we have a move event.
-                final double currentPosX = entity.posX;
-                final double currentPosY = entity.posY;
-                final double currentPosZ = entity.posZ;
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entity);
 
-                final Vector3d oldPosition = new Vector3d(context.prevX, context.prevY, context.prevZ);
-                final Vector3d currentPosition = new Vector3d(currentPosX, currentPosY, currentPosZ);
+            final MoveEntityEvent.Position event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), (Entity) entity,
+                new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.posX, entity.posY, entity.posZ));
 
-                final Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
-                final Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
-
-                Event event  = null;
-                if (!oldPosition.equals(currentPosition) && ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
-                    event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldPosition, currentPosition, spongeEntity);
-                    if (SpongeCommon.postEvent(event)) { // Cancelled event, reset position to previous position.
-                        entity.posX = context.prevX;
-                        entity.posY = context.prevY;
-                        entity.posZ = context.prevZ;
-                    } else {
-                        Vector3d newPosition = ((MoveEntityEvent) event).getToPosition();
-                        if (!newPosition.equals(currentPosition)) {
-                            entity.posX = newPosition.getX();
-                            entity.posY = newPosition.getY();
-                            entity.posZ = newPosition.getZ();
-                        }
-                    }
-
-                } else if (ShouldFire.ROTATE_ENTITY_EVENT) {
-                    event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldRotationVector, currentRotationVector, spongeEntity);
-                    if (SpongeCommon.postEvent(event)) { // Cancelled event, reset rotation to previous rotation.
-                        entity.rotationPitch = entity.prevRotationPitch;
-                        entity.rotationYaw = entity.prevRotationYaw;
-                    } else {
-                        Vector3d newRotation = ((RotateEntityEvent) event).getToRotation();
-                        if (!newRotation.equals(currentRotationVector)) {
-                            entity.rotationPitch = (float) currentRotationVector.getX();
-                            entity.rotationYaw = (float) currentRotationVector.getY();
-                        }
-                    }
-                }
-
-                return event;
+            if (SpongeCommon.postEvent(event)) {
+                entity.posX = entity.prevPosX;
+                entity.posY = entity.prevPosY;
+                entity.posZ = entity.prevPosZ;
+            } else {
+                entity.posX = event.getToPosition().getX();
+                entity.posY = event.getToPosition().getY();
+                entity.posZ = event.getToPosition().getZ();
             }
         }
-
-        return null;
     }
+
+    /**
+     * Performs the logic necessary to post the {@link RotateEntityEvent rotation event} for an {@link Entity}.
+     *
+     * @param entity The event
+     */
+    public static void callRotateEntityEvent(final net.minecraft.entity.Entity entity) {
+        if (entity.removed || !ShouldFire.ROTATE_ENTITY_EVENT || (entity.rotationPitch == entity.prevRotationPitch && entity.rotationYaw == entity.prevRotationYaw)) {
+            return;
+        }
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entity);
+
+            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
+                new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0), new Vector3d(entity.rotationPitch,
+                    entity.rotationYaw, 0), (Entity) entity);
+            if (SpongeCommon.postEvent(event)) {
+                entity.rotationPitch = entity.prevRotationPitch;
+                entity.rotationYaw = entity.prevRotationYaw;
+            } else {
+                entity.rotationPitch = (float) event.getToRotation().getX();
+                entity.rotationYaw = (float) event.getToRotation().getY();
+            }
+        }
+    }
+
     public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(final LivingEntity entity, @Nullable final DamageSource source, final boolean isMainThread) {
         final Audience originalChannel;
         final Audience channel;
@@ -1054,5 +1049,4 @@ public final class SpongeCommonEventFactory {
         SpongeCommon.postEvent(event);
         return event;
     }
-
 }

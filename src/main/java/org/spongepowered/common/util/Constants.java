@@ -1479,6 +1479,11 @@ public final class Constants {
         public static final ResourceKey SPONGE_CHANNEL_REGISTRY = ResourceKey.sponge("channel_registry");
 
         /**
+         * A sponge channel used to determine the type of client connecting
+         */
+        public static final ResourceKey SPONGE_CLIENT_TYPE = ResourceKey.sponge("client_type");
+
+        /**
          * A minecraft channel used to register channels keys.
          */
         public static final ResourceKey REGISTER_KEY = ResourceKey.minecraft("register");
