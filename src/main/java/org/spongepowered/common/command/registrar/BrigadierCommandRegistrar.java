@@ -184,11 +184,16 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         // Redirect aliases
         for (final String alias : mapping.getAllAliases()) {
             if (!alias.equals(namespacedCommand.getLiteral())) {
-                this.dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal(alias)
+                final LiteralArgumentBuilder<CommandSource> redirecting = LiteralArgumentBuilder.<CommandSource>literal(alias)
                         .executes(namespacedCommand.getCommand())
-                        .requires(namespacedCommand.getRequirement())
-                        .redirect(namespacedCommand)
-                        .build());
+                        .requires(namespacedCommand.getRequirement());
+                if (namespacedCommand.getRedirect() == null) {
+                    redirecting.redirect(namespacedCommand);
+                } else {
+                    // send it directly to the namespaced command's target.
+                    redirecting.forward(namespacedCommand.getRedirect(), namespacedCommand.getRedirectModifier(), namespacedCommand.isFork());
+                }
+                this.dispatcher.register(redirecting.build());
             }
         }
 
