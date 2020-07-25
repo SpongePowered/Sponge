@@ -29,11 +29,13 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -164,6 +166,19 @@ public final class TestPlugin {
                         })
                         .build(),
                 "flagtest"
+        );
+
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .setExecutor(x -> {
+                            x.sendMessage(TextComponent.builder("Click Me")
+                                    .clickEvent(SpongeComponents.executeCallback(ctx -> ctx.sendMessage(TextComponent.of("Hello"))))
+                                    .build()
+                            );
+                            return CommandResult.success();
+                        }).build(),
+                "testCallback"
         );
 
     }

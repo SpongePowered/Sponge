@@ -525,6 +525,10 @@ public final class SpongeCommandManager implements CommandManager {
                                 registrar.getClass());
             }
         }
+        SpongeParameterizedCommandRegistrar.INSTANCE.register(
+                Launcher.getInstance().getCommonPlugin(),
+                SpongeAdventure.CALLBACK_COMMAND.createCommand(),
+                "callback");
         BrigadierCommandRegistrar.INSTANCE.completeVanillaRegistration();
         this.hasStarted = true;
     }

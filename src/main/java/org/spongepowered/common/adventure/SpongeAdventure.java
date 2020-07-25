@@ -68,9 +68,11 @@ import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public final class SpongeAdventure {
+    public static final SpongeCallback CALLBACK_COMMAND = new SpongeCallback();
     public static final GsonComponentSerializer GSON = GsonComponentSerializer.builder()
         .legacyHoverEventSerializer(NbtLegacyHoverEventSerializer.INSTANCE)
         .downsampleColors() // TODO(1.16) remove
@@ -482,8 +484,10 @@ public final class SpongeAdventure {
         }
 
         @Override
-        public ClickEvent callbackClickEvent(final Consumer<CommandCause> callback) {
-            throw new UnsupportedOperationException("TODO");
+        @NonNull
+        public ClickEvent callbackClickEvent(@NonNull final Consumer<CommandCause> callback) {
+            final UUID key = SpongeAdventure.CALLBACK_COMMAND.registerCallback(callback);
+            return ClickEvent.runCommand("/sponge:callback " + key.toString());
         }
     }
 }
