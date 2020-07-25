@@ -22,18 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.command.arguments;
+package org.spongepowered.common.bridge.command.arguments;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.ArgumentSerializer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import org.spongepowered.api.command.selector.SelectorType;
+import org.spongepowered.api.util.Tristate;
 
-import java.util.function.Supplier;
+public interface EntitySelectorParserBridge {
 
-@Mixin(ArgumentSerializer.class)
-public interface ArgumentSerializerAccessor<T extends ArgumentType<?>> {
+    void bridge$parseSelector(SelectorType selectorType) throws CommandSyntaxException;
 
-    @Accessor("factory") Supplier<T> accessor$getFactory();
+    void bridge$handleValue(String id, String input, Tristate shouldInvert) throws CommandSyntaxException;
 
 }

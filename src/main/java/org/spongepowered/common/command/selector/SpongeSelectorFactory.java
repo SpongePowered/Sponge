@@ -22,18 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.command.arguments;
+package org.spongepowered.common.command.selector;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.ArgumentSerializer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import com.mojang.brigadier.StringReader;
+import net.minecraft.command.arguments.EntitySelectorParser;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.command.selector.Selector;
 
-import java.util.function.Supplier;
+public class SpongeSelectorFactory implements Selector.Factory {
 
-@Mixin(ArgumentSerializer.class)
-public interface ArgumentSerializerAccessor<T extends ArgumentType<?>> {
+    public static final SpongeSelectorFactory INSTANCE = new SpongeSelectorFactory();
 
-    @Accessor("factory") Supplier<T> accessor$getFactory();
+    public static Selector.Builder createBuilder() {
+        return (Selector.Builder) new EntitySelectorParser(new StringReader(""));
+    }
+
+    private SpongeSelectorFactory() {
+    }
+
+    @Override
+    @NonNull
+    public Selector parse(@NonNull final String string) throws IllegalArgumentException {
+        try {
+            return (Selector) new EntitySelectorParser(new StringReader(string)).parse();
+        } catch (final Exception ex) {
+            throw new IllegalArgumentException(ex.getMessage(), ex);
+        }
+    }
 
 }

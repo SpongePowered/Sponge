@@ -26,6 +26,8 @@
         "mcp.block.BlockStateMixin_API",
         "mcp.command.CommandSourceMixin_API",
         "mcp.command.arguments.ArgumentTypes_EntryMixin_API",
+        "mcp.command.arguments.EntitySelectorMixin_API",
+        "mcp.command.arguments.EntitySelectorParserMixin_API",
         "mcp.enchantment.EnchantmentMixin_API",
         "mcp.entity.AgeableEntityMixin_API",
         "mcp.entity.AreaEffectCloudEntityMixin_API",

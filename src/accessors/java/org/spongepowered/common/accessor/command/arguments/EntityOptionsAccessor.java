@@ -24,16 +24,20 @@
  */
 package org.spongepowered.common.accessor.command.arguments;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.ArgumentSerializer;
+import net.minecraft.command.arguments.EntityOptions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.function.Supplier;
+import java.util.Map;
 
-@Mixin(ArgumentSerializer.class)
-public interface ArgumentSerializerAccessor<T extends ArgumentType<?>> {
+@Mixin(EntityOptions.class)
+public interface EntityOptionsAccessor {
 
-    @Accessor("factory") Supplier<T> accessor$getFactory();
+    // The type is actually Map<String, EntityOptions.EntityOptions>, but the inner class is
+    // package private and we just need the accessor anyway.
+    @Accessor("REGISTRY")
+    static Map<String, EntityOptions_OptionHandlerAccessor> accessor$getREGISTRY() {
+        throw new AssertionError("This should not be called.");
+    }
 
 }

@@ -22,18 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.command.arguments;
+package org.spongepowered.common.command.selector;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.ArgumentSerializer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.Vec3d;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
 
-import java.util.function.Supplier;
+import java.util.List;
+import java.util.function.BiConsumer;
 
-@Mixin(ArgumentSerializer.class)
-public interface ArgumentSerializerAccessor<T extends ArgumentType<?>> {
+public final class SpongeSelectorSortAlgorithm implements SelectorSortAlgorithm {
 
-    @Accessor("factory") Supplier<T> accessor$getFactory();
+    private final BiConsumer<Vec3d, List<? extends Entity>> sortAlgorithm;
+    private final ResourceKey resourceKey;
+
+    public SpongeSelectorSortAlgorithm(
+            final BiConsumer<Vec3d, List<? extends Entity>> sortAlgorithm, final ResourceKey resourceKey) {
+        this.sortAlgorithm = sortAlgorithm;
+        this.resourceKey = resourceKey;
+    }
+
+    @Override
+    public final ResourceKey getKey() {
+        return this.resourceKey;
+    }
+
+    public final BiConsumer<Vec3d, List<? extends Entity>> getSortAlgorithm() {
+        return this.sortAlgorithm;
+    }
 
 }

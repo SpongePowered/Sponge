@@ -41,6 +41,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
+import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
@@ -111,6 +112,7 @@ import org.spongepowered.common.command.parameter.multi.SpongeFirstOfParameterBu
 import org.spongepowered.common.command.parameter.multi.SpongeSequenceParameterBuilder;
 import org.spongepowered.common.command.parameter.subcommand.SpongeSubcommandParameterBuilder;
 import org.spongepowered.common.command.result.SpongeCommandResultBuilder;
+import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.key.SpongeKeyBuilder;
@@ -273,6 +275,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(CommandResult.Builder.class, SpongeCommandResultBuilder::new)
             .register(Parameter.Key.Builder.class, SpongeParameterKeyBuilder::new)
             .register(Flag.Builder.class, SpongeFlagBuilder::new)
+            .register(Selector.Builder.class, SpongeSelectorFactory::createBuilder)
         ;
     }
 }

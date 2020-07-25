@@ -24,16 +24,13 @@
  */
 package org.spongepowered.common.accessor.command.arguments;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.ArgumentSerializer;
+import net.minecraft.command.arguments.EntitySelectorParser;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.function.Supplier;
+@Mixin(EntitySelectorParser.class)
+public interface EntitySelectorParserAccessor {
 
-@Mixin(ArgumentSerializer.class)
-public interface ArgumentSerializerAccessor<T extends ArgumentType<?>> {
-
-    @Accessor("factory") Supplier<T> accessor$getFactory();
+    @Invoker("parseSelector") void accessor$parseSelector();
 
 }

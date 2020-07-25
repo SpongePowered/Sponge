@@ -26,17 +26,21 @@ package org.spongepowered.common.mixin.core.entity;
 
 import co.aikar.timings.Timing;
 import net.minecraft.entity.EntityType;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.util.Constants;
+
+import java.util.Objects;
 
 @Mixin(EntityType.class)
 public abstract class EntityTypeMixin implements ResourceKeyBridge, TrackableBridge, EntityTypeBridge {
@@ -153,4 +157,13 @@ public abstract class EntityTypeMixin implements ResourceKeyBridge, TrackableBri
         }
         return this.impl$timings;
     }
+
+    @Redirect(method = "register",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"))
+    private static Object impl$setKey(final Registry<Object> registry, final String resourcePath, final Object entityType) {
+        ((ResourceKeyBridge) entityType).bridge$setKey(ResourceKey.resolve(resourcePath));
+        return Registry.register(registry, resourcePath, entityType);
+    }
+
 }

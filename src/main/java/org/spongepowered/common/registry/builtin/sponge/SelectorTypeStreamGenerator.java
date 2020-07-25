@@ -22,18 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.command.arguments;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.ArgumentSerializer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.selector.SelectorType;
+import org.spongepowered.common.command.selector.SpongeSelectorType;
 
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-@Mixin(ArgumentSerializer.class)
-public interface ArgumentSerializerAccessor<T extends ArgumentType<?>> {
+public final class SelectorTypeStreamGenerator {
 
-    @Accessor("factory") Supplier<T> accessor$getFactory();
+    private SelectorTypeStreamGenerator() {
+    }
+
+    public static Stream<SelectorType> stream() {
+        return Stream.of(
+            new SpongeSelectorType("@a", ResourceKey.minecraft("all_players")),
+            new SpongeSelectorType("@e", ResourceKey.minecraft("all_entities")),
+            new SpongeSelectorType("@p", ResourceKey.minecraft("nearest_player")),
+            new SpongeSelectorType("@r", ResourceKey.minecraft("random_player")),
+            new SpongeSelectorType("@s", ResourceKey.minecraft("source"))
+        );
+    }
 
 }

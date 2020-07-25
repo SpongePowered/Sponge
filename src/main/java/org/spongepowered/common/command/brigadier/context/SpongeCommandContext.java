@@ -37,13 +37,10 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.world.ServerLocation;
 
 import java.util.Collection;
 import java.util.List;

@@ -39,6 +39,11 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.api.command.selector.Selector;
+import org.spongepowered.api.command.selector.SelectorTypes;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
@@ -178,6 +183,27 @@ public final class TestPlugin {
                             return CommandResult.success();
                         }).build(),
                 "testCallback"
+        );
+
+        event.register(
+                this.plugin,
+                Command.builder()
+                    .setExecutor(x -> {
+                        final Collection<Entity> collection = Selector.builder()
+                                .applySelectorType(SelectorTypes.ALL_ENTITIES.get())
+                                .entityType(EntityTypes.PLAYER.get(), false)
+                                .gameMode(GameModes.CREATIVE.get())
+                                .setLimit(1)
+                                .includeSelf()
+                                .build()
+                                .select(x.getCommandCause());
+                        for (final Entity entity : collection) {
+                            x.sendMessage(TextComponent.of(entity.toString()));
+                        }
+                        return CommandResult.success();
+                    })
+                .build(),
+                "testselector"
         );
 
     }

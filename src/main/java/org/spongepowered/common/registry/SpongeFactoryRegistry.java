@@ -35,12 +35,15 @@ import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import org.spongepowered.api.command.selector.Selector;
+import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.util.Range;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.common.adventure.AudienceFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -55,6 +58,7 @@ import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
+import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTransformFactory;
 import org.spongepowered.common.world.SpongeServerLocationFactory;
 
@@ -109,6 +113,8 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(Transform.Factory.class, SpongeTransformFactory.INSTANCE)
             .registerFactory(VariableValueParameters.Factory.class, SpongeVariableValueParameterBuilderFactory.INSTANCE)
             .registerFactory(ChannelExceptionHandler.Factory.class, SpongeChannelExceptionHandlers.INSTANCE)
+            .registerFactory(Selector.Factory.class, SpongeSelectorFactory.INSTANCE)
+            .registerFactory(Range.Factory.class, SpongeRange.FACTORY_INSTANCE)
         ;
     }
 

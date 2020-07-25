@@ -22,18 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.command.arguments;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.ArgumentSerializer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import net.minecraft.command.arguments.EntitySelectorParser;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
+import org.spongepowered.common.command.selector.SpongeSelectorSortAlgorithm;
 
-import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-@Mixin(ArgumentSerializer.class)
-public interface ArgumentSerializerAccessor<T extends ArgumentType<?>> {
+public final class SelectorSortAlgorithmStreamGenerator {
 
-    @Accessor("factory") Supplier<T> accessor$getFactory();
+    private SelectorSortAlgorithmStreamGenerator() {
+    }
+
+    public static Stream<SelectorSortAlgorithm> stream() {
+        return Stream.of(
+                new SpongeSelectorSortAlgorithm(EntitySelectorParser.ARBITRARY, ResourceKey.minecraft("arbitrary")),
+                new SpongeSelectorSortAlgorithm(EntitySelectorParser.FURTHEST, ResourceKey.minecraft("furthest")),
+                new SpongeSelectorSortAlgorithm(EntitySelectorParser.NEAREST, ResourceKey.minecraft("nearest")),
+                new SpongeSelectorSortAlgorithm(EntitySelectorParser.RANDOM, ResourceKey.minecraft("random"))
+        );
+    }
 
 }

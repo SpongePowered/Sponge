@@ -22,18 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.command.arguments;
+package org.spongepowered.common.accessor.advancements.criterion;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.ArgumentSerializer;
+import net.minecraft.advancements.criterion.MinMaxBounds;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.function.Supplier;
+import javax.annotation.Nullable;
 
-@Mixin(ArgumentSerializer.class)
-public interface ArgumentSerializerAccessor<T extends ArgumentType<?>> {
+@Mixin(MinMaxBounds.IntBound.class)
+public interface MinMaxBounds_IntBoundAccessor {
 
-    @Accessor("factory") Supplier<T> accessor$getFactory();
+    @Invoker("<init>")
+    static MinMaxBounds.IntBound accessor$init(@Nullable final Integer p_i49717_1_, @Nullable final Integer p_i49717_2_) {
+        throw new AssertionError("should not happen");
+    }
 
 }
