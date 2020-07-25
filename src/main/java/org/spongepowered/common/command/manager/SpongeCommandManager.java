@@ -31,6 +31,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -41,6 +42,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.command.CommandSource;
+import net.minecraft.util.text.ITextComponent;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
@@ -335,16 +337,16 @@ public final class SpongeCommandManager implements CommandManager {
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
             throw exception;
         } catch (final net.minecraft.command.CommandException ex) {
-            // TODO: Remove when text is working
-            // final CommandResult errorResult = CommandResult.builder().setResult(0).error(SpongeTexts.toText(ex.getComponent())).build();
-            // this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
+            final CommandResult errorResult = CommandResult.builder().setResult(0).error(SpongeAdventure.asAdventure(ex.getComponent())).build();
+            this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
             throw ex;
         } catch (final Throwable thr) {
             // this is valid for now.
-            // TODO: Remove when text is working
             if (thr instanceof RuntimeException && thr.getCause() != null && thr.getCause() instanceof CommandSyntaxException) {
-                // final CommandResult errorResult = CommandResult.builder().setResult(0).error(SpongeTexts.toText(ex.getComponent())).build();
-                // this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
+                final CommandResult errorResult =
+                        CommandResult.builder().setResult(0)
+                                .error(this.asTextComponent(((CommandSyntaxException) thr.getCause()).getRawMessage())).build();
+                this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
                 throw (CommandSyntaxException) thr.getCause();
             }
             final String fullString;
@@ -552,6 +554,13 @@ public final class SpongeCommandManager implements CommandManager {
                 game,
                 registrar
         );
+    }
+
+    private Component asTextComponent(final Message message) {
+        if (message instanceof ITextComponent) {
+            return TextComponent.builder().append(SpongeAdventure.asAdventure((ITextComponent) message)).build();
+        }
+        return TextComponent.of(message.getString());
     }
 
 }
