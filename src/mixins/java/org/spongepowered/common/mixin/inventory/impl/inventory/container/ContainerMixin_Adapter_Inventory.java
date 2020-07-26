@@ -100,6 +100,9 @@ public abstract class ContainerMixin_Adapter_Inventory implements InventoryBridg
         if (slot == null) {
             Lens rootLens = this.inventoryAdapter$getRootLens();
             SlotLens slotLens = rootLens.getSlotLens(ordinal);
+            if (slotLens == null) {
+                return Optional.empty();
+            }
             slot = slotLens.getAdapter(this.inventoryAdapter$getFabric(), ((Inventory) this));
             this.impl$slots.put(ordinal, slot);
         }

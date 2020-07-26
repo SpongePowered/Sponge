@@ -79,22 +79,23 @@ import javax.annotation.Nullable;
 public final class PacketPhaseUtil {
 
     @SuppressWarnings("rawtypes")
-    public static void handleSlotRestore(final PlayerEntity player, @Nullable final Container openContainer, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
+    public static boolean handleSlotRestore(final PlayerEntity player, @Nullable final Container openContainer, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
+        boolean restoredAny = false;
         for (final SlotTransaction slotTransaction : slotTransactions) {
 
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
                 continue;
             }
+            restoredAny = true;
             final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
             final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
-            final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
             if (openContainer == null) {
-                slot.set(((org.spongepowered.api.item.inventory.ItemStack) (Object) originalStack));
+                slot.set(snapshot.createStack());
             } else {
                 final int slotNumber = slot.getOrdinal();
                 final Slot nmsSlot = openContainer.getSlot(slotNumber);
                 if (nmsSlot != null) {
-                    nmsSlot.putStack(originalStack);
+                    nmsSlot.putStack(ItemStackUtil.fromSnapshotToNative(snapshot));
                 }
             }
         }
@@ -109,6 +110,7 @@ public final class PacketPhaseUtil {
                 ((ServerPlayerEntity) player).sendContainerToPlayer(openContainer);
             }
         }
+        return restoredAny;
     }
 
     public static void handleCustomCursor(final PlayerEntity player, final ItemStackSnapshot customCursor) {

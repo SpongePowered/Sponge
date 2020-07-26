@@ -85,13 +85,14 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 public class InventoryEventFactory {
 
@@ -269,21 +270,21 @@ public class InventoryEventFactory {
             // Due to this, we can only send the original item that was clicked in slot
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.empty(), ItemStackSnapshot.empty());
             org.spongepowered.api.item.inventory.Slot slot = null;
-            if (((TrackedInventoryBridge) player.openContainer).bridge$getCapturedSlotTransactions().isEmpty() && packetIn.getSlotId() >= 0
-                    && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
+            final List<SlotTransaction> captures = ((TrackedInventoryBridge) player.openContainer).bridge$getCapturedSlotTransactions();
+            if (captures.isEmpty() && packetIn.getSlotId() >= 0 && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
                 slot = ((InventoryAdapter)player.openContainer).inventoryAdapter$getSlot(packetIn.getSlotId()).orElse(null);
                 if (slot != null) {
                     final ItemStackSnapshot clickedItem = ItemStackUtil.snapshotOf(slot.peek());
                     final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(packetIn.getStack());
                     final SlotTransaction slotTransaction = new SlotTransaction(slot, clickedItem, replacement);
-                    ((TrackedInventoryBridge) player.openContainer).bridge$getCapturedSlotTransactions().add(slotTransaction);
+                    captures.add(slotTransaction);
                 }
             }
             final ClickContainerEvent.Creative event =
                     SpongeEventFactory.createClickContainerEventCreative(frame.getCurrentCause(), (org.spongepowered.api.item.inventory.Container) player.openContainer, cursorTransaction,
                             Optional.ofNullable(slot),
-                            new ArrayList<>(((TrackedInventoryBridge) player.openContainer).bridge$getCapturedSlotTransactions()));
-            ((TrackedInventoryBridge) player.openContainer).bridge$getCapturedSlotTransactions().clear();
+                            new ArrayList<>(captures));
+            captures.clear();
             ((TrackedInventoryBridge) player.openContainer).bridge$setCaptureInventory(false);
             SpongeCommon.postEvent(event);
             frame.popCause();

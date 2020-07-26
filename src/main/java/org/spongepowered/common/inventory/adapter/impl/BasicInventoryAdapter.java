@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.adapter.impl;
 
+import com.google.common.base.MoreObjects;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -118,10 +119,12 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "(" + this.capacity() + ") in " + this.children().size() + " children\n"
-                + "Parent: " + ((this.parent == this) ? "self" : this.parent.getClass().getSimpleName()) + "\n"
-                + "Fabric: " + this.fabric.getClass().getSimpleName() + "\n"
-                + "Lens: " + this.lens.getClass().getSimpleName() + "\n"
-                ;
+        return MoreObjects.toStringHelper(this)
+                .add("capacity", this.capacity())
+                .add("children", this.children().size())
+                .add("parent", ((this.parent == this) ? "self" : this.parent.getClass().getSimpleName()))
+                .add("fabric", this.fabric.getClass().getSimpleName())
+                .add("lens",  this.lens.getClass().getSimpleName())
+                .toString();
     }
 }

@@ -40,8 +40,6 @@ import net.minecraft.network.play.server.SSetSlotPacket;
 import net.minecraft.util.IntReferenceHolder;
 import net.minecraft.util.NonNullList;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
@@ -55,10 +53,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.inventory.container.MenuBridge;
 import org.spongepowered.common.bridge.inventory.container.PlayerContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
@@ -143,37 +141,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     }
 
 
-    @Nullable private SpongeInventoryMenu impl$menu;
 
-    @Override
-    public void bridge$setMenu(SpongeInventoryMenu menu) {
-        this.impl$menu = menu;
-    }
-
-    @Nullable @Override
-    public SpongeInventoryMenu bridge$getMenu() {
-        return this.impl$menu;
-    }
-
-    @Nullable private Object impl$viewed;
-
-    @Override
-    public void bridge$setViewed(@Nullable Object viewed) {
-        if (viewed == null) {
-            this.impl$unTrackInteractable(this.impl$viewed);
-        }
-        this.impl$viewed = viewed;
-    }
-
-    private void impl$unTrackInteractable(@Nullable Object inventory) {
-        if (inventory instanceof Carrier) {
-            inventory = ((Carrier) inventory).getInventory();
-        }
-        if (inventory instanceof Inventory) {
-            ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).viewableBridge$removeContainer(((Container) (Object) this)));
-        }
-        // TODO else unknown inventory - try to provide wrapper Interactable
-    }
 
     // Injects/Redirects -------------------------------------------------------------------------
 
@@ -193,30 +161,6 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
                 this.bridge$getCapturedSlotTransactions().add(new SlotTransaction(adapter, originalItem, newItem));
             }
         }
-    }
-
-    // Called when clicking in an inventory
-    // InventoryMenu Callback
-    @Inject(method = "slotClick", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player, CallbackInfoReturnable<ItemStack> cir) {
-        if (this.bridge$getMenu() != null) {
-            if (!this.bridge$getMenu().onClick(slotId, dragType, clickTypeIn, player, (org.spongepowered.api.item.inventory.Container) this)) {
-                cir.setReturnValue(ItemStack.EMPTY);
-                // TODO maybe need to send rollback packets to client
-            }
-        }
-    }
-
-    // Called when a Container is closed
-    // InventoryMenu Callback and resetting viewed and menu state
-    @Inject(method = "onContainerClosed", at = @At(value = "HEAD"))
-    private void onOnContainerClosed(PlayerEntity player, CallbackInfo ci) {
-        SpongeInventoryMenu menu = this.bridge$getMenu();
-        if (menu != null) {
-            menu.onClose(player, (org.spongepowered.api.item.inventory.Container) this);
-        }
-        this.bridge$setViewed(null);
-        this.bridge$setMenu(null);
     }
 
 
@@ -444,7 +388,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
     public void bridge$detectAndSendChanges(final boolean captureOnly) {
         // Code-Flow changed from vanilla completely!
 
-        SpongeInventoryMenu menu = this.bridge$getMenu();
+        SpongeInventoryMenu menu = ((MenuBridge)this).bridge$getMenu();
         // We first collect all differences and check if cancelled for readonly menu changes
         boolean readOnlyCancel = false;
         List<Integer> changes = new ArrayList<>();

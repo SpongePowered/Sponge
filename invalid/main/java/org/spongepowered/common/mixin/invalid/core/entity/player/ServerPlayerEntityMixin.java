@@ -148,8 +148,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;
     @Shadow public abstract ServerWorld shadow$func_71121_q();
-    // Used to restore original item received in a packet after canceling an event
-    private ItemStack impl$packetItem = ItemStack.EMPTY;
+
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private ImmutableSet<SkinPart> impl$skinParts = ImmutableSet.of();
     private int impl$viewDistance;
@@ -301,11 +300,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public Tristate bridge$permDefault(final String permission) {
         return ((SubjectBridge) this.impl$user).bridge$permDefault(permission);
-    }
-
-    @Override
-    public void bridge$setPacketItem(final ItemStack itemstack) {
-        this.impl$packetItem = itemstack;
     }
 
     @Override

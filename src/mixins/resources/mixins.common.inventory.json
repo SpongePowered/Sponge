@@ -68,6 +68,7 @@
     "impl.inventory.container.ContainerMixin_Adapter_Inventory",
     "impl.inventory.container.ContainerMixin_Bridge_Inventory",
     "impl.inventory.container.ContainerMixin_Fabric_Inventory",
+    "impl.inventory.container.ContainerMixin_Menu_Inventory",
     "impl.inventory.container.PlayerContainerMixin_Bridge_Inventory",
     "impl.inventory.container.SlotMixin_Fabric_Inventory",
     "impl.inventory.container.SlotMixin_Lens_Inventory"

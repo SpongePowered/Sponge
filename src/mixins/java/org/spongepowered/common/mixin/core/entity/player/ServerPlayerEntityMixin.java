@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
@@ -96,4 +97,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 */
 
+    // Used to restore original item received in a packet after canceling an event
+    private ItemStack impl$packetItem = ItemStack.EMPTY;
+
+    @Override
+    public void bridge$setPacketItem(final ItemStack itemstack) {
+        this.impl$packetItem = itemstack;
+    }
 }

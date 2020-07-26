@@ -31,46 +31,53 @@ import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CClickWindowPacket;
 import net.minecraft.network.play.client.CCreativeInventoryActionPacket;
 import net.minecraft.network.play.server.SSetSlotPacket;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
 @Mixin(ServerPlayNetHandler.class)
 public class ServerPlayNetHandlerMixin_Inventory {
 
     @Shadow public ServerPlayerEntity player;
 
-    // After flag2 is set and before if(flag1 && flag2)
+    // before if(flag1 && flag2)
     @Inject(method = "processCreativeInventoryAction", locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isEmpty()Z", ordinal = 2, shift = At.Shift.BY, by = 2),
-            slice = @Slice(
-            from = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isEmpty()Z", ordinal = 2)))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CCreativeInventoryActionPacket;getSlotId()I", ordinal = 1, shift = At.Shift.BEFORE))
     private void onProcessCreativeInventoryAction(CCreativeInventoryActionPacket packetIn, CallbackInfo ci,
-            boolean flag, ItemStack itemstack, CompoundNBT compoundnbt, boolean flag1, boolean flag2) {
+            boolean flag, ItemStack itemstack, CompoundNBT compoundnbt) {
+        boolean flag2 = itemstack.isEmpty() || itemstack.getDamage() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
         if (flag2) {
-            final PacketContext<?> context = (PacketContext<?>) PhaseTracker.getInstance().getPhaseContext();
-            final boolean ignoresCreative = context.getIgnoringCreative();
-
-            if (!ignoresCreative) {
-                final ClickContainerEvent.Creative clickEvent = InventoryEventFactory.callCreativeClickContainerEvent(this.player, packetIn);
-                if (clickEvent.isCancelled()) {
-                    // Reset slot on client
-                    if (packetIn.getSlotId() >= 0 && packetIn.getSlotId() < this.player.container.inventorySlots.size()) {
-                        this.player.connection.sendPacket(
-                                new SSetSlotPacket(this.player.container.windowId, packetIn.getSlotId(),
-                                        this.player.container.getSlot(packetIn.getSlotId()).getStack()));
-                        this.player.connection.sendPacket(new SSetSlotPacket(-1, -1, ItemStack.EMPTY));
-                    }
+            // TODO handle vanilla sending a bunch of creative events (previously ignoring events within 100ms)
+            final ClickContainerEvent.Creative clickEvent = InventoryEventFactory.callCreativeClickContainerEvent(this.player, packetIn);
+            if (clickEvent.isCancelled()) {
+                // Reset slot on client
+                if (packetIn.getSlotId() >= 0 && packetIn.getSlotId() < this.player.container.inventorySlots.size()) {
+                    this.player.connection.sendPacket(
+                            new SSetSlotPacket(this.player.container.windowId, packetIn.getSlotId(),
+                                    this.player.container.getSlot(packetIn.getSlotId()).getStack()));
+                    this.player.connection.sendPacket(new SSetSlotPacket(-1, -1, ItemStack.EMPTY));
+                }
+                ci.cancel();
+            } else {
+                if (PacketPhaseUtil.handleSlotRestore(this.player, this.player.container, clickEvent.getTransactions(), false)) {
                     ci.cancel();
+                }
+                final Transaction<ItemStackSnapshot> cursorTransaction = clickEvent.getCursorTransaction();
+                if (!cursorTransaction.isValid()) {
+                    // TODO original cursor is currently always empty
+                    PacketPhaseUtil.handleCustomCursor(this.player, cursorTransaction.getOriginal());
+                }
+                else if (cursorTransaction.getCustom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(this.player, cursorTransaction.getFinal());
                 }
             }
         }

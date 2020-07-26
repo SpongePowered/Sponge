@@ -24,34 +24,13 @@
  */
 package org.spongepowered.common.bridge.inventory.container;
 
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 
-import java.util.List;
+public interface MenuBridge {
 
-public interface TrackedContainerBridge {
+    void bridge$setMenu(@Nullable SpongeInventoryMenu menu);
 
-    void bridge$setShiftCrafting(boolean flag);
+    @Nullable SpongeInventoryMenu bridge$getMenu();
 
-    boolean bridge$isShiftCrafting();
-
-    void bridge$setLastCraft(CraftItemEvent.Craft event);
-
-    CraftItemEvent.Craft bridge$getLastCraft();
-
-    void bridge$setPreviousCursor(net.minecraft.item.ItemStack stack);
-
-    net.minecraft.item.ItemStack bridge$getPreviousCursor();
-
-    void bridge$setFirePreview(boolean firePreview);
-
-    boolean bridge$firePreview();
-
-    List<SlotTransaction> bridge$getPreviewTransactions();
-
-    boolean bridge$capturePossible();
-
-    void bridge$setCapturePossible();
-
-    void bridge$detectAndSendChanges(boolean captureOnly);
 }

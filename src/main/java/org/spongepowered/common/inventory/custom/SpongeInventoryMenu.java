@@ -43,7 +43,7 @@ import org.spongepowered.api.item.inventory.menu.handler.KeySwapHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -164,7 +164,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     public Optional<Container> open(ServerPlayer player) {
         Optional<Container> container = player.openInventory(this.inventory, this.title);
         container.ifPresent(c -> {
-            ((TrackedContainerBridge)c).bridge$setMenu(this);
+            ((MenuBridge)c).bridge$setMenu(this);
             this.tracked.put(c, player);
         });
         return container;
