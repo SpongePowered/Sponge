@@ -32,6 +32,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.statistic.Statistic;
+import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -60,6 +61,10 @@ public final class ServerPlayerData {
                         .get(h -> ((StatisticsManagerBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
                                 .collect(Collectors.toMap(e -> (Statistic)e.getKey(), e -> e.getValue().longValue())))
                         .set((h, v) -> v.forEach((ik, iv) -> h.getStats().setValue(h, (Stat<?>) ik, iv.intValue())))
+                .asMutable(ServerPlayerEntityAccessor.class)
+                    .create(Keys.HAS_VIEWED_CREDITS)
+                        .get(ServerPlayerEntityAccessor::accessor$getSeenCredits)
+                        .set(ServerPlayerEntityAccessor::accessor$setSeenCredits)
                 .asMutable(ServerPlayerEntityBridge.class)
                     .create(Keys.HEALTH_SCALE)
                         .defaultValue(Constants.Entity.Player.DEFAULT_HEALTH_SCALE)

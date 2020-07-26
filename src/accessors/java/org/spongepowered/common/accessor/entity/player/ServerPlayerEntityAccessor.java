@@ -33,4 +33,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface ServerPlayerEntityAccessor {
 
     @Accessor("enteredNetherPosition") Vec3d accessor$getEnteredNetherPosition();
+
+    @Accessor("seenCredits") boolean accessor$getSeenCredits();
+
+    @Accessor("seenCredits") void accessor$setSeenCredits(boolean value);
 }

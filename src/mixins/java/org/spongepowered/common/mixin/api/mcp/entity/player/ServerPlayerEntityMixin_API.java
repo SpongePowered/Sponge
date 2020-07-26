@@ -402,6 +402,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         values.add(this.firstJoined().asImmutable());
         values.add(this.lastPlayed().asImmutable());
         values.add(this.sleepingIgnored().asImmutable());
+        values.add(this.hasViewedCredits().asImmutable());
 
         // If getSpectatingEntity returns this player, then we are not spectating any other entity, so spectatorTarget would be an Optional.empty()
         this.spectatorTarget().map(Value::asImmutable).ifPresent(values::add);
