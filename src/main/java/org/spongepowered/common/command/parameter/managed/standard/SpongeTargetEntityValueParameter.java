@@ -60,7 +60,7 @@ public final class SpongeTargetEntityValueParameter extends CatalogedZeroAdvance
             final CommandContext.@NonNull Builder context,
             final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
-        final Object root = context.getCause().root();
+        final Object root = context.getCommandCause().getCause().root();
         if (root instanceof Living) {
             final Entity entity = (Entity) root;
             /* ((Entity) root).getWorld().getIntersectingEntities(entity, 10).stream()

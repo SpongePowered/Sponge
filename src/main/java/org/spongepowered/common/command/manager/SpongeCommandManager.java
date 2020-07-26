@@ -93,6 +93,8 @@ import java.util.stream.Collectors;
 @Singleton
 public final class SpongeCommandManager implements CommandManager {
 
+    private static final boolean ALWAYS_PRINT_STACKTRACES = System.getProperty("sponge.command.alwaysPrintStacktraces") != null;
+
     private final Game game;
     private final Provider<SpongeCommand> spongeCommand;
     private final Map<String, SpongeCommandMapping> commandMappings = new HashMap<>();
@@ -159,7 +161,7 @@ public final class SpongeCommandManager implements CommandManager {
                     (org.spongepowered.api.command.parameter.CommandContext) context;
             final String[] command1 = context.getInput().split(" ", 2);
             try {
-                return registrar.process(spongeContext, mapping, command1[0], command1.length == 2 ? command1[1] : "").getResult();
+                return registrar.process(spongeContext.getCommandCause(), mapping, command1[0], command1.length == 2 ? command1[1] : "").getResult();
             } catch (final CommandException e) {
                 throw new SimpleCommandExceptionType(SpongeAdventure.asVanilla(e.getText())).create();
             }
@@ -335,10 +337,16 @@ public final class SpongeCommandManager implements CommandManager {
         } catch (final CommandException exception) {
             final CommandResult errorResult = CommandResult.builder().setResult(0).error(exception.getText()).build();
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
+            if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
+                this.prettyPrintThrowableError(exception, command, args, cause);
+            }
             throw exception;
         } catch (final net.minecraft.command.CommandException ex) {
             final CommandResult errorResult = CommandResult.builder().setResult(0).error(SpongeAdventure.asAdventure(ex.getComponent())).build();
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
+            if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
+                this.prettyPrintThrowableError(ex, command, args, cause);
+            }
             throw ex;
         } catch (final Throwable thr) {
             // this is valid for now.
@@ -347,15 +355,12 @@ public final class SpongeCommandManager implements CommandManager {
                         CommandResult.builder().setResult(0)
                                 .error(this.asTextComponent(((CommandSyntaxException) thr.getCause()).getRawMessage())).build();
                 this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
+                if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
+                    this.prettyPrintThrowableError(thr, command, args, cause);
+                }
                 throw (CommandSyntaxException) thr.getCause();
             }
-            final String fullString;
-            if (args != null && !args.isEmpty()) {
-                fullString = command + " " + args;
-            } else {
-                fullString = command;
-            }
-            this.prettyPrintThrowableError(thr, command, fullString, cause);
+            this.prettyPrintThrowableError(thr, command, args, cause);
 
             Component excBuilder;
             if (thr instanceof TextMessageException) {
@@ -426,7 +431,13 @@ public final class SpongeCommandManager implements CommandManager {
         }
     }
 
-    private void prettyPrintThrowableError(final Throwable thr, final String commandNoArgs, final String commandString, final CommandCause cause) {
+    private void prettyPrintThrowableError(final Throwable thr, final String commandNoArgs, final String args, final CommandCause cause) {
+        final String commandString;
+        if (args != null && !args.isEmpty()) {
+            commandString = commandNoArgs + " " + args;
+        } else {
+            commandString = commandNoArgs;
+        }
         final SpongeCommandMapping mapping = this.commandMappings.get(commandNoArgs.toLowerCase());
         new PrettyPrinter(100)
                 .add("Unexpected error occurred while executing command '%s'", commandString).centre()

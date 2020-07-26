@@ -24,11 +24,26 @@
  */
 package org.spongepowered.common.mixin.api.mcp.command;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.SystemSubject;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.world.Locatable;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.math.vector.Vector3d;
+
+import java.util.Optional;
 
 @Mixin(CommandSource.class)
 public abstract class CommandSourceMixin_API implements CommandCause {
@@ -36,6 +51,63 @@ public abstract class CommandSourceMixin_API implements CommandCause {
     @Override
     public Cause getCause() {
         return ((CommandSourceBridge) this).bridge$getCause();
+    }
+
+    @Override
+    public Subject getSubject() {
+        return this.getCause().getContext()
+                .get(EventContextKeys.SUBJECT)
+                .orElseGet(() -> this.getCause().first(Subject.class).orElseGet(Sponge::getSystemSubject));
+    }
+
+    @Override
+    public Audience getAudience() {
+        return this.getCause().getContext()
+                .get(EventContextKeys.AUDIENCE)
+                .orElseGet(() -> this.getCause().first(Audience.class).orElseGet(Sponge::getSystemSubject));
+    }
+
+    @Override
+    public Optional<ServerLocation> getLocation() {
+        final Cause cause = this.getCause();
+        final EventContext eventContext = cause.getContext();
+        if (eventContext.containsKey(EventContextKeys.LOCATION)) {
+            return eventContext.get(EventContextKeys.LOCATION);
+        }
+
+        final Optional<ServerLocation> optionalLocation = this.getTargetBlock().flatMap(BlockSnapshot::getLocation);
+        if (optionalLocation.isPresent()) {
+            return optionalLocation;
+        }
+
+        return cause.first(Locatable.class).map(Locatable::getServerLocation);
+    }
+
+    @Override
+    public Optional<Vector3d> getRotation() {
+        final Cause cause = this.getCause();
+        final EventContext eventContext = cause.getContext();
+        if (eventContext.containsKey(EventContextKeys.ROTATION)) {
+            return eventContext.get(EventContextKeys.ROTATION);
+        }
+
+        return cause.first(Entity.class).map(Entity::getRotation);
+    }
+
+    @Override
+    public Optional<BlockSnapshot> getTargetBlock() {
+        return Optional.ofNullable(this.getCause().getContext().get(EventContextKeys.BLOCK_TARGET)
+                .orElseGet(() -> this.getCause().first(BlockSnapshot.class).orElse(null)));
+    }
+
+    /**
+     * Sends a message to the {@link Audience} as given by
+     * {@link #getAudience()}.
+     *
+     * @param message The message to send.
+     */
+    public void sendMessage(@NonNull final Component message) {
+        this.getAudience().sendMessage(message);
     }
 
 }

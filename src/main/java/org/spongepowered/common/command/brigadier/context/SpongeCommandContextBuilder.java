@@ -37,12 +37,14 @@ import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.context.SuggestionContext;
 import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 
@@ -270,6 +272,8 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         return new SpongeCommandContextBuilder(this);
     }
 
+    @Override
+    @NonNull
     public CommandCause getCommandCause() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().getCommandCause();
@@ -277,7 +281,6 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         return (CommandCause) this.getSource();
     }
 
-    @Override
     @NonNull
     public Cause getCause() {
         return this.getCommandCause().getCause();
@@ -344,6 +347,11 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     @SuppressWarnings("unchecked")
     public <T> Collection<? extends T> getAll(final Parameter.@NonNull Key<T> key) {
         return (Collection<? extends T>) this.getFrom(SpongeParameterKey.getSpongeKey(key));
+    }
+
+    @Override
+    public void sendMessage(Component message) {
+        this.getCommandCause().sendMessage(message);
     }
 
     Collection<?> getFrom(final SpongeParameterKey<?> key) {
@@ -454,6 +462,11 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
             return !(node instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) node).getParser().doesNotRead());
         }
         return true;
+    }
+
+    @Override
+    public Subject getSubject() {
+        return this.getCommandCause().getSubject();
     }
 
 }

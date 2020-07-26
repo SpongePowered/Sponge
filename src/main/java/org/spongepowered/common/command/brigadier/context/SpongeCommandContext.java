@@ -34,6 +34,7 @@ import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -88,26 +89,8 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
 
     @Override
     @NonNull
-    public Cause getCause() {
-        return this.getCommandCause().getCause();
-    }
-
-    @Override
-    @NonNull
-    public Subject getSubject() {
-        return this.getCommandCause().getSubject();
-    }
-
-    @Override
-    @NonNull
-    public Optional<ServerLocation> getLocation() {
-        return this.getCommandCause().getLocation();
-    }
-
-    @Override
-    @NonNull
-    public Optional<BlockSnapshot> getTargetBlock() {
-        return this.getCommandCause().getTargetBlock();
+    public CommandCause getCommandCause() {
+        return (CommandCause) this.getSource();
     }
 
     @Override
@@ -169,6 +152,11 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
     }
 
     @Override
+    public void sendMessage(@NonNull final Component message) {
+        this.getCommandCause().sendMessage(message);
+    }
+
+    @Override
     public CommandContext<CommandSource> copyFor(final CommandSource source) {
         if (this.getSource() == source) {
             return this;
@@ -201,8 +189,9 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
         return (T) values.iterator().next();
     }
 
-    private CommandCause getCommandCause() {
-        return (CommandCause) this.getSource();
+    @Override
+    public Subject getSubject() {
+        return this.getCommandCause().getSubject();
     }
 
 }
