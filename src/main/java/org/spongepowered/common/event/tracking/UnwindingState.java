@@ -114,20 +114,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public BlockTransaction.ChangeBlock captureBlockChange(final UnwindingPhaseContext phaseContext, final BlockPos pos, final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
-                                                           final BlockChangeFlag flags, @Nullable final TileEntity tileEntity) {
-        if (!phaseContext.isPostingSpecialProcess()) { // If we're posting special, we need to
-            return phaseContext.getCapturedBlockSupplier().logBlockChange(originalBlockSnapshot, newState, flags);
-        }
-        if (!this.doesBulkBlockCapture(phaseContext)) {
-            phaseContext.setSingleSnapshot(originalBlockSnapshot);
-            return null;
-        }
-        phaseContext.getCapturedBlockSupplier().put(originalBlockSnapshot, newState);
-        return null;
-    }
-
-    @Override
     public boolean tracksTileEntityChanges(final UnwindingPhaseContext context) {
         return context.allowsBulkBlockCaptures() && !context.isPostingSpecialProcess() && context.usesMulti && context.tracksTiles;
     }

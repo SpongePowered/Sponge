@@ -63,7 +63,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     @Nullable final CompoundNBT compound;
     // Internal use only
     private final BlockPos blockPos;
-    private SpongeBlockChangeFlag changeFlag;
+    private final SpongeBlockChangeFlag changeFlag;
     @Nullable private WeakReference<ServerWorld> world;
     public BlockChange blockChange; // used for post event
 

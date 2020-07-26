@@ -56,6 +56,7 @@ import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
@@ -83,6 +84,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable public BlockSnapshot neighborNotificationSource;
     @Nullable SpongeBlockSnapshot singleSnapshot;
     protected final PhaseTracker createdTracker;
+    private TransactionalCaptureSupplier blockTransactor;
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
@@ -456,6 +458,13 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
         }
         return this.blocksSupplier;
+    }
+
+    public TransactionalCaptureSupplier getBlockTransactor() {
+        if (this.blockTransactor == null) {
+            this.blockTransactor = new TransactionalCaptureSupplier();
+        }
+        return this.blockTransactor;
     }
 
     public CapturedMultiMapSupplier<BlockPos, ItemDropData> getBlockDropSupplier() throws IllegalStateException {

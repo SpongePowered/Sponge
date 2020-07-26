@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.tracker.world.chunk;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -36,34 +35,26 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockStateBridge;
-import org.spongepowered.common.bridge.tileentity.TrackableTileEntityBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
+import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.List;
@@ -139,62 +130,111 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 
         // boolean flag = chunksection.isEmpty(); // Vanilla flag -> isEmpty
         final boolean isEmpty = chunksection.isEmpty();
+        // Sponge Start - Build out the BlockTransaction
+        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
+        final IPhaseState state = context.state;
+        final @Nullable TileEntity existing = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+        final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
+        // Build a transaction maybe?
+        final @Nullable SpongeBlockSnapshot snapshot = (isFake
+            || !ShouldFire.CHANGE_BLOCK_EVENT
+            || !state.shouldCaptureBlockChangeOrSkip(context, pos, currentState, newState, flag))
+            ? null
+            : TrackingUtil.createPooledSnapshot(currentState, pos, flag, existing,
+                () -> ((org.spongepowered.api.world.server.ServerWorld) this.world).getKey(),
+                Optional::empty, Optional::empty);
+
+        // Pulled up from below
+        final Block newBlock = newState.getBlock();
+        final Block currentBlock = currentState.getBlock();
+
+        final @Nullable BlockTransaction.ChangeBlock transaction = state.createTransaction(context, pos, snapshot, newState, flag, existing);
+
+        // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
+        // re-captured again.
+        if (snapshot != null) {
+            snapshot.blockChange = state.associateBlockChangeWithSnapshot(
+                context,
+                newState,
+                newBlock,
+                currentState,
+                snapshot,
+                currentBlock
+            );
+        }
+
+
         // BlockState blockstate = chunksection.setBlockState(xPos, yPos & 15, zPos, newState); // blockstate -> oldState
         final BlockState oldState = chunksection.setBlockState(xPos, yPos & 15, zPos, newState);
         if (oldState == newState) {
             return null;
         } else {
+            // Sponge Start - Members pulled up
             // Block block = state.getBlock(); // Vanilla block -> newBlock
-            final Block newBlock = newState.getBlock();
-
             // Block block1 = blockstate.getBlock(); // Vanilla block1 -> oldBlock
-            final Block oldBlock = oldState.getBlock();
 
-            this.heightMap.get(Heightmap.Type.MOTION_BLOCKING).update(xPos, yPos, zPos, newState);
-            this.heightMap.get(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES).update(xPos, yPos, zPos, newState);
-            this.heightMap.get(Heightmap.Type.OCEAN_FLOOR).update(xPos, yPos, zPos, newState);
-            this.heightMap.get(Heightmap.Type.WORLD_SURFACE).update(xPos, yPos, zPos, newState);
-            final boolean isChunkStillEmpty = chunksection.isEmpty();
-            if (isEmpty != isChunkStillEmpty) {
-                this.world.getChunkProvider().getLightManager().func_215567_a(pos, isChunkStillEmpty);
+            if (transaction != null) {
+                transaction.createEffects(context.getBlockTransactor(), (ServerWorld)this.world, this, chunksection);
             }
+             // Sponge - This is turned into a side effect monad UpdateHeightMapEffect
+            // this.heightMap.get(Heightmap.Type.MOTION_BLOCKING).update(xPos, yPos, zPos, newState);
+            // this.heightMap.get(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES).update(xPos, yPos, zPos, newState);
+            // this.heightMap.get(Heightmap.Type.OCEAN_FLOOR).update(xPos, yPos, zPos, newState);
+            // this.heightMap.get(Heightmap.Type.WORLD_SURFACE).update(xPos, yPos, zPos, newState);
 
-            if (!this.world.isRemote) {
-                oldState.onReplaced(this.world, pos, newState, isMoving);
-            } else if (this.bridge$shouldRefreshTile(oldBlock, newBlock, oldState, newState)) {
-                this.world.removeTileEntity(pos);
+            // Sponge - This is turned into a side effect monad UpdateLightManager
+            // Update Light
+            // final boolean isChunkStillEmpty = chunksection.isEmpty();
+            // if (isEmpty != isChunkStillEmpty) {
+            //    this.world.getChunkProvider().getLightManager().func_215567_a(pos, isChunkStillEmpty);
+            // }
+
+
+            // Sponge - This is turned into OldBlockOnReplaceEffect
+            { // OldState.onReplaced
+                if (!this.world.isRemote) {
+                    oldState.onReplaced(this.world, pos, newState, isMoving);
+                } else if (this.bridge$shouldRefreshTile(currentBlock, newBlock, oldState, newState)) {
+                    this.world.removeTileEntity(pos);
+                }
             }
 
             if (chunksection.getBlockState(xPos, yPos & 15, zPos).getBlock() != newBlock) {
                 return null;
             } else {
-                // if (block1 instanceof ITileEntityProvider) { // Vanilla
-                // if (blockstate.hasTileEntity()) { // Forge
-                // we bridge the differences here with a bridge method
-                if (((BlockStateBridge) oldState).bridge$hasTileEntity()) {
-                    final TileEntity tileentity = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
-                    if (tileentity != null) {
-                        tileentity.updateContainingBlockInfo();
+                { // Maybe update TileEntity container
+                    // if (block1 instanceof ITileEntityProvider) { // Vanilla
+                    // if (blockstate.hasTileEntity()) { // Forge
+                    // we bridge the differences here with a bridge method
+                    if (((BlockStateBridge) oldState).bridge$hasTileEntity()) {
+                        final TileEntity tileentity = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+                        if (tileentity != null) {
+                            tileentity.updateContainingBlockInfo();
+                        }
                     }
                 }
 
-                if (!this.world.isRemote) {
-                    newState.onBlockAdded(this.world, pos, oldState, isMoving);
+                { // Block Physics
+                    if (!this.world.isRemote) {
+                        newState.onBlockAdded(this.world, pos, oldState, isMoving);
+                    }
                 }
 
-                // if (newBlock instanceof ITileEntityProvider) { // Vanilla
-                // if (newState.hasTileEntity()) { // Forge
-                // We again cast to the bridge for easy access
-                if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
-                    TileEntity tileentity1 = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
-                    if (tileentity1 == null) {
-                        // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
-                        // tileentity1 = state.createTileEntity(this.world); // Forge
-                        // We cast to our bridge for easy access
-                        tileentity1 = ((BlockStateBridge) newState).bridge$createNewTileEntity(this.world);
-                        this.world.setTileEntity(pos, tileentity1);
-                    } else {
-                        tileentity1.updateContainingBlockInfo();
+                { // Replace or Add TileEntity
+                    // if (newBlock instanceof ITileEntityProvider) { // Vanilla
+                    // if (newState.hasTileEntity()) { // Forge
+                    // We again cast to the bridge for easy access
+                    if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
+                        TileEntity tileentity1 = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+                        if (tileentity1 == null) {
+                            // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
+                            // tileentity1 = state.createTileEntity(this.world); // Forge
+                            // We cast to our bridge for easy access
+                            tileentity1 = ((BlockStateBridge) newState).bridge$createNewTileEntity(this.world);
+                            this.world.setTileEntity(pos, tileentity1);
+                        } else {
+                            tileentity1.updateContainingBlockInfo();
+                        }
                     }
                 }
 
