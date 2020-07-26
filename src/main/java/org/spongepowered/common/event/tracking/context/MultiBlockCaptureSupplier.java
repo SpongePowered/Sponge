@@ -74,7 +74,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("rawtypes")
 public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
-    public static final boolean PRINT_TRANSACTIONS = Boolean.valueOf(System.getProperty("sponge.debugBlockTransactions", "false"));
+    public static final boolean PRINT_TRANSACTIONS = Boolean.parseBoolean(System.getProperty("sponge.debugBlockTransactions", "false"));
 
     @Nullable private LinkedListMultimap<BlockPos, SpongeBlockSnapshot> multimap;
     @Nullable private ListMultimap<BlockPos, BlockEventData> scheduledEvents;
@@ -750,25 +750,8 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
 
             }
         } finally {
-            if (this.processingWorlds == null) {
-                return noCancelledTransactions;
-            }
-            for (final Map.Entry<WorldServer, SpongeProxyBlockAccess.Proxy> entry : this.processingWorlds.entrySet()) {
-                try {
-                    entry.getValue().close();
-                } catch (final Exception e) {
-                    PhaseTracker.getInstance().printMessageWithCaughtException("Forcibly Closing Proxy", "Proxy Access could not be popped", e);
-                }
-            }
-            this.processingWorlds.clear();
-            for (BlockTransaction transaction = this.head; transaction != null; ) {
-                final BlockTransaction next = transaction.next;
-                transaction.previous = null;
-                transaction.next = null;
-                transaction = next;
-            }
-            this.head = null;
-            this.tail = null;
+            clearProxies();
+            resetTransactionLinks();
         }
         return noCancelledTransactions;
     }
@@ -821,6 +804,7 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
                 PhaseTracker.getInstance().printMessageWithCaughtException("Forcibly Closing Proxy", "Proxy Access could not be popped", e);
             }
         }
+        this.processingWorlds.clear();
     }
 
     public boolean hasTransactions() {
@@ -834,33 +818,34 @@ public final class MultiBlockCaptureSupplier implements ICaptureSupplier {
     public void reset() {
         if (this.multimap != null) {
             // shouldn't but whatever, it's the end of a phase.
-            this.multimap.clear();
             this.multimap = null;
         }
         if (this.scheduledEvents != null) {
-            this.scheduledEvents.clear();
+            this.scheduledEvents = null;
         }
         if (this.snapshots != null) {
-            this.snapshots.clear();
             this.snapshots = null;
         }
         if (this.usedBlocks != null) {
-            this.usedBlocks.clear();
+            this.usedBlocks = null;
         }
         this.clearProxies();
         this.transactionIndex = -1;
         this.snapshotIndex = -1;
         if (this.head != null) {
-            this.head = null;
-            this.tail = null;
-            for (BlockTransaction transaction = this.head; transaction != null; ) {
-                final BlockTransaction next = transaction.next;
-                transaction.previous = null;
-                transaction.next = null;
-                transaction = next;
-            }
-
+            resetTransactionLinks();
         }
 
+    }
+
+    private void resetTransactionLinks() {
+        for (BlockTransaction transaction = this.head; transaction != null; ) {
+            final BlockTransaction next = transaction.next;
+            transaction.previous = null;
+            transaction.next = null;
+            transaction = next;
+        }
+        this.head = null;
+        this.tail = null;
     }
 }
