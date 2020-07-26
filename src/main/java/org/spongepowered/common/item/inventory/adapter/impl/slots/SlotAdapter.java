@@ -39,6 +39,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -253,5 +254,22 @@ public class SlotAdapter extends AbstractInventoryAdapter implements Slot {
                 return SlotAdapter.this;
             }
         };
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final SlotAdapter that = (SlotAdapter) o;
+        return this.slotNumber == that.slotNumber
+                && this.bridge$getFabric().equals(that.bridge$getFabric());
+    }
+
+    @Override public int hashCode() {
+        return Objects.hash(this.slotNumber, this.bridge$getFabric());
     }
 }
