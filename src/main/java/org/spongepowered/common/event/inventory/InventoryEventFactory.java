@@ -292,9 +292,7 @@ public class InventoryEventFactory {
         }
     }
 
-
-
-    public static boolean callInteractInventoryOpenEvent(final ServerPlayerEntity player) {
+    public static boolean callInteractContainerOpenEvent(final ServerPlayerEntity player) {
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.empty(), newCursor);
         final InteractContainerEvent.Open event =
@@ -368,7 +366,7 @@ public class InventoryEventFactory {
             return null;
         }
 
-        if (!callInteractInventoryOpenEvent(player)) {
+        if (!callInteractContainerOpenEvent(player)) {
             return null;
         }
 

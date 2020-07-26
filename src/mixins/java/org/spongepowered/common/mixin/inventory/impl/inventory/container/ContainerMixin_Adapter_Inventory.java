@@ -99,7 +99,7 @@ public abstract class ContainerMixin_Adapter_Inventory implements InventoryBridg
         org.spongepowered.api.item.inventory.Slot slot = this.impl$slots.get(ordinal);
         if (slot == null) {
             Lens rootLens = this.inventoryAdapter$getRootLens();
-            SlotLens slotLens = rootLens.getSlotLens(ordinal);
+            SlotLens slotLens = rootLens.getSlotLens(this.inventoryAdapter$getFabric(), ordinal);
             if (slotLens == null) {
                 return Optional.empty();
             }

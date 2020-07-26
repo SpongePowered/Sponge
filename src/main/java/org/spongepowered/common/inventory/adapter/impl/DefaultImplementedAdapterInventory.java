@@ -194,27 +194,27 @@ public interface DefaultImplementedAdapterInventory extends InventoryDataHolder 
 
     @Override
     default InventoryTransactionResult.Poll pollFrom(int index) {
-        return AdapterLogic.pollSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index), null);
+        return AdapterLogic.pollSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), null);
     }
 
     @Override
     default InventoryTransactionResult.Poll pollFrom(int index, int limit) {
-        return AdapterLogic.pollSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index), limit);
+        return AdapterLogic.pollSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), limit);
     }
 
     @Override
     default Optional<ItemStack> peekAt(int index) {
-        return AdapterLogic.peekSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index));
+        return AdapterLogic.peekSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index));
     }
 
     @Override
     default InventoryTransactionResult set(int index, ItemStack stack) {
-        return AdapterLogic.insertSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index), stack);
+        return AdapterLogic.insertSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), stack);
     }
 
     @Override
     default InventoryTransactionResult offer(int index, ItemStack stack) {
-        return AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(index), stack);
+        return AdapterLogic.appendSequential(this.impl$getFabric(), this.impl$getLens().getSlotLens(this.impl$getFabric(), index), stack);
     }
 
     @Override

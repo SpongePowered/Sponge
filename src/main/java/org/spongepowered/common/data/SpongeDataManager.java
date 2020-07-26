@@ -38,14 +38,15 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Util;
 import net.minecraft.util.registry.Registry;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -57,13 +58,17 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.provider.CustomDataProvider;
+import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.util.Constants;
@@ -298,12 +303,28 @@ public final class SpongeDataManager implements DataManager {
         }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void registerDataRegistration(SpongeDataRegistration registration) {
         this.validateRegistration(registration);
 
         this.pluginRegistrations.computeIfAbsent(registration.getPluginContainer(), k -> new ArrayList<>()).add(registration);
         for (Key<?> key : registration.getKeys()) {
             this.registrationByKey.put(key, registration);
+        }
+
+        for (Key key : registration.getKeys()) {
+            registerForKey(registration, key);
+        }
+    }
+
+    private static <V extends Value<E>, E> void registerForKey(SpongeDataRegistration registration, Key<V> key) {
+        final DataProviderRegistry dataProviderRegistry = DataProviderRegistry.get();
+        final Optional<DataProvider<V, E>> provider = registration.getProviderFor(key);
+        if (provider.isPresent()) {
+            dataProviderRegistry.register(provider.get());
+        } else {
+            dataProviderRegistry.register(new CustomDataProvider<>(key));
+
         }
     }
 
@@ -313,36 +334,30 @@ public final class SpongeDataManager implements DataManager {
 
     public void serializeCustomData(CompoundNBT compound, Object object) {
         if (object instanceof CustomDataHolderBridge) {
-            final Collection<Mutable> manipulators = ((CustomDataHolderBridge) object).bridge$getCustomManipulators();
-            if (!manipulators.isEmpty()) {
-                final DataHolder dataHolder = (DataHolder) object;
-                final ListNBT manipulatorTagList = new ListNBT();
-                for (DataManipulator.Mutable manipulator : manipulators) {
-// TODO dataproviders?
-//                    manipulator.getKeys().stream().map(this::getDataProvider)
-//                            .filter(Optional::isPresent).map(Optional::get).distinct()
-//                            .forEach(provider -> provider.offer((DataHolder.Mutable) dataHolder, manipulator.get(provider.getKey()).orElse(null)));
+            final Mutable manipulator = ((CustomDataHolderBridge) object).bridge$getManipulator();
+            final DataHolder dataHolder = (DataHolder) object;
+            final ListNBT manipulatorTagList = new ListNBT();
+            // Get all data registrations for the keys in the manipulator
+            manipulator.getKeys().stream().map(this::getDataRegistration)
+                    .filter(Optional::isPresent).map(Optional::get).distinct().forEach(registration -> {
+                // For each registration attempt to serialize using the datastore for the dataholder
+                registration.getDataStore(TypeToken.of(dataHolder.getClass())).ifPresent(dataStore -> {
+                    final DataView serialized = dataStore.serialize(manipulator);
+                    if (!serialized.isEmpty()) { // Omit if the datastore did not serialize anything
+                        final DataContainer container = DataContainer.createNew();
+                        // Add Metadata
+                        container.set(Queries.CONTENT_VERSION, Constants.Sponge.CURRENT_CUSTOM_DATA)
+                                .set(Constants.Sponge.DATA_ID, registration.getKey().toString())
+                                .set(Constants.Sponge.INTERNAL_DATA, serialized);
+                        manipulatorTagList.add(NbtTranslator.getInstance().translateData(container));
+                    }
+                });
+            });
 
-                    // Get all data registrations for the keys in the manipulator (this usually should be only one)
-                    manipulator.getKeys().stream().map(this::getDataRegistration)
-                            .filter(Optional::isPresent).map(Optional::get).distinct().forEach(registration -> {
-                    // For each registration attempt to serialize using the datastore for the dataholder
-                        registration.getDataStore(TypeToken.of(dataHolder.getClass())).ifPresent(dataStore -> {
-                            final DataView serialized = dataStore.serialize(manipulator);
-                            if (!serialized.isEmpty()) { // Omit if the datastore did not serialize anything
-                                final DataContainer container = DataContainer.createNew();
-                                // Add Metadata
-                                container.set(Queries.CONTENT_VERSION, Constants.Sponge.CURRENT_CUSTOM_DATA)
-                                         .set(Constants.Sponge.DATA_ID, registration.getKey().toString())
-                                         .set(Constants.Sponge.INTERNAL_DATA, serialized);
-                                manipulatorTagList.add(NbtTranslator.getInstance().translateData(container));
-                            }
-                        });
-                    });
-                }
-                compound.put(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
-            } else {
+            if (manipulatorTagList.isEmpty()) {
                 compound.remove(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
+            } else {
+                compound.put(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
 
             final List<DataView> failedData = ((CustomDataHolderBridge) object).bridge$getFailedData();
@@ -400,4 +415,12 @@ public final class SpongeDataManager implements DataManager {
         }
     }
 
+    public void syncCustomToTag(Object dataHolder) {
+        if (dataHolder instanceof DataCompoundHolder) {
+            final DataCompoundHolder compoundHolder = (DataCompoundHolder) dataHolder;
+            final CompoundNBT spongeData = compoundHolder.data$getSpongeData();
+            SpongeDataManager.getInstance().serializeCustomData(spongeData, dataHolder);
+            compoundHolder.data$cleanEmptySpongeData();
+        }
+    }
 }

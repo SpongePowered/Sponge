@@ -64,15 +64,14 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
 import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SSpawnPlayerPacketAccessor;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -80,6 +79,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 /*
  * Notes
@@ -175,7 +176,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void readAdditional(final CompoundNBT tagCompund) {
         super.readAdditional(tagCompund);
-        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeDataCompound().getString(Constants.Entity.Human.SKIN_UUID_KEY);
+        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeData().getString(Constants.Entity.Human.SKIN_UUID_KEY);
         if (!skinUuidString.isEmpty()) {
             this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
         }
@@ -184,7 +185,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
-        final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
+        final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeData();
         if (this.skinUuid != null) {
             spongeData.putString(Constants.Entity.Human.SKIN_UUID_KEY, this.skinUuid.toString());
         } else {

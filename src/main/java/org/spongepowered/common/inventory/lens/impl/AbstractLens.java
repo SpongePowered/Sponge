@@ -118,7 +118,7 @@ public abstract class AbstractLens implements Lens {
 
     @Nullable
     @Override
-    public SlotLens getSlotLens(int ordinal) {
+    public SlotLens getSlotLens(Fabric fabric, int ordinal) {
         if (ordinal < 0 || ordinal > this.maxOrdinal) {
             return null;
         }
@@ -127,7 +127,7 @@ public abstract class AbstractLens implements Lens {
         for (final Lens child : this.spanningChildren) {
             int count = child.slotCount();
             if (ordinal < offset + count) {
-                return child.getSlotLens(ordinal - offset);
+                return child.getSlotLens(fabric, ordinal - offset);
             }
             offset += count;
         }
@@ -137,7 +137,7 @@ public abstract class AbstractLens implements Lens {
     private List<SlotLens> slotCache;
 
     @Override
-    public List<SlotLens> getSlots() {
+    public List<SlotLens> getSlots(Fabric fabric) {
         if (this.slotCache == null) {
             this.slotCache = new ArrayList<>();
             if (this instanceof SlotLens) {
@@ -147,7 +147,7 @@ public abstract class AbstractLens implements Lens {
                     if (child instanceof SlotLens) {
                         this.slotCache.add((SlotLens) child);
                     } else {
-                        this.slotCache.addAll(child.getSlots());
+                        this.slotCache.addAll(child.getSlots(fabric));
                     }
                 }
             }

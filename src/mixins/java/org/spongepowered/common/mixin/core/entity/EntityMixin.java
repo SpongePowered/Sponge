@@ -45,9 +45,14 @@ import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -60,7 +65,7 @@ import java.util.Random;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, TrackableBridge, VanishableBridge, InvulnerableTrackedBridge, TimingBridge,
-        CommandSourceProviderBridge {
+        CommandSourceProviderBridge, DataCompoundHolder {
 
     // @formatter:off
     @Shadow @Nullable private Entity ridingEntity;
@@ -407,6 +412,8 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (compound.contains(Constants.Sponge.Entity.IS_INVISIBLE, Constants.NBT.TAG_BYTE)) {
             this.bridge$setInvisible(compound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE));
         }
+
+        SpongeDataManager.getInstance().syncCustomToTag(this);
     }
 
 
@@ -792,5 +799,59 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     public CommandSource bridge$getCommandSource(final Cause cause) {
         return this.shadow$getCommandSource();
     }
+
+    // When changing custom data it is serialized on to this.
+    // On writeInternal the SpongeData tag is added to the new CompoundNBT accordingly
+    // In a Forge environment the ForgeData tag is managed by forge
+    // Structure: tileNbt - ForgeData - SpongeData - customdata
+    private CompoundNBT impl$nbt;
+
+    // TODO overrides for ForgeData
+    // @Shadow private CompoundNBT customEntityData;
+    // @Override CompoundNBT data$getForgeData()
+    // @Override CompoundNBT data$getForgeData()
+    // @Override CompoundNBT data$hasForgeData()
+    // @Override CompoundNBT cleanEmptySpongeData()
+
+    @Override
+    public CompoundNBT data$getCompound() {
+        return this.impl$nbt;
+    }
+
+    @Override
+    public void data$setCompound(CompoundNBT nbt) {
+        this.impl$nbt = nbt;
+    }
+
+    @Inject(method = "writeWithoutTypeId", at = @At("RETURN"))
+    private void impl$WriteSpongeDataToCompound(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
+        if (this.data$hasSpongeData()) {
+            final CompoundNBT forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
+            // If we are in Forge data is already present
+            if (forgeCompound != this.data$getForgeData()) {
+                if (forgeCompound.isEmpty()) { // In vanilla this should be an new detached empty compound
+                    compound.put(Constants.Forge.FORGE_DATA, forgeCompound);
+                }
+                // Get our nbt data and write it to the compound
+                forgeCompound.put(Constants.Sponge.SPONGE_DATA, this.data$getSpongeData());
+            }
+        }
+    }
+
+    @Inject(method = "read", at = @At("RETURN"))
+    private void impl$ReadSpongeDataFromCompound(final CompoundNBT compound, final CallbackInfo ci) {
+        // If we are in Forge data is already present
+        this.data$setCompound(compound); // For vanilla we set the incoming nbt
+        if (this.data$hasSpongeData()) {
+            // Deserialize our data...
+            SpongeDataManager.getInstance().deserializeCustomData(this.data$getSpongeData(), this);
+            this.data$setCompound(null); // For vanilla this will be recreated empty in the next call - for Forge it reuses the existing compound instead
+            // ReSync our data (includes failed data)
+            SpongeDataManager.getInstance().syncCustomToTag(this);
+        } else {
+            this.data$setCompound(null); // No data? No need to keep the nbt
+        }
+    }
+
 
 }

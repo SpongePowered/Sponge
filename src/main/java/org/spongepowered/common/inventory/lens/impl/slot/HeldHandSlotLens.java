@@ -32,11 +32,14 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.HeldSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.InvalidOrdinalException;
 import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.AbstractLens;
+import org.spongepowered.common.inventory.lens.impl.comp.HotbarLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.Collection;
@@ -48,7 +51,14 @@ import java.util.function.Predicate;
 /**
  * Single Slot pointing to a players {@link EquipmentTypes#MAIN_HAND} slot.
  */
-public class HeldHandSlotLens implements SlotLens {
+public class HeldHandSlotLens extends AbstractLens implements SlotLens {
+
+    private HotbarLens hotbarLens;
+
+    public HeldHandSlotLens(HotbarLens hotbarLens) {
+        super(0, 1, BasicInventoryAdapter.class);
+        this.hotbarLens = hotbarLens;
+    }
 
     private PlayerInventory getInventoryPlayer(Fabric fabric) {
         return (PlayerInventory) fabric.fabric$get(0); // Only players have this lens
@@ -71,11 +81,6 @@ public class HeldHandSlotLens implements SlotLens {
     public int getOrdinal(Fabric fabric) {
         PlayerInventory inv = this.getInventoryPlayer(fabric);
         return inv.currentItem;
-    }
-
-    @Override
-    public Lens getParent() {
-        return null;
     }
 
     @Override
@@ -109,8 +114,8 @@ public class HeldHandSlotLens implements SlotLens {
     }
 
     @Override
-    public List<SlotLens> getSlots() {
-        return Collections.singletonList(this);
+    public List<SlotLens> getSlots(Fabric fabric) {
+        return Collections.singletonList(this.getSlotLens(fabric, 0));
     }
 
     @Override
@@ -139,11 +144,11 @@ public class HeldHandSlotLens implements SlotLens {
     }
 
     @Override
-    public SlotLens getSlotLens(int ordinal) {
+    public SlotLens getSlotLens(Fabric fabric, int ordinal) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
-        return this;
+        return this.hotbarLens.getSlotLens(fabric, this.getOrdinal(fabric));
     }
 
     public Predicate<EquipmentType> getEquipmentTypeFilter() {

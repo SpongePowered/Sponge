@@ -123,7 +123,7 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public SlotLens getSlotLens(int ordinal) {
+    public SlotLens getSlotLens(Fabric fabric, int ordinal) {
         if (ordinal != 0) {
             throw new InvalidOrdinalException("Non-zero slot ordinal");
         }
@@ -131,7 +131,7 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public List<SlotLens> getSlots() {
+    public List<SlotLens> getSlots(Fabric fabric) {
         return Collections.singletonList(this);
     }
 

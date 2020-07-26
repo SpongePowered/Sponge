@@ -643,26 +643,6 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return Tristate.FALSE;
     }
 
-    @Override
-    public boolean data$hasSpongeCompound() {
-        if (this.compound == null) {
-            return false;
-        }
-        return this.compound.contains(Constants.Forge.FORGE_DATA);
-    }
-
-    @Override
-    public CompoundNBT data$getSpongeCompound() {
-        if (this.compound == null) {
-            return new CompoundNBT();
-        }
-        CompoundNBT forgeCompound = this.compound.getCompound(Constants.Forge.FORGE_DATA);
-        if (forgeCompound.isEmpty()) {
-            forgeCompound = new CompoundNBT();
-            this.compound.put(Constants.Forge.FORGE_DATA, forgeCompound);
-        }
-        return forgeCompound;
-    }
 
     @Override
     public void bridge$setInvulnerable(final boolean value) {
@@ -739,6 +719,16 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             return;
         }
         this.isVanishTarget = untargetable;
+    }
+
+    @Override
+    public CompoundNBT data$getCompound() {
+        return this.compound;
+    }
+
+    @Override
+    public void data$setCompound(CompoundNBT nbt) {
+        this.compound = nbt;
     }
 
     @Override

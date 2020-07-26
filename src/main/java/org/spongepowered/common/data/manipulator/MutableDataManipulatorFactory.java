@@ -37,6 +37,8 @@ import java.util.Map;
 
 public final class MutableDataManipulatorFactory implements DataManipulator.Mutable.Factory {
 
+    public static final DataManipulator.Mutable.Factory INSTANCE = new MutableDataManipulatorFactory();
+
     @Override
     public DataManipulator.Mutable of() {
         return new MutableDataManipulator();

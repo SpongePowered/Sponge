@@ -33,7 +33,6 @@ import org.spongepowered.api.data.DuplicateProviderException;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.ArrayList;

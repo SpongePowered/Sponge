@@ -40,8 +40,6 @@ import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Objects;
-
 @Mixin(EntityType.class)
 public abstract class EntityTypeMixin implements ResourceKeyBridge, TrackableBridge, EntityTypeBridge {
 
@@ -158,12 +156,5 @@ public abstract class EntityTypeMixin implements ResourceKeyBridge, TrackableBri
         return this.impl$timings;
     }
 
-    @Redirect(method = "register",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"))
-    private static Object impl$setKey(final Registry<Object> registry, final String resourcePath, final Object entityType) {
-        ((ResourceKeyBridge) entityType).bridge$setKey(ResourceKey.resolve(resourcePath));
-        return Registry.register(registry, resourcePath, entityType);
-    }
 
 }

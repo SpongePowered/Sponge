@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.spongepowered.common.mixin.tracker",
+  "refmap": "mixins.common.refmap.json",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8",
+  "mixinPriority": 1100,
+  "mixins": [
+    "server.management.PlayerInteractionManagerMixin_Tracker"
+  ]
+}

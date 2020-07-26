@@ -93,11 +93,10 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final ImmutableList.Builder<DataManipulator.Immutable> builder = ImmutableList.builder();
         final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
-        for (final DataManipulator.Mutable manipulator : ((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators()) {
-            builder.add(manipulator.asImmutable());
-            keyBuilder.addAll(manipulator.getKeys());
-            valueBuilder.addAll(manipulator.getValues());
-        }
+        final DataManipulator.Mutable customData = ((CustomDataHolderBridge) itemStack).bridge$getManipulator();
+        builder.add(customData.asImmutable());
+        keyBuilder.addAll(customData.getKeys());
+        valueBuilder.addAll(customData.getValues());
         this.damageValue = ItemStackUtil.toNative(itemStack).getDamage();
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();

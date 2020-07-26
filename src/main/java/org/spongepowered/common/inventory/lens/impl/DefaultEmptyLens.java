@@ -117,12 +117,12 @@ public class DefaultEmptyLens implements Lens {
     }
 
     @Override
-    public SlotLens getSlotLens(final int ordinal) {
+    public SlotLens getSlotLens(Fabric fabric, final int ordinal) {
         return null;
     }
 
     @Override
-    public List<SlotLens> getSlots() {
+    public List<SlotLens> getSlots(Fabric fabric) {
         return Collections.emptyList();
     }
 

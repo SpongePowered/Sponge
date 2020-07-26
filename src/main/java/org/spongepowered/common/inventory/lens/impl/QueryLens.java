@@ -39,7 +39,7 @@ public class QueryLens extends AbstractLens {
         for (Map.Entry<Lens, Integer> entry : lensesWithOffsets.entrySet()) {
             final Integer offset = entry.getValue();
             final Lens lens = entry.getKey();
-            this.addSpanningChild(new DelegatingLens(offset, lens, new LensRegistrar.BasicSlotLensProvider(this.size)));
+            this.addSpanningChild(new DelegatingLens(offset, lens));
         }
     }
 

@@ -31,6 +31,7 @@ import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.key.SpongeKey;
+import org.spongepowered.common.data.provider.inventory.InventoryDataProviders;
 
 import java.util.Collection;
 import java.util.List;
@@ -83,6 +84,7 @@ public final class DataProviderRegistry {
     private final Map<Class<?>, DataProviderLookup> dataProviderLookupCache = new ConcurrentHashMap<>();
 
     private DataProviderRegistry() {
+        new InventoryDataProviders(this).register(); // TODO register all dataproviders somewhere
     }
 
     private static boolean filterHolderType(final DataProvider<?,?> provider, final Class<?> holderType) {
@@ -164,7 +166,7 @@ public final class DataProviderRegistry {
      */
     public <V extends Value<E>, E> DataProvider<V, E> buildDelegate(final Key<V> key, final Predicate<DataProvider<V, E>> predicate) {
         @SuppressWarnings({"unchecked", "rawtypes"})
-        final List<DataProvider<V, E>> providers = (List) this.dataProviders.get(key);
+        final Collection<DataProvider<V, E>> providers = (Collection) this.dataProviders.get(key);
         return DataProviderRegistry.buildDelegateProvider(key, providers.stream()
                 .filter(predicate)
                 .collect(Collectors.toList()));

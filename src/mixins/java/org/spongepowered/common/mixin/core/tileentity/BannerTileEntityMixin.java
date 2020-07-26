@@ -62,11 +62,6 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
         this.impl$updatePatterns();
     }
 
-    @Override
-    protected void bridge$writeToSpongeCompound(final CompoundNBT compound) {
-        super.bridge$writeToSpongeCompound(compound);
-    }
-
     private void impl$markDirtyAndUpdate() {
         this.shadow$markDirty();
         if (this.world != null && !this.world.isRemote) {

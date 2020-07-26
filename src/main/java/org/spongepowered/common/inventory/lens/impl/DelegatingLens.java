@@ -44,6 +44,12 @@ public class DelegatingLens extends AbstractLens {
 
     private Lens delegate;
 
+    public DelegatingLens(final int base, final Lens lens) {
+        super(base, lens.slotCount(), BasicInventoryAdapter.class);
+        this.delegate = lens;
+        this.addSpanningChild(lens);
+    }
+
     public DelegatingLens(final int base, final Lens lens, final SlotLensProvider slots) {
         super(base, lens.slotCount(), BasicInventoryAdapter.class);
         this.delegate = lens;

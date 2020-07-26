@@ -38,7 +38,6 @@ import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.passive.PandaEntity;
 import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemTier;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.state.properties.ChestType;
@@ -72,6 +71,7 @@ import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
 import org.spongepowered.api.command.selector.SelectorType;
+import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.type.ArmorMaterial;
@@ -151,6 +151,8 @@ import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
+import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogEventImpl;
 import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTypeStreamGenerator;
@@ -164,6 +166,7 @@ import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStre
 import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.DimensionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DismountTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.EquipmentGroupStreamGenerator;
@@ -191,7 +194,6 @@ import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
-import org.spongepowered.common.registry.builtin.sponge.DimensionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.EffectSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.EnchantmentSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.EntityTypeSupplier;
@@ -391,11 +393,14 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     private <T extends CatalogType> SpongeCatalogRegistry generateCallbackRegistry(final Class<T> catalogClass, final ResourceKey key, final BiConsumer<ResourceLocation, T> callback) {
         Preconditions.checkNotNull(key);
 
-        final Registry<CatalogType> registry = this.registries.putIfAbsent(key, (Registry<CatalogType>) new CallbackRegistry<>(callback));
-        if (registry != null) {
-            throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered for '%s'!", catalogClass, key));
+        if (this.registries.containsKey(key)) {
+            throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered for '%s!", catalogClass, key));
         }
+
+        final Registry<CatalogType> registry =  (Registry<CatalogType>) new CallbackRegistry<>(callback);
+        this.registries.put(key, registry);
         this.registriesByType.put((Class<CatalogType>) catalogClass, registry);
+        this.dynamicCatalogs.add(catalogClass);
 
         return this;
     }
@@ -548,7 +553,10 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateMappedRegistry(DataTranslator.class, ResourceKey.sponge("data_translator"), DataSerializers.stream(), true, false)
             .generateMappedRegistry(DisplaySlot.class, ResourceKey.minecraft("display_slot"), DisplaySlotStreamGenerator.stream(), true, false)
         ;
-//        this.generateCallbackRegistry(DataRegistration.class, ResourceKey.sponge("data_registration"), (key, value) -> SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) value));
+        final ResourceKey dataRegistrationKey = ResourceKey.sponge("data_registration");
+        this.generateCallbackRegistry(DataRegistration.class, dataRegistrationKey,
+                (key, value) -> SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) value));
+        this.registerRegistry(SpongeDataRegistration.class, dataRegistrationKey, (Registry) this.getRegistry(DataRegistration.class));
 
         // Find a home for this somewhere...a post registries callback
         for (final net.minecraft.world.dimension.DimensionType dimensionType : net.minecraft.world.dimension.DimensionType.getAll()) {

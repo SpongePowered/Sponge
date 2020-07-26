@@ -45,6 +45,7 @@ import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
+import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
@@ -116,6 +117,7 @@ import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.key.SpongeKeyBuilder;
+import org.spongepowered.common.data.persistence.SpongeDataStoreBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
@@ -276,6 +278,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(Parameter.Key.Builder.class, SpongeParameterKeyBuilder::new)
             .register(Flag.Builder.class, SpongeFlagBuilder::new)
             .register(Selector.Builder.class, SpongeSelectorFactory::createBuilder)
+            .register(DataStore.Builder.class, SpongeDataStoreBuilder::new)
         ;
     }
 }
