@@ -24,18 +24,29 @@
  */
 package org.spongepowered.common.data.util;
 
+import net.minecraft.state.IProperty;
 import net.minecraft.state.IntegerProperty;
 
 public class DataHelper {
 
     // TODO: Cache min/max in IntegerProperty for faster access?
 
-    public static int min(IntegerProperty property) {
+    public static double mind(final IProperty<Double> property) {
+        //noinspection OptionalGetWithoutIsPresent
+        return property.getAllowedValues().stream().mapToDouble(i -> i).min().getAsDouble();
+    }
+
+    public static double maxd(final IProperty<Double> property) {
+        //noinspection OptionalGetWithoutIsPresent
+        return property.getAllowedValues().stream().mapToDouble(i -> i).max().getAsDouble();
+    }
+
+    public static int mini(final IntegerProperty property) {
         //noinspection OptionalGetWithoutIsPresent
         return property.getAllowedValues().stream().mapToInt(i -> i).min().getAsInt();
     }
 
-    public static int max(IntegerProperty property) {
+    public static int maxi(final IntegerProperty property) {
         //noinspection OptionalGetWithoutIsPresent
         return property.getAllowedValues().stream().mapToInt(i -> i).max().getAsInt();
     }

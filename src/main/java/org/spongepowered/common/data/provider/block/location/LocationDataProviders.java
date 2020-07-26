@@ -24,22 +24,17 @@
  */
 package org.spongepowered.common.data.provider.block.location;
 
+import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
-import org.spongepowered.common.data.provider.DataProviderRegistryBuilder;
 
-public class LocationDataProviders extends DataProviderRegistryBuilder {
+public final class LocationDataProviders extends DataProviderRegistratorBuilder {
 
-    public LocationDataProviders(DataProviderRegistry registry) {
+    public LocationDataProviders(final DataProviderRegistry registry) {
         super(registry);
     }
 
     @Override
     public void register() {
-        this.register(new BlockLightProvider());
-        this.register(new SkyLightProvider());
-        this.register(new BiomeTemperatureProvider());
-        this.register(new TemperatureProvider());
-        this.register(new FullBlockProvider());
-        this.register(new IndirectlyPoweredProvider());
+        ServerLocationData.register(this.registrator);
     }
 }

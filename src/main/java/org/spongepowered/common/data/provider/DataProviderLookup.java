@@ -35,7 +35,7 @@ import java.util.Map;
 
 public final class DataProviderLookup {
 
-    private final Map<Key<?>, DataProvider<?,?>> providerMap;
+    private final Map<Key<?>, DataProvider<?, ?>> providerMap;
 
     DataProviderLookup(Map<Key<?>, DataProvider<?, ?>> providerMap) {
         this.providerMap = ImmutableMap.copyOf(providerMap);
@@ -46,7 +46,7 @@ public final class DataProviderLookup {
      *
      * @return The delegate data providers
      */
-    public Collection<DataProvider<?,?>> getAllProviders() {
+    public Collection<DataProvider<?, ?>> getAllProviders() {
         return this.providerMap.values();
     }
 

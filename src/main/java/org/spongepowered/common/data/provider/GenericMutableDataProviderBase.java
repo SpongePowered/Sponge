@@ -42,22 +42,6 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     private static final TypeVariable<?> holderTypeParameter = GenericMutableDataProviderBase.class.getTypeParameters()[0];
     private final Class<H> holderType;
 
-    private final boolean isSetAndGetResultOverridden =
-            TypeToken.of(this.getClass()).getTypes().classes().stream()
-                    .map(TypeToken::getRawType)
-                    .filter(type -> {
-                        try {
-                            type.getDeclaredMethod("setAndGetResult", Object.class, Object.class);
-                            return true;
-                        } catch (NoSuchMethodException e) {
-                            return false;
-                        }
-                    })
-                    .findFirst()
-                    .map(type -> type != GenericMutableDataProviderBase.class &&
-                            type != BlockLocationDataProviderBase.class)
-                    .get();
-
     protected GenericMutableDataProviderBase(Supplier<? extends Key<V>> key, Class<H> holderType) {
         this(key.get(), holderType);
     }
@@ -109,7 +93,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @param dataHolder The data holder
      * @return The value, if present
      */
-    protected Optional<V> getValueFrom(H dataHolder) {
+    public Optional<V> getValueFrom(H dataHolder) {
         return this.getFrom(dataHolder).map(e -> this.constructValue(dataHolder, e));
     }
 
@@ -213,9 +197,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
         if (!this.isSupported(dataHolder)) {
             return DataTransactionResult.failNoData();
         }
-        if (this.isSetAndGetResultOverridden) {
-            return this.setAndGetResult((H) dataHolder, value.get());
-        }
+
         final Optional<Value.Immutable<E>> originalValue = this.getFrom((H) dataHolder)
                 .map(e -> this.constructValue((H) dataHolder, e).asImmutable());
         final Value.Immutable<E> replacementValue = value.asImmutable();

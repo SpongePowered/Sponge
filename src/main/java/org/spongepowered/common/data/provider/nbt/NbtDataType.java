@@ -32,7 +32,7 @@ public final class NbtDataType {
 
     private final String name;
 
-    public NbtDataType(String name) {
+    public NbtDataType(final String name) {
         requireNonNull(name, "name");
         this.name = name;
     }
