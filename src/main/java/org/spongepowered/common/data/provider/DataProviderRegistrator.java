@@ -43,7 +43,7 @@ public class DataProviderRegistrator {
 
     protected final DataProviderRegistratorBuilder builder;
 
-    public DataProviderRegistrator(DataProviderRegistratorBuilder builder) {
+    public DataProviderRegistrator(final DataProviderRegistratorBuilder builder) {
         this.builder = builder;
     }
 
@@ -61,26 +61,6 @@ public class DataProviderRegistrator {
      */
     public <T> ImmutableRegistrator<T> asImmutable(final Class<T> target) {
         return new ImmutableRegistrator<>(this.builder, target);
-    }
-
-    @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-    protected static <T, K> Function<T, Optional<K>> toOptionalFunc(final Key<? extends Value<K>> key, final Function<T, K> getter) {
-        // Optimize boolean optionals
-        if (key.getElementToken().getRawType() == Boolean.class) {
-            return h -> (Optional<K>) OptBool.of((Boolean) getter.apply(h));
-        } else {
-            return h -> Optional.ofNullable(getter.apply(h));
-        }
-    }
-
-    @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-    protected static <T, K> BiFunction<T, K, Optional<T>> toOptionalBiFunc(final Key<? extends Value<K>> key, final BiFunction<T, K, T> biFunc) {
-        // Optimize boolean optionals
-        if (key.getElementToken().getRawType() == Boolean.class) {
-            return (h, v) -> (Optional<T>) OptBool.of((Boolean) biFunc.apply(h, v));
-        } else {
-            return (h, v) -> Optional.ofNullable(biFunc.apply(h, v));
-        }
     }
 
     public static final class MutableRegistrator<T> extends DataProviderRegistrator {
@@ -114,10 +94,11 @@ public class DataProviderRegistrator {
             return registration;
         }
 
+        @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         protected <K> MutableRegistrator<T> register(final MutableRegistration<K, T> registration) {
-            final Function<T, Optional<K>> optionalGetter = toOptionalFunc(registration.key, registration.get);
             this.builder.register(
                     new GenericMutableDataProvider<T, K>(registration.key, this.target) {
+                        final boolean isBooleanKey = registration.key.getElementToken().getRawType() == Boolean.class;
 
                         @Override
                         protected Value<K> constructValue(final T dataHolder, final K element) {
@@ -129,7 +110,10 @@ public class DataProviderRegistrator {
 
                         @Override
                         protected Optional<K> getFrom(final T dataHolder) {
-                            return optionalGetter.apply(dataHolder);
+                            if (this.isBooleanKey) {
+                                return (Optional<K>) OptBool.of((Boolean) registration.get.apply(dataHolder));
+                            }
+                            return Optional.ofNullable(registration.get.apply(dataHolder));
                         }
 
                         @Override
@@ -213,11 +197,11 @@ public class DataProviderRegistrator {
             return registration;
         }
 
+        @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         protected <K> ImmutableRegistrator<T> register(final ImmutableRegistration<K, T> registration) {
-            final Function<T, Optional<K>> optionalGetter = toOptionalFunc(registration.key, registration.get);
-            final BiFunction<T, K, Optional<T>> optionalSetter = toOptionalBiFunc(registration.key, registration.set);
             this.builder.register(
                     new GenericImmutableDataProvider<T, K>(registration.key) {
+                        final boolean isBooleanKey = registration.key.getElementToken().getRawType() == Boolean.class;
 
                         @Override
                         protected Value<K> constructValue(final T dataHolder, final K element) {
@@ -229,12 +213,18 @@ public class DataProviderRegistrator {
 
                         @Override
                         protected Optional<K> getFrom(final T dataHolder) {
-                            return optionalGetter.apply(dataHolder);
+                            if (this.isBooleanKey) {
+                                return (Optional<K>) OptBool.of((Boolean) registration.get.apply(dataHolder));
+                            }
+                            return Optional.ofNullable(registration.get.apply(dataHolder));
                         }
 
                         @Override
                         protected Optional<T> set(final T dataHolder, final K value) {
-                            return optionalSetter.apply(dataHolder, value);
+                            if (this.isBooleanKey) {
+                                return (Optional<T>) OptBool.of((Boolean) registration.set.apply(dataHolder, value));
+                            }
+                            return Optional.ofNullable(registration.set.apply(dataHolder, value));
                         }
 
                         @Override
@@ -330,7 +320,9 @@ public class DataProviderRegistrator {
         }
 
         public <NK> MutableRegistration<NK, T> create(final Key<? extends Value<NK>> key) {
-            return new MutableRegistration<>(this.registrator, key);
+            final MutableRegistration<NK, T> registration = new MutableRegistration<>(this.registrator, key);
+            this.registrator.register(registration);
+            return registration;
         }
 
         /**
@@ -400,7 +392,9 @@ public class DataProviderRegistrator {
         }
 
         public <NK> ImmutableRegistration<NK, T> create(final Key<? extends Value<NK>> key) {
-            return new ImmutableRegistration<>(this.registrator, key);
+            final ImmutableRegistration<NK, T> registration = new ImmutableRegistration<>(this.registrator, key);
+            this.registrator.register(registration);
+            return registration;
         }
 
         /**

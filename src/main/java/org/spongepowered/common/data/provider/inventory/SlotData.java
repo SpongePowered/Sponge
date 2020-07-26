@@ -64,6 +64,6 @@ public final class SlotData {
         final Lens parentLens = ((InventoryBridge) holder.parent()).bridge$getAdapter().inventoryAdapter$getRootLens();
         final Lens childLens = ((InventoryBridge) holder).bridge$getAdapter().inventoryAdapter$getRootLens();
         final Map<Key<?>, Object> dataMap = parentLens.getDataFor(childLens);
-        return (D) dataMap.get(suppliedKey.get().getKey());
+        return (D) dataMap.get(suppliedKey.get());
     }
 }
