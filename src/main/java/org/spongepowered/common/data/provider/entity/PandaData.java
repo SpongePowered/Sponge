@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.entity.passive.PandaEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PandaGene;
+import org.spongepowered.common.accessor.entity.passive.PandaEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.MissingImplementationException;
 
@@ -39,30 +40,14 @@ public final class PandaData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(PandaEntity.class)
-                    .create(Keys.EATING_TIME)
-                        .get(h -> {
-                            throw new MissingImplementationException("PandaData", "EATING_TIME::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("PandaData", "EATING_TIME::setter");
-                        })
                     .create(Keys.HIDDEN_GENE)
                         .get(h -> ((PandaGene) (Object) h.getHiddenGene()))
                         .set((h, v) -> h.setHiddenGene((PandaEntity.Type) (Object) v))
                     .create(Keys.IS_EATING)
-                        .get(h -> {
-                            throw new MissingImplementationException("PandaData", "IS_EATING::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("PandaData", "IS_EATING::setter");
-                        })
+                        .get(PandaEntity::func_213578_dZ)
+                        .set(PandaEntity::func_213534_t)
                     .create(Keys.IS_FRIGHTENED)
-                        .get(h -> {
-                            throw new MissingImplementationException("PandaData", "IS_FRIGHTENED::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("PandaData", "IS_FRIGHTENED::setter");
-                        })
+                        .get(PandaEntity::func_213566_eo)
                     .create(Keys.IS_LYING_ON_BACK)
                         .get(PandaEntity::func_213567_dY)
                         .set(PandaEntity::func_213542_s)
@@ -70,19 +55,10 @@ public final class PandaData {
                         .get(PandaEntity::func_213564_eh)
                         .set(PandaEntity::func_213576_v)
                     .create(Keys.IS_SNEEZING)
-                        .get(h -> {
-                            throw new MissingImplementationException("PandaData", "IS_SNEEZING::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("PandaData", "IS_SNEEZING::setter");
-                        })
+                        .get(PandaEntity::func_213539_dW)
+                        .set(PandaEntity::func_213581_u)
                     .create(Keys.IS_UNHAPPY)
-                        .get(h -> {
-                            throw new MissingImplementationException("PandaData", "IS_UNHAPPY::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("PandaData", "IS_UNHAPPY::setter");
-                        })
+                        .get(h -> h.func_213544_dV() > 0)
                     .create(Keys.KNOWN_GENE)
                         .get(h -> ((PandaGene) (Object) h.getMainGene()))
                         .set((h, v) -> h.setMainGene((PandaEntity.Type) (Object) v))
@@ -90,12 +66,12 @@ public final class PandaData {
                         .get(PandaEntity::func_213585_ee)
                         .set(PandaEntity::func_213562_s)
                     .create(Keys.UNHAPPY_TIME)
-                        .get(h -> {
-                            throw new MissingImplementationException("PandaData", "UNHAPPY_TIME::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("PandaData", "UNHAPPY_TIME::setter");
-                        });
+                        .get(PandaEntity::func_213544_dV)
+                        .set(PandaEntity::func_213588_r)
+                .asMutable(PandaEntityAccessor.class)
+                    .create(Keys.EATING_TIME)
+                        .get(PandaEntityAccessor::accessor$func_213559_es)
+                        .set(PandaEntityAccessor::accessor$func_213571_t);
     }
     // @formatter:on
 }
