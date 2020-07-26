@@ -22,26 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inventory.property;
+package org.spongepowered.common.mixin.inventory.api.entity.player;
 
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.EnderChestInventory;
+import net.minecraft.inventory.container.Container;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.data.holder.SpongeDataHolder;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Optional;
+@Mixin(PlayerEntity.class)
+public abstract class PlayerEntityMixin_Inventory_API implements Player {
 
-public interface InventoryDataHolder extends SpongeDataHolder, Inventory {
+    @Shadow @Final public PlayerInventory inventory;
+    @Shadow public Container openContainer;
+
+    @Shadow public abstract EnderChestInventory shadow$getInventoryEnderChest();
 
     @Override
-    default <V> Optional<V> get(Inventory child, Key<? extends Value<V>> key) {
-        return this.getProviderFor(key).get((DataHolder) child);
+    public org.spongepowered.api.item.inventory.entity.PlayerInventory getInventory() {
+        return  (org.spongepowered.api.item.inventory.entity.PlayerInventory) this.inventory;
     }
 
     @Override
-    default <E> Optional<E> get(Key<? extends Value<E>> key) {
-        return this.getProviderFor(key).get(this);
+    public Inventory getEnderChestInventory() {
+        return (Inventory) this.shadow$getInventoryEnderChest();
     }
 
 }

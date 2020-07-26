@@ -183,7 +183,15 @@ public abstract class AbstractLens implements Lens {
     @Override
     public Map<Key<?>, Object> getDataFor(final Lens child) {
         if (!this.has(child)) {
-            throw new NoSuchElementException("Specified child lens is not a direct descendant this lens");
+            for (Lens spanningChild : this.spanningChildren) {
+                if (!(spanningChild instanceof SlotLens)) {
+                    try {
+                        return spanningChild.getDataFor(child);
+                    } catch (Exception ignored) {}
+                }
+            }
+
+            throw new NoSuchElementException("Specified child lens is not a descendant of this lens");
         }
         return this.handleMap.get(child);
     }

@@ -24,9 +24,14 @@
  */
 package org.spongepowered.common.data.provider.inventory;
 
+import net.kyori.adventure.text.Component;
+import net.minecraft.util.INameable;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
@@ -44,6 +49,8 @@ public final class InventoryData {
                         .get(h -> (((InventoryBridge) h).bridge$getAdapter().inventoryAdapter$getFabric().fabric$getMaxStackSize()))
                     .create(Keys.PLUGIN_CONTAINER)
                         .get(InventoryUtil::getPluginContainer)
+                    .create(Keys.DISPLAY_NAME)
+                        .get(InventoryData::findDisplayName)
                     .create(Keys.UNIQUE_ID)
                         .get(h -> {
                             if (h instanceof CustomInventory) {
@@ -53,4 +60,18 @@ public final class InventoryData {
                         });
     }
     // @formatter:on
+
+    private static Component findDisplayName(Inventory inventory) {
+        if (inventory instanceof Container) {
+            for (Inventory viewed : ((Container) inventory).getViewed()) {
+                inventory = viewed;
+                break;
+            }
+        }
+        if (inventory instanceof INameable) {
+            final ITextComponent displayName = ((INameable) inventory).getDisplayName();
+            return ((TextComponentBridge) displayName).bridge$asAdventureComponent();
+        }
+        return null;
+    }
 }

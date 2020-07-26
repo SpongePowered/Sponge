@@ -53,7 +53,6 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
-import java.util.Optional;
 
 @Mixin(WorkbenchContainer.class)
 public abstract class WorkbenchContainerMixin_Inventory {
@@ -67,7 +66,7 @@ public abstract class WorkbenchContainerMixin_Inventory {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/CraftResultInventory;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
     private static void beforeSlotChangedCraftingGrid(int p_217066_0_, final World p_217066_1_, final PlayerEntity p_217066_2_,
             final net.minecraft.inventory.CraftingInventory p_217066_3_, final CraftResultInventory p_217066_4_, final CallbackInfo ci,
-            ServerPlayerEntity serverPlayerEntity, ItemStack itemStack, Optional<ICraftingRecipe> optional) {
+            ServerPlayerEntity serverPlayerEntity, ItemStack itemStack) {
         TrackedInventoryBridge trackedContainer = (TrackedInventoryBridge) p_217066_2_.openContainer;
         TrackedContainerBridge container = (TrackedContainerBridge) p_217066_2_.openContainer;
 

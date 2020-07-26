@@ -38,7 +38,7 @@ import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridg
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 
 @Mixin(ItemEntity.class)
-public abstract class ItemEntityMixin {
+public abstract class ItemEntityMixin_Inventory {
 
     @Shadow private int pickupDelay;
 

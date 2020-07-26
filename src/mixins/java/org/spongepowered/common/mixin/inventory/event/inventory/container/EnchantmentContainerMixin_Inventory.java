@@ -32,6 +32,8 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.EnchantmentContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IntReferenceHolder;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -42,6 +44,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -61,7 +64,8 @@ public abstract class EnchantmentContainerMixin_Inventory {
     private ItemStackSnapshot prevItem;
     private ItemStackSnapshot prevLapis;
 
-    @Redirect(method = "onCraftMatrixChanged", at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/EnchantmentHelper;calcItemStackEnchantability(Ljava/util/Random;IILnet/minecraft/item/ItemStack;)I"))
+    // onCraftMatrixChanged lambda
+    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/EnchantmentHelper;calcItemStackEnchantability(Ljava/util/Random;IILnet/minecraft/item/ItemStack;)I"), require = 1)
     private int impl$onCalcItemStackEnchantability(Random random, int option, int power, ItemStack itemStack) {
         int levelRequirement = EnchantmentHelper.calcItemStackEnchantability(random, option, power, itemStack);
         levelRequirement = InventoryEventFactory.callEnchantEventLevelRequirement((EnchantmentContainer)(Object) this, this.xpSeed.get(), option, power, itemStack, levelRequirement);
@@ -78,14 +82,17 @@ public abstract class EnchantmentContainerMixin_Inventory {
         }
     }
 
-    @Inject(method = "enchantItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;onEnchant(Lnet/minecraft/item/ItemStack;I)V"))
-    private void impl$beforeEnchantItem(PlayerEntity playerIn, int option, CallbackInfoReturnable<Boolean> cir) {
+    // enchantItem lambda
+    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;onEnchant(Lnet/minecraft/item/ItemStack;I)V"), require = 1)
+    private void impl$beforeEnchantItem(CallbackInfo ci) {
         this.prevItem = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(0));
         this.prevLapis = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(1));
     }
 
-    @Inject(method = "enchantItem", cancellable = true, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addStat(Lnet/minecraft/util/ResourceLocation;)V"))
-    private void impl$afterEnchantItem(PlayerEntity playerIn, int option, CallbackInfoReturnable<Boolean> cir) {
+    // enchantItem lambda
+    @Inject(method = "*", cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addStat(Lnet/minecraft/util/ResourceLocation;)V"), require = 1)
+    private void impl$afterEnchantItem(ItemStack itemstack, int id, PlayerEntity playerIn, int i, ItemStack itemstack1, World arg5, BlockPos arg6, CallbackInfo ci) {
         ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(0));
         ItemStackSnapshot newLapis = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(1));
 
@@ -98,10 +105,10 @@ public abstract class EnchantmentContainerMixin_Inventory {
                 InventoryEventFactory.callEnchantEventEnchantPost(playerIn, (EnchantmentContainer) (Object) this,
                         new SlotTransaction(slotItem, this.prevItem, newItem),
                         new SlotTransaction(slotLapis, this.prevLapis, newLapis),
-                        option, this.xpSeed.get());
+                        id, this.xpSeed.get());
 
         if (event.isCancelled()) {
-            cir.setReturnValue(false);
+            ci.cancel();
         }
     }
 

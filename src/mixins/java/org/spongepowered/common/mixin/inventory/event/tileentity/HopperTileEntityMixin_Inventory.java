@@ -50,8 +50,8 @@ import javax.annotation.Nullable;
 @Mixin(HopperTileEntity.class)
 public abstract class HopperTileEntityMixin_Inventory {
 
-    @Shadow private static ItemStack shadow$insertStack(
-            final IInventory source, final IInventory destination, final ItemStack stack, final int index, final Direction direction) {
+    @Shadow private static ItemStack insertStack(
+            final @Nullable IInventory source, final IInventory destination, final ItemStack stack, final int index, final @Nullable Direction direction) {
         throw new AbstractMethodError("Shadow");
     }
 
@@ -93,17 +93,17 @@ public abstract class HopperTileEntityMixin_Inventory {
             final int index, final Direction direction) {
         // capture Transaction
         if (!((source instanceof TrackedInventoryBridge || destination instanceof TrackedInventoryBridge) && destination instanceof InventoryAdapter)) {
-            return shadow$insertStack(source, destination, stack, index, direction);
+            return insertStack(source, destination, stack, index, direction);
         }
         if (!ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
-            return shadow$insertStack(source, destination, stack, index, direction);
+            return insertStack(source, destination, stack, index, direction);
         }
         TrackedInventoryBridge captureIn = impl$forCapture(source);
         if (captureIn == null) {
             captureIn = impl$forCapture(destination);
         }
         return InventoryEventFactory.captureTransaction(captureIn, InventoryUtil.toInventory(destination), index,
-                () -> shadow$insertStack(source, destination, stack, index, direction));
+                () -> insertStack(source, destination, stack, index, direction));
     }
 
     // Post Captured Transactions

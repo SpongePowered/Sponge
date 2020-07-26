@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.inventory.api.entity.player;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -49,11 +48,11 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.Optional;
 
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin_Inventory_API implements ServerPlayer {
+public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntityMixin_Inventory_API implements ServerPlayer {
 
     @Override
     public Optional<Container> getOpenInventory() {
-        return Optional.ofNullable((Container) ((PlayerEntity) (Object) this).openContainer);
+        return Optional.ofNullable((Container) this.openContainer);
     }
 
     @Override
@@ -64,7 +63,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API implements ServerPla
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
     @Override
     public Optional<Container> openInventory(final Inventory inventory, final Component displayName) {
-        ContainerBridge openContainer = (ContainerBridge) ((PlayerEntity) (Object) this).openContainer;
+        ContainerBridge openContainer = (ContainerBridge) this.openContainer;
         if (openContainer.bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
@@ -84,7 +83,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API implements ServerPla
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
-        net.minecraft.inventory.container.Container openContainer = ((PlayerEntity) (Object) this).openContainer;
+        net.minecraft.inventory.container.Container openContainer = this.openContainer;
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
@@ -105,15 +104,10 @@ public abstract class ServerPlayerEntityMixin_Inventory_API implements ServerPla
                 // intentionally missing the lastCursor to not double throw close event
         ) {
             ctx.buildAndSwitch();
-            PlayerInventory inventory = ((PlayerEntity) (Object) this).inventory;
+            PlayerInventory inventory = this.inventory;
             final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(inventory.getItemStack());
             return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(openContainer, (ServerPlayerEntity) (Object) this, cursor, cursor, false).isCancelled();
         }
-    }
-
-    @Override
-    public Inventory getEnderChestInventory() {
-        return (Inventory) ((PlayerEntity) (Object) this).getInventoryEnderChest();
     }
 
 }

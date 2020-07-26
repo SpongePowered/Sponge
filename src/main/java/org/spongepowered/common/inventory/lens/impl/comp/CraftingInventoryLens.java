@@ -30,6 +30,7 @@ import org.spongepowered.common.inventory.adapter.impl.comp.CraftingInventoryAda
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 public class CraftingInventoryLens extends DefaultIndexedLens {
@@ -42,7 +43,7 @@ public class CraftingInventoryLens extends DefaultIndexedLens {
     public CraftingInventoryLens(int outputSlotIndex, int gridBase, int width, int height, SlotLensProvider slots) {
         super(gridBase, width * height + 1, slots);
         this.outputSlotIndex = outputSlotIndex;
-        this.outputSlot = (CraftingOutputSlotLens)slots.getSlotLens(this.outputSlotIndex);
+        this.outputSlot = new CraftingOutputSlotLens(slots.getSlotLens(this.outputSlotIndex), FilteringSlotLens.ItemStackFilter.filterNone());;
         this.craftingGrid = new CraftingGridInventoryLens(this.base, width, height, slots);
         this.size += 1; // output slot
         // Avoid the init() method in the superclass calling our init() too early

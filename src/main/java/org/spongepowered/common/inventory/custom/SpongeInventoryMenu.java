@@ -80,15 +80,23 @@ public class SpongeInventoryMenu implements InventoryMenu {
 
     @Override
     public void setCurrentInventory(ViewableInventory inventory) {
-        if (inventory.getClass().equals(this.inventory.getClass())) {
-            // ideally we would just swap out the IInventory from existing slots
-            // TODO handle container changes
-            this.reopen(); // if not possible reopen
+        if (inventory.getClass().equals(this.inventory.getClass()) && inventory instanceof ViewableCustomInventory && inventory.capacity() == this.inventory.capacity()) {
+            for (Map.Entry<Container, ServerPlayer> entry : this.tracked.entrySet()) {
+                final net.minecraft.inventory.container.Container container = (net.minecraft.inventory.container.Container) entry.getKey();
+                final ServerPlayer player = entry.getValue();
+                // create a new container for the viewable inventory
+                final net.minecraft.inventory.container.Container newContainer = ((ViewableCustomInventory) inventory).createMenu(-1, ((PlayerEntity)player).inventory, (PlayerEntity) player);
+                for (int i = 0; i < inventory.capacity(); i++) {
+                    // And put its slots into the old container
+                    container.inventorySlots.set(i, newContainer.inventorySlots.get(i));
+                }
+            }
         } else {
             // Get all distinct players and reopen inventory for them
+            this.inventory = inventory;
             this.reopen();
         }
-        this.inventory = inventory;
+
     }
 
     private void reopen() {

@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.inventory.event.network.play;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CClickWindowPacket;
 import net.minecraft.network.play.client.CCreativeInventoryActionPacket;
@@ -39,7 +38,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -50,10 +48,10 @@ public class ServerPlayNetHandlerMixin_Inventory {
     @Shadow public ServerPlayerEntity player;
 
     // before if(flag1 && flag2)
-    @Inject(method = "processCreativeInventoryAction", locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CCreativeInventoryActionPacket;getSlotId()I", ordinal = 1, shift = At.Shift.BEFORE))
-    private void onProcessCreativeInventoryAction(CCreativeInventoryActionPacket packetIn, CallbackInfo ci,
-            boolean flag, ItemStack itemstack, CompoundNBT compoundnbt) {
+    @Inject(method = "processCreativeInventoryAction", cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CCreativeInventoryActionPacket;getSlotId()I", ordinal = 1))
+    private void onProcessCreativeInventoryAction(CCreativeInventoryActionPacket packetIn, CallbackInfo ci) {
+        final ItemStack itemstack = packetIn.getStack();
         boolean flag2 = itemstack.isEmpty() || itemstack.getDamage() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
         if (flag2) {
             // TODO handle vanilla sending a bunch of creative events (previously ignoring events within 100ms)

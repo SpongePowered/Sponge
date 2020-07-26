@@ -127,6 +127,7 @@ import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -154,6 +155,7 @@ import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatalogedValueParameterStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.ClickTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
@@ -520,6 +522,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(WireAttachmentType.class, ResourceKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true, false)
             .generateRegistry(WoodType.class, ResourceKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true, false)
             .generateRegistry(Visibility.class, ResourceKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true, false)
+            .generateRegistry(ClickType.class, ResourceKey.minecraft("click_type"), ClickTypeStreamGenerator.stream(), true, false)
         ;
 
         this

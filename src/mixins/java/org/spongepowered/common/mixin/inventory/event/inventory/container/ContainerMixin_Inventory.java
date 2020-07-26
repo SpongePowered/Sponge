@@ -476,7 +476,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
             try {
                 adapter = this.inventoryAdapter$getSlot(index).get();
                 SlotTransaction newTransaction = new SlotTransaction(adapter, originalItem, newItem);
-                List<SlotTransaction> previewTransactions = this.bridge$getPreviewTransactions();
+                final List<SlotTransaction> previewTransactions = this.bridge$getPreviewTransactions();
                 if (this.bridge$isShiftCrafting()) {
                     previewTransactions.add(newTransaction);
                 } else {
@@ -487,7 +487,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
                         }
                     }
                     if (newTransaction != null) {
-                        previewTransactions.add(newTransaction);
+                        this.bridge$getCapturedSlotTransactions().add(newTransaction);
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
