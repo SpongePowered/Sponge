@@ -25,16 +25,18 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class NotifyClientEffect implements ProcessingSideEffect {
+public class EffectResult {
 
-    @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
-        return EffectResult.NULL_PASS;
+    public static final EffectResult NULL_RETURN = new EffectResult(null, true);
+    public static final EffectResult NULL_PASS = new EffectResult(null, false);
 
+    public final @Nullable BlockState resultingState;
+    public final boolean hasResult;
+
+    public EffectResult(@Nullable final BlockState resultingState, final boolean hasResult) {
+        this.resultingState = resultingState;
+        this.hasResult = hasResult;
     }
-
 }

@@ -28,13 +28,17 @@ import net.minecraft.block.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class NotifyClientEffect implements ProcessingSideEffect {
+public final class BlockAddedEffect implements ProcessingSideEffect {
 
-    @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
-        return EffectResult.NULL_PASS;
-
+    public BlockAddedEffect() {
     }
 
+    @Override
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
+        final SpongeBlockChangeFlag flag) {
+        if (flag.performBlockPhysics()) {
+            newState.onBlockAdded(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
+        }
+        return EffectResult.NULL_PASS;
+    }
 }

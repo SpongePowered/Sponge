@@ -25,19 +25,18 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.common.event.tracking.context.transaction.effect.FormerWorldState;
-import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class NotifyNeighborSideEffect implements ProcessingSideEffect {
 
 
     @Override
-    public void processSideEffect(final ServerWorld world, final FormerWorldState oldState, final BlockState newState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
 
 
+        return EffectResult.NULL_PASS;
 
     }
 }

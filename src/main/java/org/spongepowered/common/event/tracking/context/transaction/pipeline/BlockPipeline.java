@@ -22,19 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction.effect;
+package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
-import net.minecraft.block.BlockState;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.server.ServerWorld;
 
-public final class NotifyClientEffect implements ProcessingSideEffect {
+public interface BlockPipeline {
 
-    @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
-        return EffectResult.NULL_PASS;
+    ServerWorld getServerWorld();
 
-    }
+    Chunk getAffectedChunk();
+
+    ChunkSection getAffectedSection();
+
+    boolean wasEmpty();
+
 
 }

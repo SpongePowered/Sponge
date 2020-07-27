@@ -26,31 +26,24 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-
-import java.lang.ref.WeakReference;
 
 public final class UpdateChunkLightManagerEffect implements ProcessingSideEffect {
 
-    private final WeakReference<ChunkSection> chunkSection;
-    private final boolean wasEmpty;
-
-    public UpdateChunkLightManagerEffect(final ChunkSection map) {
-        this.chunkSection = new WeakReference<>(map);
-        this.wasEmpty = map.isEmpty();
+    public UpdateChunkLightManagerEffect() {
     }
 
     @Override
-    public void processSideEffect(final ServerWorld world, final FormerWorldState oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
-        final ChunkSection chunkSection = this.chunkSection.get();
-        if (chunkSection == null) {
-            throw new IllegalStateException("ChunkSection dereferenced!");
-        }
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
+        final SpongeBlockChangeFlag flag
+    ) {
+        final ChunkSection chunkSection = pipeline.getAffectedSection();
+        final boolean wasEmpty = pipeline.wasEmpty();
         final boolean isStillEmpty = chunkSection.isEmpty();
-        if (this.wasEmpty != isStillEmpty) {
-            world.getChunkProvider().getLightManager().func_215567_a(oldState.pos, isStillEmpty);
+        if (wasEmpty != isStillEmpty) {
+            pipeline.getServerWorld().getChunkProvider().getLightManager().func_215567_a(oldState.pos, isStillEmpty);
         }
+        return EffectResult.NULL_PASS;
     }
 }

@@ -25,16 +25,25 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.world.chunk.ChunkSection;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class NotifyClientEffect implements ProcessingSideEffect {
+public final class SetBlockToChunkSectionEffect implements ProcessingSideEffect {
+
+    public SetBlockToChunkSectionEffect() { }
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
+        final SpongeBlockChangeFlag flag) {
+        final ChunkSection chunkSection = pipeline.getAffectedSection();
+        final int x = oldState.pos.getX() & 15;
+        final int y = oldState.pos.getY() & 15;
+        final int z = oldState.pos.getZ() & 15;
+        final BlockState oldStateReturned = chunkSection.setBlockState(x, y, z, newState);
+        if (oldStateReturned == newState) {
+            return EffectResult.NULL_RETURN;
+        }
         return EffectResult.NULL_PASS;
-
     }
-
 }

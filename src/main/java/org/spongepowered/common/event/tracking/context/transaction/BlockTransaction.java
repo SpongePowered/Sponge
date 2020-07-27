@@ -30,28 +30,35 @@ import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.common.accessor.world.chunk.ChunkAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.transaction.effect.FormerWorldState;
+import org.spongepowered.common.event.tracking.context.transaction.effect.BlockAddedEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.CheckBlockPostPlacementIsSameEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.ChunkChangeCompleteEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.OldBlockOnReplaceEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.RefreshOldTileEntityOnChunkChangeEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.SetBlockToChunkSectionEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateChunkLightManagerEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateHeightMapEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateOrCreateNewTileEntityPostPlacementEffect;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 
 @SuppressWarnings("rawtypes")
@@ -92,10 +99,23 @@ public abstract class BlockTransaction {
 
     abstract Optional<TrackedWorldBridge> getWorldBridge();
 
-    public abstract void createEffects(
+    public abstract void populateChunkEffects(
         TransactionalCaptureSupplier blockTransactor,
-        ServerWorld world, TrackedChunkBridge chunkBridge, ChunkSection chunksection
+        ChunkPipeline.Builder builder, ChunkSection chunksection
     );
+
+    public List<ResultingTransactionBySideEffect> getEffects() {
+        return this.sideEffects == null ? Collections.emptyList() : this.sideEffects;
+    }
+
+    public final boolean hasChildTransactions() {
+        if (this.sideEffects != null) {
+            return this.sideEffects.stream().anyMatch(effect -> effect.child != null);
+        }
+        return false;
+    }
+
+    public abstract Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator();
 
     boolean applyTileAtTransaction(final BlockPos affectedPosition, final TileEntity queuedRemoval) {
         if (this.tilesAtTransaction == null) {
@@ -132,6 +152,8 @@ public abstract class BlockTransaction {
         return this.blocksNotAffected != null && !this.blocksNotAffected.isEmpty() && !this.affectedPosition.equals(pos);
     }
 
+    public abstract BlockState getChunkResult();
+
     @SuppressWarnings("rawtypes")
     public static final class AddTileEntity extends BlockTransaction {
 
@@ -145,10 +167,16 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void createEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ServerWorld world, final TrackedChunkBridge chunkBridge, final ChunkSection chunksection
+        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
+            final ChunkPipeline.Builder builder,
+            final ChunkSection chunksection
         ) {
 
+        }
+
+        @Override
+        public Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator() {
+            return Optional.empty();
         }
 
         @Override
@@ -169,6 +197,11 @@ public abstract class BlockTransaction {
             printer.add("AddTileEntity")
                 .addWrapped(120, " %s : %s", this.affectedPosition, ((TileEntityBridge) this.added).bridge$getPrettyPrinterString());
         }
+
+        @Override
+        public BlockState getChunkResult() {
+            return null;
+        }
     }
 
     @SuppressWarnings("rawtypes")
@@ -186,10 +219,16 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void createEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ServerWorld world, final TrackedChunkBridge chunkBridge, final ChunkSection chunksection
+        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
+            final ChunkPipeline.Builder builder,
+            final ChunkSection chunksection
         ) {
 
+        }
+
+        @Override
+        public Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator() {
+            return Optional.empty();
         }
 
         @Override
@@ -198,6 +237,11 @@ public abstract class BlockTransaction {
                 .add(" %s : %s", this.affectedPosition, ((TileEntityBridge) this.removed).bridge$getPrettyPrinterString())
                 .add(" %s : %s", this.affectedPosition, this.originalState)
             ;
+        }
+
+        @Override
+        public BlockState getChunkResult() {
+            return null;
         }
 
         @Override
@@ -232,10 +276,16 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void createEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ServerWorld world, final TrackedChunkBridge chunkBridge, final ChunkSection chunksection
+        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
+            final ChunkPipeline.Builder builder,
+            final ChunkSection chunksection
         ) {
 
+        }
+
+        @Override
+        public Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator() {
+            return Optional.empty();
         }
 
         @Override
@@ -259,6 +309,11 @@ public abstract class BlockTransaction {
                 .add(" %s : %s", "Removed", this.removed)
             ;
         }
+
+        @Override
+        public BlockState getChunkResult() {
+            return null;
+        }
     }
 
     @SuppressWarnings("rawtypes")
@@ -271,6 +326,7 @@ public abstract class BlockTransaction {
         @Nullable public TileEntity queuedRemoval;
         @Nullable public TileEntity queueTileSet;
         public boolean queueBreak = false;
+        @Nullable
 
         ChangeBlock(
             final int i, final int snapshotIndex, final SpongeBlockSnapshot attachedSnapshot, final BlockState newState, final SpongeBlockChangeFlag blockChange) {
@@ -282,24 +338,29 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void createEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ServerWorld world, final TrackedChunkBridge chunkBridge, final ChunkSection chunksection
+        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
+            final ChunkPipeline.Builder builder,
+            final ChunkSection chunksection
         ) {
-            this.sideEffects = new LinkedList<>();
-            final FormerWorldState oldState = new FormerWorldState(this.originalState, this.originalOpacity, this.affectedPosition);
-            final UpdateHeightMapEffect updateHeightMapEffect = new UpdateHeightMapEffect(((ChunkAccessor) chunkBridge).accessor$getHeightMap());
-            updateHeightMapEffect.processSideEffect(world, oldState, this.newState, this.blockChangeFlag);
-            this.sideEffects.push(new ResultingTransactionBySideEffect(updateHeightMapEffect));
-            final UpdateChunkLightManagerEffect updateChunkLightManagerEffect = new UpdateChunkLightManagerEffect(chunksection);
-            updateChunkLightManagerEffect.processSideEffect(world, oldState, this.newState, this.blockChangeFlag);
-            this.sideEffects.push(new ResultingTransactionBySideEffect(updateChunkLightManagerEffect));
-            if (this.original.getServerWorld().isPresent()) {
-                final ResultingTransactionBySideEffect onBlockBreak = new ResultingTransactionBySideEffect(new OldBlockOnReplaceEffect());
-                blockTransactor.pushEffect(onBlockBreak);
-                onBlockBreak.effect.processSideEffect(world, oldState, this.newState, this.blockChangeFlag);
-            } else {
 
-            }
+            builder.addEffect(new SetBlockToChunkSectionEffect());
+            builder.addEffect(new UpdateHeightMapEffect());
+            builder.addEffect(new UpdateChunkLightManagerEffect());
+            builder.addEffect(new OldBlockOnReplaceEffect());
+            builder.addEffect(new CheckBlockPostPlacementIsSameEffect());
+            builder.addEffect(new RefreshOldTileEntityOnChunkChangeEffect());
+            builder.addEffect(new BlockAddedEffect());
+            builder.addEffect(new UpdateOrCreateNewTileEntityPostPlacementEffect());
+            builder.addEffect(new ChunkChangeCompleteEffect());
+        }
+
+        @Override
+        public Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator() {
+            return Optional.of(frame -> {
+                // TODO - Build a Transaction for this particular change, since we only know if a *new* BlockEntity is being placed as a side effect,
+                // we cannot construct the Transaction in the constructor, it gets populated as a result of the side effect.
+                frame.pushCause(this.original);
+            });
         }
 
         @Override
@@ -324,6 +385,11 @@ public abstract class BlockTransaction {
                 .add(" %s : %s", "RemovedTile", this.queuedRemoval)
                 .add(" %s : %s", "AddedTile", this.queueTileSet)
                 .add(" %s : %s", "ChangeFlag", this.blockChangeFlag);
+        }
+
+        @Override
+        public BlockState getChunkResult() {
+            return null;
         }
 
     }
@@ -364,10 +430,16 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void createEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ServerWorld world, final TrackedChunkBridge chunkBridge, final ChunkSection chunksection
+        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
+            final ChunkPipeline.Builder builder,
+            final ChunkSection chunksection
         ) {
             
+        }
+
+        @Override
+        public Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator() {
+            return Optional.empty();
         }
 
         @Override
@@ -388,6 +460,11 @@ public abstract class BlockTransaction {
                 this.blocksNotAffected = new LinkedHashMap<>();
             }
             return true;
+        }
+
+        @Override
+        public BlockState getChunkResult() {
+            return null;
         }
 
         @Override

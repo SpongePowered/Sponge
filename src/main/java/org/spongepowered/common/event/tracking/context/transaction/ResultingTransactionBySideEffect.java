@@ -29,7 +29,7 @@ import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 
 public class ResultingTransactionBySideEffect {
-    final ProcessingSideEffect effect;
+    public final ProcessingSideEffect effect;
     @Nullable BlockTransaction child;
 
     public ResultingTransactionBySideEffect(final ProcessingSideEffect effect) {

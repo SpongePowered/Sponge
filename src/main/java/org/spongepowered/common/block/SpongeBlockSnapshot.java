@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.block;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -49,12 +49,14 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.Function;
 
-@SuppressWarnings("unchecked")
+@DefaultQualifier(NonNull.class)
 public final class SpongeBlockSnapshot implements BlockSnapshot {
 
     private final BlockState blockState;
@@ -65,12 +67,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     private final BlockPos blockPos;
     private final SpongeBlockChangeFlag changeFlag;
     @Nullable private WeakReference<ServerWorld> world;
-    public BlockChange blockChange; // used for post event
+    @MonotonicNonNull public BlockChange blockChange; // used for post event
 
     SpongeBlockSnapshot(final SpongeBlockSnapshotBuilder builder) {
-        this.blockState = Preconditions.checkNotNull(builder.blockState);
-        this.worldKey = Preconditions.checkNotNull(builder.worldKey);
-        this.pos = Preconditions.checkNotNull(builder.coordinates);
+        this.blockState = Objects.requireNonNull(builder.blockState);
+        this.worldKey = Objects.requireNonNull(builder.worldKey);
+        this.pos = Objects.requireNonNull(builder.coordinates);
         this.blockPos = VecHelper.toBlockPos(this.pos);
         this.compound = builder.compound;
         this.changeFlag = builder.flag;
@@ -248,15 +250,15 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
         }
         final SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;
         return this.changeFlag == that.changeFlag &&
-               Objects.equal(this.worldKey, that.worldKey) &&
-               Objects.equal(this.pos, that.pos) &&
-               Objects.equal(this.compound, that.compound);
+               Objects.equals(this.worldKey, that.worldKey) &&
+               Objects.equals(this.pos, that.pos) &&
+               Objects.equals(this.compound, that.compound);
     }
 
     @Override
     public int hashCode() {
         return Objects
-            .hashCode(this.blockState,
+            .hash(this.blockState,
                 this.worldKey,
                 this.pos,
                 this.changeFlag,
@@ -265,10 +267,10 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("world", this.worldKey)
-            .add("position", this.pos)
-            .add("blockState", this.blockState)
+        return new StringJoiner(", ", SpongeBlockSnapshot.class.getSimpleName() + "[", "]")
+            .add("world=" + this.worldKey)
+            .add("position=" + this.blockPos)
+            .add("blockState=" + this.blockState)
             .toString();
     }
 }

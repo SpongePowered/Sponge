@@ -26,24 +26,21 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.accessor.world.chunk.ChunkAccessor;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import java.lang.ref.WeakReference;
 import java.util.Map;
 
 public final class UpdateHeightMapEffect implements ProcessingSideEffect {
 
-    private final WeakReference<Map<Heightmap.Type, Heightmap>> chunkHeightMap;
-
-    public UpdateHeightMapEffect(final Map<Heightmap.Type, Heightmap> map) {
-        this.chunkHeightMap = new WeakReference<>(map);
+    public UpdateHeightMapEffect() {
     }
 
     @Override
-    public void processSideEffect(final ServerWorld world, final FormerWorldState oldState, final BlockState newState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
-        final Map<Heightmap.Type, Heightmap> heightMap = this.chunkHeightMap.get();
+        final Map<Heightmap.Type, Heightmap> heightMap = ((ChunkAccessor) pipeline.getAffectedChunk()).accessor$getHeightMap();
         if (heightMap == null) {
             throw new IllegalStateException("Heightmap dereferenced!");
         }
@@ -54,5 +51,6 @@ public final class UpdateHeightMapEffect implements ProcessingSideEffect {
         heightMap.get(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES).update(x, y, z, newState);
         heightMap.get(Heightmap.Type.OCEAN_FLOOR).update(x, y, z, newState);
         heightMap.get(Heightmap.Type.WORLD_SURFACE).update(x, y, z, newState);
+        return EffectResult.NULL_PASS;
     }
 }
