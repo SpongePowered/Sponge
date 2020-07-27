@@ -48,7 +48,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.server.ChunkHolder;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -76,7 +75,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
@@ -85,7 +83,16 @@ import org.spongepowered.common.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.context.transaction.effect.CheckBlockPostPlacementIsSameEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
+import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyClientEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyNeighborSideEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateConnectingBlocksEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateLightSideEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateWorldRendererEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.WorldBlockChangeCompleteEffect;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -595,138 +602,34 @@ public final class PhaseTracker implements CauseStackManager {
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
         final ServerWorld world = (ServerWorld) mixinWorld;
 
-        // World#setBlockState - A Sponge Story
-        // Vanilla already has the `isOutsideBuildHeight(pos)` check
-        //if (isOutsideBuildHeight(pos)) {
-        //    return false;
-        // Vanilla already checks if it's a server world and that the generator is not a debugger (otherwise we wouldn't
-        // be here)
-        //} else if (!this.isRemote && this.worldInfo.getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES) {
-        //    return false;
-        //} else {
-        // Vanilla gets the chunk
         final Chunk chunk = world.getChunkAt(pos);
-        // Sponge Start - double check the chunk is not empty.
-        // It is now possible for setBlockState to be called on an empty chunk due to our optimization
-        // for returning empty chunks when we don't want a chunk to load.
-        // If chunk is empty, we simply return to avoid any further logic.
         if (chunk.isEmpty()) {
             return false;
         }
-        // Sponge End
-        final Block block = newState.getBlock();
-        // Vanilla uses the bitwise flag, we use BlockChangeFlag.
-        // Sponge Start - Since vanilla will at this point tell the chunk to set the state, we need
-        // to start a tracking position
 
         final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
 
-        // We can allow the block to get changed, regardless how it's captured, not captured, etc.
-        // because ChunkMixin will perform the necessary changes, and appropriately prevent any specific
-        // physics handling.
-
         final TrackedChunkBridge mixinChunk = (TrackedChunkBridge) chunk;
-        // Sponge - Use our mixin method that allows using the BlockChangeFlag.
-        // Forge - Adds the old light check before the chunk changes
-        final int oldLight = ((BlockStateBridge) currentState).bridge$getLightValue(world, pos);
-        final int oldOpacity = currentState.getOpacity(world, pos);
 
-
-        // Up until this point, we've been setting up sponge stuff, this next line is from vanilla
-        // where it tells the chunk to set the new state, but we have to call our custom method
-        // to do transaction handling
-        // final net.minecraft.block.BlockState blockstate = chunk.setBlockState(pos, newState, (flags & 64) != 0);
         final ChunkPipeline chunkPipeline = mixinChunk.bridge$createChunkPipeline(pos, newState, currentState, spongeFlag);
-        // Sponge End
-        if (originalState == null) {
-            return false;
-        } // else { // Sponge - redundant else
-
-        { // Queue Light Update
-            // blockstate1 -> newWorldState
-            final net.minecraft.block.BlockState newWorldState = world.getBlockState(pos);
-            // vanilla4
-            // if (newWorldState != originalState && (newWorldState.getOpacity(world, pos) != originalState.getOpacity(world, pos) || newWorldState.getLightValue() != originalState.getLightValue() || newWorldState.func_215691_g() || originalState.func_215691_g())) {
-            if (newWorldState != originalState && (
-                newWorldState.getOpacity(
-                    world,
-                    pos
-                ) != oldOpacity || ((BlockStateBridge) newWorldState).bridge$getLightValue(
-                    world,
-                    pos
-                ) != oldLight || newWorldState.func_215691_g() || originalState.func_215691_g()
-            )) {
-                // this.profiler.startSection("queueCheckLight");
-                world.getProfiler().startSection("queueCheckLight");
-                // this.getChunkProvider().getLightManager().checkBlock(pos);
-                world.getChunkProvider().getLightManager().checkBlock(pos);
-                // this.profiler.endSection();
-                world.getProfiler().endSection();
+        final WorldPipeline.Builder worldPipelineBuilder = WorldPipeline.builder(chunkPipeline);
+        worldPipelineBuilder.addEffect((pipeline, oldState, newState1, flag1) -> {
+            if (oldState == null) {
+                return EffectResult.NULL_RETURN;
             }
-        }
+            return EffectResult.NULL_PASS;
+        })
+            .addEffect(new UpdateLightSideEffect())
+            .addEffect(new CheckBlockPostPlacementIsSameEffect())
+            .addEffect(new UpdateWorldRendererEffect())
+            .addEffect(new NotifyClientEffect())
+            .addEffect(new NotifyNeighborSideEffect())
+            .addEffect(new UpdateConnectingBlocksEffect())
+            .addEffect(new WorldBlockChangeCompleteEffect());
+        final WorldPipeline pipeline = worldPipelineBuilder
+            .build();
 
-        // Sponge Start - At this point, we can stop and check for captures;
-        //  by short circuiting here, we avoid additional block processing that would otherwise
-        //  have potential side effects (and ChunkMixin#bridge$setBlockState does a wonderful job at avoiding
-        //  unnecessary logic in those cases).
-
-
-
-        // Vanilla does this whole block short circuit
-        // Sponge Start - eliminate big block
-        // if (newWorldState == newState) {
-        if (newWorldState != newState) {
-            return true;
-        }
-        { // Queue Renderer update
-            // Sponge End
-            if (originalState != newWorldState) {
-                // this.func_225319_b(pos, originalState, newWorldState);
-                world.func_225319_b(pos, originalState, newWorldState);
-            }
-        }
-
-        { // Notify Neighbors
-            // Vanilla flags & 2 to check if clients are notified. isRemote is redundant since it's guaranteed a server world.
-            // And the last bit is the equivalent to basically checking if the chunk is not a border and populated.
-            // if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (this.isRemote || chunk.getLocationType() != null && chunk.getLocationType().isAtLeast(ChunkHolder.LocationType.TICKING))) {
-            if (spongeFlag.notifyClients() && (
-                chunk.getLocationType() != null && chunk.getLocationType()
-                    .isAtLeast(ChunkHolder.LocationType.TICKING)
-            )) {
-                // this.notifyBlockUpdate(pos, blockstate, newWorldState, flags);
-                world.notifyBlockUpdate(pos, originalState, newWorldState, spongeFlag.getRawFlag());
-            }
-        }
-
-        // Vanilla isremote is redundant
-        // if (!this.isRemote && (flags & 1) != 0) {
-        if (spongeFlag.updateNeighbors()) {
-            // this.notifyNeighbors(pos, originalState.getBlock());
-            world.notifyNeighbors(pos, originalState.getBlock());
-            if (newWorldState.hasComparatorInputOverride()) {
-                // this.updateComparatorOutputLevel(pos, block);
-                world.updateComparatorOutputLevel(pos, block);
-            }
-        }
-
-        // if ((flags & 16) == 0) { // Sponge BlockChangeFlag acknowledges this
-        if (spongeFlag.notifyObservers()) {
-            // final int i = flags & -2; // Vanilla negates 2 to flip the neighbor notification mask
-            final int newFlag = spongeFlag.withUpdateNeighbors(false).getRawFlag();
-            // blockstate.updateDiagonalNeighbors(this, pos, i);
-            currentState.updateDiagonalNeighbors(world, pos, newFlag);
-            // newWorldState.updateNeighbors(this, pos, i);
-            newWorldState.updateNeighbors(world, pos, newFlag);
-            // newWorldState.updateDiagonalNeighbors(this, pos, i);
-            newWorldState.updateDiagonalNeighbors(world, pos, newFlag);
-        }
-
-        world.onBlockStateChange(pos, originalState, newWorldState);
-
-        return true;
-        // } // Sponge - unnecessary formatting
-
+        return pipeline.processEffects(this.getPhaseContext(), currentState, newState, pos, spongeFlag);
     }
 
     /**

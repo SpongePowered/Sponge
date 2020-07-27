@@ -337,6 +337,14 @@ public abstract class BlockTransaction {
             this.originalOpacity = this.originalState.getOpacity(this.original.getServerWorld().get(), this.affectedPosition);
         }
 
+        public BlockState getNewState() {
+            return this.newState;
+        }
+
+        public SpongeBlockChangeFlag getBlockChangeFlag() {
+            return this.blockChangeFlag;
+        }
+
         @Override
         public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
             final ChunkPipeline.Builder builder,

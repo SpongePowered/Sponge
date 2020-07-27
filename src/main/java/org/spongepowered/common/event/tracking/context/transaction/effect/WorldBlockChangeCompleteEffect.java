@@ -25,28 +25,15 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class UpdateLightSideEffect implements ProcessingSideEffect {
-
+public final class WorldBlockChangeCompleteEffect implements ProcessingSideEffect{
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
-        final int originalOpactiy = oldState.opactiy;
-        final ServerWorld serverWorld = pipeline.getServerWorld();
-        final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos);
-        if (oldState.state != currentState && (((BlockStateBridge) currentState).bridge$getLightValue(serverWorld, oldState.pos) != originalOpactiy || currentState.func_215691_g() || oldState.state.func_215691_g())) {
-            // this.profiler.startSection("queueCheckLight");
-            serverWorld.getProfiler().startSection("queueCheckLight");
-            // this.getChunkProvider().getLightManager().checkBlock(pos);
-            serverWorld.getChunkProvider().getLightManager().checkBlock(oldState.pos);
-            // this.profiler.endSection();
-            serverWorld.getProfiler().endSection();
-        }
-        return EffectResult.NULL_PASS;
-    }
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
+        final SpongeBlockChangeFlag flag) {
+        pipeline.getServerWorld().onBlockStateChange(oldState.pos, oldState.state, newState);
 
+        return new EffectResult(oldState.state, true);
+    }
 }
