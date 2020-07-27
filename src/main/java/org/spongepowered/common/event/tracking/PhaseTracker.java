@@ -599,6 +599,9 @@ public final class PhaseTracker implements CauseStackManager {
     @SuppressWarnings("rawtypes")
     public boolean setBlockState(final TrackedWorldBridge mixinWorld, final BlockPos pos,
                                  final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) {
+        if (Thread.currentThread() != PhaseTracker.SERVER.getSidedThread() && this != PhaseTracker.SERVER) {
+            throw new UnsupportedOperationException("Cannot perform a tracked Block Change on a ServerWorld while not on the main thread!");
+        }
         final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
         final ServerWorld world = (ServerWorld) mixinWorld;
 
