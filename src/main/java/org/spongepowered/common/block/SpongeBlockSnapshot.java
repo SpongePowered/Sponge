@@ -76,6 +76,8 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
         this.blockPos = VecHelper.toBlockPos(this.pos);
         this.compound = builder.compound;
         this.changeFlag = builder.flag;
+        this.world = builder.worldRef;
+        builder.worldRef = null;
     }
 
     @Override

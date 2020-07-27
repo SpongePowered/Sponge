@@ -60,8 +60,10 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Chun
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -136,8 +138,9 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final IPhaseState state = context.state;
         final @Nullable TileEntity existing = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
         // Build a transaction maybe?
+        final WeakReference<ServerWorld> ref = new WeakReference<>((ServerWorld) this.world);
         final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(currentState, pos, flag, existing,
-                () -> ((org.spongepowered.api.world.server.ServerWorld) this.world).getKey(),
+                () -> Objects.requireNonNull(ref.get(), "ServerWorld dereferenced"),
                 Optional::empty, Optional::empty);
 
         // Pulled up from below
@@ -156,6 +159,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         );
 
         final ChunkPipeline.Builder builder = ChunkPipeline.builder()
+            .kickOff(transaction)
             .chunk((Chunk) (Object) this)
             .chunkSection(chunksection)
             .world((ServerWorld) this.world);
