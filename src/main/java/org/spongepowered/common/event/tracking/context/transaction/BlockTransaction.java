@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
@@ -58,10 +57,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 
 
-@SuppressWarnings("rawtypes")
 public abstract class BlockTransaction {
 
     final int transactionIndex;
@@ -93,11 +92,11 @@ public abstract class BlockTransaction {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
+        return new StringJoiner(", ", BlockTransaction.class.getSimpleName() + "[", "]")
+            .add("affectedPosition=" + this.affectedPosition)
+            .add("originalState=" + this.originalState)
             .toString();
     }
-
-    abstract Optional<TrackedWorldBridge> getWorldBridge();
 
     public abstract void populateChunkEffects(
         TransactionalCaptureSupplier blockTransactor,
@@ -109,10 +108,7 @@ public abstract class BlockTransaction {
     }
 
     public final boolean hasChildTransactions() {
-        if (this.sideEffects != null) {
-            return this.sideEffects.stream().anyMatch(effect -> effect.child != null);
-        }
-        return false;
+        return this.sideEffects != null && this.sideEffects.stream().anyMatch(effect -> effect.child != null);
     }
 
     public abstract Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator();
@@ -152,8 +148,6 @@ public abstract class BlockTransaction {
         return this.blocksNotAffected != null && !this.blocksNotAffected.isEmpty() && !this.affectedPosition.equals(pos);
     }
 
-    public abstract BlockState getChunkResult();
-
     @SuppressWarnings("rawtypes")
     public static final class AddTileEntity extends BlockTransaction {
 
@@ -186,22 +180,12 @@ public abstract class BlockTransaction {
             }
         }
 
-        @SuppressWarnings("unchecked")
-        @Override
-        Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<TrackedWorldBridge>) (Optional<?>) this.addedSnapshot.getServerWorld();
-        }
-
         @Override
         public void addToPrinter(final PrettyPrinter printer) {
             printer.add("AddTileEntity")
                 .addWrapped(120, " %s : %s", this.affectedPosition, ((TileEntityBridge) this.added).bridge$getPrettyPrinterString());
         }
 
-        @Override
-        public BlockState getChunkResult() {
-            return null;
-        }
     }
 
     @SuppressWarnings("rawtypes")
@@ -240,21 +224,10 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public BlockState getChunkResult() {
-            return null;
-        }
-
-        @Override
         public void provideUnchangedStates(final BlockTransaction prevChange) {
             if (prevChange.applyTileAtTransaction(this.affectedPosition, this.removed)) {
                 this.appliedPreChange = true;
             }
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<TrackedWorldBridge>) (Optional<?>) this.tileSnapshot.getServerWorld();
         }
 
     }
@@ -295,12 +268,6 @@ public abstract class BlockTransaction {
             }
         }
 
-        @SuppressWarnings("unchecked")
-        @Override
-        Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<TrackedWorldBridge>) (Optional<?>) this.removedSnapshot.getServerWorld();
-        }
-
         @Override
         public void addToPrinter(final PrettyPrinter printer) {
             printer.add("ReplaceTileEntity")
@@ -310,10 +277,6 @@ public abstract class BlockTransaction {
             ;
         }
 
-        @Override
-        public BlockState getChunkResult() {
-            return null;
-        }
     }
 
     @SuppressWarnings("rawtypes")
@@ -379,12 +342,6 @@ public abstract class BlockTransaction {
             }
         }
 
-        @SuppressWarnings("unchecked")
-        @Override
-        Optional<TrackedWorldBridge> getWorldBridge() {
-            return (Optional<TrackedWorldBridge>) (Optional<?>) this.original.getServerWorld();
-        }
-
         @Override
         public void addToPrinter(final PrettyPrinter printer) {
             printer.add("ChangeBlock")
@@ -393,11 +350,6 @@ public abstract class BlockTransaction {
                 .add(" %s : %s", "RemovedTile", this.queuedRemoval)
                 .add(" %s : %s", "AddedTile", this.queueTileSet)
                 .add(" %s : %s", "ChangeFlag", this.blockChangeFlag);
-        }
-
-        @Override
-        public BlockState getChunkResult() {
-            return null;
         }
 
     }
@@ -422,13 +374,13 @@ public abstract class BlockTransaction {
 
         @Override
         public String toString() {
-            return MoreObjects.toStringHelper(this)
-                .add("world", ((org.spongepowered.api.world.server.ServerWorld) this.worldBridge).getKey())
-                .add("notifyState", this.notifyState)
-                .add("notifyPos", this.notifyPos)
-                .add("sourceBlock", this.sourceBlock)
-                .add("sourcePos", this.sourcePos)
-                .add("actualSourceState", this.originalState)
+            return new StringJoiner(", ", NeighborNotification.class.getSimpleName() + "[", "]")
+                .add("world=" + this.worldBridge)
+                .add("notifyState=" + this.notifyState)
+                .add("notifyPos=" + this.notifyPos)
+                .add("sourceBlock=" + this.sourceBlock)
+                .add("sourcePos=" + this.sourcePos)
+                .add("actualSourceState=" + this.originalState)
                 .toString();
         }
 
@@ -471,21 +423,12 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public BlockState getChunkResult() {
-            return null;
-        }
-
-        @Override
         public void addToPrinter(final PrettyPrinter printer) {
             printer.add("NeighborNotification")
                 .add(" %s : %s, %s", "Source Pos", this.originalState, this.sourcePos)
                 .add(" %s : %s, %s", "Notification", this.notifyState, this.notifyPos);
         }
 
-        @Override
-        Optional<TrackedWorldBridge> getWorldBridge() {
-            return Optional.of(this.worldBridge);
-        }
     }
 
     static final class TransactionProcessState implements IPhaseState<TransactionContext> {

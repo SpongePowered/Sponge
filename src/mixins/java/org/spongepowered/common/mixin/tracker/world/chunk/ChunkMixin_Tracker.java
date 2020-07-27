@@ -35,6 +35,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
+import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -43,6 +44,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
@@ -55,6 +57,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.List;
@@ -76,22 +79,17 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
     // @formatter:on
 
-//    /**
-//     * @param pos The position to set
-//     * @param state The state to set
-//     * @return The changed state
-//     * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
-//     * @reason Reroute outsdie calls to chunk.setBlockState to flow through
-//     *         the tracker enhanced method.
-//     */
-//    @Nullable
-//    @Overwrite
-//    public BlockState setBlockState(final BlockPos pos, final BlockState state, final boolean isMoving) {
-//        final BlockState iblockstate1 = this.getBlockState(pos);
-//
-//        // Sponge - reroute to new method that accepts snapshot to prevent a second snapshot from being created.
-//        return this.bridge$setBlockState(pos, state, iblockstate1, BlockChangeFlags.ALL);
-//    }
+    @Inject(method = "setBlockState", at = @At("HEAD"), cancellable = true)
+    private void tracker$sanityCheckServerWorldSetBlockState(final BlockPos pos, final BlockState state, final boolean isMoving,
+        final CallbackInfoReturnable<BlockState> cir) {
+        if (!((WorldBridge) this.world).bridge$isFake()) {
+            new PrettyPrinter(80).add("Illegal Direct Chunk Access")
+                .hr()
+                .add(new IllegalAccessException("No one should be accessing Chunk.setBlockState in a ServerWorld's environment"))
+                .log(PhaseTracker.LOGGER, Level.WARN);
+            cir.setReturnValue(null);
+        }
+    }
 
     /**
      * @param pos The position changing
