@@ -57,7 +57,7 @@ public final class ArmorItemStackData {
                     .create(Keys.DAMAGE_ABSORPTION)
                         .get(h -> {
                             if (h.getItem() instanceof ArmorItem) {
-                                return ((ArmorItem) h.getItem()).getDamageReduceAmount();
+                                return (double) ((ArmorItem) h.getItem()).getDamageReduceAmount();
                             }
                             return null;
                         })
