@@ -25,17 +25,27 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class NotifyNeighborSideEffect implements ProcessingSideEffect {
 
-
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
+        final ServerWorld world = pipeline.getServerWorld();
 
-
+        // Vanilla isremote is redundant
+        // if (!this.isRemote && (flags & 1) != 0) {
+        if (flag.updateNeighbors()) {
+            // this.notifyNeighbors(pos, originalState.getBlock());
+            world.notifyNeighbors(oldState.pos, oldState.state.getBlock());
+            if (newState.hasComparatorInputOverride()) {
+                // this.updateComparatorOutputLevel(pos, block);
+                world.updateComparatorOutputLevel(oldState.pos, newState.getBlock());
+            }
+        }
         return EffectResult.NULL_PASS;
 
     }

@@ -25,6 +25,9 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ChunkHolder;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -33,8 +36,17 @@ public final class NotifyClientEffect implements ProcessingSideEffect {
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag) {
-        return EffectResult.NULL_PASS;
+        final Chunk chunk = pipeline.getAffectedChunk();
+        final ServerWorld world = pipeline.getServerWorld();
 
+        // Vanilla flags & 2 to check if clients are notified. isRemote is redundant since it's guaranteed a server world.
+        // And the last bit is the equivalent to basically checking if the chunk is not a border and populated.
+        // if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (this.isRemote || chunk.getLocationType() != null && chunk.getLocationType().isAtLeast(ChunkHolder.LocationType.TICKING))) {
+        if (flag.notifyClients() && (chunk.getLocationType().isAtLeast(ChunkHolder.LocationType.TICKING))) {
+            // this.notifyBlockUpdate(pos, blockstate, newWorldState, flags);
+            world.notifyBlockUpdate(oldState.pos, oldState.state, newState, flag.getRawFlag());
+        }
+        return EffectResult.NULL_PASS;
     }
 
 }

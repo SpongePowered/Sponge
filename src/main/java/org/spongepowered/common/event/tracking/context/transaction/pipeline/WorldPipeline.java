@@ -29,48 +29,35 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.server.ServerWorld;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
 import org.spongepowered.common.event.tracking.context.transaction.effect.FormerWorldState;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class ChunkPipeline implements BlockPipeline {
+public class WorldPipeline implements BlockPipeline {
 
-    private final @Nullable Supplier<Chunk> chunkSupplier;
-    private final @Nullable Supplier<ServerWorld> serverWorld;
-    private final @Nullable Supplier<ChunkSection> sectionSupplier;
+    private final Supplier<Chunk> chunkSupplier;
+    private final Supplier<ServerWorld> serverWorld;
+    private final Supplier<ChunkSection> sectionSupplier;
     private final boolean wasEmpty;
-    private final List<ResultingTransactionBySideEffect> chunkEffects;
-    final BlockTransaction.ChangeBlock transaction;
+    private final List<ResultingTransactionBySideEffect> worldEffects;
+    private final ChunkPipeline chunkPipeline;
 
-    public ChunkPipeline(final Builder builder) {
+    public WorldPipeline(final Builder builder) {
         this.chunkSupplier = builder.chunkSupplier;
-        this.chunkEffects = builder.effects;
+        this.worldEffects = builder.effects;
         this.serverWorld = builder.serverWorld;
         this.sectionSupplier = builder.sectionSupplier;
         this.wasEmpty = Objects.requireNonNull(builder.sectionSupplier).get().isEmpty();
-        this.transaction = builder.transaction;
-    }
-
-    public Supplier<Chunk> getChunkSupplier() {
-        return this.chunkSupplier;
-    }
-
-    public List<ResultingTransactionBySideEffect> getChunkEffects() {
-        return this.chunkEffects;
+        this.chunkPipeline = builder.chunkPipeline;
     }
 
     public ServerWorld getServerWorld() {
@@ -87,36 +74,41 @@ public class ChunkPipeline implements BlockPipeline {
         return Objects.requireNonNull(this.sectionSupplier, "ChunkSection Supplier is null in ChunkPipeline").get();
     }
 
-    public BlockState processChange(final PhaseContext<?> context, final BlockState currentState, final BlockState proposedState,
-        final BlockPos pos
+    public boolean processEffects(final PhaseContext<?> context, final BlockState currentState,
+        final BlockState newProposedState, final BlockPos pos, final SpongeBlockChangeFlag flag
     ) {
-        if (this.chunkEffects.isEmpty()) {
-            return null;
+        if (this.worldEffects.isEmpty()) {
+            return false;
         }
-        final ServerWorld serverWorld = this.serverWorld.get();
-        final int oldOpacity = currentState.getOpacity(serverWorld, pos);
-        final SpongeBlockChangeFlag flag = this.transaction.getBlockChangeFlag();
-        final FormerWorldState formerState = new FormerWorldState(currentState, oldOpacity, pos);
+        final ServerWorld serverWorld = Objects.requireNonNull(this.serverWorld).get();
+        // We have to get the "old state" from
+        final BlockState oldState = this.chunkPipeline.processChange(context, currentState, newProposedState, pos);
+        if (oldState == null) {
+            return false;
+        }
+        final int oldOpacity = oldState.getOpacity(serverWorld, pos);
 
-        for (final ResultingTransactionBySideEffect effect : this.chunkEffects) {
+        final FormerWorldState formerState = new FormerWorldState(oldState, oldOpacity, pos);
+
+        for (final ResultingTransactionBySideEffect effect : this.worldEffects) {
             try (final PhaseContext<?>.EffectTransactor ignored = context.pushTransactor(effect)) {
                 final EffectResult result = effect.effect.processSideEffect(
                     this,
                     formerState,
-                    proposedState,
+                    newProposedState,
                     flag
                 );
                 if (result.hasResult) {
-                    return result.resultingState;
+                    return result.resultingState != null;
                 }
             }
         }
         // if we've gotten here, means something is wrong, we didn't build our effects right.
-        return null;
+        return false;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(final ChunkPipeline pipeline) {
+        return new Builder(Objects.requireNonNull(pipeline, "ChunkPipeline cannot be null!"));
     }
 
     public boolean wasEmpty() {
@@ -125,16 +117,19 @@ public class ChunkPipeline implements BlockPipeline {
 
     public static final class Builder {
 
-        @Nullable Supplier<ServerWorld> serverWorld;
-        @Nullable Supplier<Chunk> chunkSupplier;
-        @Nullable Supplier<ChunkSection> sectionSupplier;
-        BlockTransaction.@MonotonicNonNull ChangeBlock transaction;
+        final Supplier<ServerWorld> serverWorld;
+        final Supplier<Chunk> chunkSupplier;
+        final Supplier<ChunkSection> sectionSupplier;
         List<ResultingTransactionBySideEffect> effects;
+        final ChunkPipeline chunkPipeline;
 
-        public Builder kickOff(final BlockTransaction.ChangeBlock transaction) {
-            this.transaction = Objects.requireNonNull(transaction, "ChangeBlock transaction cannot be null!");
-            return this;
+        Builder(final ChunkPipeline chunkPipeline) {
+            this.serverWorld = chunkPipeline::getServerWorld;
+            this.chunkSupplier = chunkPipeline::getAffectedChunk;
+            this.sectionSupplier = chunkPipeline::getAffectedSection;
+            this.chunkPipeline = chunkPipeline;
         }
+
         public Builder addEffect(final ProcessingSideEffect effect) {
             if (this.effects == null) {
                 this.effects = new LinkedList<>();
@@ -143,48 +138,11 @@ public class ChunkPipeline implements BlockPipeline {
             return this;
         }
 
-        public Builder chunk(final Chunk chunk) {
-            final WeakReference<Chunk> worldRef = new WeakReference<>(chunk);
-            this.chunkSupplier = () -> {
-                final Chunk chunkRef = worldRef.get();
-                if (chunkRef == null) {
-                    throw new IllegalStateException("ServerWorld dereferenced");
-                }
-                return chunkRef;
-            };
-            return this;
-        }
-
-        public Builder chunkSection(final ChunkSection section) {
-            final WeakReference<ChunkSection> worldRef = new WeakReference<>(section);
-            this.sectionSupplier = () -> {
-                final ChunkSection chunkRef = worldRef.get();
-                if (chunkRef == null) {
-                    throw new IllegalStateException("ServerWorld dereferenced");
-                }
-                return chunkRef;
-            };
-            return this;
-        }
-
-        public Builder world(final ServerWorld world) {
-            final WeakReference<ServerWorld> worldRef = new WeakReference<>(world);
-            this.serverWorld = () -> {
-                final ServerWorld serverWorld = worldRef.get();
-                if (serverWorld == null) {
-                    throw new IllegalStateException("ServerWorld dereferenced");
-                }
-                return serverWorld;
-            };
-            return this;
-        }
-
-        public ChunkPipeline build() {
+        public WorldPipeline build() {
             if (this.effects == null) {
                 this.effects = Collections.emptyList();
             }
-            Objects.requireNonNull(this.transaction, "ChangeBlock transaction must have been recorded!");
-            return new ChunkPipeline(this);
+            return new WorldPipeline(this);
         }
 
     }
