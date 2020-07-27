@@ -36,6 +36,7 @@ import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccesso
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
 
 import java.util.stream.Collectors;
 
@@ -56,6 +57,7 @@ public final class ServerPlayerData {
                     .create(Keys.SPECTATOR_TARGET)
                         .get(h -> (Entity) h.getSpectatingEntity())
                         .set((h, v) -> h.setSpectatingEntity((net.minecraft.entity.Entity) v))
+                        .delete(h -> h.setSpectatingEntity(null))
                     .create(Keys.STATISTICS)
                         .get(h -> ((StatisticsManagerBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
                                 .collect(Collectors.toMap(e -> (Statistic)e.getKey(), e -> e.getValue().longValue())))
@@ -73,7 +75,8 @@ public final class ServerPlayerData {
                             }
                             h.bridge$setHealthScale(v);
                             return true;
-                        });
+                        })
+                        .resetOnDelete(Constants.Entity.Player.DEFAULT_HEALTH_SCALE);
     }
     // @formatter:on
 }

@@ -28,6 +28,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.OptBool;
+import org.spongepowered.common.data.copy.CopyHelper;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -136,6 +137,9 @@ public class DataProviderRegistrator {
                                 registration.delete.accept(dataHolder);
                                 return true;
                             }
+                            if (registration.resetOnDelete != null) {
+                                return this.set(dataHolder, registration.resetOnDelete.apply(dataHolder));
+                            }
                             return super.delete(dataHolder);
                         }
 
@@ -151,6 +155,9 @@ public class DataProviderRegistrator {
                         protected DataTransactionResult deleteAndGetResult(final T dataHolder) {
                             if (registration.deleteAndGet != null) {
                                 return registration.deleteAndGet.apply(dataHolder);
+                            }
+                            if (registration.resetOnDelete != null) {
+                                return setAndGetResult(dataHolder, registration.resetOnDelete.apply(dataHolder));
                             }
                             return super.deleteAndGetResult(dataHolder);
                         }
@@ -253,6 +260,7 @@ public class DataProviderRegistrator {
         @Nullable private Function<T, Boolean> deleteAnd;
         @Nullable private Consumer<T> delete;
         @Nullable private Function<T, DataTransactionResult> deleteAndGet;
+        @Nullable private Function<T, K> resetOnDelete;
         @Nullable private BiFunction<T, K, DataTransactionResult> setAndGet;
         @Nullable private Function<T, Boolean> supports;
 
@@ -293,6 +301,19 @@ public class DataProviderRegistrator {
 
         public MutableRegistration<K, T> deleteAndGet(final Function<T, DataTransactionResult> deleteAndGet) {
             this.deleteAndGet = deleteAndGet;
+            return this;
+        }
+
+        public MutableRegistration<K, T> resetOnDelete(final K value) {
+            return this.resetOnDelete(CopyHelper.createSupplier(value));
+        }
+
+        public MutableRegistration<K, T> resetOnDelete(final Supplier<K> resetOnDeleteTo) {
+            return this.resetOnDelete(h -> resetOnDeleteTo.get());
+        }
+
+        public MutableRegistration<K, T> resetOnDelete(final Function<T, K> resetOnDeleteTo) {
+            this.resetOnDelete = resetOnDeleteTo;
             return this;
         }
 
