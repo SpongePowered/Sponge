@@ -215,14 +215,17 @@ license {
 
 allprojects {
 
+    apply(plugin = "java-library")
     apply(plugin = "maven-publish")
 
-    afterEvaluate {
-        tasks {
-            compileJava {
-                options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
-            }
+    tasks {
+        withType(JavaCompile::class) {
+            options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
         }
+    }
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     repositories {

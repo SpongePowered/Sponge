@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.block;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.world.ServerMultiWorld;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -48,8 +49,10 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
+import java.lang.ref.WeakReference;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -78,6 +81,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     @Nullable List<DataManipulator.Immutable> manipulators;
     @Nullable CompoundNBT compound;
     SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
+    @Nullable WeakReference<ServerWorld> worldRef;
     private final boolean pooled;
 
 
@@ -88,30 +92,36 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshotBuilder world(final WorldProperties worldProperties) {
-        this.worldKey = Preconditions.checkNotNull(worldProperties).getKey();
+        this.worldKey = Objects.requireNonNull(worldProperties).getKey();
         return this;
     }
 
     public SpongeBlockSnapshotBuilder world(final ResourceKey key) {
-        this.worldKey = Preconditions.checkNotNull(key);
+        this.worldKey = Objects.requireNonNull(key);
+        return this;
+    }
+    
+    public SpongeBlockSnapshotBuilder world(final ServerWorld world) {
+        this.worldKey = ((org.spongepowered.api.world.server.ServerWorld) Objects.requireNonNull(world)).getKey();
+        this.worldRef = new WeakReference<ServerWorld>(world);
         return this;
     }
 
     @Override
     public SpongeBlockSnapshotBuilder blockState(final BlockState blockState) {
-        this.blockState = Preconditions.checkNotNull(blockState);
+        this.blockState = Objects.requireNonNull(blockState);
         return this;
     }
 
     public SpongeBlockSnapshotBuilder blockState(final net.minecraft.block.BlockState blockState) {
-        this.blockState = Preconditions.checkNotNull((BlockState) blockState);
+        this.blockState = Objects.requireNonNull((BlockState) blockState);
         return this;
     }
 
 
     @Override
     public SpongeBlockSnapshotBuilder position(final Vector3i position) {
-        this.coordinates = Preconditions.checkNotNull(position);
+        this.coordinates = Objects.requireNonNull(position);
         if (this.compound != null) {
             this.compound.putInt(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X, position.getX());
             this.compound.putInt(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y, position.getY());
@@ -190,7 +200,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
 
     @Override
     public SpongeBlockSnapshot build() {
-        Preconditions.checkState(this.blockState != null);
+        Objects.requireNonNull(this.blockState, "BlockState cannot be null!");
         final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this);
         this.reset();
         if (this.pooled) {

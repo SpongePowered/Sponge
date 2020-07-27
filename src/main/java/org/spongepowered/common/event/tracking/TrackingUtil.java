@@ -958,14 +958,14 @@ public final class TrackingUtil {
 
     public static SpongeBlockSnapshot createPooledSnapshot(final net.minecraft.block.BlockState state, final BlockPos pos,
         final BlockChangeFlag updateFlag, @Nullable final TileEntity existing,
-        final Supplier<ResourceKey> worldKeySupplier,
+        final Supplier<ServerWorld> worldSupplier,
         final Supplier<Optional<UUID>> creatorSupplier,
         final Supplier<Optional<UUID>> notifierSupplier
     ) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.reset();
         builder.blockState(state)
-                .world(worldKeySupplier.get())
+                .world(worldSupplier.get())
                 .position(VecHelper.toVector3i(pos));
         creatorSupplier.get().ifPresent(builder::creator);
         notifierSupplier.get().ifPresent(builder::notifier);

@@ -58,7 +58,7 @@ import java.util.function.BiConsumer;
 
 public abstract class PacketState<P extends PacketContext<P>> extends PooledPhaseState<P> implements IPhaseState<P> {
 
-    private final BiConsumer<CauseStackManager.StackFrame, P> BASIC_PACKET_MODIFIER = IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
+    private final BiConsumer<CauseStackManager.StackFrame, P> BASIC_PACKET_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
         if (ctx.packetPlayer != null) {
             frame.pushCause(ctx.packetPlayer);
         }

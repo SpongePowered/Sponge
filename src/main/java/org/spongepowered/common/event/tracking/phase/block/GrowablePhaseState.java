@@ -44,7 +44,7 @@ import java.util.function.BiConsumer;
 @SuppressWarnings({"unchecked", "rawTypes"})
 public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> implements IPhaseState<GrowablePhaseContext> {
 
-    private final BiConsumer<CauseStackManager.StackFrame, GrowablePhaseContext> FRAME_MODIFIER = IPhaseState.super.getFrameModifier()
+    private final BiConsumer<CauseStackManager.StackFrame, GrowablePhaseContext> FRAME_MODIFIER = super.getFrameModifier()
         .andThen((stackFrame, growablePhaseContext) -> {
             if (!growablePhaseContext.usedItem.isEmpty()) {
                 stackFrame.addContext(EventContextKeys.USED_ITEM, growablePhaseContext.usedItem);

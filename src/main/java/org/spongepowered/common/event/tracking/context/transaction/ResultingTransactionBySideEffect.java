@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import javax.annotation.Nullable;
 import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 

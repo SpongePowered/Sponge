@@ -37,7 +37,7 @@ import java.util.function.BiConsumer;
 public class BlockPhaseState extends PooledPhaseState<GeneralizedContext> implements IPhaseState<GeneralizedContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> BLOCK_MODIFIER =
-        IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
+        super.getFrameModifier().andThen((frame, ctx) -> {
 
 
         });
