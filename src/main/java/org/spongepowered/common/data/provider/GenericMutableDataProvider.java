@@ -32,19 +32,19 @@ import java.util.function.Supplier;
 @SuppressWarnings("unchecked")
 public abstract class GenericMutableDataProvider<H, E> extends GenericMutableDataProviderBase<H, Value<E>, E> {
 
-    public GenericMutableDataProvider(Key<? extends Value<E>> key) {
+    public GenericMutableDataProvider(final Key<? extends Value<E>> key) {
         super((Key<Value<E>>) key);
     }
 
-    public GenericMutableDataProvider(Supplier<? extends Key<? extends Value<E>>> key) {
+    public GenericMutableDataProvider(final Supplier<? extends Key<? extends Value<E>>> key) {
         this(key.get());
     }
 
-    public GenericMutableDataProvider(Key<? extends Value<E>> key, Class<H> holderType) {
+    public GenericMutableDataProvider(final Key<? extends Value<E>> key, final Class<H> holderType) {
         super((Key<Value<E>>) key, holderType);
     }
 
-    public GenericMutableDataProvider(Supplier<? extends Key<? extends Value<E>>> key, Class<H> holderType) {
+    public GenericMutableDataProvider(final Supplier<? extends Key<? extends Value<E>>> key, final Class<H> holderType) {
         this(key.get(), holderType);
     }
 }

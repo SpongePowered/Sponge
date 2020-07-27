@@ -32,24 +32,24 @@ final class CachedBooleanValueConstructor implements ValueConstructor<Value<Bool
     private final Value<Boolean> immutableValueTrue;
     private final Value<Boolean> immutableValueFalse;
 
-    CachedBooleanValueConstructor(ValueConstructor<Value<Boolean>, Boolean> original) {
+    CachedBooleanValueConstructor(final ValueConstructor<Value<Boolean>, Boolean> original) {
         this.original = original;
         this.immutableValueFalse = original.getImmutable(false);
         this.immutableValueTrue = original.getImmutable(true);
     }
 
     @Override
-    public Value<Boolean> getMutable(Boolean element) {
+    public Value<Boolean> getMutable(final Boolean element) {
         return this.original.getMutable(element);
     }
 
     @Override
-    public Value<Boolean> getImmutable(Boolean element) {
+    public Value<Boolean> getImmutable(final Boolean element) {
         return element ? this.immutableValueTrue : this.immutableValueFalse;
     }
 
     @Override
-    public Value<Boolean> getRawImmutable(Boolean element) {
-        return null;
+    public Value<Boolean> getRawImmutable(final Boolean element) {
+        return this.getImmutable(element);
     }
 }

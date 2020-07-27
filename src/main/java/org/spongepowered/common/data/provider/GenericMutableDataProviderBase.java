@@ -42,25 +42,25 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     private static final TypeVariable<?> holderTypeParameter = GenericMutableDataProviderBase.class.getTypeParameters()[0];
     private final Class<H> holderType;
 
-    protected GenericMutableDataProviderBase(Supplier<? extends Key<V>> key, Class<H> holderType) {
+    protected GenericMutableDataProviderBase(final Supplier<? extends Key<V>> key, final Class<H> holderType) {
         this(key.get(), holderType);
     }
 
-    protected GenericMutableDataProviderBase(Key<V> key, Class<H> holderType) {
+    protected GenericMutableDataProviderBase(final Key<V> key, final Class<H> holderType) {
         super(key);
         this.holderType = holderType;
     }
 
-    protected GenericMutableDataProviderBase(Supplier<? extends Key<V>> key) {
+    protected GenericMutableDataProviderBase(final Supplier<? extends Key<V>> key) {
         this(key.get());
     }
 
-    protected GenericMutableDataProviderBase(Key<V> key) {
+    protected GenericMutableDataProviderBase(final Key<V> key) {
         super(key);
         this.holderType = (Class<H>) TypeToken.of(this.getClass()).resolveType(holderTypeParameter).getRawType();
     }
 
-    private boolean isTypeAllowed(DataHolder dataHolder) {
+    private boolean isTypeAllowed(final DataHolder dataHolder) {
         return this.holderType.isInstance(dataHolder);
     }
 
@@ -75,7 +75,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @param dataHolder The data holder
      * @return Whether supported
      */
-    protected boolean supports(H dataHolder) {
+    protected boolean supports(final H dataHolder) {
         return true;
     }
 
@@ -93,7 +93,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @param dataHolder The data holder
      * @return The value, if present
      */
-    public Optional<V> getValueFrom(H dataHolder) {
+    public Optional<V> getValueFrom(final H dataHolder) {
         return this.getFrom(dataHolder).map(e -> this.constructValue(dataHolder, e));
     }
 
@@ -104,7 +104,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @param value The element
      * @return Whether applying was successful
      */
-    protected boolean set(H dataHolder, E value) {
+    protected boolean set(final H dataHolder, final E value) {
         return false;
     }
 
@@ -115,7 +115,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @param value The element
      * @return Whether applying was successful
      */
-    protected DataTransactionResult setAndGetResult(H dataHolder, E value) {
+    protected DataTransactionResult setAndGetResult(final H dataHolder, final E value) {
         final Optional<Value.Immutable<E>> originalValue = this.getFrom(dataHolder)
                 .map(e -> this.constructValue(dataHolder, e).asImmutable());
         final Value.Immutable<E> replacementValue = Value.immutableOf(this.getKey(), value);
@@ -139,7 +139,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @param element The element
      * @return The value
      */
-    protected V constructValue(H dataHolder, E element) {
+    protected V constructValue(final H dataHolder, final E element) {
         return Value.genericImmutableOf(this.getKey(), element);
     }
 
@@ -159,7 +159,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @param dataHolder The data holder
      * @return Whether the removal was successful
      */
-    protected DataTransactionResult deleteAndGetResult(H dataHolder) {
+    protected DataTransactionResult deleteAndGetResult(final H dataHolder) {
         final Optional<Value.Immutable<E>> originalValue = this.getFrom(dataHolder)
                 .map(e -> this.constructValue(dataHolder, e).asImmutable());
         if (!originalValue.isPresent()) {
@@ -172,12 +172,12 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
-    public final boolean isSupported(DataHolder dataHolder) {
+    public final boolean isSupported(final DataHolder dataHolder) {
         return this.isTypeAllowed(dataHolder) && this.supports((H) dataHolder);
     }
 
     @Override
-    public final Optional<V> getValue(DataHolder dataHolder) {
+    public final Optional<V> getValue(final DataHolder dataHolder) {
         if (!this.isSupported(dataHolder)) {
             return Optional.empty();
         }
@@ -185,7 +185,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
-    public final Optional<E> get(DataHolder dataHolder) {
+    public final Optional<E> get(final DataHolder dataHolder) {
         if (!this.isSupported(dataHolder)) {
             return Optional.empty();
         }
@@ -193,7 +193,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
-    public final DataTransactionResult offerValue(DataHolder.Mutable dataHolder, V value) {
+    public final DataTransactionResult offerValue(final DataHolder.Mutable dataHolder, final V value) {
         if (!this.isSupported(dataHolder)) {
             return DataTransactionResult.failNoData();
         }
@@ -215,7 +215,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
-    public final DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
+    public final DataTransactionResult offer(final DataHolder.Mutable dataHolder, final E element) {
         if (!this.isSupported(dataHolder)) {
             return DataTransactionResult.failResult(Value.immutableOf(this.getKey(), element));
         }
@@ -223,7 +223,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
-    public final DataTransactionResult remove(DataHolder.Mutable dataHolder) {
+    public final DataTransactionResult remove(final DataHolder.Mutable dataHolder) {
         if (!this.isSupported(dataHolder)) {
             return DataTransactionResult.failNoData();
         }

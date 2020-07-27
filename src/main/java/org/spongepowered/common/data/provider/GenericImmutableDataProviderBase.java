@@ -39,17 +39,17 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
     private static final TypeVariable<?> holderTypeParameter = GenericImmutableDataProviderBase.class.getTypeParameters()[0];
     private final Class<H> holderType;
 
-    GenericImmutableDataProviderBase(Key<V> key, Class<H> holderType) {
+    GenericImmutableDataProviderBase(final Key<V> key, final Class<H> holderType) {
         super(key);
         this.holderType = holderType;
     }
 
-    GenericImmutableDataProviderBase(Key<V> key) {
+    GenericImmutableDataProviderBase(final Key<V> key) {
         super(key);
         this.holderType = (Class<H>) TypeToken.of(this.getClass()).resolveType(holderTypeParameter).getRawType();
     }
 
-    private boolean isTypeAllowed(DataHolder dataHolder) {
+    private boolean isTypeAllowed(final DataHolder dataHolder) {
         return this.holderType.isInstance(dataHolder);
     }
 
@@ -64,7 +64,7 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
      * @param dataHolder The data holder
      * @return Whether supported
      */
-    protected boolean supports(H dataHolder) {
+    protected boolean supports(final H dataHolder) {
         return true;
     }
 
@@ -92,7 +92,7 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
      * @param element The element
      * @return The value
      */
-    protected V constructValue(H dataHolder, E element) {
+    protected V constructValue(final H dataHolder, final E element) {
         return Value.genericImmutableOf(this.getKey(), element);
     }
 
@@ -102,12 +102,12 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
      * @param dataHolder The data holder
      * @return The new immutable object, if successful
      */
-    protected Optional<H> removeFrom(H dataHolder) {
+    protected Optional<H> removeFrom(final H dataHolder) {
         return Optional.empty();
     }
 
     @Override
-    public final Optional<E> get(DataHolder dataHolder) {
+    public final Optional<E> get(final DataHolder dataHolder) {
         if (!this.isSupported(dataHolder)) {
             return Optional.empty();
         }
@@ -115,17 +115,17 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
     }
 
     @Override
-    public Optional<V> getValue(DataHolder dataHolder) {
+    public Optional<V> getValue(final DataHolder dataHolder) {
         return this.get(dataHolder).map(e -> this.constructValue((H) dataHolder, e));
     }
 
     @Override
-    public boolean isSupported(DataHolder dataHolder) {
+    public boolean isSupported(final DataHolder dataHolder) {
         return this.isTypeAllowed(dataHolder) && this.supports((H) dataHolder);
     }
 
     @Override
-    public <I extends DataHolder.Immutable<I>> Optional<I> with(I immutable, E value) {
+    public <I extends DataHolder.Immutable<I>> Optional<I> with(final I immutable, final E value) {
         if (!this.isSupported(immutable)) {
             return Optional.empty();
         }
@@ -133,7 +133,7 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
     }
 
     @Override
-    public <I extends DataHolder.Immutable<I>> Optional<I> without(I immutable) {
+    public <I extends DataHolder.Immutable<I>> Optional<I> without(final I immutable) {
         if (!this.isSupported(immutable)) {
             return Optional.empty();
         }

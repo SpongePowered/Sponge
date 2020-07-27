@@ -41,7 +41,6 @@ public final class BrewingStandData {
                         .get(BrewingStandTileEntityAccessor::accessor$getFuel)
                         .set(BrewingStandTileEntityAccessor::accessor$setFuel)
                     .create(Keys.REMAINING_BREW_TIME)
-                        .defaultValue(400)
                         .get(h -> h.accessor$canBrew() ? h.accessor$getBrewTime() : null)
                         .set((h, v) -> {
                             if (h.accessor$canBrew()) {

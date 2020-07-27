@@ -26,20 +26,17 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.stream.Collectors;
 
-@SuppressWarnings("unchecked")
 public final class EntityData {
 
     private EntityData() {
@@ -70,13 +67,14 @@ public final class EntityData {
                         .get(h -> ((EntityAccessor) h).accessor$getFire() > 0 ? ((EntityAccessor) h).accessor$getFire() : null)
                         .set((h, v) -> ((EntityAccessor) h).accessor$setFire(Math.max(v, Constants.Entity.MINIMUM_FIRE_TICKS)))
                         .deleteAndGet(h -> {
-                            final EntityAccessor accessor = ((EntityAccessor) h);
-                            if (accessor.accessor$getFire() < Constants.Entity.MINIMUM_FIRE_TICKS) {
+                            final EntityAccessor accessor = (EntityAccessor) h;
+                            final int ticks = accessor.accessor$getFire();
+                            if (ticks < Constants.Entity.MINIMUM_FIRE_TICKS) {
                                 return DataTransactionResult.failNoData();
                             }
                             final DataTransactionResult.Builder dtrBuilder = DataTransactionResult.builder();
-                            ((GenericMutableDataProvider<EntityAccessor, Integer>) accessor).getValueFrom(accessor).map(Value::asImmutable).ifPresent(dtrBuilder::replace);
-                            ((DataHolder) h).getValue(Keys.FIRE_DAMAGE_DELAY).map(Value::asImmutable).map(dtrBuilder::replace);
+                            dtrBuilder.replace(Value.immutableOf(Keys.FIRE_TICKS, ticks));
+                            dtrBuilder.replace(Value.immutableOf(Keys.FIRE_DAMAGE_DELAY, ((EntityAccessor) h).accessor$getFireImmuneTicks()));
                             h.extinguish();
                             return dtrBuilder.result(DataTransactionResult.Type.SUCCESS).build();
                         })
@@ -137,9 +135,9 @@ public final class EntityData {
                         .set((h, v) -> h.setMotion(VecHelper.toVec3d(v)))
                 .asMutable(EntityBridge.class)
                     .create(Keys.DISPLAY_NAME)
-                        .defaultValue(null)
                         .get(EntityBridge::bridge$getDisplayNameText)
-                        .set(EntityBridge::bridge$setDisplayName);
+                        .set(EntityBridge::bridge$setDisplayName)
+                        .delete(h -> h.bridge$setDisplayName(null));
     }
     // @formatter:on
 }

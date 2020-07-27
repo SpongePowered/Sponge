@@ -32,7 +32,7 @@ final class CachedEnumValueConstructor<V extends Value<E>, E extends Enum<E>> im
     private final ValueConstructor<V, E> original;
     private final V[] immutableValues;
 
-    public CachedEnumValueConstructor(ValueConstructor<V, E> original, Class<E> enumType) {
+    public CachedEnumValueConstructor(final ValueConstructor<V, E> original, final Class<E> enumType) {
         this.original = original;
         final E[] constants = enumType.getEnumConstants();
         this.immutableValues = (V[]) new Value<?>[constants.length];
@@ -42,17 +42,17 @@ final class CachedEnumValueConstructor<V extends Value<E>, E extends Enum<E>> im
     }
 
     @Override
-    public V getMutable(E element) {
+    public V getMutable(final E element) {
         return this.original.getMutable(element);
     }
 
     @Override
-    public V getImmutable(E element) {
+    public V getImmutable(final E element) {
         return this.immutableValues[element.ordinal()];
     }
 
     @Override
-    public V getRawImmutable(E element) {
-        return null;
+    public V getRawImmutable(final E element) {
+        return this.getImmutable(element);
     }
 }

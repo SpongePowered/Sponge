@@ -46,7 +46,6 @@ public final class AgeableData {
                         .set(AgeableEntity::setGrowingAge)
                     .create(Keys.CAN_BREED)
                         .get(h -> h.getGrowingAge() == 0)
-                        .defaultSupplier(() -> Boolean.FALSE)
                         .setAnd((h, v) -> {
                             if (h.getGrowingAge() < 0) {
                                 return false;

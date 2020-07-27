@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -45,7 +44,6 @@ public final class FireworkRocketData {
         registrator
                 .asMutable(FireworkRocketEntity.class)
                     .create(Keys.FIREWORK_EFFECTS)
-                        .defaultValue(ImmutableList.of())
                         .get(h -> FireworkUtils.getFireworkEffects(h).orElse(null))
                         .set(FireworkUtils::setFireworkEffects)
                     .create(Keys.FIREWORK_FLIGHT_MODIFIER)

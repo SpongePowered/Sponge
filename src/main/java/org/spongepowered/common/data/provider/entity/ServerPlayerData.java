@@ -36,7 +36,6 @@ import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccesso
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
 
 import java.util.stream.Collectors;
 
@@ -67,7 +66,6 @@ public final class ServerPlayerData {
                         .set(ServerPlayerEntityAccessor::accessor$setSeenCredits)
                 .asMutable(ServerPlayerEntityBridge.class)
                     .create(Keys.HEALTH_SCALE)
-                        .defaultValue(Constants.Entity.Player.DEFAULT_HEALTH_SCALE)
                         .get(h -> h.bridge$isHealthScaled() ? h.bridge$getHealthScale() : null)
                         .setAnd((h, v) -> {
                             if (v < 1f || v > Float.MAX_VALUE) {

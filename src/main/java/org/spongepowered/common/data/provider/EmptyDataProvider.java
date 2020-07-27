@@ -46,37 +46,37 @@ public final class EmptyDataProvider<V extends Value<E>, E> implements DataProvi
     }
 
     @Override
-    public boolean allowsAsynchronousAccess(DataHolder dataHolder) {
+    public boolean allowsAsynchronousAccess(final DataHolder dataHolder) {
         return false;
     }
 
     @Override
-    public Optional<E> get(DataHolder dataHolder) {
+    public Optional<E> get(final DataHolder dataHolder) {
         return Optional.empty();
     }
 
     @Override
-    public boolean isSupported(DataHolder dataHolder) {
+    public boolean isSupported(final DataHolder dataHolder) {
         return false;
     }
 
     @Override
-    public DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
+    public DataTransactionResult offer(final DataHolder.Mutable dataHolder, final E element) {
         return DataTransactionResult.failResult(Value.immutableOf(this.key, element));
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder.Mutable dataHolder) {
+    public DataTransactionResult remove(final DataHolder.Mutable dataHolder) {
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    public <I extends DataHolder.Immutable<I>> Optional<I> with(I immutable, E element) {
+    public <I extends DataHolder.Immutable<I>> Optional<I> with(final I immutable, final E element) {
         return Optional.empty();
     }
 
     @Override
-    public <I extends DataHolder.Immutable<I>> Optional<I> without(I immutable) {
+    public <I extends DataHolder.Immutable<I>> Optional<I> without(final I immutable) {
         return Optional.of(immutable);
     }
 }

@@ -28,7 +28,6 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.OptBool;
-import org.spongepowered.common.data.copy.CopyHelper;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -171,8 +170,11 @@ public class DataProviderRegistrator {
 
     public static final class ImmutableRegistrator<T> extends DataProviderRegistrator {
 
+        private final Class<T> target;
+
         public ImmutableRegistrator(final DataProviderRegistratorBuilder builder, final Class<T> target) {
             super(builder);
+            this.target = target;
         }
 
         /**
@@ -200,7 +202,7 @@ public class DataProviderRegistrator {
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         protected <K> ImmutableRegistrator<T> register(final ImmutableRegistration<K, T> registration) {
             this.builder.register(
-                    new GenericImmutableDataProvider<T, K>(registration.key) {
+                    new GenericImmutableDataProvider<T, K>(registration.key, this.target) {
                         final boolean isBooleanKey = registration.key.getElementToken().getRawType() == Boolean.class;
 
                         @Override
@@ -245,7 +247,6 @@ public class DataProviderRegistrator {
         private final MutableRegistrator<T> registrator;
         private final Key<? extends Value<K>> key;
         @Nullable private BiFunction<T, K, Value<K>> constructValue;
-        @Nullable private Supplier<K> defaultSupplier;
         @Nullable private Function<T, K> get;
         @Nullable private BiFunction<T, K, Boolean> setAnd;
         @Nullable private BiConsumer<T, K> set;
@@ -262,16 +263,6 @@ public class DataProviderRegistrator {
 
         public MutableRegistration<K, T> constructValue(final BiFunction<T, K, Value<K>> constructValue) {
             this.constructValue = constructValue;
-            return this;
-        }
-
-        public MutableRegistration<K, T> defaultValue(final K value) {
-            this.defaultSupplier = CopyHelper.createSupplier(value);
-            return this;
-        }
-
-        public MutableRegistration<K, T> defaultSupplier(final Supplier<K> defaultSupplier) {
-            this.defaultSupplier = defaultSupplier;
             return this;
         }
 
@@ -347,7 +338,6 @@ public class DataProviderRegistrator {
         private final ImmutableRegistrator<T> registrator;
         private final Key<? extends Value<K>> key;
         @Nullable private BiFunction<T, K, Value<K>> constructValue;
-        @Nullable private Supplier<K> defaultSupplier;
         @Nullable private Function<T, K> get;
         @Nullable private BiFunction<T, K, T> set;
         @Nullable private Function<T, Boolean> supports;
@@ -359,16 +349,6 @@ public class DataProviderRegistrator {
 
         public ImmutableRegistration<K, T> constructValue(final BiFunction<T, K, Value<K>> constructValue) {
             this.constructValue = constructValue;
-            return this;
-        }
-
-        public ImmutableRegistration<K, T> defaultValue(final K value) {
-            this.defaultSupplier = CopyHelper.createSupplier(value);
-            return this;
-        }
-
-        public ImmutableRegistration<K, T> defaultSupplier(final Supplier<K> defaultSupplier) {
-            this.defaultSupplier = defaultSupplier;
             return this;
         }
 
