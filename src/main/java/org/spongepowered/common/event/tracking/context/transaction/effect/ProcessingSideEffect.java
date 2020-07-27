@@ -25,11 +25,12 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
+@FunctionalInterface
 public interface ProcessingSideEffect {
 
-    void processSideEffect(ServerWorld world, FormerWorldState oldState, BlockState newState, SpongeBlockChangeFlag flag);
+    EffectResult processSideEffect(BlockPipeline pipeline, FormerWorldState oldState, BlockState newState, SpongeBlockChangeFlag flag);
 
 }

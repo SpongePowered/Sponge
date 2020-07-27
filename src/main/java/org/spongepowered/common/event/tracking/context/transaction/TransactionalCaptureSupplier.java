@@ -32,6 +32,7 @@ import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -47,7 +48,6 @@ import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -256,10 +256,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    public void pushEffect(final ResultingTransactionBySideEffect effect) {
-        if (this.effect == null) {
-            this.effect = effect;
-        }
+    public void pushEffect(final @Nullable ResultingTransactionBySideEffect effect) {
+        this.effect = effect;
     }
 
     public void clear() {
@@ -277,6 +275,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if (this.scheduledEvents != null) {
             this.scheduledEvents.clear();
         }
+        this.effect = null;
         this.snapshotIndex = -1;
         this.transactionIndex = -1;
     }
@@ -379,4 +378,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
     }
 
+    public @Nullable ResultingTransactionBySideEffect getEffect() {
+        return this.effect;
+    }
 }

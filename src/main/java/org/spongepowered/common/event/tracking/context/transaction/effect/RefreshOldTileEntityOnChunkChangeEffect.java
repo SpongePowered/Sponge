@@ -25,16 +25,27 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.chunk.Chunk;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class NotifyClientEffect implements ProcessingSideEffect {
+public final class RefreshOldTileEntityOnChunkChangeEffect implements ProcessingSideEffect {
 
-    @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
-        return EffectResult.NULL_PASS;
-
+    public RefreshOldTileEntityOnChunkChangeEffect() {
     }
 
+    @Override
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
+        final SpongeBlockChangeFlag flag) {
+        final @Nullable TileEntity existing = pipeline.getAffectedChunk().getTileEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
+        if (((BlockStateBridge) oldState.state).bridge$hasTileEntity()) {
+            if (existing != null) {
+                existing.updateContainingBlockInfo();
+            }
+        }
+        return EffectResult.NULL_PASS;
+    }
 }

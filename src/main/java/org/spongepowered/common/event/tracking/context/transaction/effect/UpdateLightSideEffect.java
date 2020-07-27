@@ -27,26 +27,27 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 import net.minecraft.block.BlockState;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.bridge.block.BlockStateBridge;
-import org.spongepowered.common.event.tracking.context.transaction.effect.FormerWorldState;
-import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class UpdateLightSideEffect implements ProcessingSideEffect {
 
     @Override
-    public void processSideEffect(final ServerWorld world, final FormerWorldState oldState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag) {
         final int originalOpactiy = oldState.opactiy;
+        final ServerWorld serverWorld = pipeline.getServerWorld();
         if (oldState.state != newState && (
-            ((BlockStateBridge) newState).bridge$getLightValue(world, oldState.pos) != originalOpactiy
+            ((BlockStateBridge) newState).bridge$getLightValue(serverWorld, oldState.pos) != originalOpactiy
                 || newState.func_215691_g() || oldState.state.func_215691_g())) {
             // this.profiler.startSection("queueCheckLight");
-            world.getProfiler().startSection("queueCheckLight");
+            serverWorld.getProfiler().startSection("queueCheckLight");
             // this.getChunkProvider().getLightManager().checkBlock(pos);
-            world.getChunkProvider().getLightManager().checkBlock(oldState.pos);
+            serverWorld.getChunkProvider().getLightManager().checkBlock(oldState.pos);
             // this.profiler.endSection();
-            world.getProfiler().endSection();
+            serverWorld.getProfiler().endSection();
         }
+        return EffectResult.NULL_PASS;
     }
 
 }

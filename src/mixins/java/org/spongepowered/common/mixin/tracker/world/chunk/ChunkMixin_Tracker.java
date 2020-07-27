@@ -35,8 +35,8 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +44,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
@@ -55,13 +54,13 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 @Mixin(Chunk.class)
 public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
@@ -73,7 +72,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     @Shadow @Final private World world;
     @Shadow private volatile boolean dirty;
 
-    @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos pos, Chunk.CreateEntityType creationMode);
+    @Shadow public abstract @Nullable TileEntity shadow$getTileEntity(BlockPos pos, Chunk.CreateEntityType creationMode);
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
     // @formatter:on
 
@@ -98,6 +97,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
      * @param pos The position changing
      * @param newState The new state
      * @param currentState The current state - passed in from either chunk or world
+     * @param flag
      * @return The changed block state if not null
      * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
      *         Technically a full overwrite for {@link Chunk#setBlockState(BlockPos, BlockState, boolean)}
@@ -107,9 +107,13 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    @Nullable
-    public BlockState bridge$setBlockState(final BlockPos pos, final BlockState newState, final BlockState currentState,
-            final BlockChangeFlag flag) {
+    public ChunkPipeline bridge$createChunkPipeline(final BlockPos pos, final BlockState newState, final BlockState currentState,
+        final SpongeBlockChangeFlag flag
+    ) {
+        final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
+        if (isFake) {
+            throw new IllegalStateException("Cannot call ChunkBridge.bridge$buildChunkPipeline in non-Server managed worlds");
+        }
         // int i = pos.getX() & 15;
         final int xPos = pos.getX() & 15;
         // int j = pos.getY();
@@ -117,7 +121,6 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         // int k = pos.getZ() & 15;
         final int zPos = pos.getZ() & 15;
         // Sponge - get the moving flag from our flag construct
-        final boolean isMoving = ((SpongeBlockChangeFlag) flag).isBlockMoving();
         ChunkSection chunksection = this.sections[yPos >> 4];
         if (chunksection == EMPTY_SECTION) {
             if (newState.isAir()) {
@@ -134,13 +137,8 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState state = context.state;
         final @Nullable TileEntity existing = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
-        final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
         // Build a transaction maybe?
-        final @Nullable SpongeBlockSnapshot snapshot = (isFake
-            || !ShouldFire.CHANGE_BLOCK_EVENT
-            || !state.shouldCaptureBlockChangeOrSkip(context, pos, currentState, newState, flag))
-            ? null
-            : TrackingUtil.createPooledSnapshot(currentState, pos, flag, existing,
+        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(currentState, pos, flag, existing,
                 () -> ((org.spongepowered.api.world.server.ServerWorld) this.world).getKey(),
                 Optional::empty, Optional::empty);
 
@@ -148,100 +146,26 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final Block newBlock = newState.getBlock();
         final Block currentBlock = currentState.getBlock();
 
-        final @Nullable BlockTransaction.ChangeBlock transaction = state.createTransaction(context, pos, snapshot, newState, flag, existing);
+        final BlockTransaction.ChangeBlock transaction = state.createTransaction(context, pos, snapshot, newState, flag, existing);
 
-        // Mark the tile entity as captured so when it is being removed during the chunk setting, it won't be
-        // re-captured again.
-        if (snapshot != null) {
-            snapshot.blockChange = state.associateBlockChangeWithSnapshot(
-                context,
-                newState,
-                newBlock,
-                currentState,
-                snapshot,
-                currentBlock
-            );
-        }
+        snapshot.blockChange = state.associateBlockChangeWithSnapshot(
+            context,
+            newState,
+            newBlock,
+            currentState,
+            snapshot,
+            currentBlock
+        );
 
+        final ChunkPipeline.Builder builder = ChunkPipeline.builder()
+            .chunk((Chunk) (Object) this)
+            .chunkSection(chunksection)
+            .world((ServerWorld) this.world);
 
-        // BlockState blockstate = chunksection.setBlockState(xPos, yPos & 15, zPos, newState); // blockstate -> oldState
-        final BlockState oldState = chunksection.setBlockState(xPos, yPos & 15, zPos, newState);
-        if (oldState == newState) {
-            return null;
-        } else {
-            // Sponge Start - Members pulled up
-            // Block block = state.getBlock(); // Vanilla block -> newBlock
-            // Block block1 = blockstate.getBlock(); // Vanilla block1 -> oldBlock
+        // Populate the effects
+        transaction.populateChunkEffects(context.getBlockTransactor(), builder, chunksection);
 
-            if (transaction != null) {
-                transaction.createEffects(context.getBlockTransactor(), (ServerWorld)this.world, this, chunksection);
-            }
-             // Sponge - This is turned into a side effect monad UpdateHeightMapEffect
-            // this.heightMap.get(Heightmap.Type.MOTION_BLOCKING).update(xPos, yPos, zPos, newState);
-            // this.heightMap.get(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES).update(xPos, yPos, zPos, newState);
-            // this.heightMap.get(Heightmap.Type.OCEAN_FLOOR).update(xPos, yPos, zPos, newState);
-            // this.heightMap.get(Heightmap.Type.WORLD_SURFACE).update(xPos, yPos, zPos, newState);
-
-            // Sponge - This is turned into a side effect monad UpdateLightManager
-            // Update Light
-            // final boolean isChunkStillEmpty = chunksection.isEmpty();
-            // if (isEmpty != isChunkStillEmpty) {
-            //    this.world.getChunkProvider().getLightManager().func_215567_a(pos, isChunkStillEmpty);
-            // }
-
-
-            // Sponge - This is turned into OldBlockOnReplaceEffect
-            { // OldState.onReplaced
-                if (!this.world.isRemote) {
-                    oldState.onReplaced(this.world, pos, newState, isMoving);
-                } else if (this.bridge$shouldRefreshTile(currentBlock, newBlock, oldState, newState)) {
-                    this.world.removeTileEntity(pos);
-                }
-            }
-
-            if (chunksection.getBlockState(xPos, yPos & 15, zPos).getBlock() != newBlock) {
-                return null;
-            } else {
-                { // Maybe update TileEntity container
-                    // if (block1 instanceof ITileEntityProvider) { // Vanilla
-                    // if (blockstate.hasTileEntity()) { // Forge
-                    // we bridge the differences here with a bridge method
-                    if (((BlockStateBridge) oldState).bridge$hasTileEntity()) {
-                        final TileEntity tileentity = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
-                        if (tileentity != null) {
-                            tileentity.updateContainingBlockInfo();
-                        }
-                    }
-                }
-
-                { // Block Physics
-                    if (!this.world.isRemote) {
-                        newState.onBlockAdded(this.world, pos, oldState, isMoving);
-                    }
-                }
-
-                { // Replace or Add TileEntity
-                    // if (newBlock instanceof ITileEntityProvider) { // Vanilla
-                    // if (newState.hasTileEntity()) { // Forge
-                    // We again cast to the bridge for easy access
-                    if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
-                        TileEntity tileentity1 = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
-                        if (tileentity1 == null) {
-                            // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
-                            // tileentity1 = state.createTileEntity(this.world); // Forge
-                            // We cast to our bridge for easy access
-                            tileentity1 = ((BlockStateBridge) newState).bridge$createNewTileEntity(this.world);
-                            this.world.setTileEntity(pos, tileentity1);
-                        } else {
-                            tileentity1.updateContainingBlockInfo();
-                        }
-                    }
-                }
-
-                this.dirty = true;
-                return oldState;
-            }
-        }
+        return builder.build();
     }
 
     @Inject(method = "addEntity", at = @At("RETURN"))

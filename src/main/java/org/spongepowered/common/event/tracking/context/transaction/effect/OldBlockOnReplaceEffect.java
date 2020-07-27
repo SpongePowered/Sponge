@@ -25,14 +25,15 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public class OldBlockOnReplaceEffect implements ProcessingSideEffect {
 
     @Override
-    public void processSideEffect(final ServerWorld world, final FormerWorldState oldState, final BlockState newState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
-        oldState.state.onReplaced(world, oldState.pos, newState, flag.isBlockMoving());
+        oldState.state.onReplaced(pipeline.getServerWorld(), oldState.pos, newState, flag.isBlockMoving());
+        return EffectResult.NULL_PASS;
     }
 }

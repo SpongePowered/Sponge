@@ -25,16 +25,34 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class NotifyClientEffect implements ProcessingSideEffect {
+public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements ProcessingSideEffect {
 
-    @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
-        return EffectResult.NULL_PASS;
-
+    public UpdateOrCreateNewTileEntityPostPlacementEffect() {
     }
 
+    @Override
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
+        final SpongeBlockChangeFlag flag) {
+        final ServerWorld serverWorld = pipeline.getServerWorld();
+        final Chunk chunk = pipeline.getAffectedChunk();
+        final TileEntity maybeNewTileEntity = chunk.getTileEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
+        if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
+            if (maybeNewTileEntity == null) {
+                // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
+                // tileentity1 = state.createTileEntity(this.world); // Forge
+                // We cast to our bridge for easy access
+                serverWorld.setTileEntity(oldState.pos, ((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
+            } else {
+                maybeNewTileEntity.updateContainingBlockInfo();
+            }
+        }
+        return EffectResult.NULL_PASS;
+    }
 }

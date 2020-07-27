@@ -818,6 +818,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         final BlockState newState, final BlockChangeFlag flags, @Nullable final TileEntity tileEntity) {
         final org.spongepowered.common.event.tracking.context.transaction.BlockTransaction.ChangeBlock changeBlock = phaseContext.getBlockTransactor()
             .logBlockChange(originalBlockSnapshot, newState, flags);
+
         return changeBlock;
     }
 
