@@ -59,7 +59,7 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Shadow public abstract Chunk shadow$getChunk(int chunkX, int chunkZ);
     @Shadow public abstract Chunk shadow$getChunkAt(BlockPos pos);
     @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
-    @Shadow public abstract boolean setBlockState(BlockPos pos, BlockState state, int flags);
+    @Shadow public boolean setBlockState(final BlockPos pos, final BlockState state, final int flags) { throw new IllegalStateException("Untransformed shadow!"); }
 
     /**
      * @author gabizou - January 10th, 2020 - Minecraft 1.14.3
