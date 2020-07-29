@@ -56,14 +56,12 @@ import net.minecraft.world.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
 import org.spongepowered.common.bridge.util.text.TextComponentBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
-import org.spongepowered.common.item.SpongeItemStackSnapshot;
 
 import java.io.IOException;
 import java.util.List;
@@ -405,7 +403,10 @@ public final class SpongeAdventure {
 
     // NBT
 
-    private static BinaryTagHolder asBinaryTagHolder(final CompoundNBT tag) {
+    public static @Nullable BinaryTagHolder asBinaryTagHolder(final @Nullable CompoundNBT tag) {
+        if (tag == null) {
+            return null;
+        }
         try {
             return BinaryTagHolder.encode(tag, NBT_CODEC);
         } catch (final IOException e) {
@@ -472,20 +473,7 @@ public final class SpongeAdventure {
 
     public static class Factory implements SpongeComponents.Factory {
         @Override
-        public @NonNull HoverEvent<HoverEvent.ShowItem> showItem(final @NonNull ItemStackSnapshot item) {
-            final BinaryTagHolder nbt;
-            final CompoundNBT tag = ((SpongeItemStackSnapshot) item).getCompound().orElse(null);
-            if (tag != null) {
-                nbt = asBinaryTagHolder(((SpongeItemStackSnapshot) item).getCompound().orElse(null));
-            } else {
-                nbt = null;
-            }
-            return HoverEvent.showItem(new HoverEvent.ShowItem(item.getType().getKey(), item.getQuantity(), nbt));
-        }
-
-        @Override
-        @NonNull
-        public ClickEvent callbackClickEvent(@NonNull final Consumer<CommandCause> callback) {
+        public @NonNull ClickEvent callbackClickEvent(final @NonNull Consumer<CommandCause> callback) {
             final UUID key = SpongeAdventure.CALLBACK_COMMAND.registerCallback(callback);
             return ClickEvent.runCommand("/sponge:callback " + key.toString());
         }

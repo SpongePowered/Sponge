@@ -30,6 +30,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.DataManipulator;
@@ -44,6 +45,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -53,6 +55,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import javax.annotation.Nullable;
 
@@ -333,4 +336,9 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return Objects.hashCode(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
     }
 
+    @Override
+    public HoverEvent<HoverEvent.ShowItem> asHoverEvent(final UnaryOperator<HoverEvent.ShowItem> op) {
+        final CompoundNBT tag = this.getCompound().orElse(null);
+        return HoverEvent.showItem(op.apply(new HoverEvent.ShowItem(this.getType().getKey(), this.getQuantity(), SpongeAdventure.asBinaryTagHolder(tag))));
+    }
 }
