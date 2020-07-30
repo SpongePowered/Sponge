@@ -28,7 +28,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import org.spongepowered.api.command.CommandCause;
+import net.minecraft.command.CommandSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
@@ -44,7 +44,7 @@ public final class ChatUtil {
     private ChatUtil() {
     }
 
-    public static void sendMessage(TextComponent component, Audience channel, CommandCause source, boolean isChat) {
+    public static void sendMessage(TextComponent component, Audience channel, CommandSource source, boolean isChat) {
         final Component raw = TextComponent.builder(component.content()).build();
         final Cause cause = SpongeImplHooks.onServerThread() ? PhaseTracker.getCauseStackManager().getCurrentCause()  : Cause.of(EventContext.empty(), source);
         final MessageChannelEvent event;
