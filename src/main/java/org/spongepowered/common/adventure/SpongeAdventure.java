@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.adventure;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import java.util.EnumSet;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
@@ -388,17 +388,17 @@ public final class SpongeAdventure {
     }
 
     public static Set<BossBar.Flag> asAdventureFlags(final boolean darkenScreen, final boolean playBossMusic, final boolean createWorldFog) {
-        final ImmutableSet.Builder<BossBar.Flag> build = ImmutableSet.builder();
+        final Set<BossBar.Flag> flags = EnumSet.noneOf(BossBar.Flag.class);
         if (darkenScreen) {
-            build.add(BossBar.Flag.DARKEN_SCREEN);
+            flags.add(BossBar.Flag.DARKEN_SCREEN);
         }
         if (playBossMusic) {
-            build.add(BossBar.Flag.PLAY_BOSS_MUSIC);
+            flags.add(BossBar.Flag.PLAY_BOSS_MUSIC);
         }
         if (createWorldFog) {
-            build.add(BossBar.Flag.CREATE_WORLD_FOG);
+            flags.add(BossBar.Flag.CREATE_WORLD_FOG);
         }
-        return build.build();
+        return flags;
     }
 
     // NBT

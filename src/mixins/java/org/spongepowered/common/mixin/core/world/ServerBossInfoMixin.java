@@ -113,7 +113,7 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
     }
 
     @Override
-    public void bossBarFlagsChanged(final BossBar bar, final Set<BossBar.Flag> oldFlags, final Set<BossBar.Flag> newFlags) {
+    public void bossBarFlagsChanged(final BossBar bar, final Set<BossBar.Flag> flagsAdded, final Set<BossBar.Flag> flagsRemoved) {
         this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PROPERTIES);
     }
 }
