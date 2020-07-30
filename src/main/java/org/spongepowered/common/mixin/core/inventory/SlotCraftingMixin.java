@@ -180,7 +180,7 @@ public abstract class SlotCraftingMixin extends Slot {
         ((ContainerBridge) container).bridge$setFirePreview(true);
         this.impl$craftedStack = null;
 
-        final SlotTransaction previewTransaction = ((ContainerBridge) container).bridge$getPreviewTransaction();
+        SlotTransaction previewTransaction = ((ContainerBridge) container).bridge$getPreviewTransaction();
         if (this.craftMatrix.isEmpty()) {
             return; // CraftMatrix is empty and/or no transaction present. Do not fire Preview.
         }
