@@ -24,21 +24,18 @@
  */
 package org.spongepowered.common.text.chat;
 
-import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.message.MessageChannelEvent;
-import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.event.message.MessageEvent.MessageFormatter;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.entity.living.player.chat.ChatTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Optional;
 
@@ -47,18 +44,15 @@ public final class ChatUtil {
     private ChatUtil() {
     }
 
-    public static void sendMessage(ITextComponent component, MessageChannel channel, CommandSource source, boolean isChat) {
-        final Text raw = SpongeTexts.toText(component);
-        final MessageFormatter formatter = new MessageEvent.MessageFormatter(raw);
-        final Cause cause = SpongeImplHooks.onServerThread() ? Sponge.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source);
+    public static void sendMessage(TextComponent component, Audience channel, CommandCause source, boolean isChat) {
+        final Component raw = TextComponent.builder(component.content()).build();
+        final Cause cause = SpongeImplHooks.onServerThread() ? PhaseTracker.getCauseStackManager().getCurrentCause()  : Cause.of(EventContext.empty(), source);
         final MessageChannelEvent event;
-        if (isChat) {
-            event = SpongeEventFactory.createMessageChannelEventChat(cause, channel, Optional.of(channel), formatter, raw, false);
-        } else {
-            event = SpongeEventFactory.createMessageChannelEvent(cause, channel, Optional.of(channel), formatter, false);
-        }
-        if (!SpongeCommon.postEvent(event) && !event.isMessageCancelled() && event.getChannel().isPresent()) {
-            event.getChannel().get().send(source, event.getMessage(), isChat ? ChatTypes.CHAT : ChatTypes.SYSTEM);
+
+        event = SpongeEventFactory.createMessageChannelEvent(cause, channel, Optional.of(channel), component, raw, false);
+
+        if (!SpongeCommon.postEvent(event) && !event.isMessageCancelled() && event.getAudience().isPresent()) {
+            event.getAudience().get().sendMessage(event.getMessage(), isChat ? MessageType.CHAT : MessageType.SYSTEM);
         }
     }
 }
