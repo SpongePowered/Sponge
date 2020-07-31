@@ -29,16 +29,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.minecraft.command.CommandSource;
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.ExperienceOrb;
-import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -59,13 +55,7 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.data.provider.entity.ExperienceOrbData;
-import org.spongepowered.common.data.provider.entity.HumanData;
-import org.spongepowered.common.data.provider.entity.ServerPlayerData;
-import org.spongepowered.common.data.provider.util.ExperienceHolderUtils;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -111,12 +101,12 @@ public class SelectorResolver {
     private final Selector selector;
     private final Predicate<Entity> selectorFilter;
 
-    public SelectorResolver(Selector selector, Iterable<? extends ServerWorld> serverWorlds) {
+    public SelectorResolver(Selector selector, Iterable<ServerWorld> serverWorlds) {
         this(selector, serverWorlds, null, null);
     }
 
     public SelectorResolver(Selector selector, CommandCause origin) {
-        this(selector, (Iterable<? extends ServerWorld>) SpongeCommon.getServer().getWorlds(), origin, positionFromSource(origin));
+        this(selector, SpongeCommon.getServer().getWorlds(), origin, positionFromSource(origin));
     }
 
     private SelectorResolver(Selector selector, Iterable<? extends ServerWorld> serverWorlds, @Nullable CommandCause origin, @Nullable Vector3d position) {
@@ -341,7 +331,7 @@ public class SelectorResolver {
         boolean isReversed = maxToSelect < 0;
         maxToSelect = Math.abs(maxToSelect);
         AABB aabb = new AABB(255,255,255,255,255,255);
-        Set<? extends World> worlds = this.getExtentSet();
+        Set<? extends World> worlds = (Set<? extends World>) this.getExtentSet();
         Stream<Entity> entityStream = worlds.stream().flatMap(ext -> ext.getEntities(aabb,this.selectorFilter).parallelStream());
 
         if (maxToSelect == 0) {
@@ -372,13 +362,17 @@ public class SelectorResolver {
         };
     }
 
-    private Set<? extends World> getExtentSet() {
+    private Set<? extends net.minecraft.world.World> getExtentSet() {
         boolean location = this.selector.getArguments().stream()
                 .anyMatch(arg -> LOCATION_BASED_ARGUMENTS.contains(arg.getType()));
         if (location && this.origin instanceof Locatable) {
-            return ImmutableSet.of(((Locatable) this.origin).getWorld());
+            return ImmutableSet.of((net.minecraft.world.World) ((Locatable) this.origin).getWorld());
         }
-        return ImmutableSet.copyOf(this.serverWorlds);
+
+        Set<net.minecraft.world.World> set = Collections.EMPTY_SET;
+        this.serverWorlds.forEach(serverWorld -> set.add(serverWorld.getWorld()));
+
+        return set;
     }
 
     private static AABB getAABB(Vector3i pos, int x, int y, int z) {
