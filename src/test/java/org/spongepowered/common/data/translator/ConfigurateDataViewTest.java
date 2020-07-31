@@ -201,4 +201,23 @@ public class ConfigurateDataViewTest {
 
         ConfigurateTranslator.instance().translate(node);
     }
+
+    @Test
+    public void testNonRootNodeToData() {
+        final ConfigurationNode root = CommentedConfigurationNode.root(n -> {
+            n.getNode("test").act(c -> {
+                c.getNode("child").setValue("hello");
+                c.getNode("other").setValue("world");
+            });
+        });
+
+        final DataView view = ConfigurateTranslator.instance().translate(root.getNode("test"));
+
+        assertEquals("hello", view.getString(DataQuery.of("child")).get());
+        assertEquals("world", view.getString(DataQuery.of("other")).get());
+
+        ConfigurateTranslator.instance().translateDataToNode(root.getNode("test2"), view);
+        assertEquals(root.getNode("test").getValue(), root.getNode("test2").getValue());
+    }
+
 }
