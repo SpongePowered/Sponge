@@ -22,35 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.registrar.tree.builder;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.RootCommandNode;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import net.minecraft.command.ISuggestionProvider;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.command.brigadier.tree.ForcedRedirectLiteralCommandNode;
 
-import java.util.Collection;
-import java.util.Map;
-
-public final class RootCommandTreeBuilder extends AbstractCommandTreeBuilder<CommandTreeBuilder.Basic, RootCommandNode<CommandSource>>
-        implements CommandTreeBuilder.Basic {
+public final class LiteralCommandTreeNode extends AbstractCommandTreeNode<CommandTreeNode.Basic, LiteralCommandNode<ISuggestionProvider>>
+        implements CommandTreeNode.Basic {
 
     @Override
-    protected RootCommandNode<CommandSource> createArgumentTree(final String nodeKey, final Command<CommandSource> command) {
-        throw new IllegalStateException("RootCommandTreeBuilder must not be part of a tree (except as the root!)");
+    protected LiteralCommandNode<ISuggestionProvider> createElement(final String nodeKey) {
+        return new ForcedRedirectLiteralCommandNode(
+                nodeKey,
+                this.isExecutable()
+        );
     }
-
-    public Collection<CommandNode<CommandSource>> createArgumentTree(final Command<CommandSource> command) {
-        // The node key is ignored here.
-        final ImmutableList.Builder<CommandNode<CommandSource>> builder = ImmutableList.builder();
-        this.getChildren().forEach((key, value) -> builder.add(value.createArgumentTree(key, command)));
-        return builder.build();
-    }
-
-    public void addChildren(final Map<String, AbstractCommandTreeBuilder<?, ?>> children) {
-        this.addChildrenInternal(children);
-    }
-
 }

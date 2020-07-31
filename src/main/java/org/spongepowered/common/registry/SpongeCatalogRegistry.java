@@ -69,6 +69,7 @@ import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
 import org.spongepowered.api.command.selector.SelectorType;
 import org.spongepowered.api.data.Key;
@@ -158,6 +159,7 @@ import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatalogedValueParameterStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClickTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.ClientCompletionKeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
@@ -482,9 +484,10 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 //            .generateRegistry(BossBarOverlay.class, ResourceKey.minecraft("boss_bar_overlay"), Arrays.stream(BossInfo.Overlay.values()), true)
 //            .generateRegistry(BossBarColor.class, ResourceKey.minecraft("boss_bar_color"), Arrays.stream(BossInfo.Color.values()), true)
             .generateRegistry(BodyPart.class, ResourceKey.minecraft("body_part"), BodyPartStreamGenerator.stream(), true, false)
-            .generateRegistry(ClientCompletionType.class, ResourceKey.sponge("client_completion"), ClientCompletionTypeStreamGenerator.stream(), true, false)
 //            .generateRegistry(ChatType.class, ResourceKey.minecraft("chat_type"), Arrays.stream(net.minecraft.util.text.ChatType.values()), true)
             .generateRegistry(ChestAttachmentType.class, ResourceKey.minecraft("chest_attachment_type"), Arrays.stream(ChestType.values()), true, false)
+            .generateRegistry(ClientCompletionKey.class, ResourceKey.sponge("client_completion_key"), ClientCompletionKeyStreamGenerator.stream(), true, false)
+            .generateRegistry(ClientCompletionType.class, ResourceKey.sponge("client_completion_type"), ClientCompletionTypeStreamGenerator.stream(), true, false)
             .generateRegistry(CollisionRule.class, ResourceKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true, false)
             .generateRegistry(ComparatorMode.class, ResourceKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true, false)
             .registerRegistry(Currency.class, ResourceKey.sponge("currency"), true)

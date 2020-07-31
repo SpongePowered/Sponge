@@ -22,20 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.accessor.command.arguments;
 
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import net.minecraft.command.arguments.IArgumentSerializer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public final class SpongeRootCommandTreeBuilderFactory implements CommandTreeBuilder.RootNodeFactory {
+// It's a bit of a hack as the field is actually public, but this is being used
+// because the target type is non-public - this is in the absence of shadow
+// classes.
+@Mixin(targets = "net.minecraft.command.arguments.ArgumentTypes$Entry")
+public interface ArgumentTypes_EntryAccessor {
 
-    public final static SpongeRootCommandTreeBuilderFactory INSTANCE = new SpongeRootCommandTreeBuilderFactory();
-
-    private SpongeRootCommandTreeBuilderFactory() {
-    }
-
-    @Override
-    public CommandTreeBuilder<CommandTreeBuilder.Basic> create() {
-        return new RootCommandTreeBuilder();
-    }
+    @Accessor("serializer") IArgumentSerializer<?> accessor$getSerializer();
 
 }

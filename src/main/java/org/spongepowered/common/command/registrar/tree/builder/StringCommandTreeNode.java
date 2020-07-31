@@ -22,49 +22,66 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
-import java.util.Optional;
+public final class StringCommandTreeNode extends ArgumentCommandTreeNode<CommandTreeNode.StringParser> implements CommandTreeNode.StringParser {
 
-public final class RangeCommandTreeBuilder<T extends Number>
-        extends ArgumentCommandTreeBuilder<CommandTreeBuilder.Range<T>> implements CommandTreeBuilder.Range<T> {
+    private Types type = Types.PHRASE;
 
-    @Nullable private T min;
-    @Nullable private T max;
-
-    public RangeCommandTreeBuilder(final ClientCompletionKey<Range<T>> parameterType) {
+    public StringCommandTreeNode(final ClientCompletionKey<@NonNull StringParser> parameterType) {
         super(parameterType);
     }
 
     @Override
-    @NonNull
-    public Range<T> min(@Nullable final T min) {
-        this.min = min;
-        return this.getThis();
+    protected ArgumentType<?> getArgumentType() {
+        switch (this.type) {
+            case WORD:
+                return StringArgumentType.word();
+            case GREEDY:
+                return StringArgumentType.greedyString();
+            case PHRASE:
+                return StringArgumentType.string();
+        }
+        throw new IllegalStateException("Incorrect argument type.");
     }
 
     @Override
-    @NonNull
-    public Range<T> max(@Nullable final T max) {
-        this.max = max;
-        return this.getThis();
+    public StringParser word() {
+        this.type = Types.WORD;
+        return this;
     }
 
-    public Optional<T> getMin() {
-        return Optional.ofNullable(this.min);
+    @Override
+    public StringParser greedy() {
+        this.type = Types.GREEDY;
+        return this;
     }
 
-    public Optional<T> getMax() {
-        return Optional.ofNullable(this.max);
-    }
+    /**
+     * The behaviors available to the string parser.
+     */
+    public enum Types {
 
-    @Override protected ArgumentType<?> getArgumentType() {
-        return null;
+        /**
+         * Will parse the next word
+         */
+        WORD,
+
+        /**
+         * Will parse the next word, or, if quoted, the quoted string
+         */
+        PHRASE,
+
+        /**
+         * Will parse the remainder of the argument string
+         */
+        GREEDY
+
     }
 }

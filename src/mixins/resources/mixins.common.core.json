@@ -13,8 +13,6 @@
         "adventure.text.format.StyleMixin",
         "command.CommandsMixin",
         "command.CommandSourceMixin",
-        "command.arguments.ArgumentTypes_EntryMixin",
-        "command.arguments.ArgumentTypesMixin",
         "command.arguments.EntitySelectorParserMixin",
         "entity.EntityMixin",
         "entity.EntityTypeMixin",

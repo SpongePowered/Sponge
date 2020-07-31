@@ -22,30 +22,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.command.arguments;
+package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import net.minecraft.command.arguments.EntityArgument;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.command.arguments.ArgumentTypes_EntryBridge;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
-import java.util.function.Function;
+// TODO
+public final class EntityCommandTreeNode
+        extends ArgumentCommandTreeNode<CommandTreeNode.EntitySelection>
+        implements CommandTreeNode.EntitySelection {
 
-@Mixin(targets = "net/minecraft/command/arguments/ArgumentTypes$Entry")
-public abstract class ArgumentTypes_EntryMixin<T extends CommandTreeBuilder<T>, S extends ArgumentType<?>>
-        implements ArgumentTypes_EntryBridge<S, T> {
+    private boolean playersOnly = false;
+    private boolean oneOnly = false;
 
-    private Function<ClientCompletionKey<T>, T> impl$supplier;
-
-    @Override
-    public T bridge$provideCommandTreeBuilder() {
-        return this.impl$supplier.apply((ClientCompletionKey<T>) this);
+    public EntityCommandTreeNode(@Nullable final ClientCompletionKey<EntitySelection> parameterType) {
+        super(parameterType);
     }
 
     @Override
-    public void bridge$setCommandTreeBuilderProvider(Function<ClientCompletionKey<T>, T> supplier) {
-        this.impl$supplier = supplier;
+    protected ArgumentType<?> getArgumentType() {
+        if (this.playersOnly) {
+            if (this.oneOnly) {
+                return EntityArgument.players();
+            }
+            return EntityArgument.player();
+        } else {
+            if (this.oneOnly) {
+                return EntityArgument.entities();
+            }
+            return EntityArgument.entity();
+        }
     }
 
+    @Override
+    @NonNull
+    public EntitySelection playersOnly() {
+        this.playersOnly = true;
+        return this;
+    }
+
+    public boolean isPlayersOnly() {
+        return this.playersOnly;
+    }
+
+    @Override
+    public EntitySelection single() {
+        this.oneOnly = true;
+        return this;
+    }
 }

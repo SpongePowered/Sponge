@@ -22,16 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network.play.server;
+package org.spongepowered.common.accessor.command.arguments;
 
-import com.mojang.brigadier.tree.RootCommandNode;
-import net.minecraft.command.CommandSource;
-import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNode;
+import net.minecraft.command.arguments.ArgumentTypes;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface SCommandListPacketBridge {
+import java.util.Map;
 
-    void bridge$addRootCommandTreeBuilder(RootCommandTreeNode rootCommandTreeBuilder);
+@Mixin(ArgumentTypes.class)
+public interface ArgumentTypesAccessor {
 
-    RootCommandNode<CommandSource> bridge$getRootCommandNode();
+    @Accessor("ID_TYPE_MAP")
+    static Map<ResourceLocation, ArgumentTypes_EntryAccessor> accessor$getID_TYPE_MAP() {
+        throw new AssertionError("This should not happen");
+    }
 
 }

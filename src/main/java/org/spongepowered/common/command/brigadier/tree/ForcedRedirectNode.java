@@ -22,31 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.brigadier.tree;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.command.ISuggestionProvider;
 
-public final class StringCommandTreeBuilder extends ArgumentCommandTreeBuilder<CommandTreeBuilder.StringParser> implements CommandTreeBuilder.StringParser {
+public interface ForcedRedirectNode {
 
-    private Types type = Types.WORD;
-
-    public StringCommandTreeBuilder(final ClientCompletionKey<StringParser> parameterType) {
-        super(parameterType);
-    }
-
-    @Override protected ArgumentType<?> getArgumentType() {
-        return null;
-    }
-
-    public Types getType() {
-        return this.type;
-    }
-
-    @Override
-    public StringParser type(final Types type) {
-        this.type = type;
-        return this;
-    }
+    void setForcedRedirect(CommandNode<ISuggestionProvider> node);
 }

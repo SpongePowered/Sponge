@@ -21,6 +21,8 @@
         "block.RedstoneWireBlockAccessor",
         "command.CommandSourceAccessor",
         "command.arguments.ArgumentSerializerAccessor",
+        "command.arguments.ArgumentTypesAccessor",
+        "command.arguments.ArgumentTypes_EntryAccessor",
         "command.arguments.EntityOptionsAccessor",
         "command.arguments.EntityOptions_OptionHandlerAccessor",
         "command.arguments.EntitySelectorParserAccessor",

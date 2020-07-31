@@ -22,21 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.registrar.tree.builder;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.command.CommandSource;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
-public final class LiteralCommandTreeBuilder extends AbstractCommandTreeBuilder<CommandTreeBuilder.Basic, LiteralCommandNode<CommandSource>> implements CommandTreeBuilder.Basic {
+public final class SpongeCommandTreeBuilderFactory implements CommandTreeNode.NodeFactory {
+
+    public final static SpongeCommandTreeBuilderFactory INSTANCE = new SpongeCommandTreeBuilderFactory();
+
+    private SpongeCommandTreeBuilderFactory() {
+    }
 
     @Override
-    protected LiteralCommandNode<CommandSource> createArgumentTree(final String nodeKey, final Command<CommandSource> command) {
-        final LiteralArgumentBuilder<CommandSource> node = LiteralArgumentBuilder.literal(nodeKey);
-        this.addChildNodesToTree(node, command);
-        return node.build();
+    @NonNull
+    public CommandTreeNode<CommandTreeNode.@NonNull Root> createRoot() {
+        return new RootCommandTreeNode();
+    }
+
+    @Override
+    @NonNull
+    public CommandTreeNode<CommandTreeNode.@NonNull Basic> createLiteral() {
+        return new LiteralCommandTreeNode();
     }
 
 }

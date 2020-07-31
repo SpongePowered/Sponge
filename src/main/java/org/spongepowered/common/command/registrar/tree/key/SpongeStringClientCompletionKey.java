@@ -22,38 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.registrar.tree.key;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.command.registrar.tree.builder.EntityCommandTreeNode;
+import org.spongepowered.common.command.registrar.tree.builder.StringCommandTreeNode;
 
-public abstract class ArgumentCommandTreeBuilder<T extends CommandTreeBuilder<T>>
-        extends AbstractCommandTreeBuilder<T, CommandNode<CommandSource>> {
+public final class SpongeStringClientCompletionKey implements ClientCompletionKey<CommandTreeNode.@NonNull StringParser> {
 
-    private final ClientCompletionKey<T> parameterType;
+    private final ResourceKey key;
 
-    public ArgumentCommandTreeBuilder(final ClientCompletionKey<T> parameterType) {
-        this.parameterType = parameterType;
+    public SpongeStringClientCompletionKey(final ResourceKey key) {
+        this.key = key;
     }
 
     @Override
-    protected final CommandNode<CommandSource> createArgumentTree(@NonNull final String nodeKey, @NonNull final Command<CommandSource> command) {
-        final ArgumentType<?> type = this.getArgumentType();
-        final RequiredArgumentBuilder<CommandSource, ?> builder = RequiredArgumentBuilder.argument(nodeKey, type);
-        this.addChildNodesToTree(builder, command);
-        return builder.build();
+    public CommandTreeNode.@NonNull StringParser createNode() {
+        return new StringCommandTreeNode(this);
     }
 
-    protected abstract ArgumentType<?> getArgumentType();
-
-    public ClientCompletionKey<T> getClientCompletionKey() {
-        return this.parameterType;
+    @Override
+    @NonNull
+    public ResourceKey getKey() {
+        return this.key;
     }
 
 }

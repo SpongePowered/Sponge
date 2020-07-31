@@ -22,28 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.brigadier.tree;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.command.ISuggestionProvider;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.command.registrar.tree.builder.AbstractCommandTreeNode;
 
-public class AmountCommandTreeBuilder<T extends CommandTreeBuilder<T>>
-        extends ArgumentCommandTreeBuilder<T> implements CommandTreeBuilder.AmountBase<T> {
+public final class ForcedRedirectLiteralCommandNode extends LiteralCommandNode<ISuggestionProvider> implements ForcedRedirectNode {
 
-    private ArgumentType<?> argumentType;
+    @Nullable private CommandNode<ISuggestionProvider> forcedRedirect = null;
 
-    public AmountCommandTreeBuilder(final ClientCompletionKey<T> parameterType, final ArgumentType<?> argumentType) {
-        super(parameterType);
-        this.argumentType = argumentType;
+    public ForcedRedirectLiteralCommandNode(final String literal, final boolean executable) {
+        super(literal, executable ? AbstractCommandTreeNode.EXECUTABLE : null, c -> true, null, null, false);
     }
 
     @Override
-    protected ArgumentType<?> getArgumentType() {
-        return this.argumentType;
+    public void setForcedRedirect(final CommandNode<ISuggestionProvider> node) {
+        this.forcedRedirect = node;
     }
 
-    @Override public T single() {
-        return null;
+    @Override
+    public CommandNode<ISuggestionProvider> getRedirect() {
+        return this.forcedRedirect;
     }
+
 }

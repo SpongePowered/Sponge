@@ -22,18 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.command.arguments;
+package org.spongepowered.common.command.registrar.tree.key;
 
-import com.mojang.brigadier.arguments.ArgumentType;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.command.registrar.tree.builder.EntityCommandTreeNode;
 
-import java.util.function.Function;
+public final class SpongeEntityClientCompletionKey implements ClientCompletionKey<CommandTreeNode.EntitySelection> {
 
-public interface ArgumentTypes_EntryBridge<S extends ArgumentType<?>, T extends CommandTreeBuilder<T>> {
+    private final ResourceKey key;
 
-    T bridge$provideCommandTreeBuilder();
+    public SpongeEntityClientCompletionKey(final ResourceKey key) {
+        this.key = key;
+    }
 
-    void bridge$setCommandTreeBuilderProvider(Function<ClientCompletionKey<T>, T> producer);
+    @Override
+    public CommandTreeNode.@NonNull EntitySelection createNode() {
+        return new EntityCommandTreeNode(this);
+    }
+
+    @Override
+    @NonNull
+    public ResourceKey getKey() {
+        return this.key;
+    }
 
 }

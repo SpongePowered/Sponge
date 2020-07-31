@@ -74,6 +74,9 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
     @Override
     @NonNull
     public String getRead() {
+        if (this.cursor == 0) {
+            return "";
+        }
         return this.input.substring(0, this.cursor);
     }
 
@@ -91,6 +94,14 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
     @Override
     public boolean canRead() {
         return this.canRead(1);
+    }
+
+    @Override
+    public char peekCharacter() {
+        if (this.canRead()) {
+            return this.input.charAt(this.cursor);
+        }
+        throw new IllegalStateException("Cannot read past the end of a string!");
     }
 
     @Override

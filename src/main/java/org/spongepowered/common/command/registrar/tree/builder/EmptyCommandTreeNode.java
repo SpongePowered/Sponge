@@ -22,37 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.command.arguments;
+package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.util.ResourceLocation;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.command.arguments.ArgumentTypes_EntryBridge;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
-@Mixin(targets = "net/minecraft/command/arguments/ArgumentTypes$Entry")
-public abstract class ArgumentTypes_EntryMixin_API<T extends CommandTreeBuilder<T>, S extends ArgumentType<?>>
-        implements ClientCompletionKey<T> {
+public final class EmptyCommandTreeNode extends ArgumentCommandTreeNode<CommandTreeNode.Basic> implements CommandTreeNode.Basic {
 
-    @Shadow @Final public ResourceLocation id;
+    private final ArgumentType<?> type;
 
-    @Override
-    @NonNull
-    @SuppressWarnings("unchecked")
-    public T createCommandTreeBuilder() {
-        return ((ArgumentTypes_EntryBridge<S, T>) this).bridge$provideCommandTreeBuilder();
+    public EmptyCommandTreeNode(final ClientCompletionKey<Basic> parameterType, final ArgumentType<?> type) {
+        super(parameterType);
+        this.type = type;
     }
 
     @Override
-    @NonNull
-    @SuppressWarnings("ConstantConditions")
-    public ResourceKey getKey() {
-        return (ResourceKey) (Object) this.id;
+    protected ArgumentType<?> getArgumentType() {
+        return this.type;
     }
-
 }

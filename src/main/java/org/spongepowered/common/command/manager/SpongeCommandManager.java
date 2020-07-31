@@ -31,20 +31,25 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.util.text.ITextComponent;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
@@ -53,7 +58,7 @@ import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -65,7 +70,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
-import org.spongepowered.common.command.registrar.tree.RootCommandTreeBuilder;
+import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNode;
 import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.event.ShouldFire;
@@ -83,6 +88,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -101,6 +107,8 @@ public final class SpongeCommandManager implements CommandManager {
     private final Map<String, SpongeCommandMapping> commandMappings = new HashMap<>();
     private final Multimap<SpongeCommandMapping, String> inverseCommandMappings = HashMultimap.create();
     private final Multimap<PluginContainer, SpongeCommandMapping> pluginToCommandMap = HashMultimap.create();
+    private final LinkedHashMap<SpongeCommandMapping, RootCommandTreeNode> mappingToSuggestionNodes = new LinkedHashMap<>();
+
     private boolean isResetting = false;
     private boolean hasStarted = false;
 
@@ -134,7 +142,8 @@ public final class SpongeCommandManager implements CommandManager {
                 registrar,
                 container,
                 namespaced,
-                otherAliases
+                otherAliases,
+                null
         );
     }
 
@@ -144,7 +153,7 @@ public final class SpongeCommandManager implements CommandManager {
     public CommandMapping registerAlias(
             @NonNull final CommandRegistrar<?> registrar,
             @NonNull final PluginContainer container,
-            final CommandTreeBuilder.@NonNull Basic parameterTree,
+            final CommandTreeNode.@NonNull Root parameterTree,
             @NonNull final Predicate<CommandCause> requirement,
             @NonNull final String primaryAlias,
             @NonNull final String @NonNull ... secondaryAliases)
@@ -153,7 +162,7 @@ public final class SpongeCommandManager implements CommandManager {
         aliases.add(primaryAlias);
         Collections.addAll(aliases, secondaryAliases);
         final String namespaced = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
-        final CommandMapping mapping = this.registerAliasWithNamespacing(registrar, container, namespaced, aliases);
+        final CommandMapping mapping = this.registerAliasWithNamespacing(registrar, container, namespaced, aliases, parameterTree);
 
         // In general, this won't be executed as we will intercept it before this point. However,
         // this is as a just in case - a mod redirect or something.
@@ -168,25 +177,6 @@ public final class SpongeCommandManager implements CommandManager {
             }
         };
 
-        final Collection<CommandNode<CommandSource>> commandSourceRootCommandNode = ((RootCommandTreeBuilder) parameterTree)
-                .createArgumentTree(command);
-
-        // From the primary alias...
-        final LiteralArgumentBuilder<CommandSource> node = LiteralArgumentBuilder.literal(mapping.getPrimaryAlias());
-
-        // CommandSource == CommandCause, so this will be fine.
-        node.requires((Predicate<CommandSource>) (Object) requirement).executes(command);
-        for (final CommandNode<CommandSource> commandNode : commandSourceRootCommandNode) {
-            node.then(commandNode);
-        }
-
-        final LiteralCommandNode<CommandSource> commandToAppend = BrigadierCommandRegistrar.INSTANCE.register(node);
-        for (final String secondaryAlias : mapping.getAllAliases()) {
-            if (!secondaryAlias.equals(mapping.getPrimaryAlias())) {
-                BrigadierCommandRegistrar.INSTANCE.register(LiteralArgumentBuilder.<CommandSource>literal(secondaryAlias).redirect(commandToAppend));
-            }
-        }
-
         return mapping;
     }
 
@@ -195,7 +185,8 @@ public final class SpongeCommandManager implements CommandManager {
             @NonNull final CommandRegistrar<?> registrar,
             @NonNull final PluginContainer container,
             @NonNull final String namespacedAlias,
-            @NonNull final Collection<String> otherAliases)
+            @NonNull final Collection<String> otherAliases,
+            final CommandTreeNode.@Nullable Root parameterTree)
             throws CommandFailedRegistrationException {
         // Check it's been registered:
         if (namespacedAlias.contains(" ") || otherAliases.stream().anyMatch(x -> x.contains(" ") || x.contains(":"))) {
@@ -248,6 +239,9 @@ public final class SpongeCommandManager implements CommandManager {
             this.commandMappings.put(key, mapping);
             this.inverseCommandMappings.put(mapping, key);
         });
+        if (parameterTree instanceof RootCommandTreeNode) {
+            this.mappingToSuggestionNodes.put(mapping, (RootCommandTreeNode) parameterTree);
+        }
         return mapping;
     }
 
@@ -547,6 +541,30 @@ public final class SpongeCommandManager implements CommandManager {
         this.hasStarted = true;
     }
 
+    public Collection<CommandNode<ISuggestionProvider>> getNonBrigadierSuggestions(final CommandCause cause) {
+        final List<CommandNode<ISuggestionProvider>> suggestions = new ArrayList<>();
+
+        for (final Map.Entry<SpongeCommandMapping, RootCommandTreeNode> entry : this.mappingToSuggestionNodes.entrySet()) {
+            final SpongeCommandMapping mapping = entry.getKey();
+
+            // create tree from primary mapping
+            final CommandNode<ISuggestionProvider> node = entry.getValue()
+                    .createArgumentTree(cause, LiteralArgumentBuilder.literal(mapping.getPrimaryAlias()));
+            if (node != null) {
+                final Command<ISuggestionProvider> executableCommand = node.getCommand();
+                final CommandNode<ISuggestionProvider> toRedirectTo = node.getRedirect() == null ? node : node.getRedirect();
+                suggestions.add(node);
+                for (final String alias : mapping.getAllAliases()) {
+                    if (!alias.equals(mapping.getPrimaryAlias())) {
+                        suggestions.add(LiteralArgumentBuilder.<ISuggestionProvider>literal(alias)
+                                .executes(executableCommand).redirect(toRedirectTo).build());
+                    }
+                }
+            }
+        }
+        return suggestions;
+    }
+
     public void reset() {
         if (this.hasStarted) {
             this.isResetting = true;
@@ -558,6 +576,30 @@ public final class SpongeCommandManager implements CommandManager {
             this.pluginToCommandMap.clear();
             this.isResetting = false;
         }
+    }
+
+    public Collection<String> getAliasesThatStartWithForCause(final CommandCause cause, final String startingText) {
+        final String toCompare = startingText.toLowerCase(Locale.ROOT);
+        final List<String> aliases = new ArrayList<>();
+        final Object2BooleanMap<CommandMapping> testedMappings = new Object2BooleanOpenHashMap<>();
+        for (final Map.Entry<String, SpongeCommandMapping> mappingEntry : this.commandMappings.entrySet()) {
+            if (mappingEntry.getKey().startsWith(toCompare)) {
+                if (testedMappings.computeBooleanIfAbsent(mappingEntry.getValue(), mapping -> mapping.getRegistrar().canExecute(cause, mapping))) {
+                    aliases.add(toCompare);
+                }
+            }
+        }
+        return aliases;
+    }
+
+    public Collection<String> getAliasesForCause(final CommandCause cause) {
+        final List<String> aliases = new ArrayList<>();
+        for (final SpongeCommandMapping mapping : this.inverseCommandMappings.keySet()) {
+            if (mapping.getRegistrar().canExecute(cause, mapping)) {
+                aliases.addAll(this.inverseCommandMappings.get(mapping));
+            }
+        }
+        return aliases;
     }
 
     private <C, R extends CommandRegistrar<C>> RegisterCommandEventImpl<C, R> createEvent(final Cause cause, final Game game, final R registrar) {

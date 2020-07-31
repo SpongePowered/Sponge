@@ -22,16 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network.play.server;
+package org.spongepowered.common.command.registrar;
 
-import com.mojang.brigadier.tree.RootCommandNode;
-import net.minecraft.command.CommandSource;
-import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNode;
-
-public interface SCommandListPacketBridge {
-
-    void bridge$addRootCommandTreeBuilder(RootCommandTreeNode rootCommandTreeBuilder);
-
-    RootCommandNode<CommandSource> bridge$getRootCommandNode();
-
+/**
+ * Indicates that the registrar places items into the standard command tree.
+ */
+public interface BrigadierBasedRegistrar {
 }

@@ -22,16 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network.play.server;
+package org.spongepowered.common.command.registrar.tree.builder;
 
-import com.mojang.brigadier.tree.RootCommandNode;
-import net.minecraft.command.CommandSource;
-import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNode;
+import com.mojang.brigadier.arguments.ArgumentType;
+import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
-public interface SCommandListPacketBridge {
+public final class AmountCommandTreeNode extends ArgumentCommandTreeNode<CommandTreeNode.Amount> implements CommandTreeNode.Amount {
 
-    void bridge$addRootCommandTreeBuilder(RootCommandTreeNode rootCommandTreeBuilder);
+    private final ArgumentType<?> ifSingle;
+    private final ArgumentType<?> ifMultiple;
+    private boolean single;
 
-    RootCommandNode<CommandSource> bridge$getRootCommandNode();
+    public AmountCommandTreeNode(final ClientCompletionKey<CommandTreeNode.Amount> parameterType,
+            final ArgumentType<?> ifSingle,
+            final ArgumentType<?> ifMultiple) {
+        super(parameterType);
+        this.ifSingle = ifSingle;
+        this.ifMultiple = ifMultiple;
+    }
+
+    @Override
+    protected ArgumentType<?> getArgumentType() {
+        if (this.single) {
+            return this.ifSingle;
+        } else {
+            return this.ifMultiple;
+        }
+    }
+
+    @Override
+    public CommandTreeNode.Amount single() {
+        this.single = true;
+        return this;
+    }
 
 }

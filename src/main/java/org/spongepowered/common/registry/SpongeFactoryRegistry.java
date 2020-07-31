@@ -34,9 +34,9 @@ import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.common.command.selector.SpongeSelectorFactory;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -50,7 +50,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.command.parameter.SpongeParameterValueFactory;
 import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParameterBuilderFactory;
-import org.spongepowered.common.command.registrar.tree.SpongeRootCommandTreeBuilderFactory;
+import org.spongepowered.common.command.registrar.tree.builder.SpongeCommandTreeBuilderFactory;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlers;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
@@ -103,7 +103,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(Audiences.Factory.class, new AudienceFactory())
             .registerFactory(AdvancementCriterion.Factory.class, SpongeAdvancementCriterionFactory.INSTANCE)
             .registerFactory(CommandCause.Factory.class, SpongeCommandCauseFactory.INSTANCE)
-            .registerFactory(CommandTreeBuilder.RootNodeFactory.class, SpongeRootCommandTreeBuilderFactory.INSTANCE)
+            .registerFactory(CommandTreeNode.NodeFactory.class, SpongeCommandTreeBuilderFactory.INSTANCE)
             .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
             .registerFactory(Parameter.Value.Factory.class, SpongeParameterValueFactory.INSTANCE)
             .registerFactory(ResourcePack.Factory.class, SpongeResourcePackFactory.INSTANCE)

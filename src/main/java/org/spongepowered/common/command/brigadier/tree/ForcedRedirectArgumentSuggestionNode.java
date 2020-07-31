@@ -22,32 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.brigadier.tree;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.ArgumentType;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
+import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.command.ISuggestionProvider;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class SpongeClientCompletionKey implements ClientCompletionKey<CommandTreeBuilder.Basic> {
+public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentCommandNode<ISuggestionProvider, T> implements ForcedRedirectNode {
 
-    private final ResourceKey key;
-    private final ArgumentType<?> argumentType;
+    @Nullable private CommandNode<ISuggestionProvider> forcedRedirect = null;
 
-    public SpongeClientCompletionKey(final ResourceKey key, final ArgumentType<?> argumentType) {
-        this.key = key;
-        this.argumentType = argumentType;
+    public ForcedRedirectArgumentSuggestionNode(final String name,
+            final ArgumentType<T> type,
+            final Command<ISuggestionProvider> command,
+            final SuggestionProvider<ISuggestionProvider> customSuggestions) {
+        super(name, type, command, isp -> true, null, null, false, customSuggestions);
     }
 
     @Override
-    public CommandTreeBuilder.@NonNull Basic createCommandTreeBuilder() {
-        return new EmptyCommandTreeBuilder(this, this.argumentType);
+    public void setForcedRedirect(@Nullable final CommandNode<ISuggestionProvider> redirect) {
+        this.forcedRedirect = redirect;
     }
 
     @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.key;
+    public CommandNode<ISuggestionProvider> getRedirect() {
+        return this.forcedRedirect;
     }
+
 }
+

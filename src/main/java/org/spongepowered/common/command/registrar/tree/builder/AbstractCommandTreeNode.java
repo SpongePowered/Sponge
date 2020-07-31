@@ -22,93 +22,66 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
+import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.command.brigadier.tree.ForcedRedirectNode;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public abstract class AbstractCommandTreeBuilder<T extends CommandTreeBuilder<T>, O extends CommandNode<CommandSource>>
-        implements CommandTreeBuilder<T> {
+public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull T>, O extends CommandNode<ISuggestionProvider>>
+        implements CommandTreeNode<@NonNull T> {
 
-    @Nullable private String redirect = null;
-    @Nullable private Map<String, AbstractCommandTreeBuilder<?, ?>> children = null;
+    public final static Command<ISuggestionProvider> EXECUTABLE = isp -> 1;
+
+    @Nullable private CommandTreeNode<?> redirect = null;
+    @Nullable private Map<String, AbstractCommandTreeNode<?, ?>> children = null;
     private boolean executable = false;
     private boolean customSuggestions = false;
+    private Predicate<CommandCause> requirement = c -> true;
 
-    public ImmutableMap<String, AbstractCommandTreeBuilder<?, ?>> getChildren() {
+    public ImmutableMap<String, AbstractCommandTreeNode<?, ?>> getChildren() {
         if (this.children == null) {
             return ImmutableMap.of();
         }
         return ImmutableMap.copyOf(this.children);
     }
 
-    final void addChildrenInternal(final Map<String, AbstractCommandTreeBuilder<?, ?>> children) {
-        if (this.children == null) {
-            this.children = new HashMap<>();
-        }
-
-        this.children.putAll(children);
-    }
-
     @Override
     @NonNull
-    public T child(
-            @NonNull final String key,
-            @NonNull final Consumer<Basic> childNode) {
+    public T child(@NonNull final String key, final CommandTreeNode.@NonNull Argument<@NonNull ?> child) {
         Objects.requireNonNull(key);
-        Objects.requireNonNull(childNode);
-
-        return this.childInternal(key, LiteralCommandTreeBuilder::new, childNode);
-    }
-
-    @Override
-    @NonNull
-    public <S extends CommandTreeBuilder<S>> T child(
-            @NonNull final String key,
-            @NonNull final ClientCompletionKey<S> completionKey,
-            @NonNull final Consumer<S> childNode) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(completionKey);
-        Objects.requireNonNull(childNode);
-        return this.childInternal(key, completionKey::createCommandTreeBuilder, childNode);
-    }
-
-    private <S extends CommandTreeBuilder<S>> T childInternal(
-            @NonNull final String key,
-            @NonNull final Supplier<S> builderSupplier,
-            @NonNull final Consumer<S> childNode) {
+        Objects.requireNonNull(child);
         Preconditions.checkState(this.redirect == null, "There must be no redirect if using children nodes");
         this.checkKey(key);
         if (this.children == null) {
             this.children = new HashMap<>();
         }
 
-        final S childTreeBuilder = builderSupplier.get();
-        childNode.accept(childTreeBuilder);
-        this.children.put(key.toLowerCase(), (AbstractCommandTreeBuilder<?, ?>) childTreeBuilder);
+        this.children.put(key.toLowerCase(), (AbstractCommandTreeNode<?, ?>) child);
         return this.getThis();
     }
 
     @Override
     @NonNull
-    public T redirect(@NonNull final String to) {
+    public T redirect(@NonNull final CommandTreeNode<@NonNull ?> to) {
         Preconditions.checkNotNull(to);
         Preconditions.checkState(this.children == null, "There must be no children if using a redirect");
-        this.redirect = to.toLowerCase();
+        this.redirect = to;
         return this.getThis();
     }
 
@@ -123,6 +96,12 @@ public abstract class AbstractCommandTreeBuilder<T extends CommandTreeBuilder<T>
     @NonNull
     public T customSuggestions() {
         this.customSuggestions = true;
+        return this.getThis();
+    }
+
+    @Override
+    public @NonNull T requires(final Predicate<CommandCause> requirement) {
+        this.requirement = requirement == null ? c -> true : requirement;
         return this.getThis();
     }
 
@@ -145,10 +124,36 @@ public abstract class AbstractCommandTreeBuilder<T extends CommandTreeBuilder<T>
         return this.customSuggestions;
     }
 
-    protected abstract O createArgumentTree(final String nodeKey, final Command<CommandSource> command);
-
-    protected final void addChildNodesToTree(final ArgumentBuilder<CommandSource, ?> builder, final Command<CommandSource> command) {
-        this.getChildren().forEach((key, value) -> builder.then(value.createArgumentTree(key, command)));
+    @Nullable
+    public CommandTreeNode<?> getRedirect() {
+        return this.redirect;
     }
 
+    protected abstract O createElement(final String nodeKey);
+
+    protected final void addChildNodesToTree(
+            final CommandCause cause,
+            final CommandNode<ISuggestionProvider> node,
+            final Map<AbstractCommandTreeNode<?, ?>, CommandNode<ISuggestionProvider>> nodeToSuggestionProvider,
+            final Map<ForcedRedirectNode, AbstractCommandTreeNode<?, ?>> redirectsToApply) {
+        this.getChildren().forEach((key, value) -> {
+            if (value.requirement.test(cause)) {
+                final CommandNode<ISuggestionProvider> providerCommandNode =
+                        nodeToSuggestionProvider.computeIfAbsent(value, k -> {
+                            final CommandNode<ISuggestionProvider> ret = k.createElement(key);
+                            if (k.redirect instanceof AbstractCommandTreeNode<?, ?> && ret instanceof ForcedRedirectNode) {
+                                redirectsToApply.put((ForcedRedirectNode) ret, (AbstractCommandTreeNode<?, ?>) k.redirect);
+                            } else {
+                                k.addChildNodesToTree(cause, ret, nodeToSuggestionProvider, redirectsToApply);
+                            }
+                            return ret;
+                        });
+                node.addChild(providerCommandNode);
+            }
+        });
+    }
+
+    protected final Predicate<CommandCause> getRequirement() {
+        return this.requirement;
+    }
 }

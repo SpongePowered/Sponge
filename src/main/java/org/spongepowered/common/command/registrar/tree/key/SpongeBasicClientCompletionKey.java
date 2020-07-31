@@ -22,57 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.manager;
+package org.spongepowered.common.command.registrar.tree.key;
 
-import com.google.common.collect.ImmutableSet;
+import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.manager.CommandMapping;
-import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.common.command.registrar.tree.builder.EmptyCommandTreeNode;
 
-import java.util.Set;
+public final class SpongeBasicClientCompletionKey implements ClientCompletionKey<CommandTreeNode.@NonNull Basic> {
 
-public final class SpongeCommandMapping implements CommandMapping {
+    private final ResourceKey key;
+    private final ArgumentType<?> argumentType;
 
-    private final String alias;
-    private final Set<String> allAliases;
-    private final PluginContainer container;
-    private final CommandRegistrar<?> registrar;
+    public SpongeBasicClientCompletionKey(final ResourceKey key, final ArgumentType<?> argumentType) {
+        this.key = key;
+        this.argumentType = argumentType;
+    }
 
-    public SpongeCommandMapping(final String alias,
-                                final Set<String> allAliases,
-                                final PluginContainer container,
-                                final CommandRegistrar<?> registrar) {
-        this.alias = alias;
-        this.allAliases = ImmutableSet.copyOf(allAliases);
-        this.container = container;
-        this.registrar = registrar;
+    @Override
+    public CommandTreeNode.@NonNull Basic createNode() {
+        return new EmptyCommandTreeNode(this, this.argumentType);
     }
 
     @Override
     @NonNull
-    public String getPrimaryAlias() {
-        return this.alias;
-    }
-
-    @Override
-    @NonNull
-    public Set<String> getAllAliases() {
-        return this.allAliases;
-    }
-
-    @Override
-    @NonNull
-    public PluginContainer getPlugin() {
-        return this.container;
-    }
-
-    @Override
-    @NonNull
-    public CommandRegistrar<?> getRegistrar() {
-        return this.registrar;
+    public ResourceKey getKey() {
+        return this.key;
     }
 
 }

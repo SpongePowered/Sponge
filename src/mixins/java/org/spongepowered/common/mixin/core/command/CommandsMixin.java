@@ -33,6 +33,9 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.impl.AdvancementCommand;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -176,6 +179,21 @@ public abstract class CommandsMixin {
             return true;
         }
         return false;
+    }
+
+    @Redirect(method = "send", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/Commands;commandSourceNodesToSuggestionNodes"
+            + "(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Lnet/minecraft/command/CommandSource;Ljava/util/Map;)V"))
+    private void impl$addNonBrigSuggestions(
+            final Commands commands,
+            final CommandNode<CommandSource> p_197052_1_,
+            final CommandNode<ISuggestionProvider> p_197052_2_,
+            final CommandSource p_197052_3_,
+            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> p_197052_4_) {
+        this.shadow$commandSourceNodesToSuggestionNodes(p_197052_1_, p_197052_2_, p_197052_3_, p_197052_4_);
+        for (final CommandNode<ISuggestionProvider> node :
+                ((SpongeCommandManager) Sponge.getGame().getCommandManager()).getNonBrigadierSuggestions((CommandCause) p_197052_3_)) {
+            p_197052_2_.addChild(node);
+        }
     }
 
     private Collection<CommandNode<CommandSource>> impl$getChildrenFromNode(final CommandNode<CommandSource> parentNode) {

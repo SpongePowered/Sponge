@@ -69,7 +69,7 @@ import java.util.stream.Collectors;
  * {@link #register(PluginContainer, LiteralArgumentBuilder, String...)}
  * method.</p>
  */
-public final class BrigadierCommandRegistrar implements CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
+public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
 
     private static final TypeToken<LiteralArgumentBuilder<CommandSource>> COMMAND_TYPE = new TypeToken<LiteralArgumentBuilder<CommandSource>>() {};
 
@@ -238,6 +238,11 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public boolean canExecute(final CommandCause cause, final CommandMapping mapping) {
+        return this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias())).getRequirement().test((CommandSource) cause);
     }
 
     public CommandDispatcher<CommandSource> getDispatcher() {

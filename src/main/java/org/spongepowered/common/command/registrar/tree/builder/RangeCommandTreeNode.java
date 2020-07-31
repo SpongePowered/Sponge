@@ -22,56 +22,63 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree;
+package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.arguments.EntityArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
-// TODO
-public final class EntityCommandTreeBuilder
-        extends ArgumentCommandTreeBuilder<CommandTreeBuilder.EntitySelection>
-        implements CommandTreeBuilder.EntitySelection {
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
-    private boolean playersOnly = false;
-    private boolean oneOnly = false;
+public final class RangeCommandTreeNode<T extends Number>
+        extends ArgumentCommandTreeNode<CommandTreeNode.Range<T>> implements CommandTreeNode.Range<T> {
 
-    public EntityCommandTreeBuilder(@Nullable final ClientCompletionKey<EntitySelection> parameterType) {
+    @Nullable private T min;
+    @Nullable private T max;
+    private final T defaultMin;
+    private final T defaultMax;
+    private final BiFunction<T, T, ArgumentType<?>> typeCreator;
+
+    public RangeCommandTreeNode(
+            final ClientCompletionKey<Range<T>> parameterType,
+            final BiFunction<T, T, ArgumentType<?>> typeCreator,
+            final T defaultMin,
+            final T defaultMax) {
         super(parameterType);
-    }
-
-    @Override
-    protected ArgumentType<?> getArgumentType() {
-        if (this.playersOnly) {
-            if (this.oneOnly) {
-                return EntityArgument.players();
-            }
-            return EntityArgument.player();
-        } else {
-            if (this.oneOnly) {
-                return EntityArgument.entities();
-            }
-            return EntityArgument.entity();
-        }
+        this.typeCreator = typeCreator;
+        this.defaultMax = defaultMax;
+        this.defaultMin = defaultMin;
     }
 
     @Override
     @NonNull
-    public EntitySelection playersOnly() {
-        this.playersOnly = true;
-        return this;
-    }
-
-    public boolean isPlayersOnly() {
-        return this.playersOnly;
+    public Range<T> min(@Nullable final T min) {
+        this.min = min;
+        return this.getThis();
     }
 
     @Override
-    public EntitySelection single() {
-        this.oneOnly = true;
-        return this;
+    @NonNull
+    public Range<T> max(@Nullable final T max) {
+        this.max = max;
+        return this.getThis();
     }
+
+    public Optional<T> getMin() {
+        return Optional.ofNullable(this.min);
+    }
+
+    public Optional<T> getMax() {
+        return Optional.ofNullable(this.max);
+    }
+
+    @Override
+    protected ArgumentType<?> getArgumentType() {
+        return this.typeCreator.apply(this.getMin().orElse(this.defaultMin), this.getMax().orElse(this.defaultMax));
+    }
+
 }
