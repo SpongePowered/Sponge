@@ -49,7 +49,7 @@ public final class UnknownProjectileSource implements ProjectileSource {
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchToTarget(Class<T> projectileClass, Entity target) {
+    public <T extends Projectile> Optional<T> launchProjectileTo(Class<T> projectileClass, Entity target) {
         return Optional.empty();
     }
 }
