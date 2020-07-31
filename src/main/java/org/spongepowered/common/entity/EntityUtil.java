@@ -517,7 +517,7 @@ public final class EntityUtil {
         final ServerWorld fromWorld = ((ServerWorld) entity.world);
 
         final Map<String, String> portalAgents =
-            ((WorldInfoBridge) fromWorld.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getPortalAgents();
+            ((WorldInfoBridge) fromWorld.getWorldInfo()).bridge$getConfigAdapter().get().getWorld().getPortalAgents();
         final ResourceKey worldKey;
 
         // Check if we're to use a different teleporter for this world

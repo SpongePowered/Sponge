@@ -34,10 +34,11 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.BlockEntityTrackerCategory;
-import org.spongepowered.common.config.category.BlockEntityTrackerModCategory;
-import org.spongepowered.common.config.type.TrackerConfig;
+import org.spongepowered.common.config.ConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.tracker.BlockEntityTrackerCategory;
+import org.spongepowered.common.config.tracker.BlockEntityTrackerModCategory;
+import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(TileEntityType.class)
@@ -66,8 +67,8 @@ public abstract class TileEntityTypeMixin implements ResourceKeyBridge, Trackabl
 
         final TrackableBridge trackableBridge = (TrackableBridge) tileEntityType;
 
-        final SpongeConfig<TrackerConfig> trackerConfigAdapter = SpongeCommon.getTrackerConfigAdapter();
-        final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.getConfig().getBlockEntityTracker();
+        final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeConfigs.getTracker();
+        final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.get().getBlockEntityTracker();
 
         BlockEntityTrackerModCategory modCapturing = blockEntityTracker.getModMappings().get(plugin.getMetadata().getId());
 

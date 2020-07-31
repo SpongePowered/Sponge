@@ -38,10 +38,9 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.event.tracking.context.BlockItemDropsSupplier;
 import org.spongepowered.common.event.tracking.context.BlockItemEntityDropsSupplier;
 import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
@@ -250,7 +249,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
     public P buildAndSwitch() {
         this.isCompleted = true;
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
+        if (SpongeConfigs.getCommon().get().getPhaseTracker().generateStackTracePerStateEntry()) {
             this.stackTrace = new Exception("Debug Trace").getStackTrace();
         }
         PhaseTracker.getInstance().switchToPhase(this.state, this);
@@ -693,7 +692,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public void printTrace(final PrettyPrinter printer) {
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().generateStackTracePerStateEntry()) {
+        if (SpongeConfigs.getCommon().get().getPhaseTracker().generateStackTracePerStateEntry()) {
             printer.add("Entrypoint:")
                 .add(this.stackTrace);
         }

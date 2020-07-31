@@ -32,7 +32,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
-import org.spongepowered.common.config.SpongeConfigManager;
+import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.io.File;
@@ -73,7 +73,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return SpongeConfigManager.getPrivateRoot(this.container).getDirectory();
+            return PluginConfigManager.getPrivateRoot(this.container).getDirectory();
         }
 
     }
@@ -103,7 +103,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return SpongeConfigManager.getPrivateRoot(this.container).getConfigPath();
+            return PluginConfigManager.getPrivateRoot(this.container).getConfigPath();
         }
 
     }
@@ -133,7 +133,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return SpongeConfigManager.getSharedRoot(this.container).getConfigPath();
+            return PluginConfigManager.getSharedRoot(this.container).getConfigPath();
         }
 
     }
@@ -165,7 +165,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return SpongeConfigManager.getSharedRoot(this.container).getConfig();
+            return PluginConfigManager.getSharedRoot(this.container).getConfig();
         }
 
     }
@@ -174,7 +174,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return SpongeConfigManager.getPrivateRoot(this.container).getConfig();
+            return PluginConfigManager.getPrivateRoot(this.container).getConfig();
         }
 
     }

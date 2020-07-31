@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.config.ConfigHandle;
 import org.spongepowered.vanilla.VanillaServer;
 
 import java.io.File;
@@ -60,6 +61,9 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
 
     @Override
     public void run() {
+        // Save config now that registries have been initialized
+        ConfigHandle.setSaveSuppressed(false);
+
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishRegistries();
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.plugin;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.config.SpongeConfigs;
 
 import java.util.List;
 import java.util.Set;
@@ -45,7 +45,7 @@ public class RealTimePlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginRealTime();
+        return SpongeConfigs.getCommon().get().getModules().usePluginRealTime();
     }
 
     @Override

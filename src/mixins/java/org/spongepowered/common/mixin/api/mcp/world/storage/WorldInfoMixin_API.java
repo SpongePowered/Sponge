@@ -62,14 +62,12 @@ import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -121,7 +119,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow public abstract void shadow$setThunderTime(int time);
     @Shadow public abstract void shadow$setClearWeatherTime(int time);
     @Shadow public abstract int shadow$getClearWeatherTime();
-    
+
     @Override
     public ResourceKey getKey() {
         return ((ResourceKeyBridge) this).bridge$getKey();

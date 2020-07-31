@@ -29,7 +29,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
@@ -37,14 +36,14 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.config.InheritableConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
@@ -62,10 +61,10 @@ import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.world.chunk.Chunk.class)
 public abstract class ChunkMixin_Tracker implements ChunkBridge {
-    
+
     @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
 
-    @Shadow public abstract World shadow$getWorld();
+    @Shadow public abstract net.minecraft.world.World shadow$getWorld();
 
     private Map<Integer, PlayerTracker> trackerImpl$trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> trackerImpl$trackedShortBlockPositions = new HashMap<>();
@@ -85,7 +84,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         }
         // Update TE tracking cache
         // We must always check for a TE as a mod block may not implement ITileEntityProvider if a TE exists
-        // Note: We do not check SpongeImplHooks.hasBlockTileEntity(block, state) as neighbor notifications do not 
+        // Note: We do not check SpongeImplHooks.hasBlockTileEntity(block, state) as neighbor notifications do not
         //       include blockstate.
         final TileEntity tileEntity = this.tileEntities.get(pos);
         if (tileEntity != null) {
@@ -105,9 +104,9 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             }
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().blockTrackLogging()) {
-            if (!configAdapter.getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getKey().toString())) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().blockTrackLogging()) {
+            if (!configAdapter.get().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getKey().toString())) {
                 SpongeHooks.logBlockTrack(this.shadow$getWorld(), block, pos, user, true);
             } else {
                 SpongeHooks.logBlockTrack(this.shadow$getWorld(), block, pos, user, false);
@@ -258,7 +257,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
         final UUID uuid = (((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getUniqueIdForIndex(creatorIndex)).orElse(null);
         if (uuid != null) {
             // Verify id is valid and not invalid
-            if (SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+            if (SpongeConfigs.getCommon().get().getWorld().getInvalidLookupUuids().contains(uuid)) {
                 this.trackerImpl$trackedIntBlockPositions.remove(key);
                 return Optional.empty();
             }
@@ -355,7 +354,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
     }
 
     private SpongeUserManager getUserManager() {
-        final World world = this.shadow$getWorld();
+        final net.minecraft.world.World world = this.shadow$getWorld();
         if (world == null || ((WorldBridge) world).bridge$isFake()) {
             return null;
         }

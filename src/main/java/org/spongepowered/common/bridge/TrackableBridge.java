@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge;
 
-import org.spongepowered.common.config.type.TrackerConfig;
+import org.spongepowered.common.config.tracker.TrackerConfig;
 
 public interface TrackableBridge {
 

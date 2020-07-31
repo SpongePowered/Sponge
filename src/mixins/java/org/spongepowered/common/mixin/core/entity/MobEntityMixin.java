@@ -37,7 +37,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
 import org.spongepowered.api.entity.living.Agent;
@@ -266,7 +265,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(final double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getHardDespawnRange(), 2);
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
@@ -275,7 +274,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @ModifyConstant(method = "checkDespawn", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(final double value) {
         if (!this.world.isRemote) {
-            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getSoftDespawnRange(), 2);
+            return Math.pow(((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
@@ -283,7 +282,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @ModifyConstant(method = "checkDespawn", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(final int value) {
         if (!this.world.isRemote) {
-            return ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getEntity().getMinimumLife() * 20;
+            return ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getEntity().getMinimumLife() * 20;
         }
         return value;
     }

@@ -32,11 +32,9 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.SpongeConfigSaveManager;
-import org.spongepowered.common.config.type.CustomDataConfig;
-import org.spongepowered.common.config.type.GlobalConfig;
-import org.spongepowered.common.config.type.TrackerConfig;
+import org.spongepowered.common.config.InheritableConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
@@ -60,10 +58,7 @@ public final class SpongeCommon {
     );
 
     // Can't @Inject these because they are referenced before everything is initialized
-    @Nullable private static SpongeConfig<GlobalConfig> globalConfigAdapter;
-    @Nullable private static SpongeConfig<TrackerConfig> trackerConfigAdapter;
-    @Nullable private static SpongeConfig<CustomDataConfig> customDataConfigAdapter;
-    @Nullable private static SpongeConfigSaveManager configSaveManager;
+    @Nullable private static InheritableConfigHandle<GlobalConfig> globalConfigAdapter;
 
     @Inject @Nullable private static SpongeGame game;
 
@@ -110,7 +105,7 @@ public final class SpongeCommon {
     }
 
     public static Path getPluginConfigDirectory() {
-        return SpongeCommon.getGameDirectory().resolve(SpongeCommon.getGlobalConfigAdapter().getConfig().getGeneral().configDir());
+        return SpongeCommon.getGameDirectory().resolve(SpongeConfigs.getCommon().get().getGeneral().configDir());
     }
 
     public static Path getSpongeConfigDirectory() {
@@ -142,34 +137,6 @@ public final class SpongeCommon {
 
     public static void setActivePlugin(@Nullable final PluginContainer plugin) {
         SpongeCommon.activePlugin = plugin;
-    }
-
-    public static SpongeConfigSaveManager getConfigSaveManager() {
-        if (SpongeCommon.configSaveManager == null) {
-            SpongeCommon.configSaveManager = new SpongeConfigSaveManager();
-        }
-        return SpongeCommon.configSaveManager;
-    }
-
-    public static SpongeConfig<GlobalConfig> getGlobalConfigAdapter() {
-        if (SpongeCommon.globalConfigAdapter == null) {
-            SpongeCommon.globalConfigAdapter = new SpongeConfig<>(SpongeConfig.Type.GLOBAL, getSpongeConfigDirectory().resolve("global.conf"), SpongeCommon.ECOSYSTEM_ID, null, false);
-        }
-        return SpongeCommon.globalConfigAdapter;
-    }
-
-    public static SpongeConfig<CustomDataConfig> getCustomDataConfigAdapter() {
-        if (SpongeCommon.customDataConfigAdapter == null) {
-            SpongeCommon.customDataConfigAdapter = new SpongeConfig<>(SpongeConfig.Type.CUSTOM_DATA, getSpongeConfigDirectory().resolve("custom_data.conf"), SpongeCommon.ECOSYSTEM_ID, null, true);
-        }
-        return SpongeCommon.customDataConfigAdapter;
-    }
-
-    public static SpongeConfig<TrackerConfig> getTrackerConfigAdapter() {
-        if (SpongeCommon.trackerConfigAdapter == null) {
-            SpongeCommon.trackerConfigAdapter = new SpongeConfig<>(SpongeConfig.Type.TRACKER, getSpongeConfigDirectory().resolve("tracker.conf"), SpongeCommon.ECOSYSTEM_ID, null, true);
-        }
-        return SpongeCommon.trackerConfigAdapter;
     }
 
     /**

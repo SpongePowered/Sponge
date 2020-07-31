@@ -30,14 +30,15 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.config.SpongeConfigs;
 
 @Mixin(LeavesBlock.class)
 public abstract class LeavesBlockMixin extends BlockMixin {
 
+    // TODO(
     @Inject(method = "ticksRandomly", at = @At("HEAD"), cancellable = true)
     private void impl$checkConfigForLeafTicking(BlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getWorld().getLeafDecay()) {
+        if (!SpongeConfigs.getCommon().get().getWorld().getLeafDecay()) {
             cir.setReturnValue(false);
         }
     }

@@ -27,20 +27,23 @@ package org.spongepowered.common.mixin.movementcheck.network.play;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.config.SpongeConfigs;
 
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin_MovementCheck {
 
+    @Shadow public ServerPlayerEntity player;
+
     @Redirect(method = "processPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isInvulnerableDimensionChange()Z", ordinal = 0))
     private boolean movementCheck$onPlayerMovedTooQuicklyCheck(ServerPlayerEntity player) {
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getMovementChecks().playerMovedTooQuickly()) {
+        if (SpongeConfigs.getForWorld(this.player.world).get().getMovementChecks().playerMovedTooQuickly()) {
             return player.isInvulnerableDimensionChange();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
@@ -49,7 +52,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
     @Redirect(method = "processPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isInvulnerableDimensionChange()Z", ordinal = 1))
     private boolean movementCheck$onMovedWronglyCheck(ServerPlayerEntity player) {
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getMovementChecks().movedWrongly()) {
+        if (SpongeConfigs.getForWorld(this.player.world).get().getMovementChecks().movedWrongly()) {
             return player.isInvulnerableDimensionChange();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
@@ -61,7 +64,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
             to = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;func_217264_d()Z", ordinal = 0))
     )
     private double movementCheck$onVehicleMovedTooQuicklyCheck(double val) {
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getMovementChecks().playerVehicleMovedTooQuickly()) {
+        if (SpongeConfigs.getForWorld(this.player.world).get().getMovementChecks().playerVehicleMovedTooQuickly()) {
             return val;
         }
         return Double.NaN; // The 'vehicle moved too quickly' check only executes if the squared difference of the motion vectors lengths is greater than 100
@@ -81,7 +84,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
                 remap = false)
     ))
     private double movementCheck$onMovedWronglySecond(double val) {
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getMovementChecks().movedWrongly()) {
+        if (SpongeConfigs.getForWorld(this.player.world).get().getMovementChecks().movedWrongly()) {
             return val;
         }
         return Double.NaN; // The second 'moved wrongly' check only executes if the length of the movement vector is greater than 0.0625D

@@ -79,7 +79,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
             return originalRadius;
         }
         if (this.impl$cachedRadius == -1) {
-            final double configRadius = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getItemMergeRadius();
+            final double configRadius = ((WorldInfoBridge) this.world.getWorldInfo()).bridge$getConfigAdapter().get().getWorld().getItemMergeRadius();
             this.impl$cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.impl$cachedRadius;
@@ -186,7 +186,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
     )
     private void impl$fireExpireEntityEventTargetItem(final CallbackInfo ci) {
         if (!PhaseTracker.SERVER.onSidedThread() || this.shadow$getItem().isEmpty()) {
-            // In the rare case the first if block is actually at the end of the method instruction list, we don't want to 
+            // In the rare case the first if block is actually at the end of the method instruction list, we don't want to
             // erroneously be calling this twice.
             return;
         }

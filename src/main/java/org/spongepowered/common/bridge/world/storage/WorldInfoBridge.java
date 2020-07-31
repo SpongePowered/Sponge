@@ -30,8 +30,8 @@ import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.teleport.PortalAgentType;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.config.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Optional;
@@ -105,9 +105,9 @@ public interface WorldInfoBridge {
 
     Optional<UUID> bridge$getUniqueIdForIndex(int index);
 
-    @Nullable SpongeConfig<WorldConfig> bridge$getConfigAdapter();
+    @Nullable InheritableConfigHandle<WorldConfig> bridge$getConfigAdapter();
 
-    boolean bridge$createWorldConfig();
+    void bridge$setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter);
 
     void bridge$saveConfig();
 }

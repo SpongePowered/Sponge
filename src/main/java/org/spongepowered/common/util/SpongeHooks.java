@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.reflect.TypeToken;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.block.Block;
@@ -39,25 +38,21 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.dimension.DimensionType;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.LoggingCategory;
-import org.spongepowered.common.config.type.DimensionConfig;
-import org.spongepowered.common.config.type.GeneralConfigBase;
-import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.config.InheritableConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.inheritable.LoggingCategory;
+import org.spongepowered.common.config.inheritable.BaseConfig;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -65,12 +60,9 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
-import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 import javax.management.MBeanServer;
 
@@ -90,8 +82,8 @@ public final class SpongeHooks {
         SpongeCommon.getLogger().fatal(MessageFormat.format(msg, args));
     }
 
-    public static void logStack(final SpongeConfig<? extends GeneralConfigBase> config) {
-        if (config.getConfig().getLogging().logWithStackTraces()) {
+    public static void logStack(final InheritableConfigHandle<? extends BaseConfig> config) {
+        if (config.get().getLogging().logWithStackTraces()) {
             final Throwable ex = new Throwable();
             ex.fillInStackTrace();
             SpongeCommon.getLogger().catching(Level.INFO, ex);
@@ -103,8 +95,8 @@ public final class SpongeHooks {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().entityDeathLogging()) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().entityDeathLogging()) {
             logInfo("Dimension: {0} setDead(): {1}", entity.getEntityWorld().getDimension().getType(), entity);
             logStack(configAdapter);
         }
@@ -115,8 +107,8 @@ public final class SpongeHooks {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().entityDespawnLogging()) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().entityDespawnLogging()) {
             logInfo("Dimension: {0} Despawning ({1}): {2}", entity.getEntityWorld().getDimension().getType(), reason, entity);
             logStack(configAdapter);
         }
@@ -133,25 +125,25 @@ public final class SpongeHooks {
 
         final ITextComponent spawnName = entity.getName();
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().entitySpawnLogging()) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().entitySpawnLogging()) {
             logInfo("SPAWNED " + spawnName.getUnformattedComponentText() + " [Dimension: {1}]", entity.getEntityWorld().dimension.getType());
             logStack(configAdapter);
         }
     }
 
     public static void logBlockTrack(
-        final World world, final Block block, final BlockPos pos, final User user, final boolean allowed) {
+        final net.minecraft.world.World world, final Block block, final BlockPos pos, final User user, final boolean allowed) {
         if (world.isRemote()) {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().blockTrackLogging() && allowed) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().blockTrackLogging() && allowed) {
             logInfo("Tracking Block " + "[RootCause: {0}][Dimension: {1}][Block: {2}][Pos: {3}]",
                     user.getName(), world.getDimension().getType(), ((BlockType) block).getKey(), pos);
             logStack(configAdapter);
-        } else if (configAdapter.getConfig().getLogging().blockTrackLogging() && !allowed) {
+        } else if (configAdapter.get().getLogging().blockTrackLogging() && !allowed) {
             logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][Dimension: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
                     world.getDimension().getType(),
@@ -160,14 +152,14 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logBlockAction(final World world, @Nullable final BlockChange type, final Transaction<BlockSnapshot> transaction) {
+    public static void logBlockAction(final net.minecraft.world.World world, @Nullable final BlockChange type, final Transaction<BlockSnapshot> transaction) {
         if (world.isRemote()) {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
 
-        final LoggingCategory logging = configAdapter.getConfig().getLogging();
+        final LoggingCategory logging = configAdapter.get().getLogging();
         if (type != null && type.allowsLogging(logging)) {
             logInfo("Block " + type.name() + " [Dimension: {0}][OriginalState: {1}][NewState: {2}]",
                     world.getDimension().getType(),
@@ -177,39 +169,39 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logChunkLoad(final World world, final Vector3i chunkPos) {
+    public static void logChunkLoad(final net.minecraft.world.World world, final Vector3i chunkPos) {
         if (world.isRemote()) {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().chunkLoadLogging()) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().chunkLoadLogging()) {
             logInfo("Load Chunk in Dimension [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(configAdapter);
         }
     }
 
-    public static void logChunkUnload(final World world, final Vector3i chunkPos) {
+    public static void logChunkUnload(final net.minecraft.world.World world, final Vector3i chunkPos) {
         if (world.isRemote()) {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().chunkUnloadLogging()) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().chunkUnloadLogging()) {
             logInfo("Unload Chunk in Dimension [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(configAdapter);
         }
     }
 
-    public static void logChunkGCQueueUnload(final World world, final Chunk chunk) {
+    public static void logChunkGCQueueUnload(final net.minecraft.world.World world, final Chunk chunk) {
         if (world.isRemote()) {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().chunkGCQueueUnloadLogging()) {
             logInfo("Chunk GC Queued Chunk in Dimension '{0}' ({2}, {3} for unload)", world.getDimension().getType(), chunk.getPos().x,
                     chunk.getPos().z);
             logStack(configAdapter);
@@ -221,8 +213,8 @@ public final class SpongeHooks {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().logExploitSignCommandUpdates) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().logExploitSignCommandUpdates) {
             logInfo("[EXPLOIT] Player '{0}' attempted to exploit sign in dimension '{1}' located at '{2}' with command '{3}'",
                     player.getName(),
                     tileEntity.getWorld().getDimension().getType(),
@@ -237,8 +229,8 @@ public final class SpongeHooks {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().logExploitItemStackNameOverflow) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().logExploitItemStackNameOverflow) {
             logInfo("[EXPLOIT] Player '{0}' attempted to send a creative itemstack update with a display name length of '{1}' (Max allowed "
                             + "length is 32767). This has been blocked to avoid server overflow.",
                     player.getName(),
@@ -252,8 +244,8 @@ public final class SpongeHooks {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.getConfig().getLogging().logExploitRespawnInvisibility) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().logExploitRespawnInvisibility) {
             logInfo("[EXPLOIT] Player '{0}' attempted to perform a respawn invisibility exploit to surrounding players.",
                     player.getName());
             logStack(configAdapter);
@@ -265,12 +257,12 @@ public final class SpongeHooks {
             return false;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
         if (!(entity instanceof LivingEntity) || entity instanceof PlayerEntity || entity instanceof EnderDragonPartEntity) {
             return false; // only check living entities, so long as they are not a player or multipart entity
         }
 
-        final int maxBoundingBoxSize = configAdapter.getConfig().getEntity().getMaxBoundingBoxSize();
+        final int maxBoundingBoxSize = configAdapter.get().getEntity().getMaxBoundingBoxSize();
         if (maxBoundingBoxSize <= 0) {
             return false;
         }
@@ -304,12 +296,12 @@ public final class SpongeHooks {
             return false;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.world.getWorldInfo()).bridge$getConfigAdapter();
-        final int maxSpeed = configAdapter.getConfig().getEntity().getMaxSpeed();
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) entity.world.getWorldInfo()).bridge$getConfigAdapter();
+        final int maxSpeed = configAdapter.get().getEntity().getMaxSpeed();
         if (maxSpeed > 0) {
             final double distance = x * x + z * z;
             if (distance > maxSpeed && !entity.isPassenger()) {
-                if (configAdapter.getConfig().getLogging().logEntitySpeedRemoval()) {
+                if (configAdapter.get().getLogging().logEntitySpeedRemoval()) {
                     logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
                     if (entity instanceof LivingEntity) {
                         final LivingEntity livingEntity = (LivingEntity) entity;
@@ -319,7 +311,7 @@ public final class SpongeHooks {
                                 livingEntity.moveStrafing, livingEntity.moveForward);
                     }
 
-                    if (configAdapter.getConfig().getLogging().logWithStackTraces()) {
+                    if (configAdapter.get().getLogging().logWithStackTraces()) {
                         logInfo("Move offset: ({0}, {1}, {2})", x, y, z);
                         logInfo("Motion: ({0}, {1}, {2})", entity.getMotion().x, entity.getMotion().y, entity.getMotion().z);
                         logInfo("Entity: {0}", entity);
@@ -346,11 +338,11 @@ public final class SpongeHooks {
             return;
         }
 
-        final SpongeConfig<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (!configAdapter.getConfig().getLogging().logEntityCollisionChecks()) {
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) entity.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
+        if (!configAdapter.get().getLogging().logEntityCollisionChecks()) {
             return;
         }
-        final int collisionWarnSize = configAdapter.getConfig().getEntity().getMaxCollisionSize();
+        final int collisionWarnSize = configAdapter.get().getEntity().getMaxCollisionSize();
 
         if (collisionWarnSize > 0 && (entity.getServer().getTickCounter() % 10) == 0 && list.size() >= collisionWarnSize) {
             final SpongeHooks.CollisionWarning warning = new SpongeHooks.CollisionWarning(entity.getEntityWorld().getDimension().getType(), entity);
@@ -408,45 +400,11 @@ public final class SpongeHooks {
     }
 
     public static void enableThreadContentionMonitoring() {
-        if (!SpongeCommon.getGlobalConfigAdapter().getConfig().getDebug().isEnableThreadContentionMonitoring()) {
+        if (!SpongeConfigs.getCommon().get().getDebug().isEnableThreadContentionMonitoring()) {
             return;
         }
         final ThreadMXBean mbean = ManagementFactory.getThreadMXBean();
         mbean.setThreadContentionMonitoringEnabled(true);
     }
 
-    public static SpongeConfig<? extends GeneralConfigBase> getOrLoadConfigAdapter(@Nullable final Path dimensionPath, @Nullable
-    final ResourceKey worldKey) {
-        if (worldKey != null) {
-            final org.spongepowered.api.world.server.ServerWorld apiWorld = SpongeCommon.getGame().getServer().getWorldManager().getWorld(worldKey)
-                    .orElse(null);
-            if (apiWorld != null) {
-                return ((WorldInfoBridge) apiWorld.getProperties()).bridge$getConfigAdapter();
-            }
-        }
-
-        if (dimensionPath == null) {
-            // If no dimension type, go global
-            return SpongeCommon.getGlobalConfigAdapter();
-        }
-
-        // No in-memory config objects, lookup from disk.
-        final SpongeConfig<DimensionConfig> dimensionConfigAdapter = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimensionPath
-            .resolve("dimension.conf"), SpongeCommon.ECOSYSTEM_ID, SpongeCommon.getGlobalConfigAdapter(), false);
-
-        if (worldKey != null) {
-            // TODO Minecraft 1.14 - Should drill it down by namespace zml..
-            return new SpongeConfig<>(SpongeConfig.Type.WORLD, dimensionPath.resolve(worldKey.getValue()).resolve("world.conf"),
-                SpongeCommon.ECOSYSTEM_ID, dimensionConfigAdapter, false);
-        }
-
-        return dimensionConfigAdapter;
-    }
-
-    public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(final Map<String, Tristate> entries) {
-        return SpongeCommon.getGlobalConfigAdapter()
-            .updateSetting("metrics.plugin-states", entries, new TypeToken<Map<String, Tristate>>() {
-                private static final long serialVersionUID = 190617916448550012L;
-            });
-    }
 }

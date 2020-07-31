@@ -42,8 +42,8 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -59,7 +59,7 @@ public abstract class ChunkManagerMixin_Tracker {
         at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
     private IllegalStateException impl$reportEntityAlreadyTrackedWithWorld(final String string, final Entity entityIn) {
         final IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, this.world.getWorldInfo().getWorldName()));
-        if (SpongeCommon.getGlobalConfigAdapter().getConfig().getPhaseTracker().verboseErrors()) {
+        if (SpongeConfigs.getCommon().get().getPhaseTracker().verboseErrors()) {
             PhasePrinter.printMessageWithCaughtException(PhaseTracker.getInstance(), "Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
         }
         return exception;

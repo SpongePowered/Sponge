@@ -67,6 +67,7 @@ import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
 import org.spongepowered.common.command.registrar.tree.RootCommandTreeBuilder;
 import org.spongepowered.common.command.sponge.SpongeCommand;
+import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -220,7 +221,7 @@ public final class SpongeCommandManager implements CommandManager {
 
         // We need to consider the configuration file - if there is an entry in there
         // then remove an alias if the command is not entitled to use it.
-        SpongeCommon.getGlobalConfigAdapter().getConfig()
+        SpongeConfigs.getCommon().get()
                 .getCommands()
                 .getAliases()
                 .entrySet()

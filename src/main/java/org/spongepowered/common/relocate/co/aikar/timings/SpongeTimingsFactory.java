@@ -31,7 +31,8 @@ import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.config.category.TimingsCategory;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.common.TimingsCategory;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -52,11 +53,11 @@ public final class SpongeTimingsFactory implements TimingsFactory {
     private final boolean moduleEnabled;
 
     public SpongeTimingsFactory() {
-        this.moduleEnabled = SpongeCommon.getGlobalConfigAdapter().getConfig().getModules().usePluginTimings();
+        this.moduleEnabled = SpongeConfigs.getCommon().get().getModules().usePluginTimings();
     }
 
     public TimingsFactory init() {
-        final TimingsCategory category = SpongeCommon.getGlobalConfigAdapter().getConfig().getTimings();
+        final TimingsCategory category = SpongeConfigs.getCommon().get().getTimings();
         TimingsManager.privacy = category.isServerNamePrivate();
         TimingsManager.hiddenConfigs.addAll(category.getHiddenConfigEntries());
         this.setVerboseTimingsEnabled(category.isVerbose());

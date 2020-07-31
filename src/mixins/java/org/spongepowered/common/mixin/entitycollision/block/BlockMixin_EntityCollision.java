@@ -25,17 +25,17 @@
 package org.spongepowered.common.mixin.entitycollision.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.world.World;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.CollisionModCategory;
-import org.spongepowered.common.config.category.EntityCollisionCategory;
-import org.spongepowered.common.config.type.GlobalConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.config.ConfigHandle;
+import org.spongepowered.common.config.InheritableConfigHandle;
+import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.common.CommonConfig;
+import org.spongepowered.common.config.inheritable.CollisionModCategory;
+import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 
 @Mixin(Block.class)
@@ -70,28 +70,26 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
     }
 
     @Override
-    public void collision$initializeCollisionState(World world) {
-        final SpongeConfig<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-        final SpongeConfig<GlobalConfig> globalConfigAdapter = SpongeCommon.getGlobalConfigAdapter();
-        final EntityCollisionCategory worldCollCat = worldConfigAdapter.getConfig().getEntityCollisionCategory();
-        final EntityCollisionCategory globalCollCat = globalConfigAdapter.getConfig().getEntityCollisionCategory();
+    public void collision$initializeCollisionState(net.minecraft.world.World world) {
+        final InheritableConfigHandle<WorldConfig> worldConfigAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
+        final EntityCollisionCategory worldCollCat = worldConfigAdapter.get().getEntityCollisionCategory();
 
         this.collision$setMaxCollisions(worldCollCat.getMaxEntitiesWithinAABB());
-        
+
         boolean requiresSave = false;
         String[] ids = ((BlockType) this).getKey().toString().split(":");
         String modId = ids[0];
         String name = ids[1];
 
-        CollisionModCategory worldCollMod = worldCollCat.getModList().get(modId);
-        CollisionModCategory globalCollMod = globalCollCat.getModList().get(modId);
-        if (worldCollMod == null && worldCollCat.autoPopulateData()) {
-            globalCollMod = new CollisionModCategory(modId);
-            globalCollCat.getModList().put(modId, globalCollMod);
-            globalCollMod.getBlockList().put(name, this.collision$getMaxCollisions());
-            globalConfigAdapter.save();
-            return;
-        } else if (worldCollMod != null) {
+        final CollisionModCategory worldCollMod = worldConfigAdapter.getOrCreateValue(s -> s.getEntityCollisionCategory().getModList().get(modId),
+                c -> {
+                // TODO: finish after populating?
+                    final CollisionModCategory globalCollision = new CollisionModCategory(modId);
+                    c.getEntityCollisionCategory().getModList().put(modId, globalCollision);
+                    globalCollision.getBlockList().put(name, this.collision$getMaxCollisions());
+                }, worldCollCat.autoPopulateData());
+        if (worldCollMod != null) {
             if (!worldCollMod.isEnabled()) {
                 this.collision$setMaxCollisions(-1);
                 return;
@@ -105,7 +103,7 @@ public abstract class BlockMixin_EntityCollision implements CollisionCapabilityB
             // entity overrides
             Integer blockMaxCollision = worldCollMod.getBlockList().get(name);
             if (blockMaxCollision == null && worldCollCat.autoPopulateData()) {
-                globalCollMod.getBlockList().put(name, this.collision$getMaxCollisions());
+                worldCollMod.getBlockList().put(name, this.collision$getMaxCollisions());
                 requiresSave = true;
             } else if (blockMaxCollision != null) {
                 this.collision$setMaxCollisions(blockMaxCollision);
