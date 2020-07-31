@@ -62,7 +62,7 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
         this.addChild(slots.getSlotLens(this.base + 1), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.CHEST.get()));
         this.addChild(slots.getSlotLens(this.base + 2), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.LEGS.get()));
         this.addChild(slots.getSlotLens(this.base + 3), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.FEET.get()));
-        this.addChild(slots.getSlotLens(this.base + 4 + 4 * 9), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.OFFHAND.get()));
+        this.addChild(slots.getSlotLens(this.base + 4 + 4 * 9), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), EquipmentTypes.OFF_HAND.get()));
     }
 
 }

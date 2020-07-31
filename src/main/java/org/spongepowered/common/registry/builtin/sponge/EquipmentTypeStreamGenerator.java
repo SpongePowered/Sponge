@@ -22,19 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.inventory;
+package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 
-@Mixin(EquipmentSlotType.Group.class)
-public abstract class EquipmentSlotType_GroupMixin_Inventory_API implements EquipmentGroup {
+import java.util.stream.Stream;
 
-    @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
+public final class EquipmentTypeStreamGenerator {
+
+    private EquipmentTypeStreamGenerator() {
+    }
+
+    public static Stream<EquipmentType> stream() {
+        return Stream.of(
+            EquipmentTypeStreamGenerator.newEquipmentType(EquipmentSlotType.HEAD, ResourceKey.minecraft("head")),
+            EquipmentTypeStreamGenerator.newEquipmentType(EquipmentSlotType.CHEST, ResourceKey.minecraft("chest")),
+            EquipmentTypeStreamGenerator.newEquipmentType(EquipmentSlotType.LEGS, ResourceKey.minecraft("legs")),
+            EquipmentTypeStreamGenerator.newEquipmentType(EquipmentSlotType.FEET, ResourceKey.minecraft("feet")),
+            EquipmentTypeStreamGenerator.newEquipmentType(EquipmentSlotType.MAINHAND, ResourceKey.minecraft("main_hand")),
+            EquipmentTypeStreamGenerator.newEquipmentType(EquipmentSlotType.OFFHAND, ResourceKey.minecraft("off_hand"))
+        );
+    }
+
+    private static EquipmentType newEquipmentType(final EquipmentSlotType type, final ResourceKey key) {
+        ((ResourceKeyBridge) (Object) type).bridge$setKey(key);
+        return (EquipmentType) (Object) type;
     }
 }

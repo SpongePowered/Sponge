@@ -22,19 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.inventory;
+package org.spongepowered.common.mixin.inventory.impl.inventory.equipment;
 
 import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(EquipmentSlotType.Group.class)
-public abstract class EquipmentSlotType_GroupMixin_Inventory_API implements EquipmentGroup {
+public abstract class EquipmentSlotType_GroupMixin_Inventory implements ResourceKeyBridge {
+
+    private ResourceKey impl$key;
 
     @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
+    public void bridge$setKey(final ResourceKey key) {
+        this.impl$key = key;
+    }
+
+    @Override
+    public ResourceKey bridge$getKey() {
+        return this.impl$key;
     }
 }

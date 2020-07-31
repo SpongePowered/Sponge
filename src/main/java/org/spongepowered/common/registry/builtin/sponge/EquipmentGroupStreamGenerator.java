@@ -22,19 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.inventory;
+package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
-import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 
-@Mixin(EquipmentSlotType.Group.class)
-public abstract class EquipmentSlotType_GroupMixin_Inventory_API implements EquipmentGroup {
+import java.util.stream.Stream;
 
-    @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
+public final class EquipmentGroupStreamGenerator {
+
+    private EquipmentGroupStreamGenerator() {
+    }
+
+    public static Stream<EquipmentGroup> stream() {
+        return Stream.of(
+            EquipmentGroupStreamGenerator.newEquipmentGroup(EquipmentSlotType.Group.ARMOR, ResourceKey.minecraft("worn")),
+            EquipmentGroupStreamGenerator.newEquipmentGroup(EquipmentSlotType.Group.HAND, ResourceKey.minecraft("held"))
+        );
+    }
+
+    private static EquipmentGroup newEquipmentGroup(final EquipmentSlotType.Group type, final ResourceKey key) {
+        ((ResourceKeyBridge) (Object) type).bridge$setKey(key);
+        return (EquipmentGroup) (Object) type;
     }
 }

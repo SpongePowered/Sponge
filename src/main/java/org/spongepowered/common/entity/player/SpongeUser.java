@@ -67,7 +67,6 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.service.permission.SpongeBridgeSubject;
 import org.spongepowered.common.service.permission.SubjectHelper;
 import org.spongepowered.common.util.Constants;
@@ -367,9 +366,9 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     @Override
     public ItemStack getItemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.getEquipped(EquipmentTypes.MAINHAND).orElseThrow(IllegalStateException::new);
+            this.getEquipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.getEquipped(EquipmentTypes.OFFHAND).orElseThrow(IllegalStateException::new);
+            this.getEquipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new);
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
@@ -417,9 +416,9 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     @Override
     public void setItemInHand(final HandType handType, @Nullable final ItemStack itemInHand) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.setEquippedItem(EquipmentTypes.MAINHAND, itemInHand);
+            this.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.setEquippedItem(EquipmentTypes.OFFHAND, itemInHand);
+            this.setEquippedItem(EquipmentTypes.OFF_HAND, itemInHand);
         } else {
             throw new IllegalArgumentException("Invalid hand " + handType);
         }

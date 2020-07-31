@@ -162,6 +162,8 @@ import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistra
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DismountTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.EquipmentGroupStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.EquipmentTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.EventContextKeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.GoalExecutorTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.GoalTypeStreamGenerator;
@@ -489,8 +491,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(DyeColor.class, ResourceKey.minecraft("dye_color"), Arrays.stream(net.minecraft.item.DyeColor.values()), true, false)
             .generateRegistry(CatalogedValueParameter.class, ResourceKey.sponge("value_parameter"), CatalogedValueParameterStreamGenerator.stream(), true, true)
             .generateRegistry(CommandRegistrar.class, ResourceKey.sponge("command_registrar"), CommandRegistrarStreamGenerator.stream(), true, true)
-            .generateRegistry(EquipmentGroup.class, ResourceKey.minecraft("equipment_group"), Arrays.stream(EquipmentSlotType.Group.values()), true, false)
-            .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), Arrays.stream(EquipmentSlotType.values()), true, false)
+            .generateRegistry(EquipmentGroup.class, ResourceKey.minecraft("equipment_group"), EquipmentGroupStreamGenerator.stream(), true, false)
+            .generateRegistry(EquipmentType.class, ResourceKey.minecraft("equipment_type"), EquipmentTypeStreamGenerator.stream(), true, false)
             .generateRegistry(EventContextKey.class, ResourceKey.sponge("event_context_key"), EventContextKeyStreamGenerator.stream(), true, true)
             .generateRegistry(FoxType.class, ResourceKey.minecraft("fox_type"), Arrays.stream(FoxEntity.Type.values()), true, false)
             .generateRegistry(GameMode.class, ResourceKey.minecraft("game_mode"), Arrays.stream(GameType.values()), true, false)
