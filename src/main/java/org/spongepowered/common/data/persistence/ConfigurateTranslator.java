@@ -184,14 +184,17 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     @Override
     public DataView addTo(ConfigurationNode node, DataView dataView) {
-        final Deque<Object> view = new LinkedList<>();
-        view.add(dataView);
-        node.visit(ToDataView.INSTANCE, view);
+        final VisitState state = new VisitState();
+        state.add(dataView);
+        node.visit(ToDataView.INSTANCE, state);
         return dataView;
     }
 
+    static class VisitState extends LinkedList<Object> {
+        @Nullable ConfigurationNode start;
+    }
 
-    static class ToDataView implements ConfigurationVisitor.Safe<Deque<Object>, DataView> {
+    static class ToDataView implements ConfigurationVisitor.Safe<VisitState, DataView> {
 
         static ToDataView INSTANCE = new ToDataView();
 
@@ -207,26 +210,27 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
         }
 
         @Override
-        public Deque<Object> newState() {
-            final Deque<Object> ret = new LinkedList<>();
+        public VisitState newState() {
+            final VisitState ret = new VisitState();
             ret.add(DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED));
             return ret;
         }
 
         @Override
-        public void beginVisit(ConfigurationNode node, Deque<Object> state) {
+        public void beginVisit(ConfigurationNode node, VisitState state) {
             if (!node.isEmpty() && !node.isMap()) {
                 throw new IllegalArgumentException("Only mapping nodes can be represented in DataViews");
             }
+            state.start = node;
         }
 
         @Override
-        public void enterNode(ConfigurationNode node, Deque<Object> state) {}
+        public void enterNode(ConfigurationNode node, VisitState state) {}
 
         @Override
         @SuppressWarnings({"unchecked", "rawtypes"})
-        public void enterMappingNode(ConfigurationNode node, Deque<Object> state) {
-            if (node.getKey() == null && node.getParent() == null) { // we're at root
+        public void enterMappingNode(ConfigurationNode node, VisitState state) {
+            if (state.start == node) { // we're at root
                 state.addFirst(state.getFirst()); // keep things balanced
                 return;
             }
@@ -244,24 +248,24 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
         }
 
         @Override
-        public void enterListNode(ConfigurationNode node, Deque<Object> state) {
+        public void enterListNode(ConfigurationNode node, VisitState state) {
             state.addFirst(new LinkedList<>());
         }
 
         @Override
-        public void enterScalarNode(ConfigurationNode node, Deque<Object> state) {
+        public void enterScalarNode(ConfigurationNode node, VisitState state) {
             addToFirst(state, node, node.getValue());
         }
 
         @Override
-        public void exitMappingNode(ConfigurationNode node, Deque<Object> state) {
+        public void exitMappingNode(ConfigurationNode node, VisitState state) {
             if (!(state.removeFirst() instanceof DataView)) {
                 throw new IllegalStateException("Exited a mapping node but the top value was not a DataView");
             }
         }
 
         @Override
-        public void exitListNode(ConfigurationNode node, Deque<Object> state) {
+        public void exitListNode(ConfigurationNode node, VisitState state) {
             final Object popped = state.removeFirst();
             addToFirst(state, node, popped);
         }
@@ -277,7 +281,8 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
         }
 
         @Override
-        public DataView endVisit(Deque<Object> state) {
+        public DataView endVisit(VisitState state) {
+            state.start = null;
             return (DataView) state.remove();
         }
     }
