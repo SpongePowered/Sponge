@@ -31,12 +31,12 @@ import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeAccountDeletionResultType extends SpongeCatalogType implements AccountDeletionResultType {
 
-    public SpongeAccountDeletionResultType(ResourceKey key) {
+    public SpongeAccountDeletionResultType(final ResourceKey key) {
         super(key);
     }
 
     @Override
     public boolean isSuccess() {
-        return this == AccountDeletionResultTypes.SUCCESS;
+        return this == AccountDeletionResultTypes.SUCCESS.get();
     }
 }
