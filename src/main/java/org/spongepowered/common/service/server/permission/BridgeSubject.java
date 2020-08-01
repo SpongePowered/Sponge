@@ -122,12 +122,12 @@ public interface BridgeSubject extends Subject {
     }
 
     @Override
-    default List<SubjectReference> parents(final Set<Context> contexts) {
+    default List<? extends SubjectReference> parents(final Set<Context> contexts) {
         return ((SubjectBridge) this).bridge$resolve().parents(contexts);
     }
 
     @Override
-    default List<SubjectReference> parents() {
+    default List<? extends SubjectReference> parents() {
         return ((SubjectBridge) this).bridge$resolve().parents();
     }
 

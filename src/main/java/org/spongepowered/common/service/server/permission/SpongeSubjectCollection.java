@@ -85,7 +85,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     }
 
     @Override
-    public CompletableFuture<Map<String, Subject>> loadSubjects(Set<String> identifiers) {
+    public CompletableFuture<Map<String, ? extends Subject>> loadSubjects(Set<String> identifiers) {
         Map<String, Subject> ret = new HashMap<>();
         for (String id : identifiers) {
             ret.put(id, this.get(id));
@@ -118,7 +118,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     }
 
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> allWithPermission(String permission) {
+    public CompletableFuture<Map<? extends SubjectReference, Boolean>> allWithPermission(String permission) {
         return CompletableFuture.completedFuture(this.loadedWithPermission(permission).entrySet().stream()
                 .collect(Collectors.toMap(
                         e -> e.getKey().asSubjectReference(),
@@ -128,7 +128,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     }
 
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> allWithPermission(Set<Context> contexts, String permission) {
+    public CompletableFuture<Map<? extends SubjectReference, Boolean>> allWithPermission(Set<Context> contexts, String permission) {
         return CompletableFuture.completedFuture(this.loadedWithPermission(contexts, permission).entrySet().stream()
                 .collect(Collectors.toMap(
                         e -> e.getKey().asSubjectReference(),

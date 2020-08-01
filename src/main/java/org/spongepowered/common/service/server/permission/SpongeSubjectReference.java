@@ -30,7 +30,6 @@ import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.concurrent.CompletableFuture;
 
-
 public class SpongeSubjectReference implements SubjectReference {
     private final SpongePermissionService service;
     private final String collectionId;

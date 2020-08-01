@@ -84,7 +84,7 @@ public abstract class SpongeBaseSubject implements Subject {
     }
 
     @Override
-    public List<SubjectReference> parents(Set<Context> contexts) {
+    public List<? extends SubjectReference> parents(Set<Context> contexts) {
         return this.subjectData().parents(contexts);
     }
 

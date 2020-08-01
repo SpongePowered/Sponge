@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-
 public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
     private SubjectReference parent;
 
