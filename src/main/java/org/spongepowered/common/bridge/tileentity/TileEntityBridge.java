@@ -36,4 +36,10 @@ public interface TileEntityBridge {
     default String bridge$getPrettyPrinterString() {
         return this.toString();
     }
+
+    /**
+     * A forge compatibility method assigned for {@link net.minecraft.tileentity.TileEntity}
+     * when said tile entity gets added to a {@link net.minecraft.world.World}.
+     */
+    default void bridge$onLoad() { }
 }

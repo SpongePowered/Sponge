@@ -34,7 +34,7 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 public final class NotifyClientEffect implements ProcessingSideEffect {
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag) {
         final Chunk chunk = pipeline.getAffectedChunk();
         final ServerWorld world = pipeline.getServerWorld();

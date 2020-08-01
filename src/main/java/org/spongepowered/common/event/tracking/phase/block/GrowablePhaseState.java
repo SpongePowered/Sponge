@@ -76,7 +76,9 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
 
     @Override
     public BlockChange associateBlockChangeWithSnapshot(final GrowablePhaseContext phaseContext,
-                                                        final BlockState newState, final Block newBlock, final BlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
+        final BlockState newState, final Block newBlock, final BlockState currentState, final SpongeBlockSnapshot snapshot,
+        final Block originalBlock
+    ) {
         return BlockChange.GROW;
     }
 

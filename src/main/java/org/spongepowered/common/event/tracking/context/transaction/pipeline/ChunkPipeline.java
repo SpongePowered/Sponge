@@ -25,18 +25,18 @@
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
-import org.spongepowered.common.event.tracking.context.transaction.effect.FormerWorldState;
+import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class ChunkPipeline implements BlockPipeline {
+public final class ChunkPipeline implements BlockPipeline {
 
     private final @Nullable Supplier<Chunk> chunkSupplier;
     private final @Nullable Supplier<ServerWorld> serverWorld;
@@ -96,7 +96,8 @@ public class ChunkPipeline implements BlockPipeline {
         final ServerWorld serverWorld = this.serverWorld.get();
         final int oldOpacity = currentState.getOpacity(serverWorld, pos);
         final SpongeBlockChangeFlag flag = this.transaction.getBlockChangeFlag();
-        final FormerWorldState formerState = new FormerWorldState(currentState, oldOpacity, pos);
+        final @Nullable TileEntity existing = this.chunkSupplier.get().getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+        final PipelineCursor formerState = new PipelineCursor(currentState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.chunkEffects) {
             try (final PhaseContext<?>.EffectTransactor ignored = context.pushTransactor(effect)) {
@@ -128,6 +129,7 @@ public class ChunkPipeline implements BlockPipeline {
         @Nullable Supplier<ServerWorld> serverWorld;
         @Nullable Supplier<Chunk> chunkSupplier;
         @Nullable Supplier<ChunkSection> sectionSupplier;
+        boolean wasSectionEmpty;
         BlockTransaction.@MonotonicNonNull ChangeBlock transaction;
         List<ResultingTransactionBySideEffect> effects;
 
@@ -164,6 +166,7 @@ public class ChunkPipeline implements BlockPipeline {
                 }
                 return chunkRef;
             };
+            this.wasSectionEmpty = section.isEmpty();
             return this;
         }
 

@@ -34,7 +34,7 @@ public final class CheckBlockPostPlacementIsSameEffect implements ProcessingSide
     public CheckBlockPostPlacementIsSameEffect() { }
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
         final ChunkSection chunkSection = pipeline.getAffectedSection();
         final int x = oldState.pos.getX() & 15;

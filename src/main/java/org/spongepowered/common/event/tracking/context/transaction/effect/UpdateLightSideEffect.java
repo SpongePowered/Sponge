@@ -33,9 +33,9 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 public final class UpdateLightSideEffect implements ProcessingSideEffect {
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag) {
-        final int originalOpactiy = oldState.opactiy;
+        final int originalOpactiy = oldState.opacity;
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos);
         if (oldState.state != currentState && (((BlockStateBridge) currentState).bridge$getLightValue(serverWorld, oldState.pos) != originalOpactiy || currentState.func_215691_g() || oldState.state.func_215691_g())) {

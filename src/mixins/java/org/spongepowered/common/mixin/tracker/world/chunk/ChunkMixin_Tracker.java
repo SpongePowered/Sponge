@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
@@ -58,6 +59,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
@@ -83,7 +85,8 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 
     @Inject(method = "setBlockState", at = @At("HEAD"), cancellable = true)
     private void tracker$sanityCheckServerWorldSetBlockState(final BlockPos pos, final BlockState state, final boolean isMoving,
-        final CallbackInfoReturnable<BlockState> cir) {
+        final CallbackInfoReturnable<BlockState> cir
+    ) {
         if (!((WorldBridge) this.world).bridge$isFake()) {
             new PrettyPrinter(80).add("Illegal Direct Chunk Access")
                 .hr()
@@ -94,16 +97,17 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     }
 
     /**
+     * Technically a full overwrite for {@link Chunk#setBlockState(BlockPos, BlockState, boolean)}
+     * and due to Sponge's hijacking of {@link ServerWorld#setBlockState(BlockPos, BlockState, int)},
+     * it needs to be able to record transactions when necessary. This implementation allows for us to
+     * further specify the types of transactions and what proxies are needing to set up where.
+     *
      * @param pos The position changing
      * @param newState The new state
      * @param currentState The current state - passed in from either chunk or world
-     * @param flag
+     * @param flag The sponge change flag, converted from an int to a proper struct
      * @return The changed block state if not null
      * @author gabizou - January 13th, 2020 - Minecraft 1.14.3
-     *         Technically a full overwrite for {@link Chunk#setBlockState(BlockPos, BlockState, boolean)}
-     *         and due to Sponge's hijacking of {@link ServerWorld#setBlockState(BlockPos, BlockState, int)},
-     *         it needs to be able to record transactions when necessary. This implementation allows for us to
-     *         further specify the types of transactions and what proxies are needing to set up where.
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
@@ -131,8 +135,6 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             this.sections[yPos >> 4] = chunksection;
         }
 
-        // boolean flag = chunksection.isEmpty(); // Vanilla flag -> isEmpty
-        final boolean isEmpty = chunksection.isEmpty();
         // Sponge Start - Build out the BlockTransaction
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState state = context.state;
@@ -140,14 +142,15 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         // Build a transaction maybe?
         final WeakReference<ServerWorld> ref = new WeakReference<>((ServerWorld) this.world);
         final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(currentState, pos, flag, existing,
-                () -> Objects.requireNonNull(ref.get(), "ServerWorld dereferenced"),
-                Optional::empty, Optional::empty);
+            () -> Objects.requireNonNull(ref.get(), "ServerWorld dereferenced"),
+            Optional::empty, Optional::empty
+        );
 
         // Pulled up from below
         final Block newBlock = newState.getBlock();
         final Block currentBlock = currentState.getBlock();
 
-        final BlockTransaction.ChangeBlock transaction = state.createTransaction(context, pos, snapshot, newState, flag, existing);
+        final BlockTransaction.ChangeBlock transaction = state.createTransaction(context, snapshot, newState, flag);
 
         snapshot.blockChange = state.associateBlockChangeWithSnapshot(
             context,
@@ -157,6 +160,10 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             snapshot,
             currentBlock
         );
+        if (((BlockStateBridge) snapshot.getState()).bridge$hasTileEntity()
+            && (snapshot.blockChange == BlockChange.BREAK || snapshot.blockChange == BlockChange.MODIFY)) {
+            transaction.queuedRemoval = existing;
+        }
 
         final ChunkPipeline.Builder builder = ChunkPipeline.builder()
             .kickOff(transaction)
@@ -218,8 +225,8 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     }
 
     @Inject(
-            method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
+        method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))
     private void tracker$SetActiveChunkOnTileEntityAdd(final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(this);
         // Make sure to set creator/notifier for TE if any chunk data exists
@@ -232,7 +239,8 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At("RETURN"))
     private void tracker$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
-            final java.util.function.Predicate<? super Entity> filter, final CallbackInfo ci) {
+        final java.util.function.Predicate<? super Entity> filter, final CallbackInfo ci
+    ) {
         if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
             return;
         }

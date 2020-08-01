@@ -25,19 +25,38 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class BlockAddedEffect implements ProcessingSideEffect {
+import java.util.Iterator;
 
-    public BlockAddedEffect() {
-    }
-
+public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect implements ProcessingSideEffect {
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
-        if (flag.performBlockPhysics()) {
-            newState.onBlockAdded(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
+        final SpongeBlockChangeFlag flag
+    ) {
+        final ServerWorld serverWorld = pipeline.getServerWorld();
+        final TileEntity tileEntity = oldState.tileEntity;
+        final BlockPos pos = oldState.pos;
+        if (tileEntity == null || tileEntity.isRemoved()) {
+            return EffectResult.NULL_RETURN;
+        }
+        if (((WorldAccessor) serverWorld).accessor$getProcessingLoadedTiles()) {
+            final Iterator<TileEntity> iterator = ((WorldAccessor) serverWorld).accessor$getAddedTileEntityList().iterator();
+
+            while(iterator.hasNext()) {
+                final TileEntity tileentity = iterator.next();
+                if (tileentity.getPos().equals(pos)) {
+                    tileentity.remove();
+                    iterator.remove();
+                }
+            }
+            serverWorld.loadedTileEntityList.add(tileEntity);
+            return EffectResult.NULL_RETURN;
         }
         return EffectResult.NULL_PASS;
     }

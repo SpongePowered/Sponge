@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 import net.minecraft.block.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class EffectResult {
+public final class EffectResult {
 
     public static final EffectResult NULL_RETURN = new EffectResult(null, true);
     public static final EffectResult NULL_PASS = new EffectResult(null, false);

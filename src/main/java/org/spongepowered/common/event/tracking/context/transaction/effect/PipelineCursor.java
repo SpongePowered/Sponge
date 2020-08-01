@@ -25,20 +25,22 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class BlockAddedEffect implements ProcessingSideEffect {
+public final class PipelineCursor {
+    public final BlockState state;
+    public final int opacity;
+    public final BlockPos pos;
+    public final @Nullable TileEntity tileEntity;
 
-    public BlockAddedEffect() {
-    }
-
-    @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
-        if (flag.performBlockPhysics()) {
-            newState.onBlockAdded(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
-        }
-        return EffectResult.NULL_PASS;
+    public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
+        @Nullable final TileEntity tileEntity
+    ) {
+        this.state = state;
+        this.opacity = opacity;
+        this.pos = pos;
+        this.tileEntity = tileEntity;
     }
 }

@@ -467,9 +467,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
         public EffectTransactor(final ResultingTransactionBySideEffect effect) {
             /*
-            | ChangeBlock
-            |  |- RemoveTileEntity
-            |  |   |- ChangeBlock <--
+            | ChangeBlock(1) <- head will be RemoveTileEntity(1), tail is still RemoveTileentity(1)
+            |  |- RemoveTileEntity <- Head will be ChangeBlock(2) tail is still ChangeBlock(2)
+            |  |   |- ChangeBlock <-- Head will be null, tail is still null
              */
             this.previousEffect = PhaseContext.this.getBlockTransactor().getEffect();
             PhaseContext.this.getBlockTransactor().pushEffect(effect);

@@ -46,6 +46,7 @@ import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -53,25 +54,35 @@ import java.util.function.Consumer;
 @Mixin(World.class)
 public abstract class WorldMixin_Tracker implements WorldBridge {
 
+    // @formatter:off
     @Shadow @Final public Random rand;
     @Shadow @Final protected WorldInfo worldInfo;
+    @Shadow protected boolean processingLoadedTiles;
+    @Shadow @Final protected List<TileEntity> addedTileEntityList;
+    @Shadow @Final public List<TileEntity> loadedTileEntityList;
+    @Shadow @Final public List<TileEntity> tickableTileEntities;
 
     @Shadow public abstract Chunk shadow$getChunk(int chunkX, int chunkZ);
     @Shadow public abstract Chunk shadow$getChunkAt(BlockPos pos);
     @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
     @Shadow public boolean setBlockState(final BlockPos pos, final BlockState state, final int flags) { throw new IllegalStateException("Untransformed shadow!"); }
+    @Shadow public void shadow$removeTileEntity(final BlockPos pos) { } // shadowed
+    @Shadow public boolean shadow$addTileEntity(final TileEntity tile) { return false; }
+    @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos pos);
+    @Shadow public void shadow$setTileEntity(final BlockPos pos, @Nullable final TileEntity tileEntity) { } // Shadowed
+    // @formatter:on
 
     /**
-     * @author gabizou - January 10th, 2020 - Minecraft 1.14.3
-     * @reason We introduce the protected method to be overridden in
+     * We introduce the protected method to be overridden in
      * {@code org.spongepowered.common.mixin.core.world.server.ServerWorldMixin#tracker$wrapTileEntityTick(ITickableTileEntity)}
      * to appropriately wrap where needed.
      *
      * @param tileEntity The tile entity
+     * @author gabizou - January 10th, 2020 - Minecraft 1.14.3
      */
     @Redirect(method = "tickBlockEntities",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/tileentity/ITickableTileEntity;tick()V"))
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/tileentity/ITickableTileEntity;tick()V"))
     protected void tracker$wrapTileEntityTick(final ITickableTileEntity tileEntity) {
         tileEntity.tick();
     }
@@ -79,7 +90,7 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Redirect(method = "addTileEntity",
         at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false),
         slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/World;tickableTileEntities:Ljava/util/List;"),
-            to =   @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z")))
+            to = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z")))
     private boolean tracker$onlyAddTileEntitiesToTickIfEnabled(final List<? super TileEntity> list, final Object tile) {
         if (!this.bridge$isFake() && !((TrackableBridge) tile).bridge$shouldTick()) {
             return false;

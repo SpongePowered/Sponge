@@ -54,7 +54,6 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     @Shadow public abstract void shadow$calculateInitialSkylight();
 
     @Shadow @Final protected AbstractChunkProvider chunkProvider;
-    @Shadow @Final public Dimension dimension;
     @Shadow @Final public Random rand;
     // @formatter on
     private boolean impl$isDefinitelyFake = false;

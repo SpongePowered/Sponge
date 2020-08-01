@@ -25,15 +25,13 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class UpdateWorldRendererEffect implements ProcessingSideEffect {
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag) {
         if (oldState.state != newState) {
             pipeline.getServerWorld().func_225319_b(oldState.pos, oldState.state, newState);

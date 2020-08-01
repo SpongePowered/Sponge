@@ -63,7 +63,6 @@ import java.util.function.Consumer;
 
 public abstract class BlockTransaction {
 
-    final int transactionIndex;
     final int snapshotIndex;
     boolean isCancelled = false;
     boolean appliedPreChange;
@@ -81,8 +80,7 @@ public abstract class BlockTransaction {
     @Nullable BlockTransaction next;
 
 
-    BlockTransaction(final int i, final int snapshotIndex, final BlockPos affectedPosition, final BlockState originalState) {
-        this.transactionIndex = i;
+    BlockTransaction(final int snapshotIndex, final BlockPos affectedPosition, final BlockState originalState) {
         this.snapshotIndex = snapshotIndex;
         this.affectedPosition = affectedPosition;
         this.originalState = originalState;
@@ -108,7 +106,7 @@ public abstract class BlockTransaction {
     }
 
     public final boolean hasChildTransactions() {
-        return this.sideEffects != null && this.sideEffects.stream().anyMatch(effect -> effect.child != null);
+        return this.sideEffects != null && this.sideEffects.stream().anyMatch(effect -> effect.head != null);
     }
 
     public abstract Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator();
@@ -148,14 +146,26 @@ public abstract class BlockTransaction {
         return this.blocksNotAffected != null && !this.blocksNotAffected.isEmpty() && !this.affectedPosition.equals(pos);
     }
 
+    public boolean acceptTileRemoval(final TileEntity tileentity) {
+        return false;
+    }
+
+    public boolean acceptTileAddition(final TileEntity tileEntity) {
+        return false;
+    }
+
+    public boolean acceptTileReplacement(final TileEntity existing, final TileEntity proposed) {
+        return false;
+    }
+
     @SuppressWarnings("rawtypes")
     public static final class AddTileEntity extends BlockTransaction {
 
         final TileEntity added;
         final SpongeBlockSnapshot addedSnapshot;
 
-        AddTileEntity(final int i, final int snapshotIndex, final TileEntity added, final SpongeBlockSnapshot attachedSnapshot) {
-            super(i, snapshotIndex, attachedSnapshot.getBlockPos(), null);
+        AddTileEntity(final int snapshotIndex, final TileEntity added, final SpongeBlockSnapshot attachedSnapshot) {
+            super(snapshotIndex, attachedSnapshot.getBlockPos(), null);
             this.added = added;
             this.addedSnapshot = attachedSnapshot;
         }
@@ -194,8 +204,8 @@ public abstract class BlockTransaction {
         final TileEntity removed;
         final SpongeBlockSnapshot tileSnapshot;
 
-        RemoveTileEntity(final int i, final int snapshotIndex, final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
-            super(i, snapshotIndex, attachedSnapshot.getBlockPos(), null);
+        RemoveTileEntity(final int snapshotIndex, final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
+            super(snapshotIndex, attachedSnapshot.getBlockPos(), null);
             this.removed = removed;
             this.tileSnapshot = attachedSnapshot;
             this.applyTileAtTransaction(this.affectedPosition, this.removed);
@@ -239,8 +249,8 @@ public abstract class BlockTransaction {
         final TileEntity removed;
         final SpongeBlockSnapshot removedSnapshot;
 
-        ReplaceTileEntity(final int i, final int snapshotIndex, final TileEntity added, final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
-            super(i, snapshotIndex, attachedSnapshot.getBlockPos(), null);
+        ReplaceTileEntity(final int snapshotIndex, final TileEntity added, final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
+            super(snapshotIndex, attachedSnapshot.getBlockPos(), null);
             this.added = added;
             this.removed = removed;
             this.removedSnapshot = attachedSnapshot;
@@ -254,6 +264,14 @@ public abstract class BlockTransaction {
             final ChunkSection chunksection
         ) {
 
+        }
+
+        @Override
+        public boolean acceptTileAddition(final TileEntity tileEntity) {
+            if (this.added == tileEntity) {
+                return true;
+            }
+            return super.acceptTileAddition(tileEntity);
         }
 
         @Override
@@ -287,13 +305,12 @@ public abstract class BlockTransaction {
         final BlockState newState;
         final SpongeBlockChangeFlag blockChangeFlag;
         @Nullable public TileEntity queuedRemoval;
-        @Nullable public TileEntity queueTileSet;
+        @Nullable public TileEntity queuedAdd;
         public boolean queueBreak = false;
         @Nullable
 
-        ChangeBlock(
-            final int i, final int snapshotIndex, final SpongeBlockSnapshot attachedSnapshot, final BlockState newState, final SpongeBlockChangeFlag blockChange) {
-            super(i, snapshotIndex, attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
+        ChangeBlock(final int snapshotIndex, final SpongeBlockSnapshot attachedSnapshot, final BlockState newState, final SpongeBlockChangeFlag blockChange) {
+            super(snapshotIndex, attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
             this.original = attachedSnapshot;
             this.newState = newState;
             this.blockChangeFlag = blockChange;
@@ -335,6 +352,36 @@ public abstract class BlockTransaction {
         }
 
         @Override
+        public boolean acceptTileAddition(final TileEntity tileEntity) {
+            if (!this.affectedPosition.equals(tileEntity.getPos())) {
+                return false;
+            }
+            if (this.queuedAdd != null) {
+                return false;
+
+            }
+            this.queuedAdd = tileEntity;
+            return true;
+        }
+
+        @Override
+        public boolean acceptTileRemoval(final TileEntity tileentity) {
+            if (!this.affectedPosition.equals(tileentity.getPos())) {
+                return false;
+            }
+            if (this.queuedRemoval != null) {
+                return false;
+            }
+            this.queuedRemoval = tileentity;
+            return true;
+        }
+
+        @Override
+        public boolean acceptTileReplacement(final TileEntity existing, final TileEntity proposed) {
+            return this.acceptTileRemoval(existing) && this.acceptTileAddition(proposed);
+        }
+
+        @Override
         public void provideUnchangedStates(final BlockTransaction prevChange) {
             this.provideExistingBlockState(prevChange, (BlockState) this.original.getState());
             if (prevChange.applyTileAtTransaction(this.affectedPosition, this.queuedRemoval)) {
@@ -348,7 +395,7 @@ public abstract class BlockTransaction {
                 .add(" %s : %s", "Original Block", this.original)
                 .add(" %s : %s", "New State", this.newState)
                 .add(" %s : %s", "RemovedTile", this.queuedRemoval)
-                .add(" %s : %s", "AddedTile", this.queueTileSet)
+                .add(" %s : %s", "AddedTile", this.queuedAdd)
                 .add(" %s : %s", "ChangeFlag", this.blockChangeFlag);
         }
 
@@ -362,9 +409,11 @@ public abstract class BlockTransaction {
         final Block sourceBlock;
         final BlockPos sourcePos;
 
-        NeighborNotification(final int transactionIndex, final int snapshotIndex, final TrackedWorldBridge worldBridge, final BlockState notifyState, final BlockPos notifyPos,
-                             final Block sourceBlock, final BlockPos sourcePos, final BlockState sourceState) {
-            super(transactionIndex, snapshotIndex, sourcePos, sourceState);
+        NeighborNotification(final int snapshotIndex, final TrackedWorldBridge worldBridge,
+            final BlockState notifyState, final BlockPos notifyPos,
+            final Block sourceBlock, final BlockPos sourcePos, final BlockState sourceState
+        ) {
+            super(snapshotIndex, sourcePos, sourceState);
             this.worldBridge = worldBridge;
             this.notifyState = notifyState;
             this.notifyPos = notifyPos;
