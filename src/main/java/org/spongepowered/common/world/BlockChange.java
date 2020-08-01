@@ -26,6 +26,8 @@ package org.spongepowered.common.world;
 
 
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -35,6 +37,7 @@ import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.config.inheritable.LoggingCategory;
 
+@DefaultQualifier(NonNull.class)
 public enum BlockChange {
 
     BREAK() {

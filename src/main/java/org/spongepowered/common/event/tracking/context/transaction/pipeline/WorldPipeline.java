@@ -25,14 +25,16 @@
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
-import org.spongepowered.common.event.tracking.context.transaction.effect.FormerWorldState;
+import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -42,7 +44,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class WorldPipeline implements BlockPipeline {
+public final class WorldPipeline implements BlockPipeline {
 
     private final Supplier<Chunk> chunkSupplier;
     private final Supplier<ServerWorld> serverWorld;
@@ -87,8 +89,8 @@ public class WorldPipeline implements BlockPipeline {
             return false;
         }
         final int oldOpacity = oldState.getOpacity(serverWorld, pos);
-
-        final FormerWorldState formerState = new FormerWorldState(oldState, oldOpacity, pos);
+        final @Nullable TileEntity existing = this.chunkSupplier.get().getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+        final PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.worldEffects) {
             try (final PhaseContext<?>.EffectTransactor ignored = context.pushTransactor(effect)) {

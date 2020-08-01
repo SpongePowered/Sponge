@@ -33,7 +33,7 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 public final class UpdateConnectingBlocksEffect implements ProcessingSideEffect {
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag) {
         final ServerWorld world = pipeline.getServerWorld();
         final BlockPos pos = oldState.pos;

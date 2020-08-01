@@ -25,20 +25,19 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class BlockAddedEffect implements ProcessingSideEffect {
-
-    public BlockAddedEffect() {
-    }
-
+public final class RemoveTileEntityFromChunkEffect implements ProcessingSideEffect {
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
-        if (flag.performBlockPhysics()) {
-            newState.onBlockAdded(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
+        final TileEntity tileEntity = oldState.tileEntity;
+        if (tileEntity == null) {
+            return EffectResult.NULL_RETURN;
         }
-        return EffectResult.NULL_PASS;
+        pipeline.getAffectedChunk().removeTileEntity(oldState.pos);
+        return EffectResult.NULL_RETURN;
     }
 }

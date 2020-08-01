@@ -25,19 +25,37 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.accessor.world.WorldAccessor;
+import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class BlockAddedEffect implements ProcessingSideEffect {
-
-    public BlockAddedEffect() {
-    }
+public final class AddTileEntityToWorldWhileProcessingEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
-        if (flag.performBlockPhysics()) {
-            newState.onBlockAdded(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
+        final SpongeBlockChangeFlag flag
+    ) {
+        final ServerWorld serverWorld = pipeline.getServerWorld();
+        final TileEntity tileEntity = oldState.tileEntity;
+        if (tileEntity == null) {
+            return EffectResult.NULL_RETURN;
+        }
+        if (((WorldAccessor) serverWorld).accessor$getProcessingLoadedTiles()) {
+            ServerWorldAccessor.accessor$LOGGER().error(
+                "Adding block entity while ticking: {} @ {}",
+                () -> Registry.BLOCK_ENTITY_TYPE.getKey(tileEntity.getType()),
+                tileEntity::getPos
+            );
+            final boolean add = ((WorldAccessor) serverWorld).accessor$getAddedTileEntityList().add(tileEntity);
+            if (add) {
+                return new EffectResult(oldState.state, true);
+            } else {
+                return EffectResult.NULL_RETURN;
+            }
         }
         return EffectResult.NULL_PASS;
     }

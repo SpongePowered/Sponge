@@ -29,15 +29,13 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import java.util.function.Supplier;
-
 public final class ChunkChangeCompleteEffect implements ProcessingSideEffect {
 
     public ChunkChangeCompleteEffect() {
     }
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
 
         final Chunk chunk = pipeline.getAffectedChunk();

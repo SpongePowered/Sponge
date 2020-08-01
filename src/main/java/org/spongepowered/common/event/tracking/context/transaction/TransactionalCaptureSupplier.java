@@ -30,8 +30,10 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -44,6 +46,7 @@ import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -55,6 +58,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 @SuppressWarnings("rawtypes")
 public final class TransactionalCaptureSupplier implements ICaptureSupplier {
@@ -63,7 +67,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     @Nullable private ListMultimap<BlockPos, BlockEventData> scheduledEvents;
     @Nullable private List<SpongeBlockSnapshot> snapshots;
     @Nullable private Set<BlockPos> usedBlocks;
-    private int transactionIndex = -1; // These are used to keep track of which snapshot is being referred to as "most recent change"
     private int snapshotIndex = -1;    // so that we can appropriately cancel or discard or apply specific event transactions
     // We made BlockTransaction a Node and this is a pseudo LinkedList due to the nature of needing
     // to be able to track what block states exist at the time of the transaction while other transactions
@@ -181,7 +184,14 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             final SpongeBlockSnapshot originalSnapshot = list.get(0);
             final PhaseContext<?> peek = PhaseTracker.getInstance().getPhaseContext();
             final BlockState currentState = (BlockState) originalSnapshot.getState();
-            originalSnapshot.blockChange = ((IPhaseState) peek.state).associateBlockChangeWithSnapshot(peek, newState, newState.getBlock(), currentState, originalSnapshot, currentState.getBlock());
+            originalSnapshot.blockChange = ((IPhaseState) peek.state).associateBlockChangeWithSnapshot(
+                peek,
+                newState,
+                newState.getBlock(),
+                currentState,
+                originalSnapshot,
+                currentState.getBlock()
+            );
         }
     }
 
@@ -231,29 +241,113 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     }
 
     public BlockTransaction.ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
-        final BlockChangeFlag flags) {
+        final BlockChangeFlag flags
+    ) {
         this.put(originalBlockSnapshot, newState); // Always update the snapshot index before the block change is tracked
-        final int transactionIndex = ++this.transactionIndex;
-        final BlockTransaction.ChangeBlock changeBlock = new BlockTransaction.ChangeBlock(transactionIndex, this.snapshotIndex,
-            originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags);
+        final BlockTransaction.ChangeBlock changeBlock = new BlockTransaction.ChangeBlock(
+            this.snapshotIndex,
+            originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags
+        );
         this.logTransaction(changeBlock);
         return changeBlock;
     }
 
-    void queuePreviousStates(final BlockTransaction transaction) {
-        if (this.head != null) {
-            if (transaction == this.head) {
-                return;
-            }
-            for (BlockTransaction prevChange = this.head; prevChange != null; prevChange = prevChange.next) {
-                if (transaction.appliedPreChange) {
-                    // Short circuit. It will not have already applied changes to the previous
-                    // changes until it at least applies them to the first entry (head).
-                    return;
-                }
-                transaction.provideUnchangedStates(prevChange);
-            }
+    public boolean logTileAddition(final TileEntity tileEntity, final Supplier<ServerWorld> worldSupplier) {
+        if (tileEntity == null) {
+            return false;
         }
+        if (this.tail != null && this.effect != null) {
+            final boolean newRecorded = this.tail.acceptTileAddition(tileEntity);
+            if (newRecorded) {
+                return true;
+            }
+            this.effect.addChild(this.createTileAdditionTransaction(tileEntity, worldSupplier));
+        } else {
+            this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier));
+        }
+        return true;
+    }
+
+    public boolean logTileRemoval(@Nullable final TileEntity tileentity, final Supplier<ServerWorld> worldSupplier) {
+        if (tileentity == null) {
+            return false;
+        }
+        if (this.tail != null && this.effect != null) {
+            final boolean newRecorded = this.tail.acceptTileRemoval(tileentity);
+            if (newRecorded) {
+                return true;
+            }
+            this.effect.addChild(this.createTileRemovalTransaction(tileentity, worldSupplier));
+        } else {
+            this.logTransaction(this.createTileRemovalTransaction(tileentity, worldSupplier));
+        }
+        return true;
+    }
+
+    public boolean logTileReplacement(final BlockPos pos, final @Nullable TileEntity existing, final @Nullable TileEntity proposed, final Supplier<ServerWorld> worldSupplier) {
+        if (proposed == null) {
+            return false;
+        }
+        if (this.tail != null && this.effect != null) {
+            final boolean newRecorded = this.tail.acceptTileReplacement(existing, proposed);
+            if (newRecorded) {
+                return true;
+            }
+            this.effect.addChild(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
+        } else {
+            this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
+        }
+        return true;
+    }
+
+    private BlockTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable TileEntity existing,
+        final @Nullable TileEntity proposed, final Supplier<ServerWorld> worldSupplier
+    ) {
+        final BlockState currentState = worldSupplier.get().getBlockState(pos);
+        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
+            currentState,
+            pos,
+            BlockChangeFlags.NONE,
+            existing,
+            worldSupplier,
+            Optional::empty, Optional::empty
+        );
+        this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
+
+        return new BlockTransaction.ReplaceTileEntity(this.snapshotIndex, proposed, existing, snapshot);
+    }
+
+    private BlockTransaction.RemoveTileEntity createTileRemovalTransaction(@NonNull final TileEntity tileentity,
+        final Supplier<ServerWorld> worldSupplier
+    ) {
+        final BlockState currentState = tileentity.getBlockState();
+        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
+            currentState,
+            tileentity.getPos(),
+            BlockChangeFlags.NONE,
+            tileentity,
+            worldSupplier,
+            Optional::empty, Optional::empty
+        );
+        this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
+
+        return new BlockTransaction.RemoveTileEntity(this.snapshotIndex, tileentity, snapshot);
+    }
+    private BlockTransaction.AddTileEntity createTileAdditionTransaction(@NonNull final TileEntity tileentity,
+        final Supplier<ServerWorld> worldSupplier
+    ) {
+        final BlockState currentState = tileentity.getBlockState();
+        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
+            currentState,
+            tileentity.getPos(),
+            BlockChangeFlags.NONE,
+            tileentity,
+            worldSupplier,
+            Optional::empty, Optional::empty
+        );
+        this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
+
+        return new BlockTransaction.AddTileEntity(this.snapshotIndex, tileentity, snapshot);
     }
 
     public void pushEffect(final @Nullable ResultingTransactionBySideEffect effect) {
@@ -277,7 +371,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
         this.effect = null;
         this.snapshotIndex = -1;
-        this.transactionIndex = -1;
     }
 
     public Optional<Transaction<BlockSnapshot>> createTransaction(final SpongeBlockSnapshot snapshot) {
@@ -362,7 +455,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if (this.usedBlocks != null) {
             this.usedBlocks.clear();
         }
-        this.transactionIndex = -1;
         this.snapshotIndex = -1;
         if (this.head != null) {
             this.head = null;
@@ -381,4 +473,5 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     public @Nullable ResultingTransactionBySideEffect getEffect() {
         return this.effect;
     }
+
 }

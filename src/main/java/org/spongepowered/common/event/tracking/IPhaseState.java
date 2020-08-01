@@ -42,7 +42,6 @@ import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.checkerframework.framework.qual.InheritedAnnotation;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.CauseStackManager;
@@ -814,8 +813,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * place, including but not withstanding, tile entity replacements after the fact.
      * @return
      */
-    default org.spongepowered.common.event.tracking.context.transaction.BlockTransaction.ChangeBlock createTransaction(final C phaseContext, final BlockPos pos, final SpongeBlockSnapshot originalBlockSnapshot,
-        final BlockState newState, final BlockChangeFlag flags, @Nullable final TileEntity tileEntity) {
+    default org.spongepowered.common.event.tracking.context.transaction.BlockTransaction.ChangeBlock createTransaction(final C phaseContext,
+        final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState, final BlockChangeFlag flags) {
         final org.spongepowered.common.event.tracking.context.transaction.BlockTransaction.ChangeBlock changeBlock = phaseContext.getBlockTransactor()
             .logBlockChange(originalBlockSnapshot, newState, flags);
 

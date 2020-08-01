@@ -54,8 +54,6 @@ public interface TrackedWorldBridge {
 
     SpongeProxyBlockAccess bridge$getProxyAccess();
 
-    BlockingQueue<ScheduledBlockChange> bridge$getScheduledBlockChangeList();
-
     /**
      * Delegates to the {@link ServerWorld} to perform the lookup for a {@link Chunk}
      * such that if the target {@link BlockPos} results in a {@code false} for

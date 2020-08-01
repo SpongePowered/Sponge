@@ -596,7 +596,6 @@ public final class PhaseTracker implements CauseStackManager {
      * @param flag The notification flags
      * @return True if the block was successfully set (or captured)
      */
-    @SuppressWarnings("rawtypes")
     public boolean setBlockState(final TrackedWorldBridge mixinWorld, final BlockPos pos,
                                  final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) {
         if (Thread.currentThread() != PhaseTracker.SERVER.getSidedThread() && this != PhaseTracker.SERVER) {
@@ -633,34 +632,6 @@ public final class PhaseTracker implements CauseStackManager {
             .build();
 
         return pipeline.processEffects(this.getPhaseContext(), currentState, newState, pos, spongeFlag);
-    }
-
-    /**
-     * This will schedule the block changes to occur at the beginning of the next game tick,
-     * or at the end of the current tick if we're already in the middle of a game tick.
-     *
-     * <p>Possible advanced solution may include:
-     * - Determining if the Server's PhaseTracker is in the middle of a Server tick,
-     *   - If in the middle of the Server tick, check if any worlds are ticking,
-     *      - If a world is ticking, check if the desired world has ticked, is ticking, or is going
-     *        to be ticked. If it's already ticked, schedule the block change at the end of the server
-     *        tick. If the world is ticking, schedule to change the block at the end of the world tick,
-     *        and if the world is going to be ticked, schedule the change to occur at the beginning
-     *        of the world tick.
-     * This solution would allow for "best" simulation in accordance to scheduled block updates
-     * as a byproduct of the block change, as well as possible entity changes in the world etc. etc.
-     * This also allows for most "time appropriate" changes to occur when they would otherwise
-     * occur if the original proposed change were on the main thread.
-     * </p>
-     *
-     * @param defensiveCopy
-     * @param trackedWorld
-     * @param pos
-     * @param newState
-     * @param flag
-     */
-    private void proposeScheduledBlockChange(final PhaseContext<?> defensiveCopy, final TrackedWorldBridge trackedWorld, final BlockPos pos, final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) throws InterruptedException {
-        trackedWorld.bridge$getScheduledBlockChangeList().put(new ScheduledBlockChange(defensiveCopy, pos, newState, flag));
     }
 
     /**

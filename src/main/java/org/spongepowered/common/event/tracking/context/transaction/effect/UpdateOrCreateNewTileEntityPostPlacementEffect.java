@@ -38,7 +38,7 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
     }
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final FormerWorldState oldState, final BlockState newState,
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final Chunk chunk = pipeline.getAffectedChunk();

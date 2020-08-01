@@ -25,20 +25,31 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class BlockAddedEffect implements ProcessingSideEffect {
-
-    public BlockAddedEffect() {
-    }
-
+public final class RemoveTileEntityFromWorldEffect implements ProcessingSideEffect {
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
-        if (flag.performBlockPhysics()) {
-            newState.onBlockAdded(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
+    public EffectResult processSideEffect(
+        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag
+    ) {
+        final TileEntity tileEntity = oldState.tileEntity;
+        if (tileEntity == null) {
+            return EffectResult.NULL_RETURN;
         }
+        final ServerWorld serverWorld = pipeline.getServerWorld();
+        final WorldAccessor worldAccessor = (WorldAccessor) serverWorld;
+        if (worldAccessor.accessor$getProcessingLoadedTiles()) {
+            tileEntity.remove();
+            worldAccessor.accessor$getAddedTileEntityList().remove(tileEntity);
+            return EffectResult.NULL_RETURN;
+        }
+        worldAccessor.accessor$getAddedTileEntityList().remove(tileEntity);
+        serverWorld.loadedTileEntityList.remove(tileEntity);
+        serverWorld.tickableTileEntities.remove(tileEntity);
         return EffectResult.NULL_PASS;
     }
 }

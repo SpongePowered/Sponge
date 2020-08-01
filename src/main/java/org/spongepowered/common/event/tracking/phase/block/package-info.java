@@ -22,19 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction.effect;
+/**
+ * Centralized Block specific {@link org.spongepowered.common.event.tracking.IPhaseState}
+ */
+@DefaultQualifier(NonNull.class)
+package org.spongepowered.common.event.tracking.phase.block;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-
-public final class FormerWorldState {
-    final BlockState state;
-    final int opactiy;
-    final BlockPos pos;
-
-    public FormerWorldState(final BlockState state, final int opactiy, final BlockPos pos) {
-        this.state = state;
-        this.opactiy = opactiy;
-        this.pos = pos;
-    }
-}
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;

@@ -24,15 +24,25 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import javax.annotation.Nullable;
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 
 public class ResultingTransactionBySideEffect {
     public final ProcessingSideEffect effect;
-    @Nullable BlockTransaction child;
+    @Nullable BlockTransaction head;
+    @Nullable BlockTransaction tail;
 
     public ResultingTransactionBySideEffect(final ProcessingSideEffect effect) {
         this.effect = effect;
+    }
+
+    public void addChild(final BlockTransaction child) {
+        if (this.tail != null) {
+            this.tail.next = child;
+            child.previous = this.tail;
+        } else {
+            this.head = child;
+        }
+        this.tail = child;
     }
 }

@@ -37,15 +37,15 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.bridge.tileentity.TrackableTileEntityBridge;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.tileentity.TrackableTileEntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.accessor.world.WorldAccessor;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
