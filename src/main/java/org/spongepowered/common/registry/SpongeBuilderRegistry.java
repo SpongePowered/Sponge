@@ -88,6 +88,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.world.LocatableBlock;
@@ -162,6 +163,7 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.biome.SpongeVirtualBiomeTypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
+import org.spongepowered.common.resource.SpongeResourcePathBuilder;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -276,6 +278,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(Parameter.Key.Builder.class, SpongeParameterKeyBuilder::new)
             .register(Flag.Builder.class, SpongeFlagBuilder::new)
             .register(Selector.Builder.class, SpongeSelectorFactory::createBuilder)
+            .register(ResourcePath.Builder.class, SpongeResourcePathBuilder::new)
         ;
     }
 }

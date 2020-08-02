@@ -38,6 +38,9 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.Commands;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.ResourcePackInfo;
+import net.minecraft.resources.ResourcePackList;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -55,6 +58,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.profile.GameProfileManager;
+import org.spongepowered.api.resource.ResourceManager;
+import org.spongepowered.api.resource.pack.PackList;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -91,6 +96,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftServer.class)
 @Implements(value = @Interface(iface = Server.class, prefix = "server$"))
@@ -105,6 +111,10 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract int shadow$getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
     @Shadow public abstract void shadow$sendMessage(ITextComponent p_145747_1_);
+    @Shadow @Final private IReloadableResourceManager resourceManager;
+    @Shadow @Final private ResourcePackList<ResourcePackInfo> resourcePacks;
+
+    @Shadow public abstract void reload();
 
     private Iterable<? extends Audience> audiences;
     private SpongeScheduler api$scheduler;
@@ -334,4 +344,18 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         this.shadow$sendMessage(SpongeAdventure.asVanilla(message));
     }
 
+    @Override
+    public ResourceManager getResourceManager() {
+        return (ResourceManager) this.resourceManager;
+    }
+
+    @Override
+    public PackList getPackList() {
+        return (PackList) this.resourcePacks;
+    }
+
+    @Override
+    public CompletableFuture<Void> reloadResources() {
+        return CompletableFuture.runAsync(this::reload, this);
+    }
 }
