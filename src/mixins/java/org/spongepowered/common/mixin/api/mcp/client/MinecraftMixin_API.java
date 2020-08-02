@@ -132,6 +132,6 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
     }
 
     @Override
-    @Invoker
+    @Invoker("reloadResources")
     public abstract CompletableFuture<Void> reloadResources();
 }

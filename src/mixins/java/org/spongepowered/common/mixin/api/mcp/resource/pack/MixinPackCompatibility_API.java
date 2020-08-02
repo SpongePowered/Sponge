@@ -49,7 +49,7 @@ public abstract class MixinPackCompatibility_API implements PackVersion {
         return this.api$key;
     }
 
-    @Invoker
+    @Invoker("isCompatible")
     @Override
     public abstract boolean isCompatible();
 }

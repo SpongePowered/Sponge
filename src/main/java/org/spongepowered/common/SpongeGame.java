@@ -33,7 +33,6 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.SystemSubject;
-import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
@@ -59,7 +58,6 @@ public final class SpongeGame implements Game {
     private final DataManager dataManager;
     private final PluginManager pluginManager;
     private final EventManager eventManager;
-    private final AssetManager assetManager;
     private final ConfigManager configManager;
     private final ChannelRegistry channelRegistry;
     private final MetricsConfigManager metricsConfigManager;
@@ -75,7 +73,7 @@ public final class SpongeGame implements Game {
 
     @Inject
     public SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
-        final EventManager eventManager, final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistry channelRegistry,
+        final EventManager eventManager, final ConfigManager configManager, final ChannelRegistry channelRegistry,
         final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
         final ServiceProvider serviceProvider) {
 
@@ -84,7 +82,6 @@ public final class SpongeGame implements Game {
         this.dataManager = dataManager;
         this.pluginManager = pluginManager;
         this.eventManager = eventManager;
-        this.assetManager = assetManager;
         this.configManager = configManager;
         this.channelRegistry = channelRegistry;
         this.metricsConfigManager = metricsConfigManager;
@@ -129,11 +126,6 @@ public final class SpongeGame implements Game {
     @Override
     public EventManager getEventManager() {
         return this.eventManager;
-    }
-
-    @Override
-    public AssetManager getAssetManager() {
-        return this.assetManager;
     }
 
     @Override

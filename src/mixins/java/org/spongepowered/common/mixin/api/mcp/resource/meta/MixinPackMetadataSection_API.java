@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.resource.meta;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.resources.data.PackMetadataSection;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.resource.meta.PackMeta;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(PackMetadataSection.class)
 public abstract class MixinPackMetadataSection_API implements PackMeta {
@@ -40,11 +40,11 @@ public abstract class MixinPackMetadataSection_API implements PackMeta {
     // @formatter:on
 
     @Override
-    public Text getDescription() {
-        return SpongeTexts.toText(shadow$getDescription());
+    public Component getDescription() {
+        return SpongeAdventure.asAdventure(shadow$getDescription());
     }
 
     @Override
-    @Invoker
+    @Invoker("getPackFormat")
     public abstract int getPackFormat();
 }

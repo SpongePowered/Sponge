@@ -38,6 +38,8 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,7 +53,8 @@ import java.io.File;
 import java.net.Proxy;
 
 @Mixin(IntegratedServer.class)
-public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer implements VanillaServer  {
+@Implements(@Interface(iface=VanillaServer.class, prefix="server$"))
+public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer {
 
     @Shadow @Final private Minecraft mc;
     @Shadow @Final private WorldSettings worldSettings;
@@ -71,18 +74,22 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer impl
         lifecycle.establishCommands();
 
         // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
-        lifecycle.callStartingEngineEvent(this);
+        lifecycle.callStartingEngineEvent(cast());
         super.run();
     }
 
     @Inject(method = "init", at = @At("RETURN"))
     private void vanilla$callEngineStartedAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
-        lifecycle.callStartedEngineEvent(this);
+        lifecycle.callStartedEngineEvent(cast());
     }
 
     @Override
     public void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, JsonElement generatorOptions) {
-        this.getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions, true, this.worldSettings, this.mc.gameSettings.difficulty);
+        cast().getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions, true, this.worldSettings, this.mc.gameSettings.difficulty);
+    }
+
+    private VanillaServer cast() {
+        return (VanillaServer) this;
     }
 }

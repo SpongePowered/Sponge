@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.mixin.api.mcp.resource.pack;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.resources.IResourcePack;
 import net.minecraft.resources.ResourcePackInfo;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.resource.pack.Pack;
 import org.spongepowered.api.resource.pack.PackInfo;
 import org.spongepowered.api.resource.pack.PackVersion;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(ResourcePackInfo.class)
 public abstract class MixinResourcePackInfo_API implements PackInfo {
@@ -53,13 +53,13 @@ public abstract class MixinResourcePackInfo_API implements PackInfo {
     }
 
     @Override
-    public Text getTitle() {
-        return SpongeTexts.toText(shadow$getTitle());
+    public Component getTitle() {
+        return SpongeAdventure.asAdventure(shadow$getTitle());
     }
 
     @Override
-    public Text getDescription() {
-        return SpongeTexts.toText(shadow$getDescription());
+    public Component getDescription() {
+        return SpongeAdventure.asAdventure(shadow$getDescription());
     }
 
     @Override

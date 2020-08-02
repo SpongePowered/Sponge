@@ -95,7 +95,7 @@ public interface MixinIResourcePack_API extends Pack {
         }
     }
 
-    @Invoker
+    @Invoker("getName")
     @Override
     String getName();
 }

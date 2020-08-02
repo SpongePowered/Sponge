@@ -229,6 +229,7 @@
         "mcp.resource.meta.MixinPackMetadataSection_API",
         "mcp.resource.pack.MixinIResourcePack_API",
         "mcp.resource.pack.MixinPackCompatibility_API",
+        "mcp.resource.pack.MixinResourcePackInfo_API",
         "mcp.resource.pack.MixinResourcePackList_API",
         "mcp.resource.pack.MixinResourcePackType_API",
         "mcp.scoreboard.ScoreCriteria_RenderTypeMixin_API",

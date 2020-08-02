@@ -27,10 +27,7 @@ package org.spongepowered.common.inject.plugin;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.asset.Asset;
-import org.spongepowered.api.asset.AssetId;
 import org.spongepowered.common.inject.InjectionPointProvider;
-import org.spongepowered.common.inject.provider.PluginAssetProvider;
 import org.spongepowered.common.inject.provider.PluginConfigurationModule;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -55,8 +52,6 @@ public final class PluginModule extends AbstractModule {
 
         this.bind(PluginContainer.class).toInstance(this.container);
         this.bind(Logger.class).toInstance(this.container.getLogger());
-
-        this.bind(Asset.class).annotatedWith(AssetId.class).toProvider(PluginAssetProvider.class);
 
         this.install(new PluginConfigurationModule());
     }
