@@ -209,21 +209,6 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
 //        removed.remove();
 //    }
 
-    @Override
-    public void bridge$setTileEntity(final BlockPos pos, final TileEntity added) {
-        if (added.getWorld() != this.world) {
-            // Forge adds this because some mods do stupid things....
-            added.setWorld(this.world);
-        }
-        added.setPos(pos);
-        if (this.tileEntities.containsKey(pos)) {
-            this.tileEntities.get(pos).remove();
-        }
-        added.validate();
-        ((ActiveChunkReferantBridge) added).bridge$setActiveChunk(this);
-        this.tileEntities.put(pos, added);
-    }
-
     @Inject(
         method = "addTileEntity(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;validate()V"))

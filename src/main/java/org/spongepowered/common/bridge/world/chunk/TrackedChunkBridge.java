@@ -24,19 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.chunk;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -68,30 +58,4 @@ public interface TrackedChunkBridge {
      */
     void bridge$removeTileEntity(TileEntity removed);
 
-    /**
-     * Specifically similar to {@link Chunk#addTileEntity(BlockPos, TileEntity)}
-     * except without the validation check of {@link Chunk#getBlockState(BlockPos)}
-     * equality due to delayed tracking. This will allow the tracker to perform delayed tile entity additions
-     * and removals with physics without causing issues. Should not be called in any other fashion except from
-     * {@link BlockTransaction#process(Transaction, IPhaseState, PhaseContext, int)}.
-     *
-     * @param targetPos
-     * @param added
-     */
-    void bridge$setTileEntity(BlockPos targetPos, TileEntity added);
-
-    /**
-     * Forge compatibility method
-     * @param originalBlock
-     * @param replacingBlock
-     * @param replacingState
-     * @return
-     */
-    default boolean bridge$replacingBlockHasTile(Block originalBlock, Block replacingBlock, BlockState replacingState) {
-        return originalBlock != replacingBlock && originalBlock instanceof ITileEntityProvider;
-    }
-
-    default boolean bridge$shouldRefreshTile(Block oldBlock, Block newBlock, BlockState oldState, BlockState newState) {
-        return oldBlock != newBlock && oldBlock instanceof ITileEntityProvider;
-    }
 }

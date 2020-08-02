@@ -30,8 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.RedstoneLampBlock;
@@ -49,7 +47,6 @@ import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -58,7 +55,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -80,7 +76,6 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -91,7 +86,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
-import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.tick.BlockEventTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
@@ -107,7 +101,7 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.ArrayList;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -118,8 +112,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 /**
  * A simple utility for aiding in tracking, either with resolving notifiers
@@ -141,14 +133,6 @@ public final class TrackingUtil {
     public static final int CHANGE_BLOCK_INDEX = BlockChange.MODIFY.ordinal();
     private static final int MULTI_CHANGE_INDEX = BlockChange.values().length;
     private static final int EVENT_COUNT = BlockChange.values().length + 1;
-    private static final Function<ImmutableList.Builder<Transaction<BlockSnapshot>>[], Consumer<Transaction<BlockSnapshot>>> TRANSACTION_PROCESSOR =
-            builders ->
-                    transaction -> {
-                        final BlockChange blockChange = ((SpongeBlockSnapshot) transaction.getOriginal()).blockChange;
-                        builders[blockChange.ordinal()].add(transaction);
-                        builders[TrackingUtil.MULTI_CHANGE_INDEX].add(transaction);
-                    }
-            ;
     static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
         (blockSnapshot) -> blockSnapshot.getServerWorld().map(worldServer -> {
             final BlockPos targetPos = blockSnapshot.getBlockPos();
@@ -435,218 +419,7 @@ public final class TrackingUtil {
     }
 
     public static boolean processBlockCaptures(final PhaseContext<?> context) {
-        return TrackingUtil.processBlockCaptures(context, 0, context.getCapturedBlockSupplier());
-    }
-
-    /**
-     * Processes the given list of {@link BlockSnapshot}s and creates and throws and processes
-     * the {@link ChangeBlockEvent}s as appropriately determined based on the {@link BlockChange}
-     * for each snapshot. If any transactions are invalid or events cancelled, this event
-     * returns {@code false} to signify a transaction was cancelled. This return value
-     * is used for portal creation.
-     *
-     * @param context The phase context, only used by the phase for handling processes.
-     * @param supplier
-     * @return True if no events or transactions were cancelled
-     */
-    @SuppressWarnings({"unchecked"})
-    static boolean processBlockCaptures(final PhaseContext<?> context, final int currentDepth, final MultiBlockCaptureSupplier supplier) {
-        // Fail fast and check if it's empty.
-        if (!supplier.hasBlocksCaptured()) {
-            if (((IPhaseState) context.state).hasSpecificBlockProcess(context) && supplier.hasTransactions()) {
-                // Then we just need to process the transactions, there may be things that are not
-                // specifically block captured
-                final ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
-                // Clear captured snapshots after processing them
-                supplier.clear();
-                return supplier.processTransactions(ImmutableList.of(), context, true, scheduledEvents, currentDepth);
-
-            }
-            return false;
-        }
-        final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
-
-        final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[TrackingUtil.EVENT_COUNT];
-        final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[TrackingUtil.EVENT_COUNT];
-        for (int i = 0; i < TrackingUtil.EVENT_COUNT; i++) {
-            transactionBuilders[i] = new ImmutableList.Builder<>();
-        }
-
-        TrackingUtil.createTransactionLists(context, supplier, transactionArrays, transactionBuilders);
-        final ListMultimap<BlockPos, BlockEventData> scheduledEvents = supplier.getScheduledEvents();
-
-        // Clear captured snapshots after processing them
-        supplier.clear();
-
-        final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
-
-        // Creates the block events accordingly to the transaction arrays
-        TrackingUtil.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents); // Needs to throw events
-        // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
-        final ChangeBlockEvent.Post postEvent = TrackingUtil.throwMultiEventsAndCreatePost(context, transactionArrays, blockEvents, mainEvents);
-
-        if (postEvent == null) { // Means that we have had no actual block changes apparently?
-            return false;
-        }
-
-        final List<Transaction<BlockSnapshot>> invalid = new ArrayList<>();
-
-        // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
-        // transactions of the preceding block events)
-        boolean noCancelledTransactions = TrackingUtil.checkCancelledEvents(blockEvents, postEvent, scheduledEvents, context, invalid);
-
-        // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
-        // Because after, we will restore all the invalid transactions in reverse order.
-        TrackingUtil.clearInvalidTransactionDrops(context, postEvent);
-
-        if (!invalid.isEmpty()) {
-            // We need to set this value and return it to signify that some transactions were cancelled
-            noCancelledTransactions = false;
-            TrackingUtil.rollBackTransactions(context, invalid);
-            invalid.clear(); // Clear because we might re-enter for some reasons yet to be determined.
-
-        }
-        return TrackingUtil.performBlockAdditions(postEvent.getTransactions(), context, noCancelledTransactions, scheduledEvents, currentDepth);
-
-    }
-
-    private static void createTransactionLists(final PhaseContext<?> context, final MultiBlockCaptureSupplier supplier,
-        final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
-        final List<SpongeBlockSnapshot> snapshots = supplier.get();
-        for (final SpongeBlockSnapshot snapshot : snapshots) {
-            // This processes each snapshot to assign them to the correct event in the next area, with the
-            // correct builder array entry.
-            context.getCapturedBlockSupplier().createTransaction(snapshot)
-                .ifPresent(transaction -> TrackingUtil.TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(transaction));
-        }
-        for (int i = 0; i < TrackingUtil.EVENT_COUNT; i++) {
-            // Build each event array
-            transactionArrays[i] = transactionBuilders[i].build();
-        }
-    }
-
-    private static boolean checkCancelledEvents(final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
-        boolean noCancelledTransactions = true;
-        for (final ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
-            if (blockEvent.isCancelled()) {
-                noCancelledTransactions = false;
-                // Don't restore the transactions just yet, since we're just marking them as invalid for now
-                for (final Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
-                    if (!scheduledEvents.isEmpty()) {
-                        scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
-                    }
-                    transaction.setValid(false);
-                }
-            }
-        }
-        if (postEvent.isCancelled()) {
-            // Of course, if post is cancelled, just mark all transactions as invalid.
-            noCancelledTransactions = false;
-            for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
-                if (!scheduledEvents.isEmpty()) {
-                    scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
-                }
-                transaction.setValid(false);
-            }
-        }
-        for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
-            if (!transaction.isValid()) {
-                noCancelledTransactions = false;
-            }
-        }
-        // Now to check, if any of the transactions being cancelled means cancelling the entire event.
-        if (!noCancelledTransactions) {
-            // This is available to verify only when necessary that a state
-            // absolutely needs to cancel the entire transaction chain, this is mostly for more fasts
-            // since we don't want to iterate over the transaction list multiple times.
-            final boolean cancelAll = ((IPhaseState) context.state).getShouldCancelAllTransactions(context, blockEvents, postEvent, scheduledEvents, false);
-
-            for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
-                if (cancelAll) {
-                    if (!scheduledEvents.isEmpty()) {
-                        scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
-                    }
-                    transaction.setValid(false);
-                    noCancelledTransactions = false;
-                }
-                if (!transaction.isValid()) {
-                    invalid.add(transaction);
-                }
-            }
-        }
-
-        return noCancelledTransactions;
-    }
-
-    private static void clearInvalidTransactionDrops(final PhaseContext<?> context, final ChangeBlockEvent.Post postEvent) {
-        for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
-            if (!transaction.isValid()) {
-                // Cancel any block drops performed, avoids any item drops, regardless
-                if (transaction.getOriginal() instanceof SpongeBlockSnapshot) {
-                    final BlockPos pos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
-                    context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
-                    context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
-                }
-            }
-        }
-    }
-
-    private static void rollBackTransactions(final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
-        // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
-        // or the events were cancelled), again in reverse order of which they were received.
-        for (final Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-            transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
-            ((IPhaseState) context.state).processCancelledTransaction(context, transaction, transaction.getOriginal());
-        }
-    }
-
-    private static void iterateChangeBlockEvents(final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, final List<ChangeBlockEvent> blockEvents,
-        final ChangeBlockEvent[] mainEvents) {
-        for (final BlockChange blockChange : BlockChange.values()) {
-            if (blockChange == BlockChange.DECAY) { // Decay takes place after.
-                continue;
-            }
-            if (!transactionArrays[blockChange.ordinal()].isEmpty()) {
-                final ChangeBlockEvent event = blockChange.createEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), transactionArrays[blockChange.ordinal()]);
-                mainEvents[blockChange.ordinal()] = event;
-                SpongeCommon.postEvent(event);
-                blockEvents.add(event);
-            }
-        }
-        if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) { // Needs to be placed into iterateChangeBlockEvents
-            final ChangeBlockEvent event = BlockChange.DECAY.createEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), transactionArrays[BlockChange.DECAY.ordinal()]);
-            mainEvents[BlockChange.DECAY.ordinal()] = event;
-            SpongeCommon.postEvent(event);
-            blockEvents.add(event);
-        }
-    }
-
-    static boolean performBlockAdditions(final List<Transaction<BlockSnapshot>> transactions,
-        final PhaseContext<?> phaseContext, final boolean noCancelledTransactions,
-        final ListMultimap<BlockPos, BlockEventData> scheduledEvents,
-        final int currentDepth) {
-        // We have to use a proxy so that our pending changes are notified such that any accessors from block
-        // classes do not fail on getting the incorrect block state from the IBlockAccess
-        boolean hasEvents = false;
-        if (!scheduledEvents.isEmpty()) {
-            hasEvents = true;
-        }
-        if (((IPhaseState) phaseContext.state).hasSpecificBlockProcess(phaseContext)) {
-            // In some states, we need to be taking advantage of processing the transactions in the order in which they
-            // were processed. This means recycling some usage of how transactions are processed, but at the same time
-            // processing the ORDER of them differently (since some notifications or block events can be thrown around
-            // from time to time
-            return phaseContext.getCapturedBlockSupplier().processTransactions(transactions, phaseContext, noCancelledTransactions, scheduledEvents, currentDepth);
-        }
-        for (final Transaction<BlockSnapshot> transaction : transactions) {
-            if (!transaction.isValid()) {
-                continue;
-            }
-            TrackingUtil.performTransactionProcess(transaction, phaseContext, currentDepth);
-        }
-        phaseContext.getCapturedBlockSupplier().clearProxies();
-        return noCancelledTransactions;
+        return true;
     }
 
     /**
@@ -870,39 +643,6 @@ public final class TrackingUtil {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
             SpongeCommonEventFactory.callSpawnEntity(entitiesSpawned, phaseContext);
         }
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Nullable
-    private static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(final PhaseContext<?> context,
-        final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
-        final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent[] mainEvents) {
-        if (!blockEvents.isEmpty()) {
-            final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
-            // We suffix the cause with the extra events, without modifying the cause stack manager to avoid adding extra
-            // contexts or resetting the caches, this allows us to avoid adding extra frames when unnecessary.
-            final Cause currentCause = PhaseTracker.getCauseStackManager().getCurrentCause();
-            final Cause causeToUse;
-            if (((IPhaseState) context.state).shouldProvideModifiers(context)) {
-                final Cause.Builder builder = Cause.builder().from(currentCause);
-                final EventContext.Builder modified = EventContext.builder();
-                modified.from(currentCause.getContext());
-                for (final BlockChange blockChange : BlockChange.values()) {
-                    final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
-                    if (mainEvent != null) {
-                        builder.append(mainEvent);
-                        modified.add((EventContextKey<? super ChangeBlockEvent>) blockChange.getKey(), mainEvent);
-                    }
-                }
-                causeToUse = builder.build(modified.build());
-            } else {
-                causeToUse = currentCause;
-            }
-            final ChangeBlockEvent.Post post = ((IPhaseState) context.state).createChangeBlockPostEvent(context, transactions, causeToUse);
-            SpongeCommon.postEvent(post);
-            return post;
-        }
-        return null;
     }
 
     public static void associateTrackerToTarget(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction, final User user) {
