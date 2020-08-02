@@ -46,8 +46,8 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -58,16 +58,15 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
+import org.spongepowered.common.util.PrettyPrinter;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class InteractionPacketState extends PacketState<InteractionPacketContext> {
 
@@ -161,7 +160,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             frame.addContext(EventContextKeys.USED_ITEM, usedSnapshot);
             frame.addContext(EventContextKeys.USED_HAND, usedHand);
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
-            final boolean hasBlocks = !phaseContext.getCapturedBlockSupplier().isEmpty();
+            final boolean hasBlocks = !phaseContext.getBlockTransactor().isEmpty();
             final List<SpongeBlockSnapshot> capturedBlcoks = phaseContext.getCapturedOriginalBlocksChanged();
             final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.isEmpty()? null : capturedBlcoks.get(0) : null;
             if (hasBlocks) {

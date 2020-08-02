@@ -28,7 +28,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,12 +36,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
 
 @Mixin(Block.class)
 public abstract class BlockMixin_Tracker {
@@ -70,18 +65,6 @@ public abstract class BlockMixin_Tracker {
     private static void tracker$checkMainThreadAndRestoring(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
                                                          final CallbackInfo ci) {
         if (!PhaseTracker.SERVER.onSidedThread() || PhaseTracker.SERVER.getCurrentState().isRestoring()) {
-            ci.cancel();
-        }
-    }
-
-    // TODO - Ask Mumfrey about matching these two methods, both having the same signature/name but one with additional parameters.
-    @Inject(method = "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V", at = @At("HEAD"), cancellable = true)
-    private static void checkBlockDropForTransactions(final BlockState state, final net.minecraft.world.World worldIn, final BlockPos pos, final TileEntity tileEntityIn, final CallbackInfo ci) {
-        if (((WorldBridge) worldIn).bridge$isFake()) {
-            return;
-        }
-        final SpongeProxyBlockAccess proxyAccess = ((TrackedWorldBridge) worldIn).bridge$getProxyAccess();
-        if (proxyAccess.hasProxy() && proxyAccess.isProcessingTransactionWithNextHavingBreak(pos, state)) {
             ci.cancel();
         }
     }

@@ -28,11 +28,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.server.ServerWorld;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
@@ -109,7 +107,12 @@ public final class TileEntityPipeline implements BlockPipeline {
                     (SpongeBlockChangeFlag) BlockChangeFlags.NONE
                 );
                 if (result.resultingState != currentCursor.state) {
-                    currentCursor = new PipelineCursor(result.resultingState, currentCursor.opacity, currentCursor.pos, currentCursor.tileEntity);
+                    currentCursor = new PipelineCursor(
+                        result.resultingState,
+                        currentCursor.opacity,
+                        currentCursor.pos,
+                        currentCursor.tileEntity
+                    );
                 }
                 if (result.hasResult) {
                     return result.resultingState != null;

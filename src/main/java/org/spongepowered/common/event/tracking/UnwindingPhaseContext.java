@@ -25,23 +25,16 @@
 package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.util.PrettyPrinter;
 
+import javax.annotation.Nullable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseContext> {
-
-    @Override
-    public boolean hasCaptures() {
-        return super.hasCaptures() || (this.usesMulti && this.blockSuppliers != null && !this.blockSuppliers.isEmpty());
-    }
 
     @Override
     protected void reset() {
@@ -62,7 +55,6 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
 
     private final IPhaseState<?> unwindingState;
     private final PhaseContext<?> unwindingContext;
-    @Nullable Deque<MultiBlockCaptureSupplier> blockSuppliers;
     @Nullable private Deque<SpongeBlockSnapshot> singleSnapshots;
     final boolean usesMulti;
     final boolean tracksNeighborNotifications;
@@ -85,11 +77,7 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
         // we'll need to switch on to capture such objects. If for example, we do not track tile changes, but we track
         // neighbor notifications, that would be fine, but we cannot require that both are tracked unless specified.
         this.usesMulti = this.allowsBulkBlockCaptures() && !this.isPostingSpecial;
-        if (this.usesMulti) {
-            // 8 is the minimum element size required by the ArrayDeque
-            this.blockSuppliers = new ArrayDeque<>(8);
-            this.blockSuppliers.push(new MultiBlockCaptureSupplier());
-        }
+
     }
 
     @Override
@@ -113,20 +101,6 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
 
     boolean isPostingSpecialProcess() {
         return this.isPostingSpecial;
-    }
-
-    void pushNewCaptureSupplier() {
-        if (!this.usesMulti) {
-            throw new IllegalStateException("This post state is not meant to capture multiple changes with neighbor notifications or tile entity changes!");
-        }
-        this.hasGotten = false;
-    }
-
-    void popBlockSupplier() {
-        if (!this.usesMulti) {
-            throw new IllegalStateException("This post state is not meant to capture multiple changes with neighbor notifications or tile entity changes!");
-        }
-        this.blockSuppliers.pop();
     }
 
     @Override
@@ -163,31 +137,6 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
                 this.singleSnapshot = singleSnapshot;
             }
         }
-    }
-
-    /**
-     * Gets the {@link MultiBlockCaptureSupplier} object from this context. Note that
-     * accessing
-     * @return
-     * @throws IllegalStateException
-     */
-    @Override
-    public MultiBlockCaptureSupplier getCapturedBlockSupplier() throws IllegalStateException {
-        if (!this.usesMulti) {
-            return super.getCapturedBlockSupplier();
-        }
-        if (!this.hasGotten) {
-            // Because we have to tell the context to push a new capture supplier before
-            // we start processing on that capture supplier, we have to use this boolean state
-            // to trigger pushing a new capture supplier and peek at the existing one (the one
-            // at the head of the stack, assuming we're capturing)
-            final MultiBlockCaptureSupplier peek = this.blockSuppliers.peek();
-            this.blockSuppliers.push(new MultiBlockCaptureSupplier());
-            this.hasGotten = true;
-            return peek;
-        }
-        return this.blockSuppliers.peek();
-
     }
 
     @Override

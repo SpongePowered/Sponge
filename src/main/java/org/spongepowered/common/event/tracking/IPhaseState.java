@@ -61,7 +61,7 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.context.BlockTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -813,9 +813,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * place, including but not withstanding, tile entity replacements after the fact.
      * @return
      */
-    default org.spongepowered.common.event.tracking.context.transaction.BlockTransaction.ChangeBlock createTransaction(final C phaseContext,
+    default BlockTransaction.ChangeBlock createTransaction(final C phaseContext,
         final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState, final BlockChangeFlag flags) {
-        final org.spongepowered.common.event.tracking.context.transaction.BlockTransaction.ChangeBlock changeBlock = phaseContext.getBlockTransactor()
+        final BlockTransaction.ChangeBlock changeBlock = phaseContext.getBlockTransactor()
             .logBlockChange(originalBlockSnapshot, newState, flags);
 
         return changeBlock;
@@ -826,13 +826,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default void processCancelledTransaction(final C context, final Transaction<BlockSnapshot> transaction, final BlockSnapshot original) {
-        if (this.hasSpecificBlockProcess(context)) {
-            context.getCapturedBlockSupplier().cancelTransaction(original);
-            ((SpongeBlockSnapshot) original).getServerWorld().ifPresent(worldServer -> {
-                final Chunk chunk = worldServer.getChunkAt(((SpongeBlockSnapshot) original).getBlockPos());
-                // INTERACT WITH CHUNK MANAGER
-            });
-        }
         if (this.tracksBlockSpecificDrops(context)) {
             // Cancel any block drops or harvests for the block change.
             // This prevents unnecessary spawns.
@@ -848,10 +841,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
     default boolean doesCaptureNeighborNotifications(final C context) {
         return false;
-    }
-
-    default void postProcessSpecificBlockChange(final C currentContext, final BlockTransaction.ChangeBlock changeBlock, final int i) {
-
     }
 
     default BlockChange associateBlockChangeWithSnapshot(final C phaseContext, final BlockState newState, final Block newBlock,
