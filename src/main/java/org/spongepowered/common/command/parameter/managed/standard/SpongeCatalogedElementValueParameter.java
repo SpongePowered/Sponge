@@ -95,9 +95,9 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
             final ImmutableList.Builder<String> entries = ImmutableList.builder();
             final Collection<T> catalogTypes = SpongeCommon.getRegistry().getCatalogRegistry().getAllOf(this.catalogType);
             for (final T catalogType : catalogTypes) {
-                this.completions.add(catalogType.getKey().getFormatted());
+                entries.add(catalogType.getKey().getFormatted());
                 if (this.prefixes.contains(catalogType.getKey().getNamespace())) {
-                    this.completions.add(catalogType.getKey().getValue());
+                    entries.add(catalogType.getKey().getValue());
                 }
             }
             this.completions = entries.build();
