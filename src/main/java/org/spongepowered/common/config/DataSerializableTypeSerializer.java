@@ -33,6 +33,7 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslators;
+import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 
 import java.util.function.Predicate;
@@ -50,7 +51,9 @@ public class DataSerializableTypeSerializer implements TypeSerializer<DataSerial
     public static Predicate<TypeToken<DataSerializable>> predicate() {
         // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
         // See https://github.com/SpongePowered/SpongeCommon/issues/1348
-        return x -> TYPE.isSupertypeOf(x) && !CatalogTypeTypeSerializer.TYPE.isSupertypeOf(x);
+        return x -> TYPE.isSupertypeOf(x)
+                && !CatalogTypeTypeSerializer.TYPE.isSupertypeOf(x)
+                && !TypeTokens.TEXT_TOKEN.isSupertypeOf(x);
     }
 
     @Override

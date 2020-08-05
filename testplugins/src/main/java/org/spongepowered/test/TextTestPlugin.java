@@ -24,35 +24,42 @@
  */
 package org.spongepowered.test;
 
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import ninja.leaping.configurate.reference.ValueReference;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.ArgumentParseException;
-import org.spongepowered.api.command.args.CommandArgs;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
 
-import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 @Plugin(id = "text-test", name = "Text Test", description = "Tests text related functions", version = "0.0.0")
 public class TextTestPlugin {
 
+    @Inject
+    private @DefaultConfig(sharedRoot = true) ConfigurationLoader<CommentedConfigurationNode> configLoader;
+    private ValueReference<TextTestConfig> config;
+
     @Listener
-    public void onInit(GameInitializationEvent event) {
+    public void onInit(GameInitializationEvent event) throws IOException, ObjectMappingException {
+        this.config = this.configLoader.loadToReference().referenceTo(TextTestConfig.class);
+        this.config.setAndSave(this.config.get());
 
         Sponge.getCommandManager().register(this,
                 CommandSpec.builder()
@@ -73,6 +80,20 @@ public class TextTestPlugin {
                             return CommandResult.success();
                         }).build(),
                 "test-text-message");
+    }
+
+    @Listener
+    public void playerConnect(ClientConnectionEvent.Join event) {
+        final Text message = this.config.get().joinMessage;
+        if (message != null) {
+            event.getTargetEntity().sendMessage(message);
+        }
+    }
+
+    @ConfigSerializable
+    public static class TextTestConfig {
+        @Setting
+        private Text joinMessage = LiteralText.builder("Welcome to the test plugins!").color(TextColors.DARK_AQUA).build();
     }
 
 }
