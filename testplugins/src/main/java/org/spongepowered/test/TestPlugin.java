@@ -196,7 +196,7 @@ public final class TestPlugin {
                                 .setLimit(1)
                                 .includeSelf()
                                 .build()
-                                .select(x.getCommandCause());
+                                .select(x.getCause());
                         for (final Entity entity : collection) {
                             x.sendMessage(TextComponent.of(entity.toString()));
                         }

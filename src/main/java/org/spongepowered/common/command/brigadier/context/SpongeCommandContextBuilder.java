@@ -43,7 +43,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
@@ -274,16 +273,11 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
 
     @Override
     @NonNull
-    public CommandCause getCommandCause() {
+    public CommandCause getCause() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
-            return this.transaction.peek().getCopyBuilder().getCommandCause();
+            return this.transaction.peek().getCopyBuilder().getCause();
         }
         return (CommandCause) this.getSource();
-    }
-
-    @NonNull
-    public Cause getCause() {
-        return this.getCommandCause().getCause();
     }
 
     @Override
@@ -351,7 +345,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
 
     @Override
     public void sendMessage(Component message) {
-        this.getCommandCause().sendMessage(message);
+        this.getCause().sendMessage(message);
     }
 
     Collection<?> getFrom(final SpongeParameterKey<?> key) {
@@ -466,7 +460,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
 
     @Override
     public Subject getSubject() {
-        return this.getCommandCause().getSubject();
+        return this.getCause().getSubject();
     }
 
 }

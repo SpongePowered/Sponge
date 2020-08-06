@@ -58,7 +58,7 @@ public final class SpongeDefaultValueParser<T> implements ValueParser<T> {
             throws ArgumentParseException {
         final T result;
         try {
-            result = this.defaultFunction.apply(context.getCommandCause());
+            result = this.defaultFunction.apply(context.getCause());
         } catch (final Exception ex) {
             throw ((SpongeStringReader) reader)
                     .createException(TextComponent.of("An exception was thrown obtaining a default value for " + parameterKey.key()), ex);

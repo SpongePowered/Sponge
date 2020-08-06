@@ -70,7 +70,7 @@ public final class SpongeCallback {
     }
 
     public CommandResult commandCallback(@NonNull final CommandContext context) throws CommandException {
-        context.requireOne(this.executorKey).accept(context.getCommandCause());
+        context.requireOne(this.executorKey).accept(context.getCause());
         return CommandResult.success();
     }
 

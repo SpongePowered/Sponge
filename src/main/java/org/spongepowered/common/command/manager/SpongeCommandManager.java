@@ -162,7 +162,7 @@ public final class SpongeCommandManager implements CommandManager {
                     (org.spongepowered.api.command.parameter.CommandContext) context;
             final String[] command1 = context.getInput().split(" ", 2);
             try {
-                return registrar.process(spongeContext.getCommandCause(), mapping, command1[0], command1.length == 2 ? command1[1] : "").getResult();
+                return registrar.process(spongeContext.getCause(), mapping, command1[0], command1.length == 2 ? command1[1] : "").getResult();
             } catch (final CommandException e) {
                 throw new SimpleCommandExceptionType(SpongeAdventure.asVanilla(e.getText())).create();
             }

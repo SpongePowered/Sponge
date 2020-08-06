@@ -86,7 +86,7 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
 
     @Override
     @NonNull
-    public CommandCause getCommandCause() {
+    public CommandCause getCause() {
         return (CommandCause) this.getSource();
     }
 
@@ -150,7 +150,7 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
 
     @Override
     public void sendMessage(@NonNull final Component message) {
-        this.getCommandCause().sendMessage(message);
+        this.getCause().sendMessage(message);
     }
 
     @Override
@@ -188,7 +188,7 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
 
     @Override
     public Subject getSubject() {
-        return this.getCommandCause().getSubject();
+        return this.getCause().getSubject();
     }
 
 }

@@ -33,20 +33,17 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
-import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -59,7 +56,6 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.io.File;
 import java.net.URL;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -170,7 +166,7 @@ public class SpongeCommand {
         final PluginContainer apiPlugin = Launcher.getInstance().getApiPlugin();
         final PluginContainer minecraftPlugin = Launcher.getInstance().getMinecraftPlugin();
 
-        context.getCommandCause().sendMessage(TextComponent.builder().append(
+        context.getCause().sendMessage(TextComponent.builder().append(
                 TextComponent.of("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(TextComponent.space()),
                 TextComponent.of("Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"),
                 TextComponent.newline(),
@@ -310,7 +306,7 @@ public class SpongeCommand {
                                 context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            Timings.generateReport(context.getCommandCause().getAudience());
+                            Timings.generateReport(context.getCause().getAudience());
                             return CommandResult.success();
                         })
                         .build(), "report", "paste")
