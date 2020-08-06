@@ -28,7 +28,6 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -43,7 +42,7 @@ public class SpongeGameProfileBuilder extends AbstractDataBuilder<GameProfile> {
     @Override
     protected Optional<GameProfile> buildContent(DataView container) throws InvalidDataException {
         if (!container.contains(Constants.Entity.Player.UUID)) {
-            return Optional.of(SpongeRepresentedPlayerData.NULL_PROFILE);
+            return Optional.empty();
         }
         UUID uuid = this.getUUIDByString(container.getString(Constants.Entity.Player.UUID).get());
         if (!container.contains(Constants.Entity.Player.NAME)) {

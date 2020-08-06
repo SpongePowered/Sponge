@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.builder.item;
 
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
@@ -50,14 +51,14 @@ public class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<Firewor
     protected Optional<FireworkEffect> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(Constants.Item.Fireworks.FIREWORK_SHAPE, Constants.Item.Fireworks.FIREWORK_COLORS, Constants.Item.Fireworks.FIREWORK_FADE_COLORS,
                 Constants.Item.Fireworks.FIREWORK_FLICKERS, Constants.Item.Fireworks.FIREWORK_TRAILS)) {
-            final String fireworkShapeId = DataUtil.getData(container, Constants.Item.Fireworks.FIREWORK_SHAPE, String.class);
-            final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getType(FireworkShape.class, fireworkShapeId);
+            final ResourceKey fireworkShapeId = container.getKey(Constants.Item.Fireworks.FIREWORK_SHAPE).get();
+            final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getCatalogRegistry().get(FireworkShape.class, fireworkShapeId);
             if (!shapeOptional.isPresent()) {
                 throw new InvalidDataException("Could not find the FireworkShape for the provided id: " + fireworkShapeId);
             }
             final FireworkShape shape = shapeOptional.get();
-            final boolean trails = DataUtil.getData(container, Constants.Item.Fireworks.FIREWORK_TRAILS, Boolean.class);
-            final boolean flickers = DataUtil.getData(container, Constants.Item.Fireworks.FIREWORK_FLICKERS, Boolean.class);
+            final boolean trails = container.getBoolean(Constants.Item.Fireworks.FIREWORK_TRAILS).get();
+            final boolean flickers = container.getBoolean(Constants.Item.Fireworks.FIREWORK_FLICKERS).get();
             final List<Color> colors = container.getSerializableList(Constants.Item.Fireworks.FIREWORK_COLORS, Color.class).get();
             final List<Color> fadeColors = container.getSerializableList(Constants.Item.Fireworks.FIREWORK_FADE_COLORS, Color.class).get();
             return Optional.of(FireworkEffect.builder()
