@@ -94,11 +94,9 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
         ServerWorld world;
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-            final String rl = resourceLocation.toString();
-            world = SpongeWorldPropertiesValueParameter.getWorldProperties(resourceLocation)
-                    .flatMap(x -> SpongeCommon.getGame().getServer().getWorldManager().getWorld(x.getKey()))
+            world = SpongeCommon.getGame().getServer().getWorldManager().getWorld(resourceLocation)
                     .orElseThrow(() -> reader.createException(
-                            TextComponent.of("Could not get world with name \"" + rl + "\"")));
+                            TextComponent.of("Could not get world with key \"" + resourceLocation.toString() + "\"")));
         } catch (final ArgumentParseException e) {
             final Optional<ServerLocation> location = context.getCause().getLocation();
             if (location.isPresent()) {
