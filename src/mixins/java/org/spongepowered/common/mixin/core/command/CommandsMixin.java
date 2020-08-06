@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
@@ -161,13 +162,16 @@ public abstract class CommandsMixin {
     ) {
         if (SpongeNodePermissionCache.canUse(
                 rootCommandNode instanceof RootCommandNode, this.shadow$getDispatcher(), commandNode, sourceButTyped)) {
-            final CommandNode<ISuggestionProvider> providerCommandNode = commandNodeToSuggestionNode.get(commandNode);
-            if (providerCommandNode != null) {
-                rootSuggestion.addChild(providerCommandNode);
+
+            if (commandNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) commandNode).isComplex()) {
+                final CommandNode<ISuggestionProvider> finalCommandNode = ((SpongeArgumentCommandNode<?>) commandNode).getComplexSuggestions(
+                        rootSuggestion,
+                        commandNodeToSuggestionNode
+                );
                 if (!this.impl$getChildrenFromNode(commandNode).isEmpty()) {
-                    this.shadow$commandSourceNodesToSuggestionNodes(commandNode, providerCommandNode, sourceButTyped, commandNodeToSuggestionNode);
-                    return false; // short circuit the loop as we've done all we need to do here.
+                    this.shadow$commandSourceNodesToSuggestionNodes(commandNode, finalCommandNode, sourceButTyped, commandNodeToSuggestionNode);
                 }
+                return false; // short circuit the loop as we've done all we need to do here.
             }
             return true;
         }

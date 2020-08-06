@@ -30,6 +30,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -95,10 +96,7 @@ public abstract class SpongeCommandRegistrar<T extends Command> implements Comma
                     this.getDispatcher().execute(
                             this.getDispatcher().parse(this.createCommandString(command, arguments), (CommandSource) cause))).build();
         } catch (final CommandSyntaxException e) {
-            // We'll unwrap later.
-            // TODO: Text
-            // throw new CommandException(Text.of(e.getMessage()), e);
-            throw new RuntimeException(e.getMessage(), e);
+            throw new CommandException(TextComponent.of(e.getMessage()), e);
         }
     }
 

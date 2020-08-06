@@ -59,6 +59,7 @@ import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -155,6 +156,7 @@ public final class TestPlugin {
 
         final Parameter.Key<String> testKey = Parameter.key("testKey", TypeToken.of(String.class));
         final Parameter.Key<Component> requiredKey = Parameter.key("requiredKey", TypeToken.of(Component.class));
+        final Parameter.Key<ServerLocation> serverLocationKey = Parameter.key("locationKey", TypeToken.of(ServerLocation.class));
         event.register(
                 this.plugin,
                 Command.builder()
@@ -204,6 +206,17 @@ public final class TestPlugin {
                     })
                 .build(),
                 "testselector"
+        );
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .parameter(Parameter.location().setKey(serverLocationKey).build())
+                        .setExecutor(x -> {
+                            x.sendMessage(TextComponent.of(x.requireOne(serverLocationKey).toString()));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "testlocation"
         );
 
     }

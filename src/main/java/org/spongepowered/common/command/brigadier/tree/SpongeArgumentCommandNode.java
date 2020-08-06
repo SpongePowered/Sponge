@@ -47,6 +47,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.util.Constants;
 
@@ -82,6 +83,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
 
     private final Parameter.Key<? super T> key;
     private final ArgumentParser<T> parser;
+    private final boolean isComplexSuggestions;
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
@@ -106,7 +108,27 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 forks,
                 SpongeArgumentCommandNode.createSuggestionProvider(valueCompleter));
         this.parser = parser;
+        this.isComplexSuggestions = this.parser instanceof ComplexSuggestionNodeProvider;
         this.key = key;
+    }
+
+    public final boolean isComplex() {
+        return this.isComplexSuggestions;
+    }
+
+    public final CommandNode<ISuggestionProvider> getComplexSuggestions(
+            final CommandNode<ISuggestionProvider> rootSuggestionNode,
+            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode) {
+        if (!this.isComplexSuggestions) {
+            throw new IllegalStateException("The parser is not a ComplexSuggestionNodeParser");
+        }
+
+        final ComplexSuggestionNodeProvider provider = (ComplexSuggestionNodeProvider) this.parser;
+        return provider.createSuggestions(
+                rootSuggestionNode,
+                this.key.key(),
+                this.getCommand() != null,
+                firstNode -> commandNodeToSuggestionNode.put(this, firstNode));
     }
 
     @Override
