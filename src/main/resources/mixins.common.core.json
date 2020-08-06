@@ -548,6 +548,7 @@
         "world.storage.SaveHandlerAccessor",
         "world.storage.SaveHandlerMixin",
         "world.storage.ThreadedFileIOBaseMixin",
+        "world.storage.WorldInfoAccessor",
         "world.storage.WorldInfoMixin"
     ],
     "server": [
