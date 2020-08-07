@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.accessor.server;
 
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
@@ -34,6 +36,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
+
+    @Accessor("sessionService") MinecraftSessionService accessor$getSessionService();
+
+    @Accessor("profileRepo") GameProfileRepository accessor$getProfileRepo();
 
     @Accessor("profileCache") PlayerProfileCache accessor$getProfileCache();
 
