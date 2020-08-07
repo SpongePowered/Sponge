@@ -102,7 +102,6 @@ public class SpongePaginationList implements PaginationList {
     @Override
     public void sendTo(final Audience receiver, int page) {
         checkNotNull(receiver, "The message receiver cannot be null!");
-        this.service.registerCommandOnce();
 
         final PaginationCalculator calculator = new PaginationCalculator(this.linesPerPage);
         Iterable<Map.Entry<Component, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {

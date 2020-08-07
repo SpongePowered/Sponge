@@ -51,6 +51,7 @@ import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
@@ -77,6 +78,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -517,6 +519,15 @@ public final class SpongeCommandManager implements CommandManager {
             );
         } catch (final CommandFailedRegistrationException ex) {
             throw new RuntimeException("Failed to create root Sponge command!", ex);
+        }
+        try {
+            SpongeParameterizedCommandRegistrar.INSTANCE.register(
+                    Launcher.getInstance().getCommonPlugin(),
+                    ((SpongePaginationService) Sponge.getServiceProvider().paginationService()).createPaginationCommand(),
+                    "pagination", "page"
+            );
+        } catch (final CommandFailedRegistrationException ex) {
+            throw new RuntimeException("Failed to create pagination command!", ex);
         }
         final Set<TypeToken<?>> usedTokens = new HashSet<>();
         for (final CommandRegistrar<?> registrar : this.game.getRegistry().getCatalogRegistry().getAllOf(CommandRegistrar.class)) {

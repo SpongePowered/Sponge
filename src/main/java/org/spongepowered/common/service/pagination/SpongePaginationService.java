@@ -49,8 +49,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.util.Nameable;
-import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
-import org.spongepowered.common.launch.Launcher;
 
 import java.util.List;
 import java.util.Map;
@@ -60,7 +58,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
@@ -102,19 +99,6 @@ public final class SpongePaginationService implements PaginationService {
     private final Cache<UUID, SourcePaginations> playerActivePaginations = Caffeine.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES)
             .build();
 
-    private final AtomicBoolean commandRegistered = new AtomicBoolean();
-
-    void registerCommandOnce() {
-        if (this.commandRegistered.compareAndSet(false, true)) {
-            SpongeParameterizedCommandRegistrar.INSTANCE.register(
-                    Launcher.getInstance().getCommonPlugin(),
-                    this.buildPaginationCommand(),
-                    "pagination", "page"
-            );
-        }
-
-    }
-
     @Override
     public PaginationList.Builder builder() {
         return new SpongePaginationBuilder(this);
@@ -147,7 +131,7 @@ public final class SpongePaginationService implements PaginationService {
         return this.playerActivePaginations.get(source.getUniqueId(), k -> create ? new SourcePaginations() : null);
     }
 
-    private Command.Parameterized buildPaginationCommand() {
+    public Command.Parameterized createPaginationCommand() {
         Parameter.Value<ActivePagination> paginationIdParameter = Parameter.builder(ActivePagination.class)
                 .parser(new ActivePaginationParser())
                 .setSuggestions(new ActivePaginationCompleter())
