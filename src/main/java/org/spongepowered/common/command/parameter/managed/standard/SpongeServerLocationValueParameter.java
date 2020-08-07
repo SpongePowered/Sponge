@@ -27,12 +27,8 @@ package org.spongepowered.common.command.parameter.managed.standard;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
@@ -55,9 +51,10 @@ import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentPars
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.util.Constants;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -127,7 +124,9 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
     @Override
     public CommandNode<ISuggestionProvider> createSuggestions(final CommandNode<ISuggestionProvider> rootNode, final String key,
-            final boolean isTerminal, final Consumer<CommandNode<ISuggestionProvider>> mapInsertionConsumer) {
+            final boolean isTerminal,
+            final Consumer<List<CommandNode<ISuggestionProvider>>> firstNodes,
+            final Consumer<CommandNode<ISuggestionProvider>> redirectionNodes) {
 
         final RequiredArgumentBuilder<ISuggestionProvider, ResourceLocation> firstNode =
                 RequiredArgumentBuilder.argument(key, Constants.Command.RESOURCE_LOCATION_TYPE);
@@ -143,9 +142,13 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
         final CommandNode<ISuggestionProvider> second = secondNode.build();
         firstNode.then(second);
         final CommandNode<ISuggestionProvider> first = firstNode.build();
-        mapInsertionConsumer.accept(second);
+        redirectionNodes.accept(second);
         rootNode.addChild(first);
         rootNode.addChild(second);
+        final List<CommandNode<ISuggestionProvider>> nodesToAttach = new ArrayList<>();
+        nodesToAttach.add(first);
+        nodesToAttach.add(second);
+        firstNodes.accept(nodesToAttach);
         return second;
     }
 

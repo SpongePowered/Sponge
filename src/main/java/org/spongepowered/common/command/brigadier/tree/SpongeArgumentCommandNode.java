@@ -119,7 +119,8 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
 
     public final CommandNode<ISuggestionProvider> getComplexSuggestions(
             final CommandNode<ISuggestionProvider> rootSuggestionNode,
-            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode) {
+            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode,
+            final Map<CommandNode<CommandSource>, List<CommandNode<ISuggestionProvider>>> commandNodeListMap) {
         if (!this.isComplexSuggestions) {
             throw new IllegalStateException("The parser is not a ComplexSuggestionNodeParser");
         }
@@ -129,6 +130,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 rootSuggestionNode,
                 this.key.key(),
                 this.getCommand() != null,
+                nodeList -> commandNodeListMap.put(this, nodeList),
                 firstNode -> commandNodeToSuggestionNode.put(this, firstNode));
     }
 

@@ -33,6 +33,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.impl.AdvancementCommand;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -53,9 +54,12 @@ import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 @Mixin(Commands.class)
 public abstract class CommandsMixin {
@@ -69,6 +73,8 @@ public abstract class CommandsMixin {
     }
 
     private CauseStackManager.StackFrame impl$initFrame = null;
+    private final WeakHashMap<ServerPlayerEntity, Map<CommandNode<CommandSource>, List<CommandNode<ISuggestionProvider>>>> impl$playerNodeCache =
+            new WeakHashMap<>();
 
     // We augment the CommandDispatcher with our own methods using a wrapper, so we need to make sure it's replaced here.
     @Redirect(method = "<init>", at = @At(
@@ -139,6 +145,13 @@ public abstract class CommandsMixin {
         // This may have been done in impl$createArgumentBuilder
         if (!map.containsKey(key)) {
             // done here because this check is applicable
+            final ServerPlayerEntity e = (ServerPlayerEntity) source.getEntity();
+            final Map<CommandNode<CommandSource>,List<CommandNode<ISuggestionProvider>>> playerNodes = this.impl$playerNodeCache.get(e);
+            if (!playerNodes.containsKey((CommandNode<CommandSource>) key)) {
+                final List<CommandNode<ISuggestionProvider>> children = new ArrayList<>();
+                children.add((CommandNode<ISuggestionProvider>) value);
+                playerNodes.put((CommandNode<CommandSource>) key, children);
+            }
             rootSuggestion.addChild((CommandNode<ISuggestionProvider>) value);
             return map.put(key, value);
         }
@@ -166,17 +179,32 @@ public abstract class CommandsMixin {
         if (SpongeNodePermissionCache.canUse(
                 rootCommandNode instanceof RootCommandNode, this.shadow$getDispatcher(), commandNode, sourceButTyped)) {
 
+            boolean shouldContinue = true;
             if (commandNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) commandNode).isComplex()) {
+                shouldContinue = false;
+                final ServerPlayerEntity e = (ServerPlayerEntity) sourceButTyped.getEntity();
                 final CommandNode<ISuggestionProvider> finalCommandNode = ((SpongeArgumentCommandNode<?>) commandNode).getComplexSuggestions(
                         rootSuggestion,
-                        commandNodeToSuggestionNode
+                        commandNodeToSuggestionNode,
+                        this.impl$playerNodeCache.get(e)
                 );
                 if (!this.impl$getChildrenFromNode(commandNode).isEmpty()) {
                     this.shadow$commandSourceNodesToSuggestionNodes(commandNode, finalCommandNode, sourceButTyped, commandNodeToSuggestionNode);
                 }
-                return false; // short circuit the loop as we've done all we need to do here.
             }
-            return true;
+
+            if (shouldContinue) {
+                // If we've already created the node, then just attach what we already have.
+                final ServerPlayerEntity e = (ServerPlayerEntity) sourceButTyped.getEntity();
+                final List<CommandNode<ISuggestionProvider>> suggestionProviderCommandNode = this.impl$playerNodeCache.get(e).get(commandNode);
+                if (suggestionProviderCommandNode != null) {
+                    shouldContinue = false;
+                    for (final CommandNode<ISuggestionProvider> node : suggestionProviderCommandNode) {
+                        rootSuggestion.addChild(node);
+                    }
+                }
+            }
+            return shouldContinue;
         }
         return false;
     }
@@ -188,8 +216,14 @@ public abstract class CommandsMixin {
             final CommandNode<CommandSource> p_197052_1_,
             final CommandNode<ISuggestionProvider> p_197052_2_,
             final CommandSource p_197052_3_,
-            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> p_197052_4_) {
-        this.shadow$commandSourceNodesToSuggestionNodes(p_197052_1_, p_197052_2_, p_197052_3_, p_197052_4_);
+            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> p_197052_4_,
+            final ServerPlayerEntity playerEntity) {
+        try {
+            this.impl$playerNodeCache.put(playerEntity, new HashMap<>());
+            this.shadow$commandSourceNodesToSuggestionNodes(p_197052_1_, p_197052_2_, p_197052_3_, p_197052_4_);
+        } finally {
+            this.impl$playerNodeCache.remove(playerEntity);
+        }
         for (final CommandNode<ISuggestionProvider> node :
                 ((SpongeCommandManager) Sponge.getGame().getCommandManager()).getNonBrigadierSuggestions((CommandCause) p_197052_3_)) {
             p_197052_2_.addChild(node);
