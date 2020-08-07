@@ -74,7 +74,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             final String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
             final List<String> suggestions = completer.complete((org.spongepowered.api.command.parameter.CommandContext) context);
             for (final String suggestion : suggestions) {
-                if (suggestion.toLowerCase(Locale.ROOT).startsWith(remaining)) {
+                if (suggestion.toLowerCase(Locale.ROOT).contains(remaining)) {
                     builder.suggest(suggestion);
                 }
             }
