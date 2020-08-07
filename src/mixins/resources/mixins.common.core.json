@@ -22,7 +22,7 @@
         "entity.player.PlayerEntityMixin",
         "entity.player.ServerPlayerEntityMixin",
         "item.ItemStackMixin",
-        "network.PacketThreadUtilMixin",
+//        "network.PacketThreadUtilMixin",
         "network.handshake.ServerHandshakeNetHandlerMixin",
         "network.login.ServerLoginNetHandler_2Mixin",
         "network.login.ServerLoginNetHandlerMixin",

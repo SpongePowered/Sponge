@@ -35,7 +35,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -65,7 +64,7 @@ public class PlayerInteractionManagerMixin_Tracker {
         final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
         try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(playerIn);
-            frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld)(worldIn)).createSnapshot(pos));
+// TODO BlockSnapshots are broken atm.            frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld)(worldIn)).createSnapshot(pos));
             ((ContainerBridge) playerIn.openContainer).bridge$setOpenLocation(location);
             if (!InventoryEventFactory.callInteractContainerOpenEvent(((ServerPlayerEntity) playerIn))) {
                 cir.setReturnValue(ActionResultType.PASS); // Container Open was cancelled
@@ -85,7 +84,7 @@ public class PlayerInteractionManagerMixin_Tracker {
             final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
             try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld) (worldIn)).createSnapshot(pos));
+// TODO BlockSnapshots are broken atm.              frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld) (worldIn)).createSnapshot(pos));
                 ((ContainerBridge) player.openContainer).bridge$setOpenLocation(location);
                 if (!InventoryEventFactory.callInteractContainerOpenEvent((ServerPlayerEntity) player)) {
                     return false;
