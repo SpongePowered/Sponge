@@ -35,6 +35,7 @@ import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParse
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -46,24 +47,29 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
     private final Supplier<? extends Collection<String>> choices;
     private final Function<String, ? extends T> results;
     private final boolean showInUsage;
+    private final boolean forceLowercase;
 
     public SpongeChoicesValueParameter(
             final Map<String, Supplier<? extends T>> choices,
-            final boolean showInUsage) {
+            final boolean showInUsage,
+            final boolean forceLowercase) {
         this(
                 choices::keySet,
                 x -> choices.get(x).get(),
-                showInUsage
+                showInUsage,
+                forceLowercase
         );
     }
 
     public SpongeChoicesValueParameter(
             final Supplier<? extends Collection<String>> choices,
             final Function<String, ? extends T> results,
-            final boolean showInUsage) {
+            final boolean showInUsage,
+            final boolean forceLowercase) {
         this.choices = choices;
         this.results = results;
         this.showInUsage = showInUsage;
+        this.forceLowercase = forceLowercase;
     }
 
     @Override
@@ -78,7 +84,13 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
             final Parameter.@NonNull Key<? super T> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
-        final String entry = reader.parseString();
+        final String read = reader.parseString();
+        final String entry;
+        if (this.forceLowercase) {
+            entry = read.toLowerCase(Locale.ROOT);
+        } else {
+            entry = read;
+        }
         if (this.choices.get().contains(entry)) {
             final T result = this.results.apply(entry);
             if (result != null) {

@@ -193,11 +193,30 @@ public final class CommandTestPlugin {
                         .build(),
                 "testcatalogcompletion"
         );
+
+        final Parameter.Key<TestEnum> enumParameterKey = Parameter.key("enum", TypeToken.of(TestEnum.class));
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .parameter(Parameter.enumValue(TestEnum.class).setKey(enumParameterKey).build())
+                        .setExecutor(x -> {
+                            x.sendMessage(TextComponent.of(x.requireOne(enumParameterKey).name()));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "testenum"
+        );
     }
 
     @Listener
     public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
         event.register(this.plugin, new RawCommandTest(), "rawcommandtest");
+    }
+
+    public enum TestEnum {
+        ONE,
+        TWO,
+        THREE
     }
 
 }

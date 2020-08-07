@@ -58,7 +58,7 @@ public final class SpongeVariableValueParameterBuilderFactory implements Variabl
         for (final T e :  enumClass.getEnumConstants()) {
             choices.put(e.name().toLowerCase(), () -> e);
         }
-        return new SpongeChoicesValueParameter<>(choices.build(), true);
+        return new SpongeChoicesValueParameter<>(choices.build(), true, true);
     }
 
     @Override

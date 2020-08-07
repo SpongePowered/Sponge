@@ -61,7 +61,7 @@ public final class SpongeStaticChoicesBuilder<T> implements VariableValueParamet
     public ValueParameter<T> build() {
         Preconditions.checkState(!this.choices.isEmpty(), "There must be at least one choice!");
         final ImmutableMap<String, Supplier<? extends T>> immutableChoices = ImmutableMap.copyOf(this.choices);
-        return new SpongeChoicesValueParameter<>(immutableChoices, this.showInUsage);
+        return new SpongeChoicesValueParameter<>(immutableChoices, this.showInUsage, false);
     }
 
     @Override
