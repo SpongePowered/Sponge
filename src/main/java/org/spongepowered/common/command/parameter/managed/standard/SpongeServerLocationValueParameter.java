@@ -66,7 +66,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
     private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("location");
     private static final Vec3Argument VEC_3_ARGUMENT = Vec3Argument.vec3(false);
-    private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("^\\s*(-)?[0-9]");
+    private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("^\\s*((-)?[0-9]|~|\\^)");
 
     @Override
     @NonNull

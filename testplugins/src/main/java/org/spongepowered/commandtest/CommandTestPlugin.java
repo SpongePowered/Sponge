@@ -35,6 +35,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorTypes;
 import org.spongepowered.api.entity.Entity;
@@ -161,16 +162,36 @@ public final class CommandTestPlugin {
         );
 
         final Parameter.Key<ServerLocation> serverLocationKey = Parameter.key("serverLocation", TypeToken.of(ServerLocation.class));
+        final Parameter.Value<ServerLocation> serverLocationParmeter = Parameter.location().setKey(serverLocationKey).build();
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(Parameter.location().setKey(serverLocationKey).build())
+                        .parameter(serverLocationParmeter)
                         .setExecutor(x -> {
                             x.sendMessage(TextComponent.of(x.requireOne(serverLocationKey).toString()));
                             return CommandResult.success();
                         })
                         .build(),
                 "testlocation"
+        );
+
+        final Parameter.Key<CatalogedValueParameter<?>> commandParameterKey =
+                Parameter.key("valueParameter", new TypeToken<CatalogedValueParameter<?>>() {});
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .parameter(serverLocationParmeter)
+                        .parameter(
+                                Parameter.catalogedElement((Class<CatalogedValueParameter<?>>) (Class) CatalogedValueParameter.class)
+                                        .setKey(commandParameterKey)
+                                        .build())
+                        .setExecutor(x -> {
+                            x.sendMessage(TextComponent.of(x.requireOne(serverLocationKey).toString()));
+                            x.sendMessage(TextComponent.of(x.requireOne(commandParameterKey).getKey().toString()));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "testcatalogcompletion"
         );
     }
 
