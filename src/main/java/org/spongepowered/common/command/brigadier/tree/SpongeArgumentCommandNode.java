@@ -53,6 +53,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -71,12 +72,12 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
 
         return (context, builder) -> {
             final String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
-            completer.complete((org.spongepowered.api.command.parameter.CommandContext) context)
-                    .forEach(suggestion -> {
-                        if (suggestion.toLowerCase(Locale.ROOT).startsWith(remaining)) {
-                            builder.suggest(suggestion);
-                        }
-                    });
+            final List<String> suggestions = completer.complete((org.spongepowered.api.command.parameter.CommandContext) context);
+            for (final String suggestion : suggestions) {
+                if (suggestion.toLowerCase(Locale.ROOT).startsWith(remaining)) {
+                    builder.suggest(suggestion);
+                }
+            }
             return builder.buildFuture();
         };
     }
