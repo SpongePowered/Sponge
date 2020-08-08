@@ -145,11 +145,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean tracksTileEntityChanges(final TileEntityTickContext currentContext) {
-        return this.doesBulkBlockCapture(currentContext);
-    }
-
-    @Override
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final TileEntityTickContext context) {
         context.applyNotifierIfAvailable(explosionContext::notifier);
         context.applyOwnerIfAvailable(explosionContext::creator);
@@ -233,8 +228,4 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         return context.allowsBlockEvents();
     }
 
-    @Override
-    public boolean hasSpecificBlockProcess(final TileEntityTickContext context) {
-        return true;
-    }
 }

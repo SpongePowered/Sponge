@@ -82,11 +82,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                 .addCaptures();
     }
 
-    @Override
-    public boolean tracksTileEntityChanges(final BlockTickContext currentContext) {
-        return false;
-    }
-
 
     @Override
     public boolean shouldProvideModifiers(final BlockTickContext phaseContext) {
@@ -128,11 +123,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
         return context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
-    }
-
-    @Override
-    public boolean hasSpecificBlockProcess(final BlockTickContext context) {
-        return true;
     }
 
     @Override

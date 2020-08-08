@@ -24,14 +24,11 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -99,26 +96,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         return true;
     }
 
-    @Override
-    public boolean hasSpecificBlockProcess(final UnwindingPhaseContext context) {
-        return !context.isPostingSpecialProcess();
-    }
 
-    @Override
-    public boolean tracksTileEntityChanges(final UnwindingPhaseContext context) {
-        return context.allowsBulkBlockCaptures() && !context.isPostingSpecialProcess() && context.usesMulti && context.tracksTiles;
-    }
-
-    @Override
-    public boolean doesCaptureNeighborNotifications(final UnwindingPhaseContext context) {
-        return context.allowsBulkBlockCaptures() && !context.isPostingSpecialProcess() && context.usesMulti && context.tracksNeighborNotifications;
-    }
-
-    @Override
-    public boolean getShouldCancelAllTransactions(final UnwindingPhaseContext context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-                                                  final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
-        return context.allowsBulkBlockCaptures() && context.isPostingSpecialProcess() && context.getUnwindingState().getShouldCancelAllTransactions(context.getUnwindingContext(), blockEvents, postEvent, scheduledEvents, noCancelledTransactions);
-    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -190,9 +168,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     @Override
     public void performPostBlockNotificationsAndNeighborUpdates(final UnwindingPhaseContext context,
                                                                 final BlockState newState, final SpongeBlockChangeFlag changeFlag, final int depth) {
-        if (context.isPostingSpecialProcess()) {
-            return; // it will keep on going internally.
-        }
+
         if (PhasePrinter.checkMaxBlockProcessingDepth(this, context, depth)) {
             return;
         }
@@ -202,7 +178,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     @Override
     public boolean doesBulkBlockCapture(final UnwindingPhaseContext context) {
-        return !context.isPostingSpecialProcess() && context.allowsBulkBlockCaptures();
+        return context.allowsBulkBlockCaptures();
     }
 
     /**
