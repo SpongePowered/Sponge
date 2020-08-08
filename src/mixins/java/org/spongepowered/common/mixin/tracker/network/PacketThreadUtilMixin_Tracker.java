@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network;
+package org.spongepowered.common.mixin.tracker.network;
 
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.IPacket;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
 @Mixin(PacketThreadUtil.class)
-public abstract class PacketThreadUtilMixin {
+public abstract class PacketThreadUtilMixin_Tracker {
 
     @Redirect(method = "*",
         at = @At(value = "INVOKE",
@@ -41,7 +41,7 @@ public abstract class PacketThreadUtilMixin {
         expect = 1,
         require = 1
     )
-    private static void impl$redirectToPhaseTracker(final IPacket<?> packetIn, final INetHandler netHandler) {
+    private static void tracker$redirectProcessPacket(final IPacket<?> packetIn, final INetHandler netHandler) {
         PacketPhaseUtil.onProcessPacket(packetIn, netHandler);
     }
 }
