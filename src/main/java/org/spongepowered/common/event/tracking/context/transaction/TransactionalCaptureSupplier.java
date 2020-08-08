@@ -245,7 +245,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final BlockTransaction.ChangeBlock changeBlock = new BlockTransaction.ChangeBlock(
             originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags
         );
-        this.logTransaction(changeBlock);
+        if (this.tail != null && this.effect != null) {
+            this.tail.addEffect(this.effect);
+            this.effect.addChild(changeBlock);
+        } else {
+            this.logTransaction(changeBlock);
+        }
         return changeBlock;
     }
 
@@ -258,6 +263,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (newRecorded) {
                 return true;
             }
+            this.tail.addEffect(this.effect);
             this.effect.addChild(this.createTileAdditionTransaction(tileEntity, worldSupplier));
         } else {
             this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier));
@@ -274,6 +280,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (newRecorded) {
                 return true;
             }
+            this.tail.addEffect(this.effect);
             this.effect.addChild(this.createTileRemovalTransaction(tileentity, worldSupplier));
         } else {
             this.logTransaction(this.createTileRemovalTransaction(tileentity, worldSupplier));
@@ -290,6 +297,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (newRecorded) {
                 return true;
             }
+            this.tail.addEffect(this.effect);
             this.effect.addChild(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
         } else {
             this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
