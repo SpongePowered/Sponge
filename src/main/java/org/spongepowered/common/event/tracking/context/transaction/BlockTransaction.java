@@ -29,7 +29,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.ChunkSection;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -60,32 +62,23 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
 
-
+@DefaultQualifier(NonNull.class)
 public abstract class BlockTransaction {
 
-    final int snapshotIndex;
-    boolean isCancelled = false;
-    boolean appliedPreChange;
-    // State defintions
+    // State definitions
     final BlockPos affectedPosition;
     final BlockState originalState;
-    @Nullable Map<BlockPos, TileEntity> tilesAtTransaction;
-    @Nullable Map<BlockPos, BlockState> blocksNotAffected;
 
-    // Children Defintions
+    // Children Definitions
     @Nullable LinkedList<ResultingTransactionBySideEffect> sideEffects;
 
-    // LinkedList node defintions
+    // LinkedList node definitions
     @Nullable BlockTransaction previous;
     @Nullable BlockTransaction next;
 
-
-    BlockTransaction(final int snapshotIndex, final BlockPos affectedPosition, final BlockState originalState) {
-        this.snapshotIndex = snapshotIndex;
+    BlockTransaction(final BlockPos affectedPosition, final BlockState originalState) {
         this.affectedPosition = affectedPosition;
         this.originalState = originalState;
-        this.provideExistingBlockState(this, originalState);
-        this.appliedPreChange = false;
     }
 
     @Override
@@ -111,40 +104,7 @@ public abstract class BlockTransaction {
 
     public abstract Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator();
 
-    boolean applyTileAtTransaction(final BlockPos affectedPosition, final TileEntity queuedRemoval) {
-        if (this.tilesAtTransaction == null) {
-            this.tilesAtTransaction = new LinkedHashMap<>();
-        }
-        if (!this.tilesAtTransaction.containsKey(affectedPosition)) {
-            this.tilesAtTransaction.put(affectedPosition, queuedRemoval);
-            return true;
-        }
-        return false;
-    }
-
-    void provideExistingBlockState(final BlockTransaction prevChange, final BlockState newState) {
-        if (newState == null) {
-            return;
-        }
-        if (prevChange.affectedPosition.equals(this.affectedPosition)) {
-            return;
-        }
-        if (prevChange.blocksNotAffected == null) {
-            prevChange.blocksNotAffected = new LinkedHashMap<>();
-        }
-        final BlockState iBlockState = prevChange.blocksNotAffected.putIfAbsent(this.affectedPosition, newState);
-        if (iBlockState == null) {
-            this.appliedPreChange = true;
-        }
-    }
-
-    public void provideUnchangedStates(final BlockTransaction prevChange) { }
-
     public abstract void addToPrinter(PrettyPrinter printer);
-
-    public boolean acceptChunkChange(final BlockPos pos, final BlockState newState) {
-        return this.blocksNotAffected != null && !this.blocksNotAffected.isEmpty() && !this.affectedPosition.equals(pos);
-    }
 
     public boolean acceptTileRemoval(final TileEntity tileentity) {
         return false;
@@ -154,18 +114,18 @@ public abstract class BlockTransaction {
         return false;
     }
 
-    public boolean acceptTileReplacement(final TileEntity existing, final TileEntity proposed) {
+    public boolean acceptTileReplacement(final @Nullable TileEntity existing, final TileEntity proposed) {
         return false;
     }
 
-    @SuppressWarnings("rawtypes")
+    @DefaultQualifier(NonNull.class)
     public static final class AddTileEntity extends BlockTransaction {
 
         final TileEntity added;
         final SpongeBlockSnapshot addedSnapshot;
 
-        AddTileEntity(final int snapshotIndex, final TileEntity added, final SpongeBlockSnapshot attachedSnapshot) {
-            super(snapshotIndex, attachedSnapshot.getBlockPos(), null);
+        AddTileEntity(final TileEntity added, final SpongeBlockSnapshot attachedSnapshot) {
+            super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
             this.added = added;
             this.addedSnapshot = attachedSnapshot;
         }
@@ -184,13 +144,6 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void provideUnchangedStates(final BlockTransaction prevChange) {
-            if (prevChange.applyTileAtTransaction(this.affectedPosition, null)) {
-                this.appliedPreChange = true;
-            }
-        }
-
-        @Override
         public void addToPrinter(final PrettyPrinter printer) {
             printer.add("AddTileEntity")
                 .addWrapped(120, " %s : %s", this.affectedPosition, ((TileEntityBridge) this.added).bridge$getPrettyPrinterString());
@@ -198,18 +151,16 @@ public abstract class BlockTransaction {
 
     }
 
-    @SuppressWarnings("rawtypes")
+    @DefaultQualifier(NonNull.class)
     public static final class RemoveTileEntity extends BlockTransaction {
 
         final TileEntity removed;
         final SpongeBlockSnapshot tileSnapshot;
 
-        RemoveTileEntity(final int snapshotIndex, final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
-            super(snapshotIndex, attachedSnapshot.getBlockPos(), null);
+        RemoveTileEntity(final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
+            super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
             this.removed = removed;
             this.tileSnapshot = attachedSnapshot;
-            this.applyTileAtTransaction(this.affectedPosition, this.removed);
-            this.appliedPreChange = false;
         }
 
         @Override
@@ -233,29 +184,22 @@ public abstract class BlockTransaction {
             ;
         }
 
-        @Override
-        public void provideUnchangedStates(final BlockTransaction prevChange) {
-            if (prevChange.applyTileAtTransaction(this.affectedPosition, this.removed)) {
-                this.appliedPreChange = true;
-            }
-        }
-
     }
 
-    @SuppressWarnings("rawtypes")
+    @DefaultQualifier(NonNull.class)
     public static final class ReplaceTileEntity extends BlockTransaction {
 
         final TileEntity added;
         final TileEntity removed;
         final SpongeBlockSnapshot removedSnapshot;
 
-        ReplaceTileEntity(final int snapshotIndex, final TileEntity added, final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
-            super(snapshotIndex, attachedSnapshot.getBlockPos(), null);
+        ReplaceTileEntity(final TileEntity added, final TileEntity removed,
+            final SpongeBlockSnapshot attachedSnapshot
+        ) {
+            super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
             this.added = added;
             this.removed = removed;
             this.removedSnapshot = attachedSnapshot;
-            this.applyTileAtTransaction(this.affectedPosition, this.removed);
-            this.appliedPreChange = false;
         }
 
         @Override
@@ -280,13 +224,6 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void provideUnchangedStates(final BlockTransaction prevChange) {
-            if (prevChange.applyTileAtTransaction(this.affectedPosition, this.removed)) {
-                this.appliedPreChange = true;
-            }
-        }
-
-        @Override
         public void addToPrinter(final PrettyPrinter printer) {
             printer.add("ReplaceTileEntity")
                 .add(" %s : %s", "Position", this.affectedPosition)
@@ -297,7 +234,7 @@ public abstract class BlockTransaction {
 
     }
 
-    @SuppressWarnings("rawtypes")
+    @DefaultQualifier(NonNull.class)
     public static final class ChangeBlock extends BlockTransaction {
 
         final SpongeBlockSnapshot original;
@@ -306,11 +243,11 @@ public abstract class BlockTransaction {
         final SpongeBlockChangeFlag blockChangeFlag;
         @Nullable public TileEntity queuedRemoval;
         @Nullable public TileEntity queuedAdd;
-        public boolean queueBreak = false;
-        @Nullable
 
-        ChangeBlock(final int snapshotIndex, final SpongeBlockSnapshot attachedSnapshot, final BlockState newState, final SpongeBlockChangeFlag blockChange) {
-            super(snapshotIndex, attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
+        ChangeBlock(final SpongeBlockSnapshot attachedSnapshot, final BlockState newState,
+            final SpongeBlockChangeFlag blockChange
+        ) {
+            super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
             this.original = attachedSnapshot;
             this.newState = newState;
             this.blockChangeFlag = blockChange;
@@ -377,16 +314,8 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public boolean acceptTileReplacement(final TileEntity existing, final TileEntity proposed) {
-            return this.acceptTileRemoval(existing) && this.acceptTileAddition(proposed);
-        }
-
-        @Override
-        public void provideUnchangedStates(final BlockTransaction prevChange) {
-            this.provideExistingBlockState(prevChange, (BlockState) this.original.getState());
-            if (prevChange.applyTileAtTransaction(this.affectedPosition, this.queuedRemoval)) {
-                this.appliedPreChange = true;
-            }
+        public boolean acceptTileReplacement(final @Nullable TileEntity existing, final TileEntity proposed) {
+            return existing != null && this.acceptTileRemoval(existing) && this.acceptTileAddition(proposed);
         }
 
         @Override
@@ -409,11 +338,11 @@ public abstract class BlockTransaction {
         final Block sourceBlock;
         final BlockPos sourcePos;
 
-        NeighborNotification(final int snapshotIndex, final TrackedWorldBridge worldBridge,
+        NeighborNotification(final TrackedWorldBridge worldBridge,
             final BlockState notifyState, final BlockPos notifyPos,
             final Block sourceBlock, final BlockPos sourcePos, final BlockState sourceState
         ) {
-            super(snapshotIndex, sourcePos, sourceState);
+            super(sourcePos, sourceState);
             this.worldBridge = worldBridge;
             this.notifyState = notifyState;
             this.notifyPos = notifyPos;
@@ -434,11 +363,6 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public void provideUnchangedStates(final BlockTransaction prevChange) {
-            this.provideExistingBlockState(prevChange, this.originalState);
-        }
-
-        @Override
         public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
             final ChunkPipeline.Builder builder,
             final ChunkSection chunksection
@@ -449,26 +373,6 @@ public abstract class BlockTransaction {
         @Override
         public Optional<Consumer<CauseStackManager.StackFrame>> getFrameMutator() {
             return Optional.empty();
-        }
-
-        @Override
-        boolean applyTileAtTransaction(final BlockPos affectedPosition, final TileEntity queuedRemoval) {
-            if (this.tilesAtTransaction == null) {
-                this.tilesAtTransaction = new LinkedHashMap<>();
-            }
-            if (!this.tilesAtTransaction.containsKey(affectedPosition)) {
-                this.tilesAtTransaction.put(affectedPosition, queuedRemoval);
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean acceptChunkChange(final BlockPos pos, final BlockState newState) {
-            if (this.blocksNotAffected == null) {
-                this.blocksNotAffected = new LinkedHashMap<>();
-            }
-            return true;
         }
 
         @Override

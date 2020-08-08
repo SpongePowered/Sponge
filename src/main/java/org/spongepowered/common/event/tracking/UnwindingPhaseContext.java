@@ -25,13 +25,10 @@
 package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Optional;
 
 public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseContext> {
@@ -55,29 +52,18 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
 
     private final IPhaseState<?> unwindingState;
     private final PhaseContext<?> unwindingContext;
-    @Nullable private Deque<SpongeBlockSnapshot> singleSnapshots;
-    final boolean usesMulti;
-    final boolean tracksNeighborNotifications;
-    private final boolean isPostingSpecial;
     private boolean hasGotten = true;
-
-    final boolean tracksTiles;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private UnwindingPhaseContext(final IPhaseState<?> unwindingState, final PhaseContext<?> unwindingContext) {
         super(GeneralPhase.Post.UNWINDING, unwindingContext.createdTracker);
         this.unwindingState = unwindingState;
         this.unwindingContext = unwindingContext;
-        this.tracksTiles = ((IPhaseState) unwindingState).tracksTileEntityChanges(unwindingContext);
-        this.tracksNeighborNotifications = ((IPhaseState) unwindingState).doesCaptureNeighborNotifications(unwindingContext);
-        this.isPostingSpecial = ((IPhaseState) unwindingState).hasSpecificBlockProcess(unwindingContext);
         this.setBulkBlockCaptures(((IPhaseState) unwindingState).doesBulkBlockCapture(unwindingContext));
         // Basically put, the post state needs to understand that if we're expecting potentially chained block changes
         // to worlds, AND we're potentially getting any neighbor notification requests OR tile entity requests,
         // we'll need to switch on to capture such objects. If for example, we do not track tile changes, but we track
         // neighbor notifications, that would be fine, but we cannot require that both are tracked unless specified.
-        this.usesMulti = this.allowsBulkBlockCaptures() && !this.isPostingSpecial;
-
     }
 
     @Override
@@ -99,53 +85,13 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
         return this.unwindingState;
     }
 
-    boolean isPostingSpecialProcess() {
-        return this.isPostingSpecial;
-    }
-
-    @Override
-    public SpongeBlockSnapshot getSingleSnapshot() {
-        if (this.singleSnapshot == null) {
-            if (this.singleSnapshots == null) {
-                throw new IllegalStateException("Expected to be capturing single snapshots for immediate throwing, but we're not finding any!");
-            }
-            return this.singleSnapshots.pop();
-        }
-        return this.singleSnapshot;
-    }
-
-    @Override
-    public void setSingleSnapshot(@Nullable final SpongeBlockSnapshot singleSnapshot) {
-        if (singleSnapshot == null) {
-            if (this.singleSnapshots != null && !this.singleSnapshots.isEmpty()) {
-                this.singleSnapshots.pop();
-            } else {
-                this.singleSnapshot = null;
-            }
-        }
-        if (this.singleSnapshot != null) {
-            if (this.singleSnapshots == null) {
-                this.singleSnapshots = new ArrayDeque<>();
-            }
-            this.singleSnapshots.push(this.singleSnapshot);
-            this.singleSnapshot = null;
-            this.singleSnapshots.push(singleSnapshot);
-        } else {
-            if (this.singleSnapshots != null) {
-                this.singleSnapshots.push(singleSnapshot);
-            } else {
-                this.singleSnapshot = singleSnapshot;
-            }
-        }
-    }
-
     @Override
     public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
         final String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent)
             .add(s + "- %s: %s", "UnwindingState", this.unwindingState)
             .add(s + "- %s: %s", "UnwindingContext", this.unwindingContext)
-            .add(s + "- %s: %s", "IsPostingSpecial", this.tracksTiles);
+        ;
         this.unwindingContext.printCustom(printer, indent * 2);
         return printer;
     }

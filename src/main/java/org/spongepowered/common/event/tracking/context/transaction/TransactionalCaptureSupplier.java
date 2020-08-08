@@ -67,7 +67,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     @Nullable private ListMultimap<BlockPos, BlockEventData> scheduledEvents;
     @Nullable private List<SpongeBlockSnapshot> snapshots;
     @Nullable private Set<BlockPos> usedBlocks;
-    private int snapshotIndex = -1;    // so that we can appropriately cancel or discard or apply specific event transactions
     // We made BlockTransaction a Node and this is a pseudo LinkedList due to the nature of needing
     // to be able to track what block states exist at the time of the transaction while other transactions
     // are processing (because future transactions performing logic based on what exists at that state,
@@ -163,7 +162,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             this.snapshots = new ArrayList<>();
         }
         this.snapshots.add(backingSnapshot);
-        this.snapshotIndex++;
     }
 
     /**
@@ -245,7 +243,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     ) {
         this.put(originalBlockSnapshot, newState); // Always update the snapshot index before the block change is tracked
         final BlockTransaction.ChangeBlock changeBlock = new BlockTransaction.ChangeBlock(
-            this.snapshotIndex,
             originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags
         );
         this.logTransaction(changeBlock);
@@ -284,7 +281,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return true;
     }
 
-    public boolean logTileReplacement(final BlockPos pos, final @Nullable TileEntity existing, final @Nullable TileEntity proposed, final Supplier<ServerWorld> worldSupplier) {
+    public boolean logTileReplacement(final BlockPos pos, final @Nullable TileEntity existing, final TileEntity proposed, final Supplier<ServerWorld> worldSupplier) {
         if (proposed == null) {
             return false;
         }
@@ -301,7 +298,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     }
 
     private BlockTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable TileEntity existing,
-        final @Nullable TileEntity proposed, final Supplier<ServerWorld> worldSupplier
+        final TileEntity proposed, final Supplier<ServerWorld> worldSupplier
     ) {
         final BlockState currentState = worldSupplier.get().getBlockState(pos);
         final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
@@ -314,7 +311,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
 
-        return new BlockTransaction.ReplaceTileEntity(this.snapshotIndex, proposed, existing, snapshot);
+        return new BlockTransaction.ReplaceTileEntity(proposed, existing, snapshot);
     }
 
     private BlockTransaction.RemoveTileEntity createTileRemovalTransaction(@NonNull final TileEntity tileentity,
@@ -331,7 +328,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
 
-        return new BlockTransaction.RemoveTileEntity(this.snapshotIndex, tileentity, snapshot);
+        return new BlockTransaction.RemoveTileEntity(tileentity, snapshot);
     }
     private BlockTransaction.AddTileEntity createTileAdditionTransaction(@NonNull final TileEntity tileentity,
         final Supplier<ServerWorld> worldSupplier
@@ -347,7 +344,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
 
-        return new BlockTransaction.AddTileEntity(this.snapshotIndex, tileentity, snapshot);
+        return new BlockTransaction.AddTileEntity(tileentity, snapshot);
     }
 
     public void pushEffect(final @Nullable ResultingTransactionBySideEffect effect) {
@@ -370,7 +367,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             this.scheduledEvents.clear();
         }
         this.effect = null;
-        this.snapshotIndex = -1;
     }
 
     public Optional<Transaction<BlockSnapshot>> createTransaction(final SpongeBlockSnapshot snapshot) {
@@ -455,7 +451,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if (this.usedBlocks != null) {
             this.usedBlocks.clear();
         }
-        this.snapshotIndex = -1;
         if (this.head != null) {
             this.head = null;
             this.tail = null;

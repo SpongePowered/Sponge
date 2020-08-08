@@ -31,7 +31,10 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -78,13 +81,14 @@ import java.util.function.Supplier;
  * the context of which a {@link IPhaseState} is being completed with.
  */
 @SuppressWarnings("unchecked")
+@DefaultQualifier(NonNull.class)
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
-    @Nullable private static PhaseContext<?> EMPTY;
+    @MonotonicNonNull private static PhaseContext<?> EMPTY;
     @Nullable public BlockSnapshot neighborNotificationSource;
     @Nullable SpongeBlockSnapshot singleSnapshot;
     protected final PhaseTracker createdTracker;
-    private TransactionalCaptureSupplier blockTransactor;
+    @MonotonicNonNull private TransactionalCaptureSupplier blockTransactor;
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
@@ -309,8 +313,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         // we can safely pop the frame here since this is only called when we're checking for processing
 
         return
-            this.isNonEmpty(this.blockTransactor)
-                || this.isNonEmpty(this.blockItemDropsSupplier)
+            this.isNonEmpty(this.blockItemDropsSupplier)
                 || this.isNonEmpty(this.blockItemEntityDropsSupplier)
                 || this.isNonEmpty(this.capturedItemsSupplier)
                 || this.isNonEmpty(this.capturedEntitiesSupplier)
@@ -759,14 +762,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     @Nullable
     public BlockSnapshot getNeighborNotificationSource() {
         return this.neighborNotificationSource;
-    }
-
-    public SpongeBlockSnapshot getSingleSnapshot() {
-        return checkNotNull(this.singleSnapshot, "Single Snapshot is null!");
-    }
-
-    public void setSingleSnapshot(@Nullable final SpongeBlockSnapshot singleSnapshot) {
-        this.singleSnapshot = singleSnapshot;
     }
 
     protected boolean isRunaway(final PhaseContext<?> phaseContext) {
