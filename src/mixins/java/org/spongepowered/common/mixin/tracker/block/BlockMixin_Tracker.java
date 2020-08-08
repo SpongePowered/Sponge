@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.tracker.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,57 +33,39 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.bridge.block.TrackedBlockBridge;
+import org.spongepowered.common.launch.Launcher;
 
 @Mixin(Block.class)
-public abstract class BlockMixin_Tracker {
+public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
 
-    @Shadow public static void shadow$spawnDrops(BlockState state, World worldIn, BlockPos pos) {
+    // @formatter:off
+    @Shadow public static void shadow$spawnDrops(final BlockState state, final World worldIn, final BlockPos pos) {
         throw new IllegalStateException("untransformed shadow");
     }
+    // @formatter:on
+    private boolean tracker$hasNeighborLogicOverridden = false;
 
-    /**
-     * @author gabizou - July 23rd, 2019 - 1.12
-     * @reason Because adding a few redirects for the massive if
-     * statement is less performant than doing the fail fast check
-     * of "is main thread or are we restoring", before we reach the
-     * {@link net.minecraft.world.World#isRemote} check or
-     * {@link ItemStack#isEmpty()} check, we can eliminate a larger
-     * majority of the hooks that would otherwise be required for
-     * doing an overwrite of this method.
-     *
-     * @param worldIn The world
-     * @param pos The position
-     * @param stack The stack
-     * @param ci Callbackinfo to cancel if we're not on the main thread or we're restoring
-     */
-    @Inject(method = "spawnAsEntity", at = @At("HEAD"), cancellable = true)
-    private static void tracker$checkMainThreadAndRestoring(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
-                                                         final CallbackInfo ci) {
-        if (!PhaseTracker.SERVER.onSidedThread() || PhaseTracker.SERVER.getCurrentState().isRestoring()) {
-            ci.cancel();
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void tracker$initializeTrackerOptimizations(final Block.Properties properties, final CallbackInfo ci) {
+        // neighborChanged
+        try {
+            final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? "neighborChanged" : "func_220069_a";
+            final Class<?>[] argTypes = {net.minecraft.block.BlockState.class, net.minecraft.world.World.class, BlockPos.class, Block.class, BlockPos.class, boolean.class};
+            final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+            this.tracker$hasNeighborLogicOverridden = !clazz.equals(Block.class);
+        } catch (final Throwable e) {
+            if (e instanceof NoClassDefFoundError) {
+                // fall back to checking if class equals Block.
+                // Fixes https://github.com/SpongePowered/SpongeForge/issues/2770
+                //noinspection EqualsBetweenInconvertibleTypes
+                this.tracker$hasNeighborLogicOverridden = !this.getClass().equals(Block.class);
+            }
         }
     }
 
-
-    @Inject(method = "spawnAsEntity",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/ItemEntity;setDefaultPickupDelay()V", shift = At.Shift.AFTER),
-            locals = LocalCapture.CAPTURE_FAILSOFT,
-            cancellable = true)
-    private static void tracker$attemptCaptureOrAllowSpawn(final net.minecraft.world.World worldIn, final BlockPos pos, final ItemStack stack,
-                                                        final CallbackInfo ci, final float unused, final double xOffset, final double yOffset, final double zOffset,
-                                                        final ItemEntity toSpawn) {
-        // Sponge Start - Tell the phase state to track this position, and then unset it.
-        final PhaseContext<?> context = PhaseTracker.SERVER.getPhaseContext();
-
-        if (context.allowsBulkEntityCaptures() && context.allowsBlockPosCapturing()) {
-            context.getCaptureBlockPos().setPos(pos);
-            worldIn.addEntity(toSpawn);
-            context.getCaptureBlockPos().setPos(null);
-            ci.cancel();
-        }
+    @Override
+    public boolean bridge$overridesNeighborNotificationLogic() {
+        return this.tracker$hasNeighborLogicOverridden;
     }
-
 }

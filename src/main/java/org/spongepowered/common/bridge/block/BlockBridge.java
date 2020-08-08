@@ -112,8 +112,6 @@ public interface BlockBridge {
 
     boolean bridge$hasCollideWithStateLogic();
 
-    boolean bridge$hasNeighborChangedLogic();
-
     /**
      * Used to determine if this block should fire 
      * sponge events during WorldServer#addBlockEvent.
