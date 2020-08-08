@@ -116,16 +116,6 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public boolean tracksTileEntityChanges(final InteractionPacketContext currentContext) {
-        return true;
-    }
-
-    @Override
-    public boolean hasSpecificBlockProcess(final InteractionPacketContext context) {
-        return true;
-    }
-
-    @Override
     public boolean doesCaptureNeighborNotifications(final InteractionPacketContext context) {
         return true;
     }

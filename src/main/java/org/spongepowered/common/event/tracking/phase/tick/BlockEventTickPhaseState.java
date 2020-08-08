@@ -51,11 +51,10 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-
-import javax.annotation.Nullable;
 
 class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
@@ -174,16 +173,6 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         }
         context.setWasNotCancelled(noCancelledTransactions);
         return !noCancelledTransactions;
-    }
-
-    @Override
-    public boolean tracksTileEntityChanges(final BlockEventTickContext currentContext) {
-        return true;
-    }
-
-    @Override
-    public boolean hasSpecificBlockProcess(final BlockEventTickContext context) {
-        return true;
     }
 
     @Override

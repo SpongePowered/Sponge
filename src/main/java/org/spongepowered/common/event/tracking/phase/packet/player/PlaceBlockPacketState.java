@@ -166,8 +166,4 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         return SpawnTypes.PLACEMENT.get();
     }
 
-    @Override
-    public boolean hasSpecificBlockProcess(final BasicPacketContext context) {
-        return false;
-    }
 }

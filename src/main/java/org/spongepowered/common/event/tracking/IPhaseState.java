@@ -67,7 +67,6 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
-import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -749,23 +748,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     }
 
-
-    default void provideNotifierForNeighbors(final C context, final NeighborNotificationContext notification) {
-        if (context.neighborNotificationSource != null) {
-            notification.setSourceNotification(context.neighborNotificationSource);
-        }
-        if (context.notifier != null) {
-            notification.notifier(context.notifier);
-            return;
-        }
-        // At this point, since there's no notifier avilable, we can consider the
-        // owner as one available left (you know, someone placing a redstone block to power
-        // nearby redstone wire, the owner would at least be notifying the next blocks
-        if (context.creator != null) { // If the owner is set, at least set the owner
-            notification.notifier(context.creator);
-        }
-    }
-
     /**
      * Used in the {@link org.spongepowered.api.event.EventManager} and mod event manager equivalent for
      * world generation tasks to avoid event listener state entrance due to listeners
@@ -821,10 +803,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return changeBlock;
     }
 
-    default boolean tracksTileEntityChanges(final C currentContext) {
-        return false;
-    }
-
     default void processCancelledTransaction(final C context, final Transaction<BlockSnapshot> transaction, final BlockSnapshot original) {
         if (this.tracksBlockSpecificDrops(context)) {
             // Cancel any block drops or harvests for the block change.
@@ -836,9 +814,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         }
     }
 
-    default boolean hasSpecificBlockProcess(final C context) {
-        return false;
-    }
     default boolean doesCaptureNeighborNotifications(final C context) {
         return false;
     }

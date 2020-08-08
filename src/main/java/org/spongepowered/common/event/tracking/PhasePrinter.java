@@ -32,14 +32,13 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.config.ConfigHandle;
 import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.config.common.CommonConfig;
-import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.config.common.PhaseTrackerCategory;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -467,11 +466,6 @@ public final class PhasePrinter {
         final ConfigHandle<CommonConfig> globalConfigAdapter = SpongeConfigs.getCommon();
         final PhaseTrackerCategory trackerConfig = globalConfigAdapter.get().getPhaseTracker();
         int maxDepth = trackerConfig.getMaxBlockProcessingDepth();
-        if (maxDepth == 100 && state == TickPhase.Tick.NEIGHBOR_NOTIFY) {
-            maxDepth = 1000;
-            trackerConfig.resetMaxDepthTo1000();
-            globalConfigAdapter.save();
-        }
         if (currentDepth < maxDepth) {
             return false;
         }
