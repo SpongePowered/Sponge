@@ -262,7 +262,10 @@ public final class ContainerUtil {
         final List<Lens> additional = new ArrayList<>();
         try {
             if (crafting.out != null && crafting.base != null && crafting.grid != null) {
-                additional.add(new CraftingInventoryLensImpl(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
+                // Do not create CraftingInventoryLensImpl when inventory size does not match container size
+                if (crafting.base + crafting.grid.getSizeInventory() <= container.inventorySlots.size()) {
+                    additional.add(new CraftingInventoryLensImpl(crafting.out, crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
+                }
             } else if (crafting.base != null && crafting.grid != null) {
                 additional.add(new GridInventoryLensImpl(crafting.base, crafting.grid.getWidth(), crafting.grid.getHeight(), slots));
             }
