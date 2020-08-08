@@ -43,8 +43,6 @@ public final class TickPhase {
         public static final IPhaseState<ServerTickState.ServerTickContext> SERVER_TICK = new ServerTickState();
         public static final IPhaseState<WorldTickState.WorldTickContext> WORLD_TICK = new WorldTickState();
 
-        public static final IPhaseState<NeighborNotificationContext> NEIGHBOR_NOTIFY = new NeighborNotificationState();
-
         private Tick() { // No instances for you!
         }
     }
