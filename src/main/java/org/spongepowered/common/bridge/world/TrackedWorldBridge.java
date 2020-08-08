@@ -62,7 +62,9 @@ public interface TrackedWorldBridge {
      * @param flag The block change flag to associate with the snapshot.
      * @return The snapshot, or none if not loaded
      */
-    SpongeBlockSnapshot bridge$createSnapshot(BlockPos pos, BlockChangeFlag flag);
+    default SpongeBlockSnapshot bridge$createSnapshot(final BlockPos pos, final BlockChangeFlag flag) {
+        return this.bridge$createSnapshot(((ServerWorld) (Object) this).getBlockState(pos), pos, flag);
+    }
 
     /**
      * Creates a {@link BlockSnapshot} but performs an additional {@link Chunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
