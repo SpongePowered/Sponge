@@ -43,7 +43,6 @@ import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -57,7 +56,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.block.TrackedBlockBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -70,14 +69,17 @@ import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.ScheduledBlockChange;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToLoadedListInWorldEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToTickableListEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToWorldWhileProcessingEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.CheckBlockPostPlacementIsSameEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
+import org.spongepowered.common.event.tracking.context.transaction.effect.NeighborNotificationProcessSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyClientEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyNeighborSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
+import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromChunkEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromWorldEffect;
@@ -90,19 +92,19 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.WorldB
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
-import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
+import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implements TrackedWorldBridge {
@@ -490,51 +492,33 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // Otherwise, we continue with recording, maybe.
         final Chunk targetChunk = this.shadow$getChunkAt(immutableTarget);
         final BlockState targetBlockState = targetChunk.getBlockState(immutableTarget);
+        // Sponge - Shortcircuit if the block has no neighbor logic
+        if (!((TrackedBlockBridge) targetBlockState.getBlock()).bridge$overridesNeighborNotificationLogic()) {
+            return;
+        }
+        // Sponge End
+
         // Sponge start - prepare notification
         final PhaseContext<?> peek = server.getPhaseContext();
         final IPhaseState state = peek.state;
-        try {
 
-            if (!((BlockBridge) targetBlockState.getBlock()).bridge$hasNeighborChangedLogic()) {
-                // A little short-circuit so we do not waste expense to call neighbor notifications on blocks that do
-                // not override the method neighborChanged
-                return;
-            }
-            // If the phase state does not want to allow neighbor notifications to leak while processing,
-            // it needs to be able to do so. It will replay the notifications in the order in which they were received,
-            // such that the notification will be sent out in the same order as the block changes that may have taken place.
-//            if ((ShouldFire.CHANGE_BLOCK_EVENT || ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) && state.doesCaptureNeighborNotifications(peek)) {
-//                peek.getBlockTransactor().logNeighborNotification(mixinWorld, notifyState, notifyPos, sourceBlock, sourcePos, isMoving);
-//                return;
-//            }
+        // Generate the simple one sided effect, which can have multiple children
+        final ProcessingSideEffect effect = new NeighborNotificationProcessSideEffect();
+        final ResultingTransactionBySideEffect sideEffect = new ResultingTransactionBySideEffect(effect);
+
+
+        //  try { // Vanilla - We need to push the effect transactor so that it always pops
+        try (final PhaseContext<?>.EffectTransactor ignored = peek.pushTransactor(sideEffect)) {
+            final WeakReference<ServerWorld> worldReference = new WeakReference<>((ServerWorld) (Object) this);
+            final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldReference.get(), "ServerWorld dereferenced");
+            final @Nullable TileEntity existingTile = targetChunk.getTileEntity(immutableTarget, Chunk.CreateEntityType.CHECK);
+            peek.getBlockTransactor().logNeighborNotification(worldSupplier, immutableFrom, blockIn, immutableTarget, targetBlockState, existingTile);
+
             state.associateNeighborStateNotifier(peek, immutableFrom, targetBlockState.getBlock(), immutableTarget, ((ServerWorld) (Object) this), PlayerTracker.Type.NOTIFIER);
-            final LocatableBlock block = new SpongeLocatableBlockBuilder()
-                .world(((org.spongepowered.api.world.server.ServerWorld) this))
-                .position(immutableFrom.getX(), immutableFrom.getY(), immutableFrom.getZ())
-                .state((org.spongepowered.api.block.BlockState) blockIn.getDefaultState()).build();
-            try (final NeighborNotificationContext context = TickPhase.Tick.NEIGHBOR_NOTIFY.createPhaseContext(server)
-                .source(block)
-                .sourceBlock(blockIn)
-                .setNotifiedBlockPos(immutableTarget)
-                .setNotifiedBlockState(targetBlockState)
-                .setSourceNotification(immutableFrom)
-                .allowsCaptures(state) // We need to pass the previous state so we don't capture blocks when we're in world gen.
+            // Sponge End
 
-            ) {
-                // Since the notifier may have just been set from the previous state, we can
-                // ask it to contribute to our state
-                state.provideNotifierForNeighbors(peek, context);
-                context.buildAndSwitch();  // We need to enter the phase state, otherwise if the context is not switched into,
-                // the try with resources will perform a close without the phase context being entered, leading to issues of closing
-                // other phase contexts.
-                // Refer to https://github.com/SpongePowered/SpongeForge/issues/2706
-//                if (PhasePrinter.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
-//                    return;
-//                }
-                // Sponge End
+            targetBlockState.neighborChanged(((ServerWorld) (Object) this), immutableTarget, blockIn, immutableFrom, false);
 
-                targetBlockState.neighborChanged(((ServerWorld) (Object) this), immutableTarget, blockIn, immutableFrom, false);
-            }
         } catch (final Throwable throwable) {
             final CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
             final CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");

@@ -36,7 +36,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -340,19 +339,17 @@ public abstract class BlockTransaction {
 
 
     static final class NeighborNotification extends BlockTransaction {
-        final TrackedWorldBridge worldBridge;
-        final BlockState notifyState;
+        final BlockState original;
         final BlockPos notifyPos;
         final Block sourceBlock;
         final BlockPos sourcePos;
 
-        NeighborNotification(final TrackedWorldBridge worldBridge,
+        NeighborNotification(final BlockState snapshot,
             final BlockState notifyState, final BlockPos notifyPos,
-            final Block sourceBlock, final BlockPos sourcePos, final BlockState sourceState
+            final Block sourceBlock, final BlockPos sourcePos
         ) {
-            super(sourcePos, sourceState);
-            this.worldBridge = worldBridge;
-            this.notifyState = notifyState;
+            super(sourcePos, notifyState);
+            this.original = snapshot;
             this.notifyPos = notifyPos;
             this.sourceBlock = sourceBlock;
             this.sourcePos = sourcePos;
@@ -361,8 +358,8 @@ public abstract class BlockTransaction {
         @Override
         public String toString() {
             return new StringJoiner(", ", NeighborNotification.class.getSimpleName() + "[", "]")
-                .add("world=" + this.worldBridge)
-                .add("notifyState=" + this.notifyState)
+                .add("originalState=" + this.original)
+                .add("notifyState=" + this.originalState)
                 .add("notifyPos=" + this.notifyPos)
                 .add("sourceBlock=" + this.sourceBlock)
                 .add("sourcePos=" + this.sourcePos)
@@ -386,8 +383,8 @@ public abstract class BlockTransaction {
         @Override
         public void addToPrinter(final PrettyPrinter printer) {
             printer.add("NeighborNotification")
-                .add(" %s : %s, %s", "Source Pos", this.originalState, this.sourcePos)
-                .add(" %s : %s, %s", "Notification", this.notifyState, this.notifyPos);
+                .add(" %s : %s, %s", "Source Pos", this.sourceBlock, this.sourcePos)
+                .add(" %s : %s, %s", "Notification", this.originalState, this.notifyPos);
         }
 
     }

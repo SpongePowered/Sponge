@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
@@ -303,6 +304,19 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
         }
         return true;
+    }
+
+    public void logNeighborNotification(final Supplier<ServerWorld> serverWorldSupplier, final BlockPos immutableFrom, final Block blockIn,
+        final BlockPos immutableTarget, final BlockState targetBlockState,
+        @Nullable final TileEntity existingTile
+    ) {
+        final BlockTransaction.NeighborNotification notificationTransaction = new BlockTransaction.NeighborNotification(targetBlockState, targetBlockState, immutableTarget, blockIn, immutableFrom);
+        if (this.tail != null && this.effect != null) {
+            this.tail.addEffect(this.effect);
+            this.effect.addChild(notificationTransaction);
+        } else {
+            this.logTransaction(notificationTransaction);
+        }
     }
 
     private BlockTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable TileEntity existing,
