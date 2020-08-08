@@ -89,6 +89,14 @@ public abstract class BlockTransaction {
             .toString();
     }
 
+    final boolean addEffect(final ResultingTransactionBySideEffect effect) {
+        if (this.sideEffects == null) {
+            this.sideEffects = new LinkedList<>();
+        }
+        this.sideEffects.push(effect);
+        return true;
+    }
+
     public abstract void populateChunkEffects(
         TransactionalCaptureSupplier blockTransactor,
         ChunkPipeline.Builder builder, ChunkSection chunksection
