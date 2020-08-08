@@ -67,7 +67,6 @@ import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeCommon;
@@ -77,22 +76,11 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.context.transaction.effect.CheckBlockPostPlacementIsSameEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
-import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyClientEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyNeighborSideEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateConnectingBlocksEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateLightSideEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateWorldRendererEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.WorldBlockChangeCompleteEffect;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -101,7 +89,6 @@ import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.ThreadUtil;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.io.ByteArrayOutputStream;
@@ -585,53 +572,6 @@ public final class PhaseTracker implements CauseStackManager {
             CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, notifyState);
             throw new ReportedException(crashreport);
         }
-    }
-
-    /**
-     * Replacement of {@link ServerWorld#setBlockState(BlockPos, net.minecraft.block.BlockState, int)}
-     * with the additions of cause tracking
-     *
-     * @param pos The position of the block state to set
-     * @param newState The new state
-     * @param flag The notification flags
-     * @return True if the block was successfully set (or captured)
-     */
-    public boolean setBlockState(final TrackedWorldBridge mixinWorld, final BlockPos pos,
-                                 final net.minecraft.block.BlockState newState, final BlockChangeFlag flag) {
-        if (Thread.currentThread() != PhaseTracker.SERVER.getSidedThread() && this != PhaseTracker.SERVER) {
-            throw new UnsupportedOperationException("Cannot perform a tracked Block Change on a ServerWorld while not on the main thread!");
-        }
-        final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) flag;
-        final ServerWorld world = (ServerWorld) mixinWorld;
-
-        final Chunk chunk = world.getChunkAt(pos);
-        if (chunk.isEmpty()) {
-            return false;
-        }
-
-        final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
-
-        final TrackedChunkBridge mixinChunk = (TrackedChunkBridge) chunk;
-
-        final ChunkPipeline chunkPipeline = mixinChunk.bridge$createChunkPipeline(pos, newState, currentState, spongeFlag);
-        final WorldPipeline.Builder worldPipelineBuilder = WorldPipeline.builder(chunkPipeline);
-        worldPipelineBuilder.addEffect((pipeline, oldState, newState1, flag1) -> {
-            if (oldState == null) {
-                return EffectResult.NULL_RETURN;
-            }
-            return EffectResult.NULL_PASS;
-        })
-            .addEffect(new UpdateLightSideEffect())
-            .addEffect(new CheckBlockPostPlacementIsSameEffect())
-            .addEffect(new UpdateWorldRendererEffect())
-            .addEffect(new NotifyClientEffect())
-            .addEffect(new NotifyNeighborSideEffect())
-            .addEffect(new UpdateConnectingBlocksEffect())
-            .addEffect(new WorldBlockChangeCompleteEffect());
-        final WorldPipeline pipeline = worldPipelineBuilder
-            .build();
-
-        return pipeline.processEffects(this.getPhaseContext(), currentState, newState, pos, spongeFlag);
     }
 
     /**
