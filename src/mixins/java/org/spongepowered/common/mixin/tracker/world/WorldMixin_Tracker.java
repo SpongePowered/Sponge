@@ -24,26 +24,22 @@
  */
 package org.spongepowered.common.mixin.tracker.world;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
-import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 
 import javax.annotation.Nullable;
@@ -70,6 +66,7 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Shadow public boolean shadow$addTileEntity(final TileEntity tile) { return false; }
     @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos pos);
     @Shadow public void shadow$setTileEntity(final BlockPos pos, @Nullable final TileEntity tileEntity) { } // Shadowed
+    @Shadow public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) { } // Shadowed
     // @formatter:on
 
     /**

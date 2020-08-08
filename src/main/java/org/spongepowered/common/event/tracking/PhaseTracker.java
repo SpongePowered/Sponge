@@ -31,9 +31,6 @@ import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import net.minecraft.block.Block;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -44,7 +41,6 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
@@ -55,7 +51,6 @@ import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -67,29 +62,23 @@ import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.config.SpongeConfigs;
 import org.spongepowered.common.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.tick.NeighborNotificationContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.ThreadUtil;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -492,89 +481,6 @@ public final class PhaseTracker implements CauseStackManager {
     // --------------------- DELEGATED WORLD METHODS -------------------------
 
     /**
-     * Replacement of {@link net.minecraft.world.World#neighborChanged(BlockPos, Block, BlockPos)}
-     * that adds tracking into play.
-     *
-     * @param mixinWorld THe world
-     * @param notifyPos The original notification position
-     * @param sourceBlock The source block type
-     * @param sourcePos The source block position
-     * @param isMoving If the block is moving
-     */
-    @SuppressWarnings("rawtypes")
-    public void notifyBlockOfStateChange(final TrackedWorldBridge mixinWorld, final net.minecraft.block.BlockState notifyState, final BlockPos notifyPos,
-        final Block sourceBlock, final BlockPos sourcePos, final boolean isMoving) {
-        if (!this.onSidedThread()) {
-            // lol no, report the block change properly
-            new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
-                .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
-                .add()
-                .add(new Exception("Async Block Notifcation Detected"))
-                .log(SpongeCommon.getLogger(), Level.ERROR);
-            // Maybe? I don't think this is wise to try and sync back a notification on the main thread.
-            return;
-        }
-        try {
-            // Sponge start - prepare notification
-            final PhaseContext<?> peek = this.stack.peek();
-            final IPhaseState state = peek.state;
-            if (!((BlockBridge) notifyState.getBlock()).bridge$hasNeighborChangedLogic()) {
-                // A little short-circuit so we do not waste expense to call neighbor notifications on blocks that do
-                // not override the method neighborChanged
-                return;
-            }
-            // If the phase state does not want to allow neighbor notifications to leak while processing,
-            // it needs to be able to do so. It will replay the notifications in the order in which they were received,
-            // such that the notification will be sent out in the same order as the block changes that may have taken place.
-            if ((ShouldFire.CHANGE_BLOCK_EVENT || ShouldFire.NOTIFY_NEIGHBOR_BLOCK_EVENT) && state.doesCaptureNeighborNotifications(peek)) {
-//                peek.getBlockTransactor().captureNeighborNotification(mixinWorld, notifyState, notifyPos, sourceBlock, sourcePos, isMoving);
-                return;
-            }
-            state.associateNeighborStateNotifier(peek, sourcePos, notifyState.getBlock(), notifyPos, ((ServerWorld) mixinWorld), PlayerTracker.Type.NOTIFIER);
-            final LocatableBlock block = new SpongeLocatableBlockBuilder()
-                .world(((org.spongepowered.api.world.server.ServerWorld) mixinWorld))
-                .position(sourcePos.getX(), sourcePos.getY(), sourcePos.getZ())
-                .state((BlockState) sourceBlock.getDefaultState()).build();
-            try (final NeighborNotificationContext context = TickPhase.Tick.NEIGHBOR_NOTIFY.createPhaseContext(PhaseTracker.SERVER)
-                .source(block)
-                .sourceBlock(sourceBlock)
-                .setNotifiedBlockPos(notifyPos)
-                .setNotifiedBlockState(notifyState)
-                .setSourceNotification(sourcePos)
-                .allowsCaptures(state) // We need to pass the previous state so we don't capture blocks when we're in world gen.
-
-            ) {
-                // Since the notifier may have just been set from the previous state, we can
-                // ask it to contribute to our state
-                state.provideNotifierForNeighbors(peek, context);
-                context.buildAndSwitch();  // We need to enter the phase state, otherwise if the context is not switched into,
-                // the try with resources will perform a close without the phase context being entered, leading to issues of closing
-                // other phase contexts.
-                // Refer to https://github.com/SpongePowered/SpongeForge/issues/2706
-                if (PhasePrinter.checkMaxBlockProcessingDepth(state, peek, context.getDepth())) {
-                    return;
-                }
-                // Sponge End
-
-                notifyState.neighborChanged(((ServerWorld) mixinWorld), notifyPos, sourceBlock, sourcePos, isMoving);
-            }
-        } catch (final Throwable throwable) {
-            final CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
-            final CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
-            crashreportcategory.addDetail("Source block type", () -> {
-                try {
-                    return String.format("ID #%d (%s // %s)", Registry.BLOCK.getId(sourceBlock),
-                        sourceBlock.getTranslationKey(), sourceBlock.getClass().getCanonicalName());
-                } catch (final Throwable var2) {
-                    return "ID #" + Registry.BLOCK.getId(sourceBlock);
-                }
-            });
-            CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, notifyState);
-            throw new ReportedException(crashreport);
-        }
-    }
-
-    /**
      * This is the replacement of {@link net.minecraft.world.World#addEntity(net.minecraft.entity.Entity)}
      * where it captures into phases. The causes and relations are processed by the phases.
      *
@@ -744,7 +650,7 @@ public final class PhaseTracker implements CauseStackManager {
     }
 
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o) {
             return true;
         }
