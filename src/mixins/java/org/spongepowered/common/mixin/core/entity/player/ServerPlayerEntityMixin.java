@@ -30,7 +30,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.TicketType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
@@ -41,7 +40,6 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -61,8 +59,6 @@ import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 // See also: SubjectMixin_API and SubjectMixin
@@ -70,14 +66,14 @@ import javax.annotation.Nullable;
 public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, ServerPlayerEntityBridge {
 
     @Shadow public ServerPlayNetHandler connection;
-
     @Shadow public abstract net.minecraft.world.server.ServerWorld shadow$getServerWorld();
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private @Nullable GameProfile impl$previousGameProfile;
 
     @Override
-    public @Nullable GameProfile bridge$getPreviousGameProfile() {
+    @Nullable
+    public GameProfile bridge$getPreviousGameProfile() {
         return this.impl$previousGameProfile;
     }
 
@@ -92,12 +88,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     private User impl$getUserObjectOnConstruction() {
-        final UserManager service = SpongeCommon.getGame().getServer().getUserManager();
         if (this.impl$isFake) {
             return this.bridge$getUserObject();
         }
-        // Emnsure that the game profile is up to date.
-        return ((SpongeUserManager) service).forceRecreateUser((GameProfile) this.shadow$getGameProfile());
+        // Ensure that the game profile is up to date.
+        return ((SpongeUserManager) SpongeCommon.getGame().getServer().getUserManager()).forceRecreateUser((GameProfile) this.shadow$getGameProfile());
     }
 
     @Override
@@ -108,12 +103,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public User bridge$getUser() {
         return this.impl$user;
-    }
-
-    @Override
-    public Optional<User> bridge$getBackingUser() {
-        // may be null during initialization, mainly used to avoid potential stack overflow with #bridge$getUserObject
-        return Optional.of(this.impl$user);
     }
 
     // TODO: this, properly.

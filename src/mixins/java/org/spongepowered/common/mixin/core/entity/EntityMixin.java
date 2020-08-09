@@ -29,7 +29,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.server.MinecraftServer;
@@ -90,6 +89,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         TimingBridge, CommandSourceProviderBridge {
 
     // @formatter:off
+
     @Shadow @Nullable private Entity ridingEntity;
     @Shadow @Final private List<Entity> passengers;
     @Shadow public net.minecraft.world.World world;
@@ -114,14 +114,17 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public float prevRotationYaw;
     @Shadow protected int portalCounter;
     @Shadow public boolean forceSpawn;
+    @Shadow public boolean collided;
+    @Shadow public boolean collidedHorizontally;
+    @Shadow public boolean collidedVertically;
 
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
     @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
-    @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
+    @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int shadow$getEntityId();
     @Shadow public abstract boolean shadow$isBeingRidden();
-    @Shadow public abstract Entity getRidingEntity();
+    @Shadow public abstract Entity shadow$getRidingEntity();
     @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow protected abstract void shadow$removePassenger(Entity passenger);
     @Shadow @Nullable public Entity shadow$changeDimension(final DimensionType dimension) { return null; } // Shadow
@@ -141,31 +144,25 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract int shadow$getMaxAir();
     @Shadow protected abstract void shadow$applyEnchantments(LivingEntity entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract CommandSource shadow$getCommandSource();
-
-    @Shadow public boolean collided;
     @Shadow public abstract World shadow$getEntityWorld();
     @Shadow public abstract Vec3d shadow$getPositionVector();
     @Shadow public abstract MinecraftServer shadow$getServer();
+    @Shadow public abstract void shadow$setWorld(World worldIn);
 
     // @formatter:on
-
-    @Shadow public boolean collidedHorizontally;
-    @Shadow public boolean collidedVertically;
-
-    @Shadow public abstract void setWorld(World worldIn);
 
     private boolean impl$isConstructing = true;
     @Nullable private Component impl$displayName;
     @Nullable private BlockPos impl$lastCollidedBlockPos;
     private boolean impl$trackedInWorld = false;
-    private boolean vanish$collision = false;
-    private boolean vanish$untargetable = false;
-    private boolean vanish$isVanished = false;
-    private boolean vanish$pendingVisibilityUpdate = false;
+    private boolean impl$collision = false;
+    private boolean impl$untargetable = false;
+    private boolean impl$isVanished = false;
+    private boolean impl$pendingVisibilityUpdate = false;
     @Nullable private Cause impl$destructCause;
     private int impl$customFireImmuneTicks = this.shadow$getFireImmuneTicks();
     private boolean impl$skipSettingCustomNameTag = false;
-    private int vanish$visibilityTicks = 0;
+    private int impl$visibilityTicks = 0;
 
     // @formatter:on
 
@@ -235,7 +232,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 net.minecraft.world.server.ServerWorld originalWorld = (net.minecraft.world.server.ServerWorld) this.shadow$getEntityWorld();
                 ((PlatformServerWorldBridge) this.shadow$getEntityWorld()).bridge$removeEntity((Entity) (Object) this, true);
                 this.bridge$revive();
-                this.setWorld(destinationWorld);
+                this.shadow$setWorld(destinationWorld);
                 destinationWorld.func_217460_e((Entity) (Object) this);
 
                 originalWorld.resetUpdateEntityTick();

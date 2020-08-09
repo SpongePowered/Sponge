@@ -70,8 +70,7 @@ public interface ServerPlayerEntityBridge {
 
     int bridge$getViewDistance();
 
-    Optional<User> bridge$getBackingUser();
-
+    @Nullable
     User bridge$getUserObject();
 
     void bridge$setVelocityOverride(@Nullable Vector3d velocity);
@@ -116,6 +115,7 @@ public interface ServerPlayerEntityBridge {
 
     Set<SkinPart> bridge$getSkinParts();
 
+    @Nullable
     User bridge$getUser();
 
     boolean bridge$hasDelegate();

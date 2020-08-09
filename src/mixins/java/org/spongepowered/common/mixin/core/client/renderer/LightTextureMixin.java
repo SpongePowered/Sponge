@@ -37,7 +37,7 @@ public abstract class LightTextureMixin {
 
     @Redirect(method = "updateLightmap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/dimension/Dimension;getType()"
             + "Lnet/minecraft/world/dimension/DimensionType;"))
-    private DimensionType changeLightForAllEndDimensions(Dimension dimension) {
+    private DimensionType impl$changeLightForAllEndDimensions(Dimension dimension) {
         if (dimension instanceof EndDimension) {
             return DimensionType.THE_END;
         }
