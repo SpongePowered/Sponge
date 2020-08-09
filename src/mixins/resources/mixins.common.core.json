@@ -53,6 +53,8 @@
         "world.storage.WorldInfoMixin"
     ],
     "client": [
+        "client.renderer.LightTextureMixin",
+        "client.renderer.WorldRendererMixin",
         "client.network.handshake.ClientHandshakeNetHandlerMixin",
         "client.network.login.ClientLoginNetHandlerMixin",
         "client.network.play.ClientPlayNetHandlerMixin",

@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.client.world;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
@@ -36,14 +33,10 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 @Mixin(ClientWorld.class)
 public abstract class ClientWorldMixin extends WorldMixin implements WorldBridge {
 
-    @Shadow @Final private Minecraft mc;
-
     @Override
     public void bridge$changeDimension(final SpongeDimensionType dimensionType) {
         super.bridge$changeDimension(dimensionType);
 
-        this.mc.gameRenderer.getActiveRenderInfo().clear();
-        this.mc.worldRenderer.setWorldAndLoadRenderers(null);
-        this.mc.worldRenderer.setWorldAndLoadRenderers((ClientWorld) (Object) this);
+        this.shadow$calculateInitialSkylight();
     }
 }

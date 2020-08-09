@@ -63,31 +63,6 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
         return (float) this.impl$damageAmount;
     }
 
-    @Redirect(method = "onImpact",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isSleeping()Z"))
-    private boolean impl$onEnderPearlImpact(final ServerPlayerEntity player) {
-        if (player.isSleeping()) {
-            return true;
-        }
-
-        // TODO Minecraft 1.14 - Re-write this hook to not use the Pearl's position but the position from the event
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENDER_PEARL);
-            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (Player) player);
-
-            final ServerLocation fromLocation = ((ServerPlayer) player).getServerLocation();
-            final ServerLocation toLocation = ((org.spongepowered.api.entity.Entity) this).getServerLocation();
-            final MoveEntityEvent.Position event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), (ServerPlayer) player,
-                fromLocation.getPosition(), toLocation.getPosition());
-            if (event.isCancelled()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     @Override
     public void impl$readFromSpongeCompound(final CompoundNBT compound) {
         super.impl$readFromSpongeCompound(compound);

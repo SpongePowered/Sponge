@@ -87,6 +87,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.teleport.MovementTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -640,12 +641,12 @@ public final class SpongeCommonEventFactory {
     }
 
     /**
-     * Performs the logic necessary to post the {@link MoveEntityEvent.Position position event} for an {@link Entity}.
+     * Performs the logic necessary to post the {@link MoveEntityEvent position event} for an {@link Entity}.
      *
      * @param entity The event
      */
-    public static void callMoveEntityEventPosition(final net.minecraft.entity.Entity entity) {
-        if (entity.removed || (!ShouldFire.MOVE_ENTITY_EVENT || !ShouldFire.MOVE_ENTITY_EVENT_POSITION)) {
+    public static void callNaturalMoveEntityEvent(final net.minecraft.entity.Entity entity) {
+        if (entity.removed || (!ShouldFire.MOVE_ENTITY_EVENT)) {
             return;
         }
 
@@ -659,18 +660,20 @@ public final class SpongeCommonEventFactory {
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity);
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
-            final MoveEntityEvent.Position event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), (Entity) entity,
-                new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.posX, entity.posY, entity.posZ));
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(), (Entity) entity,
+                    new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.posX, entity.posY, entity.posZ),
+                    new Vector3d(entity.posX, entity.posY, entity.posZ));
 
             if (SpongeCommon.postEvent(event)) {
                 entity.posX = entity.prevPosX;
                 entity.posY = entity.prevPosY;
                 entity.posZ = entity.prevPosZ;
             } else {
-                entity.posX = event.getToPosition().getX();
-                entity.posY = event.getToPosition().getY();
-                entity.posZ = event.getToPosition().getZ();
+                entity.posX = event.getDestinationPosition().getX();
+                entity.posY = event.getDestinationPosition().getY();
+                entity.posZ = event.getDestinationPosition().getZ();
             }
         }
     }

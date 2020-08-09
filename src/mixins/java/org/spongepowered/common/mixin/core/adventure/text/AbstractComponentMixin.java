@@ -51,7 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(AbstractComponent.class)
-public class AbstractComponentMixin implements ComponentBridge {
+public abstract class AbstractComponentMixin implements ComponentBridge {
     private ITextComponent bridge$vanillaComponent;
 
     @Override

@@ -51,6 +51,8 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
 
     @Shadow public abstract void shadow$calculateInitialSkylight();
 
+    @Shadow public abstract void calculateInitialSkylight();
+
     private boolean impl$isDefinitelyFake = false;
     private boolean impl$hasChecked = false;
 
@@ -74,8 +76,6 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
         final BiFunction<World, net.minecraft.world.dimension.DimensionType, ? extends Dimension> factory = dimensionType.getDimensionFactory();
         final Dimension newDimension = factory.apply((World) (Object) this, ((World) (Object) this).dimension.getType());
         ((WorldAccessor) this).accessor$setDimension(newDimension);
-
-        this.shadow$calculateInitialSkylight();
     }
 
 //    @SuppressWarnings("deprecation")

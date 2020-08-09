@@ -140,15 +140,6 @@ public final class WorldTest {
 
     @Listener
     public void onChangeWorld(final ChangeEntityWorldEvent event) {
-        if (event instanceof MoveEntityEvent.Teleport) {
-            return;
-        }
-
-        System.err.println(event);
-    }
-
-    @Listener
-    public void onMoveEntity(final MoveEntityEvent.Teleport event) {
         System.err.println(event);
     }
 }

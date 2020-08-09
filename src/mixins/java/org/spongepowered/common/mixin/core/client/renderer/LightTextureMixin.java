@@ -22,27 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.adventure.bossbar;
+package org.spongepowered.common.mixin.core.client.renderer;
 
-import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.world.dimension.Dimension;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.dimension.EndDimension;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.adventure.BossBarBridge;
-import org.spongepowered.common.bridge.world.BossInfoBridge;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(targets = "net.kyori.adventure.bossbar.BossBarImpl")
-public abstract class BossBarImplMixin implements BossBarBridge {
-    private ServerBossInfo bridge$vanillaServerBar;
+@Mixin(LightTexture.class)
+public abstract class LightTextureMixin {
 
-    @Override
-    public ServerBossInfo bridge$asVanillaServerBar() {
-        if (this.bridge$vanillaServerBar == null) {
-            final BossBar $this = (BossBar) this;
-            this.bridge$vanillaServerBar = new ServerBossInfo(SpongeAdventure.asVanilla($this.name()), SpongeAdventure.asVanilla($this.color()), SpongeAdventure.asVanilla($this.overlay()));
-            final BossInfoBridge bridge = (BossInfoBridge) this.bridge$vanillaServerBar;
-            bridge.bridge$copyAndAssign($this);
+    @Redirect(method = "updateLightmap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/dimension/Dimension;getType()"
+            + "Lnet/minecraft/world/dimension/DimensionType;"))
+    private DimensionType changeLightForAllEndDimensions(Dimension dimension) {
+        if (dimension instanceof EndDimension) {
+            return DimensionType.THE_END;
         }
-        return this.bridge$vanillaServerBar;
+
+        return dimension.getType();
     }
 }

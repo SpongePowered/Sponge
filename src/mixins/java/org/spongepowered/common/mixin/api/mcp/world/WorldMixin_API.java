@@ -400,4 +400,29 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
               this.shadow$getDimension().getType(), packet);
         }
     }
+
+    @Override
+    public boolean allowsPlayerRespawns() {
+        return this.shadow$getDimension().canRespawnHere();
+    }
+
+    @Override
+    public boolean doesWaterEvaporate() {
+        return this.shadow$getDimension().doesWaterVaporize();
+    }
+
+    @Override
+    public boolean hasSkylight() {
+        return this.shadow$getDimension().hasSkyLight();
+    }
+
+    @Override
+    public boolean isCaveWorld() {
+        return this.shadow$getDimension().isNether();
+    }
+
+    @Override
+    public boolean isSurfaceWorld() {
+        return this.shadow$getDimension().isSurfaceWorld();
+    }
 }

@@ -22,27 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.adventure.bossbar;
+package org.spongepowered.common.mixin.core.client.renderer;
 
-import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.world.dimension.EndDimension;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.adventure.BossBarBridge;
-import org.spongepowered.common.bridge.world.BossInfoBridge;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(targets = "net.kyori.adventure.bossbar.BossBarImpl")
-public abstract class BossBarImplMixin implements BossBarBridge {
-    private ServerBossInfo bridge$vanillaServerBar;
+@Mixin(WorldRenderer.class)
+public abstract class WorldRendererMixin {
 
-    @Override
-    public ServerBossInfo bridge$asVanillaServerBar() {
-        if (this.bridge$vanillaServerBar == null) {
-            final BossBar $this = (BossBar) this;
-            this.bridge$vanillaServerBar = new ServerBossInfo(SpongeAdventure.asVanilla($this.name()), SpongeAdventure.asVanilla($this.color()), SpongeAdventure.asVanilla($this.overlay()));
-            final BossInfoBridge bridge = (BossInfoBridge) this.bridge$vanillaServerBar;
-            bridge.bridge$copyAndAssign($this);
+    @Shadow @Final private Minecraft mc;
+
+    @Shadow protected abstract void renderSkyEnd();
+
+    @Inject(method = "renderSky(F)V", at = @At("HEAD"), cancellable = true)
+    private void impl$renderEndSkyboxForAllEndDimensions(float partialTicks, CallbackInfo ci) {
+        if (this.mc.world.dimension instanceof EndDimension) {
+            this.renderSkyEnd();
+            ci.cancel();
         }
-        return this.bridge$vanillaServerBar;
     }
 }

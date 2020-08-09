@@ -37,13 +37,14 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.chunk.ProtoChunk;
-import org.spongepowered.api.world.dimension.Dimension;
+import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.volume.game.ReadableRegion;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -77,8 +78,8 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
     // ReadableRegion
 
     @Override
-    default Dimension getDimension() {
-        return (Dimension) this.shadow$getDimension();
+    default DimensionType getDimensionType() {
+        return ((DimensionTypeBridge) this.shadow$getDimension().getType()).bridge$getSpongeDimensionType();
     }
 
     @Override

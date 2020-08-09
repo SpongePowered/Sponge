@@ -418,10 +418,10 @@ public final class PortalHelper {
                 player.rotationYaw = yaw;
             }
 
-            final MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(PhaseTracker.getCauseStackManager()
-                    .getCurrentCause(), (ServerPlayer) player, (org.spongepowered.api.world.server.ServerWorld) fromWorld,
-                    (org.spongepowered.api.world.server.ServerWorld) toWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld,
-                    VecHelper.toVector3d(player.getPositionVector()), new Vector3d(x, y, z));
+            final MoveEntityEvent event = SpongeEventFactory.createChangeEntityWorldEventReposition(PhaseTracker.getCauseStackManager()
+                    .getCurrentCause(), (ServerPlayer) player, (org.spongepowered.api.world.server.ServerWorld) fromWorld, VecHelper
+                    .toVector3d(player.getPositionVector()),  new Vector3d(x, y, z), (org.spongepowered.api.world.server.ServerWorld) toWorld,
+                    new Vector3d(x, y, z), (org.spongepowered.api.world.server.ServerWorld) toWorld);
 
             if (SpongeCommon.postEvent(event)) {
                 // Doing the snapshot port above sets network position/rotation, roll it back
@@ -432,9 +432,9 @@ public final class PortalHelper {
                 return player;
             }
 
-            x = event.getToPosition().getX();
-            y = event.getToPosition().getY();
-            z = event.getToPosition().getZ();
+            x = event.getDestinationPosition().getX();
+            y = event.getDestinationPosition().getY();
+            z = event.getDestinationPosition().getZ();
 
             // Only create the obsidian platform if this not inter-world, not the API nether portal, and we're going to Vanilla's The End
             if (!isSameWorld && (!(portal instanceof NetherPortalType) && toWorld.getDimension().getType() == DimensionType.THE_END)) {

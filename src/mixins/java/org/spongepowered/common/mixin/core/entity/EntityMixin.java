@@ -29,6 +29,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.server.MinecraftServer;
@@ -36,16 +37,19 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.TicketType;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.api.event.cause.entity.teleport.MovementTypes;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
@@ -64,6 +68,7 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
+import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.entity.EntityUtil;
@@ -146,6 +151,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Shadow public boolean collidedHorizontally;
     @Shadow public boolean collidedVertically;
+
+    @Shadow public abstract void setWorld(World worldIn);
+
     private boolean impl$isConstructing = true;
     @Nullable private Component impl$displayName;
     @Nullable private BlockPos impl$lastCollidedBlockPos;
@@ -168,30 +176,77 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
 
         try (final TeleportContext context = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
-
-            if (!(((ServerWorld) this.shadow$getEntityWorld()).getKey().equals(location.getWorldKey()))) {
-                context.worldChange().buildAndSwitch();
-
-
-                return true;
-            }
-
             context.buildAndSwitch();
 
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.pushCause(SpongeCommon.getActivePlugin());
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
-                final MoveEntityEvent.Position.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(frame.getCurrentCause(),
-                    (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(), location.getWorld(), location.getWorld(),
-                        VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition());
+                final Vec3d originalPosition = this.shadow$getPositionVector();
 
-                if (SpongeCommon.postEvent(event)) {
+                net.minecraft.world.server.ServerWorld destinationWorld = (net.minecraft.world.server.ServerWorld) location.getWorld();
+
+                if (this.shadow$getEntityWorld() != destinationWorld) {
+                    final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(), location.getWorld(),
+                            location.getWorld());
+                    if (SpongeCommon.postEvent(event) && ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
+                        return false;
+                    }
+
+                    final ChangeEntityWorldEvent.Reposition repositionEvent =
+                            SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
+                                    (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(),
+                                    VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition(), event.getOriginalDestinationWorld(),
+                                    location.getPosition(), event.getDestinationWorld());
+
+                    if (SpongeCommon.postEvent(event)) {
+                        return false;
+                    }
+
+                    destinationWorld = (net.minecraft.world.server.ServerWorld) event.getDestinationWorld();
+
+                    this.posX = repositionEvent.getDestinationPosition().getX();
+                    this.posY = repositionEvent.getDestinationPosition().getY();
+                    this.posZ = repositionEvent.getDestinationPosition().getZ();
+                } else {
+                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()),
+                            location.getPosition(), location.getPosition());
+                    if (SpongeCommon.postEvent(event)) {
+                        return false;
+                    }
+
+                    this.posX = event.getDestinationPosition().getX();
+                    this.posY = event.getDestinationPosition().getY();
+                    this.posZ = event.getDestinationPosition().getZ();
+                }
+
+                if (!destinationWorld.getChunkProvider().chunkExists((int) this.posX >> 4, (int) this.posZ >> 4)) {
+                    // Roll back the position
+                    this.posX = originalPosition.x;
+                    this.posY = originalPosition.y;
+                    this.posZ = originalPosition.z;
                     return false;
                 }
-            }
-        }
 
-        return true;
+                ((Entity) (Object) this).detach();
+
+                net.minecraft.world.server.ServerWorld originalWorld = (net.minecraft.world.server.ServerWorld) this.shadow$getEntityWorld();
+                ((PlatformServerWorldBridge) this.shadow$getEntityWorld()).bridge$removeEntity((Entity) (Object) this, true);
+                this.bridge$revive();
+                this.setWorld(destinationWorld);
+                destinationWorld.func_217460_e((Entity) (Object) this);
+
+                originalWorld.resetUpdateEntityTick();
+                destinationWorld.resetUpdateEntityTick();
+
+                final ChunkPos chunkPos = new ChunkPos((int) this.posX >> 4, (int) this.posZ >> 4);
+                destinationWorld.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((Entity) (Object) this).getEntityId());
+            }
+
+            return true;
+        }
     }
 
     /**

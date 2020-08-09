@@ -163,7 +163,7 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             entityTiming.startTiming();
             consumer.accept(entity);
-            SpongeCommonEventFactory.callMoveEntityEventPosition(entity);
+            SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
             SpongeCommonEventFactory.callRotateEntityEvent(entity);
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
@@ -190,7 +190,7 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             entityTiming.startTiming();
             consumer.accept(entity);
-            SpongeCommonEventFactory.callMoveEntityEventPosition(entity);
+            SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
             SpongeCommonEventFactory.callRotateEntityEvent(entity);
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
@@ -218,7 +218,7 @@ public final class TrackingUtil {
             }
             context.buildAndSwitch();
             entity.updateRidden();
-            SpongeCommonEventFactory.callMoveEntityEventPosition(entity);
+            SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
             SpongeCommonEventFactory.callRotateEntityEvent(entity);
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
