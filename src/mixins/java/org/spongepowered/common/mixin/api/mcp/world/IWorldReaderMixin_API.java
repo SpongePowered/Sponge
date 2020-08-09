@@ -156,11 +156,12 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
             "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
-    @Override
-    default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
-        throw new UnsupportedOperationException(
-            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-    }
+// causes conflicting default methods
+//    @Override
+//    default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
+//        throw new UnsupportedOperationException(
+//            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+//    }
 
     @Override
     default <T extends Entity> Collection<? extends T> getEntities(final Class<? extends T> entityClass, final AABB box,

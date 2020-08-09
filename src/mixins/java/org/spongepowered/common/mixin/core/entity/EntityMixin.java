@@ -134,7 +134,6 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     private int vanish$visibilityTicks = 0;
 
     // @formatter:on
-/*
 
     @Override
     public boolean bridge$isConstructing() {
@@ -145,6 +144,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
     public void bridge$fireConstructors() {
         this.impl$isConstructing = false;
     }
+/*
 
     @Override
     public boolean bridge$isWorldTracked() {

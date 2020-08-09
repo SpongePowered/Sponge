@@ -91,7 +91,7 @@ public class CustomDataTest {
                             player.sendActionBar(TextComponent.of(entitySum));
                             break;
                         case BLOCKENTITY:
-                            player.getWorld().setBlock(player.getBlockPosition(), BlockTypes.PISTON.get().getDefaultState());
+                            player.getWorld().setBlock(player.getBlockPosition(), BlockTypes.DISPENSER.get().getDefaultState());
                             final BlockEntity blockEntity = player.getWorld().getBlockEntity(player.getBlockPosition()).get();
                             blockEntity.offer(this.myKey, number);
                             final int blockEntitySum = player.getWorld().getBlockEntities().stream().filter(e -> e.get(this.myKey).isPresent())

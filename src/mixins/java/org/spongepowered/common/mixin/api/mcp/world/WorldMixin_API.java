@@ -58,6 +58,7 @@ import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.Player;
@@ -90,6 +91,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -102,6 +104,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
 
     @Shadow public @Final Random rand;
     @Shadow protected @Final WorldInfo worldInfo;
+    @Shadow @Final public List<TileEntity> loadedTileEntityList;
 
     @Shadow public abstract Biome shadow$getBiome(BlockPos p_180494_1_);
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
@@ -399,5 +402,10 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
             this.shadow$getServer().getPlayerList().sendToAllNearExcept(null, x, y, z, radius,
               this.shadow$getDimension().getType(), packet);
         }
+    }
+
+    @Override
+    public Collection<? extends BlockEntity> getBlockEntities() {
+        return (Collection) this.loadedTileEntityList;
     }
 }
