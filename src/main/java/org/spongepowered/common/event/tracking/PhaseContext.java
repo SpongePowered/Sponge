@@ -59,6 +59,7 @@ import org.spongepowered.common.event.tracking.context.EntityItemEntityDropsSupp
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -447,26 +448,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return Collections.emptyList();
     }
 
-    public class EffectTransactor implements AutoCloseable {
-
-        private final @Nullable ResultingTransactionBySideEffect previousEffect;
-
-        public EffectTransactor(final ResultingTransactionBySideEffect effect) {
-            /*
-            | ChangeBlock(1) <- head will be RemoveTileEntity(1), tail is still RemoveTileentity(1)
-            |  |- RemoveTileEntity <- Head will be ChangeBlock(2) tail is still ChangeBlock(2)
-            |  |   |- ChangeBlock <-- Head will be null, tail is still null
-             */
-            this.previousEffect = PhaseContext.this.getBlockTransactor().getEffect();
-            PhaseContext.this.getBlockTransactor().pushEffect(effect);
-        }
-
-        @Override
-        public void close() {
-            PhaseContext.this.getBlockTransactor().pushEffect(this.previousEffect);
-        }
-    }
-
     public TransactionalCaptureSupplier getBlockTransactor() {
         if (this.blockTransactor == null) {
             this.blockTransactor = new TransactionalCaptureSupplier();
@@ -475,7 +456,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     public EffectTransactor pushTransactor(final ResultingTransactionBySideEffect effect) {
-        return new EffectTransactor(effect);
+        return this.getBlockTransactor().pushTransactor(effect);
     }
 
     public CapturedMultiMapSupplier<BlockPos, ItemDropData> getBlockDropSupplier() throws IllegalStateException {

@@ -229,11 +229,33 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     This is achieved through captureNeighborNotification and logTileChange.
      */
 
+    public EffectTransactor pushTransactor(final ResultingTransactionBySideEffect effect) {
+        final EffectTransactor effectTransactor = new EffectTransactor(effect, this.tail, this.effect, this);
+        this.effect = effect;
+        if (this.tail != null) {
+            this.tail.getEffects().addLast(effect);
+        }
+        this.tail = null;
+        return effectTransactor;
+    }
+
+    void popEffect(final EffectTransactor transactor) {
+        this.tail = transactor.parent;
+        this.effect = transactor.previousEffect;
+    }
+
     private void logTransaction(final BlockTransaction transaction) {
         if (this.tail != null) {
             this.tail.next = transaction;
+            if (this.effect != null) {
+                this.effect.addChild(transaction);
+            }
         } else {
-            this.head = transaction;
+            if (this.effect == null) {
+                this.head = transaction;
+            } else {
+                this.effect.addChild(transaction);
+            }
         }
         transaction.previous = this.tail;
         this.tail = transaction;
@@ -246,12 +268,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final BlockTransaction.ChangeBlock changeBlock = new BlockTransaction.ChangeBlock(
             originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags
         );
-        if (this.tail != null && this.effect != null) {
-            this.tail.addEffect(this.effect);
-            this.effect.addChild(changeBlock);
-        } else {
-            this.logTransaction(changeBlock);
-        }
+        this.logTransaction(changeBlock);
         return changeBlock;
     }
 
@@ -259,13 +276,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if (tileEntity == null) {
             return false;
         }
-        if (this.tail != null && this.effect != null) {
+        if (this.tail != null) {
             final boolean newRecorded = this.tail.acceptTileAddition(tileEntity);
             if (newRecorded) {
                 return true;
             }
-            this.tail.addEffect(this.effect);
-            this.effect.addChild(this.createTileAdditionTransaction(tileEntity, worldSupplier));
+            this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier));
         } else {
             this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier));
         }
@@ -276,13 +292,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if (tileentity == null) {
             return false;
         }
-        if (this.tail != null && this.effect != null) {
+        if (this.tail != null) {
             final boolean newRecorded = this.tail.acceptTileRemoval(tileentity);
             if (newRecorded) {
                 return true;
             }
-            this.tail.addEffect(this.effect);
-            this.effect.addChild(this.createTileRemovalTransaction(tileentity, worldSupplier));
+            this.logTransaction(this.createTileRemovalTransaction(tileentity, worldSupplier));
         } else {
             this.logTransaction(this.createTileRemovalTransaction(tileentity, worldSupplier));
         }
@@ -298,8 +313,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (newRecorded) {
                 return true;
             }
-            this.tail.addEffect(this.effect);
-            this.effect.addChild(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
+            this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
         } else {
             this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
         }
@@ -311,12 +325,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         @Nullable final TileEntity existingTile
     ) {
         final BlockTransaction.NeighborNotification notificationTransaction = new BlockTransaction.NeighborNotification(targetBlockState, targetBlockState, immutableTarget, blockIn, immutableFrom);
-        if (this.tail != null && this.effect != null) {
-            this.tail.addEffect(this.effect);
-            this.effect.addChild(notificationTransaction);
-        } else {
-            this.logTransaction(notificationTransaction);
-        }
+        this.logTransaction(notificationTransaction);
     }
 
     private BlockTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable TileEntity existing,
@@ -367,10 +376,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
 
         return new BlockTransaction.AddTileEntity(tileentity, snapshot);
-    }
-
-    public void pushEffect(final @Nullable ResultingTransactionBySideEffect effect) {
-        this.effect = effect;
     }
 
     public void clear() {
@@ -485,10 +490,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
         }
 
-    }
-
-    public @Nullable ResultingTransactionBySideEffect getEffect() {
-        return this.effect;
     }
 
 }
