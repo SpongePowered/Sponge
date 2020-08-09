@@ -52,11 +52,8 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Chun
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
@@ -101,8 +98,11 @@ public abstract class BlockTransaction {
         ChunkPipeline.Builder builder, ChunkSection chunksection
     );
 
-    public List<ResultingTransactionBySideEffect> getEffects() {
-        return this.sideEffects == null ? Collections.emptyList() : this.sideEffects;
+    Deque<ResultingTransactionBySideEffect> getEffects() {
+        if (this.sideEffects == null) {
+            this.sideEffects = new LinkedList<>();
+        }
+        return this.sideEffects;
     }
 
     public final boolean hasChildTransactions() {

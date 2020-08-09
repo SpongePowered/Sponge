@@ -31,6 +31,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
@@ -99,7 +100,7 @@ public final class TileEntityPipeline implements BlockPipeline {
     public boolean processEffects(final PhaseContext<?> context, final PipelineCursor initialCursor) {
         PipelineCursor currentCursor = initialCursor;
         for (final ResultingTransactionBySideEffect effect : this.effects) {
-            try (final PhaseContext<?>.EffectTransactor ignored = context.pushTransactor(effect)) {
+            try (final EffectTransactor ignored = context.pushTransactor(effect)) {
                 final EffectResult result = effect.effect.processSideEffect(
                     this,
                     currentCursor,

@@ -34,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
@@ -100,7 +101,7 @@ public final class ChunkPipeline implements BlockPipeline {
         final PipelineCursor formerState = new PipelineCursor(currentState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.chunkEffects) {
-            try (final PhaseContext<?>.EffectTransactor ignored = context.pushTransactor(effect)) {
+            try (final EffectTransactor ignored = context.pushTransactor(effect)) {
                 final EffectResult result = effect.effect.processSideEffect(
                     this,
                     formerState,

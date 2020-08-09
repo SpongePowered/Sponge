@@ -69,6 +69,7 @@ import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.ScheduledBlockChange;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToLoadedListInWorldEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToTickableListEffect;
@@ -508,7 +509,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
 
 
         //  try { // Vanilla - We need to push the effect transactor so that it always pops
-        try (final PhaseContext<?>.EffectTransactor ignored = peek.pushTransactor(sideEffect)) {
+        try (final EffectTransactor ignored = peek.pushTransactor(sideEffect)) {
             final WeakReference<ServerWorld> worldReference = new WeakReference<>((ServerWorld) (Object) this);
             final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldReference.get(), "ServerWorld dereferenced");
             final @Nullable TileEntity existingTile = targetChunk.getTileEntity(immutableTarget, Chunk.CreateEntityType.CHECK);
