@@ -31,6 +31,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
@@ -42,8 +43,11 @@ import org.spongepowered.api.item.inventory.ContainerTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
+import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
+import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
@@ -130,28 +134,46 @@ public class InventoryTest {
         doubleMyInventory.set(8, ItemStack.of(ItemTypes.GOLD_INGOT));
         doubleMyInventory.set(45, ItemStack.of(ItemTypes.EMERALD));
         doubleMyInventory.set(53, ItemStack.of(ItemTypes.DIAMOND));
-        menu.registerSlotClick((cause, container, slot, slotIndex, clickType) -> {
-            final ViewableInventory.Builder.DummyStep builder = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x6.get()).fillDummy();
-            ViewableInventory inventory = null;
-            switch (slotIndex) {
-                case 0:
-                case 8:
-                case 45:
-                case 53:
-                    inventory = builder.item(slot.peek().createSnapshot()).completeStructure().build();
-                    break;
-                default:
-                    inventory = doubleMyInventory;
-            }
-            slot.set(ItemStack.of(ItemTypes.BEDROCK));
-            if (inventory != null) {
-                menu.setCurrentInventory(inventory);
-            }
-            return false;
-        });
+        menu.registerSlotClick(new MySlotClickHandler(menu, doubleMyInventory));
         final Optional<Container> open = menu.open((ServerPlayer) player);
     }
 
+    private static class MySlotClickHandler implements SlotClickHandler {
+
+        private final InventoryMenu menu;
+        private final ViewableInventory primary;
+        private ViewableInventory last;
+
+        public MySlotClickHandler(InventoryMenu menu, ViewableInventory primary) {
+            this.primary = primary;
+            this.menu = menu;
+        }
+
+        @Override
+        public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+
+            if (slot.viewedSlot().parent() == this.primary) {
+                switch (slotIndex) {
+                    case 0:
+                    case 8:
+                    case 45:
+                    case 53:
+                        this.last = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x6.get())
+                                .fillDummy().item(slot.peek().createSnapshot())
+                                .completeStructure().build();
+                        this.menu.setCurrentInventory(this.last);
+                        break;
+                    default:
+                        slot.set(ItemStack.of(ItemTypes.BEDROCK));
+                }
+                return false;
+            } else if (slot.viewedSlot().parent() == this.last) {
+                this.menu.setCurrentInventory(this.primary);
+                return false;
+            }
+            return true;
+        }
+    }
 
     //
     //    public static net.minecraft.inventory.container.Container doStuff(net.minecraft.inventory.container.Container mcContainer, PlayerEntity

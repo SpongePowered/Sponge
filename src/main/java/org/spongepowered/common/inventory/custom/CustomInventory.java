@@ -31,8 +31,8 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.CarriedBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -107,7 +107,10 @@ public class CustomInventory implements IInventory, CarriedBridge {
         int offset = 0;
         for (Inventory inv : this.inventories) {
             if (inv.capacity() > index - offset) {
-                return inv.peekAt(index - offset).map(ItemStackUtil::toNative).orElse(ItemStack.EMPTY);
+                // This MUST not use Sponge API level because Minecraft relies on returning ItemStack references
+                return inv.getSlot(index - offset).map(InventoryAdapter.class::cast)
+                        .map(slot -> slot.inventoryAdapter$getRootLens().getStack(slot.inventoryAdapter$getFabric(), 0))
+                        .orElse(ItemStack.EMPTY);
             }
             offset += inv.capacity();
         }

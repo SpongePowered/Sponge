@@ -24,15 +24,20 @@
  */
 package org.spongepowered.common.accessor.inventory.container;
 
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
 
 @Mixin(Container.class)
 public interface ContainerAccessor {
 
     @Accessor("inventorySlots") List<Slot> accessor$getInventorySlots();
+    @Accessor("inventoryItemStacks") NonNullList<ItemStack> accessor$getInventoryItemStacks();
+    @Accessor("listeners") List<IContainerListener> accessor$getListeners();
 }

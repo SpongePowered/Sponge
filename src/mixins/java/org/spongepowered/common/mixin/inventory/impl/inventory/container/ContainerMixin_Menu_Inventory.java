@@ -27,10 +27,15 @@ package org.spongepowered.common.mixin.inventory.impl.inventory.container;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -39,11 +44,17 @@ import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.inventory.container.MenuBridge;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 @Mixin(Container.class)
-public class ContainerMixin_Menu_Inventory implements MenuBridge {
+public abstract class ContainerMixin_Menu_Inventory implements MenuBridge {
 
+    @Shadow @Final private List<IContainerListener> listeners;
+    @Shadow @Final private NonNullList<ItemStack> inventoryItemStacks;
+
+    @Shadow @Final public List<Slot> inventorySlots;
     @Nullable private SpongeInventoryMenu impl$menu;
 
     @Override
@@ -82,10 +93,20 @@ public class ContainerMixin_Menu_Inventory implements MenuBridge {
     // InventoryMenu Callback
     @Inject(method = "slotClick", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player, CallbackInfoReturnable<ItemStack> cir) {
-        if (this.bridge$getMenu() != null) {
-            if (!this.bridge$getMenu().onClick(slotId, dragType, clickTypeIn, player, (org.spongepowered.api.item.inventory.Container) this)) {
+        final SpongeInventoryMenu menu = this.bridge$getMenu();
+        if (menu != null) {
+            menu.setOldCursor(player.inventory.getItemStack().copy());
+            if (!menu.onClick(slotId, dragType, clickTypeIn, player, (org.spongepowered.api.item.inventory.Container) this)) {
                 cir.setReturnValue(ItemStack.EMPTY);
-                // TODO maybe need to send rollback packets to client
+                // Accept all changes made by plugin
+                for (int i = 0; i < this.inventorySlots.size(); i++) {
+                    Slot slot = this.inventorySlots.get(i);
+                    this.inventoryItemStacks.set(i, slot.getStack().copy());
+                }
+                // and update client
+                for (IContainerListener listener : this.listeners) {
+                    listener.sendAllContents((Container) (Object) this, this.inventoryItemStacks);
+                }
             }
         }
     }

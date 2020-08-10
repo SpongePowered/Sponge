@@ -400,7 +400,7 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
             if (!ItemStack.areItemStacksEqual(oldStack, newStack)) {
                 changes.add(i);
                 if (menu != null && menu.isReadOnly()) { // readonly menu cancels if there is any change outside of the players inventory
-                    if (!(slot.inventory instanceof PlayerInventory)) {
+                    if (slot.inventory == menu.getInventory()) {
                         readOnlyCancel = true;
                     }
                 }
@@ -411,11 +411,16 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
             // revert all changes if readonly
             for (Integer i : changes) {
                 final Slot slot = this.inventorySlots.get(i);
-                final ItemStack oldStack = slot.getStack();
-                this.inventoryItemStacks.set(i, oldStack);
+                final ItemStack oldStack = this.inventoryItemStacks.get(i);
+                slot.putStack(oldStack.copy());
                 // Send reverted slots to clients
+                this.impl$sendSlotContents(i, oldStack);
+                // Revert item in hand
                 for (IContainerListener listener : this.listeners) {
-                    listener.sendSlotContents(((Container) (Object) this), i, oldStack);
+                    if (listener instanceof ServerPlayerEntity) {
+                        ((ServerPlayerEntity) listener).inventory.setItemStack(menu.getOldCursor());
+                        ((ServerPlayerEntity) listener).updateHeldItem();
+                    }
                 }
             }
         } else {
@@ -427,7 +432,9 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
 
                 // Check for on change menu callbacks
                 if (menu != null && !menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
-                    this.inventoryItemStacks.set(i, oldStack);  // revert changes
+                    this.inventoryItemStacks.set(i, oldStack.copy());  // revert changes
+                    // Send reverted slots to clients
+                    this.impl$sendSlotContents(i, oldStack);
                 } else {
                     // Capture changes for inventory events
                     this.impl$capture(i, newStack, oldStack);
@@ -448,11 +455,29 @@ public abstract class ContainerMixin_Inventory implements TrackedContainerBridge
             }
         }
 
+        if (menu != null) {
+            menu.setOldCursor(null);
+        }
         // like vanilla send property changes
         this.impl$detectAndSendPropertyChanges();
 
         if (this instanceof PlayerContainerBridge) {
             ((PlayerContainerBridge) this).bridge$markClean();
+        }
+    }
+
+    public void impl$sendSlotContents(Integer i, ItemStack oldStack) {
+
+        for (IContainerListener listener : this.listeners) {
+            boolean isChangingQuantityOnly = true;
+            if (listener instanceof ServerPlayerEntity) {
+                isChangingQuantityOnly = ((ServerPlayerEntity) listener).isChangingQuantityOnly;
+                ((ServerPlayerEntity) listener).isChangingQuantityOnly = false;
+            }
+            listener.sendSlotContents(((Container) (Object) this), i, oldStack);
+            if (listener instanceof ServerPlayerEntity) {
+                ((ServerPlayerEntity) listener).isChangingQuantityOnly = isChangingQuantityOnly;
+            }
         }
     }
 
