@@ -96,8 +96,8 @@ public final class NetherPortalType extends VanillaPortalType {
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
 
                 final ServerLocation previousLocation = entity.getServerLocation();
-                ServerLocation destinationLocation = destination;
-                boolean worldChange = !previousLocation.getWorldKey().equals(destinationLocation.getWorldKey());
+                ServerLocation actualDestination = destination;
+                boolean worldChange = !previousLocation.getWorldKey().equals(actualDestination.getWorldKey());
 
                 if (worldChange) {
                     // Call platform event hook before changing dimensions
@@ -107,17 +107,18 @@ public final class NetherPortalType extends VanillaPortalType {
                         return false;
                     }
 
-                    destinationLocation = ServerLocation.of(event.getDestinationWorld(), entity.getPosition());
+                    actualDestination = ServerLocation.of(event.getDestinationWorld(), entity.getPosition());
                 }
 
                 final Function<Boolean, net.minecraft.entity.Entity> portalLogic;
                 if (entity instanceof ServerPlayerEntity) {
                     portalLogic = PortalHelper.createVanillaPlayerPortalLogic((ServerPlayerEntity) entity,
-                            VecHelper.toVec3d(destinationLocation.getPosition()), (ServerWorld) previousLocation.getWorld(),
-                            (ServerWorld) destinationLocation.getWorld(), this);
+                            VecHelper.toVec3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
+                            (ServerWorld) actualDestination.getWorld(), this);
                 } else {
                     portalLogic = PortalHelper.createVanillaEntityPortalLogic((net.minecraft.entity.Entity) entity,
-                            VecHelper.toVec3d(destinationLocation.getPosition()), (ServerWorld) previousLocation.getWorld(), (ServerWorld) destinationLocation.getWorld());
+                            VecHelper.toVec3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
+                            (ServerWorld) actualDestination.getWorld(), this);
                 }
 
                 ((net.minecraft.entity.Entity) entity).setPortal(VecHelper.toBlockPos(previousLocation.getPosition()));
@@ -135,9 +136,12 @@ public final class NetherPortalType extends VanillaPortalType {
                 } else {
                     final ServerLocation currentLocation = ((Entity) mEntity).getServerLocation();
 
-                    if (previousLocation.getWorldKey().equals(currentLocation.getWorldKey()) && previousLocation.getBlockPosition().equals(currentLocation.getBlockPosition())) {
+                    // We use actualDestination for the world as the world change does not happen yet
+                    if (previousLocation.getWorld() == actualDestination.getWorld() && previousLocation.getBlockPosition().equals(currentLocation.getBlockPosition())) {
                         return false;
                     }
+
+                    actualDestination = ServerLocation.of(actualDestination.getWorld(), currentLocation.getPosition());
                 }
 
                 if (!worldChange) {
@@ -153,7 +157,7 @@ public final class NetherPortalType extends VanillaPortalType {
                     ((EntityAccessor) entity).accessor$setTimeUntilPortal(Integer.MAX_VALUE);
 
                     EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) mEntity, (ServerWorld) previousLocation.getWorld(),
-                            (ServerWorld) destination.getWorld(), (ServerWorld) entity.getWorld());
+                            (ServerWorld) destination.getWorld(), (ServerWorld) actualDestination.getWorld(), false);
                 } else {
                     // The portal logic handles re-creating the entity in the other dimension, this is simply cleanup
                     ((net.minecraft.entity.Entity) entity).detach();

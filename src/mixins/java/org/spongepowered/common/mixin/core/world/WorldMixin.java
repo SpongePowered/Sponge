@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Final;
@@ -49,6 +50,8 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     @Shadow public abstract WorldInfo shadow$getWorldInfo();
     @Shadow public abstract void shadow$calculateInitialSkylight();
 
+    @Shadow @Final protected AbstractChunkProvider chunkProvider;
+    @Shadow @Final public Dimension dimension;
     private boolean impl$isDefinitelyFake = false;
     private boolean impl$hasChecked = false;
 

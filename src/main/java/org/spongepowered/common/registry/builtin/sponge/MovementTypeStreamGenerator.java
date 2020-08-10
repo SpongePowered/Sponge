@@ -38,11 +38,12 @@ public final class MovementTypeStreamGenerator {
     public static Stream<MovementType> stream() {
         return Stream.of(
                 new SpongeMovementType(ResourceKey.sponge("command")),
+                new SpongeMovementType(ResourceKey.sponge("end_gateway")),
                 new SpongeMovementType(ResourceKey.sponge("ender_pearl")),
+                new SpongeMovementType(ResourceKey.sponge("entity_teleport")),
                 new SpongeMovementType(ResourceKey.sponge("natural")),
                 new SpongeMovementType(ResourceKey.sponge("plugin")),
-                new SpongeMovementType(ResourceKey.sponge("portal")),
-                new SpongeMovementType(ResourceKey.sponge("unknown"))
+                new SpongeMovementType(ResourceKey.sponge("portal"))
         );
     }
 }

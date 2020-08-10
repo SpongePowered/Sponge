@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -38,24 +36,29 @@ import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.teleport.MovementTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.util.Transform;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
-import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 
-@Mixin(value = LivingEntity.class, priority = 999)
+@Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends EntityMixin implements LivingEntityBridge {
 
     // @formatter:off
+
     @Shadow @Final public int maxHurtResistantTime;
     @Shadow public int hurtTime;
     @Shadow public int maxHurtTime;
@@ -102,12 +105,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract void shadow$onDeath(DamageSource cause);
     @Shadow protected abstract void shadow$addItemParticles(ItemStack stack, int count);
     @Shadow public abstract void shadow$wakeUp();
+
     // @formatter:on
 
-    @Shadow public abstract boolean shadow$attemptTeleport(double p_213373_1_, double p_213373_3_, double p_213373_5_, boolean p_213373_7_);
-
+    @Shadow public int deathTime;
+    @Shadow public float rotationYawHead;
     private int impl$maxAir = this.shadow$getMaxAir();
     @Nullable private ItemStack impl$activeItemStackCopy;
+    @Nullable private Vector3d impl$preTeleportPosition;
 
 /*    @Override
     public int bridge$getMaxAir() {
@@ -795,4 +800,33 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }*/
 
     // End implementation of UseItemStackEvent
+
+    @Inject(method = "attemptTeleport", at = @At("HEAD"))
+    private void impl$snapshotPositionBeforeVanillaTeleportLogic(double x, double y, double z, boolean changeState,
+            CallbackInfoReturnable<Boolean> cir) {
+        this.impl$preTeleportPosition = new Vector3d(this.posX, this.posY, this.posZ);
+    }
+
+    @Inject(method = "attemptTeleport", at = @At(value = "RETURN", ordinal = 0, shift = At.Shift.BY, by = 2), cancellable = true)
+    private void impl$callMoveEntityEventForTeleport(double x, double y, double z, boolean changeState,
+            CallbackInfoReturnable<Boolean> cir) {
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENTITY_TELEPORT);
+
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                    (org.spongepowered.api.entity.Entity) this, this.impl$preTeleportPosition, new Vector3d(this.posX, this.posY, this.posZ),
+                    new Vector3d(x, y, z));
+
+            if (SpongeCommon.postEvent(event)) {
+                this.shadow$setPositionAndUpdate(this.impl$preTeleportPosition.getX(), this.impl$preTeleportPosition.getY(),
+                        this.impl$preTeleportPosition.getZ());
+                cir.setReturnValue(false);
+            }
+
+            this.shadow$setPositionAndUpdate(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
+                    event.getDestinationPosition().getZ());
+        }
+    }
 }

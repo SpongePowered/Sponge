@@ -30,12 +30,16 @@ import net.kyori.adventure.text.TextComponent;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SDisconnectPacket;
+import net.minecraft.network.play.server.SJoinGamePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameType;
+import net.minecraft.world.WorldType;
+import net.minecraft.world.dimension.DimensionType;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.User;
@@ -57,6 +61,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.net.SocketAddress;
@@ -155,6 +160,15 @@ public abstract class PlayerListMixin {
         if (mcPlayer.world == null) {
             ci.cancel();
         }
+    }
+
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "NEW", target = "net/minecraft/network/play/server/SJoinGamePacket"))
+    private SJoinGamePacket impl$onInitPlayer_sendFakeDimensionTypeForVanillaClient(final int entityId, final GameType gameType,
+            final boolean isHardcore, final DimensionType dimensionType, final int maxPlayers, final WorldType generatorType,
+            final int viewDistance, final boolean isReducedDebugMode, final NetworkManager manager, final ServerPlayerEntity entity) {
+        ((ServerPlayerEntityBridge) entity).bridge$sendDimensionData(manager, dimensionType);
+        return PlatformHooks.getInstance().getPacketHooks().createSJoinGamePacket(entity, gameType, isHardcore, dimensionType, maxPlayers, generatorType,
+                viewDistance, isReducedDebugMode);
     }
 
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE",

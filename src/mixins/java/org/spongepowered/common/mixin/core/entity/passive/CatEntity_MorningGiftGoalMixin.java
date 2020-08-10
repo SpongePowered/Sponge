@@ -22,35 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monster;
+package org.spongepowered.common.mixin.core.entity.passive;
 
+import net.minecraft.entity.passive.CatEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.monster.EndermanEntity;
+@Mixin(targets = "net/minecraft/entity/passive/CatEntity$MorningGiftGoal")
+public abstract class CatEntity_MorningGiftGoalMixin {
 
-@Mixin(EndermanEntity.class)
-public abstract class EndermanEntityMixin extends MonsterEntityMixin {
+    private boolean impl$teleportResult;
 
-    @Shadow @Nullable public abstract BlockState getHeldBlockState();
+    @Redirect(method = "func_220804_h", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/CatEntity;attemptTeleport(DDDZ)Z"))
+    private boolean impl$storeTeleportResult(CatEntity entity, double x, double y, double z, boolean changeState) {
+        this.impl$teleportResult = entity.attemptTeleport(x, y, z, changeState);
+        return this.impl$teleportResult;
+    }
 
-    @Shadow public abstract void setHeldBlockState(@Nullable BlockState state);
-
-    /**
-     * @author gabizou - July 26th, 2018
-     * @reason Due to vanilla logic, a block is removed *after* the held item is set,
-     * so, when the block event gets cancelled, we don't have a chance to cancel the
-     * enderman pickup.
-     *
-     * @param phaseContext The context, for whatever reason in the future
-     */
-    @Override
-    public void bridge$onCancelledBlockChange(EntityTickContext phaseContext) {
-        if (this.getHeldBlockState() != null) {
-            this.setHeldBlockState(null);
+    @Inject(method = "func_220804_h", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/entity/passive/CatEntity;attemptTeleport(DDDZ)Z",
+            shift = At.Shift.AFTER), cancellable = true)
+    private void impl$makeCatsRespectTeleportResult(CallbackInfo ci) {
+        if (!this.impl$teleportResult) {
+            ci.cancel();
         }
     }
 }

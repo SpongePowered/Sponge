@@ -93,19 +93,20 @@ public final class WrappedITeleporterPortalType implements PortalType {
                     (ServerWorld) destination.getWorld(), this);
             } else {
                 portalLogic = PortalHelper.createVanillaEntityPortalLogic((net.minecraft.entity.Entity) entity,
-                    VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getServerLocation().getWorld(), (ServerWorld) destination.getWorld());
+                        VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getServerLocation().getWorld(),
+                        (ServerWorld) destination.getWorld(), this);
             }
 
             result = portalLogic.apply(generateDestinationPortal);
         } else {
             if (entity instanceof ServerPlayer) {
                 result = this.teleporter.bridge$placeEntity((ServerPlayerEntity) entity, (ServerWorld) entity.getWorld(),
-                    (ServerWorld) destination.getWorld(), 0, PortalHelper.createVanillaEntityPortalLogic((ServerPlayerEntity) entity,
-                    VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getWorld(), (ServerWorld) destination.getWorld()));
+                    (ServerWorld) destination.getWorld(), 0, PortalHelper.createVanillaPlayerPortalLogic((ServerPlayerEntity) entity,
+                    VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getWorld(), (ServerWorld) destination.getWorld(), this));
             } else {
                 result = this.teleporter.bridge$placeEntity((net.minecraft.entity.Entity) entity, (ServerWorld) entity.getWorld(),
                     (ServerWorld) destination.getWorld(), 0, PortalHelper.createVanillaEntityPortalLogic((net.minecraft.entity.Entity) entity,
-                        VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getWorld(), (ServerWorld) destination.getWorld()));
+                        VecHelper.toVec3d(destination.getPosition()), (ServerWorld) entity.getWorld(), (ServerWorld) destination.getWorld(), this));
             }
         }
 

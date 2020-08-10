@@ -29,11 +29,15 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.EnderPearlEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.EndGatewayTileEntity;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.dimension.DimensionType;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.teleport.MovementTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -41,11 +45,17 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.projectile.ThrowableEntityMixin;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
 
 import javax.annotation.Nullable;
 
@@ -75,6 +85,51 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
     public void impl$writeToSpongeCompound(final CompoundNBT compound) {
         super.impl$writeToSpongeCompound(compound);
         compound.putDouble(Constants.Sponge.Entity.Projectile.PROJECTILE_DAMAGE_AMOUNT, this.impl$damageAmount);
+    }
+
+    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/EndGatewayTileEntity;teleportEntity(Lnet/minecraft/entity/Entity;)V"))
+    private void impl$createCauseFrameForGatewayTeleport(EndGatewayTileEntity endGatewayTileEntity, Entity entityIn) {
+        if (this.shadow$getEntityWorld().isRemote) {
+            return;
+        }
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entityIn);
+            frame.pushCause(this);
+            endGatewayTileEntity.teleportEntity(entityIn);
+        }
+    }
+
+    @Inject(
+            method = "onImpact",
+            at = @At(value = "RETURN", ordinal = 2, shift = At.Shift.BY, by = 2),
+            locals = LocalCapture.CAPTURE_FAILHARD,
+            cancellable = true
+    )
+    private void impl$callMoveEntityEventForThrower(RayTraceResult result, CallbackInfo ci, LivingEntity entity) {
+        if (this.shadow$getEntityWorld().isRemote) {
+            return;
+        }
+        
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this.perlThrower);
+            frame.pushCause(this);
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENDER_PEARL);
+
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                    (org.spongepowered.api.entity.Entity) entity, VecHelper.toVector3d(entity.getPositionVector()),
+                    VecHelper.toVector3d(this.shadow$getPositionVector()), VecHelper.toVector3d(this.shadow$getPositionVector()));
+            if (SpongeCommon.postEvent(event)) {
+                // Eventhough the event is made, the pearl was still created so remove it anyways
+                this.shadow$remove();
+                return;
+            }
+
+            // This seems odd but we move the pearl so that the pearl's logic will move the living entity later in the impact method
+            this.posX = event.getDestinationPosition().getX();
+            this.posY = event.getDestinationPosition().getY();
+            this.posZ = event.getDestinationPosition().getZ();
+        }
     }
 
     @Override

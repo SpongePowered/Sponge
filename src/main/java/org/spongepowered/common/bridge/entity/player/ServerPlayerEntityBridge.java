@@ -134,27 +134,9 @@ public interface ServerPlayerEntityBridge {
     }
 
     default void bridge$sendChangeDimension(final DimensionType type, final WorldType generator, final GameType gameType) {
-
-        final SpongeDimensionType logicType = ((DimensionTypeBridge) type).bridge$getSpongeDimensionType();
-        if (logicType == DimensionTypes.OVERWORLD.get()) {
-            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, generator, gameType));
-        } else if (logicType == DimensionTypes.THE_NETHER.get()) {
-            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, generator, gameType));
-        } else {
-            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.THE_END, generator, gameType));
-        }
+        ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(type, generator, gameType));
     }
 
     default void bridge$sendViewerEnvironment(final org.spongepowered.api.world.dimension.DimensionType dimensionType) {
-
-        final WorldType generator = ((ServerPlayerEntity) this).getEntityWorld().getWorldInfo().getGenerator();
-        final GameType gameType = ((ServerPlayerEntity) this).interactionManager.getGameType();
-        if (dimensionType == DimensionTypes.OVERWORLD.get()) {
-            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, generator, gameType));
-        } else if (dimensionType == DimensionTypes.THE_NETHER.get()) {
-            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, generator, gameType));
-        } else {
-            ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(DimensionType.THE_END, generator, gameType));
-        }
     }
 }

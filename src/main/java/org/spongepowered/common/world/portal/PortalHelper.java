@@ -46,6 +46,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
@@ -275,60 +276,120 @@ public final class PortalHelper {
         }
     }
 
-    public static Function<Boolean, Entity> createVanillaEntityPortalLogic(final Entity entity, final Vec3d destination, final ServerWorld fromWorld,
-        final ServerWorld toWorld) {
+    public static Function<Boolean, Entity> createVanillaEntityPortalLogic(final Entity entity, final Vec3d destination,
+            final ServerWorld fromWorld, final ServerWorld toWorld, final PortalType portal) {
 
         return spawnInPortal -> {
-            Vec3d vec3d = entity.getMotion();
-            float f = 0.0F;
-            BlockPos blockpos;
-            // Sponge Start - Check actual dimension, not just types (we can have multiple types of the same dimension)
-            if (fromWorld.getDimension() instanceof EndDimension && toWorld.getDimension() instanceof OverworldDimension) {
-                blockpos = toWorld.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, toWorld.getSpawnPoint());
-            } else if (toWorld.dimension instanceof EndDimension) {
-                blockpos = toWorld.getSpawnCoordinate();
+            double x = destination.x;
+            double y = destination.y;
+            double z = destination.z;
+            float pitch = entity.rotationPitch;
+            float yaw = entity.rotationYaw;
+
+            fromWorld.getProfiler().startSection("moving");
+
+            // Entering an end portal from THE_END to OVERWORLD after exiting
+            if (!(portal instanceof NetherPortalType) && fromWorld.getDimension().getType() == DimensionType.THE_END && toWorld.getDimension().getType() == DimensionType.OVERWORLD) {
+                final BlockPos pos = toWorld.getHeight(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, toWorld.getSpawnPoint());
+                x = pos.getX();
+                y = pos.getY();
+                z = pos.getZ();
+            } else if ((!(portal instanceof NetherPortalType) && toWorld.getDimension() instanceof EndDimension)) {
                 // Sponge End
+                final BlockPos blockpos = toWorld.getSpawnCoordinate();
+                x = blockpos.getX();
+                y = blockpos.getY();
+                z = blockpos.getZ();
+                yaw = 90.0F;
+                pitch = 0.0F;
             } else {
-                // Sponge Start - Use platform move factor instead of Vanilla
-                final double movementFactor =
-                    ((PlatformDimensionBridge) fromWorld.getDimension()).bridge$getMovementFactor() / ((PlatformDimensionBridge) toWorld
-                        .getDimension()).bridge$getMovementFactor();
-                // Sponge End
-                double d0 = destination.x * movementFactor;
-                double d1 = destination.z * movementFactor;
-
-                double d3 = Math.min(-2.9999872E7D, toWorld.getWorldBorder().minX() + 16.0D);
-                double d4 = Math.min(-2.9999872E7D, toWorld.getWorldBorder().minZ() + 16.0D);
-                double d5 = Math.min(2.9999872E7D, toWorld.getWorldBorder().maxX() - 16.0D);
-                double d6 = Math.min(2.9999872E7D, toWorld.getWorldBorder().maxZ() - 16.0D);
-                d0 = MathHelper.clamp(d0, d3, d5);
-                d1 = MathHelper.clamp(d1, d4, d6);
-                Vec3d vec3d1 = entity.getLastPortalVec();
-                blockpos = new BlockPos(d0, destination.y, d1);
-
-                if (spawnInPortal) {
-                    final BlockPattern.PortalInfo blockpattern$portalinfo = toWorld.getDefaultTeleporter()
-                        .placeInExistingPortal(blockpos, vec3d, entity.getTeleportDirection(), vec3d1.x, vec3d1.y,
-                            entity instanceof PlayerEntity);
-                    if (blockpattern$portalinfo == null) {
-                        return null;
-                    }
-
-                    blockpos = new BlockPos(blockpattern$portalinfo.pos);
-                    vec3d = blockpattern$portalinfo.motion;
-                    f = (float) blockpattern$portalinfo.rotation;
-                }
+                // Use platform move factor instead of Vanilla
+                final double moveFactor =
+                        ((PlatformDimensionBridge) fromWorld.getDimension()).bridge$getMovementFactor() / ((PlatformDimensionBridge)
+                                toWorld.getDimension()).bridge$getMovementFactor();
+                x *= moveFactor;
+                z *= moveFactor;
             }
 
-            fromWorld.getProfiler().endStartSection("reloading");
-            final Entity newEntity = entity.getType().create(toWorld);
-            if (newEntity != null) {
-                newEntity.copyDataFromOld(entity);
-                newEntity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw + f, entity.rotationPitch);
-                newEntity.setMotion(vec3d);
-                toWorld.func_217460_e(newEntity);
+            toWorld.getProfiler().endSection();
+            toWorld.getProfiler().startSection("placing");
+            double d7 = Math.min(-2.9999872E7D, toWorld.getWorldBorder().minX() + 16.0D);
+            double d4 = Math.min(-2.9999872E7D, toWorld.getWorldBorder().minZ() + 16.0D);
+            double d5 = Math.min(2.9999872E7D, toWorld.getWorldBorder().maxX() - 16.0D);
+            double d6 = Math.min(2.9999872E7D, toWorld.getWorldBorder().maxZ() - 16.0D);
+            x = MathHelper.clamp(x, d7, d5);
+            z = MathHelper.clamp(z, d4, d6);
+
+            // THE_END -> OVERWORLD is a straight port, no actual portal detection. Turn off the spawn flag
+            if (fromWorld.getDimension().getType() == DimensionType.THE_END && toWorld.getDimension().getType() == DimensionType.OVERWORLD) {
+                spawnInPortal = false;
             }
-            return newEntity;
+
+            // <ANY> -> THE_END is a straight port onto the obsidian slab. Turn off spawn flag
+            if (toWorld.getDimension().getType() == DimensionType.THE_END) {
+                spawnInPortal = false;
+            }
+
+            boolean isPortalThere = false;
+
+            // If the portal is our API re-implementation of the Nether portal, allow that to veto and handle repositioning (as someone specified
+            // intent to have it handle placing the nether portal/etc regardless of where we're coming and going)
+            if (portal instanceof NetherPortalType || spawnInPortal) {
+                // "Move" the player to where the portal is to fulfill the Vanilla teleporter contract
+                final Vec3d currentPosition = entity.getPositionVec();
+                entity.dimension = toWorld.dimension.getType();
+                entity.setWorld(toWorld);
+                entity.posX = x;
+                entity.posY = y;
+                entity.posZ = z;
+                entity.rotationPitch = pitch;
+
+                isPortalThere = toWorld.getDefaultTeleporter().placeInPortal(entity, yaw);
+
+                // Snapshot the position/rotation, these are what would be the end result of the port
+                x = entity.posX;
+                y = entity.posY;
+                z = entity.posZ;
+                yaw = entity.rotationYaw;
+                pitch = entity.rotationPitch;
+
+                // Rollback the port so that we can fire the event below
+                entity.dimension = fromWorld.dimension.getType();
+                entity.setWorld(fromWorld);
+                entity.posX = currentPosition.x;
+                entity.posY = currentPosition.y;
+                entity.posZ = currentPosition.z;
+                entity.rotationPitch = pitch;
+                entity.rotationYaw = yaw;
+            }
+
+            if (spawnInPortal && !isPortalThere) {
+                return entity;
+            }
+
+            final MoveEntityEvent event = SpongeEventFactory.createChangeEntityWorldEventReposition(PhaseTracker.getCauseStackManager()
+                            .getCurrentCause(), (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) fromWorld, VecHelper
+                            .toVector3d(entity.getPositionVector()),  new Vector3d(x, y, z), (org.spongepowered.api.world.server.ServerWorld) toWorld,
+                    new Vector3d(x, y, z), (org.spongepowered.api.world.server.ServerWorld) toWorld);
+
+            if (SpongeCommon.postEvent(event)) {
+                return entity;
+            }
+
+            x = event.getDestinationPosition().getX();
+            y = event.getDestinationPosition().getY();
+            z = event.getDestinationPosition().getZ();
+
+            ((PlatformEntityBridge) entity).bridge$remove(true);
+            final Entity result = entity.getType().create(toWorld);
+            if (result != null) {
+                result.copyDataFromOld(entity);
+                result.moveToBlockPosAndAngles(new BlockPos(x, y, z), yaw, pitch);
+                result.setMotion(entity.getMotion());
+                toWorld.func_217460_e(result);
+            }
+
+            return result;
         };
     }
 
@@ -400,6 +461,7 @@ public final class PortalHelper {
                 player.posX = x;
                 player.posY = y;
                 player.posZ = z;
+                player.rotationPitch = pitch;
 
                 portalIsThere = toWorld.getDefaultTeleporter().placeInPortal(player, yaw);
 
@@ -407,6 +469,8 @@ public final class PortalHelper {
                 x = player.posX;
                 y = player.posY;
                 z = player.posZ;
+                yaw = player.rotationYaw;
+                pitch = player.rotationPitch;
 
                 // Rollback the port so that we can fire the event below
                 player.dimension = fromWorld.dimension.getType();
@@ -414,8 +478,8 @@ public final class PortalHelper {
                 player.posX = currentPosition.x;
                 player.posY = currentPosition.y;
                 player.posZ = currentPosition.z;
-                player.rotationPitch = pitch;
                 player.rotationYaw = yaw;
+                player.rotationPitch = pitch;
             }
 
             final MoveEntityEvent event = SpongeEventFactory.createChangeEntityWorldEventReposition(PhaseTracker.getCauseStackManager()
@@ -436,6 +500,14 @@ public final class PortalHelper {
             y = event.getDestinationPosition().getY();
             z = event.getDestinationPosition().getZ();
 
+            final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                    (ServerPlayer) player, new Vector3d(player.rotationYaw, player.rotationPitch, 0), new Vector3d(yaw, pitch, 0));
+
+            if (!SpongeCommon.postEvent(rotateEvent)) {
+                yaw = (float) rotateEvent.getToRotation().getX();
+                pitch = (float) rotateEvent.getToRotation().getY();
+            }
+
             // Only create the obsidian platform if this not inter-world, not the API nether portal, and we're going to Vanilla's The End
             if (!isSameWorld && (!(portal instanceof NetherPortalType) && toWorld.getDimension().getType() == DimensionType.THE_END)) {
                 PortalHelper.generateEndObsidianPlatform(toWorld, (int) x, (int) y, (int) z);
@@ -453,6 +525,7 @@ public final class PortalHelper {
                 player.posX = x;
                 player.posY = y;
                 player.posZ = z;
+                player.rotationPitch = pitch;
 
                 toWorld.getDefaultTeleporter().makePortal(player);
                 toWorld.getDefaultTeleporter().placeInPortal(player, yaw);
@@ -461,12 +534,10 @@ public final class PortalHelper {
                 x = player.posX;
                 y = player.posY;
                 z = player.posZ;
-                pitch = player.rotationPitch;
                 yaw = player.rotationYaw;
+                pitch = player.rotationPitch;
             }
 
-            player.dimension = toWorld.dimension.getType();
-            player.setWorld(toWorld);
             player.setLocationAndAngles(x, y, z, yaw, pitch);
             fromWorld.getProfiler().endSection();
             return player;

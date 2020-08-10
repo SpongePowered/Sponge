@@ -49,6 +49,7 @@ public final class PlatformHooks {
     private static final PlatformHooks instance = new PlatformHooks();
     private DimensionHooks dimensionHooks = new DimensionHooks() {};
     private EventHooks eventHooks = new EventHooks() {};
+    private PacketHooks packetHooks = new PacketHooks() {};
 
     public static PlatformHooks getInstance() {
         return PlatformHooks.instance;
@@ -68,5 +69,13 @@ public final class PlatformHooks {
 
     public void setEventHooks(final EventHooks eventHooks) {
         this.eventHooks = Objects.requireNonNull(eventHooks);
+    }
+
+    public PacketHooks getPacketHooks() {
+        return this.packetHooks;
+    }
+
+    public void setPacketHooks(PacketHooks packetHooks) {
+        this.packetHooks = Objects.requireNonNull(packetHooks);
     }
 }

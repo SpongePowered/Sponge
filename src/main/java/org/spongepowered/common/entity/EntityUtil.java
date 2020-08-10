@@ -101,7 +101,6 @@ public final class EntityUtil {
 
     public static DimensionChangeResult<Entity> invokePortalTo(final Entity entity, final PortalType portal, final DimensionType dimensionType) {
 
-        // Call platform event hook before changing dimensions
         ServerWorld originalToWorld = entity.getServer().getWorld(dimensionType);
         ServerWorld toWorld = originalToWorld;
 
@@ -112,48 +111,34 @@ public final class EntityUtil {
 
         toWorld = (ServerWorld) event.getDestinationWorld();
 
-        final ServerWorld fromWorld = (ServerWorld) entity.world;
-        fromWorld.getProfiler().startSection("changeDimension");
-        final DimensionType fromDimensionType = fromWorld.dimension.getType();
+        final ServerLocation previousLocation = ((org.spongepowered.api.entity.Entity) entity).getServerLocation();
+        final ServerWorld fromWorld = (ServerWorld) entity.getEntityWorld();
 
-        entity.dimension = dimensionType;
-        entity.detach();
-
-        entity.world.getProfiler().startSection("reposition");
-
-        Entity teleportedEntity = entity;
-
+        Entity result = entity;
         if (portal instanceof WrappedITeleporterPortalType) {
             // Use platform teleporter hook
-            teleportedEntity = ((WrappedITeleporterPortalType) portal).getTeleporter().bridge$placeEntity(entity, fromWorld, toWorld,
-                entity.rotationYaw, PortalHelper.createVanillaEntityPortalLogic(entity, entity.getPositionVec(), fromWorld, toWorld));
-        } else {
-            final boolean result = portal.teleport((org.spongepowered.api.entity.Entity) entity, ServerLocation.of(
-                (org.spongepowered.api.world.server.ServerWorld) fromWorld, VecHelper.toVector3d(entity.getPositionVector())),
-                true);
+            result = ((WrappedITeleporterPortalType) portal).getTeleporter().bridge$placeEntity(entity, fromWorld, toWorld, entity.rotationYaw,
+                    PortalHelper
+                    .createVanillaEntityPortalLogic(entity, entity.getPositionVec(), fromWorld, toWorld, portal));
 
-            if (!result) {
-                teleportedEntity = null;
+            if (result == null) {
+                return new DimensionChangeResult<>(entity, false, true);
             }
-        }
 
-        // Don't always remove the entity is teleport failed
-        if (teleportedEntity == null) {
+            final ServerLocation currentLocation = ((org.spongepowered.api.entity.Entity) entity).getServerLocation();
+            if (previousLocation.getWorld() == currentLocation.getWorld() && previousLocation.getBlockPosition().equals(currentLocation.getBlockPosition())) {
+                return new DimensionChangeResult<>(entity, false, false);
+            }
+        } else if (!portal.teleport((org.spongepowered.api.entity.Entity) entity, ServerLocation.of((org.spongepowered.api.world.server.ServerWorld)
+                fromWorld, VecHelper.toVector3d(entity.getPositionVector())), true)) {
             return new DimensionChangeResult<>(entity, false, false);
         }
 
-        // Have the platform handle removing the entity from the world
-        ((PlatformEntityBridge) entity).bridge$remove(false);
+        // Sponge Start - Call platform event hook after changing dimensions
+        PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(result, fromWorld, originalToWorld);
+        // Sponge End
 
-        fromWorld.getProfiler().endSection();
-        fromWorld.resetUpdateEntityTick();
-        toWorld.resetUpdateEntityTick();
-        fromWorld.getProfiler().endSection();
-
-        // Call platform event hook after changing dimensions
-        PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(entity, fromWorld, originalToWorld);
-
-        return new DimensionChangeResult<>(entity, true, false);
+        return new DimensionChangeResult<>(result, true, false);
     }
 
     public static DimensionChangeResult<ServerPlayerEntity> invokePortalTo(final ServerPlayerEntity player, final PortalType portal,
@@ -172,7 +157,7 @@ public final class EntityUtil {
         ((ServerPlayerEntityAccessor) player).accessor$setInvulnerableDimensionChange(true);
 
         final ServerLocation previousLocation = ((ServerPlayer) player).getServerLocation();
-        final ServerWorld fromWorld = (ServerWorld) player.getEntityWorld();
+        final ServerWorld fromWorld = player.getServerWorld();
         final DimensionType fromDimensionType = fromWorld.getDimension().getType();
 
         if (portal instanceof WrappedITeleporterPortalType) {
@@ -181,7 +166,7 @@ public final class EntityUtil {
                     .createVanillaPlayerPortalLogic(player, player.getPositionVec(), fromWorld, toWorld, portal));
 
             final ServerLocation currentLocation = ((ServerPlayer) player).getServerLocation();
-            if (previousLocation.getWorldKey().equals(currentLocation.getWorldKey()) && previousLocation.getBlockPosition().equals(currentLocation.getBlockPosition())) {
+            if (previousLocation.getWorld() == currentLocation.getWorld() && previousLocation.getBlockPosition().equals(currentLocation.getBlockPosition())) {
                 return new DimensionChangeResult<>(player, false, false);
             }
         } else if (!portal.teleport((org.spongepowered.api.entity.Entity) player, ServerLocation.of((org.spongepowered.api.world.server.ServerWorld)
@@ -204,20 +189,20 @@ public final class EntityUtil {
             return new DimensionChangeResult<>(player, true, false);
         }
 
-        EntityUtil.performPostChangePlayerWorldLogic(player, fromWorld, originalToWorld, toWorld);
+        EntityUtil.performPostChangePlayerWorldLogic(player, fromWorld, originalToWorld, toWorld, true);
 
         return new DimensionChangeResult<>(player, true, false);
     }
 
     public static void performPostChangePlayerWorldLogic(final ServerPlayerEntity player, final ServerWorld fromWorld,
-            final ServerWorld originalToWorld, final ServerWorld toWorld) {
-        player.dimension = toWorld.dimension.getType();
-        WorldInfo worldinfo = toWorld.getWorldInfo();
+            final ServerWorld originalToWorld, final ServerWorld toWorld, final boolean isPortal) {
         // Sponge Start - Send any platform dimension data
         ((ServerPlayerEntityBridge) player).bridge$sendDimensionData(player.connection.netManager, toWorld.dimension.getType());
         // Sponge End
+        WorldInfo worldinfo = toWorld.getWorldInfo();
         // Sponge Start - Allow the platform to handle how dimension changes are sent down
         ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(toWorld.dimension.getType(), worldinfo.getGenerator(), player.interactionManager.getGameType());
+        player.dimension = toWorld.dimension.getType();
         // Sponge End
         player.connection.sendPacket(new SServerDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
         PlayerList playerlist = player.getServer().getPlayerList();
@@ -231,7 +216,9 @@ public final class EntityUtil {
 
         player.setWorld(toWorld);
         toWorld.func_217447_b(player);
-        ((ServerPlayerEntityAccessor) player).accessor$func_213846_b(toWorld);
+        if (isPortal) {
+            ((ServerPlayerEntityAccessor) player).accessor$func_213846_b(toWorld);
+        }
         player.interactionManager.setWorld(toWorld);
         player.connection.sendPacket(new SPlayerAbilitiesPacket(player.abilities));
         playerlist.sendWorldInfo(player, toWorld);
@@ -241,7 +228,10 @@ public final class EntityUtil {
             player.connection.sendPacket(new SPlayEntityEffectPacket(player.getEntityId(), effectinstance));
         }
 
-        player.connection.sendPacket(new SPlaySoundEventPacket(1032, BlockPos.ZERO, 0, false));
+        if (isPortal) {
+            player.connection.sendPacket(new SPlaySoundEventPacket(1032, BlockPos.ZERO, 0, false));
+        }
+
         ((ServerPlayerEntityAccessor) player).accessor$setLastExperience(-1);
         ((ServerPlayerEntityAccessor) player).accessor$setLastHealth(-1.0f);
         ((ServerPlayerEntityAccessor) player).accessor$setLastFoodLevel(-1);

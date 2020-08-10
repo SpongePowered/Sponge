@@ -78,6 +78,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionChangeResult;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.List;
 import java.util.Random;
@@ -151,6 +152,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     // @formatter:on
 
+    @Shadow public abstract void shadow$setLocationAndAngles(double p_70012_1_, double p_70012_3_, double p_70012_5_, float p_70012_7_, float p_70012_8_);
+
     private boolean impl$isConstructing = true;
     @Nullable private Component impl$displayName;
     @Nullable private BlockPos impl$lastCollidedBlockPos;
@@ -163,8 +166,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private int impl$customFireImmuneTicks = this.shadow$getFireImmuneTicks();
     private boolean impl$skipSettingCustomNameTag = false;
     private int impl$visibilityTicks = 0;
-
-    // @formatter:on
 
     @Override
     public boolean bridge$setLocation(final ServerLocation location) {
@@ -243,6 +244,44 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
 
             return true;
+        }
+    }
+
+    /**
+     * @author Zidane
+     * @reason This is a catch-all method to ensure MoveEntityEvent is fired with
+     *         useful information
+     */
+    @Overwrite
+    public final void teleportKeepLoaded(double x, double y, double z) {
+        if (this.world instanceof net.minecraft.world.server.ServerWorld) {
+            final PhaseTracker server = PhaseTracker.SERVER;
+            boolean hasMovementContext = true;
+            if (!server.getCurrentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
+                hasMovementContext = false;
+                server.pushCause(SpongeCommon.getActivePlugin());
+                server.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+            }
+
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(server.getCurrentCause(),
+                    (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()), new Vector3d(x, y, z),
+                    new Vector3d(x, y, z));
+
+            if (!hasMovementContext) {
+                server.popCause();
+                server.removeContext(EventContextKeys.MOVEMENT_TYPE);
+            }
+
+            if (SpongeCommon.postEvent(event)) {
+                return;
+            }
+
+            final Vector3d destinationPosition = event.getDestinationPosition();
+            ChunkPos chunkpos = new ChunkPos(new BlockPos(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ()));
+            ((net.minecraft.world.server.ServerWorld)this.world).getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkpos, 0,
+                    this.shadow$getEntityId());
+            this.world.getChunk(chunkpos.x, chunkpos.z);
+            this.shadow$setPositionAndUpdate(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ());
         }
     }
 

@@ -691,9 +691,9 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity);
 
-            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
-                new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0), new Vector3d(entity.rotationPitch,
-                    entity.rotationYaw, 0), (Entity) entity);
+            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), (Entity) entity,
+                    new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0), new Vector3d(entity.rotationPitch,
+                    entity.rotationYaw, 0));
             if (SpongeCommon.postEvent(event)) {
                 entity.rotationPitch = entity.prevRotationPitch;
                 entity.rotationYaw = entity.prevRotationYaw;

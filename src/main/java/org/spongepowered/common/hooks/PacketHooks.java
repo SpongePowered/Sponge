@@ -22,22 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.server;
+package org.spongepowered.common.hooks;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.server.ChunkHolder;
-import net.minecraft.world.server.ChunkManager;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.server.SJoinGamePacket;
+import net.minecraft.world.GameType;
+import net.minecraft.world.WorldType;
+import net.minecraft.world.dimension.DimensionType;
 
-@Mixin(ChunkManager.class)
-public interface ChunkManagerAccessor {
+public interface PacketHooks {
 
-    @Accessor("entities") Int2ObjectMap<EntityTrackerAccessor> accessor$getEntityTrackers();
+    default SJoinGamePacket createSJoinGamePacket(final ServerPlayerEntity entity, final GameType gameType, final boolean isHardcore,
+            final DimensionType dimensionType, final int maxPlayers, final WorldType generatorType, final int viewDistance,
+            final boolean isReducedDebugMode) {
 
-    @Accessor("generator") void accessor$setChunkGenerator(ChunkGenerator<?> chunkGenerator);
-
-    @Invoker("getLoadedChunksIterable") Iterable<ChunkHolder> accessor$getLoadedChunksIterable();
+        return new SJoinGamePacket(entity.getEntityId(), gameType, isHardcore, dimensionType, maxPlayers, generatorType, viewDistance,
+                isReducedDebugMode);
+    }
 }

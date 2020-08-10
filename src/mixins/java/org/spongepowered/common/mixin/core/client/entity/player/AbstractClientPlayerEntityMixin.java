@@ -22,22 +22,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.server;
+package org.spongepowered.common.mixin.core.client.entity.player;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.server.ChunkHolder;
-import net.minecraft.world.server.ChunkManager;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.mixin.core.entity.player.PlayerEntityMixin;
 
-@Mixin(ChunkManager.class)
-public interface ChunkManagerAccessor {
+@Mixin(AbstractClientPlayerEntity.class)
+public abstract class AbstractClientPlayerEntityMixin extends PlayerEntityMixin {
 
-    @Accessor("entities") Int2ObjectMap<EntityTrackerAccessor> accessor$getEntityTrackers();
+    @Override
+    public boolean bridge$isInvisible() {
+        return false;
+    }
 
-    @Accessor("generator") void accessor$setChunkGenerator(ChunkGenerator<?> chunkGenerator);
+    @Override
+    public void bridge$setInvisible(boolean invisible) {
 
-    @Invoker("getLoadedChunksIterable") Iterable<ChunkHolder> accessor$getLoadedChunksIterable();
+    }
+
+    @Override
+    public boolean bridge$isVanished() {
+        return false;
+    }
+
+    @Override
+    public void bridge$setVanished(boolean vanished) {
+
+    }
+
+    @Override
+    public boolean bridge$isUncollideable() {
+        return false;
+    }
+
+    @Override
+    public void bridge$setUncollideable(boolean uncollideable) {
+
+    }
+
+    @Override
+    public boolean bridge$isUntargetable() {
+        return false;
+    }
+
+    @Override
+    public void bridge$setUntargetable(boolean untargetable) {
+
+    }
 }

@@ -22,22 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.server;
+package org.spongepowered.common.mixin.core.command.impl;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.server.ChunkHolder;
-import net.minecraft.world.server.ChunkManager;
+import net.minecraft.command.impl.SpreadPlayersCommand;
+import net.minecraft.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.teleport.MovementTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(ChunkManager.class)
-public interface ChunkManagerAccessor {
+@Mixin(SpreadPlayersCommand.class)
+public abstract class SpreadPlayersCommandMixin {
 
-    @Accessor("entities") Int2ObjectMap<EntityTrackerAccessor> accessor$getEntityTrackers();
+    @Redirect(method = "doSpreading", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;teleportKeepLoaded(DDD)V"))
+    private static void impl$createCauseFrameForTeleport(Entity entity, double x, double y, double z) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
 
-    @Accessor("generator") void accessor$setChunkGenerator(ChunkGenerator<?> chunkGenerator);
-
-    @Invoker("getLoadedChunksIterable") Iterable<ChunkHolder> accessor$getLoadedChunksIterable();
+            entity.teleportKeepLoaded(x, y, z);
+        }
+    }
 }

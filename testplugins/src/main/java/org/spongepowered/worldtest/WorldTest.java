@@ -140,6 +140,15 @@ public final class WorldTest {
 
     @Listener
     public void onChangeWorld(final ChangeEntityWorldEvent event) {
-        System.err.println(event);
+        this.plugin.getLogger().error(event);
+    }
+
+    @Listener
+    public void onMoveEntity(final MoveEntityEvent event) {
+        if (event instanceof ChangeEntityWorldEvent.Reposition) {
+            return;
+        }
+        
+        this.plugin.getLogger().error(event);
     }
 }
