@@ -214,7 +214,7 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     }
 
     @Override
-    public void bridge$populateInfo(WorldInfo info) {
+    public void bridge$populateInfo(final WorldInfo info) {
         final WorldInfoBridge infoBridge = (WorldInfoBridge) info;
 
         // TODO 1.14 - Add all the property setters

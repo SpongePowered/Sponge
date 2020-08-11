@@ -49,5 +49,5 @@ public interface WorldBridge {
 
     boolean bridge$isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
 
-    void bridge$changeDimension(SpongeDimensionType dimensionType);
+    void bridge$adjustDimensionLogic(SpongeDimensionType dimensionType);
 }

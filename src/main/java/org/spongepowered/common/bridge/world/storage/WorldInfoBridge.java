@@ -43,14 +43,11 @@ public interface WorldInfoBridge {
     @Nullable
     ServerWorld bridge$getWorld();
 
-    @Nullable
-    DimensionType bridge$getDimensionType();
-
-    void bridge$setDimensionType(DimensionType type);
+    void bridge$setDimensionId(DimensionType type);
 
     SpongeDimensionType bridge$getLogicType();
 
-    void bridge$setLogicType(org.spongepowered.api.world.dimension.DimensionType type);
+    void bridge$setLogicType(SpongeDimensionType type);
 
     UUID bridge$getUniqueId();
 
@@ -112,6 +109,4 @@ public interface WorldInfoBridge {
     void bridge$setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter);
 
     void bridge$saveConfig();
-
-    void bridge$changeDimensionLogicType(org.spongepowered.api.world.dimension.DimensionType dimensionType);
 }

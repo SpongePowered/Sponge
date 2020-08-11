@@ -102,6 +102,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.BookUtil;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -191,7 +192,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void sendEnvironment(final DimensionType dimensionType) {
-        ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment(dimensionType);
+        ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment((SpongeDimensionType) dimensionType);
     }
 
     @Override

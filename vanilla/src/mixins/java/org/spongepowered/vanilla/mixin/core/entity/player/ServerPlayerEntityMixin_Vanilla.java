@@ -69,14 +69,14 @@ public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEnt
     }
 
     @Override
-    public void bridge$sendViewerEnvironment(final org.spongepowered.api.world.dimension.DimensionType dimensionType) {
+    public void bridge$sendViewerEnvironment(final SpongeDimensionType dimensionType) {
         if (this.bridge$getClientType() == ClientType.SPONGE_VANILLA) {
             SpongePacketHandler.getChannel().sendTo((ServerPlayer) this, new ChangeViewerEnvironmentPacket(dimensionType));
         } else {
             final WorldType generator = ((ServerPlayerEntity) (Object) this).getEntityWorld().getWorldInfo().getGenerator();
             final GameType gameType = ((ServerPlayerEntity) (Object) this).interactionManager.getGameType();
 
-            this.vanilla$hackChangeVanillaClientDimension((SpongeDimensionType) dimensionType, generator, gameType, false);
+            this.vanilla$hackChangeVanillaClientDimension(dimensionType, generator, gameType, false);
         }
     }
 

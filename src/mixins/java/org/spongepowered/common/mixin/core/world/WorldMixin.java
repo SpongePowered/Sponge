@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Random;
@@ -71,10 +72,9 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     }
 
     @Override
-    public void bridge$changeDimension(final SpongeDimensionType dimensionType) {
-        final BiFunction<World, net.minecraft.world.dimension.DimensionType, ? extends Dimension> factory = dimensionType.getDimensionFactory();
-        final Dimension newDimension = factory.apply((World) (Object) this, ((World) (Object) this).dimension.getType());
-        ((WorldAccessor) this).accessor$setDimension(newDimension);
+    public void bridge$adjustDimensionLogic(final SpongeDimensionType dimensionType) {
+        ((DimensionTypeBridge) this.dimension.getType()).bridge$setSpongeDimensionType(dimensionType);
+        ((WorldAccessor) this).accessor$setDimension(this.dimension.getType().create((World) (Object) this));
     }
 
 //    @SuppressWarnings("deprecation")

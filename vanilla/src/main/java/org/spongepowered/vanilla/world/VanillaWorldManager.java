@@ -362,7 +362,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
 
                 ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
-                ((WorldInfoBridge) worldInfo).bridge$setDimensionType(dimensionType);
+                ((WorldInfoBridge) worldInfo).bridge$setDimensionId(dimensionType);
                 ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
 
                 SpongeCommon.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(
@@ -375,14 +375,18 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 // This may be an existing world created before Sponge was installed, handle accordingly
                 if (((ResourceKeyBridge) worldInfo).bridge$getKey() == null) {
                     ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
-                    ((WorldInfoBridge) worldInfo).bridge$setDimensionType(dimensionType);
+                    ((WorldInfoBridge) worldInfo).bridge$setDimensionId(dimensionType);
                     ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
                 }
 
                 defaultSettings = new WorldSettings(worldInfo);
             }
 
-            final WorldInfoBridge infoBridge = (WorldInfoBridge) worldInfo;
+            if (((WorldInfoBridge) worldInfo).bridge$getLogicType() != null) {
+                ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(((WorldInfoBridge) worldInfo).bridge$getLogicType());
+            } else {
+                ((WorldInfoBridge) worldInfo).bridge$setLogicType(((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType());
+            }
 
             if (isDefaultWorld) {
                 ((MinecraftServerAccessor_Vanilla) this.server).accessor$loadDataPacks(worldDirectory.toFile(), worldInfo);
@@ -448,7 +452,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 PhaseTracker.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.server.ServerWorld) serverWorld));
 
-            if (isDefaultWorld || infoBridge.bridge$doesGenerateSpawnOnLoad()) {
+            if (isDefaultWorld || ((WorldInfoBridge) worldInfo).bridge$doesGenerateSpawnOnLoad()) {
                 this.loadSpawnChunks(serverWorld, chunkStatusListener);
             }
         }
@@ -507,8 +511,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         chunkProvider.getLightManager().func_215598_a(5);
     }
 
-    private DimensionType createDimensionType(final ResourceKey key, final SpongeDimensionType logicType,
-        final String worldDirectory, final int dimensionId) {
+    private DimensionType createDimensionType(final ResourceKey key, final SpongeDimensionType logicType, final String worldDirectory,
+            final int dimensionId) {
         final DimensionType registeredType = DimensionTypeAccessor.accessor$construct(dimensionId, "", worldDirectory, logicType.getDimensionFactory(),
             logicType.hasSkylight());
         DimensionTypeAccessor.accessor$register(key.getFormatted(), registeredType);
@@ -522,7 +526,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return;
         }
 
-        for (Path path : Files.walk(this.savesDirectory, 1).filter(path -> !this.savesDirectory.equals(path) && Files.isDirectory(path) && !this.isVanillaAlternateDimension(path.getFileName().toString()) && Files.exists(path.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT))).collect(Collectors.toList())) {
+        for (Path path : Files.walk(this.savesDirectory, 1).filter(path -> !this.savesDirectory.equals(path) && Files.isDirectory(path) && !this.isVanillaSubLevel(path.getFileName().toString()) && Files.exists(path.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT))).collect(Collectors.toList())) {
             final String worldDirectory = path.getFileName().toString();
             final CompoundNBT worldCompound;
             try {
@@ -571,7 +575,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
     }
 
-    private boolean isVanillaAlternateDimension(final String directoryName) {
+    private boolean isVanillaWorld(final ResourceKey key) {
+        return VanillaWorldManager.VANILLA_OVERWORLD.equals(key) || VanillaWorldManager.VANILLA_THE_NETHER.equals(key) || VanillaWorldManager
+                .VANILLA_THE_END.equals(key);
+    }
+
+    private boolean isVanillaSubLevel(final String directoryName) {
         return "DIM-1".equals(directoryName) || "DIM1" .equals(directoryName);
     }
 }

@@ -34,8 +34,8 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 public abstract class ClientWorldMixin extends WorldMixin implements WorldBridge {
 
     @Override
-    public void bridge$changeDimension(final SpongeDimensionType dimensionType) {
-        super.bridge$changeDimension(dimensionType);
+    public void bridge$adjustDimensionLogic(final SpongeDimensionType dimensionType) {
+        super.bridge$adjustDimensionLogic(dimensionType);
 
         this.shadow$calculateInitialSkylight();
     }

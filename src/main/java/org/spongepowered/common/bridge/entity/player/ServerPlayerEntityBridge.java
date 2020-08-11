@@ -137,6 +137,6 @@ public interface ServerPlayerEntityBridge {
         ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(type, generator, gameType));
     }
 
-    default void bridge$sendViewerEnvironment(final org.spongepowered.api.world.dimension.DimensionType dimensionType) {
+    default void bridge$sendViewerEnvironment(final SpongeDimensionType dimensionType) {
     }
 }

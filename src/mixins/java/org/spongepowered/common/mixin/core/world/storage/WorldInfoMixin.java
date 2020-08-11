@@ -46,7 +46,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.dimension.DimensionTypes;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -58,7 +57,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.InheritableConfigHandle;
 import org.spongepowered.common.config.SpongeConfigs;
@@ -89,7 +87,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     @Shadow public abstract void shadow$populateFromWorldSettings(WorldSettings p_176127_1_);
 
     @Nullable private ResourceKey impl$key;
-    @Nullable private DimensionType impl$dimensionType;
+    @Nullable private Integer impl$dimensionId;
 
     private UUID impl$uniqueId;
     private SpongeDimensionType impl$logicType;
@@ -139,31 +137,16 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$changeDimensionLogicType(org.spongepowered.api.world.dimension.DimensionType dimensionType) {
-        ((DimensionTypeBridge) this.bridge$getDimensionType()).bridge$setSpongeDimensionType((SpongeDimensionType) dimensionType);
-        ((WorldInfoBridge) this).bridge$setLogicType(dimensionType);
-
-        final ServerWorld world = this.bridge$getWorld();
-        if (world != null) {
-            ((WorldBridge) world).bridge$changeDimension((SpongeDimensionType) dimensionType);
-
-            for (final ServerPlayerEntity player : world.getPlayers()) {
-                ((ServerPlayerEntityBridge) player).bridge$sendViewerEnvironment(dimensionType);
-            }
-        }
-    }
-
-    @Override
     public boolean bridge$isValid() {
         final String levelName = this.shadow$getWorldName();
 
-        return this.impl$key != null && this.impl$dimensionType != null && !(levelName == null || levelName.equals("") || levelName.equals("MpServer") || levelName.equals("sponge$dummy_world"));
+        return this.impl$key != null && !(levelName == null || levelName.equals("") || levelName.equals("MpServer") || levelName.equals(
+                "sponge$dummy_world"));
     }
 
     @Override
-    public void bridge$setDimensionType(final DimensionType type) {
-        this.impl$dimensionType = type;
-        this.impl$logicType = ((DimensionTypeBridge) this.impl$dimensionType).bridge$getSpongeDimensionType();
+    public void bridge$setDimensionId(final DimensionType type) {
+        this.impl$dimensionId = type.getId();
     }
 
     @Override
@@ -172,12 +155,23 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setLogicType(final org.spongepowered.api.world.dimension.DimensionType type) {
-        this.impl$logicType = (SpongeDimensionType) type;
+    public void bridge$setLogicType(final SpongeDimensionType dimensionType) {
+        this.impl$logicType = dimensionType;
+
+        final ServerWorld serverWorld = this.bridge$getWorld();
+        System.err.println(serverWorld);
+        if (serverWorld != null) {
+            ((WorldBridge) serverWorld).bridge$adjustDimensionLogic(dimensionType);
+        }
     }
 
     @Override
-    public void bridge$setUniqueId(UUID uniqueId) {
+    public UUID bridge$getUniqueId() {
+        return this.impl$uniqueId;
+    }
+
+    @Override
+    public void bridge$setUniqueId(final UUID uniqueId) {
         this.impl$uniqueId = uniqueId;
     }
 
@@ -216,14 +210,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public void bridge$updatePlayersForDifficulty() {
-        ServerWorld serverWorld = null;
-        for (final org.spongepowered.api.world.server.ServerWorld world : Sponge.getServer().getWorldManager().getWorlds()) {
-            final net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
-            if (!((WorldBridge) mcWorld).bridge$isFake() && mcWorld.getWorldInfo() == (Object) this) {
-                serverWorld = (ServerWorld) world;
-                break;
-            }
-        }
+        final ServerWorld serverWorld = this.bridge$getWorld();
 
         if (serverWorld == null) {
             return;
@@ -332,11 +319,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public DimensionType bridge$getDimensionType() {
-        return this.impl$dimensionType;
-    }
-
-    @Override
     public int bridge$getIndexForUniqueId(final UUID uuid) {
         final Integer index = this.impl$playerUniqueIdMap.inverse().get(uuid);
         if (index != null) {
@@ -369,14 +351,12 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         final CompoundNBT spongeDataCompound = new CompoundNBT();
         spongeDataCompound.putInt(Constants.Sponge.DATA_VERSION, Constants.Sponge.SPONGE_DATA_VERSION);
         spongeDataCompound.putString(Constants.Sponge.World.KEY, this.impl$key.getFormatted());
-        spongeDataCompound.putInt(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionType.getId());
+        if (this.impl$dimensionId != null) {
+            spongeDataCompound.putInt(Constants.Sponge.World.DIMENSION_ID, this.impl$dimensionId);
+        }
         spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE, this.impl$logicType.getKey().toString());
         spongeDataCompound.putUniqueId(Constants.Sponge.World.UNIQUE_ID, this.impl$uniqueId);
         spongeDataCompound.putBoolean(Constants.World.GENERATE_BONUS_CHEST, this.impl$generateBonusChest);
-//        if (this.impl$portalAgentType == null) {
-//            this.impl$portalAgentType = PortalAgentTypes.DEFAULT.get();
-//        }
-//        spongeDataCompound.putString(Constants.Sponge.World.PORTAL_AGENT_TYPE, this.impl$portalAgentType.getPortalAgentClass().getName());
         short saveBehavior = 1;
         if (this.impl$serializationBehavior == SerializationBehaviors.NONE.get()) {
             saveBehavior = -1;
@@ -416,18 +396,15 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
             return;
         }
 
-        if (!spongeDataCompound.contains(Constants.Sponge.World.DIMENSION_ID)) {
-            // TODO 1.14 - Bad Sponge level data...warn/crash?
-            return;
-        }
-
         if (!spongeDataCompound.hasUniqueId(Constants.Sponge.World.UNIQUE_ID)) {
             // TODO 1.14 - Bad Sponge level data...warn/crash?
             return;
         }
 
-        // Ha ha, Vanilla!
-        this.impl$dimensionType = DimensionType.getById(spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID) + 1);
+        this.impl$key = ResourceKey.resolve(spongeDataCompound.getString(Constants.Sponge.World.KEY));
+        if (spongeDataCompound.contains(Constants.Sponge.World.DIMENSION_ID)) {
+            this.impl$dimensionId = spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID);
+        }
         final String rawDimensionType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
         this.impl$logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.spongepowered.api.world.dimension
                 .DimensionType.class, ResourceKey.resolve(rawDimensionType)).orElseGet(() -> {
@@ -438,9 +415,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         });
         this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
         this.impl$generateBonusChest = spongeDataCompound.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
-        // TODO - Zidane.
-//        this.impl$portalAgentType = PortalAgentRegistryModule.getInstance()
-//            .validatePortalAgent(spongeDataCompound.getString(Constants.Sponge.World.PORTAL_AGENT_TYPE), this.levelName);
         this.impl$hasCustomDifficulty = spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
         this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
         this.impl$modCreated = spongeDataCompound.getBoolean(Constants.Sponge.World.IS_MOD_CREATED);
