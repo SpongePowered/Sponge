@@ -79,7 +79,7 @@ import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.provider.entity.player.ExperienceHolderUtils;
-import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
 

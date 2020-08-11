@@ -22,15 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.damage;
+package org.spongepowered.common.event.cause.entity;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeDamageType extends SpongeCatalogType implements DamageType {
+public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
 
-    public SpongeDamageType(final ResourceKey key) {
+    private boolean isForced = false;
+
+    public SpongeSpawnType(ResourceKey key) {
         super(key);
+    }
+
+    public SpongeSpawnType forced() {
+        this.isForced = true;
+        return this;
+    }
+
+    public boolean isForced() {
+        return this.isForced;
     }
 }

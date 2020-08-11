@@ -38,7 +38,7 @@ import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

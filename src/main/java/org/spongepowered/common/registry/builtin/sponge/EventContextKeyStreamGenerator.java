@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.common.event.SpongeEventContextKey;
 

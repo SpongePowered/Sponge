@@ -22,11 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.damage;
+package org.spongepowered.common.event.cause.entity.damage;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.EntityDamageSource;
-import org.spongepowered.common.accessor.util.EntityDamageSourceAccessor;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
 import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 
@@ -40,10 +38,10 @@ but it can certainly declare the methods as abstract.
 More notes are geared for abstraction of generating the builders, since those
 will require sending the builders into the ctors.
  */
-public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource implements org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource {
+public abstract class SpongeCommonDamageSource extends DamageSource implements org.spongepowered.api.event.cause.entity.damage.source.DamageSource {
 
-    public SpongeCommonEntityDamageSource() {
-        super("SpongeEntityDamageSource", null);
+    protected SpongeCommonDamageSource() {
+        super("SpongeDamageSource");
     }
 
     /**
@@ -54,22 +52,6 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
      */
     public void setDamageType(final String type) {
         ((DamageSourceAccessor) this).accessor$setDamageType(type);
-    }
-
-    public void setEntitySource(final Entity entitySource) {
-        ((EntityDamageSourceAccessor) this).accessor$setDamageSourceEntity(entitySource);
-    }
-
-    public void bridge$setDamageIsAbsolute() {
-        this.setDamageIsAbsolute();
-    }
-    public void bridge$setDamageBypassesArmor() {
-        this.setDamageBypassesArmor();
-    }
-
-    @Override
-    public Entity getTrueSource() {
-        return (Entity) this.getSource();
     }
 
     @Override
@@ -107,4 +89,16 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
         return (float) this.getExhaustion();
     }
 
+
+    public void bridge$setDamageIsAbsolute() {
+        this.setDamageIsAbsolute();
+    }
+    public void bridge$setDamageBypassesArmor() {
+        this.setDamageBypassesArmor();
+    }
+
+
+    public void bridge$setHungerDamage(final float exhaustion) {
+        ((DamageSourceAccessor) this).accessor$setHungerDamage(exhaustion);
+    }
 }

@@ -22,72 +22,71 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.damage;
+package org.spongepowered.common.event.cause.entity.damage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.accessor.util.DamageSourceAccessor;
-import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
-public final class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder> implements BlockDamageSource.Builder {
+import java.lang.ref.WeakReference;
 
-    private ServerLocation location;
-    private BlockSnapshot blockSnapshot;
+public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<EntityDamageSource, EntityDamageSource.Builder>
+    implements EntityDamageSource.Builder {
 
-    @Override
-    public BlockDamageSource.Builder block(final ServerLocation location) {
-        this.location = location;
-        return this;
-    }
+    protected WeakReference<Entity> reference = null;
 
     @Override
-    public BlockDamageSource.Builder block(final BlockSnapshot blockState) {
-        this.blockSnapshot = checkNotNull(blockState);
+    public SpongeEntityDamageSourceBuilder entity(final Entity entity) {
+        this.reference = new WeakReference<>(entity);
         return this;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public BlockDamageSource build() throws IllegalStateException {
-        checkState(this.location != null);
-        checkState(this.blockSnapshot != null);
-        checkState(this.damageType != null);
-        final MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getKey().getFormatted(), this.location);
-        final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
-        if (this.absolute) {
-            accessor.accessor$setDamageIsAbsolute();
-        }
-        if (this.bypasses) {
-            accessor.accessor$setDamageBypassesArmor();
+    public EntityDamageSource build() throws IllegalStateException {
+        checkState(this.damageType != null, "Damage type cannot be null!");
+        checkState(this.reference.get() != null);
+        final net.minecraft.util.EntityDamageSource damageSource = // TODO damageType String is used for the translation key!
+            new net.minecraft.util.EntityDamageSource(this.damageType.getKey().getValue(), (net.minecraft.entity.Entity) this.reference.get());
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
+        if (this.creative) {
+            accessor.accessor$setDamageAllowedInCreativeMode();
         }
         if (this.scales) {
             damageSource.setDifficultyScaled();
         }
-        if (this.explosion) {
-            damageSource.setExplosion();
-        }
         if (this.magical) {
             damageSource.setMagicDamage();
         }
-        if (this.creative) {
-            accessor.accessor$setDamageAllowedInCreativeMode();
+        if (this.bypasses) {
+            accessor.accessor$setDamageBypassesArmor();
+        }
+        if (this.absolute) {
+            accessor.accessor$setDamageIsAbsolute();
+        }
+        if (this.explosion) {
+            damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
             accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
         }
-        return (BlockDamageSource) (Object) damageSource;
+        return (EntityDamageSource) damageSource;
     }
 
     @Override
-    public BlockDamageSource.Builder reset() {
+    public EntityDamageSource.Builder from(final EntityDamageSource value) {
+        super.from(value);
+        this.reference = new WeakReference<>(value.getSource());
+        return this;
+    }
+
+    @Override
+    public SpongeEntityDamageSourceBuilder reset() {
         super.reset();
-        this.location = null;
-        this.blockSnapshot = null;
+        this.reference = null;
         return this;
     }
 }

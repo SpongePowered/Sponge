@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.event.cause.entity;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.teleport.MovementType;
+import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeMovementType extends SpongeCatalogType implements MovementType {

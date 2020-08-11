@@ -22,44 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.damage;
+package org.spongepowered.common.event.cause.entity.damage;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.entity.item.FallingBlockEntity;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.entity.FallingBlock;
+import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 import org.spongepowered.common.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 import java.lang.ref.WeakReference;
 
-public final class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<IndirectEntityDamageSource, IndirectEntityDamageSource.Builder> implements IndirectEntityDamageSource.Builder {
+public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder> implements FallingBlockDamageSource.Builder {
 
     protected WeakReference<Entity> reference = null;
-    private WeakReference<Entity> proxy = null;
 
     @Override
-    public IndirectEntityDamageSource.Builder proxySource(final Entity projectile) {
-        this.proxy = new WeakReference<>(projectile);
-        return this;
-    }
-
-    @Override
-    public IndirectEntityDamageSource.Builder entity(final Entity entity) {
+    public SpongeFallingBlockDamgeSourceBuilder entity(final Entity entity) {
+        checkArgument(entity instanceof FallingBlock);
         this.reference = new WeakReference<>(entity);
         return this;
     }
 
     @Override
-    public IndirectEntityDamageSource build() throws IllegalStateException {
+    public FallingBlockDamageSource.Builder fire() {
+        return null;
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public FallingBlockDamageSource build() throws IllegalStateException {
         checkState(this.reference.get() != null);
-        checkState(this.proxy.get() != null);
         checkState(this.damageType != null);
-        final net.minecraft.util.IndirectEntityDamageSource damageSource =
-            new net.minecraft.util.IndirectEntityDamageSource(this.damageType.getKey().getFormatted(),
-                (net.minecraft.entity.Entity) this.reference.get(),
-                (net.minecraft.entity.Entity) this.proxy.get());
-        final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
+        final MinecraftFallingBlockDamageSource damageSource =
+            new MinecraftFallingBlockDamageSource(this.damageType.getKey().getFormatted(),
+                (FallingBlockEntity) this.reference.get());
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
         if (this.creative) {
             accessor.accessor$setDamageAllowedInCreativeMode();
         }
@@ -81,22 +83,45 @@ public final class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamag
         if (this.exhaustion != null) {
             accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
         }
-        return (IndirectEntityDamageSource) damageSource;
+        return (FallingBlockDamageSource) (Object) damageSource;
     }
 
     @Override
-    public IndirectEntityDamageSource.Builder from(final IndirectEntityDamageSource value) {
+    public FallingBlockDamageSource.Builder from(final FallingBlockDamageSource value) {
         super.from(value);
         this.reference = new WeakReference<>(value.getSource());
-        this.proxy = new WeakReference<>(value.getIndirectSource());
         return this;
     }
 
     @Override
-    public IndirectEntityDamageSource.Builder reset() {
+    public SpongeFallingBlockDamgeSourceBuilder reset() {
         super.reset();
         this.reference = null;
-        this.proxy = null;
         return this;
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder places(final boolean canPlace) {
+        throw new UnsupportedOperationException("implement me");
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder fallTime(final int time) {
+        throw new UnsupportedOperationException("implement me");
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder hurtsEntities(final boolean hurts) {
+        throw new UnsupportedOperationException("implement me");
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder maxDamage(final double damage) {
+        throw new UnsupportedOperationException("implement me");
+    }
+
+    @Override
+    public FallingBlockDamageSource.Builder damagePerBlock(final double damagePer) {
+        throw new UnsupportedOperationException("implement me");
     }
 }

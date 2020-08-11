@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.entity.item.minecart;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.item.minecart.MinecartCommandBlockEntity;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;

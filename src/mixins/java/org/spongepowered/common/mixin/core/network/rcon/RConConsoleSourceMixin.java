@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.network.rcon;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.rcon.RConConsoleSource;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Mixin;

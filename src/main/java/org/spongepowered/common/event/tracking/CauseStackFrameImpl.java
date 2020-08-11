@@ -25,9 +25,9 @@
 package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKey;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

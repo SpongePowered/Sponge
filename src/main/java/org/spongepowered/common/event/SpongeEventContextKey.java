@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.EventContextKey;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class SpongeEventContextKey<T> implements EventContextKey<T> {

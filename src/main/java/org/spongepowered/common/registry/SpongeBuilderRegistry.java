@@ -59,7 +59,7 @@ import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLike
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
-import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
@@ -132,11 +132,11 @@ import org.spongepowered.common.entity.ai.goal.builtin.creature.target.SpongeFin
 import org.spongepowered.common.entity.attribute.SpongeAttributeModifierBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
-import org.spongepowered.common.event.damage.SpongeBlockDamageSourceBuilder;
-import org.spongepowered.common.event.damage.SpongeDamageSourceBuilder;
-import org.spongepowered.common.event.damage.SpongeEntityDamageSourceBuilder;
-import org.spongepowered.common.event.damage.SpongeFallingBlockDamgeSourceBuilder;
-import org.spongepowered.common.event.damage.SpongeIndirectEntityDamageSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeEntityDamageSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeFallingBlockDamgeSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.inventory.InventoryTransactionResultImpl;

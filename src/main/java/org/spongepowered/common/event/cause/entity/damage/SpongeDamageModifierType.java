@@ -22,15 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.event.cause.entity.damage;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeDismountType extends SpongeCatalogType implements DismountType {
+public final class SpongeDamageModifierType extends SpongeCatalogType implements DamageModifierType {
 
-    public SpongeDismountType(ResourceKey key) {
+    public SpongeDamageModifierType(final ResourceKey key) {
         super(key);
     }
 }

@@ -37,7 +37,7 @@ import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;

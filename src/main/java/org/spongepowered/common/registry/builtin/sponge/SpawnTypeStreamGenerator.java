@@ -25,8 +25,8 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.common.data.type.SpongeSpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.common.event.cause.entity.SpongeSpawnType;
 
 import java.util.stream.Stream;
 

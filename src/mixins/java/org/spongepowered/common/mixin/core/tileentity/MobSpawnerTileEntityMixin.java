@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.MobSpawnerTileEntity;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(MobSpawnerTileEntity.class)

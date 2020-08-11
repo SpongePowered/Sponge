@@ -35,8 +35,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.lifecycle.RegisterChannelEvent;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.channel.Channel;
@@ -56,7 +56,6 @@ import org.spongepowered.common.accessor.network.play.server.SCustomPayloadPlayP
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 import org.spongepowered.common.entity.player.ClientType;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.network.channel.packet.SpongeBasicPacketChannel;
 import org.spongepowered.common.network.channel.packet.SpongePacketChannel;
 import org.spongepowered.common.network.channel.raw.SpongeRawDataChannel;

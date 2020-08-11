@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.bridge.tileentity;
 
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 
 public interface TileEntityBridge {
 

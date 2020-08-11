@@ -27,7 +27,7 @@ package org.spongepowered.common.bridge.command;
 import net.minecraft.command.ICommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 
 import java.util.function.Supplier;
 

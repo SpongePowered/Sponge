@@ -25,8 +25,8 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.teleport.MovementType;
-import org.spongepowered.common.data.type.SpongeMovementType;
+import org.spongepowered.api.event.cause.entity.MovementType;
+import org.spongepowered.common.event.cause.entity.SpongeMovementType;
 
 import java.util.stream.Stream;
 
