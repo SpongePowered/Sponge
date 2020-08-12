@@ -52,7 +52,7 @@ import org.spongepowered.plugin.jvm.Plugin;
 
 import java.util.List;
 
-@Plugin("inventorytest")
+@Plugin("customdatatest")
 public class CustomDataTest {
 
     @Inject

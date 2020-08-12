@@ -25,26 +25,16 @@
 package org.spongepowered.test;
 
 import com.google.common.collect.Sets;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.parameter.managed.Flag;
-import org.spongepowered.api.command.selector.Selector;
-import org.spongepowered.api.command.selector.SelectorTypes;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
@@ -57,15 +47,12 @@ import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
-import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Plugin("test")
@@ -146,5 +133,66 @@ public final class TestPlugin {
     @Listener
     public void onStoppingClient(final StoppingEngineEvent<Client> event) {
         this.logger.info("Stopping engine '{}'", event.getEngine());
+    }
+
+    private final Set<String> enabledPlugins = new HashSet<>();
+
+    @Listener
+    public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+        final Parameter.Value<PluginContainer> pluginKey = Parameter.plugin().setKey("plugin").setSuggestions(
+                context -> Sponge.getPluginManager().getPlugins().stream()
+                        .filter(pc -> pc.getInstance() instanceof LoadableModule)
+                        .map(x -> x.getMetadata().getId()).collect(Collectors.toList())).build();
+        final Command.Parameterized enableCommand = Command.builder().parameter(pluginKey)
+                .setExecutor(context -> {
+                    final PluginContainer pc = context.requireOne(pluginKey);
+                    if (pc.getInstance() instanceof LoadableModule) {
+                        if (this.enabledPlugins.add(pc.getMetadata().getId())) {
+                            ((LoadableModule) pc.getInstance()).enable(context);
+                            context.sendMessage(TextComponent.of("Enabled " + pc.getMetadata().getId()));
+                        } else {
+                            context.sendMessage(TextComponent.of("Already enabled " + pc.getMetadata().getId()));
+                        }
+                    }
+                    return CommandResult.success();
+                }).build();
+        final Command.Parameterized disableCommand = Command.builder().parameter(pluginKey)
+                .setExecutor(context -> {
+                    final PluginContainer pc = context.requireOne(pluginKey);
+                    if (pc.getInstance() instanceof LoadableModule) {
+                        if (this.enabledPlugins.remove(pc.getMetadata().getId())) {
+                            ((LoadableModule) pc.getInstance()).disable(context);
+                            context.sendMessage(TextComponent.of("Disabled " + pc.getMetadata().getId()));
+                        } else {
+                            context.sendMessage(TextComponent.of("Already disabled " + pc.getMetadata().getId()));
+                        }
+                    }
+                    return CommandResult.success();
+                }).build();
+        final Command.Parameterized toggleCommand = Command.builder().parameter(pluginKey)
+                .setExecutor(context -> {
+                    final PluginContainer pc = context.requireOne(pluginKey);
+                    if (pc.getInstance() instanceof LoadableModule) {
+                        if (this.enabledPlugins.contains(pc.getMetadata().getId())) {
+                            this.enabledPlugins.remove(pc.getMetadata().getId());
+                            ((LoadableModule) pc.getInstance()).disable(context);
+                            context.sendMessage(TextComponent.of("Disabled " + pc.getMetadata().getId()));
+                        } else {
+                            this.enabledPlugins.add(pc.getMetadata().getId());
+                            ((LoadableModule) pc.getInstance()).enable(context);
+                            context.sendMessage(TextComponent.of("Enabled " + pc.getMetadata().getId()));
+                        }
+                    }
+                    return CommandResult.success();
+                }).build();
+
+        final Command.Parameterized testPluginCommand = Command.builder()
+                .child(enableCommand, "enable")
+                .child(disableCommand, "disable")
+                .child(toggleCommand, "toggle")
+                .parameter(pluginKey)
+                .setExecutor(toggleCommand)
+                .build();
+        event.register(this.plugin, testPluginCommand, "testplugins");
     }
 }
