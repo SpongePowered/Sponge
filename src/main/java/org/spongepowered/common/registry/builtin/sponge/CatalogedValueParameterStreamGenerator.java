@@ -29,10 +29,10 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.arguments.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigDecimalValueParameter;
@@ -91,6 +91,8 @@ public final class CatalogedValueParameterStreamGenerator {
                         (reader, cause, selector) -> (Player) selector.selectOnePlayer(cause.getSource())),
                 new SpongePluginContainerValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("remaining_joined_strings", StringArgumentType.greedyString()),
+                StandardCatalogedArgumentParser.createConverter("resource_key", ResourceLocationArgument.resourceLocation(),
+                        (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation),
                 StandardCatalogedArgumentParser.createIdentity("string", StringArgumentType.string()),
                 new SpongeTargetBlockValueParameter(),
                 new SpongeTargetEntityValueParameter(false),

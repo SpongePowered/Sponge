@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
@@ -205,6 +206,20 @@ public final class CommandTestPlugin {
                         })
                         .build(),
                 "testenum"
+        );
+
+
+        final Parameter.Key<ResourceKey> resourceKeyKey = Parameter.key("rk", TypeToken.of(ResourceKey.class));
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .parameter(Parameter.resourceKey().setKey(resourceKeyKey).build())
+                        .setExecutor(x -> {
+                            x.sendMessage(TextComponent.of(x.requireOne(resourceKeyKey).getFormatted()));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "testrk"
         );
     }
 
