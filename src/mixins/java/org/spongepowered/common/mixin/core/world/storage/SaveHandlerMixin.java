@@ -300,7 +300,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
         return this.shadow$getWorldDirectory();
     }
 
-    private boolean impl$loadSpongeLevelData(WorldInfo info, File file, boolean isCurrent) {
+    private boolean impl$loadSpongeLevelData(final WorldInfo info, final File file, final boolean isCurrent) {
         final CompoundNBT compound;
         try (final FileInputStream stream = new FileInputStream(file)) {
             compound = CompressedStreamTools.readCompressed(stream);

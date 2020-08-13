@@ -34,6 +34,7 @@ import net.minecraft.crash.ReportedException;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Unit;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -167,12 +168,51 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public CompletableFuture<Optional<org.spongepowered.api.world.server.ServerWorld>> loadWorld(ResourceKey key) {
+    public CompletableFuture<Optional<org.spongepowered.api.world.server.ServerWorld>> loadWorld(final ResourceKey key) {
+        Objects.requireNonNull(key);
+
+        ServerWorld world = worlds.get(key);
+        if (world != null) {
+            return CompletableFuture.completedFuture(Optional.of((org.spongepowered.api.world.server.ServerWorld) world));
+        }
+
+        final Path worldDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir().resolve(this.server.getFolderName()).resolve(key.getValue());
+
+        if (Files.notExists(worldDirectory)) {
+            SpongeCommon.getLogger().error("World '{}' has no directory in '{}'. Skipping...", key, worldDirectory.getParent().toAbsolutePath());
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+
+        if (Files.notExists(worldDirectory.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT))) {
+            SpongeCommon.getLogger().error("World '{}' has no Sponge level data ({}). Skipping...", key, Constants.Sponge.World.LEVEL_SPONGE_DAT);
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+
+        final SaveHandler handler = new SaveHandler(worldDirectory.getParent().toFile(), key.getValue(), this.server, this.server.getDataFixer());
+        final WorldInfo worldInfo = handler.loadWorldInfo();
+        final Integer dimensionId = ((WorldInfoBridge) worldInfo).bridge$getDimensionId();
+        if (dimensionId == null) {
+            SpongeCommon.getLogger().error("World '{}' has no dimension id in the Sponge level data ({}). Skipping...", key, Constants.Sponge
+                    .World.LEVEL_SPONGE_DAT);
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+        final SpongeDimensionType logicType = ((WorldInfoBridge) worldInfo).bridge$getLogicType();
+
+        final DimensionType dimensionType = Registry.DIMENSION_TYPE.getValue((ResourceLocation) (Object) key).orElseGet(() -> {
+
+        });
+
+        if (dimensionType == null) {
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+
+        MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
+
         return null;
     }
 
     @Override
-    public CompletableFuture<Optional<org.spongepowered.api.world.server.ServerWorld>> loadWorld(WorldProperties properties) throws IOException {
+    public CompletableFuture<Optional<org.spongepowered.api.world.server.ServerWorld>> loadWorld(final WorldProperties properties) throws IOException {
         return null;
     }
 
@@ -182,7 +222,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public Optional<WorldProperties> getProperties(ResourceKey key) {
+    public Optional<WorldProperties> getProperties(final ResourceKey key) {
         Preconditions.checkNotNull(key);
 
         return (Optional<WorldProperties>) (Object) Optional.ofNullable(this.infos.get(key));
@@ -199,27 +239,27 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public CompletableFuture<Boolean> saveProperties(WorldProperties properties) {
+    public CompletableFuture<Boolean> saveProperties(final WorldProperties properties) {
         return null;
     }
 
     @Override
-    public CompletableFuture<Optional<WorldProperties>> copyWorld(ResourceKey key, String copyValue) {
+    public CompletableFuture<Optional<WorldProperties>> copyWorld(final ResourceKey key, final String copyValue) {
         return null;
     }
 
     @Override
-    public CompletableFuture<Optional<WorldProperties>> renameWorld(ResourceKey key, String newValue) {
+    public CompletableFuture<Optional<WorldProperties>> renameWorld(final ResourceKey key, final String newValue) {
         return null;
     }
 
     @Override
-    public CompletableFuture<Boolean> deleteWorld(ResourceKey key) {
+    public CompletableFuture<Boolean> deleteWorld(final ResourceKey key) {
         return null;
     }
 
     @Override
-    public boolean registerPendingWorld(ResourceKey key, @Nullable WorldArchetype archetype) {
+    public boolean registerPendingWorld(final ResourceKey key, @Nullable final WorldArchetype archetype) {
         Preconditions.checkNotNull(key);
 
         if (this.pendingWorlds.containsKey(key)) {
@@ -241,7 +281,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public @Nullable ServerWorld getWorld(DimensionType dimensionType) {
+    public @Nullable ServerWorld getWorld(final DimensionType dimensionType) {
         Preconditions.checkNotNull(dimensionType);
 
         return this.worldsByType.get(dimensionType);
@@ -253,7 +293,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean isCustom) {
+    public void adjustWorldForDifficulty(final ServerWorld world, final Difficulty newDifficulty, final boolean isCustom) {
 
     }
 
@@ -385,7 +425,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             if (((WorldInfoBridge) worldInfo).bridge$getLogicType() != null) {
                 ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(((WorldInfoBridge) worldInfo).bridge$getLogicType());
             } else {
-                ((WorldInfoBridge) worldInfo).bridge$setLogicType(((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType());
+                ((WorldInfoBridge) worldInfo).bridge$setLogicType(((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType(), false);
             }
 
             if (isDefaultWorld) {

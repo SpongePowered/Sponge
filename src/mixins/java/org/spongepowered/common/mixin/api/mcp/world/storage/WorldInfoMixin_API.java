@@ -180,7 +180,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public void setDimensionType(final DimensionType dimensionType) {
-        ((WorldInfoBridge) this).bridge$setLogicType((SpongeDimensionType) dimensionType);
+        ((WorldInfoBridge) this).bridge$setLogicType((SpongeDimensionType) dimensionType, true);
     }
 
     @Override

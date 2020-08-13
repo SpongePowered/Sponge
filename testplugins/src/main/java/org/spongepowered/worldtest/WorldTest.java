@@ -26,8 +26,11 @@ package org.spongepowered.worldtest;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -57,53 +60,54 @@ public final class WorldTest {
         final Parameter.Value<WorldProperties> worldParameter = Parameter.worldProperties().setKey("world").build();
         final Parameter.Value<ServerLocation> locationParameter = Parameter.location().setKey("location").build();
         final Parameter.Value<PortalType> portalTypeParameter = Parameter.catalogedElement(PortalType.class).setKey("portal_type").build();
-        final Parameter.Value<DimensionType> dimensionTypeParameter =
-                Parameter.catalogedElement(DimensionType.class).setKey("dimension_type").build();
+        final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElement(DimensionType.class).setKey("dimension_type").build();
+        final Parameter.Value<String> worldKeyParameter = Parameter.string().setKey("world_key").build();
 
-        event.register(this.plugin, Command
-                        .builder()
-                        .parameter(locationParameter)
-                        .parameter(portalTypeParameter)
-                        .setPermission(this.plugin.getMetadata().getId() + ".command.portal.create")
-                        .setExecutor(context -> {
-                            final ServerLocation location = context.requireOne(locationParameter);
-                            final PortalType portalType = context.requireOne(portalTypeParameter);
-                            portalType.generatePortal(location);
-                            return CommandResult.success();
-                        })
-                        .build()
+        event
+                .register(this.plugin, Command
+                    .builder()
+                    .parameter(locationParameter)
+                    .parameter(portalTypeParameter)
+                    .setPermission(this.plugin.getMetadata().getId() + ".command.portal.create")
+                    .setExecutor(context -> {
+                        final ServerLocation location = context.requireOne(locationParameter);
+                        final PortalType portalType = context.requireOne(portalTypeParameter);
+                        portalType.generatePortal(location);
+                        return CommandResult.success();
+                    })
+                    .build()
                 , "cp", "createportal"
         );
 
         event.register(this.plugin, Command
-                        .builder()
-                        .parameter(playerParameter)
-                        .parameter(locationParameter)
-                        .parameter(portalTypeParameter)
-                        .setPermission(this.plugin.getMetadata().getId() + ".command.portal.use")
-                        .setExecutor(context -> {
-                            final ServerPlayer player = context.requireOne(playerParameter);
-                            final ServerLocation location = context.requireOne(locationParameter);
-                            final PortalType portalType = context.requireOne(portalTypeParameter);
-                            return portalType.teleport(player, location, true) ? CommandResult.success() : CommandResult
-                                    .error(TextComponent.of("Could not teleport!"));
-                        })
-                        .build()
+                    .builder()
+                    .parameter(playerParameter)
+                    .parameter(locationParameter)
+                    .parameter(portalTypeParameter)
+                    .setPermission(this.plugin.getMetadata().getId() + ".command.portal.use")
+                    .setExecutor(context -> {
+                        final ServerPlayer player = context.requireOne(playerParameter);
+                        final ServerLocation location = context.requireOne(locationParameter);
+                        final PortalType portalType = context.requireOne(portalTypeParameter);
+                        return portalType.teleport(player, location, true) ? CommandResult.success() : CommandResult
+                                .error(TextComponent.of("Could not teleport!"));
+                    })
+                    .build()
                 , "up", "useportal"
         );
 
         event.register(this.plugin, Command
-                        .builder()
-                        .parameter(playerParameter)
-                        .parameter(dimensionTypeParameter)
-                        .setPermission(this.plugin.getMetadata().getId() + ".command.environment.change")
-                        .setExecutor(context -> {
-                            final ServerPlayer player = context.requireOne(playerParameter);
-                            final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
-                            player.sendEnvironment(dimensionType);
-                            return CommandResult.success();
-                        })
-                        .build()
+                    .builder()
+                    .parameter(playerParameter)
+                    .parameter(dimensionTypeParameter)
+                    .setPermission(this.plugin.getMetadata().getId() + ".command.environment.change")
+                    .setExecutor(context -> {
+                        final ServerPlayer player = context.requireOne(playerParameter);
+                        final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
+                        player.sendEnvironment(dimensionType);
+                        return CommandResult.success();
+                    })
+                    .build()
                 , "ce", "changeenvironment"
         );
 
@@ -135,6 +139,22 @@ public final class WorldTest {
                         })
                         .build()
                 , "cl", "changelocation"
+        );
+
+        event.register(this.plugin, Command
+                        .builder()
+                        .parameter(worldKeyParameter)
+                        .setPermission(this.plugin.getMetadata().getId() + ".command.world.load")
+                        .setExecutor(context -> {
+                            final String rawWorldKey = context.requireOne(worldKeyParameter);
+                            if (!rawWorldKey.contains(":")) {
+                                throw new CommandException(TextComponent.of("World key must be in namespace format!"));
+                            }
+                            Sponge.getServer().getWorldManager().loadWorld(ResourceKey.resolve(rawWorldKey));
+                            return CommandResult.success();
+                        })
+                        .build()
+                , "lw", "loadworld"
         );
     }
 

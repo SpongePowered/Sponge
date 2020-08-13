@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.storage;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -56,7 +55,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.InheritableConfigHandle;
@@ -143,6 +141,11 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
+    public Integer bridge$getDimensionId() {
+        return this.impl$dimensionId;
+    }
+
+    @Override
     public boolean bridge$isValid() {
         final String levelName = this.shadow$getWorldName();
 
@@ -161,13 +164,15 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setLogicType(final SpongeDimensionType dimensionType) {
+    public void bridge$setLogicType(final SpongeDimensionType dimensionType, boolean updatePlayers) {
         this.impl$logicType = dimensionType;
 
-        final ServerWorld serverWorld = this.bridge$getWorld();
-        System.err.println(serverWorld);
-        if (serverWorld != null) {
-            ((WorldBridge) serverWorld).bridge$adjustDimensionLogic(dimensionType);
+        if (updatePlayers) {
+            final ServerWorld serverWorld = this.bridge$getWorld();
+
+            if (serverWorld != null) {
+                ((WorldBridge) serverWorld).bridge$adjustDimensionLogic(dimensionType);
+            }
         }
     }
 

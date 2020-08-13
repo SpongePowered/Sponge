@@ -43,11 +43,14 @@ public interface WorldInfoBridge {
     @Nullable
     ServerWorld bridge$getWorld();
 
+    @Nullable
+    Integer bridge$getDimensionId();
+
     void bridge$setDimensionId(DimensionType type);
 
     SpongeDimensionType bridge$getLogicType();
 
-    void bridge$setLogicType(SpongeDimensionType type);
+    void bridge$setLogicType(SpongeDimensionType type, boolean updatePlayers);
 
     UUID bridge$getUniqueId();
 

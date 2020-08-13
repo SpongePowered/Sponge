@@ -219,7 +219,7 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
 
         // TODO 1.14 - Add all the property setters
         infoBridge.bridge$setEnabled(this.impl$isEnabled);
-        infoBridge.bridge$setLogicType(this.impl$logicType);
+        infoBridge.bridge$setLogicType(this.impl$logicType, false);
         infoBridge.bridge$setLoadOnStartup(this.impl$loadOnStartup);
         infoBridge.bridge$setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
         infoBridge.bridge$setKeepSpawnLoaded(this.impl$keepSpawnLoaded);
