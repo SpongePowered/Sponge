@@ -30,6 +30,7 @@ import net.minecraft.command.arguments.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -67,6 +68,8 @@ public final class CatalogedValueParameterStreamGenerator {
         return Stream.of(
                 new SpongeBigDecimalValueParameter(),
                 new SpongeBigIntegerValueParameter(),
+                StandardCatalogedArgumentParser.createConverter("block_state", BlockStateArgument.blockState(),
+                        (reader, cause, state) -> (BlockState) state.getState()),
                 StandardCatalogedArgumentParser.createIdentity("boolean", BoolArgumentType.bool()),
                 new SpongeColorValueParameter(), // Includes ColorArgumentParser.color(), but does more. TODO: what does 1.16 do?
                 new SpongeDataContainerValueParameter(),
