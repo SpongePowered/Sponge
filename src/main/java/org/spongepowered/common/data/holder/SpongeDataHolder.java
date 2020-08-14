@@ -52,7 +52,16 @@ public interface SpongeDataHolder extends DataHolder {
      * @return The data provider
      */
     default <V extends Value<E>, E> DataProvider<V, E> getProviderFor(Key<V> key) {
-        return DataProviderRegistry.get().getProvider(key, this.getClass());
+        return DataProviderRegistry.get().getProvider(key, this.delegateDataHolder().getClass());
+    }
+
+    /**
+     * Override this to delegate the data holder
+     *
+     * @return the delegate data holder
+     */
+    default DataHolder delegateDataHolder() {
+        return this;
     }
 
     /**
@@ -64,29 +73,29 @@ public interface SpongeDataHolder extends DataHolder {
      * @return The data providers
      */
     default Collection<DataProvider<?, ?>> getAllProviders() {
-        return DataProviderRegistry.get().getAllProviders(this.getClass());
+        return DataProviderRegistry.get().getAllProviders(this.delegateDataHolder().getClass());
     }
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     default boolean supports(Key<?> key) {
-        return this.getProviderFor((Key) key).isSupported(this);
+        return this.getProviderFor((Key) key).isSupported(this.delegateDataHolder());
     }
 
     @Override
     default <E> Optional<E> get(Key<? extends Value<E>> key) {
-        return this.getProviderFor(key).get(this);
+        return this.getProviderFor(key).get(this.delegateDataHolder());
     }
 
     @Override
     default <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
-        return this.getProviderFor(key).getValue(this);
+        return this.getProviderFor(key).getValue(this.delegateDataHolder());
     }
 
     default Map<Key<?>, Object> getMappedValues() {
         final Map<Key<?>, Object> map = new HashMap<>();
         for (final DataProvider<?, ?> provider : this.getAllProviders()) {
-            provider.get(this).ifPresent(value -> map.put(provider.getKey(), value));
+            provider.get(this.delegateDataHolder()).ifPresent(value -> map.put(provider.getKey(), value));
         }
         return map;
     }
@@ -94,7 +103,7 @@ public interface SpongeDataHolder extends DataHolder {
     @Override
     default Set<Key<?>> getKeys() {
         return this.getAllProviders().stream()
-                .map(provider -> provider.get(this).map(v -> provider.getKey()).orElse(null))
+                .map(provider -> provider.get(this.delegateDataHolder()).map(v -> provider.getKey()).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(ImmutableSet.toImmutableSet());
     }
@@ -103,7 +112,7 @@ public interface SpongeDataHolder extends DataHolder {
     @SuppressWarnings("rawtypes")
     default Set<Value.Immutable<?>> getValues() {
         return this.getAllProviders().stream()
-                .map(provider -> provider.getValue(this).map(Value::asImmutable).orElse(null))
+                .map(provider -> provider.getValue(this.delegateDataHolder()).map(Value::asImmutable).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(ImmutableSet.toImmutableSet());
     }
