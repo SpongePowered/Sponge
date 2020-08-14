@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockJukebox;
 import net.minecraft.block.state.IBlockState;
@@ -57,7 +59,9 @@ import org.spongepowered.api.data.property.item.RecordProperty;
 import org.spongepowered.api.effect.sound.record.RecordType;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -71,6 +75,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.EntityPlayerBridge;
@@ -97,6 +102,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -197,6 +203,9 @@ public abstract class WorldMixin implements WorldBridge {
         final int xStart, final int yStart, final int zStart, final int xEnd, final int yEnd, final int zEnd, final boolean allowEmpty) { return false; } // SHADOWED
     @Shadow public void updateEntities() { }
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos);
+    @Shadow protected abstract boolean getCollisionBoxes(@Nullable Entity entityIn, AxisAlignedBB aabb, boolean p_191504_3_,
+            @Nullable List<AxisAlignedBB> outList);
+    @Shadow public abstract List<Entity> getEntitiesWithinAABBExcludingEntity(@Nullable Entity entityIn, AxisAlignedBB bb);
 
     @Shadow public abstract IChunkProvider shadow$getChunkProvider();
 
@@ -218,6 +227,61 @@ public abstract class WorldMixin implements WorldBridge {
             // Removing misbehaved living entities
             cir.setReturnValue(new ArrayList<>());
         }
+    }
+
+    /**
+     * @author JBYoshi
+     * @reason Fires CollideEntityEvents for non-living entities.
+     * @param entityIn The entity to check for collisions with
+     * @param aabb The entity's bounding box
+     * @return The colliding boxes
+     */
+    @Overwrite
+    public List<AxisAlignedBB> getCollisionBoxes(@Nullable final Entity entityIn, final AxisAlignedBB aabb) {
+        final List<AxisAlignedBB> list = Lists.newArrayList();
+        this.getCollisionBoxes(entityIn, aabb, false, list);
+
+        if (entityIn != null) {
+            final List<Entity> entities = this.getEntitiesWithinAABBExcludingEntity(entityIn, aabb.grow(0.25D));
+            final Multimap<Entity, AxisAlignedBB> entityCollisions = LinkedHashMultimap.create(); // Sponge
+
+            for (int i = 0; i < entities.size(); ++i) {
+                final Entity entity = entities.get(i);
+
+                if (!entityIn.isRidingSameEntity(entity)) {
+                    AxisAlignedBB axisalignedbb = entity.getCollisionBoundingBox();
+
+                    if (axisalignedbb != null && axisalignedbb.intersects(aabb)) {
+                        // Sponge start
+                        // list.add(axisalignedbb);
+                        entityCollisions.put(entity, axisalignedbb);
+                        // Sponge end
+                    }
+
+                    axisalignedbb = entityIn.getCollisionBox(entity);
+
+                    if (axisalignedbb != null && axisalignedbb.intersects(aabb)) {
+                        // Sponge start
+                        // list.add(axisalignedbb);
+                        entityCollisions.put(entity, axisalignedbb);
+                        // Sponge end
+                    }
+                }
+            }
+
+            // Sponge start - fire event
+            if (!entityCollisions.isEmpty()) {
+                final List<Entity> collidedEntities = new ArrayList<>(entityCollisions.keySet());
+                final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent((World) (Object) this, entityIn, collidedEntities);
+                if (event != null && !event.isCancelled()) {
+                    entityCollisions.keySet().retainAll(collidedEntities);
+                    list.addAll(entityCollisions.values());
+                }
+            }
+            // Sponge end
+        }
+        SpongeImplHooks.onForgeCollision((World) (Object) this, entityIn, aabb, list); // Sponge - fire Forge event
+        return list;
     }
 
     @Inject(method = "onEntityAdded", at = @At("TAIL"))

@@ -58,6 +58,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -76,6 +77,7 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -740,5 +742,17 @@ public final class SpongeImplHooks {
 
             return tileentity2;
         }
+    }
+
+    /**
+     * @author JBYoshi
+     * @reason Forge compatibility
+     * @param world The world in which the event takes place
+     * @param entityIn The entity that called collisions
+     * @param aabb The bounding box
+     * @param collided The entities that were collided with
+     */
+    public static void onForgeCollision(final World world, @Nullable final Entity entityIn, final AxisAlignedBB aabb,
+            final List<AxisAlignedBB> collided) {
     }
 }
