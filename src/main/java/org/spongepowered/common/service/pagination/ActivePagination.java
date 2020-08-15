@@ -64,8 +64,9 @@ abstract class ActivePagination {
     protected final PaginationCalculator calc;
     private final Component padding;
 
-    public ActivePagination(Supplier<Optional<? extends Audience>> src, PaginationCalculator calc, @Nullable Component title,
-            @Nullable Component header, @Nullable Component footer, Component padding) {
+    public ActivePagination(final Supplier<Optional<? extends Audience>> src, final PaginationCalculator calc,
+            @Nullable final Component title, @Nullable final Component header, @Nullable final Component footer,
+            final Component padding) {
         this.src = src;
         this.calc = calc;
         this.title = title;
@@ -128,13 +129,13 @@ abstract class ActivePagination {
         return this.maxContentLinesPerPage;
     }
 
-    public void specificPage(int page) throws CommandException {
-        Audience src = this.src.get()
+    public void specificPage(final int page) throws CommandException {
+        final Audience src = this.src.get()
                 .orElseThrow(() -> new CommandException(TextComponent.of("Source for pagination " + this.getId() + " is no longer active!")));
         this.currentPage = page;
 
-        List<Component> toSend = new ArrayList<>();
-        Component title = this.title;
+        final List<Component> toSend = new ArrayList<>();
+        final Component title = this.title;
         if (title != null) {
             toSend.add(title);
         }
@@ -142,33 +143,33 @@ abstract class ActivePagination {
             toSend.add(this.header);
         }
 
-        for (Component line : this.getLines(page)) {
+        for (final Component line : this.getLines(page)) {
             toSend.add(line);
         }
 
-        Component footer = this.calculateFooter(page);
+        final Component footer = this.calculateFooter(page);
         toSend.add(this.calc.center(footer, this.padding));
         if (this.footer != null) {
             toSend.add(this.footer);
         }
 
-        for (Component line : toSend) {
+        for (final Component line : toSend) {
             src.sendMessage(line);
         }
     }
 
-    protected Component calculateFooter(int currentPage) {
-        boolean hasPrevious = this.hasPrevious(currentPage);
-        boolean hasNext = this.hasNext(currentPage);
+    protected Component calculateFooter(final int currentPage) {
+        final boolean hasPrevious = this.hasPrevious(currentPage);
+        final boolean hasNext = this.hasNext(currentPage);
 
-        TextComponent.Builder ret = TextComponent.builder();
+        final TextComponent.Builder ret = TextComponent.builder();
         if (hasPrevious) {
             ret.append(this.prevPageText).append(DIVIDER_TEXT);
         } else {
             ret.append(TextComponent.of("«")).append(DIVIDER_TEXT);
         }
         boolean needsDiv = false;
-        int totalPages = this.getTotalPages();
+        final int totalPages = this.getTotalPages();
         if (totalPages > 1) {
             ret.append(TextComponent.builder()
                     .content(String.valueOf(currentPage))

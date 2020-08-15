@@ -44,19 +44,20 @@ import javax.annotation.Nullable;
 /**
  * Pagination occurring for an iterable -- we don't know its size.
  */
-class IterablePagination extends ActivePagination {
+final class IterablePagination extends ActivePagination {
 
     private final PeekingIterator<Map.Entry<Component, Integer>> countIterator;
     private int lastPage;
 
-    public IterablePagination(Supplier<Optional<? extends Audience>> src, PaginationCalculator calc, Iterable<Map.Entry<Component, Integer>> counts,
-            @Nullable Component title, @Nullable Component header, @Nullable Component footer, Component padding) {
+    public IterablePagination(final Supplier<Optional<? extends Audience>> src, final PaginationCalculator calc,
+            final Iterable<Map.Entry<Component, Integer>> counts, @Nullable final Component title,
+            @Nullable final Component header, @Nullable final Component footer, final Component padding) {
         super(src, calc, title, header, footer, padding);
         this.countIterator = Iterators.peekingIterator(counts.iterator());
     }
 
     @Override
-    protected Iterable<Component> getLines(int page) throws CommandException {
+    protected Iterable<Component> getLines(final int page) throws CommandException {
         if (!this.countIterator.hasNext()) {
             throw new CommandException(TextComponent.of("You're already at the end of the pagination list iterator."));
         }
@@ -83,7 +84,7 @@ class IterablePagination extends ActivePagination {
             }));
         }
 
-        List<Component> ret = new ArrayList<>(this.getMaxContentLinesPerPage());
+        final List<Component> ret = new ArrayList<>(this.getMaxContentLinesPerPage());
         int addedLines = 0;
         while (addedLines <= this.getMaxContentLinesPerPage()) {
             if (!this.countIterator.hasNext()) {
@@ -98,7 +99,7 @@ class IterablePagination extends ActivePagination {
                 this.padPage(ret, addedLines, true);
                 break;
             }
-            Map.Entry<Component, Integer> ent = this.countIterator.next();
+            final Map.Entry<Component, Integer> ent = this.countIterator.next();
             ret.add(ent.getKey());
             addedLines += ent.getValue();
         }
@@ -106,12 +107,12 @@ class IterablePagination extends ActivePagination {
     }
 
     @Override
-    protected boolean hasPrevious(int page) {
+    protected boolean hasPrevious(final int page) {
         return false;
     }
 
     @Override
-    protected boolean hasNext(int page) {
+    protected boolean hasNext(final int page) {
         return page == this.getCurrentPage() && this.countIterator.hasNext();
     }
 

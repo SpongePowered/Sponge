@@ -48,7 +48,7 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class SpongePaginationList implements PaginationList {
+public final class SpongePaginationList implements PaginationList {
 
     private final SpongePaginationService service;
     private final Iterable<Component> contents;
@@ -58,8 +58,10 @@ public class SpongePaginationList implements PaginationList {
     private final Component paginationSpacer;
     private final int linesPerPage;
 
-    public SpongePaginationList(SpongePaginationService service, Iterable<Component> contents, @Nullable Component title, @Nullable Component header,
-            @Nullable Component footer, Component paginationSpacer, int linesPerPage) {
+    public SpongePaginationList(
+            final SpongePaginationService service, final Iterable<Component> contents, @Nullable final Component title,
+            @Nullable final Component header,
+            @Nullable final Component footer, final Component paginationSpacer, final int linesPerPage) {
         this.service = service;
         this.contents = contents;
         this.title = Optional.ofNullable(title);
@@ -100,12 +102,12 @@ public class SpongePaginationList implements PaginationList {
     }
 
     @Override
-    public void sendTo(final Audience receiver, int page) {
+    public void sendTo(final Audience receiver, final int page) {
         checkNotNull(receiver, "The message receiver cannot be null!");
 
         final PaginationCalculator calculator = new PaginationCalculator(this.linesPerPage);
-        Iterable<Map.Entry<Component, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {
-            int lines = calculator.getLines(input);
+        final Iterable<Map.Entry<Component, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {
+            final int lines = calculator.getLines(input);
             return Maps.immutableEntry(input, lines);
         }).collect(Collectors.toList());
 
@@ -116,16 +118,16 @@ public class SpongePaginationList implements PaginationList {
 
         // If the Audience is a Player, then upon death, they will become a different Audience object.
         // Thus, we use a supplier to supply the player from the server, if required.
-        Supplier<Optional<? extends Audience>> audienceSupplier;
+        final Supplier<Optional<? extends Audience>> audienceSupplier;
         if (receiver instanceof Player) {
             final UUID playerUuid = ((Player) receiver).getUniqueId();
             audienceSupplier = () -> Sponge.getServer().getPlayer(playerUuid);
         } else {
-            WeakReference<Audience> srcReference = new WeakReference<>(receiver);
+            final WeakReference<Audience> srcReference = new WeakReference<>(receiver);
             audienceSupplier = () -> Optional.ofNullable(srcReference.get());
         }
 
-        ActivePagination pagination;
+        final ActivePagination pagination;
         if (this.contents instanceof List) { // If it started out as a list, it's probably reasonable to copy it to another list
             pagination = new ListPagination(audienceSupplier, calculator, ImmutableList.copyOf(counts), title, this.header.orElse(null),
                     this.footer.orElse(null), this.paginationSpacer);
@@ -137,8 +139,8 @@ public class SpongePaginationList implements PaginationList {
         this.service.getPaginationState(receiver, true).put(pagination);
         try {
             pagination.specificPage(page);
-        } catch (CommandException e) {
-            Component text = e.getText();
+        } catch (final CommandException e) {
+            final Component text = e.getText();
             if (text != null) {
                 receiver.sendMessage(text.color(NamedTextColor.RED));
             }

@@ -59,16 +59,16 @@ import javax.annotation.Nullable;
 @Singleton
 public final class SpongePaginationService implements PaginationService {
 
-    static class SourcePaginations {
+    static final class SourcePaginations {
 
         private final Map<UUID, ActivePagination> paginations = new ConcurrentHashMap<>();
         @Nullable private volatile UUID lastUuid;
 
-        @Nullable public ActivePagination get(UUID uuid) {
+        @Nullable public ActivePagination get(final UUID uuid) {
             return this.paginations.get(uuid);
         }
 
-        public void put(ActivePagination pagination) {
+        public void put(final ActivePagination pagination) {
             synchronized (this.paginations) {
                 this.paginations.put(pagination.getId(), pagination);
                 this.lastUuid = pagination.getId();
@@ -100,7 +100,7 @@ public final class SpongePaginationService implements PaginationService {
     }
 
     @Nullable
-    SourcePaginations getPaginationState(Audience source, boolean create) {
+    SourcePaginations getPaginationState(final Audience source, final boolean create) {
         if (source instanceof Player) {
             return this.getPaginationStateForPlayer((Player) source, create);
         }
@@ -109,11 +109,11 @@ public final class SpongePaginationService implements PaginationService {
     }
 
     @Nullable
-    private SourcePaginations getPaginationStateForNonPlayer(Audience source, boolean create) {
+    private SourcePaginations getPaginationStateForNonPlayer(final Audience source, final boolean create) {
         SourcePaginations ret = this.activePaginations.get(source);
         if (ret == null && create) {
             ret = new SourcePaginations();
-            SourcePaginations existing = this.activePaginations.putIfAbsent(source, ret);
+            final SourcePaginations existing = this.activePaginations.putIfAbsent(source, ret);
             if (existing != null) {
                 ret = existing;
             }
@@ -122,38 +122,38 @@ public final class SpongePaginationService implements PaginationService {
     }
 
     @Nullable
-    private SourcePaginations getPaginationStateForPlayer(Player source, boolean create) {
+    private SourcePaginations getPaginationStateForPlayer(final Player source, final boolean create) {
         return this.playerActivePaginations.get(source.getUniqueId(), k -> create ? new SourcePaginations() : null);
     }
 
     public Command.Parameterized createPaginationCommand() {
-        Parameter.Value<ActivePagination> paginationIdParameter = Parameter.builder(ActivePagination.class)
+        final Parameter.Value<ActivePagination> paginationIdParameter = Parameter.builder(ActivePagination.class)
                 .parser(new ActivePaginationParameter())
                 .setKey("pagination-id")
                 .build();
 
-        Command.Parameterized next = Command.builder()
+        final Command.Parameterized next = Command.builder()
                 .setShortDescription(TextComponent.of("Go to the next page"))
                 .setExecutor((context) -> {
                     context.requireOne(paginationIdParameter).nextPage();
                     return CommandResult.success();
                 }).build();
 
-        Command.Parameterized prev = Command.builder()
+        final Command.Parameterized prev = Command.builder()
                 .setShortDescription(TextComponent.of("Go to the previous page"))
                 .setExecutor((context) -> {
                     context.requireOne(paginationIdParameter).previousPage();
                     return CommandResult.success();
                 }).build();
 
-        Parameter.Value<Integer> pageParameter = Parameter.integerNumber().setKey("page").build();
+        final Parameter.Value<Integer> pageParameter = Parameter.integerNumber().setKey("page").build();
 
-        CommandExecutor pageExecutor = (context) -> {
+        final CommandExecutor pageExecutor = (context) -> {
             context.requireOne(paginationIdParameter).specificPage(context.requireOne(pageParameter));
             return CommandResult.success();
         };
 
-        Command.Parameterized page = Command.builder()
+        final Command.Parameterized page = Command.builder()
                 .setShortDescription(TextComponent.of("Go to a specific page"))
                 .parameter(pageParameter)
                 .setExecutor(pageExecutor)
@@ -172,32 +172,33 @@ public final class SpongePaginationService implements PaginationService {
                 .build();
     }
 
-    private class ActivePaginationParameter implements ValueParameter<ActivePagination> {
+    private final class ActivePaginationParameter implements ValueParameter<ActivePagination> {
 
         @Override
-        public Optional<? extends ActivePagination> getValue(Parameter.Key<? super ActivePagination> parameterKey, ArgumentReader.Mutable reader,
-                CommandContext.Builder context) throws ArgumentParseException {
-            Audience source = context.getCause().first(Audience.class)
+        public Optional<? extends ActivePagination> getValue(final Parameter.Key<? super ActivePagination> parameterKey,
+                final ArgumentReader.Mutable reader,
+                final CommandContext.Builder context) throws ArgumentParseException {
+            final Audience source = context.getCause().first(Audience.class)
                     .orElseThrow(() -> reader.createException(TextComponent.of("No usable source found")));
 
-            SourcePaginations paginations = SpongePaginationService.this.getPaginationState(source, false);
+            final SourcePaginations paginations = SpongePaginationService.this.getPaginationState(source, false);
             if (paginations == null) {
-                String name = source instanceof Nameable ? ((Nameable) source).getName() : source.toString();
+                final String name = source instanceof Nameable ? ((Nameable) source).getName() : source.toString();
                 throw reader.createException(TextComponent.of(String.format("Source %s has no paginations!", name)));
             }
 
-            UUID id;
-            ArgumentReader.Immutable state = reader.getImmutable();
+            final UUID id;
+            final ArgumentReader.Immutable state = reader.getImmutable();
             try {
                 id = UUID.fromString(reader.parseString());
-            } catch (IllegalArgumentException ex) {
+            } catch (final IllegalArgumentException ex) {
                 if (paginations.getLastUuid() != null) {
                     reader.setState(state);
                     return Optional.ofNullable(paginations.get(paginations.getLastUuid()));
                 }
                 throw reader.createException(TextComponent.of("Input was not a valid UUID!"));
             }
-            ActivePagination pagination = paginations.get(id);
+            final ActivePagination pagination = paginations.get(id);
             if (pagination == null) {
                 throw reader.createException(TextComponent.of("No pagination registered for id " + id));
             }
@@ -205,7 +206,7 @@ public final class SpongePaginationService implements PaginationService {
         }
 
         @Override
-        public List<String> complete(CommandContext context) {
+        public List<String> complete(final CommandContext context) {
             return context.getCause().first(Audience.class)
                     .map(src -> SpongePaginationService.this.getPaginationState(src, false))
                     .map(paginations -> ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString)))

@@ -47,7 +47,7 @@ import java.util.PrimitiveIterator;
  * Pagination calculator for players. Handles calculation of text widths,
  * centering text, adding padding, adding spacing, and more.
  */
-class PaginationCalculator {
+final class PaginationCalculator {
 
     private static final String NON_UNICODE_CHARS;
     private static final int[] NON_UNICODE_CHAR_WIDTHS;
@@ -61,32 +61,32 @@ class PaginationCalculator {
      *
      * @param linesPerPage The amount of lines per page there should be
      */
-    PaginationCalculator(int linesPerPage) {
+    PaginationCalculator(final int linesPerPage) {
         this.linesPerPage = linesPerPage;
     }
 
     static {
-        ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
+        final ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
                 .setURL(PaginationCalculator.class.getResource("font-sizes.json"))
                 .setHeaderMode(HeaderMode.NONE)
                 .build();
         try {
-            ConfigurationNode node = loader.load();
+            final ConfigurationNode node = loader.load();
             NON_UNICODE_CHARS = node.getNode("non-unicode").getString();
-            List<? extends ConfigurationNode> charWidths = node.getNode("char-widths").getChildrenList();
-            int[] nonUnicodeCharWidths = new int[charWidths.size()];
+            final List<? extends ConfigurationNode> charWidths = node.getNode("char-widths").getChildrenList();
+            final int[] nonUnicodeCharWidths = new int[charWidths.size()];
             for (int i = 0; i < nonUnicodeCharWidths.length; ++i) {
                 nonUnicodeCharWidths[i] = charWidths.get(i).getInt();
             }
             NON_UNICODE_CHAR_WIDTHS = nonUnicodeCharWidths;
 
-            List<? extends ConfigurationNode> glyphWidths = node.getNode("glyph-widths").getChildrenList();
-            byte[] unicodeCharWidths = new byte[glyphWidths.size()];
+            final List<? extends ConfigurationNode> glyphWidths = node.getNode("glyph-widths").getChildrenList();
+            final byte[] unicodeCharWidths = new byte[glyphWidths.size()];
             for (int i = 0; i < unicodeCharWidths.length; ++i) {
                 unicodeCharWidths[i] = (byte) glyphWidths.get(i).getInt();
             }
             UNICODE_CHAR_WIDTHS = unicodeCharWidths;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
@@ -101,7 +101,7 @@ class PaginationCalculator {
      * @param text The text to calculate the number of lines for
      * @return The number of lines that this text flows into
      */
-    int getLines(Component text) {
+    int getLines(final Component text) {
         //TODO: this needs fixing as well.
         return (int) Math.ceil((double) this.getWidth(text) / PaginationCalculator.LINE_WIDTH);
     }
@@ -115,8 +115,8 @@ class PaginationCalculator {
      * @return The width of the character at the code point
      */
     @VisibleForTesting
-    int getWidth(int codePoint, boolean isBold) {
-        int nonUnicodeIdx = PaginationCalculator.NON_UNICODE_CHARS.indexOf(codePoint);
+    int getWidth(final int codePoint, final boolean isBold) {
+        final int nonUnicodeIdx = PaginationCalculator.NON_UNICODE_CHARS.indexOf(codePoint);
         int width;
         if (codePoint == 32) {
             width = 4;
@@ -129,9 +129,9 @@ class PaginationCalculator {
             // Split into high and low nibbles.
             //bit digits
             //87654321 >>> 4 = 00008765
-            int startColumn = temp >>> 4;
+            final int startColumn = temp >>> 4;
             //87654321 & 00001111 = 00004321
-            int endColumn = temp & 15;
+            final int endColumn = temp & 15;
 
             width = (endColumn + 1) - startColumn;
             //Why does this scaling happen?
@@ -159,19 +159,19 @@ class PaginationCalculator {
      * @return The amount of character pixels/columns the text takes up
      */
     @VisibleForTesting
-    int getWidth(Component text) {
-        Iterable<ITextComponent> children = SpongeAdventure.asVanilla(text);
+    int getWidth(final Component text) {
+        final Iterable<ITextComponent> children = SpongeAdventure.asVanilla(text);
         int total = 0;
 
-        for (ITextComponent child : children) {
-            PrimitiveIterator.OfInt i_it;
+        for (final ITextComponent child : children) {
+            final PrimitiveIterator.OfInt i_it;
             if (child instanceof StringTextComponent || child instanceof TranslationTextComponent) {
                 i_it = child.getUnformattedComponentText().codePoints().iterator();
             } else {
                 continue;
             }
 
-            boolean bold = child.getStyle().getBold();
+            final boolean bold = child.getStyle().getBold();
 
             Integer cp;
             boolean newLine = false;
@@ -186,7 +186,7 @@ class PaginationCalculator {
                         newLine = true;
                     }
                 } else {
-                    int width = this.getWidth(cp, bold);
+                    final int width = this.getWidth(cp, bold);
                     total += width;
                     newLine = false;
                 }
@@ -219,7 +219,7 @@ class PaginationCalculator {
         final Component textWithSpaces = this.addSpaces(TextComponent.space(), text);
 
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH
-        boolean addSpaces = this.getWidth(textWithSpaces) <= PaginationCalculator.LINE_WIDTH;
+        final boolean addSpaces = this.getWidth(textWithSpaces) <= PaginationCalculator.LINE_WIDTH;
 
         int paddingLength = this.getWidth(padding);
         final TextComponent.Builder output = TextComponent.builder();
@@ -239,13 +239,13 @@ class PaginationCalculator {
                 inputLength = this.getWidth(textWithSpaces);
             }
 
-            int paddingNecessary = PaginationCalculator.LINE_WIDTH - inputLength;
+            final int paddingNecessary = PaginationCalculator.LINE_WIDTH - inputLength;
 
-            int paddingCount = GenericMath.floor(paddingNecessary / paddingLength);
+            final int paddingCount = GenericMath.floor(paddingNecessary / paddingLength);
             //pick a halfway point
-            int beforePadding = GenericMath.floor(paddingCount / 2.0);
+            final int beforePadding = GenericMath.floor(paddingCount / 2.0);
             //Do not use ceil, this prevents floating point errors.
-            int afterPadding = paddingCount - beforePadding - 1;
+            final int afterPadding = paddingCount - beforePadding - 1;
 
             this.addPadding(padding, output, beforePadding);
             output.append(text);
@@ -262,7 +262,7 @@ class PaginationCalculator {
      * @param build The work in progress text builder
      * @return The finalized, properly styled text.
      */
-    private Component finalizeBuilder(Component text, TextComponent.Builder build) {
+    private Component finalizeBuilder(final Component text, final TextComponent.Builder build) {
         return build.style(text.style().toBuilder().build()).build();
     }
 
@@ -276,7 +276,7 @@ class PaginationCalculator {
      * @param text The text to add to
      * @return The text with the added spaces
      */
-    private Component addSpaces(Component spaces, Component text) {
+    private Component addSpaces(final Component spaces, final Component text) {
         return TextComponent.builder()
                 .append(spaces)
                 .append(text)
@@ -293,7 +293,7 @@ class PaginationCalculator {
      * @param build The work in progress text to add to
      * @param count The amount of padding to add
      */
-    private void addPadding(Component padding, TextComponent.Builder build, int count) {
+    private void addPadding(final Component padding, final TextComponent.Builder build, final int count) {
         if (count > 0) {
             build.append(Collections.nCopies(count, padding));
         }
