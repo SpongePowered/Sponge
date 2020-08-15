@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
@@ -39,6 +40,8 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.function.Function;
 
 public interface ServerWorldBridge {
+
+    CustomServerBossInfoManager bridge$getBossBarManager();
 
     void bridge$setPreviousWeather(Weather weather);
 

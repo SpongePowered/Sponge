@@ -60,6 +60,7 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -231,6 +232,9 @@ public final class EntityUtil {
         if (isPortal) {
             player.connection.sendPacket(new SPlaySoundEventPacket(1032, BlockPos.ZERO, 0, false));
         }
+
+        ((ServerWorldBridge) fromWorld).bridge$getBossBarManager().onPlayerLogout(player);
+        ((ServerWorldBridge) toWorld).bridge$getBossBarManager().onPlayerLogin(player);
 
         ((ServerPlayerEntityAccessor) player).accessor$setLastExperience(-1);
         ((ServerPlayerEntityAccessor) player).accessor$setLastHealth(-1.0f);

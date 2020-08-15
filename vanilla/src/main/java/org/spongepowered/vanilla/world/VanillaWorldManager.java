@@ -63,6 +63,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
@@ -341,7 +342,14 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         try {
             actualWorld.save(null, true, true);
         } catch (final SessionLockException e) {
-            SpongeCommon.getLogger().error("Exception caught when saving world while unloading '{}'. Aborting...", world.getKey(), e);
+            SpongeCommon.getLogger().error("Exception caught when saving world '{}' while unloading. Aborting...", world.getKey(), e);
+            return CompletableFuture.completedFuture(false);
+        }
+
+        try {
+            actualWorld.close();
+        } catch (IOException e) {
+            SpongeCommon.getLogger().error("Exception caught when closing world '{}' while unloading. Aborting...", world.getKey());
             return CompletableFuture.completedFuture(false);
         }
 
@@ -349,11 +357,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         this.infoByType.remove(actualWorld.dimension.getType());
         this.worlds.remove(world.getKey());
         this.worldsByType.remove(actualWorld.dimension.getType());
-
-        final UnloadWorldEvent event =
-                SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), world);
-
-        SpongeCommon.postEvent(event);
+        
+        SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), world));
 
         return CompletableFuture.completedFuture(true);
     }
@@ -795,11 +800,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         this.server.getPlayerList().func_212504_a(serverWorld);
         if (serverWorld.dimension.getType() == DimensionType.OVERWORLD) {
             ((SpongeUserManager) ((Server) this.server).getUserManager()).init();
+        }
 
-            // Need to see about making custom boss events be per-world
-            if (serverWorld.getWorldInfo().getCustomBossEvents() != null) {
-                this.server.getCustomBossEvents().read(serverWorld.getWorldInfo().getCustomBossEvents());
-            }
+        if (serverWorld.getWorldInfo().getCustomBossEvents() != null) {
+            ((ServerWorldBridge) serverWorld).bridge$getBossBarManager().read(serverWorld.getWorldInfo().getCustomBossEvents());
         }
 
         SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(

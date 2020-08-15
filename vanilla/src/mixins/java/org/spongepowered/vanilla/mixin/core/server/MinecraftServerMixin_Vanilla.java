@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.vanilla.VanillaServer;
@@ -106,10 +107,7 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
             // Sponge Start - per-world world border
             serverworld.getWorldBorder().copyTo(serverworld.getWorldInfo());
 
-            // TODO Minecraft 1.14 - Per-world boss events
-            if (serverworld.getDimension().getType() == DimensionType.OVERWORLD) {
-                serverworld.getWorldInfo().setCustomBossEvents(this.shadow$getCustomBossEvents().write());
-            }
+            serverworld.getWorldInfo().setCustomBossEvents(((ServerWorldBridge) serverworld).bridge$getBossBarManager().write());
 
             // Sponge Start - Save our NBT compound with each world
             serverworld.getSaveHandler().saveWorldInfoWithPlayer(serverworld.getWorldInfo(), this.shadow$getPlayerList().getHostPlayerData());

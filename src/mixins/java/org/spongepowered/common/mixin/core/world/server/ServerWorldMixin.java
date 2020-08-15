@@ -26,10 +26,14 @@ package org.spongepowered.common.mixin.core.world.server;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.CustomServerBossInfoManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
@@ -45,7 +49,10 @@ import java.util.List;
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge {
 
+    @Shadow @Final private MinecraftServer server;
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
+
+    private CustomServerBossInfoManager impl$bossBarManager;
 
     @Override
     public void bridge$adjustDimensionLogic(final SpongeDimensionType dimensionType) {
@@ -72,4 +79,17 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 .toString();
     }
 
+    @Override
+    public CustomServerBossInfoManager bridge$getBossBarManager() {
+
+        if (this.impl$bossBarManager == null) {
+            if (this.dimension.getType() == DimensionType.OVERWORLD || this.bridge$isFake()) {
+                this.impl$bossBarManager = this.server.getCustomBossEvents();
+            } else {
+                this.impl$bossBarManager = new CustomServerBossInfoManager(this.server);
+            }
+        }
+
+        return this.impl$bossBarManager;
+    }
 }

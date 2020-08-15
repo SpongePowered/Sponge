@@ -17,6 +17,7 @@
         "command.CommandSourceMixin",
         "command.arguments.EntitySelectorParserMixin",
         "data.CustomDataHolderMixin",
+        "command.impl.BossBarCommandMixin",
         "command.impl.SpreadPlayersCommandMixin",
         "command.impl.TeleportCommandMixin",
         "entity.ActiveChunkReferentMixin",

@@ -31,6 +31,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SDisconnectPacket;
 import net.minecraft.network.play.server.SJoinGamePacket;
+import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
@@ -64,6 +65,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -210,6 +212,16 @@ public abstract class PlayerListMixin {
         }
 
         ((ServerPlayerEntityBridge) mcPlayer).bridge$setPreviousGameProfile(null);
+    }
+
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
+    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(MinecraftServer minecraftServer, NetworkManager netManager, ServerPlayerEntity playerIn) {
+        return ((ServerWorldBridge) playerIn.getServerWorld()).bridge$getBossBarManager();
+    }
+
+    @Redirect(method = "playerLoggedOut", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
+    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(MinecraftServer minecraftServer, ServerPlayerEntity playerIn) {
+        return ((ServerWorldBridge) playerIn.getServerWorld()).bridge$getBossBarManager();
     }
 
     @Redirect(method = "func_212504_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSaveHandler()Lnet/minecraft/world/storage/SaveHandler;"))

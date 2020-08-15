@@ -31,9 +31,9 @@ import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
 import java.util.stream.Stream;
 
-public final class GeneratorModifierRegistrar {
+public final class GeneratorModifierTypeRegistrar {
 
-    private GeneratorModifierRegistrar() {
+    private GeneratorModifierTypeRegistrar() {
     }
 
     public static void registerRegistry(final SpongeCatalogRegistry registry) {

@@ -39,7 +39,7 @@ public abstract class CustomServerBossInfoMixin extends ServerBossInfoMixin {
 
     @Redirect(method = {"getValue", "write"},
         at = @At(value = "FIELD", target = "Lnet/minecraft/server/CustomServerBossInfo;value:I"))
-    private int valueRead(final CustomServerBossInfo $this) {
+    private int impl$valueRead(final CustomServerBossInfo $this) {
         return (int) (this.bridge$asAdventure().percent() * this.max);
     }
 
@@ -50,7 +50,7 @@ public abstract class CustomServerBossInfoMixin extends ServerBossInfoMixin {
             target = "Lnet/minecraft/server/CustomServerBossInfo;name:Lnet/minecraft/util/text/ITextComponent;"
         )
     )
-    private ITextComponent nameRead(final CustomServerBossInfo $this) {
+    private ITextComponent impl$nameRead(final CustomServerBossInfo $this) {
         return SpongeAdventure.asVanilla(this.bridge$asAdventure().name());
     }
 
