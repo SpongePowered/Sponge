@@ -77,8 +77,5 @@ public interface WorldSettingsBridge {
 
     void bridge$setRandomSeed(boolean state);
 
-    @Nullable
-    Boolean bridge$internalKeepSpawnLoaded();
-
     void bridge$populateInfo(WorldInfo info);
 }
