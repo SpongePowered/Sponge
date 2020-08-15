@@ -159,8 +159,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     // @formatter:on
 
-    @Shadow public abstract void shadow$setLocationAndAngles(double p_70012_1_, double p_70012_3_, double p_70012_5_, float p_70012_7_, float p_70012_8_);
-
     private boolean impl$isConstructing = true;
     @Nullable private Component impl$displayName;
     @Nullable private BlockPos impl$lastCollidedBlockPos;
@@ -205,7 +203,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                                     VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition(), event.getOriginalDestinationWorld(),
                                     location.getPosition(), event.getDestinationWorld());
 
-                    if (SpongeCommon.postEvent(event)) {
+                    if (SpongeCommon.postEvent(repositionEvent)) {
                         return false;
                     }
 

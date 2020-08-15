@@ -181,7 +181,8 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
                         Files.deleteIfExists(oldSpongeLevelFile);
                     } catch (final IOException e) {
                         // This server has some disk issues, bring it down to prevent more damage..
-                        throw new RuntimeException(String.format("Failed to delete the old Sponge level file in '%s'!", info.getWorldName()), e);
+                        throw new RuntimeException(String.format("Failed to delete the old Sponge level file in world '%s'!", info.getWorldName()),
+                                e);
                     }
                 }
                 return;
@@ -191,7 +192,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
         }
 
         if (exceptionRaised) {
-            throw new RuntimeException("Unable to load sponge data for world '" + info.getWorldName() + "'!");
+            throw new RuntimeException("Unable to load sponge level data for world '" + info.getWorldName() + "'!");
         }
     }
 
@@ -305,7 +306,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
                     .centre()
                     .hr();
             // We can't read it - but let's copy the file so we can ask for it to inspect what it looks like later.
-            Path corrupted = levelFile.getParent().resolve(levelFile.getFileName().toString() + ".corrupted-" +
+            final Path corrupted = levelFile.getParent().resolve(levelFile.getFileName().toString() + ".corrupted-" +
                     DateTimeFormatter.ISO_INSTANT.format(Instant.now()).replaceAll(":", "") + ".dat");
             try {
                 Files.copy(levelFile, corrupted);

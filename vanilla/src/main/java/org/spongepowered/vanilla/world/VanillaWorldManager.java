@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.world;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.longs.LongIterator;
@@ -130,16 +129,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public boolean isDimensionTypeRegistered(final DimensionType dimensionType) {
-        return Registry.DIMENSION_TYPE.getKey(dimensionType) != null;
-    }
-
-    @Override
-    public WorldInfo getInfo(final DimensionType dimensionType) {
-        return this.infoByType.get(dimensionType);
-    }
-
-    @Override
     public Optional<org.spongepowered.api.world.server.ServerWorld> getWorld(final ResourceKey key) {
         Objects.requireNonNull(key);
 
@@ -173,6 +162,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final WorldInfo worldInfo = new WorldInfo((WorldSettings) (Object) archetype, key.getValue());
         ((ResourceKeyBridge) worldInfo).bridge$setKey(key);
         ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
+        ((WorldInfoBridge) worldInfo).bridge$setModCreated(true);
 
         return CompletableFuture.completedFuture(Optional.of((WorldProperties) worldInfo));
     }
@@ -208,10 +198,18 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return CompletableFuture.completedFuture(Optional.empty());
         }
 
+        final ResourceKey existingKey = ((ResourceKeyBridge) worldInfo).bridge$getKey();
+        if (existingKey != null && !existingKey.equals(key)) {
+            SpongeCommon.getLogger().error("World '{}' is keyed as '{}' in the level data. Aborting...", key, existingKey);
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+
+        ((ResourceKeyBridge) worldInfo).bridge$setKey(key);
+
         final SpongeDimensionType logicType = ((WorldInfoBridge) worldInfo).bridge$getLogicType();
 
         final DimensionType dimensionType = Registry.DIMENSION_TYPE.getValue((ResourceLocation) (Object) key).orElseGet(() -> this.
-                createDimensionType(key, logicType, worldDirectory.getFileName().toString(), dimensionId));
+                createDimensionType(key, logicType, worldDirectory.getFileName().toString(), dimensionId + 1));
 
         if (dimensionType.getId() != dimensionId) {
             SpongeCommon.getLogger().error("World '{}' specifies internal id '{}' which was already registered. Aborting...", key, dimensionId);
@@ -224,16 +222,16 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
 
-        final ServerWorld serverWorld = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
+        world = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
                 dimensionType, this.server.getProfiler(), chunkStatusListener);
 
         this.loadedWorldInfos.put(key, worldInfo);
         this.infoByType.put(dimensionType, worldInfo);
         this.allInfos.put(key, worldInfo);
-        this.worlds.put(key, serverWorld);
-        this.worldsByType.put(dimensionType, serverWorld);
+        this.worlds.put(key, world);
+        this.worldsByType.put(dimensionType, world);
 
-        this.performPostLoadWorldLogic(serverWorld, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo.getGenerator(), null), worldDirectory, chunkStatusListener);
+        this.performPostLoadWorldLogic(world, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo.getGenerator(), null), worldDirectory, chunkStatusListener);
 
         return CompletableFuture.completedFuture(Optional.of((org.spongepowered.api.world.server.ServerWorld) world));
     }
@@ -256,14 +254,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final Path worldDirectory =
                 ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir().resolve(this.server.getFolderName())
                         .resolve(properties.getKey().getValue());
-        boolean isOnDisk = false;
+        final boolean isOnDisk = Files.exists(worldDirectory);
 
         final SaveHandler saveHandler = new SaveHandler(worldDirectory.getParent().toFile(), properties.getKey().getValue(), this.server,
                 this.server.getDataFixer());
 
-        if (Files.exists(worldDirectory)) {
+        if (isOnDisk) {
             properties = (WorldProperties) saveHandler.loadWorldInfo();
-            isOnDisk = true;
         }
 
         DimensionType dimensionType = Registry.DIMENSION_TYPE.getValue((ResourceLocation) (Object) properties.getKey()).orElse(null);
@@ -363,7 +360,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public Optional<WorldProperties> getProperties(final ResourceKey key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         return (Optional<WorldProperties>) (Object) Optional.ofNullable(this.loadedWorldInfos.get(key));
     }
@@ -425,7 +422,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public boolean registerPendingWorld(final ResourceKey key, @Nullable final WorldArchetype archetype) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         if (this.pendingWorlds.containsKey(key)) {
             return false;
@@ -447,9 +444,19 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public @Nullable ServerWorld getWorld(final DimensionType dimensionType) {
-        Preconditions.checkNotNull(dimensionType);
+        Objects.requireNonNull(dimensionType);
 
         return this.worldsByType.get(dimensionType);
+    }
+
+    @Override
+    @Nullable
+    public ServerWorld getWorld0(final ResourceKey key) {
+        if (key == null) {
+            return null;
+        }
+
+        return this.worlds.get(key);
     }
 
     @Override
@@ -545,12 +552,14 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 // Demo code does not run on SinglePlayer
                 if (isSinglePlayer) {
                     worldInfo = new WorldInfo(defaultSettings, levelName);
-                } else if (defaultSettings == null) {
-                    defaultSettings = this.createDefaultSettings(defaultSettings, isDefaultWorld, seed, type, generatorOptions);
-                    if (isDefaultWorld) {
-                        defaultSettings.setGeneratorOptions(generatorOptions);
-                        if (((MinecraftServerAccessor_Vanilla) this.server).accessor$getEnableBonusChest()) {
-                            defaultSettings.enableBonusChest();
+                } else {
+                    if (defaultSettings == null) {
+                        defaultSettings = this.createDefaultSettings(defaultSettings, isDefaultWorld, seed, type, generatorOptions);
+                        if (isDefaultWorld) {
+                            defaultSettings.setGeneratorOptions(generatorOptions);
+                            if (((MinecraftServerAccessor_Vanilla) this.server).accessor$getEnableBonusChest()) {
+                                defaultSettings.enableBonusChest();
+                            }
                         }
                     }
 
@@ -726,11 +735,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             registeredType = this.createDimensionType(key, logicType, worldDirectory, dimensionId + 1);
             this.pendingWorlds.put(key, new WorldRegistration(key, registeredType, null));
         }
-    }
-
-    private boolean isVanillaWorld(final ResourceKey key) {
-        return VanillaWorldManager.VANILLA_OVERWORLD.equals(key) || VanillaWorldManager.VANILLA_THE_NETHER.equals(key) || VanillaWorldManager
-                .VANILLA_THE_END.equals(key);
     }
 
     private boolean isVanillaSubLevel(final String directoryName) {

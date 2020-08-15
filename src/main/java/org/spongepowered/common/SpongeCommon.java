@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Client;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.Direction;
@@ -40,6 +41,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
 
@@ -98,6 +100,10 @@ public final class SpongeCommon {
 
     public static AsyncScheduler getAsyncScheduler() {
         return getGame().getAsyncScheduler();
+    }
+
+    public static SpongeWorldManager getWorldManager() {
+        return (SpongeWorldManager) Sponge.getServer().getWorldManager();
     }
 
     public static Path getGameDirectory() {

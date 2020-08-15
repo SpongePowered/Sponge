@@ -26,23 +26,24 @@ package org.spongepowered.worldtest;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
+
+import java.io.IOException;
 
 @Plugin("worldtest")
 public final class WorldTest {
@@ -61,7 +62,7 @@ public final class WorldTest {
         final Parameter.Value<ServerLocation> locationParameter = Parameter.location().setKey("location").build();
         final Parameter.Value<PortalType> portalTypeParameter = Parameter.catalogedElement(PortalType.class).setKey("portal_type").build();
         final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElement(DimensionType.class).setKey("dimension_type").build();
-        final Parameter.Value<String> worldKeyParameter = Parameter.string().setKey("world_key").build();
+        final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
 
         event
                 .register(this.plugin, Command
@@ -146,29 +147,53 @@ public final class WorldTest {
                         .parameter(worldKeyParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.world.load")
                         .setExecutor(context -> {
-                            final String rawWorldKey = context.requireOne(worldKeyParameter);
-                            if (!rawWorldKey.contains(":")) {
-                                throw new CommandException(TextComponent.of("World key must be in namespace format!"));
-                            }
-                            Sponge.getServer().getWorldManager().loadWorld(ResourceKey.resolve(rawWorldKey));
+                            final ResourceKey key = context.requireOne(worldKeyParameter);
+                            Sponge.getServer().getWorldManager().loadWorld(key);
                             return CommandResult.success();
                         })
                         .build()
                 , "lw", "loadworld"
         );
-    }
 
-    @Listener
-    public void onChangeWorld(final ChangeEntityWorldEvent event) {
-        this.plugin.getLogger().error(event);
-    }
+        event.register(this.plugin, Command
+                        .builder()
+                        .parameter(worldKeyParameter)
+                        .parameter(dimensionTypeParameter)
+                        .setPermission(this.plugin.getMetadata().getId() + ".command.world.create")
+                        .setExecutor(context -> {
+                            final ResourceKey key = context.requireOne(worldKeyParameter);
+                            final DimensionType dimensionType = context.requireOne(dimensionTypeParameter);
+                            final WorldArchetype archetype = WorldArchetype.builder()
+                                    .key(ResourceKey.of(this.plugin, "nether_style"))
+                                    .dimensionType(dimensionType)
+                                    .generateSpawnOnLoad(true)
+                                    .build();
+                            Sponge.getServer().getWorldManager().createProperties(key, archetype).thenAccept(result -> result.ifPresent(properties -> {
+                                try {
+                                    Sponge.getServer().getWorldManager().loadWorld(properties);
+                                } catch (final IOException e) {
+                                    context.getCause().getAudience().sendMessage(TextComponent.of("Failed to load world!"));
+                                }
+                            }));
 
-    @Listener
-    public void onMoveEntity(final MoveEntityEvent event) {
-        if (event instanceof ChangeEntityWorldEvent.Reposition) {
-            return;
-        }
-        
-        this.plugin.getLogger().error(event);
+                            return CommandResult.success();
+                        })
+                        .build()
+                , "cw", "createworld"
+        );
+
+        event.register(this.plugin, Command
+                        .builder()
+                        .parameter(playerParameter)
+                        .setExecutor(context -> {
+                            final ServerPlayer player = context.requireOne(playerParameter);
+                            player.sendMessage(TextComponent.of("You are in World ").append(TextComponent.of(player.getWorld().getKey().toString(),
+                             NamedTextColor.AQUA)).append(TextComponent.of(" at (" + player.getPosition().getFloorX() + ", " + player.getPosition().getFloorY() +
+                                    ", " + player.getPosition().getFloorZ() + ")")));
+                            return CommandResult.success();
+                        })
+                        .build()
+                , "wai", "whereami"
+        );
     }
 }

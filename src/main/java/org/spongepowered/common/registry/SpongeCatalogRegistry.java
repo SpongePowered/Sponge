@@ -173,6 +173,7 @@ import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerat
 import org.spongepowered.common.registry.builtin.sponge.EquipmentGroupStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.EquipmentTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.EventContextKeyStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.GeneratorModifierRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.GoalExecutorTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.GoalTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.HorseColorStreamGenerator;
@@ -599,6 +600,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         // Que the "I'm Vanilla and I'm fucking stupid" music
         CriteriaTriggersRegistrar.registerRegistry(this);
+        GeneratorModifierRegistrar.registerRegistry(this);
         IAttributeTypeRegistrar.registerRegistry(this);
         PhaseTypeRegistrar.registerRegistry(this);
     }
@@ -619,6 +621,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         EnchantmentSupplier.registerSuppliers(this);
         EntityTypeSupplier.registerSuppliers(this);
         FluidSupplier.registerSuppliers(this);
+        GeneratorModifierRegistrar.registerSuppliers(this);
         IAttributeTypeRegistrar.registerSuppliers(this);
         ItemSupplier.registerSuppliers(this);
         PaintingTypeSupplier.registerSuppliers(this);

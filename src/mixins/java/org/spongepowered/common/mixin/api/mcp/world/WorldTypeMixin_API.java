@@ -27,15 +27,17 @@ package org.spongepowered.common.mixin.api.mcp.world;
 import com.google.common.base.MoreObjects;
 import net.minecraft.world.WorldType;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.world.gen.GeneratorModifierType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.data.MemoryDataContainer;
 
 @Mixin(WorldType.class)
-public abstract class WorldTypeMixin_API implements GeneratorType {
+public abstract class WorldTypeMixin_API implements GeneratorModifierType {
 
     private ResourceKey api$key;
 
@@ -70,5 +72,10 @@ public abstract class WorldTypeMixin_API implements GeneratorType {
             .add("key", this.api$key)
             .add("settings", this.getDefaultGeneratorSettings())
             .toString();
+    }
+
+    @Override
+    public DataContainer getDefaultGeneratorSettings() {
+        return new MemoryDataContainer();
     }
 }

@@ -165,8 +165,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
                 if (this.shadow$getServerWorld() != destinationWorld) {
                     final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
-                            (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getServerWorld(), location.getWorld(),
-                            location.getWorld());
+                            (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getServerWorld(),
+                            location.getWorld(), location.getWorld());
                     if (SpongeCommon.postEvent(event) && ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
                         return false;
                     }
@@ -177,7 +177,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                                     VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition(), event.getOriginalDestinationWorld(),
                                     location.getPosition(), event.getDestinationWorld());
 
-                    if (SpongeCommon.postEvent(event)) {
+                    if (SpongeCommon.postEvent(repositionEvent)) {
                         return false;
                     }
 

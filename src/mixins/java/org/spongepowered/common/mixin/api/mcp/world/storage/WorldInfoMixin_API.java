@@ -41,7 +41,7 @@ import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.gamerule.GameRule;
-import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.world.gen.GeneratorModifierType;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
@@ -138,14 +138,14 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.shadow$getGenerator();
+    public GeneratorModifierType getGeneratorModifier() {
+        return (GeneratorModifierType) this.shadow$getGenerator();
     }
 
     @Override
-    public void setGeneratorType(final GeneratorType type) {
-        Objects.requireNonNull(type);
-        this.shadow$setGenerator((WorldType) type);
+    public void setGeneratorModifier(final GeneratorModifierType modifier) {
+        Objects.requireNonNull(modifier);
+        this.shadow$setGenerator((WorldType) modifier);
     }
 
     @Intrinsic

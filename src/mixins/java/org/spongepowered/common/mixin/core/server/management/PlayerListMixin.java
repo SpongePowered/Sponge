@@ -40,7 +40,10 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.SaveHandler;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -118,13 +121,16 @@ public abstract class PlayerListMixin {
 
         //noinspection ConstantConditions
         if (mcWorld == null) {
-            SpongeCommon.getLogger().warn("The player \"{}\" was located in a world that isn't loaded "
-                            + "or doesn't exist. This is not safe so the player will be moved to the first available world.",
-                    mcPlayer.getGameProfile().getName());
-            mcWorld = server.getWorlds().iterator().next();
+            SpongeCommon.getLogger().warn("The player '{}' was located in a world that isn't loaded or doesn't exist. This is not safe so "
+                            + "the player will be moved to the spawn of the default world.", mcPlayer.getGameProfile().getName());
+            mcPlayer.dimension = DimensionType.OVERWORLD;
+            mcWorld = server.getWorld(mcPlayer.dimension);
             final BlockPos spawnPoint = mcWorld.getSpawnPoint();
-            mcPlayer.setPosition(spawnPoint.getX() + 0.5, spawnPoint.getY(), spawnPoint.getZ() + 0.5);
+            mcPlayer.posX = spawnPoint.getX() + 0.5;
+            mcPlayer.posY = spawnPoint.getY() + 0.5;
+            mcPlayer.posZ = spawnPoint.getZ() + 0.5;
         }
+
         mcPlayer.setWorld(mcWorld);
 
         final ServerPlayer player = (ServerPlayer) mcPlayer;
@@ -204,5 +210,14 @@ public abstract class PlayerListMixin {
         }
 
         ((ServerPlayerEntityBridge) mcPlayer).bridge$setPreviousGameProfile(null);
+    }
+
+    @Redirect(method = "func_212504_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSaveHandler()Lnet/minecraft/world/storage/SaveHandler;"))
+    private SaveHandler impl$onlyUseOverworldForPlayerData(ServerWorld serverWorld) {
+        if (serverWorld.dimension.getType() == DimensionType.OVERWORLD) {
+            return serverWorld.getSaveHandler();
+        }
+
+        return SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler();
     }
 }

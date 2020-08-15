@@ -135,7 +135,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
             return null;
         }
 
-        final ServerWorld world = (ServerWorld) Sponge.getServer().getWorldManager().getWorld(this.bridge$getKey()).orElse(null);
+        final ServerWorld world = SpongeCommon.getWorldManager().getWorld0(this.bridge$getKey());
         if (world == null) {
             return null;
         }
