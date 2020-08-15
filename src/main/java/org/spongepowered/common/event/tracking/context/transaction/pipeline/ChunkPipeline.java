@@ -57,7 +57,7 @@ public final class ChunkPipeline implements BlockPipeline {
     private final List<ResultingTransactionBySideEffect> chunkEffects;
     final BlockTransaction.ChangeBlock transaction;
 
-    public ChunkPipeline(final Builder builder) {
+    ChunkPipeline(final Builder builder) {
         this.chunkSupplier = builder.chunkSupplier;
         this.chunkEffects = builder.effects;
         this.serverWorld = builder.serverWorld;

@@ -30,6 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.RedstoneLampBlock;
@@ -54,12 +56,10 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.TickBlockEvent;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -86,6 +86,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.ItemDropData;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.tick.BlockEventTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
@@ -132,7 +133,6 @@ public final class TrackingUtil {
     public static final int DECAY_BLOCK_INDEX = BlockChange.DECAY.ordinal();
     public static final int CHANGE_BLOCK_INDEX = BlockChange.MODIFY.ordinal();
     private static final int MULTI_CHANGE_INDEX = BlockChange.values().length;
-    private static final int EVENT_COUNT = BlockChange.values().length + 1;
     static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
         (blockSnapshot) -> blockSnapshot.getServerWorld().map(worldServer -> {
             final BlockPos targetPos = blockSnapshot.getBlockPos();
@@ -298,7 +298,7 @@ public final class TrackingUtil {
              final Timing timing = ((TimingBridge) block.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
-//            PhaseTracker.LOGGER.trace(BLOCK_TICK, "Wrapping Block Tick: " + block.toString());
+            PhaseTracker.LOGGER.trace(BLOCK_TICK, "Wrapping Block Tick: " + block.toString());
             block.tick(world, pos, random);
         } catch (Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
@@ -337,6 +337,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
         try (final PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
+            PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, "Wrapping Random Block Tick: " + state.toString());
             state.randomTick(world, pos, random);
         } catch (final Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
@@ -419,8 +420,122 @@ public final class TrackingUtil {
     }
 
     public static boolean processBlockCaptures(final PhaseContext<?> context) {
-        return true;
+        final TransactionalCaptureSupplier transactor = context.getBlockTransactor();
+        // Fail fast and check if it's empty.
+        if (transactor.isEmpty()) {
+            return false;
+        }
+        // Start the hybrid depth first batched iteration of transactions
+        // Some rules of the iteration:
+        /*
+        1) Each transaction can be potentially turned into a Transaction<BlockSnapshot>
+        2) If a transaction has children side effects, stop and throw the related event(s) to verify
+          - the event was not cancelled
+          - the event result was the same
+        3) If there are child side effects, repeat the process.
+
+         */
+        return transactor.processTransactions(context);
     }
+
+
+    private static boolean checkCancelledEvents(final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
+        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
+        boolean noCancelledTransactions = true;
+        for (final ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
+            if (blockEvent.isCancelled()) {
+                noCancelledTransactions = false;
+                // Don't restore the transactions just yet, since we're just marking them as invalid for now
+                for (final Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
+                    if (!scheduledEvents.isEmpty()) {
+                        scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                    }
+                    transaction.setValid(false);
+                }
+            }
+        }
+        if (postEvent.isCancelled()) {
+            // Of course, if post is cancelled, just mark all transactions as invalid.
+            noCancelledTransactions = false;
+            for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                if (!scheduledEvents.isEmpty()) {
+                    scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                }
+                transaction.setValid(false);
+            }
+        }
+        for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+            if (!transaction.isValid()) {
+                noCancelledTransactions = false;
+            }
+        }
+        // Now to check, if any of the transactions being cancelled means cancelling the entire event.
+        if (!noCancelledTransactions) {
+            // This is available to verify only when necessary that a state
+            // absolutely needs to cancel the entire transaction chain, this is mostly for more fasts
+            // since we don't want to iterate over the transaction list multiple times.
+            final boolean cancelAll = ((IPhaseState) context.state).getShouldCancelAllTransactions(context, blockEvents, postEvent, scheduledEvents, false);
+
+            for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                if (cancelAll) {
+                    if (!scheduledEvents.isEmpty()) {
+                        scheduledEvents.removeAll(VecHelper.toBlockPos(transaction.getOriginal().getPosition()));
+                    }
+                    transaction.setValid(false);
+                    noCancelledTransactions = false;
+                }
+                if (!transaction.isValid()) {
+                    invalid.add(transaction);
+                }
+            }
+        }
+
+        return noCancelledTransactions;
+    }
+
+    private static void clearInvalidTransactionDrops(final PhaseContext<?> context, final ChangeBlockEvent.Post postEvent) {
+        for (final Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+            if (!transaction.isValid()) {
+                // Cancel any block drops performed, avoids any item drops, regardless
+                if (transaction.getOriginal() instanceof SpongeBlockSnapshot) {
+                    final BlockPos pos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
+                    context.getBlockItemDropSupplier().removeAllIfNotEmpty(pos);
+                    context.getPerBlockEntitySpawnSuppplier().removeAllIfNotEmpty(pos);
+                }
+            }
+        }
+    }
+
+    private static void rollBackTransactions(final PhaseContext<?> context, final List<Transaction<BlockSnapshot>> invalid) {
+        // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
+        // or the events were cancelled), again in reverse order of which they were received.
+        for (final Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
+            transaction.getOriginal().restore(true, BlockChangeFlags.NONE);
+            ((IPhaseState) context.state).processCancelledTransaction(context, transaction, transaction.getOriginal());
+        }
+    }
+
+    private static void iterateChangeBlockEvents(final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, final List<ChangeBlockEvent> blockEvents,
+        final ChangeBlockEvent[] mainEvents) {
+        for (final BlockChange blockChange : BlockChange.values()) {
+            if (blockChange == BlockChange.DECAY) { // Decay takes place after.
+                continue;
+            }
+            if (!transactionArrays[blockChange.ordinal()].isEmpty()) {
+                final ChangeBlockEvent event = blockChange.createEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), transactionArrays[blockChange.ordinal()]);
+                mainEvents[blockChange.ordinal()] = event;
+                SpongeCommon.postEvent(event);
+                blockEvents.add(event);
+            }
+        }
+        if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) { // Needs to be placed into iterateChangeBlockEvents
+            final ChangeBlockEvent event = BlockChange.DECAY.createEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), transactionArrays[BlockChange.DECAY.ordinal()]);
+            mainEvents[BlockChange.DECAY.ordinal()] = event;
+            SpongeCommon.postEvent(event);
+            blockEvents.add(event);
+        }
+    }
+
 
     /**
      * The heart of all that is chaos. If you're reading this... well.. Let me explain it to you..

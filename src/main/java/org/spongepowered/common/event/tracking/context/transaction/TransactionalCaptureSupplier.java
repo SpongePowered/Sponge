@@ -34,11 +34,17 @@ import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -59,6 +65,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @SuppressWarnings("rawtypes")
@@ -230,35 +239,29 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
      */
 
     public EffectTransactor pushTransactor(final ResultingTransactionBySideEffect effect) {
-        final EffectTransactor effectTransactor = new EffectTransactor(effect, this.tail, this.effect, this);
+        final BlockTransaction parentTransaction = Optional.ofNullable(this.effect)
+            .map(child -> child.tail)
+            .orElse(Objects.requireNonNull(this.tail));
+        final EffectTransactor effectTransactor = new EffectTransactor(effect, parentTransaction, this.effect, this);
         this.effect = effect;
-        if (this.tail != null) {
-            this.tail.getEffects().addLast(effect);
-        }
-        this.tail = null;
+        parentTransaction.getEffects().addLast(effect);
         return effectTransactor;
     }
 
     void popEffect(final EffectTransactor transactor) {
-        this.tail = transactor.parent;
         this.effect = transactor.previousEffect;
     }
 
     private void logTransaction(final BlockTransaction transaction) {
-        if (this.tail != null) {
-            this.tail.next = transaction;
-            if (this.effect != null) {
-                this.effect.addChild(transaction);
-            }
+        if (this.head == null) {
+            this.head = transaction;
+            this.tail = transaction;
+        } else if (this.effect != null) {
+            this.effect.addChild(transaction);
         } else {
-            if (this.effect == null) {
-                this.head = transaction;
-            } else {
-                this.effect.addChild(transaction);
-            }
+            transaction.previous = this.tail;
+            this.tail = transaction;
         }
-        transaction.previous = this.tail;
-        this.tail = transaction;
     }
 
     public BlockTransaction.ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
@@ -281,10 +284,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (newRecorded) {
                 return true;
             }
-            this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier));
-        } else {
-            this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier));
         }
+        this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier));
+
         return true;
     }
 
@@ -308,15 +310,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if (proposed == null) {
             return false;
         }
-        if (this.tail != null && this.effect != null) {
+        if (this.tail != null) {
             final boolean newRecorded = this.tail.acceptTileReplacement(existing, proposed);
             if (newRecorded) {
                 return true;
             }
-            this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
-        } else {
-            this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
         }
+        this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
         return true;
     }
 
@@ -324,7 +324,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final BlockPos immutableTarget, final BlockState targetBlockState,
         @Nullable final TileEntity existingTile
     ) {
-        final BlockTransaction.NeighborNotification notificationTransaction = new BlockTransaction.NeighborNotification(targetBlockState, targetBlockState, immutableTarget, blockIn, immutableFrom);
+        final BlockTransaction.NeighborNotification notificationTransaction = new BlockTransaction.NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom);
         this.logTransaction(notificationTransaction);
     }
 
@@ -345,7 +345,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return new BlockTransaction.ReplaceTileEntity(proposed, existing, snapshot);
     }
 
-    private BlockTransaction.RemoveTileEntity createTileRemovalTransaction(@NonNull final TileEntity tileentity,
+    private BlockTransaction.RemoveTileEntity createTileRemovalTransaction(final TileEntity tileentity,
         final Supplier<ServerWorld> worldSupplier
     ) {
         final BlockState currentState = tileentity.getBlockState();
@@ -361,7 +361,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
         return new BlockTransaction.RemoveTileEntity(tileentity, snapshot);
     }
-    private BlockTransaction.AddTileEntity createTileAdditionTransaction(@NonNull final TileEntity tileentity,
+
+    private BlockTransaction.AddTileEntity createTileAdditionTransaction(final TileEntity tileentity,
         final Supplier<ServerWorld> worldSupplier
     ) {
         final BlockState currentState = tileentity.getBlockState();
@@ -396,45 +397,100 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         this.effect = null;
     }
 
-    public Optional<Transaction<BlockSnapshot>> createTransaction(final SpongeBlockSnapshot snapshot) {
-        final Optional<ServerWorld> maybeWorld = snapshot.getServerWorld();
-        if (!maybeWorld.isPresent()) {
-            return Optional.empty();
+    public boolean processTransactions(final PhaseContext<?> context) {
+        if (this.head == null) {
+            return true;
         }
-        final ServerWorld worldServer = maybeWorld.get();
-        final BlockPos blockPos = snapshot.getBlockPos();
-        final BlockState newState = worldServer.getBlockState(blockPos);
-        // Because enhanced tracking requires handling very specific proxying of block states
-        // so, the requests for the actual states sometimes may cause issues with mods and their
-        // extended state handling logic if what the world sees is different from what our tracker
-        // saw, so, we have to just provide the new state (extended states are calculated anyways).
-        final BlockSnapshot newSnapshot =
-            ((TrackedWorldBridge) worldServer).bridge$createSnapshot(newState, blockPos, BlockChangeFlags.NONE);
-        // Up until this point, we can create a default Transaction
-        if (this.multimap != null) { // But we need to check if there's any intermediary block changes...
-            // And because multi is true, we can be sure the multimap is populated at least somewhere.
-            final List<SpongeBlockSnapshot> intermediary = this.multimap.get(blockPos);
-            if (!intermediary.isEmpty() && intermediary.size() > 1) {
-                // We need to make a carbon copy of the list since it's technically a key view list
-                // within the multimap, so, if the multimap is cleared, at the very least, the list will
-                // not be cleared. Likewise, we also need to skip over the first element since the snapshots
-                // list will have that element anyways (we don't want to be providing duplicate snapshots
-                // for plugins to witness and come to expect that they are intermediary states, when they're still the original positions
-                final ImmutableList.Builder<SpongeBlockSnapshot> builder = ImmutableList.builder();
-                boolean movedPastFirst = false;
-                for (final Iterator<SpongeBlockSnapshot> iterator = intermediary.iterator(); iterator.hasNext(); ) {
-                    if (!movedPastFirst) {
-                        iterator.next();
-                        movedPastFirst = true;
-                        continue;
-                    }
-                    builder.add(iterator.next());
-
-                }
-                return Optional.of(new Transaction<>(snapshot, newSnapshot, builder.build()));
+        final ImmutableList<EventByTransaction> batched = TransactionalCaptureSupplier.batchTransactions(this.head, context);
+        boolean cancelRemaining = false;
+        for (final EventByTransaction eventWithTransactions : batched) {
+            final Event first = eventWithTransactions.event;
+            if (cancelRemaining) {
+                final ImmutableList<BlockTransaction> second = eventWithTransactions.transactions;
+                second.reverse().iterator().forEachRemaining(BlockTransaction::restore);
+                continue;
+            }
+            Sponge.getEventManager().post(first);
+            if (first instanceof Cancellable && ((Cancellable) first).isCancelled()) {
+                final ImmutableList<BlockTransaction> second = eventWithTransactions.transactions;
+                second.reverse().iterator().forEachRemaining(BlockTransaction::restore);
+                cancelRemaining = true;
             }
         }
-        return Optional.of(new Transaction<>(snapshot, newSnapshot));
+        return cancelRemaining;
+    }
+
+    private static ImmutableList<EventByTransaction> batchTransactions(final BlockTransaction head,
+        final PhaseContext<?> context) {
+        final ImmutableList.Builder<EventByTransaction> builder = ImmutableList.builder();
+        @Nullable BlockTransaction pointer = head;
+        ImmutableList.Builder<BlockTransaction> accumilator = ImmutableList.builder();
+        @MonotonicNonNull BlockTransaction batchDecider = null;
+        while (pointer != null) {
+            if (pointer.avoidsEvent()) {
+                pointer = pointer.next;
+                continue;
+            }
+            if (batchDecider == null) {
+                batchDecider = pointer;
+            }
+            // First - check if the side effects are empty
+            if (pointer.hasChildTransactions()) {
+                // If they're not, we need to basically build the event and whatever
+                // has accumulated to this point as an event
+                accumilator.add(pointer);
+                final ImmutableList<BlockTransaction> transactions = accumilator.build();
+                accumilator = ImmutableList.builder();
+                batchDecider = null;
+                TransactionalCaptureSupplier.generateEventForTransaction(pointer, context, builder, transactions);
+            } else if (!batchDecider.canBatchWith(pointer)) {
+                final ImmutableList<BlockTransaction> transactions = accumilator.build();
+                accumilator = ImmutableList.builder();
+                TransactionalCaptureSupplier.generateEventForTransaction(batchDecider, context, builder, transactions);
+                accumilator.add(pointer);
+                batchDecider = null;
+            } else {
+                accumilator.add(pointer);
+            }
+            pointer = pointer.next;
+        }
+        final ImmutableList<BlockTransaction> remaining = accumilator.build();
+        if (!remaining.isEmpty()) {
+            TransactionalCaptureSupplier.generateEventForTransaction(Objects.requireNonNull(batchDecider, "BatchDeciding Transaction was null"), context, builder, remaining);
+        }
+        return builder.build();
+    }
+
+    private static EventByTransaction generateEventForTransaction(@NonNull final BlockTransaction pointer, final PhaseContext<?> context,
+        final ImmutableList.Builder<EventByTransaction> builder,
+        final ImmutableList<BlockTransaction> transactions
+    ) {
+        final Optional<BiConsumer<PhaseContext<?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator();
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        try (
+            final CauseStackManager.@Nullable StackFrame frame = frameMutator
+                .map(mutator -> {
+                    final CauseStackManager.StackFrame transactionFrame = instance.pushCauseFrame();
+                    mutator.accept(context, transactionFrame);
+                    return transactionFrame;
+                })
+                .orElse(null)
+        ) {
+            final Event event = pointer.generateEvent(context, transactions, instance.getCurrentCause());
+
+            final EventByTransaction element = new EventByTransaction(event, transactions);
+            builder.add(element);
+
+            if (frame != null) {
+                frame.pushCause(event);
+            }
+            pointer.getEffects().forEach(effect -> {
+                if (effect.head != null) {
+                    builder.addAll(TransactionalCaptureSupplier.batchTransactions(effect.head, context));
+                }
+            });
+            return element;
+        }
     }
 
     @Override
