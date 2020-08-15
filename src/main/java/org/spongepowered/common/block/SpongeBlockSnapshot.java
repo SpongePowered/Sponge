@@ -66,7 +66,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     // Internal use only
     private final BlockPos blockPos;
     private final SpongeBlockChangeFlag changeFlag;
-    @Nullable private WeakReference<ServerWorld> world;
+    @Nullable WeakReference<ServerWorld> world;
     @MonotonicNonNull public BlockChange blockChange; // used for post event
 
     SpongeBlockSnapshot(final SpongeBlockSnapshotBuilder builder) {

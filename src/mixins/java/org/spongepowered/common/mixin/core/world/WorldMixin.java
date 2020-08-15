@@ -39,22 +39,20 @@ import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Random;
-import java.util.function.BiFunction;
 
 @Mixin(net.minecraft.world.World.class)
 public abstract class WorldMixin implements WorldBridge, IWorld {
 
     // @formatter: off
     @Shadow @Final public boolean isRemote;
-    @Shadow @Final protected WorldInfo worldInfo;
     @Shadow @Final public Dimension dimension;
+    @Shadow @Final public Random rand;
+    @Shadow @Final protected WorldInfo worldInfo;
+    @Shadow @Final protected AbstractChunkProvider chunkProvider;
 
     @Shadow public abstract Dimension shadow$getDimension();
     @Shadow public abstract WorldInfo shadow$getWorldInfo();
     @Shadow public abstract void shadow$calculateInitialSkylight();
-
-    @Shadow @Final protected AbstractChunkProvider chunkProvider;
-    @Shadow @Final public Random rand;
     // @formatter on
     private boolean impl$isDefinitelyFake = false;
     private boolean impl$hasChecked = false;
@@ -64,7 +62,7 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
         if (this.impl$hasChecked) {
             return this.impl$isDefinitelyFake;
         }
-        this.impl$isDefinitelyFake = this.isRemote || this.shadow$getWorldInfo() == null || this.shadow$getWorldInfo().getWorldName() == null || !(this instanceof ServerWorldBridge);
+        this.impl$isDefinitelyFake = this.isRemote || this.shadow$getWorldInfo() == null || this.shadow$getWorldInfo().getWorldName() == null || !(this instanceof TrackedWorldBridge);
         this.impl$hasChecked = true;
         return this.impl$isDefinitelyFake;
     }

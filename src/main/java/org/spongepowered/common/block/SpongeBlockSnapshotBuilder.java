@@ -26,11 +26,14 @@ package org.spongepowered.common.block;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ServerMultiWorld;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -182,6 +185,24 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
             this.notifierUniqueId = holder.getNotifier().get();
         }
         this.coordinates = holder.getPosition();
+        return this;
+    }
+
+    public SpongeBlockSnapshotBuilder from(final SpongeBlockSnapshot snapshot) {
+        this.blockState = snapshot.getState();
+        this.worldKey = snapshot.getWorld();
+        this.worldRef = snapshot.world;
+        this.compound = snapshot.compound;
+        this.coordinates = snapshot.getPosition();
+        this.flag = snapshot.getChangeFlag();
+        return this;
+    }
+
+    public SpongeBlockSnapshotBuilder tileEntity(final TileEntity added) {
+        this.compound = null;
+        final CompoundNBT tag = new CompoundNBT();
+        added.write(tag);
+        this.compound = tag;
         return this;
     }
 

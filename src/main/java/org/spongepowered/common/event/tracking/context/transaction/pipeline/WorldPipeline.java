@@ -54,7 +54,7 @@ public final class WorldPipeline implements BlockPipeline {
     private final List<ResultingTransactionBySideEffect> worldEffects;
     private final ChunkPipeline chunkPipeline;
 
-    public WorldPipeline(final Builder builder) {
+    WorldPipeline(final Builder builder) {
         this.chunkSupplier = builder.chunkSupplier;
         this.worldEffects = builder.effects;
         this.serverWorld = builder.serverWorld;

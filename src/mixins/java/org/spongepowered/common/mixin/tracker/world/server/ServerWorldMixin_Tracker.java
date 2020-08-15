@@ -178,7 +178,6 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
     }
 
-
     @Override
     protected void tracker$wrapTileEntityTick(final ITickableTileEntity tileEntity) {
         if (!SpongeImplHooks.shouldTickTile(tileEntity)) {
@@ -503,13 +502,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final PhaseContext<?> peek = server.getPhaseContext();
         final IPhaseState state = peek.state;
 
-        // Generate the simple one sided effect, which can have multiple children
-        final ProcessingSideEffect effect = new NeighborNotificationProcessSideEffect();
-        final ResultingTransactionBySideEffect sideEffect = new ResultingTransactionBySideEffect(effect);
-
-
         //  try { // Vanilla - We need to push the effect transactor so that it always pops
-        try (final EffectTransactor ignored = peek.pushTransactor(sideEffect)) {
+        try {
             final WeakReference<ServerWorld> worldReference = new WeakReference<>((ServerWorld) (Object) this);
             final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldReference.get(), "ServerWorld dereferenced");
             final @Nullable TileEntity existingTile = targetChunk.getTileEntity(immutableTarget, Chunk.CreateEntityType.CHECK);
