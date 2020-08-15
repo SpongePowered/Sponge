@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
@@ -74,14 +73,7 @@ final class IterablePagination extends ActivePagination {
         this.lastPage = page;
 
         if (this.getMaxContentLinesPerPage() <= 0) {
-            return Lists.newArrayList(Iterators.transform(this.countIterator, new Function<Map.Entry<Component, Integer>, Component>() {
-
-                @Nullable
-                @Override
-                public Component apply(Map.Entry<Component, Integer> input) {
-                    return input.getKey();
-                }
-            }));
+            return Lists.newArrayList(Iterators.transform(this.countIterator, Map.Entry::getKey));
         }
 
         final List<Component> ret = new ArrayList<>(this.getMaxContentLinesPerPage());
