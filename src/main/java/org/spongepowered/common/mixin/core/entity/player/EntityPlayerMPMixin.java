@@ -87,7 +87,9 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
+import org.spongepowered.api.event.entity.living.humanoid.player.KickPlayerEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
@@ -948,4 +950,26 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     public int bridge$getViewDistance() {
         return this.impl$viewDistance;
     }
+
+    @Override
+    public void bridge$kick(final Text message) {
+        final Text messageToSend;
+        if (ShouldFire.KICK_PLAYER_EVENT) {
+            final KickPlayerEvent kickPlayerEvent = SpongeEventFactory.createKickPlayerEvent(
+                    Sponge.getCauseStackManager().getCurrentCause(),
+                    MessageChannel.TO_NONE,
+                    Optional.empty(),
+                    new MessageEvent.MessageFormatter(message),
+                    (Player) this,
+                    false
+            );
+            Sponge.getEventManager().post(kickPlayerEvent);
+            messageToSend = kickPlayerEvent.getMessage();
+        } else {
+            messageToSend = message;
+        }
+        final ITextComponent component = SpongeTexts.toComponent(messageToSend);
+        this.connection.disconnect(component);
+    }
+
 }
