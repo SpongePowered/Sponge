@@ -132,9 +132,9 @@ public class CustomDataTest {
         this.myKey = Key.builder().key(ResourceKey.of(this.plugin, "mydata")).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
         final DataRegistration myRegistration = DataRegistration.builder()
                 .key(this.myKey)
-                .store(DataStore.builder().key(this.myKey, "mykey").build(TypeTokens.ITEM_STACK_TOKEN))
-                .store(DataStore.builder().key(this.myKey, "mykey").build(TypeTokens.USER_TOKEN))
-                .store(DataStore.builder().key(this.myKey, "mykey").build(TypeTokens.PLAYER_TOKEN))
+                .store(DataStore.builder().key(this.myKey, "mykey")
+                        .holder(TypeTokens.ITEM_TYPE_TOKEN, TypeTokens.USER_TOKEN, TypeTokens.PLAYER_TOKEN)
+                        .build())
                 .key(ResourceKey.of(this.plugin, "mydataregistration"))
                 .build();
         event.register(myRegistration);

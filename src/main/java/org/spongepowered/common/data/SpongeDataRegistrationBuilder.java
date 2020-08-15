@@ -26,6 +26,7 @@ package org.spongepowered.common.data;
 
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DuplicateDataStoreException;
@@ -50,7 +51,9 @@ public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<Da
 
     @Override
     public DataRegistration.Builder store(DataStore store) throws DuplicateDataStoreException {
-        this.dataStoreMap.put(store.getSupportedToken(), store);
+        for (TypeToken<? extends DataHolder> holderType : store.getSupportedTokens()) {
+            this.dataStoreMap.put(holderType, store);
+        }
         return this;
     }
 
