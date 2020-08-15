@@ -122,4 +122,6 @@ public class ShouldFire {
     public static boolean PLAY_SOUND_EVENT_BROADCAST = false;
     public static boolean PLAY_SOUND_EVENT_NOTE_BLOCK = false;
 
+    public static boolean KICK_PLAYER_EVENT = false;
+
 }

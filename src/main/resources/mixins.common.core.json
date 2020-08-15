@@ -159,6 +159,7 @@
         "command.CommandHandlerMixin",
         "command.CommandScoreboardMixin",
         "command.CommandSenderWrapperMixin",
+        "command.CommandServerKickMixin",
         "command.EntityMinecartCommandBlock_1Mixin",
         "command.EntitySelector_7Mixin",
         "command.EntitySelectorAccessor",
