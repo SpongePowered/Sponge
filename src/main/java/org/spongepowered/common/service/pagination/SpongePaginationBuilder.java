@@ -48,7 +48,7 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
     private Component header;
     @Nullable
     private Component footer;
-    private Component paginationSpacer = EQUALS_TEXT;
+    private Component paginationSpacer = SpongePaginationBuilder.EQUALS_TEXT;
     private int linesPerPage = 20;
 
     @Nullable
@@ -139,7 +139,7 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
         this.title = null;
         this.header = null;
         this.footer = null;
-        this.paginationSpacer = EQUALS_TEXT;
+        this.paginationSpacer = SpongePaginationBuilder.EQUALS_TEXT;
 
         this.paginationList = null;
         return this;

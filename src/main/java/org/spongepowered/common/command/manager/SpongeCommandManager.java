@@ -65,6 +65,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.command.ExecuteCommandEvent;
+import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.common.SpongeCommon;
@@ -521,11 +522,14 @@ public final class SpongeCommandManager implements CommandManager {
             throw new RuntimeException("Failed to create root Sponge command!", ex);
         }
         try {
-            SpongeParameterizedCommandRegistrar.INSTANCE.register(
-                    Launcher.getInstance().getCommonPlugin(),
-                    ((SpongePaginationService) Sponge.getServiceProvider().paginationService()).createPaginationCommand(),
-                    "pagination", "page"
-            );
+            final PaginationService paginationService = Sponge.getServiceProvider().paginationService();
+            if (paginationService instanceof SpongePaginationService) {
+                SpongeParameterizedCommandRegistrar.INSTANCE.register(
+                        Launcher.getInstance().getCommonPlugin(),
+                        ((SpongePaginationService) paginationService).createPaginationCommand(),
+                        "pagination", "page"
+                );
+            }
         } catch (final CommandFailedRegistrationException ex) {
             throw new RuntimeException("Failed to create pagination command!", ex);
         }

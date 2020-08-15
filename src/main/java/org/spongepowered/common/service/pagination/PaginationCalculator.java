@@ -103,7 +103,7 @@ class PaginationCalculator {
      */
     int getLines(Component text) {
         //TODO: this needs fixing as well.
-        return (int) Math.ceil((double) this.getWidth(text) / LINE_WIDTH);
+        return (int) Math.ceil((double) this.getWidth(text) / PaginationCalculator.LINE_WIDTH);
     }
 
     /**
@@ -116,16 +116,16 @@ class PaginationCalculator {
      */
     @VisibleForTesting
     int getWidth(int codePoint, boolean isBold) {
-        int nonUnicodeIdx = NON_UNICODE_CHARS.indexOf(codePoint);
+        int nonUnicodeIdx = PaginationCalculator.NON_UNICODE_CHARS.indexOf(codePoint);
         int width;
         if (codePoint == 32) {
             width = 4;
         } else if (codePoint > 0 && nonUnicodeIdx != -1) {
-            width = NON_UNICODE_CHAR_WIDTHS[nonUnicodeIdx];
-        } else if (UNICODE_CHAR_WIDTHS[codePoint] != 0) {
+            width = PaginationCalculator.NON_UNICODE_CHAR_WIDTHS[nonUnicodeIdx];
+        } else if (PaginationCalculator.UNICODE_CHAR_WIDTHS[codePoint] != 0) {
             //from 1.9 & 255 to avoid strange signed int math ruining things.
             //https://bugs.mojang.com/browse/MC-7181
-            final int temp = UNICODE_CHAR_WIDTHS[codePoint] & 255;
+            final int temp = PaginationCalculator.UNICODE_CHAR_WIDTHS[codePoint] & 255;
             // Split into high and low nibbles.
             //bit digits
             //87654321 >>> 4 = 00008765
@@ -180,9 +180,9 @@ class PaginationCalculator {
                 if (cp == '\n') {
                     // if the previous character is a '\n'
                     if (newLine) {
-                        total += LINE_WIDTH;
+                        total += PaginationCalculator.LINE_WIDTH;
                     } else {
-                        total = ((int) Math.ceil((double) total / LINE_WIDTH)) * LINE_WIDTH;
+                        total = ((int) Math.ceil((double) total / PaginationCalculator.LINE_WIDTH)) * PaginationCalculator.LINE_WIDTH;
                         newLine = true;
                     }
                 } else {
@@ -213,13 +213,13 @@ class PaginationCalculator {
     Component center(Component text, Component padding) {
         int inputLength = this.getWidth(text);
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH, this seems most graceful way to fail
-        if (inputLength >= LINE_WIDTH) {
+        if (inputLength >= PaginationCalculator.LINE_WIDTH) {
             return text;
         }
         final Component textWithSpaces = this.addSpaces(TextComponent.space(), text);
 
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH
-        boolean addSpaces = this.getWidth(textWithSpaces) <= LINE_WIDTH;
+        boolean addSpaces = this.getWidth(textWithSpaces) <= PaginationCalculator.LINE_WIDTH;
 
         int paddingLength = this.getWidth(padding);
         final TextComponent.Builder output = TextComponent.builder();
@@ -232,14 +232,14 @@ class PaginationCalculator {
 
         //if we only need padding
         if (inputLength == 0) {
-            this.addPadding(padding, output, GenericMath.floor((double) LINE_WIDTH / paddingLength));
+            this.addPadding(padding, output, GenericMath.floor((double) PaginationCalculator.LINE_WIDTH / paddingLength));
         } else {
             if (addSpaces) {
                 text = textWithSpaces;
                 inputLength = this.getWidth(textWithSpaces);
             }
 
-            int paddingNecessary = LINE_WIDTH - inputLength;
+            int paddingNecessary = PaginationCalculator.LINE_WIDTH - inputLength;
 
             int paddingCount = GenericMath.floor(paddingNecessary / paddingLength);
             //pick a halfway point

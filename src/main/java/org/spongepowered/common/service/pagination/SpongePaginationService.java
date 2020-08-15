@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.service.pagination;
 
-import static org.spongepowered.api.command.parameter.Parameter.firstOf;
-import static org.spongepowered.api.command.parameter.Parameter.integerNumber;
-import static org.spongepowered.api.command.parameter.Parameter.subcommand;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.collect.ImmutableList;
@@ -43,8 +39,7 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.parameter.managed.ValueCompleter;
-import org.spongepowered.api.command.parameter.managed.ValueParser;
+import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
@@ -133,8 +128,7 @@ public final class SpongePaginationService implements PaginationService {
 
     public Command.Parameterized createPaginationCommand() {
         Parameter.Value<ActivePagination> paginationIdParameter = Parameter.builder(ActivePagination.class)
-                .parser(new ActivePaginationParser())
-                .setSuggestions(new ActivePaginationCompleter())
+                .parser(new ActivePaginationParameter())
                 .setKey("pagination-id")
                 .build();
 
@@ -152,7 +146,7 @@ public final class SpongePaginationService implements PaginationService {
                     return CommandResult.success();
                 }).build();
 
-        Parameter.Value<Integer> pageParameter = integerNumber().setKey("page").build();
+        Parameter.Value<Integer> pageParameter = Parameter.integerNumber().setKey("page").build();
 
         CommandExecutor pageExecutor = (context) -> {
             context.requireOne(paginationIdParameter).specificPage(context.requireOne(pageParameter));
@@ -168,17 +162,17 @@ public final class SpongePaginationService implements PaginationService {
         //We create the child manually in order to force that paginationElement is required for all children + fallback
         //https://github.com/SpongePowered/SpongeAPI/issues/1272
         return Command.builder()
-                .parameters(paginationIdParameter, firstOf(pageParameter,
-                        subcommand(next, "next", "n"),
-                        subcommand(prev, "prev", "p", "previous"),
-                        subcommand(page, "page")))
+                .parameters(paginationIdParameter, Parameter.firstOf(pageParameter,
+                        Parameter.subcommand(next, "next", "n"),
+                        Parameter.subcommand(prev, "prev", "p", "previous"),
+                        Parameter.subcommand(page, "page")))
                 .child(page, "page")
                 .setExecutor(page)
                 .setShortDescription(TextComponent.of("Helper command for paginations occurring"))
                 .build();
     }
 
-    private class ActivePaginationParser implements ValueParser<ActivePagination> {
+    private class ActivePaginationParameter implements ValueParameter<ActivePagination> {
 
         @Override
         public Optional<? extends ActivePagination> getValue(Parameter.Key<? super ActivePagination> parameterKey, ArgumentReader.Mutable reader,
@@ -209,9 +203,6 @@ public final class SpongePaginationService implements PaginationService {
             }
             return Optional.ofNullable(paginations.get(id));
         }
-    }
-
-    private class ActivePaginationCompleter implements ValueCompleter {
 
         @Override
         public List<String> complete(CommandContext context) {
