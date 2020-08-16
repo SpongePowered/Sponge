@@ -38,6 +38,7 @@ import net.minecraft.command.arguments.Vec3Argument;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -50,6 +51,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.world.SpongeServerLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,14 +63,21 @@ import java.util.stream.Collectors;
 
 public final class SpongeServerLocationValueParameter extends CatalogedArgumentParser<ServerLocation> implements ComplexSuggestionNodeProvider {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("location");
     private static final Vec3Argument VEC_3_ARGUMENT = Vec3Argument.vec3(false);
     private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("^\\s*((-)?[0-9]|~|\\^)");
+    private final ResourceKey resourceKey;
+    private final boolean selectAllWorlds;
+
+    public SpongeServerLocationValueParameter(final boolean selectAllWorlds) {
+        this.selectAllWorlds = selectAllWorlds;
+        this.resourceKey = selectAllWorlds ?  ResourceKey.sponge("location_all") : ResourceKey.sponge("location_online_only");
+    }
+
 
     @Override
     @NonNull
     public ResourceKey getKey() {
-        return SpongeServerLocationValueParameter.RESOURCE_KEY;
+        return this.resourceKey;
     }
 
     @Override
@@ -78,7 +87,12 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
     }
 
     private List<String> complete() {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getKey).map(ResourceKey::getFormatted).collect(Collectors.toList());
+        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
+                .stream()
+                .filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
+                .map(WorldProperties::getKey)
+                .map(ResourceKey::getFormatted)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -88,10 +102,11 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         final ArgumentReader.Immutable state = reader.getImmutable();
-        ServerWorld world;
+        WorldProperties worldProperties;
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-            world = SpongeCommon.getGame().getServer().getWorldManager().getWorld(resourceLocation)
+            worldProperties = SpongeCommon.getGame().getServer().getWorldManager()
+                    .getProperties(resourceLocation).filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
                     .orElseThrow(() -> reader.createException(
                             TextComponent.of("Could not get world with key \"" + resourceLocation.toString() + "\"")));
         } catch (final ArgumentParseException e) {
@@ -101,7 +116,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
                 if (!SpongeServerLocationValueParameter.STARTS_WITH_NUMBER.matcher(state.getRemaining()).find()) {
                     throw e;
                 }
-                world = location.get().getWorld();
+                worldProperties = location.get().getWorld().getProperties();
             } else {
                 throw e;
             }
@@ -111,7 +126,11 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
         try {
             reader.skipWhitespace();
             final Vec3d vec3d = VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
-            return Optional.of(world.getLocation(vec3d.x, vec3d.y, vec3d.z));
+            final ResourceKey key = worldProperties.getKey();
+            return Optional.of(
+                    worldProperties.getWorld()
+                            .map(x -> x.getLocation(vec3d.x, vec3d.y, vec3d.z))
+                            .orElseGet(() -> ServerLocation.of(key, vec3d.x, vec3d.y, vec3d.z)));
         } catch (final CommandSyntaxException e) {
             throw reader.createException(TextComponent.of(e.getMessage()));
         }

@@ -83,7 +83,8 @@ public final class CatalogedValueParameterStreamGenerator {
                         (reader, cause, converter) -> converter.getNames(cause.getSource())),
                 StandardCatalogedArgumentParser.createIdentity("integer", IntegerArgumentType.integer()),
                 new SpongeIPAddressValueParameter(),
-                new SpongeServerLocationValueParameter(),
+                new SpongeServerLocationValueParameter(true),
+                new SpongeServerLocationValueParameter(false),
                 StandardCatalogedArgumentParser.createIdentity("long", LongArgumentType.longArg()),
                 StandardCatalogedArgumentParser.createConverter("many_entities", EntityArgument.entities(),
                         (reader, cause, selector) -> selector.select(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())),
@@ -143,7 +144,8 @@ public final class CatalogedValueParameterStreamGenerator {
                         "vector3d",
                         Vec3Argument.vec3(),
                         (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))),
-                new SpongeWorldPropertiesValueParameter()
+                new SpongeWorldPropertiesValueParameter(true),
+                new SpongeWorldPropertiesValueParameter(false)
             );
     }
 

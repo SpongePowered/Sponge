@@ -25,12 +25,8 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.TextComponent;
-import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -39,7 +35,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
 import org.spongepowered.common.util.Constants;
 
@@ -49,19 +44,29 @@ import java.util.stream.Collectors;
 
 public final class SpongeWorldPropertiesValueParameter extends CatalogedArgumentParser<WorldProperties> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("world_properties");
+    private final ResourceKey resourceKey;
+    private final boolean selectAll;
+
+    public SpongeWorldPropertiesValueParameter(final boolean selectAll) {
+        this.selectAll = selectAll;
+        this.resourceKey = selectAll ? ResourceKey.sponge("world_properties_all") : ResourceKey.sponge("world_properties_online_only");
+    }
 
     @Override
     @NonNull
     public ResourceKey getKey() {
-        return SpongeWorldPropertiesValueParameter.RESOURCE_KEY;
+        return this.resourceKey;
     }
 
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().filter(properties -> properties.getWorld().isPresent()).map(WorldProperties::getKey)
-                .map(ResourceKey::getFormatted).collect(Collectors.toList());
+        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
+                .stream()
+                .filter(x -> this.selectAll || x.getWorld().isPresent())
+                .map(WorldProperties::getKey)
+                .map(ResourceKey::getFormatted)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -75,7 +80,10 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
         final Optional<WorldProperties> worldProperties = SpongeWorldPropertiesValueParameter.getWorldProperties(resourceLocation);
 
         if (worldProperties.isPresent()) {
-            return worldProperties;
+            if (this.selectAll || worldProperties.get().getWorld().isPresent()) {
+                return worldProperties;
+            }
+            throw reader.createException(TextComponent.of("World with identifier \"" + resourceLocation.toString() + "\" is not online."));
         }
 
         throw reader.createException(TextComponent.of("Could not find world with identifier \"" + resourceLocation.toString() + "\""));

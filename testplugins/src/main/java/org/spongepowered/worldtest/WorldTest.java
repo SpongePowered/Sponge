@@ -31,7 +31,9 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
@@ -39,12 +41,15 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Plugin("worldtest")
 public final class WorldTest {
@@ -66,6 +71,14 @@ public final class WorldTest {
         final Parameter.Value<PortalType> portalTypeParameter = Parameter.catalogedElement(PortalType.class).setKey("portal_type").build();
         final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElement(DimensionType.class).setKey("dimension_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
+        final Parameter.Value<ResourceKey> unloadedWorldKeyParameter = Parameter.resourceKey()
+                .setSuggestions(context -> Sponge.getServer().getWorldManager()
+                        .getAllProperties()
+                        .stream()
+                        .filter(x -> !x.getWorld().isPresent())
+                        .map(x -> x.getKey().asString())
+                        .collect(Collectors.toList()))
+                .setKey("world").build();
 
         event
                 .register(this.plugin, Command
@@ -150,10 +163,10 @@ public final class WorldTest {
 
         event.register(this.plugin, Command
                         .builder()
-                        .parameter(worldKeyParameter)
+                        .parameter(unloadedWorldKeyParameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.world.load")
                         .setExecutor(context -> {
-                            final ResourceKey key = context.requireOne(worldKeyParameter);
+                            final ResourceKey key = context.requireOne(unloadedWorldKeyParameter);
                             Sponge.getServer().getWorldManager().loadWorld(key).whenComplete(((serverWorld, throwable) -> {
                                 if (throwable != null) {
                                     context.getCause().getAudience().sendMessage(TextComponent.of(throwable.getMessage()));
