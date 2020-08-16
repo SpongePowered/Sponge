@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking;
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.util.Constants;
@@ -75,17 +76,22 @@ public final class BlockChangeFlagManager {
         if (flag == 2) {
             return BlockChangeFlagManager.PHYSICS_OBSERVER;
         }
-        final SpongeBlockChangeFlag spongeBlockChangeFlag = BlockChangeFlagManager.getInstance().maskedFlags.get(flag);
+        final BlockChangeFlagManager instance = BlockChangeFlagManager.getInstance();
+        final SpongeBlockChangeFlag spongeBlockChangeFlag = instance.maskedFlags.get(flag);
         if (spongeBlockChangeFlag != null) {
             return spongeBlockChangeFlag;
+        } else {
+            final SpongeBlockChangeFlag newFlag = new SpongeBlockChangeFlag(BlockChangeFlagManager.getFlagName(flag)
+                .toString(), flag);
+            instance.register(newFlag);
+            return newFlag;
         }
-        return (SpongeBlockChangeFlag) org.spongepowered.api.world.BlockChangeFlags.ALL;
     }
 
-    public static BlockChangeFlag andNotifyClients(final BlockChangeFlag flag) {
+    public static SpongeBlockChangeFlag andNotifyClients(final BlockChangeFlag flag) {
         final int rawFlag = ((SpongeBlockChangeFlag) flag).getRawFlag();
         if ((rawFlag & Constants.BlockChangeFlags.NOTIFY_CLIENTS) != 0){
-            return flag; // We don't need to rerun the flag
+            return (SpongeBlockChangeFlag) flag; // We don't need to rerun the flag
         }
         return BlockChangeFlagManager.fromNativeInt(rawFlag & ~Constants.BlockChangeFlags.NOTIFY_CLIENTS);
     }
@@ -113,31 +119,7 @@ public final class BlockChangeFlagManager {
 
         // devise all permutations
         for (int i = 0; i < 128; i++) { // 64 because we get to the 6th bit of possible combinations
-            final StringJoiner builder = new StringJoiner("|");
-            if ((i & Constants.BlockChangeFlags.NEIGHBOR_MASK) != 0) {
-                builder.add(Flag.NOTIFY_NEIGHBOR.name);
-            }
-            if ((i & Constants.BlockChangeFlags.NOTIFY_CLIENTS) != 0) {
-                // We don't want to confuse that there are going to be multiple flags
-                // but with slight differences because of the notify flag
-                builder.add(Flag.NOTIFY_CLIENTS.name);
-            }
-            if ((i & Constants.BlockChangeFlags.IGNORE_RENDER) != 0) {
-                // We don't want to confuse that there are going to be multiple flags
-                // but with a slight difference because of the ignore render flag
-                builder.add(Flag.IGNORE_RENDER.name);
-            }
-            if ((i & Constants.BlockChangeFlags.FORCE_RE_RENDER) != 0) {
-                // We don't want to confuse that there are going to be multiple flags
-                // but with a slight difference due to the client only flag.
-                builder.add(Flag.FORCE_RE_RENDER.name);
-            }
-            if ((i & Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE) == 0) {
-                builder.add(Flag.DENY_NEIGHBOR_SHAPE_UPDATE.name);
-            }
-            if ((i & Constants.BlockChangeFlags.PHYSICS_MASK) == 0) {
-                builder.add(Flag.IGNORE_PHYSICS.name);
-            }
+            final StringJoiner builder = BlockChangeFlagManager.getFlagName(i);
             if (Constants.BlockChangeFlags.NONE == i) {
                 this.register(new SpongeBlockChangeFlag("NONE".toLowerCase(Locale.ENGLISH), i));
             } else if (Constants.BlockChangeFlags.ALL == i) {
@@ -160,6 +142,36 @@ public final class BlockChangeFlagManager {
             }
         }
 
+    }
+
+    @NonNull
+    private static StringJoiner getFlagName(int i) {
+        final StringJoiner builder = new StringJoiner("|");
+        if ((i & Constants.BlockChangeFlags.NEIGHBOR_MASK) != 0) {
+            builder.add(Flag.NOTIFY_NEIGHBOR.name);
+        }
+        if ((i & Constants.BlockChangeFlags.NOTIFY_CLIENTS) != 0) {
+            // We don't want to confuse that there are going to be multiple flags
+            // but with slight differences because of the notify flag
+            builder.add(Flag.NOTIFY_CLIENTS.name);
+        }
+        if ((i & Constants.BlockChangeFlags.IGNORE_RENDER) != 0) {
+            // We don't want to confuse that there are going to be multiple flags
+            // but with a slight difference because of the ignore render flag
+            builder.add(Flag.IGNORE_RENDER.name);
+        }
+        if ((i & Constants.BlockChangeFlags.FORCE_RE_RENDER) != 0) {
+            // We don't want to confuse that there are going to be multiple flags
+            // but with a slight difference due to the client only flag.
+            builder.add(Flag.FORCE_RE_RENDER.name);
+        }
+        if ((i & Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE) == 0) {
+            builder.add(Flag.DENY_NEIGHBOR_SHAPE_UPDATE.name);
+        }
+        if ((i & Constants.BlockChangeFlags.PHYSICS_MASK) == 0) {
+            builder.add(Flag.IGNORE_PHYSICS.name);
+        }
+        return builder;
     }
 
     private void register(final SpongeBlockChangeFlag flag) {
