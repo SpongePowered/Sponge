@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -39,6 +39,7 @@ import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
@@ -55,7 +56,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -69,6 +70,7 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Update
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateHeightMapEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateOrCreateNewTileEntityPostPlacementEffect;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -88,7 +90,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
-public abstract class BlockTransaction {
+public abstract class BlockTransaction<E extends Event & Cancellable> {
     private static final int EVENT_COUNT = BlockChange.values().length + 1;
     private static final int MULTI_CHANGE_INDEX = BlockChange.values().length;
     private static final Function<ImmutableList.Builder<Transaction<BlockSnapshot>>[], Consumer<Transaction<BlockSnapshot>>> TRANSACTION_PROCESSOR =
@@ -96,7 +98,7 @@ public abstract class BlockTransaction {
             transaction -> {
                 final BlockChange blockChange = ((SpongeBlockSnapshot) transaction.getOriginal()).blockChange;
                 builders[blockChange.ordinal()].add(transaction);
-                builders[MULTI_CHANGE_INDEX].add(transaction);
+                builders[BlockTransaction.MULTI_CHANGE_INDEX].add(transaction);
             }
         ;
     static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
@@ -109,13 +111,14 @@ public abstract class BlockTransaction {
     // State definitions
     final BlockPos affectedPosition;
     final BlockState originalState;
+    boolean cancelled = false;
 
     // Children Definitions
     @Nullable LinkedList<ResultingTransactionBySideEffect> sideEffects;
 
     // LinkedList node definitions
-    @Nullable BlockTransaction previous;
-    @Nullable BlockTransaction next;
+    @Nullable BlockTransaction<@NonNull ?> previous;
+    @Nullable BlockTransaction<@NonNull ?> next;
 
     BlockTransaction(final BlockPos affectedPosition, final BlockState originalState) {
         this.affectedPosition = affectedPosition;
@@ -128,14 +131,6 @@ public abstract class BlockTransaction {
             .add("affectedPosition=" + this.affectedPosition)
             .add("originalState=" + this.originalState)
             .toString();
-    }
-
-    final boolean addEffect(final ResultingTransactionBySideEffect effect) {
-        if (this.sideEffects == null) {
-            this.sideEffects = new LinkedList<>();
-        }
-        this.sideEffects.push(effect);
-        return true;
     }
 
     public abstract void populateChunkEffects(
@@ -170,21 +165,23 @@ public abstract class BlockTransaction {
         return false;
     }
 
-    public boolean requiresEvent() {
-        return this.sideEffects != null;
-    }
-
-    public abstract Event generateEvent(PhaseContext<?> context, ImmutableList<BlockTransaction> transactions, Cause currentCause);
+    public abstract E generateEvent(PhaseContext<@NonNull ?> context, ImmutableList<BlockTransaction<E>> transactions, Cause currentCause);
 
     public abstract void restore();
 
-    public abstract boolean canBatchWith(@Nullable final BlockTransaction next);
+    public abstract boolean canBatchWith(@Nullable final BlockTransaction<?> next);
 
     public boolean avoidsEvent() {
         return false;
     }
 
-    static abstract class BlockEventBasedTransaction extends BlockTransaction {
+    public void markCancelled() {
+        this.cancelled = true;
+    }
+
+    public abstract boolean markCancelledTransactions(E event, ImmutableList<? extends BlockTransaction<E>> transactions);
+
+    static abstract class BlockEventBasedTransaction extends BlockTransaction<ChangeBlockEvent> {
 
         BlockEventBasedTransaction(final BlockPos affectedPosition, final BlockState originalState) {
             super(affectedPosition, originalState);
@@ -192,20 +189,21 @@ public abstract class BlockTransaction {
 
         @SuppressWarnings({"unchecked", "rawtypes"})
         @Override
-        public final Event generateEvent(final PhaseContext<?> context, final ImmutableList<BlockTransaction> transactions,
+        public final ChangeBlockEvent generateEvent(final PhaseContext<@NonNull ?> context,
+            final ImmutableList<BlockTransaction<ChangeBlockEvent>> transactions,
             final Cause currentCause
         ) {
-            final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = ArrayListMultimap.create();
-            for (final BlockTransaction transaction : transactions) {
+            final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
+            for (final BlockTransaction<@NonNull ?> transaction : transactions) {
                 if (!positions.containsKey(transaction.affectedPosition)) {
                     positions.put(transaction.affectedPosition, ((BlockEventBasedTransaction) transaction).getOriginalSnapshot());
                 }
                 positions.put(transaction.affectedPosition, ((BlockEventBasedTransaction) transaction).getResultingSnapshot());
             }
 
-            final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[EVENT_COUNT];
-            final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[EVENT_COUNT];
-            for (int i = 0; i < EVENT_COUNT; i++) {
+            final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[BlockTransaction.EVENT_COUNT];
+            final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[BlockTransaction.EVENT_COUNT];
+            for (int i = 0; i < BlockTransaction.EVENT_COUNT; i++) {
                 transactionBuilders[i] = new ImmutableList.Builder<>();
             }
             // Bug is here- use the multimap
@@ -224,7 +222,7 @@ public abstract class BlockTransaction {
                     transactionBuilders[original.blockChange.ordinal()].add(eventTransaction);
                     return eventTransaction;
                 }).collect(ImmutableList.toImmutableList());
-            for (int i = 0; i < EVENT_COUNT; i++) {
+            for (int i = 0; i < BlockTransaction.EVENT_COUNT; i++) {
                 transactionArrays[i] = transactionBuilders[i].build();
             }
             final @Nullable ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
@@ -270,8 +268,32 @@ public abstract class BlockTransaction {
         protected abstract SpongeBlockSnapshot getOriginalSnapshot();
 
         @Override
-        public boolean canBatchWith(final @Nullable  BlockTransaction next) {
+        public boolean canBatchWith(final @Nullable BlockTransaction<@NonNull ?> next) {
             return next instanceof BlockEventBasedTransaction;
+        }
+
+        @Override
+        public final boolean markCancelledTransactions(final ChangeBlockEvent event,
+            final ImmutableList<? extends BlockTransaction<ChangeBlockEvent>> blockTransactions
+        ) {
+            boolean cancelledAny = false;
+            for (final Transaction<BlockSnapshot> transaction: event.getTransactions()) {
+                if (!transaction.isValid()) {
+                    cancelledAny = true;
+                    for (final BlockTransaction<ChangeBlockEvent> blockTransaction : blockTransactions) {
+                        final Vector3i position = transaction.getOriginal().getPosition();
+                        final BlockPos affectedPosition = blockTransaction.affectedPosition;
+                        if (position.getX() == affectedPosition.getX()
+                            && position.getY() == affectedPosition.getY()
+                            && position.getZ() == affectedPosition.getZ()
+                        ) {
+                            blockTransaction.markCancelled();
+                        }
+                    }
+                }
+            }
+
+            return cancelledAny;
         }
     }
 
@@ -279,12 +301,17 @@ public abstract class BlockTransaction {
     public static final class AddTileEntity extends BlockEventBasedTransaction {
 
         final TileEntity added;
+        final SpongeBlockSnapshot oldSnapshot;
         final SpongeBlockSnapshot addedSnapshot;
 
-        AddTileEntity(final TileEntity added, final SpongeBlockSnapshot attachedSnapshot) {
-            super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
+        AddTileEntity(final TileEntity added,
+            final SpongeBlockSnapshot attachedSnapshot,
+            final SpongeBlockSnapshot existing
+        ) {
+            super(existing.getBlockPos(), (BlockState) existing.getState());
             this.added = added;
             this.addedSnapshot = attachedSnapshot;
+            this.oldSnapshot = existing;
         }
 
         @Override
@@ -308,7 +335,7 @@ public abstract class BlockTransaction {
 
         @Override
         public void restore() {
-
+            this.oldSnapshot.restore(true, BlockChangeFlags.NONE);
         }
 
         @Override
@@ -357,7 +384,7 @@ public abstract class BlockTransaction {
 
         @Override
         public void restore() {
-
+            this.tileSnapshot.restore(true, BlockChangeFlags.NONE);
         }
 
         @Override
@@ -410,7 +437,7 @@ public abstract class BlockTransaction {
 
         @Override
         public void restore() {
-
+            this.removedSnapshot.restore(true, BlockChangeFlags.NONE);
         }
 
         @Override
@@ -527,7 +554,7 @@ public abstract class BlockTransaction {
 
         @Override
         public void restore() {
-
+            this.original.restore(true, BlockChangeFlagManager.fromNativeInt(Constants.BlockChangeFlags.FORCED_RESTORE));
         }
 
         @Override
@@ -557,7 +584,7 @@ public abstract class BlockTransaction {
     }
 
 
-    static final class NeighborNotification extends BlockTransaction {
+    static final class NeighborNotification extends BlockTransaction<NotifyNeighborBlockEvent> {
         final BlockState original;
         final BlockPos notifyPos;
         final Block sourceBlock;
@@ -621,7 +648,8 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public Event generateEvent(final PhaseContext<?> context, final ImmutableList<BlockTransaction> transactions,
+        public NotifyNeighborBlockEvent generateEvent(final PhaseContext<@NonNull ?> context,
+            final ImmutableList<BlockTransaction<NotifyNeighborBlockEvent>> transactions,
             final Cause currentCause
         ) {
             // TODO - for all neighbor notifications in the transactions find the direction of notification being used and pump into map.
@@ -639,13 +667,20 @@ public abstract class BlockTransaction {
         }
 
         @Override
-        public boolean canBatchWith(@Nullable final BlockTransaction next) {
+        public boolean canBatchWith(@Nullable final BlockTransaction<@NonNull ?> next) {
             return next instanceof NeighborNotification;
         }
 
         @Override
         public boolean avoidsEvent() {
             return true;
+        }
+
+        @Override
+        public boolean markCancelledTransactions(final NotifyNeighborBlockEvent event,
+            final ImmutableList<? extends BlockTransaction<NotifyNeighborBlockEvent>> blockTransactions
+        ) {
+            return false;
         }
 
     }

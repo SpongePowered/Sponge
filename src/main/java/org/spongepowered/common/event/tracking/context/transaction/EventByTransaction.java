@@ -25,19 +25,31 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;
+import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 
-import java.util.List;
+@DefaultQualifier(NonNull.class)
+final class EventByTransaction<T extends Event & Cancellable> {
 
-final class EventByTransaction {
+    final T event;
+    final ImmutableList<BlockTransaction<T>> transactions;
+    final BlockTransaction<T> decider;
 
-    final Event event;
-    final ImmutableList<BlockTransaction> transactions;
-
-    EventByTransaction(final Event event,
-        final ImmutableList<BlockTransaction> transactions
+    EventByTransaction(final T event,
+        final ImmutableList<BlockTransaction<T>> transactions,
+        final BlockTransaction<T> decider
     ) {
         this.event = event;
         this.transactions = transactions;
+        this.decider = decider;
+    }
+
+    public void markCancelled() {
+        this.decider.markCancelled();
+        for (BlockTransaction<T> transaction : this.transactions) {
+            transaction.markCancelled();
+        }
     }
 }

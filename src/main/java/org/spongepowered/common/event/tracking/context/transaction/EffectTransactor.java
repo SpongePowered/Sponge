@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class EffectTransactor implements AutoCloseable {
     final @Nullable ResultingTransactionBySideEffect previousEffect;
-    final @Nullable BlockTransaction parent;
+    final @Nullable BlockTransaction<@NonNull ?> parent;
     private final TransactionalCaptureSupplier supplier;
     private final ResultingTransactionBySideEffect effect;
 
-    EffectTransactor(final ResultingTransactionBySideEffect effect, final @Nullable BlockTransaction parent,
+    EffectTransactor(final ResultingTransactionBySideEffect effect, final @Nullable BlockTransaction<@NonNull ?> parent,
         final @Nullable ResultingTransactionBySideEffect previousEffect, final TransactionalCaptureSupplier transactor) {
         /*
         | ChangeBlock(1) <- head will be RemoveTileEntity(1), tail is still RemoveTileentity(1)
@@ -47,7 +48,11 @@ public class EffectTransactor implements AutoCloseable {
 
     @Override
     public void close() {
-        if (this.effect.head == null && this.parent != null && this.parent.getEffects().peekLast() == this.effect) {
+        if (this.effect.head == null
+            && this.parent != null
+            && this.parent.sideEffects != null
+            && this.parent.getEffects().peekLast() == this.effect
+        ) {
             this.parent.getEffects().removeLast();
         }
         this.supplier.popEffect(this);

@@ -33,23 +33,21 @@ import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -60,14 +58,11 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @SuppressWarnings("rawtypes")
@@ -179,9 +174,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
      * already guaranteed original {@link SpongeBlockSnapshot} for proper event
      * creation when multiple block changes exist for the provided {@link BlockPos}.
      *
-     * <p>Note: This method <strong>requires</strong> that {@link #multimap} is not
-     * {@code null}, otherwise it will cause an NPE.</p>
-     *
      * @param newState The incoming block change to compare to change
      * @param blockPos The block position to get the backing list from the multimap
      */
@@ -260,6 +252,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             this.effect.addChild(transaction);
         } else {
             transaction.previous = this.tail;
+            if (this.tail != null) {
+                this.tail.next = transaction;
+            }
             this.tail = transaction;
         }
     }
@@ -275,7 +270,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return changeBlock;
     }
 
-    public boolean logTileAddition(final TileEntity tileEntity, final Supplier<ServerWorld> worldSupplier) {
+    public boolean logTileAddition(final TileEntity tileEntity,
+        final Supplier<ServerWorld> worldSupplier, final Chunk chunk
+        ) {
         if (tileEntity == null) {
             return false;
         }
@@ -285,7 +282,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 return true;
             }
         }
-        this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier));
+        this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier, chunk));
 
         return true;
     }
@@ -363,20 +360,32 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     }
 
     private BlockTransaction.AddTileEntity createTileAdditionTransaction(final TileEntity tileentity,
-        final Supplier<ServerWorld> worldSupplier
+        final Supplier<ServerWorld> worldSupplier, final Chunk chunk
     ) {
-        final BlockState currentState = tileentity.getBlockState();
-        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
-            currentState,
-            tileentity.getPos(),
+        final BlockPos pos = tileentity.getPos().toImmutable();
+        final BlockState currentBlock = chunk.getBlockState(pos);
+        final @Nullable TileEntity existingTile = chunk.getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+
+        final SpongeBlockSnapshot added = TrackingUtil.createPooledSnapshot(
+            currentBlock,
+            pos,
             BlockChangeFlags.NONE,
             tileentity,
             worldSupplier,
             Optional::empty, Optional::empty
         );
-        this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
+        final SpongeBlockSnapshot existing = TrackingUtil.createPooledSnapshot(
+            currentBlock,
+            pos,
+            BlockChangeFlags.NONE,
+            existingTile,
+            worldSupplier,
+            Optional::empty,
+            Optional::empty
+        );
+        this.put(existing, currentBlock); // Always update the snapshot index before the block change is tracked
 
-        return new BlockTransaction.AddTileEntity(tileentity, snapshot);
+        return new BlockTransaction.AddTileEntity(tileentity, added, existing);
     }
 
     public void clear() {
@@ -397,32 +406,46 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         this.effect = null;
     }
 
+    @SuppressWarnings("unchecked")
     public boolean processTransactions(final PhaseContext<?> context) {
         if (this.head == null) {
             return true;
         }
-        final ImmutableList<EventByTransaction> batched = TransactionalCaptureSupplier.batchTransactions(this.head, context);
-        boolean cancelRemaining = false;
-        for (final EventByTransaction eventWithTransactions : batched) {
-            final Event first = eventWithTransactions.event;
-            if (cancelRemaining) {
-                final ImmutableList<BlockTransaction> second = eventWithTransactions.transactions;
-                second.reverse().iterator().forEachRemaining(BlockTransaction::restore);
+        final ImmutableList<EventByTransaction<?>> batched = TransactionalCaptureSupplier.batchTransactions(this.head, this.head, context);
+        boolean cancelledAny = false;
+        for (final EventByTransaction<?> eventWithTransactions : batched) {
+            final Event event = eventWithTransactions.event;
+            if (eventWithTransactions.decider.cancelled) {
+                cancelledAny = true;
+                eventWithTransactions.markCancelled();
                 continue;
             }
-            Sponge.getEventManager().post(first);
-            if (first instanceof Cancellable && ((Cancellable) first).isCancelled()) {
-                final ImmutableList<BlockTransaction> second = eventWithTransactions.transactions;
-                second.reverse().iterator().forEachRemaining(BlockTransaction::restore);
-                cancelRemaining = true;
+            Sponge.getEventManager().post(event);
+            if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
+                eventWithTransactions.markCancelled();
+                cancelledAny = true;
+            }
+            if (((BlockTransaction) eventWithTransactions.decider).markCancelledTransactions(event, eventWithTransactions.transactions)) {
+                cancelledAny = true;
             }
         }
-        return cancelRemaining;
+        if (cancelledAny) {
+            for (final EventByTransaction<@NonNull ?> eventByTransaction : batched.reverse()) {
+                for (final BlockTransaction<@NonNull ?> blockTransaction : eventByTransaction.transactions.reverse()) {
+                    if (blockTransaction.cancelled) {
+                        blockTransaction.restore();
+                    }
+                }
+            }
+        }
+        return cancelledAny;
     }
 
-    private static ImmutableList<EventByTransaction> batchTransactions(final BlockTransaction head,
+    @SuppressWarnings("unchecked")
+    private static ImmutableList<EventByTransaction<@NonNull ?>> batchTransactions(final BlockTransaction head,
+        final BlockTransaction parent,
         final PhaseContext<?> context) {
-        final ImmutableList.Builder<EventByTransaction> builder = ImmutableList.builder();
+        final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder = ImmutableList.builder();
         @Nullable BlockTransaction pointer = head;
         ImmutableList.Builder<BlockTransaction> accumilator = ImmutableList.builder();
         @MonotonicNonNull BlockTransaction batchDecider = null;
@@ -442,11 +465,11 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 final ImmutableList<BlockTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
                 batchDecider = null;
-                TransactionalCaptureSupplier.generateEventForTransaction(pointer, context, builder, transactions);
+                TransactionalCaptureSupplier.generateEventForTransaction(pointer, parent, context, builder, (ImmutableList) transactions);
             } else if (!batchDecider.canBatchWith(pointer)) {
                 final ImmutableList<BlockTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
-                TransactionalCaptureSupplier.generateEventForTransaction(batchDecider, context, builder, transactions);
+                TransactionalCaptureSupplier.generateEventForTransaction(batchDecider, parent, context, builder, (ImmutableList) transactions);
                 accumilator.add(pointer);
                 batchDecider = null;
             } else {
@@ -456,16 +479,26 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
         final ImmutableList<BlockTransaction> remaining = accumilator.build();
         if (!remaining.isEmpty()) {
-            TransactionalCaptureSupplier.generateEventForTransaction(Objects.requireNonNull(batchDecider, "BatchDeciding Transaction was null"), context, builder, remaining);
+            TransactionalCaptureSupplier.generateEventForTransaction(
+                Objects.requireNonNull(batchDecider, "BatchDeciding Transaction was null"),
+                parent,
+                context,
+                builder,
+                (ImmutableList) remaining
+            );
         }
         return builder.build();
     }
 
-    private static EventByTransaction generateEventForTransaction(@NonNull final BlockTransaction pointer, final PhaseContext<?> context,
-        final ImmutableList.Builder<EventByTransaction> builder,
-        final ImmutableList<BlockTransaction> transactions
+    @SuppressWarnings("unchecked")
+    private static <E extends Event & Cancellable> void generateEventForTransaction(
+        @NonNull final BlockTransaction<E> pointer,
+        @Nullable final BlockTransaction<?> parent,
+        final PhaseContext<@NonNull ?> context,
+        final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder,
+        final ImmutableList<BlockTransaction<E>> transactions
     ) {
-        final Optional<BiConsumer<PhaseContext<?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator();
+        final Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator();
         final PhaseTracker instance = PhaseTracker.getInstance();
         try (
             final CauseStackManager.@Nullable StackFrame frame = frameMutator
@@ -476,9 +509,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 })
                 .orElse(null)
         ) {
-            final Event event = pointer.generateEvent(context, transactions, instance.getCurrentCause());
+            final E event = pointer.generateEvent(context, transactions, instance.getCurrentCause());
 
-            final EventByTransaction element = new EventByTransaction(event, transactions);
+            final BlockTransaction<E> decider = parent != null ? (BlockTransaction<E>) parent : pointer;
+            final EventByTransaction<E> element = new EventByTransaction<>(event, transactions, decider);
             builder.add(element);
 
             if (frame != null) {
@@ -486,10 +520,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             }
             pointer.getEffects().forEach(effect -> {
                 if (effect.head != null) {
-                    builder.addAll(TransactionalCaptureSupplier.batchTransactions(effect.head, context));
+                    builder.addAll(TransactionalCaptureSupplier.batchTransactions(effect.head, pointer, context));
                 }
             });
-            return element;
         }
     }
 
@@ -537,13 +570,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if (this.head != null) {
             this.head = null;
             this.tail = null;
-            for (BlockTransaction transaction = this.head; transaction != null; ) {
-                final BlockTransaction next = transaction.next;
-                transaction.previous = null;
-                transaction.next = null;
-                transaction = next;
-            }
-
+        }
+        if (this.effect != null) {
+            this.effect = null;
         }
 
     }

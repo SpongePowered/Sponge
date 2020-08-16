@@ -1026,6 +1026,11 @@ public final class Constants {
         // The flags that are naturally inverted are already inverted here by being masked in
         // with the opposite OR.
         // Example: If we DO want physics, we don't include the physics flag, if we DON'T want physics, we | it in.
+        public static final int FORCED_RESTORE = Constants.BlockChangeFlags.NOTIFY_CLIENTS
+            | Constants.BlockChangeFlags.PHYSICS_MASK
+            | Constants.BlockChangeFlags.FORCE_RE_RENDER
+            | Constants.BlockChangeFlags.NEIGHBOR_DROPS
+            ;
         public static final int ALL = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.NEIGHBOR_MASK;
         public static final int DEFAULT = Constants.BlockChangeFlags.NEIGHBOR_MASK

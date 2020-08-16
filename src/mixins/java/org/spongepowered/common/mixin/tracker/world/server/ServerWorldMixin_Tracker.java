@@ -70,18 +70,14 @@ import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.ScheduledBlockChange;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
-import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToLoadedListInWorldEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToTickableListEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToWorldWhileProcessingEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.CheckBlockPostPlacementIsSameEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
-import org.spongepowered.common.event.tracking.context.transaction.effect.NeighborNotificationProcessSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyClientEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyNeighborSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
-import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromChunkEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromWorldEffect;
@@ -425,8 +421,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             if (tileEntity.getWorld() != (ServerWorld) (Object) this) {
                 tileEntity.setWorld((ServerWorld) (Object) this);
             }
-
-            if (current.getBlockTransactor().logTileAddition(tileEntity, () -> (ServerWorld) (Object) this)) {
+            final Chunk chunk = this.shadow$getChunkAt(immutable);
+            if (current.getBlockTransactor().logTileAddition(tileEntity, () -> (ServerWorld) (Object) this, chunk)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
                     .addEffect(new AddTileEntityToWorldWhileProcessingEffect())
                     .addEffect(new AddTileEntityToLoadedListInWorldEffect())
