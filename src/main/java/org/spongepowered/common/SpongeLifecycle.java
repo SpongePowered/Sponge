@@ -33,6 +33,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogRegistryEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
@@ -144,5 +145,9 @@ public final class SpongeLifecycle {
                 .stream()
                 .filter(plugin -> !(plugin instanceof DummyPluginContainer))
                 .collect(Collectors.toList());
+    }
+
+    public void establishDataProviders() {
+        DataProviderRegistry.get().registerDefaultProviders();
     }
 }

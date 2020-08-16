@@ -31,7 +31,15 @@ import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.key.SpongeKey;
+import org.spongepowered.common.data.provider.block.entity.TileEntityDataProviders;
+import org.spongepowered.common.data.provider.block.location.LocationDataProviders;
+import org.spongepowered.common.data.provider.block.state.BlockStateDataProviders;
+import org.spongepowered.common.data.provider.entity.EntityDataProviders;
+import org.spongepowered.common.data.provider.generic.GenericDataProviders;
 import org.spongepowered.common.data.provider.inventory.InventoryDataProviders;
+import org.spongepowered.common.data.provider.item.ItemDataProviders;
+import org.spongepowered.common.data.provider.item.stack.ItemStackDataProviders;
+import org.spongepowered.common.data.provider.nbt.NBTDataProviders;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,8 +61,8 @@ public final class DataProviderRegistry {
     private static class LookupKey {
 
         final Class<?> holderType;
-        final Key<?> key;
 
+        final Key<?> key;
         private LookupKey(final Class<?> holderType, final Key<?> key) {
             this.holderType = holderType;
             this.key = key;
@@ -77,15 +85,12 @@ public final class DataProviderRegistry {
         public int hashCode() {
             return Objects.hash(this.holderType, this.key);
         }
-    }
 
+    }
     private final Multimap<Key<?>, DataProvider<?,?>> dataProviders = HashMultimap.create();
+
     private final Map<LookupKey, DataProvider<?,?>> dataProviderCache = new ConcurrentHashMap<>();
     private final Map<Class<?>, DataProviderLookup> dataProviderLookupCache = new ConcurrentHashMap<>();
-
-    private DataProviderRegistry() {
-        new InventoryDataProviders(this).register(); // TODO register all dataproviders somewhere
-    }
 
     private static boolean filterHolderType(final DataProvider<?,?> provider, final Class<?> holderType) {
         // Filter out data providers of which we know that they will never be relevant.
@@ -218,4 +223,26 @@ public final class DataProviderRegistry {
         this.dataProviderCache.clear();
         this.dataProviderLookupCache.clear();
     }
+
+    public void registerDefaultProviders() {
+        this.registerDefaultProviders(
+                new LocationDataProviders(this),
+                new BlockStateDataProviders(this),
+                new NBTDataProviders(this),
+                new ItemDataProviders(this),
+                new TileEntityDataProviders(this),
+                new GenericDataProviders(this),
+                new ItemStackDataProviders(this),
+                new InventoryDataProviders(this),
+                new EntityDataProviders(this)
+        );
+    }
+
+    private void registerDefaultProviders(DataProviderRegistratorBuilder... dataProviderRegistratorBuilders) {
+        for (DataProviderRegistratorBuilder dataProviderRegistratorBuilder : dataProviderRegistratorBuilders) {
+            dataProviderRegistratorBuilder.register();
+        }
+    }
+
+
 }

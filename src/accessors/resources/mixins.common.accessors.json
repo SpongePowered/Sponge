@@ -176,7 +176,8 @@
         "world.server.ServerChunkProviderAccessor",
         "world.server.ServerWorldAccessor",
         "world.spawner.AbstractSpawnerAccessor",
-        "world.storage.SaveHandlerAccessor"
+        "world.storage.SaveHandlerAccessor",
+        "entity.item.BoatEntityAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",
