@@ -25,8 +25,11 @@
 package org.spongepowered.common.block;
 
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -43,6 +46,12 @@ import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -118,7 +127,83 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public boolean restore(final boolean force, final BlockChangeFlag flag) {
         // TODO - rewrite with the PhaseTracker being the hook or use SpongeImplHooks to do the restore.
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+
+        final Optional<ServerWorld> optionalWorld = Optional.ofNullable(this.world.get());
+        if (!optionalWorld.isPresent()) {
+            return false;
+        }
+
+        final ServerWorld world = optionalWorld.get();
+        // We need to deterministically define the context as nullable if we don't need to enter.
+        // this way we guarantee an exit.
+        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
+            context.buildAndSwitch();
+            final BlockPos pos = VecHelper.toBlockPos(this.pos);
+            if (!World.isValid(pos)) { // Invalid position. Inline this check
+                return false;
+            }
+            final net.minecraft.block.BlockState current = world.getBlockState(pos);
+            final net.minecraft.block.BlockState replaced = (net.minecraft.block.BlockState) this.blockState;
+            if (!force && (current.getBlock() != replaced.getBlock() || current != replaced)) {
+                return false;
+            }
+
+            // Prevent Shulker Boxes from dropping when restoring BlockSnapshot
+//            if (current.getBlock().getClass() == BlockShulkerBox.class) {
+//                world.bridge$removeTileEntity(pos);
+//            }
+            world.removeTileEntity(pos);
+            world.setBlockState(pos, replaced, BlockChangeFlagManager.andNotifyClients(flag).getRawFlag());
+            if (this.compound != null) {
+                @Nullable TileEntity te = world.getTileEntity(pos);
+                if (te != null) {
+                    te.read(this.compound);
+                } else {
+                    // Because, some mods will "unintentionally" only obey some of the rules but not all.
+                    // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.
+                    try {
+                        te = TileEntity.create(this.compound);
+                        if (te != null) {
+                            world.getChunk(pos).addTileEntity(pos, te);
+                        }
+                    } catch (Exception e) {
+                        // Seriously? The mod should be broken then.
+                        final PrettyPrinter printer = new PrettyPrinter(60).add("Unable to restore").centre().hr()
+                            .add("A mod is not correctly deserializing a TileEntity that is being restored. ")
+                            .addWrapped(60, "Note that this is not the fault of Sponge. Sponge is understanding that "
+                                + "a block is supposed to have a TileEntity, but the mod is breaking the contract"
+                                + "on how to re-create the tile entity. Please open an issue with the offending mod.")
+                            .add("Here's the provided compound:");
+                        printer.add();
+                        try {
+                            printer.addWrapped(80, "%s : %s", "This compound", this.compound);
+                        } catch (Throwable error) {
+                            printer.addWrapped(
+                                80,
+                                "Unable to get the string of this compound. Printing out some of the entries to better assist"
+                            );
+
+                        }
+                        printer.add()
+                            .add("Desired World: " + this.worldKey)
+                            .add("Position: " + this.pos)
+                            .add("Desired BlockState: " + this.blockState);
+                        printer.add();
+                        printer.log(SpongeCommon.getLogger(), Level.ERROR);
+                        return true; // I mean, I guess. the block was set up, but not the tile entity.
+                    }
+
+                }
+
+                if (te != null) {
+                    te.markDirty();
+                }
+
+            }
+            // Finally, mark the location as being updated.
+            world.getChunkProvider().markBlockChanged(pos);
+            return true;
+        }
     }
 
     @Override
