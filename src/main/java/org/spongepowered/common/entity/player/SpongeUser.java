@@ -34,6 +34,8 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -109,6 +111,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     private boolean isVanishCollide;
     private boolean isVanishTarget;
 
+    @Nullable private SubjectReference subjectReference;
     @Nullable private SpongeUserInventory inventory; // lazy load when accessing inventory
     @Nullable private EnderChestInventory enderChest; // lazy load when accessing inventory
     @Nullable private CompoundNBT compound;
@@ -182,10 +185,19 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.compound = compound;
 
         if (!compound.contains(Constants.Sponge.World.KEY)) {
-            // TODO Minecraft 1.14 - Handle this better
-            return;
+            if (compound.contains(Constants.Sponge.World.DIMENSION_ID)) {
+                final DimensionType type = DimensionType.getById(compound.getInt(Constants.Sponge.World.DIMENSION_ID));
+                if (type == null) {
+                    this.worldKey = SpongeWorldManager.VANILLA_OVERWORLD;
+                }
+
+                this.worldKey = (ResourceKey) (Object) Registry.DIMENSION_TYPE.getKey(type);
+            } else {
+                this.worldKey = SpongeWorldManager.VANILLA_OVERWORLD;
+            }
+        } else {
+            this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.KEY));
         }
-        this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.KEY));
         final ListNBT position = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
         final ListNBT rotation = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
         this.x = position.getDouble(0);
@@ -548,13 +560,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     @Override
     public ResourceKey getWorldKey() {
         final Optional<ServerPlayer> player = this.getPlayer();
-        if (player.isPresent()) {
-            final ResourceKey key = player.get().getWorld().getKey();
-            // TODO Syncing
-            this.worldKey = key;
-        }
+        return player.map(serverPlayer -> serverPlayer.getWorld().getKey()).orElseGet(() -> this.worldKey);
 
-        return this.worldKey;
     }
 
     @Override
@@ -611,20 +618,17 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return ((Inventory) this.enderChest);
     }
 
-    @org.checkerframework.checker.nullness.qual.Nullable
-    private SubjectReference impl$subjectReference;
-
     @Override
     public void bridge$setSubject(final SubjectReference subj) {
-        this.impl$subjectReference = subj;
+        this.subjectReference = subj;
     }
 
     @Override
     public Optional<SubjectReference> bridge$resolveReferenceOptional() {
-        if (this.impl$subjectReference == null) {
+        if (this.subjectReference == null) {
             SubjectHelper.applySubject(this);
         }
-        return Optional.ofNullable(this.impl$subjectReference);
+        return Optional.ofNullable(this.subjectReference);
     }
 
     @Override
