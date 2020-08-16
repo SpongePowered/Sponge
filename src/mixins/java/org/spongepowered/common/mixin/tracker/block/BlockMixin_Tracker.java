@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.block.TrackedBlockBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launcher;
 
 @Mixin(Block.class)
@@ -67,5 +68,32 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
     @Override
     public boolean bridge$overridesNeighborNotificationLogic() {
         return this.tracker$hasNeighborLogicOverridden;
+    }
+
+    /**
+     * This is a scattering approach to checking that all block spawns being
+     * attempted are going to be prevented if the block changes are currently
+     * restoring.
+     *
+     * @author gabizou - August 16th, 2020 - Minecraft 1.14.4
+     * @param ci The callback info
+     */
+    @Inject(
+        method = {
+            // Effectively, all the spawnDrops injection points we can scatter
+            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/storage/loot/LootContext$Builder;)V",
+            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
+            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V"
+        },
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    private static void tracker$cancelOnBlockRestoration(final CallbackInfo ci) {
+        if (Thread.currentThread() == PhaseTracker.SERVER.getSidedThread()) {
+            if (PhaseTracker.SERVER.getPhaseContext().state.isRestoring()) {
+                ci.cancel();
+            }
+        }
     }
 }
