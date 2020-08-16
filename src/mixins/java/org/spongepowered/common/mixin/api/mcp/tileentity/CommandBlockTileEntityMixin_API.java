@@ -80,6 +80,6 @@ public abstract class CommandBlockTileEntityMixin_API extends TileEntityMixin_AP
 
     @Override
     public String getIdentifier() {
-        return "";
+        return this.getCommandBlockLogic().getName().getString();
     }
 }
