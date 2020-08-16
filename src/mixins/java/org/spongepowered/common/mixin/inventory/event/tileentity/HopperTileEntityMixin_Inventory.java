@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.accessor.tileentity.HopperTileEntityAccessor;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
@@ -50,14 +51,6 @@ import javax.annotation.Nullable;
 @Mixin(HopperTileEntity.class)
 public abstract class HopperTileEntityMixin_Inventory {
 
-    @Shadow private static ItemStack insertStack(
-            final @Nullable IInventory source, final IInventory destination, final ItemStack stack, final int index, final @Nullable Direction direction) {
-        throw new AbstractMethodError("Shadow");
-    }
-
-    @Shadow private static boolean shadow$isInventoryEmpty(final IInventory inventoryIn, final Direction side) {
-        throw new AbstractMethodError("Shadow");
-    }
     @Shadow protected abstract boolean shadow$isInventoryFull(IInventory inventoryIn, Direction side);
 
     // Call PreEvents
@@ -66,7 +59,7 @@ public abstract class HopperTileEntityMixin_Inventory {
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/tileentity/HopperTileEntity;isInventoryEmpty(Lnet/minecraft/inventory/IInventory;Lnet/minecraft/util/Direction;)Z"))
     private static boolean impl$throwTransferPreIfNotEmpty(final IInventory inventory, final Direction facing, final IHopper hopper) {
-        final boolean result = shadow$isInventoryEmpty(inventory, facing);
+        final boolean result = HopperTileEntityAccessor.accsssor$isInventoryEmpty(inventory, facing);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
         }
@@ -93,17 +86,17 @@ public abstract class HopperTileEntityMixin_Inventory {
             final int index, final Direction direction) {
         // capture Transaction
         if (!((source instanceof TrackedInventoryBridge || destination instanceof TrackedInventoryBridge) && destination instanceof InventoryAdapter)) {
-            return insertStack(source, destination, stack, index, direction);
+            return HopperTileEntityAccessor.accsssor$insertStack(source, destination, stack, index, direction);
         }
         if (!ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
-            return insertStack(source, destination, stack, index, direction);
+            return HopperTileEntityAccessor.accsssor$insertStack(source, destination, stack, index, direction);
         }
         TrackedInventoryBridge captureIn = impl$forCapture(source);
         if (captureIn == null) {
             captureIn = impl$forCapture(destination);
         }
         return InventoryEventFactory.captureTransaction(captureIn, InventoryUtil.toInventory(destination), index,
-                () -> insertStack(source, destination, stack, index, direction));
+                () -> HopperTileEntityAccessor.accsssor$insertStack(source, destination, stack, index, direction));
     }
 
     // Post Captured Transactions

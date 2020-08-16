@@ -26,6 +26,8 @@
         "entity.EntityTypeMixin",
         "entity.LivingEntityMixin",
         "entity.item.EnderPearlEntityMixin",
+        "entity.item.minecart.AbstractMinecartEntityMixin",
+        "entity.item.minecart.MinecartCommandBlockEntityMixin",
         "entity.item.minecart.MinecartCommandBlockEntity_MinecartCommandLogicMixin",
         "entity.passive.CatEntity_MorningGiftGoalMixin",
         "entity.player.PlayerEntityMixin",

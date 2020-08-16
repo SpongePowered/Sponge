@@ -37,9 +37,8 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
 import javax.annotation.Nullable;
 
-// TODO: Uncomment extends when everything is okay again.
 @Mixin(SignTileEntity.class)
-public abstract class SignTileEntityMixin /* extends TileEntityMixin */ implements SubjectBridge, CommandSourceProviderBridge {
+public abstract class SignTileEntityMixin extends TileEntityMixin implements SubjectBridge, CommandSourceProviderBridge {
 
     @Shadow public abstract CommandSource shadow$getCommandSource(@Nullable ServerPlayerEntity p_195539_1_);
 

@@ -58,12 +58,12 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
     @Shadow @Nullable private BlockState cachedBlockState;
     @Shadow protected net.minecraft.world.World world;
     @Shadow protected BlockPos pos;
+    @Nullable private Timing impl$timing;
 
     @Shadow public abstract BlockPos shadow$getPos();
     @Shadow public abstract BlockState shadow$getBlockState();
     @Shadow public abstract void shadow$markDirty();
     //@formatter:on
-    @Nullable private Timing impl$timing;
 
     @Override
     public Timing bridge$getTimingsHandler() {

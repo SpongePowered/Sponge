@@ -50,6 +50,7 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
+import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
@@ -189,7 +190,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     key, Constants.Sponge.World.LEVEL_SPONGE_DAT)));
         }
 
-        final SaveHandler saveHandler = new SaveHandler(worldDirectory.getParent().toFile(), key.getValue(), this.server, this.server.getDataFixer());
+        final SaveHandler saveHandler = this.server.getActiveAnvilConverter().getSaveLoader(key.getValue(), this.server);
         final WorldInfo worldInfo = saveHandler.loadWorldInfo();
         final Integer dimensionId = ((WorldInfoBridge) worldInfo).bridge$getDimensionId();
 
@@ -508,7 +509,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             SpongeCommon.getLogger().error("Exception caught registering existing Sponge worlds!", e);
         }
 
-        final DataFixer dataFixer = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getDataFixer();
         final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
 
         final Path worldsDirectory = saveName.equals(levelName) ? savesDirectory : savesDirectory.resolve(levelName);
@@ -564,10 +564,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 }
             }
 
-            final SaveHandler saveHandler = new SaveHandler(worldDirectory.getParent().toFile(), isDefaultWorld ? saveName : this.getDirectoryName(key), this.server, dataFixer);
-
+            final SaveHandler saveHandler;
             if (isDefaultWorld) {
-                ((MinecraftServerAccessor_Vanilla) this.server).accessor$setResourcePackFromWorld(saveName, saveHandler);
+                saveHandler = this.server.getActiveAnvilConverter().getSaveLoader(isDefaultWorld ? saveName : this.getDirectoryName(key), this.server);
+            } else {
+                saveHandler = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("../backups"),
+                        this.server.getDataFixer()).getSaveLoader(this.getDirectoryName(key), this.server);
             }
 
             WorldInfo worldInfo = saveHandler.loadWorldInfo();
