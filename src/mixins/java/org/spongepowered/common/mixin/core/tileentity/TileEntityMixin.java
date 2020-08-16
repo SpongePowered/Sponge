@@ -32,6 +32,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -140,7 +141,7 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
     protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
         return MoreObjects.toStringHelper(this)
             .add("type", ((BlockEntityType) this.type).getKey())
-            .add("world", this.world.getWorldInfo().getWorldName())
+            .add("world", ((ServerWorld) this.world).getKey())
             .add("pos", this.pos);
     }
 

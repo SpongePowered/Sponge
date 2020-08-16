@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.context;
 import com.google.common.base.MoreObjects;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 
 import java.lang.ref.WeakReference;
@@ -65,7 +64,7 @@ public final class CaptureBlockPos implements AutoCloseable {
         }
     }
 
-    public Optional<ServerWorldBridge> getMixinWorld() {
+    public Optional<ServerWorldBridge> getServerWorldBridge() {
         return this.mixinWorldReference == null ? Optional.empty() : Optional.ofNullable(this.mixinWorldReference.get());
     }
 
@@ -90,7 +89,7 @@ public final class CaptureBlockPos implements AutoCloseable {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("pos", this.pos)
-                .add("world", this.getMixinWorld().map(w -> ((ServerWorld) w).getWorldInfo().getWorldName()))
+                .add("world", this.getServerWorldBridge().map(w -> ((org.spongepowered.api.world.server.ServerWorld) w).getKey()))
                 .toString();
     }
 

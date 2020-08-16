@@ -26,6 +26,7 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timing;
 import net.minecraft.world.World;
+import org.spongepowered.api.world.server.ServerWorld;
 
 /**
  * Set of timers per world, to track world specific Timings.
@@ -77,7 +78,7 @@ public class WorldTimingsHandler {
     public final Timing chunkPopulate;
 
     public WorldTimingsHandler(World world) {
-        String name = world.getWorldInfo().getWorldName() + " - ";
+        String name = ((ServerWorld) world).getKey() + " - ";
 
         this.mobSpawn = SpongeTimingsFactory.ofSafe(name + "mobSpawn");
         this.doChunkUnload = SpongeTimingsFactory.ofSafe(name + "doChunkUnload");

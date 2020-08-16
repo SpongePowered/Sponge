@@ -107,15 +107,12 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
 
         final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) this.shadow$getWorld().getWorldInfo()).bridge$getConfigAdapter();
         if (configAdapter.get().getLogging().blockTrackLogging()) {
-            if (!configAdapter.get().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getKey().toString())) {
-                SpongeHooks.logBlockTrack(this.shadow$getWorld(), block, pos, user, true);
-            } else {
-                SpongeHooks.logBlockTrack(this.shadow$getWorld(), block, pos, user, false);
-            }
+            SpongeHooks.logBlockTrack(this.shadow$getWorld(), block, pos, user,
+                    !configAdapter.get().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getKey().toString()));
         }
 
-        final WorldInfoBridge worldInfo = (WorldInfoBridge) this.shadow$getWorld().getWorldInfo();
-        final int indexForUniqueId = worldInfo.bridge$getIndexForUniqueId(user.getUniqueId());
+        final WorldInfoBridge infoBridge = (WorldInfoBridge) this.shadow$getWorld().getWorldInfo();
+        final int indexForUniqueId = infoBridge.bridge$getIndexForUniqueId(user.getUniqueId());
         if (pos.getY() <= 255) {
             final short blockPos = Constants.Sponge.blockPosToShort(pos);
             final PlayerTracker playerTracker = this.trackertracker$trackedShortBlockPositions.get(blockPos);

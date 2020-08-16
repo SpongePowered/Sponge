@@ -435,13 +435,12 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         return this.impl$knockback;
     }
 
-
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("causesFire", this.causesFire)
                 .add("mode", this.mode)
-                .add("world", this.world.getWorldInfo() == null ? "null" : this.world.getWorldInfo().getWorldName())
+                .add("world", ((org.spongepowered.api.world.server.ServerWorld) this.world).getKey())
                 .add("x", this.x)
                 .add("y", this.y)
                 .add("z", this.z)
