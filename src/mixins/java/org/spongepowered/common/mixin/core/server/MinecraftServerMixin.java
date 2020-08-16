@@ -63,6 +63,7 @@ import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
+import java.util.function.BooleanSupplier;
 
 import javax.annotation.Nullable;
 
@@ -128,6 +129,11 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Inject(method = "tick", at = @At(value = "HEAD"))
     private void impl$onServerTickStart(final CallbackInfo ci) {
         TimingsManager.FULL_SERVER_TICK.startTiming();
+    }
+
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void impl$tickServerScheduler(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
+        ((SpongeServer) SpongeCommon.getServer()).getScheduler().tick();
     }
 
     @Override

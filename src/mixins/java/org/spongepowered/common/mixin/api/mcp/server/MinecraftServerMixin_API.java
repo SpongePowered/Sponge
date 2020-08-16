@@ -107,7 +107,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void shadow$sendMessage(ITextComponent p_145747_1_);
 
     private Iterable<? extends Audience> audiences;
-    private SpongeScheduler api$scheduler;
+    private ServerScheduler api$scheduler;
     private SpongeTeleportHelper api$teleportHelper;
     private SpongePlayerDataManager api$playerDataHandler;
     private UsernameCache api$usernameCache;
@@ -301,7 +301,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public Scheduler getScheduler() {
+    public ServerScheduler getScheduler() {
         return this.api$scheduler;
     }
 
