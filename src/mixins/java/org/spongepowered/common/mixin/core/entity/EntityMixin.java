@@ -43,10 +43,10 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.TicketType;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.DismountTypes;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
@@ -64,15 +64,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TimingBridge;
-import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -321,9 +320,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
         }
     }
-/*
->>>>>>> Implement the Portal API.
-
+//>>>>>>> Implement the Portal API.
     @Override
     public boolean bridge$isConstructing() {
         return this.impl$isConstructing;
