@@ -99,7 +99,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     private final GameProfile profile;
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
 
-    private ResourceKey worldKey;
+    private ResourceKey worldKey = SpongeWorldManager.VANILLA_OVERWORLD;
     private double x;
     private double y;
     private double z;
@@ -187,13 +187,10 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         if (!compound.contains(Constants.Sponge.World.KEY)) {
             if (compound.contains(Constants.Sponge.World.DIMENSION_ID)) {
                 final DimensionType type = DimensionType.getById(compound.getInt(Constants.Sponge.World.DIMENSION_ID));
-                if (type == null) {
-                    this.worldKey = SpongeWorldManager.VANILLA_OVERWORLD;
-                }
 
-                this.worldKey = (ResourceKey) (Object) Registry.DIMENSION_TYPE.getKey(type);
-            } else {
-                this.worldKey = SpongeWorldManager.VANILLA_OVERWORLD;
+                if (type != null) {
+                    this.worldKey = (ResourceKey) (Object) Registry.DIMENSION_TYPE.getKey(type);
+                }
             }
         } else {
             this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.KEY));
