@@ -66,6 +66,7 @@ public final class EffectSupplier {
             .registerSupplier(PotionEffectType.class, "conduit_power", () -> (PotionEffectType) Effects.CONDUIT_POWER)
             .registerSupplier(PotionEffectType.class, "dolphins_grace", () -> (PotionEffectType) Effects.DOLPHINS_GRACE)
             .registerSupplier(PotionEffectType.class, "bad_omen", () -> (PotionEffectType) Effects.BAD_OMEN)
+            .registerSupplier(PotionEffectType.class, "hero_of_the_village", () -> (PotionEffectType) Effects.HERO_OF_THE_VILLAGE)
         ;
     }
 }

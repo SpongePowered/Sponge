@@ -42,6 +42,8 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.util.weighted.ChanceTable;
+import org.spongepowered.api.util.weighted.NestedTableEntry;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.accessor.item.ToolItemAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -67,9 +69,11 @@ public final class ItemStackData {
                             if (h.isFood()) {
                                 final List<Pair<EffectInstance,Float>> itemEffects = h.getItem().getFood().getEffects();
                                 final WeightedTable<PotionEffect> effects = new WeightedTable<>();
+                                final ChanceTable<PotionEffect> chance = new ChanceTable<>();
                                 for (Pair<EffectInstance,Float> effect : itemEffects) {
-                                    effects.add((PotionEffect) effect.getKey(), effect.getValue());
+                                    chance.add((PotionEffect) effect.getKey(), effect.getValue());
                                 }
+                                effects.add(new NestedTableEntry<>(1, chance));
                                 return effects;
                             }
                             return null;

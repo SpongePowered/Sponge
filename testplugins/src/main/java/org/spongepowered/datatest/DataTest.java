@@ -25,22 +25,29 @@
 package org.spongepowered.datatest;
 
 import com.google.inject.Inject;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.ArmorMaterials;
+import org.spongepowered.api.data.type.ArtTypes;
+import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -48,8 +55,11 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -105,70 +115,86 @@ public class DataTest  {
         zombiePigman.remove();
 
         final ItemStack goldenApple = ItemStack.of(ItemTypes.ENCHANTED_GOLDEN_APPLE);
-        final WeightedTable<PotionEffect> appleEffects = goldenApple.get(Keys.APPLICABLE_POTION_EFFECTS).get();
-        this.checkGetData(goldenApple, Keys.APPLICABLE_POTION_EFFECTS, appleEffects); // TODO this does not check anything
+        final List<PotionEffect> expectedEffects = Arrays.asList(
+                PotionEffect.builder().potionType(PotionEffectTypes.REGENERATION).amplifier(1).ambient(false).duration(400).build(),
+                PotionEffect.builder().potionType(PotionEffectTypes.RESISTANCE).amplifier(0).ambient(false).duration(6000).build(),
+                PotionEffect.builder().potionType(PotionEffectTypes.FIRE_RESISTANCE).amplifier(0).ambient(false).duration(6000).build(),
+                PotionEffect.builder().potionType(PotionEffectTypes.ABSORPTION).amplifier(3).ambient(false).duration(2400).build());
+        this.checkGetWeightedData(goldenApple, Keys.APPLICABLE_POTION_EFFECTS, expectedEffects);
+
+        this.checkOfferListData(goldenApple, Keys.APPLIED_ENCHANTMENTS, Arrays.asList(Enchantment.of(EnchantmentTypes.SHARPNESS, 5)));
+        this.checkOfferListData(goldenApple, Keys.APPLIED_ENCHANTMENTS, Arrays.asList(Enchantment.of(EnchantmentTypes.PROTECTION, 4)));
+
+        this.checkGetData(ItemStack.of(ItemTypes.DIAMOND_LEGGINGS), Keys.ARMOR_MATERIAL, ArmorMaterials.DIAMOND.get());
+        this.checkGetData(ItemStack.of(ItemTypes.LEATHER_BOOTS), Keys.ARMOR_MATERIAL, ArmorMaterials.LEATHER.get());
+        this.checkGetData(ItemStack.of(ItemTypes.TURTLE_HELMET), Keys.ARMOR_MATERIAL, ArmorMaterials.TURTLE.get());
+
+        final Entity painting = world.createEntity(EntityTypes.PAINTING.get(), position);
+        this.checkGetData(painting, Keys.ART_TYPE, ArtTypes.KEBAB.get()); // TODO test offer (only works on valid painting)
     }
 
-    private <T> void checkOfferData(DataHolder.Mutable holder, Supplier<Key<SetValue<T>>> key, Set<T> value) {
+    private <T> void checkOfferSetData(DataHolder.Mutable holder, Supplier<Key<SetValue<T>>> key, Set<T> value) {
         final DataTransactionResult result = holder.offer(key, value);
-        if (!result.isSuccessful()) {
-            System.err.println("Failed offer on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString() + " with " + value);
-            return;
+        if (this.checkResult(holder, key, value, result)) {
+            this.checkGetSetData(holder, key, value);
         }
-        this.checkGetData(holder, key, value);
     }
 
-    private <T> void checkOfferData(DataHolder.Mutable holder, Supplier<Key<WeightedCollectionValue<T>>> key, WeightedTable<T> value) {
+    private <T> void checkOfferListData(DataHolder.Mutable holder, Supplier<Key<ListValue<T>>> key, List<T> value) {
         final DataTransactionResult result = holder.offer(key, value);
-        if (!result.isSuccessful()) {
-            System.err.println("Failed offer on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString() + " with " + value);
-            return;
+        if (this.checkResult(holder, key, value, result)) {
+            this.checkGetListData(holder, key, value);
         }
-        this.checkGetData(holder, key, value);
     }
 
     private <T> void checkOfferData(DataHolder.Mutable holder, Supplier<Key<Value<T>>> key, T value) {
         final DataTransactionResult result = holder.offer(key, value);
+        if (this.checkResult(holder, key, value, result)) {
+            this.checkGetData(holder, key, value);
+        }
+    }
+
+    private <V extends Value<?>> boolean checkResult(DataHolder.Mutable holder, Supplier<Key<V>> key, Object value, DataTransactionResult result) {
         if (!result.isSuccessful()) {
             System.err.println("Failed offer on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString() + " with " + value);
-            return;
+            return true;
         }
-        this.checkGetData(holder, key, value);
+        return false;
     }
 
-    private <T> void checkGetData(DataHolder holder, Supplier<Key<WeightedCollectionValue<T>>> key, WeightedTable<T> expected) {
+    private <T> void checkGetWeightedData(DataHolder holder, Supplier<Key<WeightedCollectionValue<T>>> key, List<T> expected) {
         final Optional<WeightedTable<T>> gotValue = holder.get(key);
         if (gotValue.isPresent()) {
-            if (!Objects.equals(gotValue.get(), expected)) {
+            final List<T> actual = gotValue.get().get(new Random());
+            if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
                 System.err.println("Value differs on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString()
-                        + " expected: " + expected + " actual: " + gotValue.get());
+                        + "\nexpected: " + expected + "\nactual:   " + actual);
             }
         } else {
             System.err.println("Value is missing on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString());
         }
     }
 
-    private <T> void checkGetData(DataHolder holder, Supplier<Key<SetValue<T>>> key, Set<T> expected) {
-        final Optional<Set<T>> gotValue = holder.get(key);
-        if (gotValue.isPresent()) {
-            if (!Objects.equals(gotValue.get(), expected)) {
-                System.err.println("Value differs on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString()
-                        + " expected: " + expected + " actual: " + gotValue.get());
-            }
-        } else {
-            System.err.println("Value is missing on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString());
-        }
+    private <T> void checkGetListData(DataHolder holder, Supplier<Key<ListValue<T>>> key, List<T> expected) {
+        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    }
+
+    private <T> void checkGetSetData(DataHolder holder, Supplier<Key<SetValue<T>>> key, Set<T> expected) {
+        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
     private <T> void checkGetData(DataHolder holder, Supplier<Key<Value<T>>> key, T expected) {
-        final Optional<T> gotValue = holder.get(key);
-        if (gotValue.isPresent()) {
-            if (!Objects.equals(gotValue.get(), expected)) {
-                System.err.println("Value differs on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString()
-                        + " expected: " + expected + " actual: " + gotValue.get());
+        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    }
+
+    private <T> void checkData(DataHolder holder, String key, T expectedValue, @Nullable T actualValue) {
+        if (actualValue != null) {
+            if (!Objects.equals(actualValue, expectedValue)) {
+                System.err.println("Value differs on " + holder.getClass().getSimpleName() + " for " + key
+                        + "\nexpected: " + expectedValue + "\nactual: " + actualValue);
             }
         } else {
-            System.err.println("Value is missing on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString());
+            System.err.println("Value is missing on " + holder.getClass().getSimpleName() + " for " + key);
         }
     }
 
