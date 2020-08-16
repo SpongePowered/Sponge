@@ -202,7 +202,11 @@ public final class WorldTest {
                         .parameter(worldParameter)
                         .setExecutor(context -> {
                             final WorldProperties properties = context.requireOne(worldParameter);
-                            Sponge.getServer().getWorldManager().unloadWorld(properties.getKey());
+                            Sponge.getServer().getWorldManager().unloadWorld(properties.getKey()).whenComplete((aBoolean, throwable) -> {
+                                if (throwable != null) {
+                                    context.getCause().getAudience().sendMessage(TextComponent.of(throwable.getMessage()));
+                                }
+                            });
 
                             return CommandResult.success();
                         })

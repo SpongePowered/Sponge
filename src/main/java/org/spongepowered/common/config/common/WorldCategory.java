@@ -34,7 +34,7 @@ import java.util.UUID;
 @ConfigSerializable
 public final class WorldCategory {
 
-    @Setting(value = "auto-player-save-interval", comment = "The auto-save tick interval used when saving global player data. (Default: 900) \n"
+    @Setting(value = "auto-player-save-interval", comment = "The auto-save tick interval used when saving global player data. (Default: 6000) \n"
                                                           + "Note: 20 ticks is equivalent to 1 second. Set to 0 to disable.")
     private int autoPlayerSaveInterval = 6000;
 
