@@ -339,12 +339,17 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         Objects.requireNonNull(world);
 
         if (world.getKey().equals(VanillaWorldManager.VANILLA_OVERWORLD)) {
-            return FutureUtil.completedWithException(new IOException("The default world can not be unloaded"));
+            return FutureUtil.completedWithException(new IOException("The default world can not be unloaded."));
         }
 
         if (world != this.worlds.get(world.getKey())) {
             return FutureUtil.completedWithException(new IOException(String.format("World '%s' was told to unload but does not match the actual "
                     + "world loaded.", world.getKey())));
+        }
+
+        if (world.getPlayers().size() != 0) {
+            return FutureUtil.completedWithException(new IOException(String.format("World '%s' was told to unload but players remain.",
+                    world.getKey())));
         }
 
         try (final ServerWorld closingWorld = (ServerWorld) world) {
@@ -354,8 +359,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             try {
                 closingWorld.save(null, true, true);
             } catch (final SessionLockException e) {
-                SpongeCommon.getLogger().error("Exception caught when saving world '{}' while unloading. Aborting...", world.getKey(), e);
-                return CompletableFuture.completedFuture(false);
+                return FutureUtil.completedWithException(new IOException(e));
             }
 
             this.loadedWorldInfos.remove(((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey());
