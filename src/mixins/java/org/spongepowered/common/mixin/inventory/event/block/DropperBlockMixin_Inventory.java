@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 
 import javax.annotation.Nullable;
@@ -55,13 +56,18 @@ public abstract class DropperBlockMixin_Inventory {
             final Direction direction, final IInventory iinventory, final ItemStack itemstack1) {
         // after setInventorySlotContents
         dispensertileentity.setInventorySlotContents(i, itemstack1);
-        // Transfer worked if remainder is one less than the original stack
-        if (itemstack1.getCount() == itemstack.getCount() - 1) {
-            final TrackedInventoryBridge capture = impl$forCapture(dispensertileentity);
-            final Inventory sourceInv = ((Inventory) dispensertileentity);
-            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
-            InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
+
+        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
+            // Transfer worked if remainder is one less than the original stack
+            if (itemstack1.getCount() == itemstack.getCount() - 1) {
+                final TrackedInventoryBridge capture = impl$forCapture(dispensertileentity);
+                final Inventory sourceInv = ((Inventory) dispensertileentity);
+                SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+                InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
+            }
         }
+
+        // dont call setInventorySlotContents twice
         callbackInfo.cancel();
     }
 

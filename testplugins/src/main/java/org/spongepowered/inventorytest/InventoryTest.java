@@ -124,7 +124,6 @@ public class InventoryTest implements LoadableModule {
 
             //        System.out.println(event);
         }
-
     }
 
     @Override
