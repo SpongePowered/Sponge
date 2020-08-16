@@ -26,7 +26,10 @@ package org.spongepowered.common.client;
 
 import org.spongepowered.api.Client;
 import org.spongepowered.common.SpongeEngine;
+import org.spongepowered.common.scheduler.ClientScheduler;
 
 public interface SpongeClient extends SpongeEngine, Client {
 
+    @Override
+    ClientScheduler getScheduler();
 }

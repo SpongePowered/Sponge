@@ -84,6 +84,11 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         }
     }
 
+    @Inject(method = "runGameLoop", at = @At("TAIL"))
+    private void impl$tickClientScheduler(boolean renderWorldIn, CallbackInfo ci) {
+        this.getScheduler().tick();
+    }
+
     // Note: worldSettingsIn is never null here, it is null checked and assigned before this point in the method.
     @Redirect(method = "launchIntegratedServer", at = @At(value = "NEW", target = "com/mojang/authlib/yggdrasil/YggdrasilAuthenticationService"))
     private YggdrasilAuthenticationService impl$createServerBeforeCache(final Proxy proxy, final String clientToken, final String folderName,

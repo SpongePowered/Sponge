@@ -68,7 +68,7 @@ import java.util.function.BooleanSupplier;
 import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements MinecraftServerBridge,
+public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer, MinecraftServerBridge,
         CommandSourceProviderBridge {
 
     @Shadow @Final protected Thread serverThread;
@@ -133,7 +133,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void impl$tickServerScheduler(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
-        ((SpongeServer) SpongeCommon.getServer()).getScheduler().tick();
+        this.getScheduler().tick();
     }
 
     @Override

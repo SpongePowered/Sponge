@@ -57,7 +57,7 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
     @Shadow @Nullable private NetworkManager networkManager;
     @Shadow @Nullable public abstract IntegratedServer shadow$getIntegratedServer();
 
-    private final SpongeScheduler api$scheduler = new ClientScheduler();
+    private final ClientScheduler api$scheduler = new ClientScheduler();
 
     public MinecraftMixin_API(String name) {
         super(name);
@@ -103,7 +103,7 @@ public abstract class MinecraftMixin_API extends RecursiveEventLoop<Runnable> im
     }
 
     @Override
-    public Scheduler getScheduler() {
+    public ClientScheduler getScheduler() {
         return this.api$scheduler;
     }
 
