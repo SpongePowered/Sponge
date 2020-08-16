@@ -36,6 +36,7 @@ import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -54,6 +55,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends EntityMixin implements LivingEntityBridge {
@@ -100,6 +102,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected abstract float shadow$getSoundPitch();
     @Shadow protected abstract SoundEvent shadow$getDeathSound();
     @Shadow public abstract boolean shadow$isSleeping();
+    @Shadow public abstract Optional<BlockPos> shadow$getBedPosition();
     @Shadow private boolean shadow$checkTotemDeathProtection(final DamageSource p_190628_1_) {
         return false; // SHADOWED
     }
