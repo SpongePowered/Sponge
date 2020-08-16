@@ -154,7 +154,11 @@ public final class WorldTest {
                         .setPermission(this.plugin.getMetadata().getId() + ".command.world.load")
                         .setExecutor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
-                            Sponge.getServer().getWorldManager().loadWorld(key);
+                            Sponge.getServer().getWorldManager().loadWorld(key).whenComplete(((serverWorld, throwable) -> {
+                                if (throwable != null) {
+                                    context.getCause().getAudience().sendMessage(TextComponent.of(throwable.getMessage()));
+                                }
+                            }));
                             return CommandResult.success();
                         })
                         .build()
@@ -174,12 +178,17 @@ public final class WorldTest {
                                     .dimensionType(dimensionType)
                                     .generateSpawnOnLoad(true)
                                     .build();
-                            Sponge.getServer().getWorldManager().createProperties(key, archetype).thenAccept(result -> result.ifPresent(properties -> {
-                                try {
-                                    Sponge.getServer().getWorldManager().loadWorld(properties);
-                                } catch (final IOException e) {
-                                    context.getCause().getAudience().sendMessage(TextComponent.of("Failed to load world!"));
+                            Sponge.getServer().getWorldManager().createProperties(key, archetype).whenComplete(((worldProperties, throwable) -> {
+                                if (throwable != null) {
+                                    context.getCause().getAudience().sendMessage(TextComponent.of(throwable.getMessage()));
+                                    return;
                                 }
+
+                                Sponge.getServer().getWorldManager().loadWorld(worldProperties).whenComplete(((serverWorld, throwable1) -> {
+                                    if (throwable1 != null) {
+                                        context.getCause().getAudience().sendMessage(TextComponent.of(throwable1.getMessage()));
+                                    }
+                                }));
                             }));
 
                             return CommandResult.success();
