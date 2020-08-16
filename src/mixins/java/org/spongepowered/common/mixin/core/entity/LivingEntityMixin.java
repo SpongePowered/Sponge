@@ -37,6 +37,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -813,7 +814,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENTITY_TELEPORT);
+
+            // ENTITY_TELEPORT is our fallback context
+            if (!frame.getCurrentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
+                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENTITY_TELEPORT);
+            }
 
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
                     (org.spongepowered.api.entity.Entity) this, this.impl$preTeleportPosition, new Vector3d(this.posX, this.posY, this.posZ),
@@ -823,6 +828,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 this.shadow$setPositionAndUpdate(this.impl$preTeleportPosition.getX(), this.impl$preTeleportPosition.getY(),
                         this.impl$preTeleportPosition.getZ());
                 cir.setReturnValue(false);
+                return;
             }
 
             this.shadow$setPositionAndUpdate(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),

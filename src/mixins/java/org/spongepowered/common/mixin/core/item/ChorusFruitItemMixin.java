@@ -24,33 +24,26 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ChorusFruitItem;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(Items.class)
-public class ItemsMixin {
+@Mixin(ChorusFruitItem.class)
+public abstract class ChorusFruitItemMixin {
 
-    /**
-     * @author gabizou - June 10th, 2019 - 1.12.2
-     * @reason This uses the SpongeImplHooks so that we eliminate
-     * more Mixins in SpongeForge and SpongeVanilla. The hook here
-     * is to allow a mod in Forge to replace a previously registered
-     * item. Vanilla doesn't do this, so we don't have to care about
-     * vanilla, but Forge, we have to check against the Item registry.
+    @Redirect(method = "onItemUseFinish", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;attemptTeleport(DDDZ)Z"))
+    private boolean impl$createCauseFrameForTeleport(LivingEntity entity, double p_213373_1_, double p_213373_3_, double p_213373_5_,
+            boolean p_213373_7_) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.CHORUS_FRUIT);
 
-     * @param key The location id of the item, like "minecraft:diamond_sword"
-     * @param item The item instance
-     * @param ci callback
-     */
-    @Inject(method = "register(Lnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)Lnet/minecraft/item/Item;", at = @At("RETURN"))
-    private static void spongeImpl$registerItemWithSpongeRegistry(final ResourceLocation key, final Item item, final CallbackInfoReturnable<Item> ci) {
-        SpongeImplHooks.registerItemForSpongeRegistry(key, item);
+            return entity.attemptTeleport(p_213373_1_, p_213373_3_, p_213373_5_, p_213373_7_);
+        }
     }
-
 }

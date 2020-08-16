@@ -47,7 +47,7 @@ import javax.annotation.Nullable;
 public abstract class ItemStackMixin implements CustomDataHolderBridge, DataCompoundHolder {
 
     @Shadow public abstract void shadow$setTag(@Nullable CompoundNBT nbt);
-    @Shadow public abstract @Nullable CompoundNBT shadow$getTag();
+    @Shadow @Nullable public abstract CompoundNBT shadow$getTag();
 
     @Override
     public <E> DataTransactionResult bridge$offerCustom(Key<? extends Value<E>> key, E value) {
@@ -76,18 +76,18 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
 
     // Add our manipulators when creating copies from this ItemStack:
     @Inject(method = "copy", at = @At("RETURN"))
-    private void onCopy(CallbackInfoReturnable<ItemStack> info) {
+    private void impl$onCopy(CallbackInfoReturnable<ItemStack> info) {
         ((CustomDataHolderBridge) (Object) info.getReturnValue()).bridge$getManipulator().copyFrom(this.bridge$getManipulator());
     }
 
     @Inject(method = "split", at = @At("RETURN"))
-    private void onSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
+    private void impl$onSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
         ((CustomDataHolderBridge) (Object) info.getReturnValue()).bridge$getManipulator().copyFrom(this.bridge$getManipulator());
     }
 
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/CompoundNBT;)V", at = @At("RETURN"))
-    private void onRead(CompoundNBT compound, CallbackInfo info) {
+    private void impl$onRead(CompoundNBT compound, CallbackInfo info) {
         if (this.data$hasSpongeData()) {
             SpongeDataManager.getInstance().deserializeCustomData(this.data$getSpongeData(), this);
             SpongeDataManager.getInstance().syncCustomToTag(this);
@@ -95,7 +95,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
     }
 
     @Inject(method = "setTag", at = @At("RETURN"))
-    private void onSet(CompoundNBT compound, CallbackInfo callbackInfo) {
+    private void impl$onSet(CompoundNBT compound, CallbackInfo callbackInfo) {
         if (this.shadow$getTag() != compound) {
             this.bridge$clearCustomData();
         }

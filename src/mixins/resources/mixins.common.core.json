@@ -29,6 +29,8 @@
         "entity.player.PlayerEntityMixin",
         "entity.player.ServerPlayerEntityMixin",
         "entity.projectile.ThrowableEntityMixin",
+        "item.ChorusFruitItemMixin",
+        "item.ItemMixin",
         "item.ItemStackMixin",
         "network.NetworkManagerMixin",
         "network.handshake.ServerHandshakeNetHandlerMixin",
