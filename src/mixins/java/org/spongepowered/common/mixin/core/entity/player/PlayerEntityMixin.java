@@ -88,7 +88,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Shadow public float experience;
     @Shadow public PlayerAbilities abilities;
     @Shadow public net.minecraft.entity.player.PlayerInventory inventory;
-    @Shadow public BlockPos spawnPos;
     @Shadow public Container openContainer;
 
     @Shadow public abstract boolean shadow$isSpectator();
@@ -163,7 +162,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
             if (!((WorldBridge) this.world).bridge$isFake()) {
                 final CauseStackManager csm = PhaseTracker.getCauseStackManager();
                 csm.pushCause(this);
-                final BlockPos bedLocation = this.spawnPos;
+                final BlockPos bedLocation = this.shadow$getBedPosition().get();
                 final BlockSnapshot snapshot = ((ServerWorld) this.world).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
                 SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (Humanoid) this));
                 csm.popCause();
