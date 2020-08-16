@@ -106,7 +106,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     }
 
     @Override
-    public SpongeWorldArchetypeBuilder generatorModifier(GeneratorModifierType modifier) {
+    public SpongeWorldArchetypeBuilder generatorModifierType(GeneratorModifierType modifier) {
         Objects.requireNonNull(modifier);
         this.generatorModifier = modifier;
         return this;
@@ -198,7 +198,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     public SpongeWorldArchetypeBuilder from(WorldArchetype value) {
         Objects.requireNonNull(value);
         this.dimensionType(value.getDimensionType());
-        this.generatorModifier(value.getGeneratorModifier());
+        this.generatorModifierType(value.getGeneratorModifier());
         this.gameMode(value.getGameMode());
         this.difficulty(value.getDifficulty());
         this.serializationBehavior(value.getSerializationBehavior());
@@ -221,7 +221,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     public SpongeWorldArchetypeBuilder from(WorldProperties value) {
         Objects.requireNonNull(value);
         this.dimensionType(value.getDimensionType());
-        this.generatorModifier(value.getGeneratorModifier());
+        this.generatorModifierType(value.getGeneratorModifierType());
         this.gameMode(value.getGameMode());
         this.difficulty(value.getDifficulty());
         this.serializationBehavior(value.getSerializationBehavior());

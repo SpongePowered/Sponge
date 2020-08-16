@@ -42,6 +42,7 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.gen.GeneratorModifierType;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
@@ -127,6 +128,11 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
+    public Optional<ServerWorld> getWorld() {
+        return Optional.ofNullable((ServerWorld) ((WorldInfoBridge) this).bridge$getWorld());
+    }
+
+    @Override
     public Vector3i getSpawnPosition() {
         return new Vector3i(this.shadow$getSpawnX(), this.shadow$getSpawnY(), this.shadow$getSpawnZ());
     }
@@ -138,12 +144,12 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public GeneratorModifierType getGeneratorModifier() {
+    public GeneratorModifierType getGeneratorModifierType() {
         return (GeneratorModifierType) this.shadow$getGenerator();
     }
 
     @Override
-    public void setGeneratorModifier(final GeneratorModifierType modifier) {
+    public void setGeneratorModifierType(final GeneratorModifierType modifier) {
         Objects.requireNonNull(modifier);
         this.shadow$setGenerator((WorldType) modifier);
     }

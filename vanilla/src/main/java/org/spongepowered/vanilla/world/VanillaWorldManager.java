@@ -324,43 +324,61 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public CompletableFuture<Boolean> unloadWorld(final org.spongepowered.api.world.server.ServerWorld world) {
-        Objects.requireNonNull(world);
+    public CompletableFuture<Boolean> unloadWorld(final ResourceKey key) {
+        Objects.requireNonNull(key);
 
-        if (world.getKey() == VanillaWorldManager.VANILLA_OVERWORLD) {
+        if (key.equals(VanillaWorldManager.VANILLA_OVERWORLD)) {
             SpongeCommon.getLogger().error("The default world is not allowed to be unloaded. Aborting...");
             return CompletableFuture.completedFuture(false);
         }
 
-        final ServerWorld actualWorld = this.worlds.get(world.getKey());
-        if (actualWorld != world) {
+        final ServerWorld world = this.worlds.get(key);
+        if (world == null) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        return this.unloadWorld((org.spongepowered.api.world.server.ServerWorld) world);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> unloadWorld(final org.spongepowered.api.world.server.ServerWorld world) {
+        Objects.requireNonNull(world);
+
+        if (world.getKey().equals(VanillaWorldManager.VANILLA_OVERWORLD)) {
+            SpongeCommon.getLogger().error("The default world is not allowed to be unloaded. Aborting...");
+            return CompletableFuture.completedFuture(false);
+        }
+
+        if (world != this.worlds.get(world.getKey())) {
             SpongeCommon.getLogger().error("World '{}' was told to unload but does not match the actual world loaded. "
                     + "Aborting...", world.getKey());
             return CompletableFuture.completedFuture(false);
         }
 
-        try {
-            actualWorld.save(null, true, true);
-        } catch (final SessionLockException e) {
-            SpongeCommon.getLogger().error("Exception caught when saving world '{}' while unloading. Aborting...", world.getKey(), e);
-            return CompletableFuture.completedFuture(false);
-        }
+        try (final ServerWorld closingWorld = (ServerWorld) world) {
+            SpongeCommon.getLogger().info("Unloading World '{}' ({}/{})", ((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey(),
+                    ((org.spongepowered.api.world.server.ServerWorld) closingWorld).getDimensionType().getKey(),
+                    closingWorld.dimension.getType().getId());
+            try {
+                closingWorld.save(null, true, true);
+            } catch (final SessionLockException e) {
+                SpongeCommon.getLogger().error("Exception caught when saving world '{}' while unloading. Aborting...", world.getKey(), e);
+                return CompletableFuture.completedFuture(false);
+            }
 
-        try {
-            actualWorld.close();
-        } catch (IOException e) {
+            this.loadedWorldInfos.remove(((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey());
+            this.infoByType.remove(closingWorld.dimension.getType());
+            this.worlds.remove(((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey());
+            this.worldsByType.remove(closingWorld.dimension.getType());
+
+            SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                    (org.spongepowered.api.world.server.ServerWorld) closingWorld));
+
+            return CompletableFuture.completedFuture(true);
+        } catch (IOException ex) {
             SpongeCommon.getLogger().error("Exception caught when closing world '{}' while unloading. Aborting...", world.getKey());
             return CompletableFuture.completedFuture(false);
         }
-
-        this.loadedWorldInfos.remove(world.getKey());
-        this.infoByType.remove(actualWorld.dimension.getType());
-        this.worlds.remove(world.getKey());
-        this.worldsByType.remove(actualWorld.dimension.getType());
-        
-        SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), world));
-
-        return CompletableFuture.completedFuture(true);
     }
 
     @Override
