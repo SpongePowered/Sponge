@@ -95,7 +95,28 @@
             "name": "CustomDataTest",
             "version": "8.0.0",
             "main-class": "org.spongepowered.customdatatest.CustomDataTest",
-            "description": "Testing custom data changes",
+            "description": "Testing custom data",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }],
+            "extra": {}
+        },
+        {
+            "id": "datatest",
+            "name": "DataTest",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.datatest.DataTest",
+            "description": "Testing data",
             "links": {
                 "homepage": "https://www.spongepowered.org",
                 "source": "https://www.spongepowered.org/source",

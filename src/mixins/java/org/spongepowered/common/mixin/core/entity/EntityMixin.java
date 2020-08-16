@@ -736,23 +736,25 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         this.vanish$collision = prevents;
     }
 
+
+    */
+
     @Override
     public boolean bridge$isUntargetable() {
-        return this.vanish$untargetable;
+        return this.impl$untargetable;
     }
 
     @Override
     public void bridge$setUntargetable(final boolean untargetable) {
-        this.vanish$untargetable = untargetable;
+        this.impl$untargetable = untargetable;
     }
 
-    */
-/**
-     * @author gabizou - January 4th, 2016
-     * @reason gabizou - January 27th, 2016 - Rewrite to a redirect
-     *     <p>
-     *     This prevents sounds from being sent to the server by entities that are vanished
-     *//*
+    /**
+         * @author gabizou - January 4th, 2016
+         * @reason gabizou - January 27th, 2016 - Rewrite to a redirect
+         *     <p>
+         *     This prevents sounds from being sent to the server by entities that are vanished
+         *//*
 
     @Redirect(method = "playSound",
         at = @At(value = "INVOKE",

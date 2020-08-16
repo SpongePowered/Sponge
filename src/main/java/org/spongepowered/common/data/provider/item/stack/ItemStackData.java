@@ -35,13 +35,14 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.PotionUtils;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.util.registry.Registry;
+import org.apache.commons.lang3.tuple.Pair;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.accessor.item.ToolItemAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -63,11 +64,15 @@ public final class ItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
                         .get(h -> {
-                            final List<EffectInstance> effectsFromStack = PotionUtils.getEffectsFromStack(h);
-                            if (effectsFromStack.isEmpty()){
-                                return null;
+                            if (h.isFood()) {
+                                final List<Pair<EffectInstance,Float>> itemEffects = h.getItem().getFood().getEffects();
+                                final WeightedTable<PotionEffect> effects = new WeightedTable<>();
+                                for (Pair<EffectInstance,Float> effect : itemEffects) {
+                                    effects.add((PotionEffect) effect.getKey(), effect.getValue());
+                                }
+                                return effects;
                             }
-                            return ImmutableSet.copyOf((List<PotionEffect>) (Object) effectsFromStack);
+                            return null;
                         })
                     .create(Keys.BURN_TIME)
                         .get(h -> {
