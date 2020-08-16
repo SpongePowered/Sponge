@@ -45,6 +45,7 @@
         "server.management.PlayerListMixin",
         "server.management.PlayerProfileCacheMixin",
         "service.permission.SubjectMixin",
+        "tileentity.CommandBlockTileEntityMixin",
         "tileentity.CommandBlockTileEntity_1Mixin",
         "tileentity.EndGatewayTileEntityMixin",
         "tileentity.LecternTileEntityMixin",
