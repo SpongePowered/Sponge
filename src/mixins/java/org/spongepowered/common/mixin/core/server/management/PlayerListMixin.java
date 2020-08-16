@@ -44,7 +44,6 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SaveHandler;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -168,6 +167,12 @@ public abstract class PlayerListMixin {
         if (mcPlayer.world == null) {
             ci.cancel();
         }
+    }
+
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V"))
+    private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(Logger logger, String message, Object p0, Object p1, Object p2, Object p3,
+            Object p4, Object p5, NetworkManager manager, ServerPlayerEntity entity) {
+        logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", p0, p1, ((org.spongepowered.api.world.server.ServerWorld) entity.getServerWorld()).getKey(), p2, p3, p4, p5);
     }
 
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "NEW", target = "net/minecraft/network/play/server/SJoinGamePacket"))

@@ -59,6 +59,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -140,7 +141,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
             return null;
         }
 
-        final ServerWorld world = SpongeCommon.getWorldManager().getWorld0(this.bridge$getKey());
+        final ServerWorld world = ((SpongeServer) SpongeCommon.getServer()).getWorldManager().getWorld0(this.bridge$getKey());
         if (world == null) {
             return null;
         }
