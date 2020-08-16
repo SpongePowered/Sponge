@@ -57,7 +57,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
@@ -75,6 +74,7 @@ import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.FutureUtil;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.server.WorldRegistration;
@@ -156,7 +156,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public CompletableFuture<Optional<WorldProperties>> createProperties(final ResourceKey key, final WorldArchetype archetype) {
+    public CompletableFuture<WorldProperties> createProperties(final ResourceKey key, final WorldArchetype archetype) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(archetype);
 
@@ -165,28 +165,28 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
         ((WorldInfoBridge) worldInfo).bridge$setModCreated(true);
 
-        return CompletableFuture.completedFuture(Optional.of((WorldProperties) worldInfo));
+        return CompletableFuture.completedFuture((WorldProperties) worldInfo);
     }
 
     @Override
-    public CompletableFuture<Optional<org.spongepowered.api.world.server.ServerWorld>> loadWorld(final ResourceKey key) {
+    public CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld(final ResourceKey key) {
         Objects.requireNonNull(key);
 
         ServerWorld world = worlds.get(key);
         if (world != null) {
-            return CompletableFuture.completedFuture(Optional.of((org.spongepowered.api.world.server.ServerWorld) world));
+            return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
         }
 
         final Path worldDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir().resolve(this.server.getFolderName()).resolve(key.getValue());
 
         if (Files.notExists(worldDirectory)) {
-            SpongeCommon.getLogger().error("World '{}' has no directory in '{}'. Aborting...", key, worldDirectory.getParent().toAbsolutePath());
-            return CompletableFuture.completedFuture(Optional.empty());
+            return FutureUtil.completedWithException(new IOException(String.format("World '%s' has no directory in '%s'.", key,
+                    worldDirectory.getParent().toAbsolutePath())));
         }
 
         if (Files.notExists(worldDirectory.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT))) {
-            SpongeCommon.getLogger().error("World '{}' has no Sponge level data ({}). Aborting...", key, Constants.Sponge.World.LEVEL_SPONGE_DAT);
-            return CompletableFuture.completedFuture(Optional.empty());
+            return FutureUtil.completedWithException(new IOException(String.format("World '%s has no Sponge level data ('%s').",
+                    key, Constants.Sponge.World.LEVEL_SPONGE_DAT)));
         }
 
         final SaveHandler saveHandler = new SaveHandler(worldDirectory.getParent().toFile(), key.getValue(), this.server, this.server.getDataFixer());
@@ -194,15 +194,14 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final Integer dimensionId = ((WorldInfoBridge) worldInfo).bridge$getDimensionId();
 
         if (dimensionId == null) {
-            SpongeCommon.getLogger().error("World '{}' has no dimension id in the Sponge level data ({}). Aborting...", key, Constants.Sponge
-                    .World.LEVEL_SPONGE_DAT);
-            return CompletableFuture.completedFuture(Optional.empty());
+            return FutureUtil.completedWithException(new IOException(String.format("World '%s' has no dimension id in the Sponge level data ('%s').",
+                    key, Constants.Sponge.World.LEVEL_SPONGE_DAT)));
         }
 
         final ResourceKey existingKey = ((ResourceKeyBridge) worldInfo).bridge$getKey();
         if (existingKey != null && !existingKey.equals(key)) {
-            SpongeCommon.getLogger().error("World '{}' is keyed as '{}' in the level data. Aborting...", key, existingKey);
-            return CompletableFuture.completedFuture(Optional.empty());
+            return FutureUtil.completedWithException(new IOException(String.format("World '%s' is keyed as '%s' in the level data.", key,
+                    existingKey)));
         }
 
         ((ResourceKeyBridge) worldInfo).bridge$setKey(key);
@@ -213,8 +212,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 createDimensionType(key, logicType, worldDirectory.getFileName().toString(), dimensionId + 1));
 
         if (dimensionType.getId() != dimensionId) {
-            SpongeCommon.getLogger().error("World '{}' specifies internal id '{}' which was already registered. Aborting...", key, dimensionId);
-            return CompletableFuture.completedFuture(Optional.empty());
+            return FutureUtil.completedWithException(new IOException(String.format("World '%s' specifies internal id '%s' which was already "
+                            + "registered.", key, dimensionId)));
         }
 
         ((DimensionTypeBridge) dimensionType).bridge$setSpongeDimensionType(logicType);
@@ -234,22 +233,21 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         this.performPostLoadWorldLogic(world, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo.getGenerator(), null), worldDirectory, chunkStatusListener);
 
-        return CompletableFuture.completedFuture(Optional.of((org.spongepowered.api.world.server.ServerWorld) world));
+        return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
     }
 
     @Override
-    public CompletableFuture<Optional<org.spongepowered.api.world.server.ServerWorld>> loadWorld(WorldProperties properties) {
+    public CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld(WorldProperties properties) {
         Objects.requireNonNull(properties);
 
         ServerWorld world = this.worlds.get(properties.getKey());
         if (world != null) {
             if (world.getWorldInfo() != properties) {
-                SpongeCommon.getLogger().error("While properties '{}' already is a loaded world, that world's properties does not match. Aborting.."
-                        + ".", properties.getKey());
-                return CompletableFuture.completedFuture(Optional.empty());
+                return FutureUtil.completedWithException(new IOException(String.format("While '%s' is already a loaded world, the "
+                        + "properties does not match the one given", properties.getKey())));
             }
 
-            return CompletableFuture.completedFuture(Optional.of((org.spongepowered.api.world.server.ServerWorld) world));
+            return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
         }
 
         final Path worldDirectory =
@@ -268,24 +266,21 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         if (dimensionType != null) {
             // Validation checks
             if (isOnDisk && !dimensionType.getDirectory(worldDirectory.getParent().toFile()).equals(worldDirectory.toFile())) {
-                SpongeCommon.getLogger().error("World '{}' was registered with a different directory on this server instance before. Aborting...",
-                        properties.getKey());
-                return CompletableFuture.completedFuture(Optional.empty());
+                return FutureUtil.completedWithException(new IOException(String.format("World '%s' was registered with a different directory on "
+                        + "this server instance before. Aborting...", properties.getKey())));
             }
 
             if (((WorldInfoBridge) properties).bridge$getDimensionId() != null && dimensionType.getId() != (((WorldInfoBridge) properties).bridge$getDimensionId())) {
-                SpongeCommon.getLogger().error("World '{}' was registered with a different internal id on this server instance before. Aborting...",
-                        properties.getKey());
-                return CompletableFuture.completedFuture(Optional.empty());
+                return FutureUtil.completedWithException(new IOException(String.format("World '%s' was registered with a different internal id on "
+                                + "this server instance before. Aborting...", properties.getKey())));
             }
         } else {
             int dimensionId;
             if (((WorldInfoBridge) properties).bridge$getDimensionId() != null) {
                 dimensionType = DimensionType.getById(((WorldInfoBridge) properties).bridge$getDimensionId());
                 if (dimensionType != null) {
-                    SpongeCommon.getLogger().error("World '{}' is already registered under a different id. Aborting...",
-                            properties.getKey());
-                    return CompletableFuture.completedFuture(Optional.empty());
+                    return FutureUtil.completedWithException(new IOException(String.format("World '%s' is already registered under a different id. "
+                            + "Aborting...", properties.getKey())));
                 }
                 dimensionId = ((WorldInfoBridge) properties).bridge$getDimensionId();
             } else {
@@ -320,47 +315,61 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         this.performPostLoadWorldLogic(serverWorld, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo.getGenerator(), null), worldDirectory, chunkStatusListener);
 
-        return CompletableFuture.completedFuture(Optional.of((org.spongepowered.api.world.server.ServerWorld) world));
+        return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
+    }
+
+    @Override
+    public CompletableFuture<Boolean> unloadWorld(final ResourceKey key) {
+        Objects.requireNonNull(key);
+
+        if (key.equals(VanillaWorldManager.VANILLA_OVERWORLD)) {
+            return FutureUtil.completedWithException(new IOException("The default world can not be unloaded"));
+        }
+
+        final ServerWorld world = this.worlds.get(key);
+        if (world == null) {
+            return CompletableFuture.completedFuture(false);
+        }
+
+        return this.unloadWorld((org.spongepowered.api.world.server.ServerWorld) world);
     }
 
     @Override
     public CompletableFuture<Boolean> unloadWorld(final org.spongepowered.api.world.server.ServerWorld world) {
         Objects.requireNonNull(world);
 
-        if (world.getKey() == VanillaWorldManager.VANILLA_OVERWORLD) {
-            SpongeCommon.getLogger().error("The default world is not allowed to be unloaded. Aborting...");
-            return CompletableFuture.completedFuture(false);
+        if (world.getKey().equals(VanillaWorldManager.VANILLA_OVERWORLD)) {
+            return FutureUtil.completedWithException(new IOException("The default world can not be unloaded"));
         }
 
-        final ServerWorld actualWorld = this.worlds.get(world.getKey());
-        if (actualWorld != world) {
-            SpongeCommon.getLogger().error("World '{}' was told to unload but does not match the actual world loaded. "
-                    + "Aborting...", world.getKey());
-            return CompletableFuture.completedFuture(false);
+        if (world != this.worlds.get(world.getKey())) {
+            return FutureUtil.completedWithException(new IOException(String.format("World '%s' was told to unload but does not match the actual "
+                    + "world loaded.", world.getKey())));
         }
 
-        try {
-            actualWorld.save(null, true, true);
-        } catch (final SessionLockException e) {
-            SpongeCommon.getLogger().error("Exception caught when saving world '{}' while unloading. Aborting...", world.getKey(), e);
-            return CompletableFuture.completedFuture(false);
+        try (final ServerWorld closingWorld = (ServerWorld) world) {
+            SpongeCommon.getLogger().info("Unloading World '{}' ({}/{})", ((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey(),
+                    ((org.spongepowered.api.world.server.ServerWorld) closingWorld).getDimensionType().getKey(),
+                    closingWorld.dimension.getType().getId());
+            try {
+                closingWorld.save(null, true, true);
+            } catch (final SessionLockException e) {
+                SpongeCommon.getLogger().error("Exception caught when saving world '{}' while unloading. Aborting...", world.getKey(), e);
+                return CompletableFuture.completedFuture(false);
+            }
+
+            this.loadedWorldInfos.remove(((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey());
+            this.infoByType.remove(closingWorld.dimension.getType());
+            this.worlds.remove(((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey());
+            this.worldsByType.remove(closingWorld.dimension.getType());
+
+            SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                    (org.spongepowered.api.world.server.ServerWorld) closingWorld));
+
+            return CompletableFuture.completedFuture(true);
+        } catch (IOException ex) {
+            return FutureUtil.completedWithException(ex);
         }
-
-        try {
-            actualWorld.close();
-        } catch (IOException e) {
-            SpongeCommon.getLogger().error("Exception caught when closing world '{}' while unloading. Aborting...", world.getKey());
-            return CompletableFuture.completedFuture(false);
-        }
-
-        this.loadedWorldInfos.remove(world.getKey());
-        this.infoByType.remove(actualWorld.dimension.getType());
-        this.worlds.remove(world.getKey());
-        this.worldsByType.remove(actualWorld.dimension.getType());
-        
-        SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), world));
-
-        return CompletableFuture.completedFuture(true);
     }
 
     @Override
@@ -411,12 +420,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public CompletableFuture<Optional<WorldProperties>> copyWorld(final ResourceKey key, final String copyValue) {
+    public CompletableFuture<WorldProperties> copyWorld(final ResourceKey key, final String copyValue) {
         return null;
     }
 
     @Override
-    public CompletableFuture<Optional<WorldProperties>> renameWorld(final ResourceKey key, final String newValue) {
+    public CompletableFuture<WorldProperties> renameWorld(final ResourceKey key, final String newValue) {
         return null;
     }
 

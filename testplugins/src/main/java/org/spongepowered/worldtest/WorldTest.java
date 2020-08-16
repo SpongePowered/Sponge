@@ -40,6 +40,7 @@ import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -59,7 +60,9 @@ public final class WorldTest {
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerPlayer> playerParameter = Parameter.playerOrSource().setKey("player").build();
         final Parameter.Value<WorldProperties> worldParameter = Parameter.worldProperties().setKey("world").build();
+        final Parameter.Value<WorldProperties> optWorldParameter = Parameter.worldProperties().optional().setKey("world").build();
         final Parameter.Value<ServerLocation> locationParameter = Parameter.location().setKey("location").build();
+        final Parameter.Value<Vector3d> optVector3Parameter = Parameter.vector3d().optional().setKey("position").build();
         final Parameter.Value<PortalType> portalTypeParameter = Parameter.catalogedElement(PortalType.class).setKey("portal_type").build();
         final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElement(DimensionType.class).setKey("dimension_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
@@ -130,13 +133,16 @@ public final class WorldTest {
         event.register(this.plugin, Command
                         .builder()
                         .parameter(playerParameter)
-                        .parameter(locationParameter)
+                        .parameter(optWorldParameter)
+                        .parameter(optVector3Parameter)
                         .setPermission(this.plugin.getMetadata().getId() + ".command.position.change")
                         .setExecutor(context -> {
                             final ServerPlayer player = context.requireOne(playerParameter);
-                            final ServerLocation location = context.requireOne(locationParameter);
-                            return player.setLocation(location) ? CommandResult.success() : CommandResult.error(TextComponent.of("Could not "
-                                    + "teleport!"));
+                            final WorldProperties properties = context.getOne(optWorldParameter).orElse(player.getWorld().getProperties());
+                            final Vector3d position =
+                                    context.getOne(optVector3Parameter).orElse(properties.getSpawnPosition().toDouble());
+                            return player.setLocation(ServerLocation.of(properties.getKey(), position)) ? CommandResult.success() :
+                                    CommandResult.error(TextComponent.of("Could not teleport!"));
                         })
                         .build()
                 , "cl", "changelocation"
@@ -148,7 +154,11 @@ public final class WorldTest {
                         .setPermission(this.plugin.getMetadata().getId() + ".command.world.load")
                         .setExecutor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
-                            Sponge.getServer().getWorldManager().loadWorld(key);
+                            Sponge.getServer().getWorldManager().loadWorld(key).whenComplete(((serverWorld, throwable) -> {
+                                if (throwable != null) {
+                                    context.getCause().getAudience().sendMessage(TextComponent.of(throwable.getMessage()));
+                                }
+                            }));
                             return CommandResult.success();
                         })
                         .build()
@@ -168,18 +178,36 @@ public final class WorldTest {
                                     .dimensionType(dimensionType)
                                     .generateSpawnOnLoad(true)
                                     .build();
-                            Sponge.getServer().getWorldManager().createProperties(key, archetype).thenAccept(result -> result.ifPresent(properties -> {
-                                try {
-                                    Sponge.getServer().getWorldManager().loadWorld(properties);
-                                } catch (final IOException e) {
-                                    context.getCause().getAudience().sendMessage(TextComponent.of("Failed to load world!"));
+                            Sponge.getServer().getWorldManager().createProperties(key, archetype).whenComplete(((worldProperties, throwable) -> {
+                                if (throwable != null) {
+                                    context.getCause().getAudience().sendMessage(TextComponent.of(throwable.getMessage()));
+                                    return;
                                 }
+
+                                Sponge.getServer().getWorldManager().loadWorld(worldProperties).whenComplete(((serverWorld, throwable1) -> {
+                                    if (throwable1 != null) {
+                                        context.getCause().getAudience().sendMessage(TextComponent.of(throwable1.getMessage()));
+                                    }
+                                }));
                             }));
 
                             return CommandResult.success();
                         })
                         .build()
                 , "cw", "createworld"
+        );
+
+        event.register(this.plugin, Command
+                        .builder()
+                        .parameter(worldParameter)
+                        .setExecutor(context -> {
+                            final WorldProperties properties = context.requireOne(worldParameter);
+                            Sponge.getServer().getWorldManager().unloadWorld(properties.getKey());
+
+                            return CommandResult.success();
+                        })
+                        .build()
+                , "uw", "unloadworld"
         );
 
         event.register(this.plugin, Command
