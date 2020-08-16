@@ -28,12 +28,15 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.storage.SessionLockException;
+import org.apache.logging.log4j.LogManager;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
@@ -46,10 +49,12 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge {
 
-    @Shadow @Final private MinecraftServer server;
+    @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
 
     private CustomServerBossInfoManager impl$bossBarManager;
@@ -72,24 +77,41 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("Name", this.shadow$getWorldInfo().getWorldName())
-                .add("DimensionType", Registry.DIMENSION_TYPE.getKey(this.shadow$getDimension().getType()))
-                .toString();
-    }
-
-    @Override
     public CustomServerBossInfoManager bridge$getBossBarManager() {
 
         if (this.impl$bossBarManager == null) {
             if (this.dimension.getType() == DimensionType.OVERWORLD || this.bridge$isFake()) {
-                this.impl$bossBarManager = this.server.getCustomBossEvents();
+                this.impl$bossBarManager = this.shadow$getServer().getCustomBossEvents();
             } else {
-                this.impl$bossBarManager = new CustomServerBossInfoManager(this.server);
+                this.impl$bossBarManager = new CustomServerBossInfoManager(this.shadow$getServer());
             }
         }
 
         return this.impl$bossBarManager;
+    }
+
+    @Override
+    public void bridge$save(@Nullable IProgressUpdate update, boolean flush, boolean forced) {
+        final ServerWorld world = (ServerWorld) (Object) this;
+
+        try {
+            world.save(null, flush, world.disableLevelSaving && !forced);
+        } catch (SessionLockException sessionlockexception) {
+            LogManager.getLogger().warn(sessionlockexception.getMessage());
+        }
+
+        world.getWorldBorder().copyTo(world.getWorldInfo());
+
+        world.getWorldInfo().setCustomBossEvents(((ServerWorldBridge) world).bridge$getBossBarManager().write());
+
+        world.getSaveHandler().saveWorldInfoWithPlayer(world.getWorldInfo(), this.shadow$getServer().getPlayerList().getHostPlayerData());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("Key", ((org.spongepowered.api.world.server.ServerWorld) this).getKey())
+                .add("DimensionType", Registry.DIMENSION_TYPE.getKey(this.shadow$getDimension().getType()))
+                .toString();
     }
 }

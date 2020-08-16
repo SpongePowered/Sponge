@@ -97,8 +97,6 @@ public interface WorldInfoBridge {
      */
     void bridge$forceSetDifficulty(Difficulty difficulty);
 
-    void bridge$updatePlayersForDifficulty();
-
     void bridge$writeSpongeLevelData(CompoundNBT compound);
 
     void bridge$readSpongeLevelData(CompoundNBT compound);

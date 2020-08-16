@@ -31,6 +31,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.play.server.SServerDifficultyPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
@@ -38,6 +39,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.DerivedWorldInfo;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,13 +50,16 @@ import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
@@ -193,25 +198,20 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         this.impl$uniqueId = uniqueId;
     }
 
-    @Inject(method = "setDifficulty", at = @At("HEAD"), cancellable = true)
-    private void impl$onSetDifficultyVanilla(@Nullable final Difficulty newDifficulty, final CallbackInfo ci) {
-        if (newDifficulty == null) {
-            // This is an error from someone
-            new PrettyPrinter(60).add("Null Difficulty being set!").centre().hr()
-                .add("Someone (not Sponge) is attempting to set a null difficulty to this WorldInfo setup! Please report to the mod/plugin author!")
-                .add()
-                .addWrapped(60, " %s : %s", "WorldInfo", this)
-                .add()
-                .add(new Exception("Stacktrace"))
-                .log(SpongeCommon.getLogger(), Level.ERROR);
-            ci.cancel(); // We cannot let the null set the field.
+    /**
+     * @author Zidane
+     * @reason Flag using setDifficulty as an explicit set and mark it as custom
+     */
+    @Overwrite
+    public void setDifficulty(Difficulty newDifficulty) {
+        if ((Object) this instanceof DerivedWorldInfo) {
             return;
         }
 
         this.impl$hasCustomDifficulty = true;
         this.difficulty = newDifficulty;
 
-        this.bridge$updatePlayersForDifficulty();
+        this.impl$updateWorldForDifficultyChange();
     }
 
     @Override
@@ -223,20 +223,30 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     public void bridge$forceSetDifficulty(final Difficulty difficulty) {
         this.difficulty = difficulty;
 
-        this.bridge$updatePlayersForDifficulty();
+        this.impl$updateWorldForDifficultyChange();
     }
 
-    @Override
-    public void bridge$updatePlayersForDifficulty() {
+    public void impl$updateWorldForDifficultyChange() {
         final ServerWorld serverWorld = this.bridge$getWorld();
 
         if (serverWorld == null) {
             return;
         }
 
+        final MinecraftServer server = serverWorld.getServer();
+
+        if (this.difficulty == Difficulty.HARD) {
+            serverWorld.setAllowedSpawnTypes(true, true);
+        } else if (server.isSinglePlayer()) {
+            serverWorld.setAllowedSpawnTypes(this.difficulty != Difficulty.PEACEFUL, true);
+        } else {
+            serverWorld.setAllowedSpawnTypes(((MinecraftServerAccessor) server).accessor$allowSpawnMonsters(), server.getCanSpawnAnimals());
+        }
+
         serverWorld
             .getPlayers()
-            .forEach(player -> player.connection.sendPacket(new SServerDifficultyPacket(this.difficulty, ((WorldInfo) (Object) this).isDifficultyLocked())));
+            .forEach(player -> player.connection.sendPacket(new SServerDifficultyPacket(this.difficulty, ((WorldInfo) (Object) this)
+                    .isDifficultyLocked())));
     }
 
     @Override
@@ -433,12 +443,14 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
         this.impl$generateBonusChest = spongeDataCompound.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
         this.impl$hasCustomDifficulty = spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
-        this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
         this.impl$modCreated = spongeDataCompound.getBoolean(Constants.Sponge.World.IS_MOD_CREATED);
+        this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
         if (spongeDataCompound.contains(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR)) {
             final short saveBehavior = spongeDataCompound.getShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR);
             if (saveBehavior == 0) {
                 this.impl$serializationBehavior = SerializationBehaviors.MANUAL.get();
+            } else if (saveBehavior == 1) {
+                this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
             } else {
                 this.impl$serializationBehavior = SerializationBehaviors.NONE.get();
             }

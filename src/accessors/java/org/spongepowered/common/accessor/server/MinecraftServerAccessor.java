@@ -33,6 +33,7 @@ import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
@@ -48,4 +49,6 @@ public interface MinecraftServerAccessor {
     @Accessor("dataFixer") DataFixer accessor$getDataFixer();
 
     @Accessor("chunkStatusListenerFactory") IChunkStatusListenerFactory accessor$getChunkStatusListenerFactory();
+
+    @Invoker("allowSpawnMonsters") boolean accessor$allowSpawnMonsters();
 }

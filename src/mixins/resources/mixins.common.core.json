@@ -17,6 +17,7 @@
         "command.CommandSourceMixin",
         "command.arguments.EntitySelectorParserMixin",
         "data.CustomDataHolderMixin",
+        "command.impl.DifficultyCommandMixin",
         "command.impl.BossBarCommandMixin",
         "command.impl.SpreadPlayersCommandMixin",
         "command.impl.TeleportCommandMixin",
@@ -66,6 +67,7 @@
         "world.dimension.EndDimensionMixin",
         "world.dimension.NetherDimensionMixin",
         "world.dimension.OverworldDimensionMixin",
+        "world.server.ServerChunkProviderMixin",
         "world.server.ServerWorldMixin",
         "world.storage.SaveHandlerMixin",
         "world.storage.WorldInfoMixin"

@@ -448,7 +448,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public @Nullable ServerWorld getWorld(final DimensionType dimensionType) {
+    @Nullable
+    public ServerWorld getWorld(final DimensionType dimensionType) {
         Objects.requireNonNull(dimensionType);
 
         return this.worldsByType.get(dimensionType);
@@ -465,13 +466,21 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
-    public @Nullable ServerWorld getDefaultWorld() {
+    @Nullable
+    public ServerWorld getDefaultWorld() {
         return this.worlds.get(VanillaWorldManager.VANILLA_OVERWORLD);
     }
 
     @Override
-    public void adjustWorldForDifficulty(final ServerWorld world, final Difficulty newDifficulty, final boolean isCustom) {
-
+    public void adjustWorldForDifficulty(final ServerWorld world, final Difficulty newDifficulty, final boolean forceDifficulty) {
+        if (forceDifficulty) {
+            // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
+            if (!((WorldInfoBridge) world.getWorldInfo()).bridge$hasCustomDifficulty()) {
+                ((WorldInfoBridge) world.getWorldInfo()).bridge$forceSetDifficulty(newDifficulty);
+            }
+        } else {
+            world.getWorldInfo().setDifficulty(newDifficulty);
+        }
     }
 
     @Override
@@ -626,15 +635,12 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         this.pendingWorlds.clear();
 
-        if (!isSinglePlayer) {
-            this.server.setDifficultyForAllWorlds(this.server.getDifficulty(), true);
+        if (this.server.isSinglePlayer()) {
+            this.server.setDifficultyForAllWorlds(defaultDifficulty, true);
         } else {
-            this.worldsByType.forEach((k, v) -> {
-                if (v.getWorldInfo().getDifficulty() == null) {
-                    v.getWorldInfo().setDifficulty(defaultDifficulty);
-                }
-            });
+            this.server.setDifficultyForAllWorlds(this.server.getDifficulty(), true);
         }
+
 
         // TODO May not be the best spot for this...
         ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();

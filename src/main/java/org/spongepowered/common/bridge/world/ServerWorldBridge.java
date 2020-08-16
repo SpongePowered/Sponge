@@ -70,5 +70,5 @@ public interface ServerWorldBridge {
 
     void bridge$setWeatherStartTime(long start);
 
-    void bridge$saveChunksAndProperties(@Nullable IProgressUpdate update, boolean flush, boolean saveChunks) throws SessionLockException;
+    void bridge$save(@Nullable IProgressUpdate update, boolean flush, boolean saveChunks);
 }

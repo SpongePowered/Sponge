@@ -36,7 +36,7 @@ public final class WorldCategory {
 
     @Setting(value = "auto-player-save-interval", comment = "The auto-save tick interval used when saving global player data. (Default: 900) \n"
                                                           + "Note: 20 ticks is equivalent to 1 second. Set to 0 to disable.")
-    private int autoPlayerSaveInterval = 900;
+    private int autoPlayerSaveInterval = 6000;
 
     @Setting(value = "leaf-decay", comment = "If 'true', natural leaf decay is allowed.")
     private boolean leafDecay = true;

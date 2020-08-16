@@ -102,10 +102,6 @@ public final class SpongeCommon {
         return getGame().getAsyncScheduler();
     }
 
-    public static SpongeWorldManager getWorldManager() {
-        return (SpongeWorldManager) Sponge.getServer().getWorldManager();
-    }
-
     public static Path getGameDirectory() {
         return Launcher.getInstance().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
     }

@@ -59,10 +59,10 @@ public interface SpongeWorldManager extends WorldManager {
     @Nullable
     ServerWorld getDefaultWorld();
 
-    void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions, boolean isSinglePlayer, @Nullable
-            WorldSettings defaultSettings, Difficulty defaultDifficulty);
+    void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean forceDifficulty);
 
-    void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean isCustom);
+    void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions, boolean isSinglePlayer,
+            @Nullable WorldSettings defaultSettings, Difficulty defaultDifficulty);
 
     default String getDirectoryName(final ResourceKey key) {
         if (SpongeWorldManager.VANILLA_OVERWORLD.equals(key)) {

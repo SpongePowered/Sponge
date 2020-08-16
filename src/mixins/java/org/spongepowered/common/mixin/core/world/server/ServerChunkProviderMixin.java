@@ -22,19 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.mixin.core.world.server;
 
-import org.spongepowered.api.Server;
-import org.spongepowered.common.util.UsernameCache;
-import org.spongepowered.common.world.server.SpongeWorldManager;
-import org.spongepowered.common.world.storage.SpongePlayerDataManager;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.api.world.SerializationBehaviors;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 
-public interface SpongeServer extends SpongeEngine, Server {
+@Mixin(ServerChunkProvider.class)
+public abstract class ServerChunkProviderMixin {
 
-    @Override
-    SpongeWorldManager getWorldManager();
+    @Redirect(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerChunkProvider;save(Z)V"))
+    private void impl$dontCallSaveIFSerializationIsOff(ServerChunkProvider serverChunkProvider, boolean flush) {
+        final ServerWorld world = (ServerWorld) serverChunkProvider.getWorld();
+        if (((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior() == SerializationBehaviors.NONE) {
+            return;
+        }
 
-    SpongePlayerDataManager getPlayerDataManager();
-
-    UsernameCache getUsernameCache();
+        serverChunkProvider.save(flush);
+    }
 }
