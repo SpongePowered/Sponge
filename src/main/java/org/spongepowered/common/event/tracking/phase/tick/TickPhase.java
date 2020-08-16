@@ -31,6 +31,7 @@ public final class TickPhase {
     public static final class Tick {
 
         public static final IPhaseState<BlockTickContext> BLOCK = new BlockTickPhaseState("BlockTickPhase");
+        public static final IPhaseState<BlockTickContext> FLUID = new FluidTickPhaseState("FluidTickPhase");
         public static final IPhaseState<BlockTickContext> RANDOM_BLOCK = new BlockTickPhaseState("RandomBlockTickPhase");
 
         public static final IPhaseState<EntityTickContext> ENTITY = new EntityTickPhaseState();

@@ -31,6 +31,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.Entity;
+import net.minecraft.fluid.IFluidState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -216,6 +217,20 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             return;
         }
         TrackingUtil.updateTickBlock(this, blockState, pos, random);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Redirect(method = "tickFluid",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/fluid/IFluidState;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
+    private void tracker$wrapFluidTick(final IFluidState fluidState, final World worldIn, final BlockPos pos) {
+        final PhaseContext<?> currentContext = PhaseTracker.SERVER.getPhaseContext();
+        final IPhaseState currentState = currentContext.state;
+        if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
+            fluidState.tick(worldIn, pos);
+            return;
+        }
+        TrackingUtil.updateTickFluid(this, fluidState, pos);
     }
 
     /**
