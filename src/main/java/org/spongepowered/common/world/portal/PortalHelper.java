@@ -401,7 +401,8 @@ public final class PortalHelper {
             double y = destination.y;
             double z = destination.z;
             float pitch = player.rotationPitch;
-            float yaw = player.rotationYaw;
+            final float originalYaw = player.rotationYaw;
+            float yaw = originalYaw;
 
             fromWorld.getProfiler().startSection("moving");
 
@@ -430,8 +431,8 @@ public final class PortalHelper {
                 z *= moveFactor;
             }
 
-            toWorld.getProfiler().endSection();
-            toWorld.getProfiler().startSection("placing");
+            fromWorld.getProfiler().endSection();
+            fromWorld.getProfiler().startSection("placing");
             double d7 = Math.min(-2.9999872E7D, toWorld.getWorldBorder().minX() + 16.0D);
             double d4 = Math.min(-2.9999872E7D, toWorld.getWorldBorder().minZ() + 16.0D);
             double d5 = Math.min(2.9999872E7D, toWorld.getWorldBorder().maxX() - 16.0D);
@@ -458,12 +459,9 @@ public final class PortalHelper {
                 final Vec3d currentPosition = player.getPositionVec();
                 player.dimension = toWorld.dimension.getType();
                 player.setWorld(toWorld);
-                player.posX = x;
-                player.posY = y;
-                player.posZ = z;
-                player.rotationPitch = pitch;
+                player.setLocationAndAngles(x, y, z, originalYaw, pitch);
 
-                portalIsThere = toWorld.getDefaultTeleporter().placeInPortal(player, yaw);
+                portalIsThere = toWorld.getDefaultTeleporter().placeInPortal(player, originalYaw);
 
                 // Snapshot the position/rotation, these are what would be the end result of the port
                 x = player.posX;
@@ -475,11 +473,7 @@ public final class PortalHelper {
                 // Rollback the port so that we can fire the event below
                 player.dimension = fromWorld.dimension.getType();
                 player.setWorld(fromWorld);
-                player.posX = currentPosition.x;
-                player.posY = currentPosition.y;
-                player.posZ = currentPosition.z;
-                player.rotationYaw = yaw;
-                player.rotationPitch = pitch;
+                player.setLocationAndAngles(currentPosition.x, currentPosition.y, currentPosition.z, yaw, pitch);
             }
 
             final MoveEntityEvent event = SpongeEventFactory.createChangeEntityWorldEventReposition(PhaseTracker.getCauseStackManager()
@@ -501,11 +495,11 @@ public final class PortalHelper {
             z = event.getDestinationPosition().getZ();
 
             final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                    (ServerPlayer) player, new Vector3d(player.rotationYaw, player.rotationPitch, 0), new Vector3d(yaw, pitch, 0));
+                    (ServerPlayer) player, new Vector3d(player.rotationPitch, player.rotationYaw, 0), new Vector3d(pitch, yaw, 0));
 
             if (!SpongeCommon.postEvent(rotateEvent)) {
-                yaw = (float) rotateEvent.getToRotation().getX();
-                pitch = (float) rotateEvent.getToRotation().getY();
+                yaw = (float) rotateEvent.getToRotation().getY();
+                pitch = (float) rotateEvent.getToRotation().getX();
             }
 
             // Only create the obsidian platform if this not inter-world, not the API nether portal, and we're going to Vanilla's The End
@@ -522,13 +516,10 @@ public final class PortalHelper {
                 // Apply snapshot values now that event has been fired
                 player.dimension = toWorld.dimension.getType();
                 player.setWorld(toWorld);
-                player.posX = x;
-                player.posY = y;
-                player.posZ = z;
-                player.rotationPitch = pitch;
+                player.setLocationAndAngles(x, y, z, originalYaw, pitch);
 
                 toWorld.getDefaultTeleporter().makePortal(player);
-                toWorld.getDefaultTeleporter().placeInPortal(player, yaw);
+                toWorld.getDefaultTeleporter().placeInPortal(player, originalYaw);
 
                 // Grab values one last time, only to allow us to call setLocationAndAngles below
                 x = player.posX;

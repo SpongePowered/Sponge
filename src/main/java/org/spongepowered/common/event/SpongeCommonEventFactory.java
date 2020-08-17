@@ -681,7 +681,7 @@ public final class SpongeCommonEventFactory {
      *
      * @param entity The event
      */
-    public static void callRotateEntityEvent(final net.minecraft.entity.Entity entity) {
+    public static void callNaturalRotateEntityEvent(final net.minecraft.entity.Entity entity) {
         if (entity.removed || !ShouldFire.ROTATE_ENTITY_EVENT || (entity.rotationPitch == entity.prevRotationPitch && entity.rotationYaw == entity.prevRotationYaw)) {
             return;
         }
@@ -692,6 +692,7 @@ public final class SpongeCommonEventFactory {
             final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), (Entity) entity,
                     new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0), new Vector3d(entity.rotationPitch,
                     entity.rotationYaw, 0));
+
             if (SpongeCommon.postEvent(event)) {
                 entity.rotationPitch = entity.prevRotationPitch;
                 entity.rotationYaw = entity.prevRotationYaw;

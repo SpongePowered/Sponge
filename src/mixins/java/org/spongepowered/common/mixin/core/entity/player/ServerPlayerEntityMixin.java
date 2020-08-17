@@ -249,21 +249,21 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                         (org.spongepowered.api.entity.Entity) player, VecHelper.toVector3d(player.getPositionVector()),
                         new Vector3d(x, y, z), new Vector3d(x, y, z));
 
-                final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) player, new Vector3d(actualYaw, actualPitch, 0),
-                        new Vector3d(yaw, pitch, 0));
-
                 if (SpongeCommon.postEvent(posEvent)) {
                     return;
                 }
+
+                final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
+                        (org.spongepowered.api.entity.Entity) player, new Vector3d(actualPitch, actualYaw, 0),
+                        new Vector3d(pitch, yaw, 0));
 
                 SpongeCommon.postEvent(rotateEvent);
 
                 actualX = posEvent.getDestinationPosition().getX();
                 actualY = posEvent.getDestinationPosition().getY();
                 actualZ = posEvent.getDestinationPosition().getZ();
-                actualYaw = rotateEvent.isCancelled() ? player.rotationYaw : rotateEvent.getToRotation().getX();
-                actualPitch = rotateEvent.isCancelled() ? player.rotationPitch : rotateEvent.getToRotation().getY();
+                actualYaw = rotateEvent.isCancelled() ? player.rotationYaw : rotateEvent.getToRotation().getY();
+                actualPitch = rotateEvent.isCancelled() ? player.rotationPitch : rotateEvent.getToRotation().getX();
 
                 this.shadow$setSpectatingEntity(player);
                 this.shadow$stopRiding();

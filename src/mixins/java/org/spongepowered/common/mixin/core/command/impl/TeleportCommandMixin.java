@@ -88,8 +88,8 @@ public abstract class TeleportCommandMixin {
                         new Vector3d(x, y, z), new Vector3d(x, y, z));
 
                 final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(actualYaw, actualPitch, 0),
-                        new Vector3d(yaw, pitch, 0));
+                        (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(actualPitch, actualYaw, 0),
+                        new Vector3d(pitch, yaw, 0));
 
                 if (SpongeCommon.postEvent(posEvent)) {
                     return;
@@ -100,8 +100,8 @@ public abstract class TeleportCommandMixin {
                 actualX = posEvent.getDestinationPosition().getX();
                 actualY = posEvent.getDestinationPosition().getY();
                 actualZ = posEvent.getDestinationPosition().getZ();
-                actualYaw = rotateEvent.isCancelled() ? entityIn.rotationYaw : rotateEvent.getToRotation().getX();
-                actualPitch = rotateEvent.isCancelled() ? entityIn.rotationPitch : rotateEvent.getToRotation().getY();
+                actualYaw = rotateEvent.isCancelled() ? entityIn.rotationYaw : rotateEvent.getToRotation().getY();
+                actualPitch = rotateEvent.isCancelled() ? entityIn.rotationPitch : rotateEvent.getToRotation().getX();
 
                 if (entityIn instanceof ServerPlayerEntity) {
                     if (((ServerPlayerEntity)entityIn).isSleeping()) {
@@ -151,37 +151,34 @@ public abstract class TeleportCommandMixin {
                         return;
                     }
 
-                    final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
-                            (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(entityIn.rotationYaw, entityIn.rotationPitch, 0),
-                            new Vector3d(actualYaw, actualPitch, 0));
-
-                    final boolean isRotateEventCancelled = SpongeCommon.postEvent(rotateEvent);
-
                     entityIn.detach();
                     entityIn.dimension = ((ServerWorld) preEvent.getDestinationWorld()).dimension.getType();
-                    Entity entity = entityIn;
-                    entityIn = entityIn.getType().create(worldIn);
-                    if (entityIn == null) {
+                    final Entity result = entityIn.getType().create(worldIn);
+                    if (result == null) {
                         return;
                     }
 
-                    if (!isRotateEventCancelled) {
-                        actualYaw = MathHelper.wrapDegrees(rotateEvent.getToRotation().getX());
-                        actualPitch = MathHelper.wrapDegrees(rotateEvent.getToRotation().getY());
+                    final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0),
+                            new Vector3d(actualPitch, actualYaw, 0));
+
+                    if (!SpongeCommon.postEvent(rotateEvent)) {
+                        actualYaw = MathHelper.wrapDegrees(rotateEvent.getToRotation().getY());
+                        actualPitch = MathHelper.wrapDegrees(rotateEvent.getToRotation().getX());
                         actualPitch = MathHelper.clamp(actualPitch, -90.0F, 90.0F);
                     } else {
                         actualYaw = entityIn.rotationYaw;
-                        actualPitch = entity.rotationPitch;
+                        actualPitch = entityIn.rotationPitch;
                     }
 
-                    entityIn.copyDataFromOld(entity);
-                    entityIn.setLocationAndAngles(posEvent.getDestinationPosition().getX(), posEvent.getDestinationPosition().getY(),
+                    result.copyDataFromOld(entityIn);
+                    result.setLocationAndAngles(posEvent.getDestinationPosition().getX(), posEvent.getDestinationPosition().getY(),
                             posEvent.getDestinationPosition().getZ(), (float) actualYaw, (float) actualPitch);
-                    entityIn.setRotationYawHead((float) actualYaw);
-                    worldIn.func_217460_e(entityIn);
-                    entity.removed = true;
+                    result.setRotationYawHead((float) actualYaw);
+                    worldIn.func_217460_e(result);
+                    entityIn.removed = true;
 
-                    PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(entityIn, fromWorld,
+                    PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(result, fromWorld,
                             (ServerWorld) preEvent.getOriginalDestinationWorld());
                 }
             }

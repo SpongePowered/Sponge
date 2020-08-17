@@ -190,7 +190,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     key, Constants.Sponge.World.LEVEL_SPONGE_DAT)));
         }
 
-        final SaveHandler saveHandler = this.server.getActiveAnvilConverter().getSaveLoader(key.getValue(), this.server);
+        final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
+                this.server.getDataFixer());
+        final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(key), this.server);
+
         final WorldInfo worldInfo = saveHandler.loadWorldInfo();
         final Integer dimensionId = ((WorldInfoBridge) worldInfo).bridge$getDimensionId();
 
@@ -511,7 +514,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
 
-        final Path worldsDirectory = saveName.equals(levelName) ? savesDirectory : savesDirectory.resolve(levelName);
+        final Path worldsDirectory = savesDirectory.resolve(saveName);
 
         if (!isSinglePlayer) {
             // Symlink needs special handling
@@ -551,7 +554,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 continue;
             }
 
-            final Path worldDirectory = isDefaultWorld ? worldsDirectory.resolve(saveName) : worldsDirectory.resolve(saveName).resolve(this.getDirectoryName(key));
+            final Path worldDirectory = isDefaultWorld ? worldsDirectory : worldsDirectory.resolve(this.getDirectoryName(key));
 
             MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
 
@@ -564,12 +567,16 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 }
             }
 
+            final SaveFormat saveFormat;
             final SaveHandler saveHandler;
+
             if (isDefaultWorld) {
-                saveHandler = this.server.getActiveAnvilConverter().getSaveLoader(isDefaultWorld ? saveName : this.getDirectoryName(key), this.server);
+                saveFormat = this.server.getActiveAnvilConverter();
+                saveHandler = saveFormat.getSaveLoader(saveName, this.server);
             } else {
-                saveHandler = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("../backups"),
-                        this.server.getDataFixer()).getSaveLoader(this.getDirectoryName(key), this.server);
+                saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
+                        this.server.getDataFixer());
+                saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(key), this.server);
             }
 
             WorldInfo worldInfo = saveHandler.loadWorldInfo();

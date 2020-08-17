@@ -164,7 +164,7 @@ public final class TrackingUtil {
             PhaseTracker.LOGGER.trace(TrackingUtil.ENTITY_TICK, "Wrapping Ticked Entity: " + entity.toString());
             consumer.accept(entity);
             SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
-            SpongeCommonEventFactory.callRotateEntityEvent(entity);
+            SpongeCommonEventFactory.callNaturalRotateEntityEvent(entity);
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
         }
@@ -194,7 +194,7 @@ public final class TrackingUtil {
             PhaseTracker.LOGGER.trace(TrackingUtil.ENTITY_TICK, "Wrapping Ticked Entity: " + entity.toString());
             consumer.accept(entity);
             SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
-            SpongeCommonEventFactory.callRotateEntityEvent(entity);
+            SpongeCommonEventFactory.callNaturalRotateEntityEvent(entity);
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
         }
@@ -222,7 +222,7 @@ public final class TrackingUtil {
             context.buildAndSwitch();
             entity.updateRidden();
             SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
-            SpongeCommonEventFactory.callRotateEntityEvent(entity);
+            SpongeCommonEventFactory.callNaturalRotateEntityEvent(entity);
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
         }

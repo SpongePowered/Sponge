@@ -34,6 +34,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogRegistryEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
@@ -120,7 +121,8 @@ public final class SpongeLifecycle {
 
     public void callConstructEvent() {
         for (final PluginContainer plugin : this.filterInternalPlugins(this.game.getPluginManager().getPlugins())) {
-            this.game.getEventManager().post(SpongeEventFactory.createConstructPluginEvent(Cause.of(EventContext.empty(), this.game), this.game, plugin));
+            ((SpongeEventManager) this.game.getEventManager()).post(SpongeEventFactory.createConstructPluginEvent(Cause.of(EventContext.empty(),
+                    this.game), this.game, plugin), plugin);
         }
     }
 
