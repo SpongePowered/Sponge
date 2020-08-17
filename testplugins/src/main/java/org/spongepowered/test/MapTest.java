@@ -188,7 +188,7 @@ public class MapTest {
             //map.offer(Keys.MAP_LOCATION, new Vector2i(10000,10000));
             MapColor color = MapColor.of(MapColorTypes.BLACK_STAINED_HARDENED_CLAY);
             MapInfo mapInfo = map.require(Keys.MAP_INFO);
-            mapInfo.offer(Keys.MAP_LOCKED, false);
+            mapInfo.offer(Keys.MAP_LOCKED, true);
             mapInfo.offer(Keys.MAP_CANVAS, MapCanvas.builder().paintAll(color).build());
             player.sendMessage(Text.of(mapInfo.require(Keys.MAP_CANVAS).getColor(0,0)));
             return CommandResult.success();
