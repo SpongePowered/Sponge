@@ -76,17 +76,17 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -141,7 +141,6 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -151,6 +150,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 public final class SpongeCommonEventFactory {
 
@@ -809,11 +810,8 @@ public final class SpongeCommonEventFactory {
                     return false;
                 }
 
-                final BlockSnapshot targetBlock = ((World) projectile.world).createSnapshot(VecHelper.toVector3i(blockMovingObjectPosition.getPos()));
-                Direction side = Direction.NONE;
-                if (blockMovingObjectPosition.getFace() != null) {
-                    side = DirectionFacingProvider.getInstance().getKey(blockMovingObjectPosition.getFace()).get();
-                }
+                final BlockSnapshot targetBlock = ((World) projectile.world).createSnapshot(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                final Direction side = DirectionFacingProvider.getInstance().getKey(blockMovingObjectPosition.getFace()).get();
 
                 final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.getCurrentCause(),
                         impactPoint, targetBlock.getState(),
@@ -833,11 +831,6 @@ public final class SpongeCommonEventFactory {
                         cancelled = SpongeCommon.postEvent(event);
             }
 
-            if (cancelled) {
-                // Entities such as EnderPearls call setDead during onImpact. However, if the event is cancelled
-                // setDead will never be called resulting in a bad state such as falling through world.
-                projectile.remove();
-            }
             return cancelled;
         }
     }

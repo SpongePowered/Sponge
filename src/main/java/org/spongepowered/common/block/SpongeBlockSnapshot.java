@@ -35,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
@@ -55,6 +56,7 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import org.spongepowered.common.world.SpongeServerLocationFactory;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
@@ -116,7 +118,8 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<ServerLocation> getLocation() {
-        return Optional.empty();
+        return this.getServerWorld()
+                .map(world -> SpongeServerLocationFactory.INSTANCE.create((org.spongepowered.api.world.server.ServerWorld) world, this.pos));
     }
 
     @Override
@@ -296,10 +299,14 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
         throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
     public Optional<ServerWorld> getServerWorld() {
-        if (this.world == null) {
-            return Optional.empty();
+        @Nullable ServerWorld world = this.world != null ? this.world.get() : null;
+        if (world == null) {
+            world = (ServerWorld) Sponge.getServer().getWorldManager().getWorld(this.worldKey).orElse(null);
+            if (world != null) {
+                this.world = new WeakReference<>(world);
+            }
         }
-        return Optional.ofNullable(this.world.get());
+        return Optional.ofNullable(world);
     }
 
     public Optional<CompoundNBT> getCompound() {
