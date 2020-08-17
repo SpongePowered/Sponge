@@ -34,19 +34,6 @@ import org.objectweb.asm.Type;
 public final class GeneratorUtils {
 
     /**
-     * Gets a class name with the provided classifier.
-     *
-     * @param targetPackage The target package
-     * @param clazz The parent class
-     * @param classifier The classifier
-     * @return The java class name equivalent with the provided classifier
-     */
-    public static String getClassName(String targetPackage, Class<?> clazz, String classifier) {
-        final String name = clazz.getName();
-        return targetPackage + "." + name + "$" + classifier;
-    }
-
-    /**
      * Insert the necessary methods to box a primitive type (if the given type
      * is a primitive object).
      *
@@ -107,30 +94,6 @@ public final class GeneratorUtils {
             mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Character", "charValue", "()C", false);
         } else {
             mv.visitTypeInsn(CHECKCAST, type.getInternalName());
-        }
-    }
-
-
-    public static class LocalClassLoader extends ClassLoader {
-
-        /**
-         * Creates a new {@link LocalClassLoader}.
-         *
-         * @param parent The parent class loader
-         */
-        public LocalClassLoader(ClassLoader parent) {
-            super(parent);
-        }
-
-        /**
-         * Defines the class by name and bytecode array.
-         *
-         * @param name The name of the class
-         * @param b The bytecode array
-         * @return The class
-         */
-        public Class<?> defineClass(String name, byte[] b) {
-            return defineClass(name, b, 0, b.length);
         }
     }
 
