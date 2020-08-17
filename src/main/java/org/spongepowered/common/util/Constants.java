@@ -29,8 +29,10 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockLever;
@@ -1179,6 +1181,30 @@ public final class Constants {
         // Colors are multiplied by this then divided by 255 to make the true RGB displayed
         public static final int[] SHADE_MULTIPLIER = new int[] {180, 220, 255, 135};
         public static final int SHADE_DIVIDER = 255;
+
+        // Converts directions into a byte from 0-15 relating to the
+        // BiMap - Allows Direction -> Byte and Byte -> Direction easily.
+        public static final BiMap<Direction, Byte> DIRECTION_CONVERSION_MAP = HashBiMap.create(16);
+
+        static {
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTH,             (byte) 0);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTH_SOUTHWEST,   (byte) 1);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTHWEST,         (byte) 2);
+            DIRECTION_CONVERSION_MAP.put(Direction.WEST_SOUTHWEST,    (byte) 3);
+            DIRECTION_CONVERSION_MAP.put(Direction.WEST,              (byte) 4);
+            DIRECTION_CONVERSION_MAP.put(Direction.WEST_NORTHWEST,    (byte) 5);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTHWEST,         (byte) 6);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTH_NORTHWEST,   (byte) 7);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTH,             (byte) 8);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTH_NORTHEAST,   (byte) 9);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTHEAST,         (byte) 10);
+            DIRECTION_CONVERSION_MAP.put(Direction.EAST_NORTHEAST,    (byte) 11);
+            DIRECTION_CONVERSION_MAP.put(Direction.EAST,              (byte) 12);
+            DIRECTION_CONVERSION_MAP.put(Direction.EAST_SOUTHEAST,    (byte) 13);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTHEAST,         (byte) 14);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTH_SOUTHEAST,   (byte) 15);
+            // This should always be 16 long, unless minecraft changes the supported amount of directions for maps.
+        }
     }
 
     public static final class Particles {

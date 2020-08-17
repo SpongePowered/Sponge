@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.map;
 import com.google.common.collect.Sets;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapDecoration;
 import org.spongepowered.api.data.DataContainer;
@@ -37,6 +38,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -69,6 +71,7 @@ public abstract class MapInfoMixin_API implements SpongeMapInfo {
      * No decorations are saved to disk. Player/frames are recalculated and treasure maps have nbt on their
      * ItemStacks, therefore, due to our adding of the ability to make maps and add decorations, it could
      * get out of sync quite easily. Therefore we opt to save the ones that would be saved on ItemStacks
+     * that aren't ones that are depend on the world surroundings (Players, item frames)
      * (but also leave them there)
      */
     @Shadow public Map<String, MapDecoration> mapDecorations;

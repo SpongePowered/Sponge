@@ -85,7 +85,14 @@ public class MapUtil {
      * @param i number to check
      * @return true if it is in bounds
      */
-    public static boolean isInBounds(int i) {
+    public static boolean isInCanvasBounds(int i) {
         return i >= 0 && i < Constants.Map.MAP_PIXELS;
+    }
+
+    /**
+     *
+     */
+    public static boolean isInMapDecorationBounds(int i) {
+        return i >= Byte.MIN_VALUE && i <= Byte.MAX_VALUE;
     }
 }

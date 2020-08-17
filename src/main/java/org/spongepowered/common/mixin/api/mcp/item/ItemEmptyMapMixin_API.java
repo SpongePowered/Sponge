@@ -25,21 +25,25 @@
 package org.spongepowered.common.mixin.api.mcp.item;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.google.common.collect.Sets;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.world.map.MapStorage;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,6 +57,7 @@ import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
 import org.spongepowered.common.map.MapUtil;
 import org.spongepowered.common.map.SpongeMapInfo;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
@@ -78,9 +83,16 @@ public abstract class ItemEmptyMapMixin_API {
                             .map(org.spongepowered.api.item.inventory.ItemStack::createSnapshot)
                             .orElse(ItemStackSnapshot.NONE));
 
-            MapStorage mapStorage = Sponge.getServer().getMapStorage().orElseThrow(() -> new IllegalStateException("MapStorage was not present while a player was creating a new map"));
-            //MapInfo mapInfo = mapStorage.createNewMapInfo();
-            MapInfoData mapInfoData = new SpongeMapInfoData();
+            Vector2i center = calculateMapCenter(x, z, scale);
+            MapInfoData mapInfoData = new SpongeMapInfoData(center,
+                    (org.spongepowered.api.world.World) worldIn,
+                    trackPosition,
+                    unlimitedTracking,
+                    scale,
+                    MapCanvas.blank(),
+                    Constants.Map.DEFAULT_MAP_LOCKED,
+                    Sets.newHashSet());
+
             Optional<MapInfo> optMapInfo = MapUtil.fireCreateMapEvent(mapInfoData, frame.getCurrentCause());
             // Event Cancelled
             if (!optMapInfo.isPresent()) {
@@ -101,4 +113,12 @@ public abstract class ItemEmptyMapMixin_API {
         }
     }
 
+    private static Vector2i calculateMapCenter(double x, double z, int mapScale) {
+        int i = 128 * (1 << mapScale);
+        int j = MathHelper.floor((x + 64.0D) / (double)i);
+        int k = MathHelper.floor((z + 64.0D) / (double)i);
+        int xCenter = j * i + i / 2 - 64;
+        int zCenter = k * i + i / 2 - 64; // Copied pretty much directly from MapData but static.
+        return new Vector2i(xCenter, zCenter);
+    }
 }

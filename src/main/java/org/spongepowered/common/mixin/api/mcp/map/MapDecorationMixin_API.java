@@ -32,6 +32,7 @@ import net.minecraft.world.storage.MapDecoration;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.map.decoration.MapDecorationType;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -105,38 +106,37 @@ public class MapDecorationMixin_API implements SpongeMapDecoration {
 
     @Override
     public void setPosition(Vector2i position) {
-        checkState(MapUtil.isInBounds(position.getX()), "x position out of bounds");
-        checkState(MapUtil.isInBounds(position.getY()), "y position out of bounds");
+        checkState(MapUtil.isInMapDecorationBounds(position.getX()), "x position out of bounds");
+        checkState(MapUtil.isInMapDecorationBounds(position.getY()), "y position out of bounds");
         this.x = (byte) position.getX();
         this.y = (byte) position.getY();
     }
 
     @Override
-    public void setPosition(Vector3i position) {
-        this.x = (byte) position.getX();
-        this.y = (byte) position.getZ();
-    }
-
-    @Override
     public void setX(int x) {
-        checkState(MapUtil.isInBounds(x), "x out of bounds");
+        checkState(MapUtil.isInMapDecorationBounds(x), "x out of bounds");
         this.x = (byte) x;
     }
 
     @Override
     public void setY(int y) {
-        checkState(MapUtil.isInBounds(y), "y out of bounds");
+        checkState(MapUtil.isInMapDecorationBounds(y), "y out of bounds");
         this.y = (byte)y;
     }
 
     @Override
-    public void setRotation(int rot) {
-        this.rotation = (byte)rot;
+    public void setRotation(Direction dir) {
+        if (!(dir.isCardinal()
+                || dir.isOrdinal()
+                || dir.isSecondaryOrdinal())) {
+            throw new IllegalStateException("Invalid direction. Not a valid direction, must be cardinal, ordinal or secondary ordinal.");
+        }
+        this.rotation = Constants.Map.DIRECTION_CONVERSION_MAP.get(dir);
     }
 
     @Override
-    public int getRotation() {
-        return 0;
+    public Direction getRotation() {
+        return Constants.Map.DIRECTION_CONVERSION_MAP.inverse().get(this.rotation);
     }
 
     @Override

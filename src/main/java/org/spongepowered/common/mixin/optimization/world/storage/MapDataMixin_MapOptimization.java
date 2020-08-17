@@ -88,6 +88,7 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
     @Shadow public int zCenter;
     @Shadow public boolean unlimitedTracking;
 
+    @Shadow public byte dimension;
     private Set<UUID> mapOptimizationImpl$activeWorlds = new HashSet<>();
     // Used
     private ItemStack mapOptimizationImpl$dummyItemStack = new ItemStack(Items.FILLED_MAP, 1, this.mapOptimizationImpl$getMapId());
@@ -172,7 +173,6 @@ public abstract class MapDataMixin_MapOptimization extends WorldSavedData implem
                     it.remove();
                     continue;
                 }
-
                 if (!mixinMapInfo.mapOptimizationBridge$isValid()) {
                     this.mapDecorations.remove(player.getName());
                 } else {
