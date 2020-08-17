@@ -42,7 +42,7 @@ public final class AgeableData {
                         .get(h -> h.getGrowingAge() < 0 ? -h.getGrowingAge() : null)
                         .set((h, v) -> h.setGrowingAge(-v))
                     .create(Keys.BREEDING_COOLDOWN)
-                        .get(h -> h.getGrowingAge() > 0 ? h.getGrowingAge() : null)
+                        .get(h -> h.getGrowingAge() >= 0 ? h.getGrowingAge() : null)
                         .set(AgeableEntity::setGrowingAge)
                     .create(Keys.CAN_BREED)
                         .get(h -> h.getGrowingAge() == 0)

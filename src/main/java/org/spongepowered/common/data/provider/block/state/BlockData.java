@@ -57,7 +57,7 @@ public final class BlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.BLAST_RESISTANCE)
-                        .get(h -> (double) ((BlockAccessor) h).accessor$getBlockResistance())
+                        .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockResistance())
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
                             if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
@@ -66,7 +66,7 @@ public final class BlockData {
                             return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)));
                         })
                     .create(Keys.HARDNESS)
-                        .get(h -> (double) ((BlockAccessor) h).accessor$getBlockHardness())
+                        .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockHardness())
                     .create(Keys.HELD_ITEM)
                         .get(h -> {
                             final Item item = h.getBlock().asItem();

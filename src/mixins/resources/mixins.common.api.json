@@ -237,6 +237,7 @@
         "mcp.state.IStateHolderMixin_API",
         "mcp.state.PropertyMixin_API",
         "mcp.state.StateHolderMixin_API",
+        "mcp.state.properties.AttachFaceMixin_API",
         "mcp.state.properties.ChestTypeMixin_API",
         "mcp.state.properties.ComparatorModeMixin_API",
         "mcp.state.properties.DoorHingeSideMixin_API",

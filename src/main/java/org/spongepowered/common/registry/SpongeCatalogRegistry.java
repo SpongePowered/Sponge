@@ -76,6 +76,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.type.ArmorMaterial;
 import org.spongepowered.api.data.type.ArtType;
+import org.spongepowered.api.data.type.AttachmentSurface;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.CatType;
@@ -122,10 +123,10 @@ import org.spongepowered.api.entity.attribute.AttributeOperation;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.DismountType;
-import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.MovementType;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ContainerType;
@@ -181,6 +182,7 @@ import org.spongepowered.common.registry.builtin.sponge.HorseStyleStreamGenerato
 import org.spongepowered.common.registry.builtin.sponge.IAttributeTypeRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.KeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.LlamaTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.MovementTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ParrotTypeStreamGenerator;
@@ -192,7 +194,6 @@ import org.spongepowered.common.registry.builtin.sponge.SelectorSortAlgorithmStr
 import org.spongepowered.common.registry.builtin.sponge.SelectorTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SerializationBehaviorStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.MovementTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
@@ -485,8 +486,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .registerRegistry(AdvancementTree.class, ResourceKey.minecraft("advancement_tree"), false)
 //            .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
             .generateRegistry(ArmorMaterial.class, ResourceKey.minecraft("armor_material"), Arrays.stream(net.minecraft.item.ArmorMaterial.values()), true, false)
-            .generateRegistry(AttributeOperation.class, ResourceKey.minecraft("attribute_operation"),
-                Arrays.stream(AttributeModifier.Operation.values()), true, false)
+            .generateRegistry(AttachmentSurface.class, ResourceKey.minecraft("attach_face"), Arrays.stream(net.minecraft.state.properties.AttachFace.values()), true, false)
+            .generateRegistry(AttributeOperation.class, ResourceKey.minecraft("attribute_operation"), Arrays.stream(AttributeModifier.Operation.values()), true, false)
             .generateRegistry(BanType.class, ResourceKey.minecraft("ban_type"), BanTypeStreamGenerator.stream(), true, false)
             .generateRegistry(BannerPatternShape.class, ResourceKey.minecraft("banner_pattern_shape"), Arrays.stream(BannerPattern.values()), true, false)
 //            .generateRegistry(BossBarOverlay.class, ResourceKey.minecraft("boss_bar_overlay"), Arrays.stream(BossInfo.Overlay.values()), true)
