@@ -259,8 +259,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                         .resolve(properties.getKey().getValue());
         final boolean isOnDisk = Files.exists(worldDirectory);
 
-        final SaveHandler saveHandler = new SaveHandler(worldDirectory.getParent().toFile(), properties.getKey().getValue(), this.server,
+        final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
                 this.server.getDataFixer());
+        final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(properties.getKey()), this.server);
 
         if (isOnDisk) {
             properties = (WorldProperties) saveHandler.loadWorldInfo();
@@ -420,8 +421,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir().resolve(this.server.getFolderName())
                         .resolve(properties.getKey().getValue());
 
-        final SaveHandler saveHandler = new SaveHandler(worldDirectory.getParent().toFile(), worldDirectory.getFileName().toString(), this.server,
+        final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
                 this.server.getDataFixer());
+        final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(properties.getKey()), this.server);
+
         saveHandler.saveWorldInfo((WorldInfo) properties);
 
         return CompletableFuture.completedFuture(true);
