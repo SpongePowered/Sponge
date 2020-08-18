@@ -32,7 +32,6 @@ public final class EntityPhase {
         public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
         public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
         public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
-        public static final IPhaseState<TeleportContext> TELEPORT = new TeleportPhaseState();
 
         private State() {
         }

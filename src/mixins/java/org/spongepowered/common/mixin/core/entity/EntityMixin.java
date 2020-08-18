@@ -177,78 +177,74 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             return false;
         }
 
-        try (final TeleportContext context = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
-            context.buildAndSwitch();
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(SpongeCommon.getActivePlugin());
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(SpongeCommon.getActivePlugin());
-                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+            final Vec3d originalPosition = this.shadow$getPositionVector();
 
-                final Vec3d originalPosition = this.shadow$getPositionVector();
+            net.minecraft.world.server.ServerWorld destinationWorld = (net.minecraft.world.server.ServerWorld) location.getWorld();
 
-                net.minecraft.world.server.ServerWorld destinationWorld = (net.minecraft.world.server.ServerWorld) location.getWorld();
-
-                if (this.shadow$getEntityWorld() != destinationWorld) {
-                    final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
-                            (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(), location.getWorld(),
-                            location.getWorld());
-                    if (SpongeCommon.postEvent(event) && ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
-                        return false;
-                    }
-
-                    final ChangeEntityWorldEvent.Reposition repositionEvent =
-                            SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
-                                    (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(),
-                                    VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition(), event.getOriginalDestinationWorld(),
-                                    location.getPosition(), event.getDestinationWorld());
-
-                    if (SpongeCommon.postEvent(repositionEvent)) {
-                        return false;
-                    }
-
-                    destinationWorld = (net.minecraft.world.server.ServerWorld) event.getDestinationWorld();
-
-                    this.posX = repositionEvent.getDestinationPosition().getX();
-                    this.posY = repositionEvent.getDestinationPosition().getY();
-                    this.posZ = repositionEvent.getDestinationPosition().getZ();
-                } else {
-                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
-                            (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()),
-                            location.getPosition(), location.getPosition());
-                    if (SpongeCommon.postEvent(event)) {
-                        return false;
-                    }
-
-                    this.posX = event.getDestinationPosition().getX();
-                    this.posY = event.getDestinationPosition().getY();
-                    this.posZ = event.getDestinationPosition().getZ();
-                }
-
-                if (!destinationWorld.getChunkProvider().chunkExists((int) this.posX >> 4, (int) this.posZ >> 4)) {
-                    // Roll back the position
-                    this.posX = originalPosition.x;
-                    this.posY = originalPosition.y;
-                    this.posZ = originalPosition.z;
+            if (this.shadow$getEntityWorld() != destinationWorld) {
+                final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
+                        (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(), location.getWorld(),
+                        location.getWorld());
+                if (SpongeCommon.postEvent(event) && ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
                     return false;
                 }
 
-                ((Entity) (Object) this).detach();
+                final ChangeEntityWorldEvent.Reposition repositionEvent =
+                        SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
+                                (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getEntityWorld(),
+                                VecHelper.toVector3d(this.shadow$getPositionVector()), location.getPosition(), event.getOriginalDestinationWorld(),
+                                location.getPosition(), event.getDestinationWorld());
 
-                net.minecraft.world.server.ServerWorld originalWorld = (net.minecraft.world.server.ServerWorld) this.shadow$getEntityWorld();
-                ((PlatformServerWorldBridge) this.shadow$getEntityWorld()).bridge$removeEntity((Entity) (Object) this, true);
-                this.bridge$revive();
-                this.shadow$setWorld(destinationWorld);
-                destinationWorld.func_217460_e((Entity) (Object) this);
+                if (SpongeCommon.postEvent(repositionEvent)) {
+                    return false;
+                }
 
-                originalWorld.resetUpdateEntityTick();
-                destinationWorld.resetUpdateEntityTick();
+                destinationWorld = (net.minecraft.world.server.ServerWorld) event.getDestinationWorld();
 
-                final ChunkPos chunkPos = new ChunkPos((int) this.posX >> 4, (int) this.posZ >> 4);
-                destinationWorld.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((Entity) (Object) this).getEntityId());
+                this.posX = repositionEvent.getDestinationPosition().getX();
+                this.posY = repositionEvent.getDestinationPosition().getY();
+                this.posZ = repositionEvent.getDestinationPosition().getZ();
+            } else {
+                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                        (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()),
+                        location.getPosition(), location.getPosition());
+                if (SpongeCommon.postEvent(event)) {
+                    return false;
+                }
+
+                this.posX = event.getDestinationPosition().getX();
+                this.posY = event.getDestinationPosition().getY();
+                this.posZ = event.getDestinationPosition().getZ();
             }
 
-            return true;
+            if (!destinationWorld.getChunkProvider().chunkExists((int) this.posX >> 4, (int) this.posZ >> 4)) {
+                // Roll back the position
+                this.posX = originalPosition.x;
+                this.posY = originalPosition.y;
+                this.posZ = originalPosition.z;
+                return false;
+            }
+
+            ((Entity) (Object) this).detach();
+
+            net.minecraft.world.server.ServerWorld originalWorld = (net.minecraft.world.server.ServerWorld) this.shadow$getEntityWorld();
+            ((PlatformServerWorldBridge) this.shadow$getEntityWorld()).bridge$removeEntity((Entity) (Object) this, true);
+            this.bridge$revive();
+            this.shadow$setWorld(destinationWorld);
+            destinationWorld.func_217460_e((Entity) (Object) this);
+
+            originalWorld.resetUpdateEntityTick();
+            destinationWorld.resetUpdateEntityTick();
+
+            final ChunkPos chunkPos = new ChunkPos((int) this.posX >> 4, (int) this.posZ >> 4);
+            destinationWorld.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((Entity) (Object) this).getEntityId());
         }
+
+        return true;
     }
 
     /**
@@ -300,27 +296,21 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             return null;
         }
 
-        try (final TeleportContext context = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
-            context
-                .worldChange()
-                .buildAndSwitch();
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
 
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(this);
-                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
-
-                final DimensionChangeResult<Entity> result = EntityUtil.invokePortalTo((Entity) (Object) this, new WrappedITeleporterPortalType(
+            final DimensionChangeResult<Entity> result = EntityUtil.invokePortalTo((Entity) (Object) this, new WrappedITeleporterPortalType(
                     (PlatformITeleporterBridge) this.shadow$getServer().getWorld(destination).getDefaultTeleporter(), null), destination);
 
-                if (!result.isSuccess() && result.shouldRemove()) {
-                    return null;
-                }
-
-                return result.getEntity();
+            if (!result.isSuccess() && result.shouldRemove()) {
+                return null;
             }
+
+            return result.getEntity();
         }
     }
-//>>>>>>> Implement the Portal API.
+
     @Override
     public boolean bridge$isConstructing() {
         return this.impl$isConstructing;

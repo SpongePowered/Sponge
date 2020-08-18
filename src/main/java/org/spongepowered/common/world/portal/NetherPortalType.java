@@ -83,93 +83,85 @@ public final class NetherPortalType extends VanillaPortalType {
             return false;
         }
 
-        try (final TeleportContext context = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER)) {
-            if (entity instanceof ServerPlayer) {
-                context.player();
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(SpongeCommon.getActivePlugin());
+            frame.pushCause(this);
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
+
+            final ServerLocation previousLocation = entity.getServerLocation();
+            ServerLocation actualDestination = destination;
+            boolean worldChange = !previousLocation.getWorldKey().equals(actualDestination.getWorldKey());
+
+            if (worldChange) {
+                // Call platform event hook before changing dimensions
+                final ChangeEntityWorldEvent.Pre event = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre((net.minecraft.entity.Entity)
+                        entity, (ServerWorld) destination.getWorld());
+                if (event == null || event.isCancelled() || ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
+                    return false;
+                }
+
+                actualDestination = ServerLocation.of(event.getDestinationWorld(), entity.getPosition());
             }
 
-            context.buildAndSwitch();
+            final Function<Boolean, net.minecraft.entity.Entity> portalLogic;
+            if (entity instanceof ServerPlayerEntity) {
+                portalLogic = PortalHelper.createVanillaPlayerPortalLogic((ServerPlayerEntity) entity,
+                        VecHelper.toVec3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
+                        (ServerWorld) actualDestination.getWorld(), this);
+            } else {
+                portalLogic = PortalHelper.createVanillaEntityPortalLogic((net.minecraft.entity.Entity) entity,
+                        VecHelper.toVec3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
+                        (ServerWorld) actualDestination.getWorld(), this);
+            }
 
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(this);
-                frame.pushCause(SpongeCommon.getActivePlugin());
-                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
+            ((net.minecraft.entity.Entity) entity).setPortal(VecHelper.toBlockPos(previousLocation.getPosition()));
 
-                final ServerLocation previousLocation = entity.getServerLocation();
-                ServerLocation actualDestination = destination;
-                boolean worldChange = !previousLocation.getWorldKey().equals(actualDestination.getWorldKey());
+            if (entity instanceof ServerPlayerEntity) {
+                ((ServerPlayerEntityAccessor) entity).accessor$setInvulnerableDimensionChange(true);
+            }
 
-                if (worldChange) {
-                    // Call platform event hook before changing dimensions
-                    final ChangeEntityWorldEvent.Pre event = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre((net.minecraft.entity.Entity)
-                            entity, (ServerWorld) destination.getWorld());
-                    if (event == null || event.isCancelled() || ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
-                        return false;
-                    }
+            final net.minecraft.entity.Entity result = portalLogic.apply(generateDestinationPortal);
 
-                    actualDestination = ServerLocation.of(event.getDestinationWorld(), entity.getPosition());
-                }
+            ((EntityAccessor) entity).accessor$setInPortal(false);
 
-                final Function<Boolean, net.minecraft.entity.Entity> portalLogic;
-                if (entity instanceof ServerPlayerEntity) {
-                    portalLogic = PortalHelper.createVanillaPlayerPortalLogic((ServerPlayerEntity) entity,
-                            VecHelper.toVec3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
-                            (ServerWorld) actualDestination.getWorld(), this);
-                } else {
-                    portalLogic = PortalHelper.createVanillaEntityPortalLogic((net.minecraft.entity.Entity) entity,
-                            VecHelper.toVec3d(actualDestination.getPosition()), (ServerWorld) previousLocation.getWorld(),
-                            (ServerWorld) actualDestination.getWorld(), this);
-                }
+            if (result == null) {
+                return false;
+            } else {
+                final ServerLocation currentLocation = ((Entity) mEntity).getServerLocation();
 
-                ((net.minecraft.entity.Entity) entity).setPortal(VecHelper.toBlockPos(previousLocation.getPosition()));
-
-                if (entity instanceof ServerPlayerEntity) {
-                    ((ServerPlayerEntityAccessor) entity).accessor$setInvulnerableDimensionChange(true);
-                }
-
-                final net.minecraft.entity.Entity result = portalLogic.apply(generateDestinationPortal);
-
-                ((EntityAccessor) entity).accessor$setInPortal(false);
-
-                if (result == null) {
+                // We use actualDestination for the world as the world change does not happen yet
+                if (previousLocation.getWorld() == actualDestination.getWorld() && previousLocation.getBlockPosition().equals(currentLocation.getBlockPosition())) {
                     return false;
-                } else {
-                    final ServerLocation currentLocation = ((Entity) mEntity).getServerLocation();
-
-                    // We use actualDestination for the world as the world change does not happen yet
-                    if (previousLocation.getWorld() == actualDestination.getWorld() && previousLocation.getBlockPosition().equals(currentLocation.getBlockPosition())) {
-                        return false;
-                    }
-
-                    actualDestination = ServerLocation.of(actualDestination.getWorld(), currentLocation.getPosition());
                 }
 
-                if (!worldChange) {
-                    ((EntityAccessor) entity).accessor$setLastPortalPos(new BlockPos(mEntity.posX, mEntity.posY, mEntity.posZ));
-                    ((EntityAccessor) entity).accessor$setTimeUntilPortal(Integer.MAX_VALUE);
+                actualDestination = ServerLocation.of(actualDestination.getWorld(), currentLocation.getPosition());
+            }
 
-                    return true;
-                }
-
-                // Players are special fickle things
-                if (entity instanceof ServerPlayerEntity) {
-                    // Hacks
-                    ((EntityAccessor) entity).accessor$setTimeUntilPortal(Integer.MAX_VALUE);
-
-                    EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) mEntity, (ServerWorld) previousLocation.getWorld(),
-                            (ServerWorld) destination.getWorld(), (ServerWorld) actualDestination.getWorld(), false);
-                } else {
-                    // The portal logic handles re-creating the entity in the other dimension, this is simply cleanup
-                    ((net.minecraft.entity.Entity) entity).detach();
-                    ((PlatformEntityBridge) entity).bridge$remove(false);
-                    ((ServerWorld) previousLocation.getWorld()).getProfiler().endSection();
-                    ((ServerWorld) previousLocation.getWorld()).resetUpdateEntityTick();
-                    ((ServerWorld) result.getEntityWorld()).resetUpdateEntityTick();
-                    ((ServerWorld) previousLocation.getWorld()).getProfiler().endSection();
-                }
+            if (!worldChange) {
+                ((EntityAccessor) entity).accessor$setLastPortalPos(new BlockPos(mEntity.posX, mEntity.posY, mEntity.posZ));
+                ((EntityAccessor) entity).accessor$setTimeUntilPortal(Integer.MAX_VALUE);
 
                 return true;
             }
+
+            // Players are special fickle things
+            if (entity instanceof ServerPlayerEntity) {
+                // Hacks
+                ((EntityAccessor) entity).accessor$setTimeUntilPortal(Integer.MAX_VALUE);
+
+                EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) mEntity, (ServerWorld) previousLocation.getWorld(),
+                        (ServerWorld) destination.getWorld(), (ServerWorld) actualDestination.getWorld(), false);
+            } else {
+                // The portal logic handles re-creating the entity in the other dimension, this is simply cleanup
+                ((net.minecraft.entity.Entity) entity).detach();
+                ((PlatformEntityBridge) entity).bridge$remove(false);
+                ((ServerWorld) previousLocation.getWorld()).getProfiler().endSection();
+                ((ServerWorld) previousLocation.getWorld()).resetUpdateEntityTick();
+                ((ServerWorld) result.getEntityWorld()).resetUpdateEntityTick();
+                ((ServerWorld) previousLocation.getWorld()).getProfiler().endSection();
+            }
+
+            return true;
         }
     }
 }
