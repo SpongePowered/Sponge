@@ -159,8 +159,6 @@ public final class SpongePaginationService implements PaginationService {
                 .setExecutor(pageExecutor)
                 .build();
 
-        //We create the child manually in order to force that paginationElement is required for all children + fallback
-        //https://github.com/SpongePowered/SpongeAPI/issues/1272
         return Command.builder()
                 .parameters(paginationIdParameter, Parameter.firstOf(pageParameter,
                         Parameter.subcommand(next, "next", "n"),
@@ -178,8 +176,7 @@ public final class SpongePaginationService implements PaginationService {
         public Optional<? extends ActivePagination> getValue(final Parameter.Key<? super ActivePagination> parameterKey,
                 final ArgumentReader.Mutable reader,
                 final CommandContext.Builder context) throws ArgumentParseException {
-            final Audience source = context.getCause().first(Audience.class)
-                    .orElseThrow(() -> reader.createException(TextComponent.of("No usable source found")));
+            final Audience source = context.getCause().getAudience();
 
             final SourcePaginations paginations = SpongePaginationService.this.getPaginationState(source, false);
             if (paginations == null) {
@@ -207,10 +204,12 @@ public final class SpongePaginationService implements PaginationService {
 
         @Override
         public List<String> complete(final CommandContext context) {
-            return context.getCause().first(Audience.class)
-                    .map(src -> SpongePaginationService.this.getPaginationState(src, false))
-                    .map(paginations -> ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString)))
-                    .orElseGet(ImmutableList::of);
+            final Audience audience = context.getCause().getAudience();
+            final SourcePaginations paginations = SpongePaginationService.this.getPaginationState(audience, false);
+            if (paginations != null) {
+                return ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString));
+            }
+            return ImmutableList.of();
         }
     }
 }

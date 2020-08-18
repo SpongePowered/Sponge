@@ -47,14 +47,13 @@ import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class SpongePaginationList implements PaginationList {
 
     private final SpongePaginationService service;
     private final Iterable<Component> contents;
-    private final Optional<Component> title;
-    private final Optional<Component> header;
-    private final Optional<Component> footer;
+    private final Component title;
+    private final Component header;
+    private final Component footer;
     private final Component paginationSpacer;
     private final int linesPerPage;
 
@@ -64,9 +63,9 @@ public final class SpongePaginationList implements PaginationList {
             @Nullable final Component footer, final Component paginationSpacer, final int linesPerPage) {
         this.service = service;
         this.contents = contents;
-        this.title = Optional.ofNullable(title);
-        this.header = Optional.ofNullable(header);
-        this.footer = Optional.ofNullable(footer);
+        this.title = title;
+        this.header = header;
+        this.footer = footer;
         this.paginationSpacer = paginationSpacer;
         this.linesPerPage = linesPerPage;
     }
@@ -78,17 +77,17 @@ public final class SpongePaginationList implements PaginationList {
 
     @Override
     public Optional<Component> getTitle() {
-        return this.title;
+        return Optional.ofNullable(this.title);
     }
 
     @Override
     public Optional<Component> getHeader() {
-        return this.header;
+        return Optional.ofNullable(this.header);
     }
 
     @Override
     public Optional<Component> getFooter() {
-        return this.footer;
+        return Optional.ofNullable(this.footer);
     }
 
     @Override
@@ -111,7 +110,7 @@ public final class SpongePaginationList implements PaginationList {
             return Maps.immutableEntry(input, lines);
         }).collect(Collectors.toList());
 
-        Component title = this.title.orElse(null);
+        Component title = this.title;
         if (title != null) {
             title = calculator.center(title, this.paginationSpacer);
         }
@@ -129,11 +128,11 @@ public final class SpongePaginationList implements PaginationList {
 
         final ActivePagination pagination;
         if (this.contents instanceof List) { // If it started out as a list, it's probably reasonable to copy it to another list
-            pagination = new ListPagination(audienceSupplier, calculator, ImmutableList.copyOf(counts), title, this.header.orElse(null),
-                    this.footer.orElse(null), this.paginationSpacer);
+            pagination = new ListPagination(audienceSupplier, calculator, ImmutableList.copyOf(counts), title, this.header,
+                    this.footer, this.paginationSpacer);
         } else {
-            pagination = new IterablePagination(audienceSupplier, calculator, counts, title, this.header.orElse(null),
-                    this.footer.orElse(null), this.paginationSpacer);
+            pagination = new IterablePagination(audienceSupplier, calculator, counts, title, this.header,
+                    this.footer, this.paginationSpacer);
         }
 
         this.service.getPaginationState(receiver, true).put(pagination);

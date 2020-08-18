@@ -263,7 +263,7 @@ final class PaginationCalculator {
      * @return The finalized, properly styled text.
      */
     private Component finalizeBuilder(final Component text, final TextComponent.Builder build) {
-        return build.style(text.style().toBuilder().build()).build();
+        return build.style(text.style()).build();
     }
 
     /**
@@ -281,7 +281,7 @@ final class PaginationCalculator {
                 .append(spaces)
                 .append(text)
                 .append(spaces)
-                .style(text.style().toBuilder().build())
+                .style(text.style())
                 .build();
     }
 
