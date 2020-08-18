@@ -311,29 +311,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
      * @author Zidane
      * @reason Call to EntityUtil to handle dimension changes
      */
-//    @Nullable
-//    @Overwrite
-//    public Entity changeDimension(DimensionType destination) {
-//        if (this.shadow$getEntityWorld().isRemote || this.removed) {
-//            return (ServerPlayerEntity) (Object) this;
-//        }
-//
-//        try (final TeleportContext ignored = EntityPhase.State.TELEPORT.createPhaseContext(PhaseTracker.SERVER).player().worldChange().buildAndSwitch()) {
-//
-//            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-//                final WrappedITeleporterPortalType portalType = new WrappedITeleporterPortalType((PlatformITeleporterBridge) this.shadow$getServer()
-//                        .getWorld(destination).getDefaultTeleporter(), null);
-//
-//                frame.pushCause(this);
-//                frame.pushCause(portalType);
-//                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PORTAL);
-//
-//                EntityUtil.invokePortalTo((ServerPlayerEntity) (Object) this, portalType, destination);
-//                return (ServerPlayerEntity) (Object) this;
-//            }
-//        }
-//    }
-
     @Nullable
     @Overwrite
     public Entity changeDimension(DimensionType destination) {
