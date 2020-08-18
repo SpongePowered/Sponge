@@ -51,6 +51,7 @@ minecraft {
 tasks {
     compileJava {
         options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
+        options.encoding = "UTF-8"
     }
     jar {
         manifest {
@@ -221,6 +222,7 @@ allprojects {
     tasks {
         withType(JavaCompile::class) {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
+            options.encoding = "UTF-8"
         }
     }
     java {

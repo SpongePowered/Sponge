@@ -25,18 +25,17 @@
 package org.spongepowered.common.service.pagination;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.command.CommandMessageFormatting.error;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.source.ProxySource;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageReceiver;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
@@ -46,50 +45,53 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class SpongePaginationList implements PaginationList {
+import javax.annotation.Nullable;
+
+public final class SpongePaginationList implements PaginationList {
 
     private final SpongePaginationService service;
-    private final Iterable<Text> contents;
-    private final Optional<Text> title;
-    private final Optional<Text> header;
-    private final Optional<Text> footer;
-    private final Text paginationSpacer;
+    private final Iterable<Component> contents;
+    private final Component title;
+    private final Component header;
+    private final Component footer;
+    private final Component paginationSpacer;
     private final int linesPerPage;
 
-    public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, @Nullable Text title, @Nullable Text header,
-            @Nullable Text footer, Text paginationSpacer, int linesPerPage) {
+    public SpongePaginationList(
+            final SpongePaginationService service, final Iterable<Component> contents, @Nullable final Component title,
+            @Nullable final Component header,
+            @Nullable final Component footer, final Component paginationSpacer, final int linesPerPage) {
         this.service = service;
         this.contents = contents;
-        this.title = Optional.ofNullable(title);
-        this.header = Optional.ofNullable(header);
-        this.footer = Optional.ofNullable(footer);
+        this.title = title;
+        this.header = header;
+        this.footer = footer;
         this.paginationSpacer = paginationSpacer;
         this.linesPerPage = linesPerPage;
     }
 
     @Override
-    public Iterable<Text> getContents() {
+    public Iterable<Component> getContents() {
         return this.contents;
     }
 
     @Override
-    public Optional<Text> getTitle() {
-        return this.title;
+    public Optional<Component> getTitle() {
+        return Optional.ofNullable(this.title);
     }
 
     @Override
-    public Optional<Text> getHeader() {
-        return this.header;
+    public Optional<Component> getHeader() {
+        return Optional.ofNullable(this.header);
     }
 
     @Override
-    public Optional<Text> getFooter() {
-        return this.footer;
+    public Optional<Component> getFooter() {
+        return Optional.ofNullable(this.footer);
     }
 
     @Override
-    public Text getPadding() {
+    public Component getPadding() {
         return this.paginationSpacer;
     }
 
@@ -99,50 +101,48 @@ public class SpongePaginationList implements PaginationList {
     }
 
     @Override
-    public void sendTo(final MessageReceiver receiver, int page) {
+    public void sendTo(final Audience receiver, final int page) {
         checkNotNull(receiver, "The message receiver cannot be null!");
-        this.service.registerCommandOnce();
 
-        MessageReceiver realSource = receiver;
-        while (realSource instanceof ProxySource) {
-            realSource = ((ProxySource)realSource).getOriginalSource();
-        }
         final PaginationCalculator calculator = new PaginationCalculator(this.linesPerPage);
-        Iterable<Map.Entry<Text, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {
-            int lines = calculator.getLines(input);
+        final Iterable<Map.Entry<Component, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {
+            final int lines = calculator.getLines(input);
             return Maps.immutableEntry(input, lines);
         }).collect(Collectors.toList());
 
-        Text title = this.title.orElse(null);
+        Component title = this.title;
         if (title != null) {
             title = calculator.center(title, this.paginationSpacer);
         }
 
-        // If the MessageReceiver is a Player, then upon death, they will become a different MessageReceiver object.
+        // If the Audience is a Player, then upon death, they will become a different Audience object.
         // Thus, we use a supplier to supply the player from the server, if required.
-        Supplier<Optional<MessageReceiver>> messageReceiverSupplier;
+        final Supplier<Optional<? extends Audience>> audienceSupplier;
         if (receiver instanceof Player) {
             final UUID playerUuid = ((Player) receiver).getUniqueId();
-            messageReceiverSupplier = () -> Sponge.getServer().getPlayer(playerUuid).map(x -> (MessageReceiver) x);
+            audienceSupplier = () -> Sponge.getServer().getPlayer(playerUuid);
         } else {
-            WeakReference<MessageReceiver> srcReference = new WeakReference<>(receiver);
-            messageReceiverSupplier = () -> Optional.ofNullable(srcReference.get());
+            final WeakReference<Audience> srcReference = new WeakReference<>(receiver);
+            audienceSupplier = () -> Optional.ofNullable(srcReference.get());
         }
 
-        ActivePagination pagination;
+        final ActivePagination pagination;
         if (this.contents instanceof List) { // If it started out as a list, it's probably reasonable to copy it to another list
-            pagination = new ListPagination(messageReceiverSupplier, calculator, ImmutableList.copyOf(counts), title, this.header.orElse(null),
-                    this.footer.orElse(null), this.paginationSpacer);
+            pagination = new ListPagination(audienceSupplier, calculator, ImmutableList.copyOf(counts), title, this.header,
+                    this.footer, this.paginationSpacer);
         } else {
-            pagination = new IterablePagination(messageReceiverSupplier, calculator, counts, title, this.header.orElse(null),
-                    this.footer.orElse(null), this.paginationSpacer);
+            pagination = new IterablePagination(audienceSupplier, calculator, counts, title, this.header,
+                    this.footer, this.paginationSpacer);
         }
 
         this.service.getPaginationState(receiver, true).put(pagination);
         try {
             pagination.specificPage(page);
-        } catch (CommandException e) {
-            receiver.sendMessage(error(e.getText()));
+        } catch (final CommandException e) {
+            final Component text = e.getText();
+            if (text != null) {
+                receiver.sendMessage(text.color(NamedTextColor.RED));
+            }
         }
     }
 }

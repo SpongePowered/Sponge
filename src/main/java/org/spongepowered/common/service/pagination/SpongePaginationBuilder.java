@@ -28,34 +28,38 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
 
-public class SpongePaginationBuilder implements PaginationList.Builder {
+public final class SpongePaginationBuilder implements PaginationList.Builder {
+
+    private static final @NonNull TextComponent EQUALS_TEXT = TextComponent.of("=");
 
     private final SpongePaginationService service;
     @Nullable
-    private Iterable<Text> contents;
+    private Iterable<Component> contents;
     @Nullable
-    private Text title;
+    private Component title;
     @Nullable
-    private Text header;
+    private Component header;
     @Nullable
-    private Text footer;
-    private Text paginationSpacer = Text.of("=");
+    private Component footer;
+    private Component paginationSpacer = SpongePaginationBuilder.EQUALS_TEXT;
     private int linesPerPage = 20;
 
     @Nullable
     private PaginationList paginationList;
 
-    public SpongePaginationBuilder(SpongePaginationService service) {
+    public SpongePaginationBuilder(final SpongePaginationService service) {
         this.service = service;
     }
 
     @Override
-    public PaginationList.Builder contents(Iterable<Text> contents) {
+    public PaginationList.Builder contents(final Iterable<Component> contents) {
         checkNotNull(contents, "The contents cannot be null!");
         this.contents = contents;
         this.paginationList = null;
@@ -63,7 +67,7 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
     }
 
     @Override
-    public PaginationList.Builder contents(Text... contents) {
+    public PaginationList.Builder contents(final Component... contents) {
         checkNotNull(contents, "The contents cannot be null!");
         this.contents = ImmutableList.copyOf(contents);
         this.paginationList = null;
@@ -71,28 +75,28 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
     }
 
     @Override
-    public PaginationList.Builder title(@Nullable Text title) {
+    public PaginationList.Builder title(@Nullable final Component title) {
         this.title = title;
         this.paginationList = null;
         return this;
     }
 
     @Override
-    public PaginationList.Builder header(@Nullable Text header) {
+    public PaginationList.Builder header(@Nullable final Component header) {
         this.header = header;
         this.paginationList = null;
         return this;
     }
 
     @Override
-    public PaginationList.Builder footer(@Nullable Text footer) {
+    public PaginationList.Builder footer(@Nullable final Component footer) {
         this.footer = footer;
         this.paginationList = null;
         return this;
     }
 
     @Override
-    public PaginationList.Builder padding(Text padding) {
+    public PaginationList.Builder padding(final Component padding) {
         checkNotNull(padding, "The padding cannot be null!");
         this.paginationSpacer = padding;
         this.paginationList = null;
@@ -100,7 +104,7 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
     }
 
     @Override
-    public PaginationList.Builder linesPerPage(int linesPerPage) {
+    public PaginationList.Builder linesPerPage(final int linesPerPage) {
         this.linesPerPage = linesPerPage;
         return this;
     }
@@ -110,13 +114,14 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
         checkState(this.contents != null, "The contents of the pagination list cannot be null!");
 
         if (this.paginationList == null) {
-            this.paginationList = new SpongePaginationList(this.service, this.contents, this.title, this.header, this.footer, this.paginationSpacer, this.linesPerPage);
+            this.paginationList = new SpongePaginationList(this.service, this.contents, this.title, this.header, this.footer, this.paginationSpacer,
+                    this.linesPerPage);
         }
         return this.paginationList;
     }
 
     @Override
-    public PaginationList.Builder from(PaginationList list) {
+    public PaginationList.Builder from(final PaginationList list) {
         this.reset();
         this.contents = list.getContents();
         this.title = list.getTitle().orElse(null);
@@ -134,7 +139,7 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
         this.title = null;
         this.header = null;
         this.footer = null;
-        this.paginationSpacer = Text.of("=");
+        this.paginationSpacer = SpongePaginationBuilder.EQUALS_TEXT;
 
         this.paginationList = null;
         return this;

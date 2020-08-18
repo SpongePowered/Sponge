@@ -51,6 +51,7 @@ import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.service.ban.SpongeBanService;
+import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -77,11 +78,10 @@ public final class SpongeServiceProvider implements ServiceProvider {
                             EconomyService.class,
                             ServicesCategory.ServicePluginSubCategory::getEconomyService,
                             null))
-                    // TODO: currently in invalid, will need doing when text comes back up
                     .add(new Service<>(
                             PaginationService.class,
                             ServicesCategory.ServicePluginSubCategory::getPaginationService,
-                            null))
+                            SpongePaginationService.class))
                     .add(new Service<>(
                             PermissionService.class,
                             ServicesCategory.ServicePluginSubCategory::getPermissionService,
