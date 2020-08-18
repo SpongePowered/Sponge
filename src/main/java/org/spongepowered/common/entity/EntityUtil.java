@@ -149,7 +149,7 @@ public final class EntityUtil {
         ServerWorld toWorld = originalToWorld;
 
         final ChangeEntityWorldEvent.Pre event = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre(player, toWorld);
-        if (event == null || event.isCancelled() || ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
+        if (event == null || event.isCancelled()) {
             return new DimensionChangeResult<>(player, false, false);
         }
 
@@ -171,11 +171,12 @@ public final class EntityUtil {
                 return new DimensionChangeResult<>(player, false, false);
             }
         } else if (!portal.teleport((org.spongepowered.api.entity.Entity) player, ServerLocation.of((org.spongepowered.api.world.server.ServerWorld)
-                    fromWorld, VecHelper.toVector3d(player.getPositionVector())), true)) {
+                fromWorld, VecHelper.toVector3d(player.getPositionVector())), true)) {
             return new DimensionChangeResult<>(player, false, false);
         }
 
-        final boolean isVanillaPortal = portal instanceof WrappedITeleporterPortalType && ((WrappedITeleporterPortalType) portal).getTeleporter().bridge$isVanilla();
+        final boolean isVanillaPortal = portal instanceof WrappedITeleporterPortalType && ((WrappedITeleporterPortalType) portal).getTeleporter()
+                .bridge$isVanilla();
 
         // Only show the credits if coming from Vanilla's The End to the default dimension
         if (fromDimensionType == DimensionType.THE_END && toWorld.getDimension().getType() == DimensionType.OVERWORLD && isVanillaPortal) {
@@ -183,7 +184,8 @@ public final class EntityUtil {
             player.getServerWorld().removePlayer(player);
             if (!player.queuedEndExit) {
                 player.queuedEndExit = true;
-                player.connection.sendPacket(new SChangeGameStatePacket(4, ((ServerPlayerEntityAccessor) player).accessor$getSeenCredits() ? 0.0F : 1.0F));
+                player.connection.sendPacket(new SChangeGameStatePacket(4, ((ServerPlayerEntityAccessor) player).accessor$getSeenCredits() ?
+                        0.0F : 1.0F));
                 ((ServerPlayerEntityAccessor) player).accessor$setSeenCredits(true);
             }
 
@@ -201,12 +203,16 @@ public final class EntityUtil {
         ((ServerPlayerEntityBridge) player).bridge$sendDimensionData(player.connection.netManager, toWorld.dimension.getType());
         // Sponge End
         WorldInfo worldinfo = toWorld.getWorldInfo();
-        // Sponge Start - Allow the platform to handle how dimension changes are sent down
-        ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(toWorld.dimension.getType(), worldinfo.getGenerator(), player.interactionManager.getGameType());
+        // We send dimension change for portals before loading chunks
+        if (!isPortal) {
+            // Sponge Start - Allow the platform to handle how dimension changes are sent down
+            ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(toWorld.dimension.getType(), worldinfo.getGenerator(), player
+                    .interactionManager.getGameType());
+        }
         player.dimension = toWorld.dimension.getType();
         // Sponge End
         player.connection.sendPacket(new SServerDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
-        PlayerList playerlist = player.getServer().getPlayerList();
+        final PlayerList playerlist = player.getServer().getPlayerList();
         playerlist.updatePermissionLevel(player);
 
         // Sponge Start - Have the platform handle removing the entity from the world. Move this to after the event call so
@@ -240,8 +246,10 @@ public final class EntityUtil {
         ((ServerPlayerEntityAccessor) player).accessor$setLastHealth(-1.0f);
         ((ServerPlayerEntityAccessor) player).accessor$setLastFoodLevel(-1);
 
-        player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
-        player.connection.captureCurrentPosition();
+        if (!isPortal) {
+            player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+            player.connection.captureCurrentPosition();
+        }
 
         // Sponge Start - Call platform event hook after changing dimensions
         PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(player, fromWorld, originalToWorld);

@@ -152,7 +152,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             return false;
         }
 
-
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(SpongeCommon.getActivePlugin());
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
