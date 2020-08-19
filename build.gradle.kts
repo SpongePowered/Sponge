@@ -125,10 +125,7 @@ dependencies {
 
     // api
     api(project(":SpongeAPI"))
-    api("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
-        exclude(group = "com.google.inject", module = "guice") // We use our own version
-    }
-
+    api("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
     api("net.kyori:adventure-api:4.0.0-SNAPSHOT")
     api("net.kyori:adventure-text-serializer-gson:4.0.0-SNAPSHOT")
     api("net.kyori:adventure-text-serializer-legacy:4.0.0-SNAPSHOT")
@@ -139,16 +136,20 @@ dependencies {
     implementation("com.h2database:h2:1.4.196")
     implementation("org.xerial:sqlite-jdbc:3.20.0")
     implementation("com.google.inject:guice:4.1.0")
+    implementation("javax.inject:javax.inject:1")
 
     // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:6.2")
     implementation("org.ow2.asm:asm-tree:6.2")
 
+    annotationProcessor("org.spongepowered:mixin:0.8")
+    annotationProcessor("com.google.code.gson:gson:2.2.4")
+    annotationProcessor("com.google.guava:guava:21.0")
+    annotationProcessor("org.ow2.asm:asm-tree:6.2")
+
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig(project(":SpongeAPI"))
-    launchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
-        exclude(group = "com.google.inject", module = "guice") // We use our own version
-    }
+    launchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
     launchConfig("org.spongepowered:mixin:0.8")
     launchConfig("org.checkerframework:checker-qual:2.8.1")
     launchConfig("com.google.guava:guava:21.0") {
@@ -159,7 +160,7 @@ dependencies {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
     launchConfig("com.google.inject:guice:4.1.0")
-
+    launchConfig("javax.inject:javax.inject:1")
     launchConfig("com.google.code.gson:gson:2.8.0")
     launchConfig("org.ow2.asm:asm-tree:6.2")
     launchConfig("org.ow2.asm:asm-util:6.2")
@@ -440,6 +441,11 @@ project("SpongeVanilla") {
         implementation(project(commonProject.path)) {
             exclude(group = "net.minecraft", module = "$minecraftDep")
         }
+        annotationProcessor("org.spongepowered:mixin:0.8")
+        annotationProcessor("com.google.code.gson:gson:2.2.4")
+        annotationProcessor("com.google.guava:guava:21.0")
+        annotationProcessor("org.ow2.asm:asm-tree:6.2")
+
         vanillaMixinsImplementation(project(commonProject.path)) {
             exclude(group = "net.minecraft", module = "$minecraftDep")
         }
@@ -450,9 +456,8 @@ project("SpongeVanilla") {
         vanillaModLauncherConfig("org.spongepowered:mixin:0.8")
         vanillaModLauncherConfig("org.ow2.asm:asm-util:6.2")
         vanillaModLauncherConfig("org.ow2.asm:asm-tree:6.2")
-        vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
-            exclude(group = "com.google.inject", module = "guice") // We use our own version
-        }
+        vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+        vanillaModLauncherConfig("javax.inject:javax.inject:1")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.11.2")
         vanillaModLauncherRuntime("com.zaxxer:HikariCP:2.6.3")
@@ -623,9 +628,8 @@ if (spongeForge != null) {
             forgeLaunchConfig("org.spongepowered:mixin:0.8")
             forgeLaunchConfig("org.ow2.asm:asm-util:6.2")
             forgeLaunchConfig("org.ow2.asm:asm-tree:6.2")
-            forgeLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
-                exclude(group = "com.google.inject", module = "guice") // We use our own version
-            }
+            forgeLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+            forgeLaunchConfig("javax.inject:javax.inject:1")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
             runtime("com.zaxxer:HikariCP:2.6.3")

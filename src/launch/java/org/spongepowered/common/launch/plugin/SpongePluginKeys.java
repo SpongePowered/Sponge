@@ -22,35 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.common.launch.plugin;
 
-import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginLocator;
+import com.google.inject.Injector;
+import org.spongepowered.plugin.Blackboard;
 
-public final class ClientLauncher extends VanillaLauncher {
+public final class SpongePluginKeys {
 
-    protected ClientLauncher(final VanillaPluginLocator pluginLocator, final Stage injectionStage) {
-        super(pluginLocator, injectionStage);
-    }
-
-    public static void launch(final VanillaPluginLocator pluginLoader, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(pluginLoader, isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.launchPlatform(args);
-    }
-
-    @Override
-    public boolean isDedicatedServer() {
-        return false;
-    }
-
-    public void launchPlatform(final String[] args) {
-        super.onLaunch();
-        this.getLogger().info("Loading Sponge, please wait...");
-
-        SpongeBootstrap.perform("Client", () -> Main.main(args));
-    }
+    public static final Blackboard.Key<Injector> PARENT_INJECTOR = Blackboard.Key.of("parent_injector", Injector.class);
 }

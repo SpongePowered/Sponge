@@ -29,9 +29,8 @@ import com.google.common.collect.Maps;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
-import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
-import org.spongepowered.vanilla.launch.plugin.PluginLoader;
+import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginLocator;
 import org.spongepowered.vanilla.modlauncher.Main;
 
 import java.nio.file.Path;
@@ -47,13 +46,8 @@ import javax.annotation.Nonnull;
 public final class PluginDiscovererService implements ITransformationService {
 
     private static final String NAME = "plugin_discoverer";
-    private final PluginEnvironment pluginEnvironment;
 
-    private PluginLoader pluginLoader;
-
-    public PluginDiscovererService() {
-        this.pluginEnvironment = Main.getLaunchPluginEnvironment();
-    }
+    private static final VanillaPluginLocator pluginLocator = Main.getPluginLocator();
 
     @Nonnull
     @Override
@@ -63,7 +57,7 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public void initialize(final IEnvironment environment) {
-        this.pluginLoader.initialize();
+        Main.getPluginLocator().initialize();
     }
 
     @Override
@@ -73,11 +67,12 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
-        this.pluginLoader.discoverPluginResources();
+        PluginDiscovererService.pluginLocator.discoverPluginResources();
+        PluginDiscovererService.pluginLocator.createPluginCandidates();
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
-        for (final Map.Entry<String, Collection<Path>> resourcesEntry : this.pluginLoader.getResources().entrySet()) {
+        for (final Map.Entry<String, Collection<Path>> resourcesEntry : pluginLocator.getResources().entrySet()) {
             final Collection<Path> resources = resourcesEntry.getValue();
             launchResources.addAll(
                 resources
@@ -92,10 +87,11 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
-        this.pluginEnvironment.getLogger().info("SpongePowered PLUGIN Subsystem Version={} Service=ModLauncher", this.pluginEnvironment.getBlackboard().get(PluginKeys.VERSION).get());
-        this.pluginLoader = new PluginLoader(this.pluginEnvironment, null);
-        this.pluginLoader.discoverLanguageServices();
-        this.pluginLoader.getServices().forEach((k, v) -> this.pluginLoader.getEnvironment().getLogger().info("Plugin language loader '{}' found.", k));
+        PluginDiscovererService.pluginLocator.getPluginEnvironment().getLogger().info("SpongePowered PLUGIN Subsystem Version={} Service=ModLauncher",
+                PluginDiscovererService.pluginLocator.getPluginEnvironment().getBlackboard().get(PluginKeys.VERSION).get());
+        PluginDiscovererService.pluginLocator.discoverLanguageServices();
+        PluginDiscovererService.pluginLocator.getServices().forEach((k, v) -> pluginLocator.getPluginEnvironment().getLogger().info("Plugin "
+                + "language loader '{}' found.", k));
     }
 
     @Nonnull

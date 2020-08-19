@@ -127,8 +127,8 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
 
     @Override
     @Nullable
-    public Entity shadow$changeDimension(final DimensionType dimensionIn) {
-        final Entity entity = super.shadow$changeDimension(dimensionIn);
+    public Entity changeDimension(final DimensionType dimensionIn) {
+        final Entity entity = super.changeDimension(dimensionIn);
 
         if (entity instanceof EnderPearlEntity) {
             // We actually teleported so...

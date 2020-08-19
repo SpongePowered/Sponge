@@ -22,39 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.modlauncher.bootstrap;
+package org.spongepowered.common.launch.plugin.loader;
 
-import cpw.mods.gross.Java9ClassLoaderUtil;
-import cpw.mods.modlauncher.api.ILaunchHandlerService;
-import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
+import org.spongepowered.plugin.PluginEnvironment;
 
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Paths;
+public interface PluginLocator {
 
-/**
- * The Sponge {@link ILaunchHandlerService launch handler} for development
- * environments.
- *
- * @author Jamie Mansfield
- */
-public abstract class AbstractSpongeDevLaunchHandler extends AbstractSpongeLaunchHandler {
-
-    @Override
-    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        // TODO Minecraft 1.14 - Very much not correct...
-        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
-            if (url.toString().contains("mixin") && url.toString().endsWith(".jar")) {
-                continue;
-            }
-
-            try {
-                builder.addTransformationPath(Paths.get(url.toURI()));
-            }
-            catch (final URISyntaxException ex) {
-                log.error("Failed to add Mixin transformation path", ex);
-            }
-        }
-    }
-
+    PluginEnvironment getPluginEnvironment();
 }

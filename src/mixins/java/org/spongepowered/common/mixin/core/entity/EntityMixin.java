@@ -78,8 +78,6 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
-import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionChangeResult;
@@ -134,7 +132,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract Entity shadow$getRidingEntity();
     @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow protected abstract void shadow$removePassenger(Entity passenger);
-    @Shadow @Nullable public Entity shadow$changeDimension(final DimensionType dimension) { return null; } // Shadow
     @Shadow public abstract boolean shadow$isInvisible();
     @Shadow public abstract void shadow$setInvisible(boolean invisible);
     @Shadow protected abstract int shadow$getFireImmuneTicks();

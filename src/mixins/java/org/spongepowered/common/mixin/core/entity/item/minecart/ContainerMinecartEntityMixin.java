@@ -44,8 +44,8 @@ public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntit
      */
     @Override
     @Nullable
-    public Entity shadow$changeDimension(DimensionType dimensionIn) {
-        final Entity entity = super.shadow$changeDimension(dimensionIn);
+    public Entity changeDimension(DimensionType dimensionIn) {
+        final Entity entity = super.changeDimension(dimensionIn);
 
         if (entity instanceof ContainerMinecartEntity) {
             // We actually teleported so...

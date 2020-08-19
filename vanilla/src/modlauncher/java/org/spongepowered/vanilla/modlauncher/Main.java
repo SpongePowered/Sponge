@@ -30,6 +30,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.util.PathConverter;
 import joptsimple.util.PathProperties;
+import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginLocator;
 import org.spongepowered.vanilla.modlauncher.util.ArgumentList;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
@@ -42,7 +43,7 @@ import java.util.Arrays;
 
 public final class Main {
 
-    private static PluginEnvironment pluginEnvironment;
+    private static VanillaPluginLocator pluginLoader;
 
     public static void main(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();
@@ -51,10 +52,10 @@ public final class Main {
         final OptionSet optionSet = parser.parse(args);
 
         final Path gameDirectory = optionSet.valueOf(gameDir);
-        Main.pluginEnvironment = new PluginEnvironment();
+        final PluginEnvironment pluginEnvironment = new PluginEnvironment();
         final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
-        Main.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
-        Main.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> gameDirectory);
+        pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
+        pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> gameDirectory);
         // Pass sponge base directory to SpongeConfigs
         System.setProperty("org.spongepowered.common.baseDir", gameDirectory.toString());
         final Path modsDirectory = gameDirectory.resolve("mods");
@@ -62,13 +63,15 @@ public final class Main {
             Files.createDirectories(modsDirectory);
         }
         // TODO Read in plugin directories from CLI/Config
-        Main.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, gameDirectory.resolve("plugins")));
+        pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, gameDirectory.resolve("plugins")));
+
+        Main.pluginLoader = new VanillaPluginLocator(pluginEnvironment);
 
         final ArgumentList lst = ArgumentList.from(args);
         Launcher.main(lst.getArguments());
     }
 
-    public static PluginEnvironment getLaunchPluginEnvironment() {
-        return Main.pluginEnvironment;
+    public static VanillaPluginLocator getPluginLocator() {
+        return Main.pluginLoader;
     }
 }
