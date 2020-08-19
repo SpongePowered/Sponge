@@ -94,8 +94,7 @@ public abstract class SpongeDepthQuery extends SpongeQuery {
             }
         }
 
-
-        if (lens.base() != 0 && !matches.isEmpty()) {
+        if (lens.base() != 0 && !matches.isEmpty() && lens instanceof DelegatingLens) {
             matches.entrySet().forEach(entry -> entry.setValue(entry.getValue() + lens.base()));
         }
 
