@@ -444,7 +444,10 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
             return;
         }
         Objects.requireNonNull(title, "title");
-        this.connection.sendPacket(new STitlePacket(ticks(title.fadeInTime()), ticks(title.fadeOutTime()), ticks(title.stayTime())));
+        final Title.Times times = title.times();
+        if (times != null) {
+            this.connection.sendPacket(new STitlePacket(ticks(times.fadeIn()), ticks(times.stay()), ticks(times.fadeOut())));
+        }
         this.connection.sendPacket(new STitlePacket(STitlePacket.Type.SUBTITLE, SpongeAdventure.asVanilla(title.subtitle())));
         this.connection.sendPacket(new STitlePacket(STitlePacket.Type.TITLE, SpongeAdventure.asVanilla(title.title())));
     }
