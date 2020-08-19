@@ -1494,4 +1494,11 @@ public final class Constants {
          */
         public static final ResourceKey UNREGISTER_KEY = ResourceKey.minecraft("unregister");
     }
+
+    public static final class KeyValueMatcher {
+
+        public static final DataQuery VALUE = DataQuery.of("Value");
+        public static final DataQuery OPERATOR = DataQuery.of("Operator");
+        public static final DataQuery KEY = DataQuery.of("Key");
+    }
 }
