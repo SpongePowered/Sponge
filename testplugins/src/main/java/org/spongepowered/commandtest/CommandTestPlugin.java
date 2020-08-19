@@ -24,6 +24,7 @@
  */
 package org.spongepowered.commandtest;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
@@ -196,10 +197,12 @@ public final class CommandTestPlugin {
         );
 
         final Parameter.Key<TestEnum> enumParameterKey = Parameter.key("enum", TypeToken.of(TestEnum.class));
+        final Parameter.Key<String> stringKey = Parameter.key("stringKey", TypeToken.of(String.class));
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(Parameter.enumValue(TestEnum.class).setKey(enumParameterKey).build())
+                        .parameter(Parameter.enumValue(TestEnum.class).orDefault(TestEnum.ONE).setKey(enumParameterKey).build())
+                        .parameter(Parameter.string().setKey(stringKey).setSuggestions(context -> ImmutableList.of("bacon", "eggs", "spam")).build())
                         .setExecutor(x -> {
                             x.sendMessage(TextComponent.of(x.requireOne(enumParameterKey).name()));
                             return CommandResult.success();

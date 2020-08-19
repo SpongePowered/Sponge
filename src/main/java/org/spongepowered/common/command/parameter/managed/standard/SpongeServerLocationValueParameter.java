@@ -38,24 +38,20 @@ import net.minecraft.command.arguments.Vec3Argument;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.Vec3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.SpongeServerLocation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -145,14 +141,17 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
     public CommandNode<ISuggestionProvider> createSuggestions(final CommandNode<ISuggestionProvider> rootNode, final String key,
             final boolean isTerminal,
             final Consumer<List<CommandNode<ISuggestionProvider>>> firstNodes,
-            final Consumer<CommandNode<ISuggestionProvider>> redirectionNodes) {
+            final Consumer<CommandNode<ISuggestionProvider>> redirectionNodes,
+            final boolean allowCustomSuggestionsOnTheFirstElement) {
 
         final RequiredArgumentBuilder<ISuggestionProvider, ResourceLocation> firstNode =
                 RequiredArgumentBuilder.argument(key, Constants.Command.RESOURCE_LOCATION_TYPE);
-        firstNode.suggests((context, builder) -> {
-            this.complete().forEach(builder::suggest);
-            return builder.buildFuture();
-        });
+        if (allowCustomSuggestionsOnTheFirstElement) {
+            firstNode.suggests((context, builder) -> {
+                this.complete().forEach(builder::suggest);
+                return builder.buildFuture();
+            });
+        }
         final RequiredArgumentBuilder<ISuggestionProvider, ILocationArgument> secondNode =
                 RequiredArgumentBuilder.argument(key + "_pos", Vec3Argument.vec3());
         if (isTerminal) {

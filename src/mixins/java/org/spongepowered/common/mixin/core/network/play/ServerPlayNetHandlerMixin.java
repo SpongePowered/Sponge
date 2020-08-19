@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.network.play;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.TextComponent;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
@@ -42,10 +46,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
+import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Locale;
@@ -105,6 +112,15 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
                 }
             }
         }
+    }
+
+    @Redirect(method = "processTabComplete", at = @At(value = "INVOKE",
+            target = "Lcom/mojang/brigadier/CommandDispatcher;parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)"
+                    + "Lcom/mojang/brigadier/ParseResults;"))
+    private ParseResults<CommandSource> impl$informParserThisIsASuggestionCheck(final CommandDispatcher<CommandSource> commandDispatcher,
+            final StringReader command,
+            final Object source) {
+        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().parse(command, (CommandSource) source, true);
     }
 
     private String[] impl$extractCommandString(final String commandString) {

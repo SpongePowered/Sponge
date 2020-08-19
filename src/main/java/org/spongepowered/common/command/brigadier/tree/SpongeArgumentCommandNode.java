@@ -40,6 +40,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import jdk.nashorn.internal.runtime.RecompilableScriptFunctionData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -120,7 +122,8 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     public final CommandNode<ISuggestionProvider> getComplexSuggestions(
             final CommandNode<ISuggestionProvider> rootSuggestionNode,
             final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode,
-            final Map<CommandNode<CommandSource>, List<CommandNode<ISuggestionProvider>>> commandNodeListMap) {
+            final Map<CommandNode<CommandSource>, List<CommandNode<ISuggestionProvider>>> commandNodeListMap,
+            final boolean allowCustomSuggestionsOnTheFirstElement) {
         if (!this.isComplexSuggestions) {
             throw new IllegalStateException("The parser is not a ComplexSuggestionNodeParser");
         }
@@ -131,7 +134,8 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 this.key.key(),
                 this.getCommand() != null,
                 nodeList -> commandNodeListMap.put(this, nodeList),
-                firstNode -> commandNodeToSuggestionNode.put(this, firstNode));
+                firstNode -> commandNodeToSuggestionNode.put(this, firstNode),
+                allowCustomSuggestionsOnTheFirstElement);
     }
 
     @Override
@@ -207,7 +211,6 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             builder.withArgumentInternal(this.getName(), parsed, false);
             builder.withNode(this, parsed.getRange());
         }
-
     }
 
     @Override
