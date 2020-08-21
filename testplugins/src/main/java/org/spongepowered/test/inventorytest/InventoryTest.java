@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.inventorytest;
+package org.spongepowered.test.inventorytest;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
@@ -57,7 +57,7 @@ import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
-import org.spongepowered.LoadableModule;
+import org.spongepowered.test.LoadableModule;
 
 import java.util.Optional;
 

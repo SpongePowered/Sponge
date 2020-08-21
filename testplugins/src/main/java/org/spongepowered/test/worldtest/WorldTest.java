@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.worldtest;
+package org.spongepowered.test.worldtest;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
@@ -31,9 +31,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
@@ -41,14 +39,11 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Plugin("worldtest")

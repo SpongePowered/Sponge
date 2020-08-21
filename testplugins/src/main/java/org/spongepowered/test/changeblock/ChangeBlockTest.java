@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.changeblock;
+package org.spongepowered.test.changeblock;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
@@ -41,7 +41,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
-import org.spongepowered.LoadableModule;
+import org.spongepowered.test.LoadableModule;
 
 @Plugin("changeblocktest")
 public class ChangeBlockTest implements LoadableModule {

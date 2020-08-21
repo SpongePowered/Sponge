@@ -22,41 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.channeltest;
+package org.spongepowered.test.channeltest;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
 
-public final class PrintTextPacket implements Packet {
+public final class PongPacket implements Packet {
 
-    private String text;
+    private int id;
 
-    public PrintTextPacket(final String text) {
-        this.text = text;
+    public PongPacket(final int id) {
+        this.id = id;
     }
 
-    private PrintTextPacket() {
+    private PongPacket() {
     }
 
-    public String getText() {
-        return this.text;
+    public int getId() {
+        return this.id;
     }
 
     @Override
     public void read(final ChannelBuf buf) {
-        this.text = buf.readString();
+        this.id = buf.readVarInt();
     }
 
     @Override
     public void write(final ChannelBuf buf) {
-        buf.writeString(this.text);
+        buf.writeVarInt(this.id);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("text", this.text)
+                .add("id", this.id)
                 .toString();
     }
 }

@@ -22,16 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered;
+package org.spongepowered.test.channeltest;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.parameter.CommandContext;
+import com.google.common.base.MoreObjects;
+import org.spongepowered.api.network.channel.ChannelBuf;
+import org.spongepowered.api.network.channel.packet.Packet;
 
-public interface LoadableModule {
+public final class PrintTextPacket implements Packet {
 
-    default void disable(final CommandContext ctx) {
-        Sponge.getEventManager().unregisterPluginListeners(Sponge.getPluginManager().fromInstance(this).get());
+    private String text;
+
+    public PrintTextPacket(final String text) {
+        this.text = text;
     }
 
-    void enable(CommandContext ctx);
+    private PrintTextPacket() {
+    }
+
+    public String getText() {
+        return this.text;
+    }
+
+    @Override
+    public void read(final ChannelBuf buf) {
+        this.text = buf.readString();
+    }
+
+    @Override
+    public void write(final ChannelBuf buf) {
+        buf.writeString(this.text);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("text", this.text)
+                .toString();
+    }
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.commandtest;
+package org.spongepowered.test.commandtest;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;

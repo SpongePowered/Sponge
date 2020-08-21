@@ -26,8 +26,6 @@ package org.spongepowered.test;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.LoadableModule;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;

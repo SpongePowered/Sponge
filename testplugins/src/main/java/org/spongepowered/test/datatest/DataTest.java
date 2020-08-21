@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.datatest;
+package org.spongepowered.test.datatest;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;

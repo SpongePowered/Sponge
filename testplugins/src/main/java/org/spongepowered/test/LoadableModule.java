@@ -22,41 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.channeltest;
+package org.spongepowered.test;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.network.channel.ChannelBuf;
-import org.spongepowered.api.network.channel.packet.Packet;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.parameter.CommandContext;
 
-public final class PongPacket implements Packet {
+public interface LoadableModule {
 
-    private int id;
-
-    public PongPacket(final int id) {
-        this.id = id;
+    default void disable(final CommandContext ctx) {
+        Sponge.getEventManager().unregisterPluginListeners(Sponge.getPluginManager().fromInstance(this).get());
     }
 
-    private PongPacket() {
-    }
-
-    public int getId() {
-        return this.id;
-    }
-
-    @Override
-    public void read(final ChannelBuf buf) {
-        this.id = buf.readVarInt();
-    }
-
-    @Override
-    public void write(final ChannelBuf buf) {
-        buf.writeVarInt(this.id);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
-                .toString();
-    }
+    void enable(CommandContext ctx);
 }

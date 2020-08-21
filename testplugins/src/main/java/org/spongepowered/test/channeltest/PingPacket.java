@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.channeltest;
+package org.spongepowered.test.channeltest;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.network.channel.ChannelBuf;
