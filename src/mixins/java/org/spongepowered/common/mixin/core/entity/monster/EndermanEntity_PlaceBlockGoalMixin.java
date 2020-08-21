@@ -65,7 +65,7 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
      * @return The block state that can be placed, or null if the enderman can't grief
      */
     @Redirect(
-        method = "shouldExecute",
+        method = "shouldExecute()Z",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/monster/EndermanEntity;getHeldBlockState()Lnet/minecraft/block/BlockState;"
@@ -91,8 +91,9 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
 
      * @return True if the state is a full cube, and the event didnt get cancelled
      */
-    @Redirect(method = "func_220836_a", at = @At(value = "INVOKE",
-              target = "Lnet/minecraft/block/BlockState;func_224756_o(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"))
+    @Redirect(method = "func_220836_a(Lnet/minecraft/world/IWorldReader;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)Z",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/block/BlockState;func_224756_o(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean impl$onPlaceBlockCancel(final BlockState blockState, final IBlockReader world, final BlockPos pos) {
         if (blockState.func_224756_o(world, pos)) {
             // Sponge start

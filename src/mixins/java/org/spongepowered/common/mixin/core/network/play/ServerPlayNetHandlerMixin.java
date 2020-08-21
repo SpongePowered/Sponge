@@ -114,9 +114,12 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         }
     }
 
-    @Redirect(method = "processTabComplete", at = @At(value = "INVOKE",
-            target = "Lcom/mojang/brigadier/CommandDispatcher;parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)"
-                    + "Lcom/mojang/brigadier/ParseResults;"))
+    @Redirect(method = "processTabComplete",
+        at = @At(value = "INVOKE",
+            target = "Lcom/mojang/brigadier/CommandDispatcher;parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/ParseResults;",
+            remap = false
+        )
+    )
     private ParseResults<CommandSource> impl$informParserThisIsASuggestionCheck(final CommandDispatcher<CommandSource> commandDispatcher,
             final StringReader command,
             final Object source) {

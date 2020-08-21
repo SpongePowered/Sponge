@@ -113,7 +113,6 @@ val mixins by sourceSets.registering {
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = main, targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
 }
 
-configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {}
 repositories {
     mavenLocal()
     maven("https://files.minecraftforge.net/maven")
@@ -178,7 +177,10 @@ dependencies {
     add(mixins.get().implementationConfigurationName, mixinsConfig)
     add(mixins.get().implementationConfigurationName, project(":SpongeAPI"))
 }
-
+configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
+    add("mixins", "common.mixins.refmap.json")
+    add("accessors", "common.accessors.refmap.json")
+}
 fun debug(logger: Logger, messsage: String) {
     println(message = messsage)
     if (System.getProperty("sponge.gradleDebug", "false")!!.toBoolean()) {
@@ -486,6 +488,10 @@ project("SpongeVanilla") {
         }
     }
 
+    configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
+        add(vanillaMixins, "vanilla.mixins.refmap.json")
+        add(vanillaAccessors, "vanilla.accessors.refmap.json")
+    }
 
     tasks {
         jar {
@@ -644,6 +650,11 @@ if (spongeForge != null) {
                     exclude(group = "org.spongepowered")
                 }
             }
+        }
+
+        configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
+            add(forgeMixins, "forge.mixins.refmap.json")
+            add(forgeAccessors, "forge.accessors.refmap.json")
         }
 
         tasks {

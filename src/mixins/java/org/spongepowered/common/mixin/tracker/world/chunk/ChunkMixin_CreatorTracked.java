@@ -359,8 +359,8 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
         this.tracker$trackedShortBlockPositions = trackedPositions;
     }
 
-    @Inject(method = "onLoad", at = @At("HEAD"))
-    private void tracker$startLoad(final CallbackInfo callbackInfo) {
+    @Inject(method = "setLoaded(Z)V", at = @At("HEAD"))
+    private void tracker$startLoad(final boolean loaded, final CallbackInfo callbackInfo) {
         final boolean isFake = ((WorldBridge) this.shadow$getWorld()).bridge$isFake();
         if (isFake) {
             return;
@@ -389,8 +389,8 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
             .buildAndSwitch();
     }
 
-    @Inject(method = "setLoaded", at = @At("RETURN"))
-    private void tracker$endLoad(final CallbackInfo callbackInfo) {
+    @Inject(method = "setLoaded(Z)V", at = @At("RETURN"))
+    private void tracker$endLoad(final boolean loaded, final CallbackInfo callbackInfo) {
         if (!((WorldBridge) this.shadow$getWorld()).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;

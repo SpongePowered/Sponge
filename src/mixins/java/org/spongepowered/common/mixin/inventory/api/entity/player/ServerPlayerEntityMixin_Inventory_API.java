@@ -60,7 +60,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
         return this.openInventory(inventory, null);
     }
 
-    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
+    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes", "deprecation"})
     @Override
     public Optional<Container> openInventory(final Inventory inventory, final Component displayName) {
         ContainerBridge openContainer = (ContainerBridge) this.openContainer;

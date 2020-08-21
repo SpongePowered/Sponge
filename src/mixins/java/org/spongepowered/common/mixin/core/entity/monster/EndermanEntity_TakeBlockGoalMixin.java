@@ -52,7 +52,7 @@ public abstract class EndermanEntity_TakeBlockGoalMixin extends Goal {
      * @return The held blockstate, if can grief, or air state if they cannot (the pickup checks if the block state is not null only)
      */
     @Redirect(
-        method = "shouldExecute",
+        method = "shouldExecute()Z",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/monster/EndermanEntity;getHeldBlockState()Lnet/minecraft/block/BlockState;"

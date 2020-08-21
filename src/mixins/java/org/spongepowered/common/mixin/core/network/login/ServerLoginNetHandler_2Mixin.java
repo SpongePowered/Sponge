@@ -37,7 +37,7 @@ import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
 @Mixin(targets = "net/minecraft/network/login/ServerLoginNetHandler$2")
 public abstract class ServerLoginNetHandler_2Mixin extends Thread {
 
-    @Shadow(aliases = {"this$0", "field_180221_a"})
+    @Shadow(aliases = {"this$0", "field_180221_a"}, remap = false)
     @Final
     private ServerLoginNetHandler handler;
 

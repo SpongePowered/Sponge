@@ -139,7 +139,9 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             from = @At(value = "INVOKE",
                 target = "Lnet/minecraft/world/server/ServerWorld;resetUpdateEntityTick()V"),
             to = @At(value = "INVOKE",
-                target = "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;int2ObjectEntrySet()Lit/unimi/dsi/fastutil/objects/ObjectSet;")
+                target = "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;int2ObjectEntrySet()Lit/unimi/dsi/fastutil/objects/ObjectSet;",
+                remap = false
+            )
         )
     )
     private void tracker$wrapGlobalEntityTicking(final ServerWorld serverWorld, final Consumer<Entity> consumer, final Entity entity) {

@@ -37,6 +37,7 @@ import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Mixin(VillagerEntity.class)
 public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
@@ -74,7 +75,7 @@ public abstract class VillagerEntityMixin extends AbstractVillagerEntityMixin {
      * @return true
      */
     @Override
-    protected boolean impl$addNewOfferToTempMap(final MerchantOffers merchantOffers, final MerchantOffer offer) {
+    protected boolean impl$addNewOfferToTempMap(final Set<MerchantOffer> merchantOffers, final MerchantOffer offer) {
         return this.impl$newOffers.add(offer);
     }
 }

@@ -169,7 +169,12 @@ public abstract class PlayerListMixin {
         }
     }
 
-    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V"))
+    @Redirect(method = "initializeConnectionToPlayer",
+        at = @At(value = "INVOKE",
+            target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V",
+            remap = false
+        )
+    )
     private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(Logger logger, String message, Object p0, Object p1, Object p2, Object p3,
             Object p4, Object p5, NetworkManager manager, ServerPlayerEntity entity) {
         logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", p0, p1, ((org.spongepowered.api.world.server.ServerWorld) entity.getServerWorld()).getKey(), p2, p3, p4, p5);

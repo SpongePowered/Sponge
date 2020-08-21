@@ -88,7 +88,7 @@ public abstract class BreedGoalMixin {
 
     @Inject(method = "spawnBaby",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
+            target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z",
             shift = At.Shift.AFTER,
             ordinal = 0),
         cancellable = true)
@@ -102,7 +102,7 @@ public abstract class BreedGoalMixin {
     @Redirect(method = "spawnBaby()V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
+            target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z",
             ordinal = 0))
     private boolean impl$throwBreedEvent(final World world, final Entity baby) {
         if (ShouldFire.BREEDING_EVENT_BREED) {

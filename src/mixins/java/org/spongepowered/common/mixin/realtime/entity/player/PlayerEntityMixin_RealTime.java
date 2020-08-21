@@ -80,16 +80,16 @@ public abstract class PlayerEntityMixin_RealTime extends LivingEntityMixin_RealT
     }
 
     @Redirect(
-        method = "onUpdate",
+        method = "tick()V",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/player/EntityPlayer;sleepTimer:I",
+            target = "Lnet/minecraft/entity/player/PlayerEntity;sleepTimer:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/entity/player/EntityPlayer;wakeUpPlayer(ZZZ)V",
+                target = "Lnet/minecraft/entity/player/PlayerEntity;wakeUpPlayer(ZZZ)V",
                 ordinal = 1
             ),
             to = @At(

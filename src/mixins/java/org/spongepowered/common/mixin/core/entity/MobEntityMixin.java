@@ -35,6 +35,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IEntityReader;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.Entity;
@@ -289,11 +290,11 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
 
     @Nullable
     @Redirect(
-            method = "checkDespawn",
+            method = "checkDespawn()V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/World;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
-    private PlayerEntity impl$getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entity, final double distance) {
+                    target = "Lnet/minecraft/world/IEntityReader;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
+    private PlayerEntity impl$getClosestPlayerForSpawning(final IEntityReader world, final net.minecraft.entity.Entity entity, final double distance) {
         double bestDistance = -1.0D;
         PlayerEntity result = null;
 

@@ -90,7 +90,12 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     }
 
     // Note: worldSettingsIn is never null here, it is null checked and assigned before this point in the method.
-    @Redirect(method = "launchIntegratedServer", at = @At(value = "NEW", target = "com/mojang/authlib/yggdrasil/YggdrasilAuthenticationService"))
+    @Redirect(method = "launchIntegratedServer",
+        at = @At(value = "NEW",
+            target = "com/mojang/authlib/yggdrasil/YggdrasilAuthenticationService",
+            remap = false
+        )
+    )
     private YggdrasilAuthenticationService impl$createServerBeforeCache(final Proxy proxy, final String clientToken, final String folderName,
             final String worldName, final WorldSettings worldSettingsIn) {
 
@@ -106,15 +111,21 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     }
 
     @Redirect(method = "launchIntegratedServer",
-            at = @At(value = "INVOKE",
-                    target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;"))
+        at = @At(value = "INVOKE",
+            target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;",
+            remap = false
+        )
+    )
     private MinecraftSessionService impl$useServerMinecraftSessionService(final YggdrasilAuthenticationService yggdrasilAuthenticationService) {
         return ((MinecraftServerAccessor) this.integratedServer).accessor$getSessionService();
     }
 
     @Redirect(method = "launchIntegratedServer",
-            at = @At(value = "INVOKE",
-                    target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createProfileRepository()Lcom/mojang/authlib/GameProfileRepository;"))
+        at = @At(value = "INVOKE",
+            target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createProfileRepository()Lcom/mojang/authlib/GameProfileRepository;",
+            remap = false
+        )
+    )
     private GameProfileRepository impl$useServerGameProfileRepository(final YggdrasilAuthenticationService yggdrasilAuthenticationService) {
         return ((MinecraftServerAccessor) this.integratedServer).accessor$getProfileRepo();
     }

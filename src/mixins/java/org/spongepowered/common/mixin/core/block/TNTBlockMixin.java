@@ -60,7 +60,7 @@ public abstract class TNTBlockMixin extends BlockMixin {
     }
 
     @Inject(method = "explode(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/LivingEntity;)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
@@ -81,7 +81,7 @@ public abstract class TNTBlockMixin extends BlockMixin {
 
     @Inject(
         method = "onExplosionDestroy",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )

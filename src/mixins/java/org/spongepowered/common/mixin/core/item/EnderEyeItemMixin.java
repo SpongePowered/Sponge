@@ -142,10 +142,10 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
      * @param targetPos The target position of the dungeon
      * @param enderEye The ender eye being spawned
      */
-    @Inject(method = "onItemRightClick",
+    @Inject(method = "onItemRightClick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"
+            target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"
         ),
         slice = @Slice(
             from = @At(
