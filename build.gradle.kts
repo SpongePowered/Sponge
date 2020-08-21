@@ -34,6 +34,8 @@ val minecraftDep: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
 
+val mixinVersion: String by project
+
 minecraft {
     mappings(mcpType, mcpMappings)
     project.sourceSets["main"].resources
@@ -142,15 +144,12 @@ dependencies {
     implementation("org.ow2.asm:asm-util:6.2")
     implementation("org.ow2.asm:asm-tree:6.2")
 
-    annotationProcessor("org.spongepowered:mixin:0.8")
-    annotationProcessor("com.google.code.gson:gson:2.2.4")
-    annotationProcessor("com.google.guava:guava:21.0")
-    annotationProcessor("org.ow2.asm:asm-tree:6.2")
+    annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig(project(":SpongeAPI"))
     launchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
-    launchConfig("org.spongepowered:mixin:0.8")
+    launchConfig("org.spongepowered:mixin:$mixinVersion")
     launchConfig("org.checkerframework:checker-qual:2.8.1")
     launchConfig("com.google.guava:guava:21.0") {
         exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
@@ -172,10 +171,8 @@ dependencies {
     add(launch.get().implementationConfigurationName, launchConfig)
 
     // Annotation Processor
-    "accessorsAnnotationProcessor"(launchConfig)
-    "mixinsAnnotationProcessor"(launchConfig)
-    "accessorsAnnotationProcessor"("org.spongepowered:mixin:0.8")
-    "mixinsAnnotationProcessor"("org.spongepowered:mixin:0.8")
+    "accessorsAnnotationProcessor"("org.spongepowered:mixin:$mixinVersion:processor")
+    "mixinsAnnotationProcessor"("org.spongepowered:mixin:$mixinVersion:processor")
     mixinsConfig(sourceSets["main"].output)
     add(accessors.get().implementationConfigurationName, accessorsConfig)
     add(mixins.get().implementationConfigurationName, mixinsConfig)
@@ -439,21 +436,18 @@ project("SpongeVanilla") {
         api(launch.get().output)
         implementation(accessors.get().output)
         implementation(project(commonProject.path)) {
-            exclude(group = "net.minecraft", module = "$minecraftDep")
+            exclude(group = "net.minecraft", module = minecraftDep)
         }
-        annotationProcessor("org.spongepowered:mixin:0.8")
-        annotationProcessor("com.google.code.gson:gson:2.2.4")
-        annotationProcessor("com.google.guava:guava:21.0")
-        annotationProcessor("org.ow2.asm:asm-tree:6.2")
+        annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
         vanillaMixinsImplementation(project(commonProject.path)) {
-            exclude(group = "net.minecraft", module = "$minecraftDep")
+            exclude(group = "net.minecraft", module = minecraftDep)
         }
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
         add(vanillaLaunch.implementationConfigurationName, vanillaModLauncherConfig)
 
         vanillaModLauncherConfig(project(":SpongeAPI"))
-        vanillaModLauncherConfig("org.spongepowered:mixin:0.8")
+        vanillaModLauncherConfig("org.spongepowered:mixin:$mixinVersion")
         vanillaModLauncherConfig("org.ow2.asm:asm-util:6.2")
         vanillaModLauncherConfig("org.ow2.asm:asm-tree:6.2")
         vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
@@ -482,8 +476,8 @@ project("SpongeVanilla") {
         // Annotation Processor
         vanillaAccessorsAnnotationProcessor(vanillaModLauncherImplementation)
         vanillaMixinsAnnotationProcessor(vanillaModLauncherImplementation)
-        vanillaAccessorsAnnotationProcessor("org.spongepowered:mixin:0.8")
-        vanillaMixinsAnnotationProcessor("org.spongepowered:mixin:0.8")
+        vanillaAccessorsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion")
+        vanillaMixinsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion")
 
         testplugins?.apply {
             vanillaModLauncherRuntime(project(testplugins.path)) {
@@ -618,14 +612,15 @@ if (spongeForge != null) {
             api(launch.get().output)
             implementation(accessors.get().output)
             implementation(project(commonProject.path)) {
-                exclude(group = "net.minecraft", module = "$minecraftDep")
+                exclude(group = "net.minecraft", module = minecraftDep)
             }
             forgeMixinsImplementation(project(commonProject.path)) {
-                exclude(group = "net.minecraft", module = "$minecraftDep")
+                exclude(group = "net.minecraft", module = minecraftDep)
             }
+            annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
             add(forgeLaunch.implementationConfigurationName, project(":SpongeAPI"))
 
-            forgeLaunchConfig("org.spongepowered:mixin:0.8")
+            forgeLaunchConfig("org.spongepowered:mixin:$mixinVersion")
             forgeLaunchConfig("org.ow2.asm:asm-util:6.2")
             forgeLaunchConfig("org.ow2.asm:asm-tree:6.2")
             forgeLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
@@ -641,8 +636,8 @@ if (spongeForge != null) {
             forgeAccessorsImplementation(forgeLaunchConfig)
 
             // Annotation Processor
-            forgeAccessorsAnnotationProcessor("org.spongepowered:mixin:0.8")
-            forgeMixinsAnnotationProcessor("org.spongepowered:mixin:0.8")
+            forgeAccessorsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
+            forgeMixinsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
             testplugins?.apply {
                 add(forgeLaunch.runtimeConfigurationName, project(testplugins.path)) {
