@@ -24,30 +24,16 @@
  */
 package org.spongepowered.test;
 
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Client;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Server;
+import org.spongepowered.LoadableModule;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
-import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
-import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
-import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogRegistryEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
-import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
-import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
-import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
-import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
@@ -58,87 +44,16 @@ import java.util.stream.Collectors;
 @Plugin("test")
 public final class TestPlugin {
 
-    private final Logger logger;
     private final PluginContainer plugin;
+    private final Set<String> enabledPlugins = new HashSet<>();
 
     @Inject
-    public TestPlugin(final Logger logger, final PluginContainer plugin) {
-        this.logger = logger;
+    public TestPlugin(final PluginContainer plugin) {
         this.plugin = plugin;
     }
 
     @Listener
-    public void onConstruct(final ConstructPluginEvent event) {
-        this.logger.info(event);
-    }
-
-    @Listener
-    public void onRegisterFactory(final RegisterFactoryEvent event) {
-        this.logger.info(event);
-    }
-
-    @Listener
-    public void onRegisterBuilder(final RegisterBuilderEvent event) {
-        this.logger.info(event);
-    }
-
-    @Listener
-    public void onProvideService(final ProvideServiceEvent<WhitelistService> event) {
-        this.logger.info(event);
-        event.suggest(TestWhitelistService::new);
-    }
-
-    @Listener
-    public void onRegisterCatalogRegistry(final RegisterCatalogRegistryEvent event) {
-        this.logger.info(event);
-        event.register(TestType.class, ResourceKey.of(this.plugin, "test_type"), () -> Sets.newHashSet(new TestType(ResourceKey.of(this.plugin, "a"))));
-    }
-
-    @Listener
-    public void onRegisterTestType(final RegisterCatalogEvent<TestType> event) {
-        this.logger.info(event);
-        event.register(new TestType(ResourceKey.of(this.plugin, "b")));
-    }
-
-    @Listener
-    public void onStartingServer(final StartingEngineEvent<Server> event) {
-        this.logger.info("Starting engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onStartingClient(final StartingEngineEvent<Client> event) {
-        this.logger.info("Starting engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onStartedServer(final StartedEngineEvent<Server> event) {
-        this.logger.info("Started engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onStartedClient(final StartedEngineEvent<Client> event) {
-        this.logger.info("Started engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onLoadedGame(final LoadedGameEvent event) {
-        this.logger.info(event);
-    }
-
-    @Listener
-    public void onStoppingServer(final StoppingEngineEvent<Server> event) {
-        this.logger.info("Stopping engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onStoppingClient(final StoppingEngineEvent<Client> event) {
-        this.logger.info("Stopping engine '{}'", event.getEngine());
-    }
-
-    private final Set<String> enabledPlugins = new HashSet<>();
-
-    @Listener
-    public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<PluginContainer> pluginKey = Parameter.plugin().setKey("plugin").setSuggestions(
                 context -> Sponge.getPluginManager().getPlugins().stream()
                         .filter(pc -> pc.getInstance() instanceof LoadableModule)

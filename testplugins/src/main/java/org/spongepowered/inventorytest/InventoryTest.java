@@ -57,82 +57,84 @@ import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
-import org.spongepowered.test.LoadableModule;
+import org.spongepowered.LoadableModule;
 
 import java.util.Optional;
 
 @Plugin("inventorytest")
-public class InventoryTest implements LoadableModule {
+public final class InventoryTest implements LoadableModule {
+
+    private final PluginContainer plugin;
 
     @Inject
-    private PluginContainer plugin;
+    public InventoryTest(final PluginContainer plugin) {
+        this.plugin = plugin;
+    }
 
     public static class InventoryTestListener {
-        @Listener
-        public void onOpen(InteractContainerEvent.Open event) {
-            final Optional<Component> component = event.getContainer().get(Keys.DISPLAY_NAME);
-            final String title = component.map(c -> PlainComponentSerializer.plain().serialize(c)).orElse("No Title");
-            System.out.println(event.getClass().getSimpleName() + " [" + title + "]");
+
+        private final PluginContainer plugin;
+
+        public InventoryTestListener(final PluginContainer plugin) {
+            this.plugin = plugin;
         }
 
         @Listener
-        public void onClickContainer(InteractContainerEvent event) {
-            //        System.out.println(event);
+        public void onInteractContainerOpen(final InteractContainerEvent.Open event) {
+            final Optional<Component> component = event.getContainer().get(Keys.DISPLAY_NAME);
+            final String title = component.map(c -> PlainComponentSerializer.plain().serialize(c)).orElse("No Title");
+            this.plugin.getLogger().info("{} [{}]", event.getClass().getSimpleName(), title);
+        }
+
+        @Listener
+        public void onInteractContainer(final InteractContainerEvent event) {
             if (event instanceof EnchantItemEvent) {
-                System.out.println(
-                        event.getClass().getSimpleName() + " [" + ((EnchantItemEvent) event).getOption() + "] S:" + ((EnchantItemEvent) event).getSeed());
+                this.plugin.getLogger().info("{} [{}] S:{}", event.getClass().getSimpleName(), ((EnchantItemEvent) event).getOption(),
+                        ((EnchantItemEvent) event).getSeed());
             }
             final Optional<Component> component = event.getContainer().get(Keys.DISPLAY_NAME);
             final String title = component.map(c -> PlainComponentSerializer.plain().serialize(c)).orElse("No Title");
             if (title.equals("Foobar")) {
                 doFancyStuff(event.getCause().first(Player.class).get());
             }
-
         }
 
         @Listener
-        public void onInteract(ChangeInventoryEvent event) {
+        public void onInteract(final ChangeInventoryEvent event) {
 
             if (event instanceof ClickContainerEvent) {
-                System.out.println(event.getClass().getSimpleName() + " " + ((ClickContainerEvent) event).getContainer().getClass().getSimpleName());
+                this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), ((ClickContainerEvent) event).getContainer().getClass().getSimpleName());
                 final Transaction<ItemStackSnapshot> cursor = ((ClickContainerEvent) event).getCursorTransaction();
-                System.out.println("Cursor: " + cursor.getOriginal().getType() + "x" + cursor.getOriginal().getQuantity() + "->" +
-                        cursor.getFinal().getType() + "x" + cursor.getFinal().getQuantity()
-                );
+                this.plugin.getLogger().info("Cursor: {}x{}->{}x{}", cursor.getOriginal().getType(), cursor.getOriginal().getQuantity(),
+                        cursor.getFinal().getType(), cursor.getFinal().getQuantity());
             } else {
-                System.out.println(event.getClass().getSimpleName() + " " + event.getInventory().getClass().getSimpleName());
+                this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), event.getInventory().getClass().getSimpleName());
             }
-            for (SlotTransaction slotTrans : event.getTransactions()) {
-                System.out.println("SlotTr: " + slotTrans.getOriginal().getType() + "x" + slotTrans.getOriginal().getQuantity() + "->" +
-                        slotTrans.getFinal().getType() + "x" + slotTrans.getFinal().getQuantity() + "[" + slotTrans.getSlot().get(Keys.SLOT_INDEX).get()
-                        + "]");
+            for (final SlotTransaction slotTrans : event.getTransactions()) {
+                this.plugin.getLogger().info("SlotTr: {}x{}->{}x{}[{}]", slotTrans.getOriginal().getType(), slotTrans.getOriginal().getQuantity(),
+                        slotTrans.getFinal().getType(), slotTrans.getFinal().getQuantity(), slotTrans.getSlot().get(Keys.SLOT_INDEX).get());
             }
-            //        System.out.println(event);
         }
 
         @Listener
-        public void onTransfer(TransferInventoryEvent event) {
+        public void onTransfer(final TransferInventoryEvent event) {
             if (event instanceof TransferInventoryEvent.Post) {
-                System.out.println(
-                        event.getClass().getSimpleName() + " " + event.getSourceInventory().getClass().getSimpleName() + "=>" + event.getTargetInventory()
-                                .getClass().getSimpleName());
+                this.plugin.getLogger().info("{} {}=>{}", event.getClass().getSimpleName(), event.getSourceInventory().getClass().getSimpleName(), event.getTargetInventory()
+                        .getClass().getSimpleName());
                 final Integer sourceIdx = ((TransferInventoryEvent.Post) event).getSourceSlot().get(Keys.SLOT_INDEX).get();
                 final Integer targetIdx = ((TransferInventoryEvent.Post) event).getTargetSlot().get(Keys.SLOT_INDEX).get();
                 final ItemStackSnapshot item = ((TransferInventoryEvent.Post) event).getTransferredItem();
-                System.out.println("[" + sourceIdx + "] -> [" + targetIdx + "] " + item.getType() + "x" + item.getQuantity());
+                this.plugin.getLogger().info("[{}] -> [{}] {}x{}", sourceIdx, targetIdx, item.getType(), item.getQuantity());
             }
-
-            //        System.out.println(event);
         }
     }
 
     @Override
-    public void enable(CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, new InventoryTestListener());
+    public void enable(final CommandContext ctx) {
+        Sponge.getEventManager().registerListeners(this.plugin, new InventoryTestListener(this.plugin));
     }
 
-
-    private static void doFancyStuff(Player player) {
+    private static void doFancyStuff(final Player player) {
 
         final GridInventory inv27Grid = player.getInventory().query(PrimaryPlayerInventory.class).get().getStorage();
         final Inventory inv27Slots = Inventory.builder().slots(27).completeStructure().build();
@@ -159,13 +161,13 @@ public class InventoryTest implements LoadableModule {
         private final ViewableInventory primary;
         private ViewableInventory last;
 
-        public MySlotClickHandler(InventoryMenu menu, ViewableInventory primary) {
+        public MySlotClickHandler(final InventoryMenu menu, final ViewableInventory primary) {
             this.primary = primary;
             this.menu = menu;
         }
 
         @Override
-        public boolean handle(Cause cause, Container container, Slot slot, int slotIndex, ClickType<?> clickType) {
+        public boolean handle(final Cause cause, final Container container, final Slot slot, final int slotIndex, final ClickType<?> clickType) {
 
             if (slot.viewedSlot().parent() == this.primary) {
                 switch (slotIndex) {

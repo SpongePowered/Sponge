@@ -25,7 +25,6 @@
 package org.spongepowered.channeltest;
 
 import com.google.inject.Inject;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterChannelEvent;
@@ -46,7 +45,6 @@ import java.util.concurrent.CompletionException;
 @Plugin("channeltest")
 public final class ChannelTest {
 
-    private final Logger logger;
     private final PluginContainer plugin;
 
     private PacketChannel channel;
@@ -54,17 +52,8 @@ public final class ChannelTest {
     private RawDataChannel rawChannel;
 
     @Inject
-    public ChannelTest(final Logger logger, final PluginContainer plugin) {
-        this.logger = logger;
+    public ChannelTest(final PluginContainer plugin) {
         this.plugin = plugin;
-    }
-
-    private static String getName(final EngineConnectionSide<?> side) {
-        return side == EngineConnectionSide.CLIENT ? "client" : "server";
-    }
-
-    private void logReceived(final Channel channel, final Object packet, final EngineConnection connection) {
-        this.logger.info("Received {} through {} on the {} side.", packet, channel.getKey(), getName(connection.getSide()));
     }
 
     @Listener
@@ -73,7 +62,7 @@ public final class ChannelTest {
         this.channel.register(PrintTextPacket.class, 0)
                 .addHandler((packet, connection) -> {
                     this.logReceived(this.channel, packet, connection);
-                    this.logger.info(packet.getText());
+                    this.plugin.getLogger().info(packet.getText());
                 });
         this.channel.registerTransactional(PingPacket.class, PongPacket.class, 1)
                 .setRequestHandler((requestPacket, connection, response) -> {
@@ -85,7 +74,7 @@ public final class ChannelTest {
         this.basicChannel.register(PrintTextPacket.class, 0)
                 .addHandler((packet, connection) -> {
                     this.logReceived(this.basicChannel, packet, connection);
-                    this.logger.info(packet.getText());
+                    this.plugin.getLogger().info(packet.getText());
                 });
         this.basicChannel.registerTransactional(PingPacket.class, PongPacket.class, 1)
                 .setRequestHandler((requestPacket, connection, response) -> {
@@ -108,7 +97,7 @@ public final class ChannelTest {
 
     @Listener
     public void onConnectionHandshake(final ServerSideConnectionEvent.Handshake event) {
-        this.logger.info("Starting handshake phase.");
+        this.plugin.getLogger().info("Starting handshake phase.");
         final PingPacket pingPacket1 = new PingPacket(123);
         final ServerSideConnection connection = event.getConnection();
         this.channel.sendTo(connection, pingPacket1)
@@ -119,15 +108,15 @@ public final class ChannelTest {
                             .thenAccept(response2 -> {
                                 this.logReceived(this.channel, response2, connection);
                                 this.channel.sendTo(connection, new PrintTextPacket("Finished handshake phase."));
-                                this.logger.info("Finished handshake phase.");
+                                this.plugin.getLogger().info("Finished handshake phase.");
                             })
                             .exceptionally(cause -> {
-                                this.logger.error("Failed to get a response to {}", pingPacket2, cause);
+                                this.plugin.getLogger().error("Failed to get a response to {}", pingPacket2, cause);
                                 return null;
                             });
                 })
                 .exceptionally(cause -> {
-                    this.logger.error("Failed to get a response to {}", pingPacket1, cause);
+                    this.plugin.getLogger().error("Failed to get a response to {}", pingPacket1, cause);
                     return null;
                 });
 
@@ -140,22 +129,22 @@ public final class ChannelTest {
                             .thenAccept(response2 -> {
                                 this.logReceived(this.channel, response2, connection);
                                 this.basicChannel.handshake().sendTo(connection, new PrintTextPacket("Finished handshake phase for basic channel."));
-                                this.logger.info("Finished handshake phase for basic channel.");
+                                this.plugin.getLogger().info("Finished handshake phase for basic channel.");
                             })
                             .exceptionally(cause -> {
-                                this.logger.error("Failed to get a response to {}", basicPingPacket2, cause);
+                                this.plugin.getLogger().error("Failed to get a response to {}", basicPingPacket2, cause);
                                 return null;
                             });
                 })
                 .exceptionally(cause -> {
-                    this.logger.error("Failed to get a response to {}", pingPacket1, cause);
+                    this.plugin.getLogger().error("Failed to get a response to {}", pingPacket1, cause);
                     return null;
                 });
 
         this.rawChannel.handshake().sendTo(connection, buf -> buf.writeVarInt(200))
                 .thenAccept(response -> this.logReceived(this.rawChannel, response.readVarInt(), connection))
                 .exceptionally(cause -> {
-                    this.logger.error("Failed to get a response to raw 200 value", cause);
+                    this.plugin.getLogger().error("Failed to get a response to raw 200 value", cause);
                     return null;
                 });
 
@@ -166,9 +155,9 @@ public final class ChannelTest {
                         cause = cause.getCause();
                     }
                     if (cause instanceof NoResponseException) {
-                        this.logger.error("Successfully received no response exception");
+                        this.plugin.getLogger().error("Successfully received no response exception");
                     } else {
-                        this.logger.error("Failed to get a response to raw 0 value", cause);
+                        this.plugin.getLogger().error("Failed to get a response to raw 0 value", cause);
                     }
                     return null;
                 });
@@ -176,26 +165,34 @@ public final class ChannelTest {
 
     @Listener
     public void onConnectionLogin(final ServerSideConnectionEvent.Login event) {
-        this.logger.info("Player \"" + event.getProfile().getName().orElse("unknown") + "\" is logging in.");
+        this.plugin.getLogger().info("Player \"" + event.getProfile().getName().orElse("unknown") + "\" is logging in.");
     }
 
     @Listener
     public void onConnectionJoin(final ServerSideConnectionEvent.Join event) {
-        this.logger.info("Player \"" + event.getPlayer().getName() + "\" joined.");
+        this.plugin.getLogger().info("Player \"" + event.getPlayer().getName() + "\" joined.");
 
         final ServerSideConnection connection = event.getConnection();
         final PingPacket pingPacket1 = new PingPacket(789);
         this.channel.sendTo(connection, pingPacket1)
                 .thenAccept(response1 -> this.logReceived(this.channel, response1, connection))
                 .exceptionally(cause -> {
-                    this.logger.error("Failed to get a response to {}", pingPacket1, cause);
+                    this.plugin.getLogger().error("Failed to get a response to {}", pingPacket1, cause);
                     return null;
                 });
 
         this.basicChannel.play().sendTo(connection, new PrintTextPacket("You successfully joined the server."))
                 .exceptionally(cause -> {
-                    this.logger.error(cause);
+                    this.plugin.getLogger().error(cause);
                     return null;
                 });
+    }
+
+    private static String getName(final EngineConnectionSide<?> side) {
+        return side == EngineConnectionSide.CLIENT ? "client" : "server";
+    }
+
+    private void logReceived(final Channel channel, final Object packet, final EngineConnection connection) {
+        this.plugin.getLogger().info("Received {} through {} on the {} side.", packet, channel.getKey(), getName(connection.getSide()));
     }
 }

@@ -80,8 +80,7 @@ public final class WorldTest {
                         .collect(Collectors.toList()))
                 .setKey("world").build();
 
-        event
-                .register(this.plugin, Command
+        event.register(this.plugin, Command
                     .builder()
                     .parameter(locationParameter)
                     .parameter(portalTypeParameter)

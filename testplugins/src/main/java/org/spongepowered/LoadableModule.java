@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test;
+package org.spongepowered;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.parameter.CommandContext;
 
 public interface LoadableModule {
 
-    default void disable(CommandContext ctx) {
+    default void disable(final CommandContext ctx) {
         Sponge.getEventManager().unregisterPluginListeners(Sponge.getPluginManager().fromInstance(this).get());
     }
 

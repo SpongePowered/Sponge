@@ -41,34 +41,36 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
-import org.spongepowered.test.LoadableModule;
+import org.spongepowered.LoadableModule;
 
 @Plugin("changeblocktest")
 public class ChangeBlockTest implements LoadableModule {
 
     private static final Marker marker = MarkerManager.getMarker("CHANGEBLOCK");
 
-    @Inject Logger pluginLogger;
-    @Inject PluginContainer pluginContainer;
-
+    private final PluginContainer plugin;
     private boolean cancelAll = false;
 
+    @Inject
+    public ChangeBlockTest(final PluginContainer plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
-    public void enable(CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.pluginContainer, new ChangeBlockListener());
+    public void enable(final CommandContext ctx) {
+        Sponge.getEventManager().registerListeners(this.plugin, new ChangeBlockListener());
     }
 
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
-        event.register(this.pluginContainer, Command.builder()
+        event.register(this.plugin, Command.builder()
             .setExecutor(context -> {
                 this.cancelAll = !this.cancelAll;
                 final TextComponent newState = TextComponent.of(this.cancelAll ? "ON" : "OFF", this.cancelAll ? NamedTextColor.GREEN : NamedTextColor.RED);
                 context.sendMessage(TextComponent.of("Turning Block Changes: ").append(newState));
                 return CommandResult.success();
             })
-            .build(),
-            "toggleBlockChanges"
+            .build(), "toggleBlockChanges"
         );
     }
 
@@ -76,7 +78,7 @@ public class ChangeBlockTest implements LoadableModule {
     private class ChangeBlockListener {
         @Listener
         public void onChangeBlock(final ChangeBlockEvent.Post post) {
-            final Logger pluginLogger = ChangeBlockTest.this.pluginLogger;
+            final Logger pluginLogger = ChangeBlockTest.this.plugin.getLogger();
             pluginLogger.log(Level.FATAL, ChangeBlockTest.marker, "/*************");
             pluginLogger.log(Level.FATAL, ChangeBlockTest.marker, "/* ChangeBlockEvent");
             pluginLogger.log(Level.FATAL, ChangeBlockTest.marker, "/");
@@ -89,6 +91,5 @@ public class ChangeBlockTest implements LoadableModule {
                 post.setCancelled(true);
             }
         }
-
     }
 }

@@ -68,7 +68,6 @@ public final class CommandTestPlugin {
         this.logger = logger;
     }
 
-
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerPlayer> playerKey = Parameter.playerOrSource().setKey("player").build();
@@ -236,5 +235,4 @@ public final class CommandTestPlugin {
         TWO,
         THREE
     }
-
 }

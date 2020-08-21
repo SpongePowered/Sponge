@@ -60,11 +60,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Plugin("customdatatest")
-public class CustomDataTest {
+public final class CustomDataTest {
+
+    private final PluginContainer plugin;
+    private Key<Value<Integer>> myKey;
 
     @Inject
-    private PluginContainer plugin;
-    private Key<Value<Integer>> myKey;
+    public CustomDataTest(final PluginContainer plugin) {
+        this.plugin = plugin;
+    }
 
     private enum Type {
         ITEMSTACK,
@@ -73,6 +77,7 @@ public class CustomDataTest {
         PLAYER,
         USER
     }
+
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<Integer> numberKey = Parameter.integerNumber().orDefault(1).setKey("number").build();
@@ -128,7 +133,7 @@ public class CustomDataTest {
     }
 
     @Listener
-    public void onRegisterData(RegisterCatalogEvent<DataRegistration> event) {
+    public void onRegisterData(final RegisterCatalogEvent<DataRegistration> event) {
         this.myKey = Key.builder().key(ResourceKey.of(this.plugin, "mydata")).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
         final DataRegistration myRegistration = DataRegistration.builder()
                 .key(this.myKey)
@@ -141,20 +146,17 @@ public class CustomDataTest {
     }
 
     @Listener
-    public void onJoin(ServerSideConnectionEvent.Join event) {
+    public void onJoin(final ServerSideConnectionEvent.Join event) {
         final Optional<Integer> myValue = event.getPlayer().get(this.myKey);
-        if (myValue.isPresent()) {
-            System.out.println("CustomData: " + myValue.get());
-        }
+        myValue.ifPresent(integer -> this.plugin.getLogger().info("CustomData: {}", integer));
     }
 
-    private void customUserData(UUID playerUUID, int number) {
+    private void customUserData(final UUID playerUUID, final int number) {
         final Optional<User> user = Sponge.getServer().getUserManager().get(playerUUID);
         if (user.isPresent()) {
             final Integer integer = user.get().get(this.myKey).orElse(0);
-            System.out.println("Custom data on user " + user.get().getName() + ":" + integer);
+            this.plugin.getLogger().info("Custom data on user {}: {}", user.get().getName(), integer);
             user.get().offer(this.myKey, number);
         }
     }
-
 }

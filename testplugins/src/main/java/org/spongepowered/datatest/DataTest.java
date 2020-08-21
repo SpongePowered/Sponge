@@ -79,25 +79,29 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 @Plugin("datatest")
-public class DataTest  {
+public final class DataTest  {
+
+    private final PluginContainer plugin;
 
     @Inject
-    private PluginContainer plugin;
+    public DataTest(final PluginContainer plugin) {
+        this.plugin = plugin;
+    }
 
     @Listener
-    public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Command.Parameterized myCommand = Command.builder()
+    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+        event.register(this.plugin, Command.builder()
                 .setExecutionRequirements(cc -> cc.first(ServerPlayer.class).isPresent())
                 .setExecutor(context -> {
                     this.testData(context.getCause().first(ServerPlayer.class).get());
                     return CommandResult.success();
                 })
-                .build();
-        event.register(this.plugin, myCommand, "datatest");
+                .build()
+        , "datatest");
     }
 
 
-    public void testData(ServerPlayer player) {
+    public void testData(final ServerPlayer player) {
         final ServerWorld world = player.getWorld();
         final Vector3d position = player.getPosition();
         final Vector3i blockPos = position.toInt();
@@ -401,71 +405,70 @@ public class DataTest  {
 //        tropicalFish.remove();
     }
 
-    private <T> void checkOfferSetData(DataHolder.Mutable holder, Supplier<Key<SetValue<T>>> key, Set<T> value) {
+    private <T> void checkOfferSetData(final DataHolder.Mutable holder, final Supplier<Key<SetValue<T>>> key, final Set<T> value) {
         final DataTransactionResult result = holder.offer(key, value);
         if (this.checkResult(holder, key, value, result)) {
             this.checkGetSetData(holder, key, value);
         }
     }
 
-    private <T> void checkOfferListData(DataHolder.Mutable holder, Supplier<Key<ListValue<T>>> key, List<T> value) {
+    private <T> void checkOfferListData(final DataHolder.Mutable holder, final Supplier<Key<ListValue<T>>> key, final List<T> value) {
         final DataTransactionResult result = holder.offer(key, value);
         if (this.checkResult(holder, key, value, result)) {
             this.checkGetListData(holder, key, value);
         }
     }
 
-    private <T> void checkOfferData(DataHolder.Mutable holder, Supplier<Key<Value<T>>> key, T value) {
+    private <T> void checkOfferData(final DataHolder.Mutable holder, final Supplier<Key<Value<T>>> key, final T value) {
         final DataTransactionResult result = holder.offer(key, value);
         if (this.checkResult(holder, key, value, result)) {
             this.checkGetData(holder, key, value);
         }
     }
 
-    private <V extends Value<?>> boolean checkResult(DataHolder.Mutable holder, Supplier<Key<V>> key, Object value, DataTransactionResult result) {
+    private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Supplier<Key<V>> key, final Object value, final DataTransactionResult result) {
         if (!result.isSuccessful()) {
-            System.err.println("Failed offer on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString() + " with " + value);
+            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", holder.getClass().getSimpleName(), key.get().getKey()
+                    .asString(), value);
             return true;
         }
         return false;
     }
 
-    private <T> void checkGetWeightedData(DataHolder holder, Supplier<Key<WeightedCollectionValue<T>>> key, List<T> expected) {
+    private <T> void checkGetWeightedData(final DataHolder holder, final Supplier<Key<WeightedCollectionValue<T>>> key, final List<T> expected) {
         final Optional<WeightedTable<T>> gotValue = holder.get(key);
         if (gotValue.isPresent()) {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
-                System.err.println("Value differs on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString()
-                        + "\nexpected: " + expected + "\nactual:   " + actual);
+                this.plugin.getLogger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", holder.getClass().getSimpleName(),
+                        key.get().getKey().asString(), expected, actual);
             }
         } else {
-            System.err.println("Value is missing on " + holder.getClass().getSimpleName() + " for " + key.get().getKey().asString() +
-                    "\nexpected: " + expected);
+            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", holder.getClass().getSimpleName(),
+                    key.get().getKey().asString(), expected);
         }
     }
 
-    private <T> void checkGetListData(DataHolder holder, Supplier<Key<ListValue<T>>> key, List<T> expected) {
+    private <T> void checkGetListData(final DataHolder holder, final Supplier<Key<ListValue<T>>> key, final List<T> expected) {
         this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
-    private <T> void checkGetSetData(DataHolder holder, Supplier<Key<SetValue<T>>> key, Set<T> expected) {
+    private <T> void checkGetSetData(final DataHolder holder, final Supplier<Key<SetValue<T>>> key, final Set<T> expected) {
         this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
-    private <T> void checkGetData(DataHolder holder, Supplier<Key<Value<T>>> key, T expected) {
+    private <T> void checkGetData(final DataHolder holder, final Supplier<Key<Value<T>>> key, final T expected) {
         this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
-    private <T> void checkData(DataHolder holder, String key, T expectedValue, @Nullable T actualValue) {
+    private <T> void checkData(final DataHolder holder, final String key, final T expectedValue, @Nullable final T actualValue) {
         if (actualValue != null) {
             if (!Objects.equals(actualValue, expectedValue)) {
-                System.err.println("Value differs on " + holder.getClass().getSimpleName() + " for " + key
-                        + "\nexpected: " + expectedValue + "\nactual: " + actualValue);
+                this.plugin.getLogger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", holder.getClass().getSimpleName(), key,
+                        expectedValue, actualValue);
             }
         } else if (expectedValue != null) {
-            System.err.println("Value is missing on " + holder.getClass().getSimpleName() + " for " + key +
-                    "\nexpected: " + expectedValue);
+            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", holder.getClass().getSimpleName(), key, expectedValue);
         }
     }
-
 }
