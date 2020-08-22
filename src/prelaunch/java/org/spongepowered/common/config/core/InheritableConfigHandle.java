@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config;
+package org.spongepowered.common.config.core;
 
 import ninja.leaping.configurate.Types;
 import ninja.leaping.configurate.ValueType;
@@ -54,12 +54,12 @@ public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<
      */
     private CommentedConfigurationNode mergedNode;
 
-    InheritableConfigHandle(final T instance, final @Nullable InheritableConfigHandle<?> parent) {
+    public InheritableConfigHandle(final T instance, final @Nullable InheritableConfigHandle<?> parent) {
         super(instance);
         this.parent = parent;
     }
 
-    InheritableConfigHandle(final T instance,
+    public InheritableConfigHandle(final T instance,
             final ConfigurationLoader<? extends CommentedConfigurationNode> loader,
             final @Nullable InheritableConfigHandle<?> parent) {
         super(instance, loader);
@@ -97,7 +97,7 @@ public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<
             // make a copy of the file data
             this.mergedNode = this.node.copy();
         } else {
-            this.mergedNode = SimpleCommentedConfigurationNode.root(SpongeConfigs.OPTIONS);
+            this.mergedNode = CommentedConfigurationNode.root(SpongeConfigs.OPTIONS);
         }
 
         // merge with settings from parent

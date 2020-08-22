@@ -68,7 +68,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.core.SpongeConfigs;
 import org.spongepowered.common.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config;
+package org.spongepowered.common.config.core;
 
 import static java.util.Objects.requireNonNull;
 
@@ -36,13 +36,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.util.Functional;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.UnaryOperator;
 
@@ -128,7 +129,7 @@ public class ConfigHandle<T extends Config> {
 
     public CompletableFuture<T> updateAndSave(final UnaryOperator<T> updater) {
         final T updated = requireNonNull(updater, "updater").apply(this.mapper.getInstance());
-        return Functional.asyncFailableFuture(() -> {
+        return asyncFailableFuture(() -> {
             // TODO: Force one save at a time
             this.save();
             return updated;
@@ -147,7 +148,7 @@ public class ConfigHandle<T extends Config> {
     }
 
     protected final void doVersionUpdate() {
-        final boolean wasEmpty = this.node.getValue() == null; // TODO(Configurate 3.7) isEmpty
+        final boolean wasEmpty = this.node.isEmpty();
         final CommentedConfigurationNode versionNode = this.node.getNode(VERSION_PATH);
         final int existingVersion = versionNode.getInt(-1);
         this.mapper.getInstance().getTransformation().apply(this.node);
@@ -155,7 +156,7 @@ public class ConfigHandle<T extends Config> {
         if (!wasEmpty && newVersion > existingVersion) {
             LOGGER.info("Updated {} from version {} to {}", this.mapper.getInstance(), existingVersion, newVersion);
         }
-        versionNode.setComment(VERSION_COMMENT); // TODO(Configurate 3.7) setCommentIfAbsent
+        versionNode.setCommentIfAbsent(VERSION_COMMENT);
         this.node.getNode(VERSION_PATH).setValue(versionNode); // workaround for some weird issue, can remove @configurate 4.0
     }
 
@@ -203,7 +204,7 @@ public class ConfigHandle<T extends Config> {
     }
 
     public CompletableFuture<CommentedConfigurationNode> updateSetting(String key, Object value) {
-        return Functional.asyncFailableFuture(() -> {
+        return asyncFailableFuture(() -> {
             CommentedConfigurationNode upd = this.getSetting(key);
             this.mapper.populate(this.node);
             this.save();
@@ -212,13 +213,25 @@ public class ConfigHandle<T extends Config> {
     }
 
     public <V> CompletableFuture<CommentedConfigurationNode> updateSetting(String key, V value, TypeToken<V> token) {
-        return Functional.asyncFailableFuture(() -> {
+        return asyncFailableFuture(() -> {
             CommentedConfigurationNode upd = this.getSetting(key);
             upd.setValue(token, value);
             this.mapper.populate(this.node);
             this.save();
             return upd;
         }, ForkJoinPool.commonPool());
+    }
+
+    private static <T> CompletableFuture<T> asyncFailableFuture(final Callable<T> action, final Executor executor) {
+        final CompletableFuture<T> future = new CompletableFuture<>();
+        executor.execute(() -> {
+            try {
+                future.complete(action.call());
+            } catch (Exception ex) {
+                future.completeExceptionally(ex);
+            }
+        });
+        return future;
     }
 
     public ConfigurationNode getNode() {

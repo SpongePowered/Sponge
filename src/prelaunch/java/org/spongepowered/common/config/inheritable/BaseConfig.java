@@ -26,7 +26,7 @@ package org.spongepowered.common.config.inheritable;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.transformation.ConfigurationTransformation;
-import org.spongepowered.common.config.Config;
+import org.spongepowered.common.config.core.Config;
 
 import java.util.ArrayList;
 import java.util.List;

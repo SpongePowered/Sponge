@@ -44,7 +44,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.network.RconConnection;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.core.SpongeConfigs;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
 

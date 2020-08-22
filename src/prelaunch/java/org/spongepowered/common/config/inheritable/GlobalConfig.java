@@ -26,10 +26,9 @@ package org.spongepowered.common.config.inheritable;
 
 import com.google.common.collect.ImmutableSet;
 import ninja.leaping.configurate.transformation.ConfigurationTransformation;
-import org.spongepowered.common.config.FileMovingConfigurationTransformation;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.core.FileMovingConfigurationTransformation;
+import org.spongepowered.common.config.core.SpongeConfigs;
 import org.spongepowered.common.config.common.CommonConfig;
-import org.spongepowered.common.config.metrics.MetricsConfiguration;
 
 import java.util.Set;
 
@@ -80,7 +79,7 @@ public final class GlobalConfig extends BaseConfig {
                 new FileMovingConfigurationTransformation(MIGRATE_SPONGE_PATHS, // move to broken-out configuration files
                         SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(CommonConfig.FILE_NAME)), true),
                 new FileMovingConfigurationTransformation(MIGRATE_METRICS_PATHS,
-                        SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(MetricsConfiguration.FILE_NAME)), true)
+                        SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(SpongeConfigs.METRICS_NAME)), true)
         );
     }
 }

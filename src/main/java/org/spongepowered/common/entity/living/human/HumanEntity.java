@@ -69,7 +69,7 @@ import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
 import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SSpawnPlayerPacketAccessor;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
@@ -340,7 +340,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     }
 
     public void removeFromTabListDelayed(@Nullable final ServerPlayerEntity player, final SPlayerListItemPacket removePacket) {
-        final int delay = SpongeConfigs.getForWorld(this.world).get().getEntity().getHumanPlayerListRemoveDelay();
+        final int delay = SpongeGameConfigs.getForWorld(this.world).get().getEntity().getHumanPlayerListRemoveDelay();
         final Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
             removeTask.run();

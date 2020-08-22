@@ -45,7 +45,7 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.core.SpongeConfigs;
 import org.spongepowered.common.config.common.ServicesCategory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;

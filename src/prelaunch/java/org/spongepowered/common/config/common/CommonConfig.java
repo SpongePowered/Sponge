@@ -24,18 +24,12 @@
  */
 package org.spongepowered.common.config.common;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import ninja.leaping.configurate.objectmapping.Setting;
-import org.spongepowered.common.config.Config;
-import org.spongepowered.common.util.IpSet;
+import org.spongepowered.common.config.core.Config;
 
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 /**
  * Sponge's core configuration.
@@ -66,7 +60,7 @@ public class CommonConfig implements Config {
     private ModuleCategory mixins = new ModuleCategory();
 
     @Setting("ip-sets")
-    private Map<String, List<IpSet>> ipSets = new HashMap<>();
+    private Map<String, List<String>> ipSets = new HashMap<>();
 
     @Setting(value = "bungeecord")
     private BungeeCordCategory bungeeCord = new BungeeCordCategory();
@@ -136,9 +130,6 @@ public class CommonConfig implements Config {
         return this.servicesCategory;
     }
 
-    public Map<String, Predicate<InetAddress>> getIpSets() {
-        return ImmutableMap.copyOf(Maps.transformValues(this.ipSets, Predicates::and));
-    }
 
     public ExploitCategory getExploits() {
         return this.exploits;
@@ -148,9 +139,15 @@ public class CommonConfig implements Config {
         return this.optimizations;
     }
 
+    /* TODO(zml): Reimplement this when bringing in SpongeContextCalculator from invalid
+    public Map<String, Predicate<InetAddress>> getIpSets() {
+        return ImmutableMap.copyOf(Maps.transformValues(this.ipSets, Predicates::and));
+    }
+
     public Predicate<InetAddress> getIpSet(String name) {
         return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
     }
+     */
 
     public PhaseTrackerCategory getPhaseTracker() {
         return this.causeTracker;

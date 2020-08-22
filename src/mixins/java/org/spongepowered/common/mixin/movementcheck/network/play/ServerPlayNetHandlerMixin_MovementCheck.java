@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.SpongeGameConfigs;
 
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin_MovementCheck {
@@ -43,7 +43,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
     @Redirect(method = "processPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isInvulnerableDimensionChange()Z", ordinal = 0))
     private boolean movementCheck$onPlayerMovedTooQuicklyCheck(ServerPlayerEntity player) {
-        if (SpongeConfigs.getForWorld(this.player.world).get().getMovementChecks().playerMovedTooQuickly()) {
+        if (SpongeGameConfigs.getForWorld(this.player.world).get().getMovementChecks().playerMovedTooQuickly()) {
             return player.isInvulnerableDimensionChange();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
@@ -52,7 +52,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
     @Redirect(method = "processPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;isInvulnerableDimensionChange()Z", ordinal = 1))
     private boolean movementCheck$onMovedWronglyCheck(ServerPlayerEntity player) {
-        if (SpongeConfigs.getForWorld(this.player.world).get().getMovementChecks().movedWrongly()) {
+        if (SpongeGameConfigs.getForWorld(this.player.world).get().getMovementChecks().movedWrongly()) {
             return player.isInvulnerableDimensionChange();
         }
         return true; // The 'moved too quickly' check only executes if isInvulnerableDimensionChange return false
@@ -64,7 +64,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
             to = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;func_217264_d()Z", ordinal = 0))
     )
     private double movementCheck$onVehicleMovedTooQuicklyCheck(double val) {
-        if (SpongeConfigs.getForWorld(this.player.world).get().getMovementChecks().playerVehicleMovedTooQuickly()) {
+        if (SpongeGameConfigs.getForWorld(this.player.world).get().getMovementChecks().playerVehicleMovedTooQuickly()) {
             return val;
         }
         return Double.NaN; // The 'vehicle moved too quickly' check only executes if the squared difference of the motion vectors lengths is greater than 100
@@ -84,7 +84,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
                 remap = false)
     ))
     private double movementCheck$onMovedWronglySecond(double val) {
-        if (SpongeConfigs.getForWorld(this.player.world).get().getMovementChecks().movedWrongly()) {
+        if (SpongeGameConfigs.getForWorld(this.player.world).get().getMovementChecks().movedWrongly()) {
             return val;
         }
         return Double.NaN; // The second 'moved wrongly' check only executes if the length of the movement vector is greater than 0.0625D

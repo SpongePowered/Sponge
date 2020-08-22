@@ -26,6 +26,9 @@ package org.spongepowered.common.config.common;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.config.core.SpongeConfigs;
+import org.spongepowered.plugin.PluginEnvironment;
+import org.spongepowered.plugin.PluginKeys;
 
 @ConfigSerializable
 public class GeneralCategory {
@@ -68,5 +71,10 @@ public class GeneralCategory {
 
     public void setConfigDir(String configDir) {
         this.configDir = configDir;
+    }
+    private static String parsePlaceholders(final String input) {
+        final PluginEnvironment env = SpongeConfigs.getPluginEnvironment();
+        env.getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES);
+        return input;
     }
 }

@@ -177,7 +177,7 @@ public class PhaseTrackerCategory {
     }
 
     private boolean isVanilla() {
-        return true; //Launcher.getInstance().isVanilla(); // TODO: access earlier
+        return true; //Launcher.getInstance().isVanilla(); // TODO: expose this in the PluginEnvironment if necessary
     }
 
     public void setAutoFixedTiles(Map<String, Boolean> autoFixedTiles) {

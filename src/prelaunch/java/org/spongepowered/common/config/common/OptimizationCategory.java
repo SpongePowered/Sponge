@@ -121,7 +121,7 @@ public class OptimizationCategory {
     public OptimizationCategory() {
         // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
         // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-        this.preItemDropMerge = true; //Launcher.getInstance().isVanilla(); // TODO: how to get this info even earlier
+        this.preItemDropMerge = true; //Launcher.getInstance().isVanilla(); // TODO: expose this in the PluginEnvironment if necessary
     }
 
 

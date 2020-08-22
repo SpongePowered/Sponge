@@ -31,7 +31,7 @@ import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.core.SpongeConfigs;
 import org.spongepowered.common.config.common.TimingsCategory;
 import org.spongepowered.plugin.PluginContainer;
 
