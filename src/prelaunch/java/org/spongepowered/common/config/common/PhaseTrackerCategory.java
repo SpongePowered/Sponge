@@ -26,6 +26,7 @@ package org.spongepowered.common.config.common;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.config.core.SpongeConfigs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -177,7 +178,7 @@ public class PhaseTrackerCategory {
     }
 
     private boolean isVanilla() {
-        return true; //Launcher.getInstance().isVanilla(); // TODO: expose this in the PluginEnvironment if necessary
+        return SpongeConfigs.getPluginEnvironment().getBlackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
     }
 
     public void setAutoFixedTiles(Map<String, Boolean> autoFixedTiles) {

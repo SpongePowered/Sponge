@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.common.config.common.CommonConfig;
 import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
@@ -44,6 +45,8 @@ import java.nio.file.Path;
  * Common utility methods for sponge configurations and necessary helpers for early init.
  */
 public class SpongeConfigs {
+
+    public static final Blackboard.Key<Boolean> IS_VANILLA_PLATFORM = Blackboard.Key.of("is_vanilla", Boolean.class);
 
     public static final String METRICS_NAME = "metrics.conf";
 

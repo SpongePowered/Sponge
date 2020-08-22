@@ -63,6 +63,7 @@ public final class Main {
         }
         // TODO Read in plugin directories from CLI/Config
         pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, gameDirectory.resolve("plugins")));
+        pluginEnvironment.getBlackboard().getOrCreate(SpongeConfigs.IS_VANILLA_PLATFORM, () -> true);
 
         SpongeConfigs.initialize(pluginEnvironment);
         Main.pluginEngine = new VanillaPluginEngine(pluginEnvironment);

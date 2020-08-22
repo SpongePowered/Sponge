@@ -26,6 +26,8 @@ package org.spongepowered.common.config.common;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.common.config.core.SpongeConfigs;
+import org.spongepowered.plugin.PluginEnvironment;
 
 @ConfigSerializable
 public class OptimizationCategory {
@@ -121,7 +123,7 @@ public class OptimizationCategory {
     public OptimizationCategory() {
         // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
         // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-        this.preItemDropMerge = true; //Launcher.getInstance().isVanilla(); // TODO: expose this in the PluginEnvironment if necessary
+        this.preItemDropMerge = SpongeConfigs.getPluginEnvironment().getBlackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
     }
 
 
