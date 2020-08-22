@@ -34,7 +34,14 @@ import java.util.Map;
 
 public final class UpdateHeightMapEffect implements ProcessingSideEffect {
 
-    public UpdateHeightMapEffect() {
+    private static final class Holder {
+        static final UpdateHeightMapEffect INSTANCE = new UpdateHeightMapEffect();
+    }
+    UpdateHeightMapEffect() {
+    }
+
+    public static UpdateHeightMapEffect getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

@@ -31,7 +31,14 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class UpdateChunkLightManagerEffect implements ProcessingSideEffect {
 
-    public UpdateChunkLightManagerEffect() {
+    private static final class Holder {
+        static final UpdateChunkLightManagerEffect INSTANCE = new UpdateChunkLightManagerEffect();
+    }
+    private UpdateChunkLightManagerEffect() {
+    }
+
+    public static UpdateChunkLightManagerEffect getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

@@ -34,7 +34,14 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class RefreshOldTileEntityOnChunkChangeEffect implements ProcessingSideEffect {
 
-    public RefreshOldTileEntityOnChunkChangeEffect() {
+    private static final class Holder {
+        static final RefreshOldTileEntityOnChunkChangeEffect INSTANCE = new RefreshOldTileEntityOnChunkChangeEffect();
+    }
+    RefreshOldTileEntityOnChunkChangeEffect() {
+    }
+
+    public static RefreshOldTileEntityOnChunkChangeEffect getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

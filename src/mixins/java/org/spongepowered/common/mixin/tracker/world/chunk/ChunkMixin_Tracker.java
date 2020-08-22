@@ -172,7 +172,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             .world((ServerWorld) this.world);
 
         // Populate the effects
-        transaction.populateChunkEffects(context.getBlockTransactor(), builder, chunksection);
+        transaction.populateChunkEffects(builder);
 
         return builder.build();
     }

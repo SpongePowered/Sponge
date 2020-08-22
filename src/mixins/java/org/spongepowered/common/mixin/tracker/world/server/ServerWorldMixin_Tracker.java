@@ -303,7 +303,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             return EffectResult.NULL_PASS;
         })
             .addEffect(new UpdateLightSideEffect())
-            .addEffect(new CheckBlockPostPlacementIsSameEffect())
+            .addEffect(CheckBlockPostPlacementIsSameEffect.getInstance())
             .addEffect(new UpdateWorldRendererEffect())
             .addEffect(new NotifyClientEffect())
             .addEffect(new NotifyNeighborSideEffect())

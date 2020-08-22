@@ -30,8 +30,13 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Bloc
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class CheckBlockPostPlacementIsSameEffect implements ProcessingSideEffect {
-
-    public CheckBlockPostPlacementIsSameEffect() { }
+    private static final class Holder {
+        static final CheckBlockPostPlacementIsSameEffect INSTANCE = new CheckBlockPostPlacementIsSameEffect();
+    }
+    CheckBlockPostPlacementIsSameEffect() {}
+    public static CheckBlockPostPlacementIsSameEffect getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,

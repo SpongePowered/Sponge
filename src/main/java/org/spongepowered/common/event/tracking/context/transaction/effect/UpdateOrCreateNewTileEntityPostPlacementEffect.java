@@ -34,7 +34,14 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements ProcessingSideEffect {
 
-    public UpdateOrCreateNewTileEntityPostPlacementEffect() {
+    private static final class Holder {
+        static final UpdateOrCreateNewTileEntityPostPlacementEffect INSTANCE = new UpdateOrCreateNewTileEntityPostPlacementEffect();
+    }
+    UpdateOrCreateNewTileEntityPostPlacementEffect() {
+    }
+
+    public static UpdateOrCreateNewTileEntityPostPlacementEffect getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

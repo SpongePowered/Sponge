@@ -31,7 +31,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,7 +54,6 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -85,28 +83,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
 public abstract class BlockTransaction<E extends Event & Cancellable> {
     private static final int EVENT_COUNT = BlockChange.values().length + 1;
-    private static final int MULTI_CHANGE_INDEX = BlockChange.values().length;
-    private static final Function<ImmutableList.Builder<Transaction<BlockSnapshot>>[], Consumer<Transaction<BlockSnapshot>>> TRANSACTION_PROCESSOR =
-        builders ->
-            transaction -> {
-                final BlockChange blockChange = ((SpongeBlockSnapshot) transaction.getOriginal()).blockChange;
-                builders[blockChange.ordinal()].add(transaction);
-                builders[BlockTransaction.MULTI_CHANGE_INDEX].add(transaction);
-            }
-        ;
-    static final Function<SpongeBlockSnapshot, Optional<Transaction<BlockSnapshot>>> TRANSACTION_CREATION =
-        (blockSnapshot) -> blockSnapshot.getServerWorld().map(worldServer -> {
-            final BlockPos targetPos = blockSnapshot.getBlockPos();
-            final SpongeBlockSnapshot replacement = ((TrackedWorldBridge) worldServer).bridge$createSnapshot(targetPos, BlockChangeFlags.NONE);
-            return new Transaction<>(blockSnapshot, replacement);
-        });
 
     // State definitions
     final BlockPos affectedPosition;
@@ -133,10 +114,6 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
             .toString();
     }
 
-    public abstract void populateChunkEffects(
-        TransactionalCaptureSupplier blockTransactor,
-        ChunkPipeline.Builder builder, ChunkSection chunksection
-    );
 
     Deque<ResultingTransactionBySideEffect> getEffects() {
         if (this.sideEffects == null) {
@@ -149,7 +126,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         return this.sideEffects != null && this.sideEffects.stream().anyMatch(effect -> effect.head != null);
     }
 
-    public abstract Optional<BiConsumer<PhaseContext<?>, CauseStackManager.StackFrame>> getFrameMutator();
+    public abstract Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator();
 
     public abstract void addToPrinter(PrettyPrinter printer);
 
@@ -169,7 +146,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
 
     public abstract void restore();
 
-    public abstract boolean canBatchWith(@Nullable final BlockTransaction<?> next);
+    public abstract boolean canBatchWith(@Nullable final BlockTransaction<@NonNull ?> next);
 
     public boolean avoidsEvent() {
         return false;
@@ -315,15 +292,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         }
 
         @Override
-        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ChunkPipeline.Builder builder,
-            final ChunkSection chunksection
-        ) {
-
-        }
-
-        @Override
-        public Optional<BiConsumer<PhaseContext<?>, CauseStackManager.StackFrame>> getFrameMutator() {
+        public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
             return Optional.empty();
         }
 
@@ -362,15 +331,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         }
 
         @Override
-        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ChunkPipeline.Builder builder,
-            final ChunkSection chunksection
-        ) {
-
-        }
-
-        @Override
-        public Optional<BiConsumer<PhaseContext<?>, CauseStackManager.StackFrame>> getFrameMutator() {
+        public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
             return Optional.empty();
         }
 
@@ -420,14 +381,6 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         }
 
         @Override
-        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ChunkPipeline.Builder builder,
-            final ChunkSection chunksection
-        ) {
-
-        }
-
-        @Override
         public boolean acceptTileAddition(final TileEntity tileEntity) {
             if (this.added == tileEntity) {
                 return true;
@@ -441,7 +394,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         }
 
         @Override
-        public Optional<BiConsumer<PhaseContext<?>, CauseStackManager.StackFrame>> getFrameMutator() {
+        public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
             return Optional.empty();
         }
 
@@ -497,25 +450,21 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
             return this.blockChangeFlag;
         }
 
-        @Override
-        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ChunkPipeline.Builder builder,
-            final ChunkSection chunksection
-        ) {
+        public void populateChunkEffects(final ChunkPipeline.Builder builder) {
 
-            builder.addEffect(new SetBlockToChunkSectionEffect());
-            builder.addEffect(new UpdateHeightMapEffect());
-            builder.addEffect(new UpdateChunkLightManagerEffect());
-            builder.addEffect(new OldBlockOnReplaceEffect());
-            builder.addEffect(new CheckBlockPostPlacementIsSameEffect());
-            builder.addEffect(new RefreshOldTileEntityOnChunkChangeEffect());
-            builder.addEffect(new BlockAddedEffect());
-            builder.addEffect(new UpdateOrCreateNewTileEntityPostPlacementEffect());
-            builder.addEffect(new ChunkChangeCompleteEffect());
+            builder.addEffect(SetBlockToChunkSectionEffect.getInstance());
+            builder.addEffect(UpdateHeightMapEffect.getInstance());
+            builder.addEffect(UpdateChunkLightManagerEffect.getInstance());
+            builder.addEffect(OldBlockOnReplaceEffect.getInstance());
+            builder.addEffect(CheckBlockPostPlacementIsSameEffect.getInstance());
+            builder.addEffect(RefreshOldTileEntityOnChunkChangeEffect.getInstance());
+            builder.addEffect(BlockAddedEffect.getInstance());
+            builder.addEffect(UpdateOrCreateNewTileEntityPostPlacementEffect.getInstance());
+            builder.addEffect(ChunkChangeCompleteEffect.getInstance());
         }
 
         @Override
-        public Optional<BiConsumer<PhaseContext<?>, CauseStackManager.StackFrame>> getFrameMutator() {
+        public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
             return Optional.of((context, frame) -> {
                 context.addCreatorAndNotifierToCauseStack(frame);
                 frame.pushCause(this.original);
@@ -626,15 +575,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         }
 
         @Override
-        public void populateChunkEffects(final TransactionalCaptureSupplier blockTransactor,
-            final ChunkPipeline.Builder builder,
-            final ChunkSection chunksection
-        ) {
-            
-        }
-
-        @Override
-        public Optional<BiConsumer<PhaseContext<?>, CauseStackManager.StackFrame>> getFrameMutator() {
+        public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
             return Optional.of((context, frame) -> {
                 frame.pushCause(this.locatableBlock.get());
             });

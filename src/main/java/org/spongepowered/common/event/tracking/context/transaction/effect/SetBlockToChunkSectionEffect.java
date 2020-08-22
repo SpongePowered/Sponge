@@ -31,7 +31,14 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class SetBlockToChunkSectionEffect implements ProcessingSideEffect {
 
-    public SetBlockToChunkSectionEffect() { }
+    private static final class Holder {
+        private static final SetBlockToChunkSectionEffect INSTANCE = new SetBlockToChunkSectionEffect();
+    }
+    SetBlockToChunkSectionEffect() { }
+
+    public static SetBlockToChunkSectionEffect getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
