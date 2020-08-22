@@ -27,8 +27,20 @@ package org.spongepowered.common.config.common;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.common.config.core.SpongeConfigs;
+import org.spongepowered.common.config.core.TokenHoldingString;
+import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
+
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ConfigSerializable
 public class GeneralCategory {
@@ -42,7 +54,7 @@ public class GeneralCategory {
                                             + "is going to search for a plugins folder in the mods directory. \n"
                                             + "If you wish for the plugins folder to reside in the root game \n"
                                             + "directory, change the value to \"${CANONICAL_GAME_DIR}/plugins\".")
-    private String pluginsDir = "${CANONICAL_MODS_DIR}/plugins";
+    private TokenHoldingString pluginsDir = TokenHoldingString.of("${CANONICAL_MODS_DIR}/plugins");
     @Setting(value = "config-dir", comment = "The directory for Sponge plugin configurations, relative to the  \n"
                                            + "execution root or specified as an absolute path. \n"
                                            + "Note that the default: \"${CANONICAL_GAME_DIR}/config\" \n"
@@ -51,30 +63,26 @@ public class GeneralCategory {
                                            + "directory, change the value to, for example, \"${CANONICAL_CONFIG_DIR}/sponge/plugins\". \n"
                                            + "Note: It is not recommended to set this to \"${CANONICAL_CONFIG_DIR}/sponge\", as there is \n"
                                            + "a possibility that plugin configurations can conflict the Sponge core configurations. \n")
-    private String configDir = "${CANONICAL_GAME_DIR}/config";
+    private TokenHoldingString configDir = TokenHoldingString.of("${CANONICAL_GAME_DIR}/config");
 
     public boolean getFileIoThreadSleep() {
         return this.fileIOThreadSleep;
     }
 
     public String pluginsDir() {
-        return this.pluginsDir;
+        return this.pluginsDir.getParsed();
     }
 
-    public void setPluginsDir(String pluginsDir) {
-        this.pluginsDir = pluginsDir;
+    public void setPluginsDir(final String pluginsDir) {
+        this.pluginsDir = TokenHoldingString.of(pluginsDir);
     }
 
     public String configDir() {
-        return this.configDir;
+        return this.configDir.getParsed();
     }
 
-    public void setConfigDir(String configDir) {
-        this.configDir = configDir;
+    public void setConfigDir(final String configDir) {
+        this.configDir = TokenHoldingString.of(configDir);
     }
-    private static String parsePlaceholders(final String input) {
-        final PluginEnvironment env = SpongeConfigs.getPluginEnvironment();
-        env.getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES);
-        return input;
-    }
+
 }

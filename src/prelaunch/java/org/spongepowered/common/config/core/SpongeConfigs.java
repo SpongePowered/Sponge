@@ -56,7 +56,8 @@ public class SpongeConfigs {
 
     static final ConfigurationOptions OPTIONS = ConfigurationOptions.defaults()
             .withHeader(HEADER)
-            .withShouldCopyDefaults(true);
+            .withShouldCopyDefaults(true)
+            .withSerializers(collection -> collection.register(TokenHoldingString.SERIALIZER));
 
     static final Logger LOGGER = LogManager.getLogger();
 

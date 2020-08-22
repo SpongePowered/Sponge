@@ -45,6 +45,7 @@ import org.spongepowered.plugin.PluginKeys;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Singleton
@@ -106,7 +107,7 @@ public final class SpongeCommon {
     }
 
     public static Path getPluginConfigDirectory() {
-        return SpongeCommon.getGameDirectory().resolve(SpongeConfigs.getCommon().get().getGeneral().configDir());
+        return Paths.get(SpongeConfigs.getCommon().get().getGeneral().configDir());
     }
 
     public static Path getSpongeConfigDirectory() {
