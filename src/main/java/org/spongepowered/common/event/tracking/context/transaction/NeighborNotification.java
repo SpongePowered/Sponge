@@ -53,6 +53,9 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     final BlockPos notifyPos;
     final Block sourceBlock;
     final BlockPos sourcePos;
+    // State definitions
+    final BlockPos affectedPosition;
+    final BlockState originalState;
     private final Supplier<ServerWorld> serverWorld;
     private Supplier<LocatableBlock> locatableBlock;
 
@@ -60,7 +63,9 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
         final BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos
     ) {
-        super(sourcePos, notifyState);
+        super();
+        this.affectedPosition = sourcePos;
+        this.originalState = notifyState;
         this.serverWorld = serverWorldSupplier;
         this.notifyPos = notifyPos;
         this.sourceBlock = sourceBlock;

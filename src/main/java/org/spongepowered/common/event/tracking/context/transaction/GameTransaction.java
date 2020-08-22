@@ -25,9 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -37,7 +35,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.world.BlockChange;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -48,9 +45,6 @@ import java.util.function.BiConsumer;
 @DefaultQualifier(NonNull.class)
 public abstract class GameTransaction<E extends Event & Cancellable> {
 
-    // State definitions
-    final BlockPos affectedPosition;
-    final BlockState originalState;
     boolean cancelled = false;
 
     // Children Definitions
@@ -60,16 +54,12 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
     @Nullable GameTransaction<@NonNull ?> previous;
     @Nullable GameTransaction<@NonNull ?> next;
 
-    GameTransaction(final BlockPos affectedPosition, final BlockState originalState) {
-        this.affectedPosition = affectedPosition;
-        this.originalState = originalState;
+    GameTransaction() {
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", GameTransaction.class.getSimpleName() + "[", "]")
-            .add("affectedPosition=" + this.affectedPosition)
-            .add("originalState=" + this.originalState)
             .toString();
     }
 

@@ -50,9 +50,13 @@ import java.util.List;
 abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEvent> {
 
     public static final int EVENT_COUNT = BlockChange.values().length + 1;
+    // State definitions
+    final BlockPos affectedPosition;
+    final BlockState originalState;
 
     BlockEventBasedTransaction(final BlockPos affectedPosition, final BlockState originalState) {
-        super(affectedPosition, originalState);
+        this.affectedPosition = affectedPosition;
+        this.originalState = originalState;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -63,25 +67,27 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
     ) {
         final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
         for (final GameTransaction<@NonNull ?> transaction : transactions) {
-            if (!positions.containsKey(transaction.affectedPosition)) {
+            final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) transaction;
+            if (!positions.containsKey(blockTransaction.affectedPosition)) {
                 positions.put(
-                    transaction.affectedPosition,
-                    ((org.spongepowered.common.event.tracking.context.transaction.BlockEventBasedTransaction) transaction).getOriginalSnapshot()
+                    blockTransaction.affectedPosition,
+                    blockTransaction.getOriginalSnapshot()
                 );
             }
             positions.put(
-                transaction.affectedPosition,
-                ((org.spongepowered.common.event.tracking.context.transaction.BlockEventBasedTransaction) transaction).getResultingSnapshot()
+                blockTransaction.affectedPosition,
+                blockTransaction.getResultingSnapshot()
             );
         }
 
-        final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[EVENT_COUNT];
-        final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[EVENT_COUNT];
-        for (int i = 0; i < EVENT_COUNT; i++) {
+        final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[BlockEventBasedTransaction.EVENT_COUNT];
+        final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[BlockEventBasedTransaction.EVENT_COUNT];
+        for (int i = 0; i < BlockEventBasedTransaction.EVENT_COUNT; i++) {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
         // Bug is here- use the multimap
         final ImmutableList<Transaction<BlockSnapshot>> eventTransactions = transactions.stream()
+            .map(transaction -> (BlockEventBasedTransaction) transaction)
             .map(transaction -> {
                 final List<SpongeBlockSnapshot> snapshots = positions.get(transaction.affectedPosition);
                 final SpongeBlockSnapshot original = snapshots.get(0);
@@ -96,7 +102,7 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                 transactionBuilders[original.blockChange.ordinal()].add(eventTransaction);
                 return eventTransaction;
             }).collect(ImmutableList.toImmutableList());
-        for (int i = 0; i < EVENT_COUNT; i++) {
+        for (int i = 0; i < BlockEventBasedTransaction.EVENT_COUNT; i++) {
             transactionArrays[i] = transactionBuilders[i].build();
         }
         final @Nullable ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
@@ -155,8 +161,9 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
             if (!transaction.isValid()) {
                 cancelledAny = true;
                 for (final GameTransaction<ChangeBlockEvent> gameTransaction : blockTransactions) {
+                    final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) gameTransaction;
                     final Vector3i position = transaction.getOriginal().getPosition();
-                    final BlockPos affectedPosition = gameTransaction.affectedPosition;
+                    final BlockPos affectedPosition = blockTransaction.affectedPosition;
                     if (position.getX() == affectedPosition.getX()
                         && position.getY() == affectedPosition.getY()
                         && position.getZ() == affectedPosition.getZ()
