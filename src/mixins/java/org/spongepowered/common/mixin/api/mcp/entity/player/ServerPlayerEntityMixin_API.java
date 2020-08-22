@@ -54,6 +54,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -69,8 +70,10 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -246,14 +249,29 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public void kick() {
-        this.kick(TranslatableComponent.of("disconnect.disconnected"));
+    public boolean kick() {
+        return this.kick(TranslatableComponent.of("disconnect.disconnected"));
     }
 
     @Override
-    public void kick(final Component message) {
-        final ITextComponent component = SpongeAdventure.asVanilla(message);
+    public boolean kick(final Component message) {
+        Component messageToSend = message;
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            final KickPlayerEvent kickPlayerEvent = SpongeEventFactory.createKickPlayerEvent(
+                    frame.getCurrentCause(),
+                    message,
+                    message,
+                    (ServerPlayer) this,
+                    false
+            );
+            if (Sponge.getEventManager().post(kickPlayerEvent)) {
+                return false;
+            }
+            messageToSend = kickPlayerEvent.getMessage();
+        }
+        final ITextComponent component = SpongeAdventure.asVanilla(messageToSend);
         this.connection.disconnect(component);
+        return true;
     }
 
     @Override
