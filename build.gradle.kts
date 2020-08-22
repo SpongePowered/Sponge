@@ -213,9 +213,9 @@ dependencies {
     launchConfig("org.ow2.asm:asm-tree:6.2")
     launchConfig("org.ow2.asm:asm-util:6.2")
     launchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
-    launchConfig("org.spongepowered:configurate-core:3.6.1")
-    launchConfig("org.spongepowered:configurate-hocon:3.6.1")
-    launchConfig("org.spongepowered:configurate-json:3.6.1")
+    launchConfig("org.spongepowered:configurate-core:3.7.1")
+    launchConfig("org.spongepowered:configurate-hocon:3.7.1")
+    launchConfig("org.spongepowered:configurate-json:3.7.1")
     launchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
     add(launch.get().implementationConfigurationName, launchConfig)
 
