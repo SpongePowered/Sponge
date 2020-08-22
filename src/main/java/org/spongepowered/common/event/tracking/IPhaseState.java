@@ -61,7 +61,7 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -795,9 +795,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * place, including but not withstanding, tile entity replacements after the fact.
      * @return
      */
-    default GameTransaction.ChangeBlock createTransaction(final C phaseContext,
+    default ChangeBlock createTransaction(final C phaseContext,
         final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState, final BlockChangeFlag flags) {
-        final GameTransaction.ChangeBlock changeBlock = phaseContext.getBlockTransactor()
+        final ChangeBlock changeBlock = phaseContext.getBlockTransactor()
             .logBlockChange(originalBlockSnapshot, newState, flags);
 
         return changeBlock;

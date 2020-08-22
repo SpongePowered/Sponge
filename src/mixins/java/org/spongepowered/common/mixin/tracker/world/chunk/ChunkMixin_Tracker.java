@@ -56,7 +56,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
@@ -149,7 +149,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final Block newBlock = newState.getBlock();
         final Block currentBlock = currentState.getBlock();
 
-        final GameTransaction.ChangeBlock transaction = state.createTransaction(context, snapshot, newState, flag);
+        final ChangeBlock transaction = state.createTransaction(context, snapshot, newState, flag);
 
         snapshot.blockChange = state.associateBlockChangeWithSnapshot(
             context,

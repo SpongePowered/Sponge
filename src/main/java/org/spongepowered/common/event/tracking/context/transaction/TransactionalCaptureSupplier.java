@@ -259,11 +259,11 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    public GameTransaction.ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
+    public ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
         final BlockChangeFlag flags
     ) {
         this.put(originalBlockSnapshot, newState); // Always update the snapshot index before the block change is tracked
-        final GameTransaction.ChangeBlock changeBlock = new GameTransaction.ChangeBlock(
+        final ChangeBlock changeBlock = new ChangeBlock(
             originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags
         );
         this.logTransaction(changeBlock);
@@ -321,7 +321,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final BlockPos immutableTarget, final BlockState targetBlockState,
         @Nullable final TileEntity existingTile
     ) {
-        final GameTransaction.NeighborNotification notificationTransaction = new GameTransaction.NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom);
+        final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom);
         this.logTransaction(notificationTransaction);
     }
 
@@ -339,10 +339,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
 
-        return new GameTransaction.ReplaceTileEntity(proposed, existing, snapshot);
+        return new ReplaceTileEntity(proposed, existing, snapshot);
     }
 
-    private GameTransaction.RemoveTileEntity createTileRemovalTransaction(final TileEntity tileentity,
+    private RemoveTileEntity createTileRemovalTransaction(final TileEntity tileentity,
         final Supplier<ServerWorld> worldSupplier
     ) {
         final BlockState currentState = tileentity.getBlockState();
@@ -356,10 +356,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
 
-        return new GameTransaction.RemoveTileEntity(tileentity, snapshot);
+        return new RemoveTileEntity(tileentity, snapshot);
     }
 
-    private GameTransaction.AddTileEntity createTileAdditionTransaction(final TileEntity tileentity,
+    private AddTileEntity createTileAdditionTransaction(final TileEntity tileentity,
         final Supplier<ServerWorld> worldSupplier, final Chunk chunk
     ) {
         final BlockPos pos = tileentity.getPos().toImmutable();
@@ -385,7 +385,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         this.put(existing, currentBlock); // Always update the snapshot index before the block change is tracked
 
-        return new GameTransaction.AddTileEntity(tileentity, added, existing);
+        return new AddTileEntity(tileentity, added, existing);
     }
 
     public void clear() {

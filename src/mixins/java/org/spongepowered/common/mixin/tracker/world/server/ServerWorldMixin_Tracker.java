@@ -73,7 +73,9 @@ import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.ScheduledBlockChange;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.RemoveTileEntity;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToLoadedListInWorldEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToTickableListEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToWorldWhileProcessingEffect;
@@ -366,8 +368,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      *     <li>The current {@link IPhaseState} must be allowing to record transactions with an applicable {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier}</li>
      * </ul>
      * After which, we may be able to appropriately associate the {@link TileEntity}
-     * being removed with either an existing {@link GameTransaction.ChangeBlock},
-     * or generate a new {@link GameTransaction.RemoveTileEntity} transaction
+     * being removed with either an existing {@link ChangeBlock},
+     * or generate a new {@link RemoveTileEntity} transaction
      * that would otherwise be able to associate with either the current {@link IPhaseState} or a parent {@link GameTransaction}
      * if this call is the result of a {@link org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect}..
      *
