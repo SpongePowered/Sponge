@@ -45,6 +45,7 @@ import java.util.function.BiConsumer;
 @DefaultQualifier(NonNull.class)
 public abstract class GameTransaction<E extends Event & Cancellable> {
 
+    private final TransactionType transactionType;
     boolean cancelled = false;
 
     // Children Definitions
@@ -54,7 +55,8 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
     @Nullable GameTransaction<@NonNull ?> previous;
     @Nullable GameTransaction<@NonNull ?> next;
 
-    GameTransaction() {
+    GameTransaction(final TransactionType transactionType) {
+        this.transactionType = transactionType;
     }
 
     @Override
@@ -73,6 +75,22 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
 
     public final boolean hasChildTransactions() {
         return this.sideEffects != null && this.sideEffects.stream().anyMatch(effect -> effect.head != null);
+    }
+
+    public final boolean hasAnyPrimaryChildrenTransactions() {
+        if (this.sideEffects == null) {
+            return false;
+        }
+        for (final ResultingTransactionBySideEffect sideEffect : this.sideEffects) {
+            @Nullable GameTransaction<@NonNull ?> transaction = sideEffect.head;
+            while (transaction != null) {
+                if (transaction.transactionType.isPrimary() || transaction.hasChildTransactions()) {
+                    return true;
+                }
+                transaction = transaction.next;
+            }
+        }
+        return false;
     }
 
     public abstract Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator();

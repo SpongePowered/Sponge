@@ -458,7 +458,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 batchDecider = pointer;
             }
             // First - check if the side effects are empty
-            if (pointer.hasChildTransactions()) {
+            if (pointer.hasAnyPrimaryChildrenTransactions()) {
                 // If they're not, we need to basically build the event and whatever
                 // has accumulated to this point as an event
                 accumilator.add(pointer);
