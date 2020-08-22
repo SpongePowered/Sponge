@@ -43,7 +43,7 @@ import java.util.Arrays;
 
 public final class Main {
 
-    private static VanillaPluginLocator pluginLoader;
+    private static VanillaPluginLocator pluginLocator;
 
     public static void main(final String[] args) throws IOException {
         final OptionParser parser = new OptionParser();
@@ -52,8 +52,8 @@ public final class Main {
         final OptionSet optionSet = parser.parse(args);
 
         final Path gameDirectory = optionSet.valueOf(gameDir);
-        final PluginEnvironment pluginEnvironment = new PluginEnvironment();
         final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
+        final PluginEnvironment pluginEnvironment = new PluginEnvironment();
         pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
         pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> gameDirectory);
         // Pass sponge base directory to SpongeConfigs
@@ -65,13 +65,13 @@ public final class Main {
         // TODO Read in plugin directories from CLI/Config
         pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, gameDirectory.resolve("plugins")));
 
-        Main.pluginLoader = new VanillaPluginLocator(pluginEnvironment);
+        Main.pluginLocator = new VanillaPluginLocator(pluginEnvironment);
 
         final ArgumentList lst = ArgumentList.from(args);
         Launcher.main(lst.getArguments());
     }
 
     public static VanillaPluginLocator getPluginLocator() {
-        return Main.pluginLoader;
+        return Main.pluginLocator;
     }
 }

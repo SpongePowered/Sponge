@@ -83,7 +83,6 @@ public class SpongeConfigs {
     private static ConfigHandle<CustomDataConfig> customDataConfigAdapter;
     private static InheritableConfigHandle<GlobalConfig> global;
 
-
     public static Path getDirectory() {
         if (SpongeConfigs.configDir == null) {
             final Path baseDir = Paths.get(Objects.requireNonNull(System.getProperty("org.spongepowered.common.baseDir"),
