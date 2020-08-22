@@ -28,6 +28,7 @@ import com.google.inject.Stage;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
 import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginEngine;
@@ -42,8 +43,8 @@ public abstract class VanillaLauncher extends Launcher {
     private final Stage injectionStage;
     private PluginContainer vanillaPlugin;
 
-    protected VanillaLauncher(final VanillaPluginEngine pluginLocator, final Stage injectionStage) {
-        super(pluginLocator, new VanillaPluginManager());
+    protected VanillaLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
+        super(pluginEngine, new VanillaPluginManager());
         this.injectionStage = injectionStage;
     }
 
@@ -79,7 +80,7 @@ public abstract class VanillaLauncher extends Launcher {
     protected final void createPlatformPlugins(final Path gameDirectory) {
         try {
             final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(VanillaLauncher.class.getResourceAsStream(
-                "/META-INF/plugins.json"));
+                    "/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME));
             for (final PluginMetadata metadata : read) {
                 this.getPluginManager().addPlugin(new DummyPluginContainer(metadata, gameDirectory, this.getLogger(), this));
             }

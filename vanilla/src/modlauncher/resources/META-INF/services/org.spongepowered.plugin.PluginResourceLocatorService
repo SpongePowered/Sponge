@@ -1,2 +1,2 @@
-org.spongepowered.vanilla.launch.plugin.loader.locator.ClasspathPluginResourceLocatorService
-org.spongepowered.vanilla.launch.plugin.loader.locator.DirectoryPluginResourceLocatorService
+org.spongepowered.plugin.jvm.locator.DirectoryPluginResourceLocatorService
+org.spongepowered.plugin.jvm.locator.ClasspathPluginResourceLocatorService

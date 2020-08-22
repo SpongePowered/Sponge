@@ -87,7 +87,7 @@ public final class VanillaPluginEngine implements PluginEngine {
 
     public void discoverLocatorServices() {
         final ServiceLoader<PluginResourceLocatorService<PluginResource>> serviceLoader = (ServiceLoader<PluginResourceLocatorService<PluginResource>>) (Object) ServiceLoader.load(
-                PluginResourceLocatorService.class, VanillaPluginEngine.class.getClassLoader());
+                PluginResourceLocatorService.class, null);
 
         for (final Iterator<PluginResourceLocatorService<PluginResource>> iter = serviceLoader.iterator(); iter.hasNext(); ) {
             final PluginResourceLocatorService<PluginResource> next;

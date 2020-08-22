@@ -32,12 +32,12 @@ import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginEngine;
 
 public final class DedicatedServerLauncher extends VanillaLauncher {
 
-    protected DedicatedServerLauncher(final VanillaPluginEngine pluginLocator, final Stage injectionStage) {
-        super(pluginLocator, injectionStage);
+    protected DedicatedServerLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
+        super(pluginEngine, injectionStage);
     }
 
-    public static void launch(final VanillaPluginEngine pluginLoader, final Boolean isDeveloperEnvironment, final String[] args) {
-        final DedicatedServerLauncher launcher = new DedicatedServerLauncher(pluginLoader, isDeveloperEnvironment ? Stage.DEVELOPMENT :
+    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isDeveloperEnvironment, final String[] args) {
+        final DedicatedServerLauncher launcher = new DedicatedServerLauncher(pluginEngine, isDeveloperEnvironment ? Stage.DEVELOPMENT :
                 Stage.PRODUCTION);
         Launcher.setInstance(launcher);
         launcher.launchPlatform(args);
