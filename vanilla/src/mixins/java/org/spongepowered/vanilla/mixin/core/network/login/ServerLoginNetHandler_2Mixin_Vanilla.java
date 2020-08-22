@@ -33,10 +33,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.vanilla.accessor.network.login.ServerLoginNetHandlerAccessor_Vanilla;
 
-@Mixin(targets = "net/minecraft/network/login/ServerLoginNetHandler$2")
+@Mixin(targets = "net/minecraft/network/login/ServerLoginNetHandler$1")
 public abstract class ServerLoginNetHandler_2Mixin_Vanilla extends Thread {
 
-    @Shadow(aliases = {"this$0", "field_180221_a"})
+    @Shadow(aliases = {"this$0", "field_151292_a"})
     @Final
     private ServerLoginNetHandler handler;
 

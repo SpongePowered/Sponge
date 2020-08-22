@@ -78,7 +78,8 @@ public abstract class VanillaLauncher extends Launcher {
     @Override
     protected final void createPlatformPlugins(final Path gameDirectory) {
         try {
-            final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(VanillaLauncher.class.getResourceAsStream("/plugins.json"));
+            final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(VanillaLauncher.class.getResourceAsStream(
+                "/META-INF/plugins.json"));
             for (final PluginMetadata metadata : read) {
                 this.getPluginManager().addPlugin(new DummyPluginContainer(metadata, gameDirectory, this.getLogger(), this));
             }

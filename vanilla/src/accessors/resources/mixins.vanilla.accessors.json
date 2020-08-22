@@ -2,7 +2,7 @@
     "required": true,
     "minVersion": "0.8",
     "package": "org.spongepowered.vanilla.accessor",
-    "refmap": "mixins.vanilla.refmap.json",
+    "refmap": "spongevanilla.accessors.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1200,
