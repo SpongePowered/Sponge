@@ -44,11 +44,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -61,7 +61,7 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -795,9 +795,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * place, including but not withstanding, tile entity replacements after the fact.
      * @return
      */
-    default BlockTransaction.ChangeBlock createTransaction(final C phaseContext,
+    default GameTransaction.ChangeBlock createTransaction(final C phaseContext,
         final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState, final BlockChangeFlag flags) {
-        final BlockTransaction.ChangeBlock changeBlock = phaseContext.getBlockTransactor()
+        final GameTransaction.ChangeBlock changeBlock = phaseContext.getBlockTransactor()
             .logBlockChange(originalBlockSnapshot, newState, flags);
 
         return changeBlock;

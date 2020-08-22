@@ -79,8 +79,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     // processing). Example: When starting to perform neighbor notifications during piston movement, one
     // can feasibly see that the block state is changed already without being able to get the appropriate
     // block state.
-    @Nullable private BlockTransaction tail;
-    @Nullable private BlockTransaction head;
+    @Nullable private GameTransaction tail;
+    @Nullable private GameTransaction head;
     @Nullable private ResultingTransactionBySideEffect effect;
 
     public TransactionalCaptureSupplier() {
@@ -231,7 +231,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
      */
 
     public EffectTransactor pushTransactor(final ResultingTransactionBySideEffect effect) {
-        final BlockTransaction parentTransaction = Optional.ofNullable(this.effect)
+        final GameTransaction parentTransaction = Optional.ofNullable(this.effect)
             .map(child -> child.tail)
             .orElse(Objects.requireNonNull(this.tail));
         final EffectTransactor effectTransactor = new EffectTransactor(effect, parentTransaction, this.effect, this);
@@ -244,7 +244,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         this.effect = transactor.previousEffect;
     }
 
-    private void logTransaction(final BlockTransaction transaction) {
+    private void logTransaction(final GameTransaction transaction) {
         if (this.head == null) {
             this.head = transaction;
             this.tail = transaction;
@@ -259,11 +259,11 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    public BlockTransaction.ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
+    public GameTransaction.ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
         final BlockChangeFlag flags
     ) {
         this.put(originalBlockSnapshot, newState); // Always update the snapshot index before the block change is tracked
-        final BlockTransaction.ChangeBlock changeBlock = new BlockTransaction.ChangeBlock(
+        final GameTransaction.ChangeBlock changeBlock = new GameTransaction.ChangeBlock(
             originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags
         );
         this.logTransaction(changeBlock);
@@ -321,11 +321,11 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final BlockPos immutableTarget, final BlockState targetBlockState,
         @Nullable final TileEntity existingTile
     ) {
-        final BlockTransaction.NeighborNotification notificationTransaction = new BlockTransaction.NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom);
+        final GameTransaction.NeighborNotification notificationTransaction = new GameTransaction.NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom);
         this.logTransaction(notificationTransaction);
     }
 
-    private BlockTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable TileEntity existing,
+    private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable TileEntity existing,
         final TileEntity proposed, final Supplier<ServerWorld> worldSupplier
     ) {
         final BlockState currentState = worldSupplier.get().getBlockState(pos);
@@ -339,10 +339,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
 
-        return new BlockTransaction.ReplaceTileEntity(proposed, existing, snapshot);
+        return new GameTransaction.ReplaceTileEntity(proposed, existing, snapshot);
     }
 
-    private BlockTransaction.RemoveTileEntity createTileRemovalTransaction(final TileEntity tileentity,
+    private GameTransaction.RemoveTileEntity createTileRemovalTransaction(final TileEntity tileentity,
         final Supplier<ServerWorld> worldSupplier
     ) {
         final BlockState currentState = tileentity.getBlockState();
@@ -356,10 +356,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         this.put(snapshot, currentState); // Always update the snapshot index before the block change is tracked
 
-        return new BlockTransaction.RemoveTileEntity(tileentity, snapshot);
+        return new GameTransaction.RemoveTileEntity(tileentity, snapshot);
     }
 
-    private BlockTransaction.AddTileEntity createTileAdditionTransaction(final TileEntity tileentity,
+    private GameTransaction.AddTileEntity createTileAdditionTransaction(final TileEntity tileentity,
         final Supplier<ServerWorld> worldSupplier, final Chunk chunk
     ) {
         final BlockPos pos = tileentity.getPos().toImmutable();
@@ -385,7 +385,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         this.put(existing, currentBlock); // Always update the snapshot index before the block change is tracked
 
-        return new BlockTransaction.AddTileEntity(tileentity, added, existing);
+        return new GameTransaction.AddTileEntity(tileentity, added, existing);
     }
 
     public void clear() {
@@ -425,15 +425,15 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 eventWithTransactions.markCancelled();
                 cancelledAny = true;
             }
-            if (((BlockTransaction) eventWithTransactions.decider).markCancelledTransactions(event, eventWithTransactions.transactions)) {
+            if (((GameTransaction) eventWithTransactions.decider).markCancelledTransactions(event, eventWithTransactions.transactions)) {
                 cancelledAny = true;
             }
         }
         if (cancelledAny) {
             for (final EventByTransaction<@NonNull ?> eventByTransaction : batched.reverse()) {
-                for (final BlockTransaction<@NonNull ?> blockTransaction : eventByTransaction.transactions.reverse()) {
-                    if (blockTransaction.cancelled) {
-                        blockTransaction.restore();
+                for (final GameTransaction<@NonNull ?> gameTransaction : eventByTransaction.transactions.reverse()) {
+                    if (gameTransaction.cancelled) {
+                        gameTransaction.restore();
                     }
                 }
             }
@@ -442,13 +442,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     }
 
     @SuppressWarnings("unchecked")
-    private static ImmutableList<EventByTransaction<@NonNull ?>> batchTransactions(final BlockTransaction head,
-        final BlockTransaction parent,
+    private static ImmutableList<EventByTransaction<@NonNull ?>> batchTransactions(final GameTransaction head,
+        final GameTransaction parent,
         final PhaseContext<?> context) {
         final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder = ImmutableList.builder();
-        @Nullable BlockTransaction pointer = head;
-        ImmutableList.Builder<BlockTransaction> accumilator = ImmutableList.builder();
-        @MonotonicNonNull BlockTransaction batchDecider = null;
+        @Nullable GameTransaction pointer = head;
+        ImmutableList.Builder<GameTransaction> accumilator = ImmutableList.builder();
+        @MonotonicNonNull GameTransaction batchDecider = null;
         while (pointer != null) {
             if (pointer.avoidsEvent()) {
                 pointer = pointer.next;
@@ -462,12 +462,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 // If they're not, we need to basically build the event and whatever
                 // has accumulated to this point as an event
                 accumilator.add(pointer);
-                final ImmutableList<BlockTransaction> transactions = accumilator.build();
+                final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
                 batchDecider = null;
                 TransactionalCaptureSupplier.generateEventForTransaction(pointer, parent, context, builder, (ImmutableList) transactions);
             } else if (!batchDecider.canBatchWith(pointer)) {
-                final ImmutableList<BlockTransaction> transactions = accumilator.build();
+                final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
                 TransactionalCaptureSupplier.generateEventForTransaction(batchDecider, parent, context, builder, (ImmutableList) transactions);
                 accumilator.add(pointer);
@@ -477,7 +477,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             }
             pointer = pointer.next;
         }
-        final ImmutableList<BlockTransaction> remaining = accumilator.build();
+        final ImmutableList<GameTransaction> remaining = accumilator.build();
         if (!remaining.isEmpty()) {
             TransactionalCaptureSupplier.generateEventForTransaction(
                 Objects.requireNonNull(batchDecider, "BatchDeciding Transaction was null"),
@@ -492,11 +492,11 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
     @SuppressWarnings("unchecked")
     private static <E extends Event & Cancellable> void generateEventForTransaction(
-        @NonNull final BlockTransaction<E> pointer,
-        @Nullable final BlockTransaction<?> parent,
+        @NonNull final GameTransaction<E> pointer,
+        @Nullable final GameTransaction<?> parent,
         final PhaseContext<@NonNull ?> context,
         final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder,
-        final ImmutableList<BlockTransaction<E>> transactions
+        final ImmutableList<GameTransaction<E>> transactions
     ) {
         final Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator();
         final PhaseTracker instance = PhaseTracker.getInstance();
@@ -511,7 +511,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         ) {
             final E event = pointer.generateEvent(context, transactions, instance.getCurrentCause());
 
-            final BlockTransaction<E> decider = parent != null ? (BlockTransaction<E>) parent : pointer;
+            final GameTransaction<E> decider = parent != null ? (GameTransaction<E>) parent : pointer;
             final EventByTransaction<E> element = new EventByTransaction<>(event, transactions, decider);
             builder.add(element);
 

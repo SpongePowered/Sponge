@@ -86,7 +86,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
-public abstract class BlockTransaction<E extends Event & Cancellable> {
+public abstract class GameTransaction<E extends Event & Cancellable> {
     private static final int EVENT_COUNT = BlockChange.values().length + 1;
 
     // State definitions
@@ -98,17 +98,17 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
     @Nullable LinkedList<ResultingTransactionBySideEffect> sideEffects;
 
     // LinkedList node definitions
-    @Nullable BlockTransaction<@NonNull ?> previous;
-    @Nullable BlockTransaction<@NonNull ?> next;
+    @Nullable GameTransaction<@NonNull ?> previous;
+    @Nullable GameTransaction<@NonNull ?> next;
 
-    BlockTransaction(final BlockPos affectedPosition, final BlockState originalState) {
+    GameTransaction(final BlockPos affectedPosition, final BlockState originalState) {
         this.affectedPosition = affectedPosition;
         this.originalState = originalState;
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", BlockTransaction.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", GameTransaction.class.getSimpleName() + "[", "]")
             .add("affectedPosition=" + this.affectedPosition)
             .add("originalState=" + this.originalState)
             .toString();
@@ -142,11 +142,11 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         return false;
     }
 
-    public abstract E generateEvent(PhaseContext<@NonNull ?> context, ImmutableList<BlockTransaction<E>> transactions, Cause currentCause);
+    public abstract E generateEvent(PhaseContext<@NonNull ?> context, ImmutableList<GameTransaction<E>> transactions, Cause currentCause);
 
     public abstract void restore();
 
-    public abstract boolean canBatchWith(@Nullable final BlockTransaction<@NonNull ?> next);
+    public abstract boolean canBatchWith(@Nullable final GameTransaction<@NonNull ?> next);
 
     public boolean avoidsEvent() {
         return false;
@@ -156,9 +156,9 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         this.cancelled = true;
     }
 
-    public abstract boolean markCancelledTransactions(E event, ImmutableList<? extends BlockTransaction<E>> transactions);
+    public abstract boolean markCancelledTransactions(E event, ImmutableList<? extends GameTransaction<E>> transactions);
 
-    static abstract class BlockEventBasedTransaction extends BlockTransaction<ChangeBlockEvent> {
+    static abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEvent> {
 
         BlockEventBasedTransaction(final BlockPos affectedPosition, final BlockState originalState) {
             super(affectedPosition, originalState);
@@ -167,20 +167,20 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         @SuppressWarnings({"unchecked", "rawtypes"})
         @Override
         public final ChangeBlockEvent generateEvent(final PhaseContext<@NonNull ?> context,
-            final ImmutableList<BlockTransaction<ChangeBlockEvent>> transactions,
+            final ImmutableList<GameTransaction<ChangeBlockEvent>> transactions,
             final Cause currentCause
         ) {
             final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
-            for (final BlockTransaction<@NonNull ?> transaction : transactions) {
+            for (final GameTransaction<@NonNull ?> transaction : transactions) {
                 if (!positions.containsKey(transaction.affectedPosition)) {
                     positions.put(transaction.affectedPosition, ((BlockEventBasedTransaction) transaction).getOriginalSnapshot());
                 }
                 positions.put(transaction.affectedPosition, ((BlockEventBasedTransaction) transaction).getResultingSnapshot());
             }
 
-            final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[BlockTransaction.EVENT_COUNT];
-            final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[BlockTransaction.EVENT_COUNT];
-            for (int i = 0; i < BlockTransaction.EVENT_COUNT; i++) {
+            final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GameTransaction.EVENT_COUNT];
+            final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[GameTransaction.EVENT_COUNT];
+            for (int i = 0; i < GameTransaction.EVENT_COUNT; i++) {
                 transactionBuilders[i] = new ImmutableList.Builder<>();
             }
             // Bug is here- use the multimap
@@ -199,7 +199,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
                     transactionBuilders[original.blockChange.ordinal()].add(eventTransaction);
                     return eventTransaction;
                 }).collect(ImmutableList.toImmutableList());
-            for (int i = 0; i < BlockTransaction.EVENT_COUNT; i++) {
+            for (int i = 0; i < GameTransaction.EVENT_COUNT; i++) {
                 transactionArrays[i] = transactionBuilders[i].build();
             }
             final @Nullable ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
@@ -245,26 +245,26 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         protected abstract SpongeBlockSnapshot getOriginalSnapshot();
 
         @Override
-        public boolean canBatchWith(final @Nullable BlockTransaction<@NonNull ?> next) {
+        public boolean canBatchWith(final @Nullable GameTransaction<@NonNull ?> next) {
             return next instanceof BlockEventBasedTransaction;
         }
 
         @Override
         public final boolean markCancelledTransactions(final ChangeBlockEvent event,
-            final ImmutableList<? extends BlockTransaction<ChangeBlockEvent>> blockTransactions
+            final ImmutableList<? extends GameTransaction<ChangeBlockEvent>> blockTransactions
         ) {
             boolean cancelledAny = false;
             for (final Transaction<BlockSnapshot> transaction: event.getTransactions()) {
                 if (!transaction.isValid()) {
                     cancelledAny = true;
-                    for (final BlockTransaction<ChangeBlockEvent> blockTransaction : blockTransactions) {
+                    for (final GameTransaction<ChangeBlockEvent> gameTransaction : blockTransactions) {
                         final Vector3i position = transaction.getOriginal().getPosition();
-                        final BlockPos affectedPosition = blockTransaction.affectedPosition;
+                        final BlockPos affectedPosition = gameTransaction.affectedPosition;
                         if (position.getX() == affectedPosition.getX()
                             && position.getY() == affectedPosition.getY()
                             && position.getZ() == affectedPosition.getZ()
                         ) {
-                            blockTransaction.markCancelled();
+                            gameTransaction.markCancelled();
                         }
                     }
                 }
@@ -533,7 +533,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
     }
 
 
-    static final class NeighborNotification extends BlockTransaction<NotifyNeighborBlockEvent> {
+    static final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEvent> {
         final BlockState original;
         final BlockPos notifyPos;
         final Block sourceBlock;
@@ -590,7 +590,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
 
         @Override
         public NotifyNeighborBlockEvent generateEvent(final PhaseContext<@NonNull ?> context,
-            final ImmutableList<BlockTransaction<NotifyNeighborBlockEvent>> transactions,
+            final ImmutableList<GameTransaction<NotifyNeighborBlockEvent>> transactions,
             final Cause currentCause
         ) {
             // TODO - for all neighbor notifications in the transactions find the direction of notification being used and pump into map.
@@ -608,7 +608,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
         }
 
         @Override
-        public boolean canBatchWith(@Nullable final BlockTransaction<@NonNull ?> next) {
+        public boolean canBatchWith(@Nullable final GameTransaction<@NonNull ?> next) {
             return next instanceof NeighborNotification;
         }
 
@@ -619,7 +619,7 @@ public abstract class BlockTransaction<E extends Event & Cancellable> {
 
         @Override
         public boolean markCancelledTransactions(final NotifyNeighborBlockEvent event,
-            final ImmutableList<? extends BlockTransaction<NotifyNeighborBlockEvent>> blockTransactions
+            final ImmutableList<? extends GameTransaction<NotifyNeighborBlockEvent>> blockTransactions
         ) {
             return false;
         }

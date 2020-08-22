@@ -29,14 +29,14 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Proces
 
 public class ResultingTransactionBySideEffect {
     public final ProcessingSideEffect effect;
-    @Nullable BlockTransaction head;
-    @Nullable BlockTransaction tail;
+    @Nullable GameTransaction head;
+    @Nullable GameTransaction tail;
 
     public ResultingTransactionBySideEffect(final ProcessingSideEffect effect) {
         this.effect = effect;
     }
 
-    public void addChild(final BlockTransaction child) {
+    public void addChild(final GameTransaction child) {
         if (this.tail != null) {
             this.tail.next = child;
             child.previous = this.tail;

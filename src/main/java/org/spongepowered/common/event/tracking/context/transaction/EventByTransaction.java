@@ -34,12 +34,12 @@ import org.spongepowered.api.event.Event;
 final class EventByTransaction<T extends Event & Cancellable> {
 
     final T event;
-    final ImmutableList<BlockTransaction<T>> transactions;
-    final BlockTransaction<T> decider;
+    final ImmutableList<GameTransaction<T>> transactions;
+    final GameTransaction<T> decider;
 
     EventByTransaction(final T event,
-        final ImmutableList<BlockTransaction<T>> transactions,
-        final BlockTransaction<T> decider
+        final ImmutableList<GameTransaction<T>> transactions,
+        final GameTransaction<T> decider
     ) {
         this.event = event;
         this.transactions = transactions;
@@ -48,7 +48,7 @@ final class EventByTransaction<T extends Event & Cancellable> {
 
     public void markCancelled() {
         this.decider.markCancelled();
-        for (BlockTransaction<T> transaction : this.transactions) {
+        for (GameTransaction<T> transaction : this.transactions) {
             transaction.markCancelled();
         }
     }
