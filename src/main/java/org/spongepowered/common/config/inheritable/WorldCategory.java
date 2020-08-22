@@ -35,9 +35,9 @@ import java.util.Map;
 public class WorldCategory {
 
     @Setting(value = "auto-save-interval", comment = "The auto-save tick interval used to save all loaded chunks in a world. \n"
-                                                   + "Set to 0 to disable. (Default: 900) \n"
+                                                   + "Set to 0 to disable. (Default: 6000) \n"
                                                    + "Note: 20 ticks is equivalent to 1 second.")
-    private int autoSaveInterval = 900;
+    private int autoSaveInterval = 6000;
 
     @Setting(value = "mob-spawn-range", comment = "Specifies the radius (in chunks) of where creatures will spawn. \n"
                                                 + "This value is capped to the current view distance setting in server.properties")
