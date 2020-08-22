@@ -30,8 +30,8 @@ import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -125,9 +125,7 @@ final class DeathUpdateState extends EntityPhaseState<BasicEntityContext> {
             }
 
         });
-        context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
-            // Unused, ItemDropData needs to be reinvented or reintroduced, maybe for 1.13
-        });
+
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);

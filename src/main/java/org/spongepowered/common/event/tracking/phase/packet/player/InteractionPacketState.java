@@ -39,8 +39,8 @@ import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -55,10 +55,8 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -158,7 +156,6 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                     // Stop entities like XP from being spawned
                     phaseContext.getBlockItemDropSupplier().get().clear();
                     phaseContext.getCapturedItems().clear();
-                    phaseContext.getPerEntityItemDropSupplier().get().clear();
                     phaseContext.getCapturedEntities().clear();
                     return;
                 }
@@ -198,22 +195,6 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                     if (!dispense.isCancelled()) {
                         processSpawnedEntities(player, dispense);
                     }
-                });
-            phaseContext.getPerEntityItemDropSupplier()
-                .acceptAndClearIfNotEmpty(map -> {
-                    if (map.isEmpty()) {
-                        return;
-                    }
-                    final PrettyPrinter printer = new PrettyPrinter(80);
-                    printer.add("Processing Interaction").centre().hr();
-                    printer.add("The item stacks captured are: ");
-                    for (final Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
-                        printer.add("  - Entity with UUID: %s", entry.getKey());
-                        for (final ItemDropData stack : entry.getValue()) {
-                            printer.add("    - %s", stack);
-                        }
-                    }
-                    printer.trace(System.err);
                 });
             phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
                 this.throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, entities);

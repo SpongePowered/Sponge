@@ -72,14 +72,10 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.world.server.SpongeWorldManager;
-
-import java.util.Collection;
 
 /**
  * Contains default Vanilla implementations for features that are only
@@ -195,13 +191,6 @@ public class SpongeImplHooks {
     }
 
     // Item stack merging
-
-    public static void addItemStackToListForSpawning(final Collection<ItemDropData> dropData, @Nullable final ItemDropData drop) {
-        // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
-        if (drop != null) {
-            dropData.add(drop);
-        }
-    }
 
     public static int getMaxSpawnPackSize(final MobEntity mob) {
         return mob.getMaxSpawnedInChunk();

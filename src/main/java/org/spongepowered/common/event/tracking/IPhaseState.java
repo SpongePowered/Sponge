@@ -336,11 +336,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
-     * {@link Transaction} has taken place. The provided {@link BlockChange} is usually
-     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, PhaseContext, int)}
-     * or {@link IPhaseState#postBlockTransactionApplication(BlockChange, Transaction, PhaseContext)} due to
-     * delegation to the underlying context during post processing of reactionary
-     * side effects (like water spread from a bucket).
+     * {@link Transaction} has taken place.
      *
      * @param blockChange The block change performed
      * @param snapshotTransaction The transaction of the old and new snapshots
@@ -801,17 +797,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
             .logBlockChange(originalBlockSnapshot, newState, flags);
 
         return changeBlock;
-    }
-
-    default void processCancelledTransaction(final C context, final Transaction<BlockSnapshot> transaction, final BlockSnapshot original) {
-        if (this.tracksBlockSpecificDrops(context)) {
-            // Cancel any block drops or harvests for the block change.
-            // This prevents unnecessary spawns.
-            if (transaction.getOriginal() instanceof SpongeBlockSnapshot) {
-                final BlockPos pos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
-                context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
-            }
-        }
     }
 
     default boolean doesCaptureNeighborNotifications(final C context) {

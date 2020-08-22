@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.player;
 
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -33,10 +32,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import net.minecraft.world.server.ServerWorld;
 
 final class PlayerLogoutPhaseState extends PooledPhaseState<GeneralizedContext> implements IPhaseState<GeneralizedContext> {
 
@@ -60,13 +55,7 @@ final class PlayerLogoutPhaseState extends PooledPhaseState<GeneralizedContext> 
             phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
 
             });
-            phaseContext.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(items -> {
-                final List<Entity> drops = items.stream()
-                    .map(drop -> drop.create((ServerWorld) player.getWorld()))
-                    .map(entity -> (Entity) entity)
-                    .collect(Collectors.toList());
-                SpongeCommonEventFactory.callDropItemCustom(drops, phaseContext);
-            });
+
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
             TrackingUtil.processBlockCaptures(phaseContext);

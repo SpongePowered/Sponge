@@ -45,8 +45,11 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.common.accessor.entity.item.ItemFrameEntityAccessor;
+import org.spongepowered.common.accessor.util.CombatEntryAccessor;
+import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -54,9 +57,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.accessor.entity.item.ItemFrameEntityAccessor;
-import org.spongepowered.common.accessor.util.CombatEntryAccessor;
-import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -187,15 +187,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 }
 
             });
-        phaseContext.getCapturedItemStackSupplier()
-                .acceptAndClearIfNotEmpty(drops -> {
-                    final List<Entity> items = drops.stream()
-                            .map(drop -> drop.create((ServerWorld) tickingEntity.getWorld()))
-                            .map(entity -> (Entity) entity)
-                            .collect(Collectors.toList());
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
-                });
 
         // Some entities (DynamicTrees) can tell blocks to break themselves while they're ticking, and
         // specifically having removed the block but not performed the drops until the entity is ticking.

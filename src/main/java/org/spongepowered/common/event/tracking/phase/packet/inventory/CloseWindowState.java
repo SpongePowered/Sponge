@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.network.IPacket;
@@ -71,7 +70,7 @@ public final class CloseWindowState extends BasicPacketState {
             stackManager.popCause();
         }
 
-        if (context.getCapturedItemsSupplier().isEmpty() && context.getCapturedItemStackSupplier().isEmpty() && context.getBlockTransactor().isEmpty()) {
+        if (context.getCapturedItemsSupplier().isEmpty() && context.getBlockTransactor().isEmpty()) {
             return;
         }
 
@@ -86,19 +85,6 @@ public final class CloseWindowState extends BasicPacketState {
                     .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
                     SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
-                }
-            });
-            // Pre-merged items
-            context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(stacks -> {
-                final List<ItemEntity> items = stacks.stream()
-                    .map(drop -> drop.create(player.getServerWorld()))
-                    .collect(Collectors.toList());
-                final List<Entity> entities = items
-                    .stream()
-                    .map(entity -> (Entity) entity)
-                    .collect(Collectors.toList());
-                if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
                 }
             });
         }

@@ -36,35 +36,27 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 
 final class CommandState extends GeneralState<CommandPhaseContext> {
 
@@ -140,63 +132,6 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
                 csm.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
 
                 SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
-            });
-        phaseContext.getPerEntityItemDropSupplier()
-            .acceptAndClearIfNotEmpty(uuidItemStackMultimap ->
-            {
-                for (final Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet())
-                {
-                    final UUID key = entry.getKey();
-                    @Nullable
-                    net.minecraft.entity.Entity foundEntity = null;
-                    // TODO Minecraft 1.14, States need to know their engine...
-//                    for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds())
-//                    {
-//                        final ServerWorld world = (ServerWorld) apiWorld;
-//                        final net.minecraft.entity.Entity entityFromUuid = world.getEntityByUuid(key);
-//                        if (entityFromUuid != null)
-//                        {
-//                            foundEntity = entityFromUuid;
-//                            break;
-//                        }
-//                    }
-                    final Optional<Entity> affectedEntity = Optional.ofNullable((Entity) foundEntity);
-                    if (!affectedEntity.isPresent())
-                    {
-                        continue;
-                    }
-                    final Collection<ItemDropData> itemStacks = entry.getValue();
-                    if (itemStacks.isEmpty())
-                    {
-                        return;
-                    }
-                    final List<ItemDropData> items = new ArrayList<>();
-                    items.addAll(itemStacks);
-                    itemStacks.clear();
-
-                    final ServerWorld minecraftWorld = (ServerWorld) affectedEntity.get().getWorld();
-                    if (!items.isEmpty())
-                    {
-                        csm.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-
-                        final List<Entity> itemEntities = items.stream()
-                            .map(data -> data.create(minecraftWorld))
-                            .map(entity -> (Entity) entity)
-                            .collect(Collectors.toList());
-                        csm.pushCause(affectedEntity.get());
-                        final DropItemEvent.Destruct destruct =
-                            SpongeEventFactory.createDropItemEventDestruct(csm.getCurrentCause(), itemEntities);
-                        SpongeCommon.postEvent(destruct);
-                        csm.popCause();
-                        if (!destruct.isCancelled())
-                        {
-                            final boolean isPlayer = sender instanceof ServerPlayer;
-                            final ServerPlayer player = isPlayer ? (ServerPlayer) sender : null;
-                            EntityUtil.processEntitySpawnsFromEvent(destruct, () -> Optional.ofNullable(isPlayer ? player.getUser() : null));
-                        }
-
-                    }
-                }
             });
     }
 

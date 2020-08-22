@@ -25,8 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -38,14 +36,11 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 final class BlockDropItemsPhaseState extends BlockPhaseState {
 
@@ -100,29 +95,6 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
-        context.getCapturedItemStackSupplier()
-            .acceptAndClearIfNotEmpty(drops -> maybeWorld.ifPresent(mixinWorld -> {
-                final List<ItemEntity> items = drops.stream()
-                    .map(drop -> drop.create((ServerWorld) mixinWorld))
-                    .collect(Collectors.toList());
-                final List<Entity> entities = (List<Entity>) (List<?>) items;
-                if (!entities.isEmpty()) {
-                    PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context);
-                }
-                drops.clear();
-            }));
-        context.getBlockDropSupplier()
-            .acceptAndClearIfNotEmpty(drops -> {
-                for (final BlockPos key : drops.asMap().keySet()) {
-                    final List<ItemDropData> values = drops.get(key);
-                    if (!values.isEmpty()) {
-                        PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        TrackingUtil.spawnItemDataForBlockDrops(values, blockSnapshot, context);
-                    }
-                }
-            });
-
     }
 
     @Override

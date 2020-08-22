@@ -30,8 +30,8 @@ import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -132,8 +132,6 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
             }
         }
 
-        // Note that this is only used if and when item pre-merging is enabled. Which is never enabled in forge.
-        EntityDropPhaseState.processPerItemDrop(context, dyingEntity, isPlayer, entityPlayer);
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.

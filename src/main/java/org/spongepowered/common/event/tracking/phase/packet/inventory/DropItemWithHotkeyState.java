@@ -36,8 +36,8 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
@@ -58,11 +58,10 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
@@ -138,10 +137,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     slotTrans.clear();
                     mixinContainer.bridge$setCaptureInventory(false);
                 });
-            context.getPerEntityItemDropSupplier()
-                .acceptAndClearIfNotEmpty(itemMapping -> {
 
-                });
             final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
             mixinContainer.bridge$setCaptureInventory(false);
             mixinContainer.bridge$getCapturedSlotTransactions().clear();

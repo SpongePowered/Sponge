@@ -27,8 +27,6 @@ package org.spongepowered.common.event.tracking.phase.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -92,16 +90,6 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                 PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                 SpongeCommonEventFactory.callDropItemDestruct(entities, context);
 
-            });
-        context.getCapturedItemStackSupplier()
-            .acceptAndClearIfNotEmpty(drops -> {
-                final List<ItemEntity> items = drops.stream()
-                    .map(drop -> drop.create((ServerWorld) mixinWorld))
-                    .collect(Collectors.toList());
-                final List<Entity> entities = (List<Entity>) (List<?>) items;
-                if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemDestruct(entities, context);
-                }
             });
 
         context.getBlockItemDropSupplier()
