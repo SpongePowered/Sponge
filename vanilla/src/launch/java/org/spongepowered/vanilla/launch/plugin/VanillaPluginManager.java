@@ -32,8 +32,9 @@ import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginLoader;
+import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.vanilla.launch.VanillaLauncher;
-import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginLocator;
+import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginEngine;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -92,28 +93,28 @@ public final class VanillaPluginManager implements SpongePluginManager {
         this.sortedPlugins.add(plugin);
     }
 
-    public void loadPlugins(final VanillaPluginLocator loader) {
-        for (final Map.Entry<PluginLanguageService, List<PluginCandidate>> languageCandidates : loader.getCandidates().entrySet()) {
-            final PluginLanguageService languageService = languageCandidates.getKey();
-            final Collection<PluginCandidate> candidates = languageCandidates.getValue();
+    public void loadPlugins(final VanillaPluginEngine engine) {
+        for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> languageCandidates : engine.getCandidates().entrySet()) {
+            final PluginLanguageService<PluginResource> languageService = languageCandidates.getKey();
+            final Collection<PluginCandidate<PluginResource>> candidates = languageCandidates.getValue();
             final String loaderClass = languageService.getPluginLoader();
-            final org.spongepowered.plugin.PluginLoader<PluginContainer> pluginLoader;
+            final PluginLoader<PluginResource, PluginContainer> pluginLoader;
             try {
-                pluginLoader =  (PluginLoader<PluginContainer>) Class.forName(loaderClass).newInstance();
+                pluginLoader =  (PluginLoader<PluginResource, PluginContainer>) Class.forName(loaderClass).newInstance();
             } catch (final InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            for (final PluginCandidate candidate : candidates) {
-                final PluginContainer pluginContainer = pluginLoader.createPluginContainer(candidate, loader.getPluginEnvironment()).orElse(null);
+            for (final PluginCandidate<PluginResource> candidate : candidates) {
+                final PluginContainer pluginContainer = pluginLoader.createPluginContainer(candidate, engine.getPluginEnvironment()).orElse(null);
                 if (pluginContainer == null) {
-                    loader.getPluginEnvironment().getLogger().debug("Language service '{}' returned a null plugin container for '{}'.",
+                    engine.getPluginEnvironment().getLogger().debug("Language service '{}' returned a null plugin container for '{}'.",
                             languageService.getName(), candidate.getMetadata().getId());
                     continue;
                 }
 
                 try {
-                    pluginLoader.loadPlugin(loader.getPluginEnvironment(), pluginContainer, VanillaLauncher.getInstance().getClass().getClassLoader());
-                    loader.getPluginEnvironment().getLogger().info("Loaded plugin '{}'", pluginContainer.getMetadata().getId());
+                    pluginLoader.loadPlugin(engine.getPluginEnvironment(), pluginContainer, VanillaLauncher.getInstance().getClass().getClassLoader());
+                    engine.getPluginEnvironment().getLogger().info("Loaded plugin '{}'", pluginContainer.getMetadata().getId());
                     this.addPlugin(pluginContainer);
                 } catch (final InvalidPluginException e) {
                     e.printStackTrace();

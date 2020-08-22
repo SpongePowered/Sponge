@@ -32,6 +32,7 @@ import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.jvm.JVMPluginContainer;
 import org.spongepowered.plugin.jvm.JVMPluginLoader;
+import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginContainer> 
     }
 
     @Override
-    public Optional<JVMPluginContainer> createPluginContainer(final PluginCandidate candidate, final PluginEnvironment environment) {
+    public Optional<JVMPluginContainer> createPluginContainer(final PluginCandidate<JVMPluginResource> candidate, final PluginEnvironment environment) {
         return Optional.of(new JVMPluginContainer(candidate));
     }
 

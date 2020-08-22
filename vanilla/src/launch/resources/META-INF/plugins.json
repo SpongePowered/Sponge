@@ -1,6 +1,7 @@
 {
     "plugins": [
         {
+            "loader": "java_plain",
             "id": "minecraft",
             "name": "Minecraft",
             "version": "1.14.4",
@@ -18,6 +19,7 @@
             "extra": {}
         },
         {
+            "loader": "java_plain",
             "id": "spongeapi",
             "name": "SpongeAPI",
             "version": "8.0.0",
@@ -38,6 +40,7 @@
             "extra": {}
         },
         {
+            "loader": "java_plain",
             "id": "sponge",
             "name": "Sponge",
             "version": "1.14.4-8.0.0",
@@ -67,6 +70,7 @@
             "extra": {}
         },
         {
+            "loader": "java_plain",
             "id": "spongevanilla",
             "name": "SpongeVanilla",
             "version": "1.14.4-8.0.0",

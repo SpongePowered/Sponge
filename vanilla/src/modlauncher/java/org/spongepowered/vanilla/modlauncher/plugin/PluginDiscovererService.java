@@ -30,12 +30,12 @@ import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import org.spongepowered.plugin.PluginKeys;
-import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginLocator;
+import org.spongepowered.plugin.PluginResource;
+import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginEngine;
 import org.spongepowered.vanilla.modlauncher.Main;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +47,7 @@ public final class PluginDiscovererService implements ITransformationService {
 
     private static final String NAME = "plugin_discoverer";
 
-    private static final VanillaPluginLocator pluginLocator = Main.getPluginLocator();
+    private static final VanillaPluginEngine pluginEngine = Main.getPluginEngine();
 
     @Nonnull
     @Override
@@ -57,7 +57,7 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public void initialize(final IEnvironment environment) {
-        Main.getPluginLocator().initialize();
+        Main.getPluginEngine().initialize();
     }
 
     @Override
@@ -67,18 +67,18 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
-        PluginDiscovererService.pluginLocator.discoverPluginResources();
-        PluginDiscovererService.pluginLocator.createPluginCandidates();
+        PluginDiscovererService.pluginEngine.locatePluginResources();
+        PluginDiscovererService.pluginEngine.createPluginCandidates();
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
-        for (final Map.Entry<String, Collection<Path>> resourcesEntry : pluginLocator.getResources().entrySet()) {
-            final Collection<Path> resources = resourcesEntry.getValue();
+        for (final Map.Entry<String, List<PluginResource>> resourcesEntry : pluginEngine.getResources().entrySet()) {
+            final List<PluginResource> resources = resourcesEntry.getValue();
             launchResources.addAll(
-                resources
-                    .stream()
-                    .map(pluginFile -> Maps.immutableEntry(pluginFile.getFileName().toString(), pluginFile))
-                    .collect(Collectors.toList())
+                    resources
+                            .stream()
+                            .map(resource -> Maps.immutableEntry(resource.getPath().getFileName().toString(), resource.getPath()))
+                            .collect(Collectors.toList())
             );
         }
 
@@ -87,11 +87,14 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
-        PluginDiscovererService.pluginLocator.getPluginEnvironment().getLogger().info("SpongePowered PLUGIN Subsystem Version={} Service=ModLauncher",
-                PluginDiscovererService.pluginLocator.getPluginEnvironment().getBlackboard().get(PluginKeys.VERSION).get());
-        PluginDiscovererService.pluginLocator.discoverLanguageServices();
-        PluginDiscovererService.pluginLocator.getServices().forEach((k, v) -> pluginLocator.getPluginEnvironment().getLogger().info("Plugin "
-                + "language loader '{}' found.", k));
+        PluginDiscovererService.pluginEngine.getPluginEnvironment().getLogger().info("SpongePowered PLUGIN Subsystem Version={} Service=ModLauncher",
+                PluginDiscovererService.pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.VERSION).get());
+        PluginDiscovererService.pluginEngine.discoverLocatorServices();
+        PluginDiscovererService.pluginEngine.getLocatorServices().forEach((k, v) -> PluginDiscovererService.pluginEngine.getPluginEnvironment()
+                .getLogger().info("Plugin Resource Locator '{}' found.", k));
+        PluginDiscovererService.pluginEngine.discoverLanguageServices();
+        PluginDiscovererService.pluginEngine.getLanguageServices().forEach((k, v) -> PluginDiscovererService.pluginEngine.getPluginEnvironment()
+                .getLogger().info("Plugin language loader '{}' found.", k));
     }
 
     @Nonnull

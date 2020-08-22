@@ -27,20 +27,9 @@ package org.spongepowered.vanilla.modlauncher.bootstrap;
 import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
-import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.PluginLanguageService;
-import org.spongepowered.plugin.jvm.JarPluginCandidate;
-import org.spongepowered.vanilla.modlauncher.Main;
-
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * The Sponge {@link ILaunchHandlerService launch handler} for development environments.
@@ -61,27 +50,6 @@ public abstract class AbstractVanillaDevLaunchHandler extends AbstractVanillaLau
             }
         }
 
-        builder.setClassBytesLocator(s -> {
-                for (final Map.Entry<PluginLanguageService, List<PluginCandidate>> serviceCandidates :
-                    Main.getPluginLocator().getCandidates().entrySet()) {
-                    for (final PluginCandidate candidate : serviceCandidates.getValue()) {
-                        if (!(candidate instanceof JarPluginCandidate)) {
-                            continue;
-                        }
-
-                        final Path path = ((JarPluginCandidate) candidate).getFileSystem().getPath(s);
-                        if (Files.exists(path)) {
-                            try {
-                                return Optional.of(path.toUri().toURL());
-                            } catch (final MalformedURLException e) {
-                                e.printStackTrace();
-                                return Optional.empty();
-                            }
-                        }
-                    }
-                }
-                return Optional.empty();
-            }
-        );
+        super.configureTransformationClassLoader(builder);
     }
 }

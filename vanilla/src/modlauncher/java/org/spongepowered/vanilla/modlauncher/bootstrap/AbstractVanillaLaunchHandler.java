@@ -27,11 +27,23 @@ package org.spongepowered.vanilla.modlauncher.bootstrap;
 import cpw.mods.modlauncher.TransformingClassLoader;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.plugin.PluginCandidate;
+import org.spongepowered.plugin.PluginLanguageService;
+import org.spongepowered.plugin.PluginResource;
+import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
+import org.spongepowered.plugin.jvm.locator.ResourceType;
+import org.spongepowered.vanilla.modlauncher.Main;
 
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
@@ -61,6 +73,36 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
     );
 
     @Override
+    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+
+        builder.setClassBytesLocator(s -> {
+            for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> serviceCandidates : Main.getPluginEngine().getCandidates().entrySet()) {
+                for (final PluginCandidate<PluginResource> candidate : serviceCandidates.getValue()) {
+                    final PluginResource resource = candidate.getResource();
+
+                    if (resource instanceof JVMPluginResource) {
+                        if (((JVMPluginResource) resource).getType() != ResourceType.JAR) {
+                            continue;
+                        }
+                    }
+
+                    final Path resolved = resource.getFileSystem().getPath(s);
+                    if (Files.exists(resolved)) {
+                        try {
+                            return Optional.of(resolved.toUri().toURL());
+                        } catch (final MalformedURLException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                }
+            }
+
+            return Optional.empty();
+            }
+        );
+    }
+
+    @Override
     public Callable<Void> launchService(final String[] arguments, final ITransformingClassLoader launchClassLoader) {
         log.info("Transitioning to Sponge launcher, please wait...");
 
@@ -88,5 +130,4 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
      * @throws Exception This can be any exception that occurs during the launch process
      */
     protected abstract void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception;
-
 }

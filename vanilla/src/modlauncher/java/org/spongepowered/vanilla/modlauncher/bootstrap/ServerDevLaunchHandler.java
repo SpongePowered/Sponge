@@ -25,7 +25,7 @@
 package org.spongepowered.vanilla.modlauncher.bootstrap;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginLocator;
+import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginEngine;
 import org.spongepowered.vanilla.modlauncher.Main;
 
 public final class ServerDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
@@ -38,7 +38,7 @@ public final class ServerDevLaunchHandler extends AbstractVanillaDevLaunchHandle
     @Override
     protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
         Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginLocator.class, Boolean.class, String[].class)
-                .invoke(null, Main.getPluginLocator(), Boolean.TRUE, arguments);
+                .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
+                .invoke(null, Main.getPluginEngine(), Boolean.TRUE, arguments);
     }
 }

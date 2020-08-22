@@ -30,7 +30,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
-import org.spongepowered.common.launch.plugin.loader.PluginLocator;
+import org.spongepowered.common.launch.plugin.loader.PluginEngine;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
@@ -47,15 +47,15 @@ public abstract class Launcher {
 
     private static Launcher INSTANCE;
 
-    protected final PluginLocator pluginLocator;
+    protected final PluginEngine pluginEngine;
     protected final SpongePluginManager pluginManager;
     private final Logger logger;
     private final List<PluginContainer> launcherPlugins;
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
 
-    protected Launcher(final PluginLocator pluginLocator, final SpongePluginManager pluginManager) {
+    protected Launcher(final PluginEngine pluginEngine, final SpongePluginManager pluginManager) {
         this.logger = LogManager.getLogger("Sponge");
-        this.pluginLocator = pluginLocator;
+        this.pluginEngine = pluginEngine;
         this.pluginManager = pluginManager;
         this.launcherPlugins = new ArrayList<>();
     }
@@ -81,8 +81,8 @@ public abstract class Launcher {
         return this.logger;
     }
 
-    public PluginLocator getPluginLocator() {
-        return this.pluginLocator;
+    public PluginEngine getPluginEngine() {
+        return this.pluginEngine;
     }
 
     public SpongePluginManager getPluginManager() {
@@ -149,7 +149,7 @@ public abstract class Launcher {
     }
 
     private void createInternalPlugins() {
-        final Path gameDirectory = this.pluginLocator.getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY).get();
+        final Path gameDirectory = this.pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY).get();
         try {
             final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(Launcher.class.getResourceAsStream("/META-INF/plugins.json"));
             for (final PluginMetadata metadata : read) {

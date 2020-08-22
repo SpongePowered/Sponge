@@ -28,15 +28,15 @@ import com.google.inject.Stage;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginLocator;
+import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginEngine;
 
 public final class DedicatedServerLauncher extends VanillaLauncher {
 
-    protected DedicatedServerLauncher(final VanillaPluginLocator pluginLocator, final Stage injectionStage) {
+    protected DedicatedServerLauncher(final VanillaPluginEngine pluginLocator, final Stage injectionStage) {
         super(pluginLocator, injectionStage);
     }
 
-    public static void launch(final VanillaPluginLocator pluginLoader, final Boolean isDeveloperEnvironment, final String[] args) {
+    public static void launch(final VanillaPluginEngine pluginLoader, final Boolean isDeveloperEnvironment, final String[] args) {
         final DedicatedServerLauncher launcher = new DedicatedServerLauncher(pluginLoader, isDeveloperEnvironment ? Stage.DEVELOPMENT :
                 Stage.PRODUCTION);
         Launcher.setInstance(launcher);

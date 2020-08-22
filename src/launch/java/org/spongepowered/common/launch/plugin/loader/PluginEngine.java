@@ -26,7 +26,7 @@ package org.spongepowered.common.launch.plugin.loader;
 
 import org.spongepowered.plugin.PluginEnvironment;
 
-public interface PluginLocator {
+public interface PluginEngine {
 
     PluginEnvironment getPluginEnvironment();
 }

@@ -30,7 +30,7 @@ import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
-import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginLocator;
+import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginEngine;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public abstract class VanillaLauncher extends Launcher {
     private final Stage injectionStage;
     private PluginContainer vanillaPlugin;
 
-    protected VanillaLauncher(final VanillaPluginLocator pluginLocator, final Stage injectionStage) {
+    protected VanillaLauncher(final VanillaPluginEngine pluginLocator, final Stage injectionStage) {
         super(pluginLocator, new VanillaPluginManager());
         this.injectionStage = injectionStage;
     }
@@ -59,7 +59,7 @@ public abstract class VanillaLauncher extends Launcher {
 
     @Override
     public final void loadPlugins() {
-        this.getPluginManager().loadPlugins(this.getPluginLocator());
+        this.getPluginManager().loadPlugins(this.getPluginEngine());
     }
 
     @Override
@@ -89,8 +89,8 @@ public abstract class VanillaLauncher extends Launcher {
     }
 
     @Override
-    public VanillaPluginLocator getPluginLocator() {
-        return (VanillaPluginLocator) this.pluginLocator;
+    public VanillaPluginEngine getPluginEngine() {
+        return (VanillaPluginEngine) this.pluginEngine;
     }
 
     public VanillaPluginManager getPluginManager() {
