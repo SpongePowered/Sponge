@@ -98,8 +98,18 @@ public abstract class BaseConfig implements Config {
     @Override
     public ConfigurationTransformation getTransformation() {
         return ConfigurationTransformation.versionedBuilder()
+                .addVersion(2, this.buildOneToTwo())
                 // move everything out of sponge subcategory
-                .addVersion(1, buildInitialToOne())
+                .addVersion(1, this.buildInitialToOne())
+                .build();
+    }
+
+    protected ConfigurationTransformation buildOneToTwo() {
+        return ConfigurationTransformation.builder()
+                .addAction(new Object[] { "world", "portal-agents" }, (path, value) -> {
+                    value.setValue(null);
+                    return null;
+                })
                 .build();
     }
 

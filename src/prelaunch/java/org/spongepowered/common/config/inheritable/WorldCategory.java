@@ -28,9 +28,6 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.common.config.core.SpongeConfigs;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @ConfigSerializable
 public class WorldCategory {
 
