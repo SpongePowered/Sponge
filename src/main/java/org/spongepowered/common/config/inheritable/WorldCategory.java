@@ -58,11 +58,6 @@ public class WorldCategory {
     @Setting(value = "pvp-enabled", comment = "If 'true', this world will allow PVP combat.")
     private boolean pvpEnabled = true;
 
-    @Setting(value = "portal-agents", comment = "A list of all detected portal agents used in this world. \n"
-                                              + "In order to override, change the target world name to any other valid world. \n"
-                                              + "Note: If world is not found, it will fallback to default.")
-    private Map<String, String> portalAgents = new HashMap<>();
-
     @Setting(value = "deny-chunk-requests", comment = "If 'true', any request for a chunk not currently loaded will be denied (exceptions apply \n"
                                                     + "for things like world gen and player movement). \n"
                                                     + "Warning: As this is an experimental setting for performance gain, if you encounter any issues \n"
@@ -114,9 +109,6 @@ public class WorldCategory {
     private int viewDistance = USE_SERVER_VIEW_DISTANCE;
 
     public WorldCategory() {
-        this.portalAgents.put("minecraft:default_the_nether", "DIM-1");
-        this.portalAgents.put("minecraft:default_the_end", "DIM1");
-
         try {
             // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
             // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
@@ -185,11 +177,7 @@ public class WorldCategory {
     public void setMobSpawnRange(int range) {
         this.mobSpawnRange = range;
     }
-
-    public Map<String, String> getPortalAgents() {
-        return this.portalAgents;
-    }
-
+    
     public boolean getDenyChunkRequests() {
         return this.denyChunkRequests;
     }
