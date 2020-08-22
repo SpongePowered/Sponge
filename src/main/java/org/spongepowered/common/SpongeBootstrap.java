@@ -34,16 +34,18 @@ import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.common.launch.plugin.SpongePluginKeys;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
+import org.spongepowered.plugin.Blackboard;
 
 import java.util.List;
 
 public final class SpongeBootstrap {
 
     private static SpongeLifecycle lifecycle;
-    
+
+    public static Blackboard.Key<Injector> PARENT_INJECTOR = Blackboard.Key.of("parent_injector", Injector.class);
+
     public static void perform(final String engineName, final Runnable engineStart) {
         final Stage stage = SpongeGuice.getInjectorStage(Launcher.getInstance().getInjectionStage());
         SpongeCommon.getLogger().debug("Creating injector in stage '{}'", stage);
@@ -53,7 +55,7 @@ public final class SpongeBootstrap {
         );
         final Injector bootstrapInjector = Guice.createInjector(stage, modules);
 
-        Launcher.getInstance().getPluginEngine().getPluginEnvironment().getBlackboard().getOrCreate(SpongePluginKeys.PARENT_INJECTOR,
+        Launcher.getInstance().getPluginEngine().getPluginEnvironment().getBlackboard().getOrCreate(SpongeBootstrap.PARENT_INJECTOR,
                 () -> bootstrapInjector);
         SpongeBootstrap.lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);
         Launcher.getInstance().loadPlugins();
