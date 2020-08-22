@@ -85,15 +85,8 @@ public final class SpongeTimingsFactory implements TimingsFactory {
         return time;
     }
 
-    private static PluginContainer checkPlugin(Object plugin) {
-        Optional<PluginContainer> optPlugin = SpongeCommon.getGame().getPluginManager().fromInstance(plugin);
-        checkArgument(optPlugin.isPresent(), "Provided object is not a plugin instance");
-        return optPlugin.get();
-    }
-
     @Override
-    public Timing of(PluginContainer pluginObj, String name, @Nullable Timing groupHandler) {
-        PluginContainer plugin = checkPlugin(pluginObj);
+    public Timing of(PluginContainer plugin, String name, @Nullable Timing groupHandler) {
         return TimingsManager.getHandler(plugin.getMetadata().getId(), name, groupHandler, true);
     }
 

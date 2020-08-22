@@ -181,14 +181,8 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public Builder newDescriptionBuilder(final PluginContainer instance) {
-        final Optional<PluginContainer> container = this.game.getPluginManager().fromInstance(checkNotNull(instance, "instance"));
-        if (!container.isPresent()) {
-            throw new IllegalArgumentException("The provided plugin object does not have an associated plugin container "
-                    + "(in other words, is 'plugin' actually your plugin object?)");
-        }
-
-        return new SpongePermissionDescription.Builder(this, container.get());
+    public Builder newDescriptionBuilder(final PluginContainer container) {
+        return new SpongePermissionDescription.Builder(this, container);
     }
 
     public void addDescription(final PermissionDescription permissionDescription) {
