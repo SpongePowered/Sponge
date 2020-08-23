@@ -435,7 +435,6 @@ project("SpongeVanilla") {
 
     val vanillaMinecraftConfig by configurations.named("minecraft")
     val vanillaAppLaunchConfig by configurations.register("applaunch") {
-        extendsFrom(vanillaMinecraftConfig)
     }
 
     val vanillaMain by sourceSets.named("main") {
@@ -552,6 +551,7 @@ project("SpongeVanilla") {
         }
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
         add(vanillaLaunch.implementationConfigurationName, vanillaAppLaunchConfig)
+        add(vanillaLaunch.implementationConfigurationName, vanillaMinecraftConfig)
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
@@ -596,7 +596,9 @@ project("SpongeVanilla") {
         }
         vanillaAppLaunchImplementation(vanillaAppLaunchConfig)
         vanillaMixinsImplementation(vanillaAppLaunchConfig)
+        vanillaMixinsImplementation(vanillaMinecraftConfig)
         vanillaAccessorsImplementation(vanillaAppLaunchConfig)
+        vanillaAccessorsImplementation(vanillaMinecraftConfig)
 
         // Annotation Processor
         vanillaAccessorsAnnotationProcessor(vanillaAppLaunchImplementation)
@@ -742,6 +744,7 @@ project("SpongeVanilla") {
             from(vanillaAppLaunchJar)
             from(vanillaMixinsJar)
             from(vanillaAccessorsJar)
+            from(vanillaAppLaunchConfig)
             dependencies {
                 include(project(":"))
                 include(project(":SpongeAPI"))
