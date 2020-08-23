@@ -230,9 +230,6 @@ public class DataProviderRegistrator {
 
                         @Override
                         protected Optional<T> set(final T dataHolder, final K value) {
-                            if (this.isBooleanKey) {
-                                return (Optional<T>) OptBool.of((Boolean) registration.set.apply(dataHolder, value));
-                            }
                             return Optional.ofNullable(registration.set.apply(dataHolder, value));
                         }
 

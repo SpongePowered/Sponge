@@ -53,6 +53,7 @@
         "entity.monster.GuardianEntityAccessor",
         "entity.monster.PatrollerEntityAccessor",
         "entity.monster.PhantomEntityAccessor",
+        "entity.monster.PillagerEntityAccessor",
         "entity.monster.RavagerEntityAccessor",
         "entity.monster.SlimeEntityAccessor",
         "entity.monster.SpellcastingIllagerEntity_UseSpellGoalAccessor",
