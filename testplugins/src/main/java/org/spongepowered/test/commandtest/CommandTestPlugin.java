@@ -42,6 +42,7 @@ import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -223,6 +224,19 @@ public final class CommandTestPlugin {
                         .build(),
                 "testrk"
         );
+
+        final Parameter.Key<User> userKey = Parameter.key("user", TypeToken.of(User.class));
+        event.register(
+                this.plugin,
+                Command.builder()
+                    .parameter(Parameter.user().setKey(userKey).build())
+                    .setExecutor(context -> {
+                        context.sendMessage(TextComponent.of(context.requireOne(userKey).getName()));
+                        return CommandResult.success();
+                    })
+                    .build(),
+                "getuser"
+                );
     }
 
     @Listener
