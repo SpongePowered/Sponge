@@ -33,6 +33,7 @@ import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.PluginResourceLocatorService;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -52,9 +53,9 @@ public final class VanillaPluginEngine implements PluginEngine {
 
     public VanillaPluginEngine(final PluginEnvironment pluginEnvironment) {
         this.pluginEnvironment = pluginEnvironment;
-        this.locatorServices = new Object2ObjectOpenHashMap<>();
-        this.languageServices = new Object2ObjectOpenHashMap<>();
-        this.locatorResources = new Object2ObjectOpenHashMap<>();
+        this.locatorServices = new HashMap<>();
+        this.languageServices = new HashMap<>();
+        this.locatorResources = new HashMap<>();
         this.pluginCandidates = new IdentityHashMap<>();
     }
 
