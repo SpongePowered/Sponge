@@ -62,9 +62,6 @@ public final class ServicesCategory {
         @Setting(value = "permission-service", comment = "Specifies the plugin that will provide the permission service")
         private String permissionService = "?";
 
-        @Setting(value = "user-storage-service", comment = "Specifies the plugin that will provide the user storage service")
-        private String userStorageService = "?";
-
         @Setting(value = "whitelist-service", comment = "Specifies the plugin that will provide the whitelist service")
         private String whitelistService = "?";
 
@@ -82,10 +79,6 @@ public final class ServicesCategory {
 
         public String getPermissionService() {
             return this.permissionService;
-        }
-
-        public String getUserStorageService() {
-            return this.userStorageService;
         }
 
         public String getWhitelistService() {
