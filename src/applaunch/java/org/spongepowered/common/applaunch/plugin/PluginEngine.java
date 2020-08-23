@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.plugin.loader;
+package org.spongepowered.common.applaunch.plugin;
 
 import org.spongepowered.plugin.PluginEnvironment;
 

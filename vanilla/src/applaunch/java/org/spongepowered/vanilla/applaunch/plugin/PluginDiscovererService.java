@@ -31,7 +31,6 @@ import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
 import org.spongepowered.vanilla.applaunch.Main;
 
 import java.nio.file.Path;

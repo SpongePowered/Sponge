@@ -22,23 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler;
+package org.spongepowered.vanilla.applaunch.handler.prod;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
-import org.spongepowered.vanilla.applaunch.Main;
+import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 
-public final class ServerDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
+public abstract class AbstractVanillaProdLaunchHandler extends AbstractVanillaLaunchHandler {
 
-    @Override
-    public String name() {
-        return "sponge_server_dev";
-    }
-
-    @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
-                .invoke(null, Main.getPluginEngine(), Boolean.TRUE, arguments);
-    }
 }

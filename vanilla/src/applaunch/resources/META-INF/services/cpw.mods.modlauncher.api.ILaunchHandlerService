@@ -1,2 +1,3 @@
-org.spongepowered.vanilla.applaunch.handler.ServerDevLaunchHandler
-org.spongepowered.vanilla.applaunch.handler.ClientDevLaunchHandler
+org.spongepowered.vanilla.applaunch.handler.dev.ServerDevLaunchHandler
+org.spongepowered.vanilla.applaunch.handler.dev.ClientDevLaunchHandler
+org.spongepowered.vanilla.applaunch.handler.prod.ServerProdLaunchHandler

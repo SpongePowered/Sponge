@@ -33,7 +33,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginLoader;
 import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.launch.VanillaLauncher;
 
 import java.util.ArrayList;

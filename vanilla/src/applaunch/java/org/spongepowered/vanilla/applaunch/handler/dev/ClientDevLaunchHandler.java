@@ -22,34 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler;
+package org.spongepowered.vanilla.applaunch.handler.dev;
 
-import cpw.mods.gross.Java9ClassLoaderUtil;
-import cpw.mods.modlauncher.api.ILaunchHandlerService;
-import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Paths;
+import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import org.spongepowered.vanilla.applaunch.VanillaLaunchTargets;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.Main;
 
-/**
- * The Sponge {@link ILaunchHandlerService launch handler} for development environments.
- */
-public abstract class AbstractVanillaDevLaunchHandler extends AbstractVanillaLaunchHandler {
+public final class ClientDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
 
     @Override
-    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
-            if (url.toString().contains("mixin") && url.toString().endsWith(".jar")) {
-                continue;
-            }
+    public String name() {
+        return VanillaLaunchTargets.CLIENT_DEVELOPMENT.getLaunchTarget();
+    }
 
-            try {
-                builder.addTransformationPath(Paths.get(url.toURI()));
-            } catch (final URISyntaxException ex) {
-                log.error("Failed to add Mixin transformation path", ex);
-            }
-        }
-
-        super.configureTransformationClassLoader(builder);
+    @Override
+    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
+        Class.forName("org.spongepowered.vanilla.launch.ClientLauncher", true, launchClassLoader.getInstance())
+                .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
+                .invoke(null, Main.getPluginEngine(), Boolean.TRUE, arguments);
     }
 }

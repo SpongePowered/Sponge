@@ -579,6 +579,8 @@ project("SpongeVanilla") {
             exclude(group = "com.google.guava", module = "guava")
             exclude(group = "org.checkerframework", module = "checker-qual")
         }
+        vanillaAppLaunchConfig("org.cadixdev:lorenz:0.6.0-SNAPSHOT")
+        vanillaAppLaunchConfig("org.cadixdev:atlas:0.3.0-SNAPSHOT")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
@@ -719,9 +721,8 @@ project("SpongeVanilla") {
             archiveClassifier.set("universal")
             manifest {
                 attributes(mapOf(
+                        "Main-Class" to "org.spongepowered.vanilla.applaunch.Main",
                         "Launch-Target" to "sponge_server_prod",
-                        "Mappings-Channel" to mcpType,
-                        "Mappings-Version" to mcpMappings,
                         "Specification-Title" to "SpongeCommon",
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
@@ -774,12 +775,17 @@ project("SpongeVanilla") {
                 include(dependency("org.apache.logging.log4j:log4j-slf4j-impl"))
                 include(dependency("org.apache.logging.log4j:log4j-api"))
 
-                // Now for ModLauncher and launching in general
+                // And now the vanilla dependencies
                 include(dependency("net.minecraftforge:accesstransformers"))
                 include(dependency("cpw.mods:grossjava9hacks"))
                 include(dependency("cpw.mods:modlauncher"))
                 include(dependency("net.minecraftforge:mergetool"))
                 include(dependency("net.sf.jopt-simple:jopt-simple"))
+                include(dependency("org.cadixdev:lorenz"))
+                include(dependency("org.cadixdev:atlas"))
+                include(dependency("org.ow2.asm:asm-commons"))
+                include(dependency("org.cadixdev:bombe"))
+                include(dependency("org.cadixdev:bombe-jar"))
             }
         }
         reobf {

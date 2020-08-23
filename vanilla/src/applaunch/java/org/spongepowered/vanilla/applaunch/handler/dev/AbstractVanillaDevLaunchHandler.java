@@ -22,35 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.vanilla.applaunch.handler.dev;
 
-import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import cpw.mods.gross.Java9ClassLoaderUtil;
+import cpw.mods.modlauncher.api.ILaunchHandlerService;
+import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
+import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 
-public final class ClientLauncher extends VanillaLauncher {
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 
-    protected ClientLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
-        super(pluginEngine, injectionStage);
-    }
-
-    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(pluginEngine, isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.launchPlatform(args);
-    }
+/**
+ * The Sponge {@link ILaunchHandlerService launch handler} for development environments.
+ */
+public abstract class AbstractVanillaDevLaunchHandler extends AbstractVanillaLaunchHandler {
 
     @Override
-    public boolean isDedicatedServer() {
-        return false;
-    }
+    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
+            if (url.toString().contains("mixin") && url.toString().endsWith(".jar")) {
+                continue;
+            }
 
-    public void launchPlatform(final String[] args) {
-        super.onLaunch();
-        this.getLogger().info("Loading Sponge, please wait...");
+            try {
+                builder.addTransformationPath(Paths.get(url.toURI()));
+            } catch (final URISyntaxException ex) {
+                log.error("Failed to add Mixin transformation path", ex);
+            }
+        }
 
-        SpongeBootstrap.perform("Client", () -> Main.main(args));
+        super.configureTransformationClassLoader(builder);
     }
 }

@@ -24,52 +24,32 @@
  */
 package org.spongepowered.vanilla.applaunch;
 
-import cpw.mods.modlauncher.Launcher;
-import joptsimple.ArgumentAcceptingOptionSpec;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.util.PathConverter;
-import joptsimple.util.PathProperties;
-import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.vanilla.applaunch.util.ArgumentList;
-import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginKeys;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import org.spongepowered.vanilla.applaunch.pipeline.AppPipeline;
+import org.spongepowered.vanilla.applaunch.pipeline.ProductionServerAppPipeline;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 
 public final class Main {
 
+    private static AppPipeline appPipeline;
     private static VanillaPluginEngine pluginEngine;
-
-    public static void main(final String[] args) throws IOException {
-        final OptionParser parser = new OptionParser();
-        final ArgumentAcceptingOptionSpec<Path> gameDir = parser.accepts("gameDir", "Alternative game directory").withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Paths.get("."));
-        parser.allowsUnrecognizedOptions();
-        final OptionSet optionSet = parser.parse(args);
-
-        final Path gameDirectory = optionSet.valueOf(gameDir);
-        final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
-        final PluginEnvironment pluginEnvironment = new PluginEnvironment();
-        pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
-        pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> gameDirectory);
-        final Path modsDirectory = gameDirectory.resolve("mods");
-        if (Files.notExists(modsDirectory)) {
-            Files.createDirectories(modsDirectory);
+    
+    public static void main(String[] args) throws Exception {
+        final String[] launchArgs = VanillaCommandLine.configure(args);
+        switch (VanillaCommandLine.LAUNCH_TARGET) {
+            case CLIENT_DEVELOPMENT:
+            case SERVER_DEVELOPMENT:
+                Main.appPipeline = new ProductionServerAppPipeline();
+                break;
+            case SERVER_PRODUCTION:
+                Main.appPipeline = new ProductionServerAppPipeline();
+                break;
+            default:
+                throw new RuntimeException("Plebizou doesn't want to do a production SpongeVanilla client :'(");
         }
-        // TODO Read in plugin directories from CLI/Config
-        pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, gameDirectory.resolve("plugins")));
-        pluginEnvironment.getBlackboard().getOrCreate(SpongeConfigs.IS_VANILLA_PLATFORM, () -> true);
 
-        SpongeConfigs.initialize(pluginEnvironment);
-        Main.pluginEngine = new VanillaPluginEngine(pluginEnvironment);
-
-        final ArgumentList lst = ArgumentList.from(args);
-        Launcher.main(lst.getArguments());
+        Main.appPipeline.prepare();
+        Main.pluginEngine = new VanillaPluginEngine(Main.appPipeline.getPluginEnvironment());
+        Main.appPipeline.start(launchArgs);
     }
 
     public static VanillaPluginEngine getPluginEngine() {

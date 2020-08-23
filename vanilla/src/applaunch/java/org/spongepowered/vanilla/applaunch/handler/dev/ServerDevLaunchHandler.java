@@ -22,35 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.vanilla.applaunch.handler.dev;
 
-import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.launch.Launcher;
+import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import org.spongepowered.vanilla.applaunch.VanillaLaunchTargets;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.Main;
 
-public final class ClientLauncher extends VanillaLauncher {
+public final class ServerDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
 
-    protected ClientLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
-        super(pluginEngine, injectionStage);
-    }
-
-    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(pluginEngine, isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.launchPlatform(args);
+    @Override
+    public String name() {
+        return VanillaLaunchTargets.SERVER_DEVELOPMENT.getLaunchTarget();
     }
 
     @Override
-    public boolean isDedicatedServer() {
-        return false;
-    }
-
-    public void launchPlatform(final String[] args) {
-        super.onLaunch();
-        this.getLogger().info("Loading Sponge, please wait...");
-
-        SpongeBootstrap.perform("Client", () -> Main.main(args));
+    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
+        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance())
+                .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
+                .invoke(null, Main.getPluginEngine(), Boolean.TRUE, arguments);
     }
 }
