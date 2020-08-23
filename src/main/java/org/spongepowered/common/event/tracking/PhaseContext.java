@@ -395,7 +395,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
      * {@link TransactionalCaptureSupplier}. It is intended that the returned list is not
      * self updating, nor is it to be used as to "remove" blocks from being captured.
      *
-     * <p>To mutate entries presented in the returned list, use {@link #getBlockTransactor()}
+     * <p>To mutate entries presented in the returned list, use {@link #getTransactor()}
      * and methods available in {@link TransactionalCaptureSupplier} such as:
      * <ul>
      *     <li>{@link TransactionalCaptureSupplier#clear()} - To clear the captured lists</li>
@@ -421,15 +421,11 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return Collections.emptyList();
     }
 
-    public TransactionalCaptureSupplier getBlockTransactor() {
+    public TransactionalCaptureSupplier getTransactor() {
         if (this.blockTransactor == null) {
             this.blockTransactor = new TransactionalCaptureSupplier();
         }
         return this.blockTransactor;
-    }
-
-    public EffectTransactor pushTransactor(final ResultingTransactionBySideEffect effect) {
-        return this.getBlockTransactor().pushTransactor(effect);
     }
 
     public CapturedMultiMapSupplier<BlockPos, ItemEntity> getBlockItemDropSupplier() throws IllegalStateException {

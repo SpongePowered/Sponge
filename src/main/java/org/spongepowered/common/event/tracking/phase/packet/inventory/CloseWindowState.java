@@ -70,7 +70,7 @@ public final class CloseWindowState extends BasicPacketState {
             stackManager.popCause();
         }
 
-        if (context.getCapturedItemsSupplier().isEmpty() && context.getBlockTransactor().isEmpty()) {
+        if (context.getCapturedItemsSupplier().isEmpty() && context.getTransactor().isEmpty()) {
             return;
         }
 

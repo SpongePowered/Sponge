@@ -433,7 +433,7 @@ public final class TrackingUtil {
     }
 
     public static boolean processBlockCaptures(final PhaseContext<?> context) {
-        final TransactionalCaptureSupplier transactor = context.getBlockTransactor();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
         // Fail fast and check if it's empty.
         if (transactor.isEmpty()) {
             return false;

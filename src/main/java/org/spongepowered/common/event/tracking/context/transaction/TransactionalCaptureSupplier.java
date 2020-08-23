@@ -230,7 +230,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     This is achieved through captureNeighborNotification and logTileChange.
      */
 
-    public EffectTransactor pushTransactor(final ResultingTransactionBySideEffect effect) {
+    @SuppressWarnings("unchecked")
+    public EffectTransactor pushEffect(final ResultingTransactionBySideEffect effect) {
         final GameTransaction parentTransaction = Optional.ofNullable(this.effect)
             .map(child -> child.tail)
             .orElse(Objects.requireNonNull(this.tail));

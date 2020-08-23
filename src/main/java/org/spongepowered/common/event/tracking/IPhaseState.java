@@ -793,7 +793,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default ChangeBlock createTransaction(final C phaseContext,
         final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState, final BlockChangeFlag flags) {
-        final ChangeBlock changeBlock = phaseContext.getBlockTransactor()
+        final ChangeBlock changeBlock = phaseContext.getTransactor()
             .logBlockChange(originalBlockSnapshot, newState, flags);
 
         return changeBlock;

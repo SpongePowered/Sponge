@@ -94,7 +94,7 @@ public final class WorldPipeline implements BlockPipeline {
         final PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.worldEffects) {
-            try (final EffectTransactor ignored = context.pushTransactor(effect)) {
+            try (final EffectTransactor ignored = context.getTransactor().pushEffect(effect)) {
                 final EffectResult result = effect.effect.processSideEffect(
                     this,
                     formerState,

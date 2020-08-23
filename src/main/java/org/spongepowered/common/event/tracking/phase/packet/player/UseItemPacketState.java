@@ -118,7 +118,7 @@ public final class UseItemPacketState extends BasicPacketState {
                 .acceptAndClearIfNotEmpty(entities -> {
                     SpongeCommonEventFactory.callSpawnEntity(entities, context);
                 });
-            if (!context.getBlockTransactor().isEmpty()) {
+            if (!context.getTransactor().isEmpty()) {
                 // TODO - Determine if we need to pass the supplier or perform some parameterized
                 //  process if not empty method on the capture object.
                 boolean success = TrackingUtil.processBlockCaptures(context);

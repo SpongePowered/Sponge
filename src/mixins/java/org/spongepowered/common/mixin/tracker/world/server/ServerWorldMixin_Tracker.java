@@ -396,7 +396,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final PhaseContext<?> current = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState state = current.state;
         if (state.doesBulkBlockCapture(current)) {
-            if (current.getBlockTransactor().logTileRemoval(tileentity, () -> (ServerWorld) (Object) this)) {
+            if (current.getTransactor().logTileRemoval(tileentity, () -> (ServerWorld) (Object) this)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
                     .addEffect(new RemoveTileEntityFromWorldEffect())
                     .addEffect(new RemoveTileEntityFromChunkEffect())
@@ -427,7 +427,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
                 tileEntity.setWorldAndPos((ServerWorld) (Object) this, immutable);
             }
             final Chunk chunk = this.shadow$getChunkAt(immutable);
-            if (current.getBlockTransactor().logTileAddition(tileEntity, () -> (ServerWorld) (Object) this, chunk)) {
+            if (current.getTransactor().logTileAddition(tileEntity, () -> (ServerWorld) (Object) this, chunk)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
                     .addEffect(new AddTileEntityToWorldWhileProcessingEffect())
                     .addEffect(new AddTileEntityToLoadedListInWorldEffect())
@@ -465,7 +465,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final IPhaseState state = current.state;
         if (state.doesBulkBlockCapture(current)) {
             final @Nullable TileEntity existing = this.shadow$getChunkAt(immutable).getTileEntity(immutable);
-            if (current.getBlockTransactor().logTileReplacement(immutable, existing, proposed, () -> (ServerWorld) (Object) this)) {
+            if (current.getTransactor().logTileReplacement(immutable, existing, proposed, () -> (ServerWorld) (Object) this)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
                     .addEffect(new RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect())
                     .addEffect(new ReplaceTileEntityInWorldEffect())
@@ -524,7 +524,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             final WeakReference<ServerWorld> worldReference = new WeakReference<>((ServerWorld) (Object) this);
             final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldReference.get(), "ServerWorld dereferenced");
             final @Nullable TileEntity existingTile = targetChunk.getTileEntity(immutableTarget, Chunk.CreateEntityType.CHECK);
-            peek.getBlockTransactor().logNeighborNotification(worldSupplier, immutableFrom, blockIn, immutableTarget, targetBlockState, existingTile);
+            peek.getTransactor().logNeighborNotification(worldSupplier, immutableFrom, blockIn, immutableTarget, targetBlockState, existingTile);
 
             state.associateNeighborStateNotifier(peek, immutableFrom, targetBlockState.getBlock(), immutableTarget, ((ServerWorld) (Object) this), PlayerTracker.Type.NOTIFIER);
             // Sponge End

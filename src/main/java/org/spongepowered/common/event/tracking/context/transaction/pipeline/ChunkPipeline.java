@@ -88,6 +88,7 @@ public final class ChunkPipeline implements BlockPipeline {
         return Objects.requireNonNull(this.sectionSupplier, "ChunkSection Supplier is null in ChunkPipeline").get();
     }
 
+    @Nullable
     public BlockState processChange(final PhaseContext<?> context, final BlockState currentState, final BlockState proposedState,
         final BlockPos pos
     ) {
@@ -101,7 +102,7 @@ public final class ChunkPipeline implements BlockPipeline {
         final PipelineCursor formerState = new PipelineCursor(currentState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.chunkEffects) {
-            try (final EffectTransactor ignored = context.pushTransactor(effect)) {
+            try (final EffectTransactor ignored = context.getTransactor().pushEffect(effect)) {
                 final EffectResult result = effect.effect.processSideEffect(
                     this,
                     formerState,
