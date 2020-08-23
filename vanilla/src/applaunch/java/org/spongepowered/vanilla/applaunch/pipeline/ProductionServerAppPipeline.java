@@ -57,7 +57,7 @@ public final class ProductionServerAppPipeline extends AppPipeline {
     public static final String MINECRAFT_PATH_PREFIX = "net/minecraft/server";
     public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
     public static final String MCP_CONFIG_NAME = "mcp_config";
-    public static final String MCP_CONFIG_PREFIX_URL = "http://files.minecraftforge.net/maven/de/oceanlabs/mcp/" + MCP_CONFIG_NAME;
+    public static final String MCP_CONFIG_PREFIX_URL = "https://files.minecraftforge.net/maven/de/oceanlabs/mcp/" + MCP_CONFIG_NAME;
     public static final String MCP_CONFIG_PATH_PREFIX = "de/oceanlabs/mcp/" + MCP_CONFIG_NAME;
     public static final String MCP_JOINED_PATH = "config/joined.tsrg";
 

@@ -38,7 +38,7 @@ public final class Main {
         switch (VanillaCommandLine.LAUNCH_TARGET) {
             case CLIENT_DEVELOPMENT:
             case SERVER_DEVELOPMENT:
-                Main.appPipeline = new ProductionServerAppPipeline();
+                Main.appPipeline = new AppPipeline();
                 break;
             case SERVER_PRODUCTION:
                 Main.appPipeline = new ProductionServerAppPipeline();
