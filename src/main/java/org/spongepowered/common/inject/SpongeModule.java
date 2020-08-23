@@ -30,7 +30,6 @@ import com.google.inject.Provider;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.inject.provider.ConfigDirAnnotation;
-import org.spongepowered.common.inject.provider.PathAsFileProvider;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -40,12 +39,6 @@ public final class SpongeModule extends AbstractModule {
     @Override
     protected void configure() {
         this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeCommon.getPluginConfigDirectory());
-        this.bind(File.class).annotatedWith(ConfigDirAnnotation.SHARED).toProvider(new PathAsFileProvider() {
-            @Inject
-            void init(@ConfigDir(sharedRoot = true) Provider<Path> path) {
-                this.path = path;
-            }
-        });
     }
 
 }
