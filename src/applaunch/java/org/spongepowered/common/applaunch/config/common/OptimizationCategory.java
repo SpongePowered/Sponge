@@ -60,17 +60,6 @@ public class OptimizationCategory {
                                                  + "be removed in a future release.")
     private boolean pandaRedstone = false;
 
-    @Setting(value = "enchantment-helper-leak-fix", comment = "If 'true', provides a fix for possible leaks through\n"
-                                                              + "Minecraft's enchantment helper code that can leak\n"
-                                                              + "entity and world references without much interaction\n"
-                                                              + "Forge native (so when running SpongeForge implementation)\n"
-                                                              + "has a similar patch, but Sponge's patch works a little harder\n"
-                                                              + "at it, but Vanilla (SpongeVanilla implementation) does NOT\n"
-                                                              + "have any of the patch, leading to the recommendation that this\n"
-                                                              + "patch is enabled \"for sure\" when using SpongeVanilla implementation.\n"
-                                                              + "See https://bugs.mojang.com/browse/MC-128547 for more information.\n")
-    private boolean enchantmentLeak = true;
-
     @Setting(value = "faster-thread-checks", comment = "If 'true', allows for Sponge to make better assumptinos on single threaded\n"
                                                        + "operations with relation to various checks for server threaded operations.\n"
                                                        + "This is default to true due to Sponge being able to precisely inject when\n"
@@ -165,10 +154,6 @@ public class OptimizationCategory {
 
     public boolean usePandaRedstone() {
         return this.pandaRedstone;
-    }
-
-    public boolean useEnchantmentHelperFix() {
-        return this.enchantmentLeak;
     }
 
     public boolean useFastThreadChecks() {
