@@ -25,7 +25,7 @@
 package org.spongepowered.vanilla.launch.plugin.loader;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.spongepowered.common.launch.plugin.loader.PluginEngine;
+import org.spongepowered.applaunch.plugin.loader.PluginEngine;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginLanguageService;

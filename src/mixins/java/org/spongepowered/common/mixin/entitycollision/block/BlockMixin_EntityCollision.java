@@ -29,13 +29,13 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.ConfigHandle;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.common.CommonConfig;
-import org.spongepowered.common.config.inheritable.CollisionModCategory;
-import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.applaunch.config.core.ConfigHandle;
+import org.spongepowered.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.applaunch.config.common.CommonConfig;
+import org.spongepowered.applaunch.config.inheritable.CollisionModCategory;
+import org.spongepowered.applaunch.config.inheritable.EntityCollisionCategory;
+import org.spongepowered.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
 
 @Mixin(Block.class)

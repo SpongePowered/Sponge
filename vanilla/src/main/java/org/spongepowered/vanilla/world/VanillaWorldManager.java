@@ -67,11 +67,11 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
@@ -562,7 +562,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
 
-            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeConfigs.createWorld(logicType, key);
+            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(logicType, key);
             if (!isDefaultWorld) {
                 if (!configAdapter.get().getWorld().isWorldEnabled()) {
                     MinecraftServerAccessor_Vanilla.accessor$getLogger().warn("World '{}' ({}/{}) has been disabled in the configuration. "

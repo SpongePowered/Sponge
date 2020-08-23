@@ -25,7 +25,7 @@
 package org.spongepowered.common.config.customdata;
 
 import ninja.leaping.configurate.objectmapping.Setting;
-import org.spongepowered.common.config.Config;
+import org.spongepowered.applaunch.config.core.Config;
 
 public final class CustomDataConfig implements Config {
 

@@ -25,14 +25,9 @@
 package org.spongepowered.common.config.tracker;
 
 import ninja.leaping.configurate.objectmapping.Setting;
-import org.spongepowered.common.config.Config;
-import org.spongepowered.common.config.ConfigHandle;
+import org.spongepowered.applaunch.config.core.Config;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class TrackerConfig implements Config {
 

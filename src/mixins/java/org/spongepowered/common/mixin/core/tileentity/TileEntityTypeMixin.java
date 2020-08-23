@@ -34,8 +34,8 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
-import org.spongepowered.common.config.ConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.config.tracker.BlockEntityTrackerCategory;
 import org.spongepowered.common.config.tracker.BlockEntityTrackerModCategory;
 import org.spongepowered.common.config.tracker.TrackerConfig;
@@ -63,7 +63,7 @@ public abstract class TileEntityTypeMixin implements ResourceKeyBridge, TileEnti
 
         final TrackableBridge trackableBridge = (TrackableBridge) tileEntityType;
 
-        final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeConfigs.getTracker();
+        final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeGameConfigs.getTracker();
         final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.get().getBlockEntityTracker();
 
         BlockEntityTrackerModCategory modCapturing = blockEntityTracker.getModMappings().get(plugin.getMetadata().getId());

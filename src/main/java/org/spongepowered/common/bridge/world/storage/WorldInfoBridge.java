@@ -29,8 +29,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Optional;

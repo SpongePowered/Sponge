@@ -28,19 +28,18 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import ninja.leaping.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.common.config.Config;
+import org.spongepowered.applaunch.config.core.Config;
+import org.spongepowered.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: migration -- `sponge/metrics` from old `global.conf`
-
 @ConfigSerializable
 public class MetricsConfiguration implements Config {
 
-    public static String FILE_NAME = "metrics.conf";
+    public static String FILE_NAME = SpongeConfigs.METRICS_NAME;
 
     @Setting(value = "global-state", comment = "The global collection state that should be respected by all plugins that have no specified "
       + "collection state. If undefined then it is treated as disabled.")

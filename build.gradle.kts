@@ -114,11 +114,27 @@ tasks {
         }
         from(launch.get().output)
     }
+    val applaunchJar by registering(Jar::class) {
+        getArchiveClassifier().set("applaunch")
+        manifest {
+            attributes(mapOf(
+                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Vendor" to "SpongePowered",
+                    "Specification-Version" to apiProject.version,
+                    "Implementation-Title" to project.name,
+                    "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                    "Implementation-Vendor" to "SpongePowered"
+//                            "Implementation-Timestamp" to Instant.now().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            ))
+        }
+        from(applaunch.get().output)
+    }
 
     reobf {
         create("mixinsJar")
         create("accessorsJar")
         create("launchJar")
+        // TODO: does applaunch need to be here? it has no reference to obf classes
     }
 
 }
@@ -128,18 +144,23 @@ version = generateImplementationVersionString(apiProject.version as String, mine
 // Configurations
 val minecraftConfig by configurations.named("minecraft")
 
+val applaunchConfig by configurations.register("applaunch")
+
 val launchConfig by configurations.register("launch") {
     extendsFrom(minecraftConfig)
+    extendsFrom(applaunchConfig)
 }
 val accessorsConfig by configurations.register("accessors") {
     extendsFrom(minecraftConfig)
     extendsFrom(launchConfig)
 }
 val mixinsConfig by configurations.register("mixins") {
+    extendsFrom(applaunchConfig)
     extendsFrom(launchConfig)
     extendsFrom(minecraftConfig)
 }
 val modlauncherConfig by configurations.register("modlauncher") {
+    extendsFrom(applaunchConfig)
     extendsFrom(launchConfig)
     extendsFrom(minecraftConfig)
 }
@@ -147,7 +168,14 @@ val modlauncherConfig by configurations.register("modlauncher") {
 // create the sourcesets
 val main by sourceSets
 
+val applaunch by sourceSets.registering {
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = this, targetSource = main, implProject = project, dependencyConfigName = main.implementationConfigurationName)
+    project.dependencies {
+        mixinsConfig(this@registering.output)
+    }
+}
 val launch by sourceSets.registering {
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = applaunch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     project.dependencies {
         mixinsConfig(this@registering.output)
     }
@@ -163,6 +191,7 @@ val accessors by sourceSets.registering {
 }
 val mixins by sourceSets.registering {
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = applaunch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = accessors.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = main, targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
 }
@@ -212,12 +241,16 @@ dependencies {
     launchConfig("com.google.code.gson:gson:2.8.0")
     launchConfig("org.ow2.asm:asm-tree:6.2")
     launchConfig("org.ow2.asm:asm-util:6.2")
-    launchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
-    launchConfig("org.spongepowered:configurate-core:3.7.1")
-    launchConfig("org.spongepowered:configurate-hocon:3.7.1")
-    launchConfig("org.spongepowered:configurate-json:3.7.1")
-    launchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
     add(launch.get().implementationConfigurationName, launchConfig)
+
+    // Applaunch -- initialization that needs to occur without game access
+    applaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+    applaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
+    applaunchConfig("org.spongepowered:configurate-core:3.7.1")
+    applaunchConfig("org.spongepowered:configurate-hocon:3.7.1")
+    applaunchConfig("org.spongepowered:configurate-json:3.7.1")
+    applaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
+    add(applaunch.get().implementationConfigurationName, applaunchConfig)
 
     // Annotation Processor
     "accessorsAnnotationProcessor"("org.spongepowered:mixin:$mixinVersion:processor")
@@ -399,16 +432,19 @@ project("SpongeVanilla") {
         // implementation (compile) dependencies
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
     }
     val vanillaLaunch by sourceSets.register("launch") {
         // implementation (compile) dependencies
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaMain, implProject = vanillaProject, dependencyConfigName = vanillaMain.implementationConfigurationName)
     }
     val vanillaAccessors by sourceSets.register("accessors") {
         // implementation (compile) dependencies
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaMain, implProject = vanillaProject, dependencyConfigName = vanillaMain.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
@@ -419,6 +455,7 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaAccessors, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMain, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
@@ -427,6 +464,7 @@ project("SpongeVanilla") {
         // implementation (compile) dependencies
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         // runtime dependencies - literally add the rest of the project, because we want to launch the game
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMixins, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaAccessors, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
@@ -642,6 +680,7 @@ project("SpongeVanilla") {
             from(commonProject.tasks.getByName("mixinsJar"))
             from(commonProject.tasks.getByName("accessorsJar"))
             from(commonProject.tasks.getByName("launchJar"))
+            from(commonProject.tasks.getByName("applaunchJar"))
             from(jar)
             from(vanillaLaunchJar)
             from(vanillaModLauncherJar)
@@ -670,6 +709,7 @@ project("SpongeVanilla") {
             from(commonProject.tasks.getByName("mixinsJar"))
             from(commonProject.tasks.getByName("accessorsJar"))
             from(commonProject.tasks.getByName("launchJar"))
+            from(commonProject.tasks.getByName("applaunchJar"))
             from(jar)
             from(vanillaLaunchJar)
             from(vanillaModLauncherJar)
@@ -769,16 +809,19 @@ if (spongeForge != null) {
             // implementation (compile) dependencies
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
+            applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
         }
         val forgeLaunch by sourceSets.register("launch") {
             // implementation (compile) dependencies
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
+            applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = this, targetSource = forgeMain, implProject = forgeProject, dependencyConfigName = forgeMain.implementationConfigurationName)
         }
         val forgeAccessors by sourceSets.register("accessors") {
             // implementation (compile) dependencies
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
+            applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = this, targetSource = forgeMain, implProject = forgeProject, dependencyConfigName = forgeMain.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = forgeLaunch, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
@@ -789,6 +832,7 @@ if (spongeForge != null) {
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = forgeAccessors, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
+            applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = forgeMain, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = forgeLaunch, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)

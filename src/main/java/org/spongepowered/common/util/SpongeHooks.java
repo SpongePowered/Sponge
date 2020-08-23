@@ -48,11 +48,11 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.inheritable.LoggingCategory;
-import org.spongepowered.common.config.inheritable.BaseConfig;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.applaunch.config.inheritable.LoggingCategory;
+import org.spongepowered.applaunch.config.inheritable.BaseConfig;
+import org.spongepowered.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.math.vector.Vector3i;
 

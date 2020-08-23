@@ -31,6 +31,7 @@ import joptsimple.OptionSet;
 import joptsimple.util.PathConverter;
 import joptsimple.util.PathProperties;
 import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginEngine;
+import org.spongepowered.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.vanilla.modlauncher.util.ArgumentList;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
@@ -56,15 +57,15 @@ public final class Main {
         final PluginEnvironment pluginEnvironment = new PluginEnvironment();
         pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
         pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> gameDirectory);
-        // Pass sponge base directory to SpongeConfigs
-        System.setProperty("org.spongepowered.common.baseDir", gameDirectory.toString());
         final Path modsDirectory = gameDirectory.resolve("mods");
         if (Files.notExists(modsDirectory)) {
             Files.createDirectories(modsDirectory);
         }
         // TODO Read in plugin directories from CLI/Config
         pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, gameDirectory.resolve("plugins")));
+        pluginEnvironment.getBlackboard().getOrCreate(SpongeConfigs.IS_VANILLA_PLATFORM, () -> true);
 
+        SpongeConfigs.initialize(pluginEnvironment);
         Main.pluginEngine = new VanillaPluginEngine(pluginEnvironment);
 
         final ArgumentList lst = ArgumentList.from(args);

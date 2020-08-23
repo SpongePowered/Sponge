@@ -67,8 +67,20 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
      * be to exclude {@code "org.neptune."}.
      */
     protected static final List<String> EXCLUDED_PACKAGES = Arrays.asList(
+            // Configs
+            "org.spongepowered.common.config.core.",
+            "org.spongepowered.common.config.common.",
+            "org.spongepowered.common.config.inheritable.",
+            // configurate 3
+            "com.google.common.reflect.TypeToken",
+            "ninja.leaping.configurate.",
+            // configurate 4 (coming soon)
+            "io.leangen.geantyref.",
+            "org.spongepowered.configurate.",
+
+            // Plugin loading
             "org.spongepowered.plugin.",
-            "org.spongepowered.common.launch.plugin.loader.",
+            "org.spongepowered.common.plugin.loader.",
             "org.spongepowered.vanilla.launch.plugin.loader."
     );
 

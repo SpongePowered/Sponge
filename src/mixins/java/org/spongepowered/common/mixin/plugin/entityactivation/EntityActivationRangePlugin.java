@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.plugin.entityactivation;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.applaunch.config.core.SpongeConfigs;
 
 import java.util.ArrayList;
 import java.util.List;

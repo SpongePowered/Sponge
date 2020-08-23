@@ -28,7 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.common.config.common.ModuleCategory;
+import org.spongepowered.applaunch.config.common.ModuleCategory;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
