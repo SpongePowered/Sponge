@@ -91,7 +91,7 @@ public final class PluginDiscovererService implements ITransformationService {
                 PluginDiscovererService.pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.VERSION).get());
         PluginDiscovererService.pluginEngine.discoverLocatorServices();
         PluginDiscovererService.pluginEngine.getLocatorServices().forEach((k, v) -> PluginDiscovererService.pluginEngine.getPluginEnvironment()
-                .getLogger().info("Plugin Resource Locator '{}' found.", k));
+                .getLogger().info("Plugin resource locator '{}' found.", k));
         PluginDiscovererService.pluginEngine.discoverLanguageServices();
         PluginDiscovererService.pluginEngine.getLanguageServices().forEach((k, v) -> PluginDiscovererService.pluginEngine.getPluginEnvironment()
                 .getLogger().info("Plugin language loader '{}' found.", k));
