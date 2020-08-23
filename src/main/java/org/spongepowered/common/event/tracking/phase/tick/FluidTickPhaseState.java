@@ -30,7 +30,6 @@ import net.minecraft.block.BlockEventData;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.IGrowable;
 import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -112,16 +111,6 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     @Override
     public void unwind(final BlockTickContext context) {
         TrackingUtil.processBlockCaptures(context);
-            context.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(items -> {
-                        PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (final ItemEntity entity : items) {
-                            capturedEntities.add((Entity) entity);
-                        }
-                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
-                    });
-
     }
 
     @Override
@@ -153,11 +142,6 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         }
     }
 
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
-    }
 
     /**
      * Specifically overridden here because some states have defaults and don't check the context.

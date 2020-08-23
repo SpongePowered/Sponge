@@ -45,13 +45,7 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
     @Override
     public void unwind(final TickContext.General phaseContext) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-            phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
-
-            });
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
+//            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             TrackingUtil.processBlockCaptures(phaseContext);
         }
     }

@@ -25,18 +25,12 @@
 package org.spongepowered.common.event.tracking;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings("rawtypes")
 public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> {
@@ -121,59 +115,10 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         final IPhaseState<?> unwindingState = context.getUnwindingState();
         final PhaseContext<?> unwindingContext = context.getUnwindingContext();
         try {
-            final List<Entity> contextEntities = context.getCapturedEntitiesOrEmptyList();
-            final List<Entity> contextItems = (List<Entity>) (List<?>) context.getCapturedItemsOrEmptyList();
 
-            if (contextEntities.isEmpty() && contextItems.isEmpty()) {
-                return;
-            }
-            if (!contextEntities.isEmpty()) {
-                final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
-                contextEntities.clear();
-                ((IPhaseState) unwindingState).postProcessSpawns(unwindingContext, entities);
-            }
-            if (!contextItems.isEmpty()) {
-                final ArrayList<Entity> items = new ArrayList<>(contextItems);
-                contextItems.clear();
-                SpongeCommonEventFactory.callSpawnEntity(items, unwindingContext);
-
-            }
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final UnwindingPhaseContext context, final Entity entity) {
-        return context.getCapturedEntities().add(entity);
-    }
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
-    }
-
-    @Override
-    public void performOnBlockAddedSpawns(final UnwindingPhaseContext context, final int depth) {
-        if (PhasePrinter.checkMaxBlockProcessingDepth(this, context, depth)) {
-            return;
-        }
-
-        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-            final ArrayList<Entity> capturedEntities = new ArrayList<>(entities);
-            context.getUnwindingState().postProcessSpawns(context.getUnwindingContext(), capturedEntities);
-        });
-    }
-
-    @Override
-    public void performPostBlockNotificationsAndNeighborUpdates(final UnwindingPhaseContext context,
-                                                                final BlockState newState, final SpongeBlockChangeFlag changeFlag, final int depth) {
-
-        if (PhasePrinter.checkMaxBlockProcessingDepth(this, context, depth)) {
-            return;
-        }
-        context.setBulkBlockCaptures(false);
-
     }
 
     @Override

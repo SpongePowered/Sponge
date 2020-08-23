@@ -65,11 +65,6 @@ public final class TileEntityInvalidatingPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
-    }
-
-    @Override
     public boolean doesBulkBlockCapture(final GeneralizedContext context) {
         return false;
     }

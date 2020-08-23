@@ -32,7 +32,6 @@ import net.minecraft.item.SpawnEggItem;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
@@ -62,9 +61,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 public final class InteractionPacketState extends PacketState<InteractionPacketContext> {
 
@@ -153,68 +149,9 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.isEmpty()? null : capturedBlcoks.get(0) : null;
             if (hasBlocks) {
                 if (!TrackingUtil.processBlockCaptures(phaseContext)) {
-                    // Stop entities like XP from being spawned
-                    phaseContext.getBlockItemDropSupplier().get().clear();
-                    phaseContext.getCapturedItems().clear();
-                    phaseContext.getCapturedEntities().clear();
                     return;
                 }
             }
-            phaseContext.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
-                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-                    for (final Map.Entry<BlockPos, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
-                        if (!entry.getValue().isEmpty()) {
-                            final List<Entity> items = entry.getValue().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-                            final DropItemEvent.Destruct event =
-                                SpongeEventFactory.createDropItemEventDestruct(PhaseTracker.getCauseStackManager().getCurrentCause(), items);
-                            SpongeCommon.postEvent(event);
-                            if (!event.isCancelled()) {
-                                processSpawnedEntities(player, event);
-                            }
-                        }
-                    }
-                } else {
-                    for (final Map.Entry<BlockPos, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
-                        if (!entry.getValue().isEmpty()) {
-                            processEntities(player, (Collection<Entity>) (Collection<?>) entry.getValue());
-                        }
-                    }
-                }
-            });
-
-
-            phaseContext.getCapturedItemsSupplier()
-                .acceptAndClearIfNotEmpty(items -> {
-                    final ArrayList<Entity> entities = new ArrayList<>();
-                    for (final ItemEntity item : items) {
-                        entities.add((Entity) item);
-                    }
-                    final DropItemEvent.Dispense dispense =
-                        SpongeEventFactory.createDropItemEventDispense(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeCommon.postEvent(dispense);
-                    if (!dispense.isCancelled()) {
-                        processSpawnedEntities(player, dispense);
-                    }
-                });
-            phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                this.throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, entities);
-            });
-
-            phaseContext.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty((multimap -> {
-                for (final Map.Entry<UUID, Collection<ItemEntity>> entry : multimap.asMap().entrySet()) {
-                    if (entry.getKey().equals(player.getUniqueID())) {
-                        this.throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
-                    } else {
-                        final net.minecraft.entity.Entity spawnedEntity = ((ServerWorld) player.world).getEntityByUuid(entry.getKey());
-                        if (spawnedEntity != null) {
-                            try (final CauseStackManager.StackFrame entityFrame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                                entityFrame.pushCause(spawnedEntity);
-                                this.throwEntitySpawnEvents(phaseContext, player, usedSnapshot, firstBlockChange, (Collection<Entity>) (Collection<?>) entry.getValue());
-                            }
-                        }
-                    }
-                }
-            }));
 
             final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
             trackedInventory.bridge$setCaptureInventory(false);

@@ -24,38 +24,24 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CUseEntityPacket;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 public final class AttackEntityPacketState extends BasicPacketState {
 
@@ -104,43 +90,9 @@ public final class AttackEntityPacketState extends BasicPacketState {
             ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
         }
 
-        context.getCapturedItemsSupplier()
-            .acceptAndClearIfNotEmpty(items -> {
-                // For destruction, this should be empty, however, some
-                // times,
-                // it may not be?
-                final PrettyPrinter printer = new PrettyPrinter(60);
-                printer.add("Processing Attack Entity").centre().hr();
-                printer.add("There are some captured items after the entity was destructed!");
-                printer.addWrapped(60, "%s : %s", "Items captured", items);
-                printer.add("Stacktrace:");
-                printer.add(new Exception("Stack trace"));
-                printer.trace(System.err, SpongeCommon.getLogger(), Level.TRACE);
-            });
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
-        context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
-            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(player);
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                for (Map.Entry<UUID, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
-                    final UUID key = entry.getKey();
-                    final Optional<Entity> attackedEntities = spongeWorld.getEntity(key);
-                    if (!attackedEntities.isPresent()) {
-                        continue;
-                    }
-                    final List<Entity> items = entry.getValue().stream().map(entity1 -> (Entity) entity1).collect(Collectors.toList());
-
-                    final DropItemEvent.Destruct destruct =
-                        SpongeEventFactory.createDropItemEventDestruct(frame.getCurrentCause(), items);
-                    SpongeCommon.postEvent(destruct);
-                    if (!destruct.isCancelled()) {
-                        processSpawnedEntities(player, destruct);
-                    }
-                }
-            }
-        });
     }
 
     @Override

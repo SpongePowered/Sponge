@@ -25,30 +25,16 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
@@ -96,32 +82,30 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
 
     @Override
     public void unwind(final ExplosionContext context) {
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
-        context.getCapturedEntitySupplier()
-            .acceptAndClearIfNotEmpty(entities -> {
-                try (final CauseStackManager.StackFrame smaller = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
-                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
-                }
-            });
-        context.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(drops -> drops.asMap()
-            .forEach((pos, items) -> {
-                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-                    final List<Entity> itemEntities = items.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-                    final DropItemEvent.Destruct event =
-                        SpongeEventFactory.createDropItemEventDestruct(PhaseTracker.getCauseStackManager().getCurrentCause(), itemEntities);
-                    SpongeCommon.postEvent(event);
-                    if (!event.isCancelled()) {
-                        EntityUtil.processEntitySpawnsFromEvent(context, event);
-                    }
-                } else {
-                    items
-                        .forEach(item -> EntityUtil.processEntitySpawn((Entity) item, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context)));
-                }
-            })
-        );
+//        context.getCapturedEntitySupplier()
+//            .acceptAndClearIfNotEmpty(entities -> {
+//                try (final CauseStackManager.StackFrame smaller = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+//                    smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
+//                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+//                }
+//            });
+//        context.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(drops -> drops.asMap()
+//            .forEach((pos, items) -> {
+//                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+//                    final List<Entity> itemEntities = items.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
+//                    final DropItemEvent.Destruct event =
+//                        SpongeEventFactory.createDropItemEventDestruct(PhaseTracker.getCauseStackManager().getCurrentCause(), itemEntities);
+//                    SpongeCommon.postEvent(event);
+//                    if (!event.isCancelled()) {
+//                        EntityUtil.processEntitySpawnsFromEvent(context, event);
+//                    }
+//                } else {
+//                    items
+//                        .forEach(item -> EntityUtil.processEntitySpawn((Entity) item, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context)));
+//                }
+//            })
+//        );
 
     }
 
@@ -129,35 +113,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     public ChangeBlockEvent.Post createChangeBlockPostEvent(final ExplosionContext context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
         final Cause cause) {
         return SpongeEventFactory.createExplosionEventPost(cause, context.getSpongeExplosion(), transactions);
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final ExplosionContext context, final Entity entity) {
-        return context.getBlockPosition().map(blockPos -> {
-            // TODO - this needs to be guaranteed. can't be bothered to figure out why it isn't
-            final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getPerBlockEntitySpawnSuppplier().get();
-            final Multimap<BlockPos, ItemEntity> blockPosEntityItemMultimap = context.getBlockItemDropSupplier().get();
-            if (entity instanceof ItemEntity) {
-                blockPosEntityItemMultimap.put(blockPos, (ItemEntity) entity);
-            } else {
-                blockPosEntityMultimap.put(blockPos, (net.minecraft.entity.Entity) entity);
-            }
-            return true;
-        }).orElseGet(() -> {
-            final ArrayList<Entity> entities = new ArrayList<>(1);
-            entities.add(entity);
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()){
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-            }
-        });
-
-    }
-
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return true;
     }
 
     @Override

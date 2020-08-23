@@ -27,20 +27,18 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
@@ -52,7 +50,6 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
@@ -99,48 +96,9 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            TrackingUtil.processBlockCaptures(context);
             frame.pushCause(tickingTile.getLocatableBlock());
+            TrackingUtil.processBlockCaptures(context);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-            context.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (final ItemEntity entity : entities) {
-                            capturedEntities.add((Entity) entity);
-                        }
-                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
-                    });
-            // Unwind the spawn type for the tile entity. because occasionaly, we have to handle
-            // when mods interact with "internalized" entities within the TileEntity such that
-            // the entity can be "used" to spawn items that are specifically captured to the entity
-            // to multiple drops mapping.
-            frame.removeContext(EventContextKeys.SPAWN_TYPE);
-            context.getPerEntityItemEntityDropSupplier()
-                .acceptAndClearIfNotEmpty((id, item) -> {
-                    frame.popCause();
-                    final List<Entity> entities = new ArrayList<>();
-                    entities.add((Entity) item);
-                    final Optional<Entity> entity = tickingTile.getWorld().getEntity(id);
-                    if (!entity.isPresent()) {
-                        // Means that the tile entity is spawning an entity from another entity that doesn't exist
-                        // in the world in normal circumstances. Because this is only achievalbe through mods,
-                        // we have to spawn the entities anyways, in the event the mod is expecting those drops to
-                        // be spawned regardless (because their entrance is through Entity#entityDropItem, which we
-                        // reroute to captures)
-                        frame.pushCause(tickingTile); // We only have the tile entity to consider
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-                        SpongeCommonEventFactory.callSpawnEntity(entities, context);
-                        return;
-                    }
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    // Now we can actually push the entity onto the stack, and then push the tile entity onto the stack as well.
-                    final Entity nestedEntity = entity.get();
-                    frame.pushCause(nestedEntity);
-                    frame.pushCause(tickingTile);
-                    SpongeCommonEventFactory.callSpawnEntityCustom(entities, context);
-                    // Now to clean up the list that is tied to the entity, so that this phase context isn't continuously wrapped
-                    ((EntityBridge) nestedEntity).bridge$clearWrappedCaptureList();
-                });
         }
     }
 

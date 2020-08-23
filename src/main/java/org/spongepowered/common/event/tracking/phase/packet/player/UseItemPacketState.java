@@ -43,7 +43,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -114,10 +113,10 @@ public final class UseItemPacketState extends BasicPacketState {
         try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE,
                 itemStack.getType() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
-            context.getCapturedEntitySupplier()
-                .acceptAndClearIfNotEmpty(entities -> {
-                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
-                });
+//            context.getCapturedEntitySupplier()
+//                .acceptAndClearIfNotEmpty(entities -> {
+//                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+//                });
             if (!context.getTransactor().isEmpty()) {
                 // TODO - Determine if we need to pass the supplier or perform some parameterized
                 //  process if not empty method on the capture object.

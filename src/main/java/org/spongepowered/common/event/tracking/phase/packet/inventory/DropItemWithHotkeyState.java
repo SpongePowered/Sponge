@@ -85,58 +85,56 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
             TrackingUtil.processBlockCaptures(context);
-            context.getCapturedItemsSupplier()
-                .acceptAndClearIfNotEmpty(items -> {
+            { // TODO - figure this out with transactions
+                final List<ItemEntity> items = new ArrayList<>();
 
-                    final ArrayList<Entity> entities = new ArrayList<>();
-                    for (final ItemEntity item : items) {
-                        entities.add((Entity) item);
-                    }
+                final ArrayList<Entity> entities = new ArrayList<>();
+                for (final ItemEntity item : items) {
+                    entities.add((Entity) item);
+                }
 
-                    final int usedButton;
-                    final Slot slot;
-                    if (context.getPacket() instanceof CPlayerDiggingPacket) {
-                        final CPlayerDiggingPacket packetIn = context.getPacket();
-                        usedButton = packetIn.getAction() == CPlayerDiggingPacket.Action.DROP_ITEM
-                            ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID
-                            : 1;
-                        slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(
-                            EquipmentTypes.MAIN_HAND).orElse(null);
-                    } else {
-                        final CClickWindowPacket packetIn = context.getPacket();
-                        usedButton = packetIn.getUsedButton();
-                        slot = ((InventoryAdapter) player.inventory).inventoryAdapter$getSlot(
-                            packetIn.getSlotId()).orElse(null);
-                    }
+                final int usedButton;
+                final Slot slot;
+                if (context.getPacket() instanceof CPlayerDiggingPacket) {
+                    final CPlayerDiggingPacket packetIn = context.getPacket();
+                    usedButton = packetIn.getAction() == CPlayerDiggingPacket.Action.DROP_ITEM
+                        ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID
+                        : 1;
+                    slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(
+                        EquipmentTypes.MAIN_HAND).orElse(null);
+                } else {
+                    final CClickWindowPacket packetIn = context.getPacket();
+                    usedButton = packetIn.getUsedButton();
+                    slot = ((InventoryAdapter) player.inventory).inventoryAdapter$getSlot(
+                        packetIn.getSlotId()).orElse(null);
+                }
 
-                    final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.empty(),
-                        ItemStackSnapshot.empty());
-                    final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
-                    final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
-                    final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(player,
-                        ContainerUtil.fromNative(player.openContainer),
-                        cursorTrans, Lists.newArrayList(slotTrans), entities, usedButton, slot);
+                final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.empty(),
+                    ItemStackSnapshot.empty());
+                final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
+                final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
+                final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(player,
+                    ContainerUtil.fromNative(player.openContainer),
+                    cursorTrans, Lists.newArrayList(slotTrans), entities, usedButton, slot);
 
-                    SpongeCommon.postEvent(dropItemEvent);
-                    if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
-                        dropItemEvent.getTransactions())) {
-                        ((ServerPlayerEntityBridge) player).bridge$restorePacketItem(Hand.MAIN_HAND);
-                        PacketPhaseUtil.handleSlotRestore(player, player.openContainer, dropItemEvent.getTransactions(),
-                            true);
-                    } else {
-                        processSpawnedEntities(player, dropItemEvent);
+                SpongeCommon.postEvent(dropItemEvent);
+                if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
+                    dropItemEvent.getTransactions())) {
+                    ((ServerPlayerEntityBridge) player).bridge$restorePacketItem(Hand.MAIN_HAND);
+                    PacketPhaseUtil.handleSlotRestore(player, player.openContainer, dropItemEvent.getTransactions(),
+                        true);
+                } else {
+                    processSpawnedEntities(player, dropItemEvent);
+                }
+                for (Entity entity : entities) {
+                    if (((EntityBridge) entity).bridge$isConstructing()) {
+                        ((EntityBridge) entity).bridge$fireConstructors();
                     }
-                    for (Entity entity : entities) {
-                        if (((EntityBridge) entity).bridge$isConstructing()) {
-                            ((EntityBridge) entity).bridge$fireConstructors();
-                        }
-                    }
-                    slotTrans.clear();
-                    mixinContainer.bridge$setCaptureInventory(false);
-                });
+                }
+                slotTrans.clear();
+                mixinContainer.bridge$setCaptureInventory(false);
+            }
 
             final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
             mixinContainer.bridge$setCaptureInventory(false);

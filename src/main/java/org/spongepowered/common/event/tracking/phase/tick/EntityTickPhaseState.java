@@ -28,7 +28,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.entity.item.HangingEntity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -50,7 +49,6 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.common.accessor.entity.item.ItemFrameEntityAccessor;
 import org.spongepowered.common.accessor.util.CombatEntryAccessor;
 import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -62,11 +60,8 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
@@ -111,107 +106,53 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         if (!phaseContext.allowsBulkEntityCaptures()) {
             return; // The rest of this method is all about entity captures
         }
-        phaseContext.getCapturedEntitySupplier()
-                .acceptAndClearIfNotEmpty(entities -> {
-                    final List<Entity> experience = new ArrayList<>(entities.size());
-                    final List<Entity> nonExp = new ArrayList<>(entities.size());
-                    final List<Entity> breeding = new ArrayList<>(entities.size());
-                    final List<Entity> projectile = new ArrayList<>(entities.size());
-                    for (final Entity entity : entities) {
-                        if (entity instanceof ExperienceOrbEntity) {
-                            experience.add(entity);
-                        } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
-                            breeding.add(entity);
-                        } else if (entity instanceof Projectile) {
-                            projectile.add(entity);
-                        } else {
-                            nonExp.add(entity);
-                        }
-                    }
-
-                    if (!experience.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                        this.appendContextOfPossibleEntityDeath(tickingEntity, frame);
-                        SpongeCommonEventFactory.callSpawnEntity(experience, phaseContext);
-                        frame.removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
-                    }
-                    if (!breeding.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
-                        if (tickingEntity instanceof AnimalEntity) {
-                            final PlayerEntity playerInLove = ((AnimalEntity) tickingEntity).getLoveCause();
-                            if (playerInLove != null) {
-                                frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
-                            }
-                        }
-                        SpongeCommonEventFactory.callSpawnEntity(breeding, phaseContext);
-
-                        frame.removeContext(EventContextKeys.PLAYER);
-                    }
-                    if (!projectile.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
-                        SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
-                        frame.removeContext(EventContextKeys.SPAWN_TYPE);
-
-                    }
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-                    SpongeCommonEventFactory.callSpawnEntity(nonExp, phaseContext);
-                    frame.removeContext(EventContextKeys.SPAWN_TYPE);
-
-                });
-        phaseContext.getCapturedItemsSupplier()
-                .acceptAndClearIfNotEmpty(entities -> {
-                    final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                    for (final ItemEntity entity : entities) {
-                        capturedEntities.add((Entity) entity);
-                    }
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemCustom(capturedEntities, phaseContext);
-                    frame.removeContext(EventContextKeys.SPAWN_TYPE);
-                });
-        // This could be happening regardless whether block bulk captures are done or not.
-        // Would depend on whether entity captures are done.
-        phaseContext.getBlockItemDropSupplier()
-            .acceptAndClearIfNotEmpty(map -> {
-                final List<SpongeBlockSnapshot> capturedBlocks = phaseContext.getCapturedOriginalBlocksChanged();
-                for (final SpongeBlockSnapshot snapshot : capturedBlocks) {
-                    final BlockPos blockPos = snapshot.getBlockPos();
-                    final Collection<ItemEntity> entityItems = map.get(blockPos);
-                    if (!entityItems.isEmpty()) {
-                        frame.pushCause(snapshot);
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                        final List<Entity> items = entityItems.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-                        SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
-
-                        frame.popCause();
-                    }
-                }
-
-            });
-
-        // Some entities (DynamicTrees) can tell blocks to break themselves while they're ticking, and
-        // specifically having removed the block but not performed the drops until the entity is ticking.
-        phaseContext.getPerBlockEntitySpawnSuppplier()
-            .acceptAndClearIfNotEmpty(blockDrops -> blockDrops.asMap().forEach((pos, drops) -> {
-                final List<Entity> items = drops.stream()
-                    .filter(entity -> entity instanceof ItemEntity)
-                    .map(entity2 -> (Entity) entity2)
-                    .collect(Collectors.toList());
-                final BlockSnapshot snapshot = tickingEntity.getWorld().createSnapshot(VecHelper.toVector3i(pos));
-                frame.pushCause(snapshot);
-                if (!items.isEmpty()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemCustom(items, phaseContext);
-                }
-                final List<Entity> nonItems = drops.stream()
-                    .filter(entity -> !(entity instanceof ItemEntity))
-                    .map(entity1 -> (Entity) entity1)
-                    .collect(Collectors.toList());
-                if (!nonItems.isEmpty()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-                    SpongeCommonEventFactory.callSpawnEntityCustom(nonItems, phaseContext);
-                }
-            }));
-
+//        phaseContext.getCapturedEntitySupplier()
+//                .acceptAndClearIfNotEmpty(entities -> {
+//                    final List<Entity> experience = new ArrayList<>(entities.size());
+//                    final List<Entity> nonExp = new ArrayList<>(entities.size());
+//                    final List<Entity> breeding = new ArrayList<>(entities.size());
+//                    final List<Entity> projectile = new ArrayList<>(entities.size());
+//                    for (final Entity entity : entities) {
+//                        if (entity instanceof ExperienceOrbEntity) {
+//                            experience.add(entity);
+//                        } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
+//                            breeding.add(entity);
+//                        } else if (entity instanceof Projectile) {
+//                            projectile.add(entity);
+//                        } else {
+//                            nonExp.add(entity);
+//                        }
+//                    }
+//
+//                    if (!experience.isEmpty()) {
+//                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
+//                        this.appendContextOfPossibleEntityDeath(tickingEntity, frame);
+//                        SpongeCommonEventFactory.callSpawnEntity(experience, phaseContext);
+//                        frame.removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
+//                    }
+//                    if (!breeding.isEmpty()) {
+//                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
+//                        if (tickingEntity instanceof AnimalEntity) {
+//                            final PlayerEntity playerInLove = ((AnimalEntity) tickingEntity).getLoveCause();
+//                            if (playerInLove != null) {
+//                                frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
+//                            }
+//                        }
+//                        SpongeCommonEventFactory.callSpawnEntity(breeding, phaseContext);
+//
+//                        frame.removeContext(EventContextKeys.PLAYER);
+//                    }
+//                    if (!projectile.isEmpty()) {
+//                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
+//                        SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
+//                        frame.removeContext(EventContextKeys.SPAWN_TYPE);
+//
+//                    }
+//                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+//                    SpongeCommonEventFactory.callSpawnEntity(nonExp, phaseContext);
+//                    frame.removeContext(EventContextKeys.SPAWN_TYPE);
+//
+//                });
     }
 
     private void appendContextOfPossibleEntityDeath(final Entity tickingEntity, final CauseStackManager.StackFrame frame) {
@@ -293,20 +234,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
 
         // Now to actually do something....
-        if (context.allowsBulkEntityCaptures()) {
-            // We need to check if any blocks are being broken at the moment. If they are, we need to
-            // put them in the associated block pos multimap, because the block change may not have
-            // occurred yet.
-            // Refer to https://github.com/SpongePowered/SpongeCommon/issues/1443
-            // Look at net.minecraft.world.World#breakBlock
-            final Optional<BlockPos> pos = context.getCaptureBlockPos().getPos();
-            if (pos.isPresent()) {
-                return context.getPerBlockEntitySpawnSuppplier().get().put(pos.get(), (net.minecraft.entity.Entity) entity);
-            } else {
-                return context.getCapturedEntities().add(entity);
-            }
-            // Otherwise... we'll just spawn them normally.
-        }
         // It kinda sucks we have to make the cause frame here, but if we're already here, we are
         // effectively already going to throw an event, and we're configured not to bulk capture.
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -344,11 +271,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
             return SpongeCommonEventFactory.callSpawnEntity(nonExp, context);
         }
-    }
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
     }
 
     @Override

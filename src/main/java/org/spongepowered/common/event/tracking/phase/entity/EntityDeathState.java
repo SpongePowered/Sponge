@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.Entity;
@@ -84,30 +83,7 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
         // WE have to handle per-item entity drops and entity item drops before we handle other entity spawns
         // the reason we have to do it this way is because forge allows for item drops to potentially spawn
         // other entities at the same time.
-        final boolean hasCaptures = !context.getPerEntityItemEntityDropSupplier().isEmpty();
-        context.getPerEntityItemEntityDropSupplier().acceptAndRemoveIfPresent(dyingEntity.getUniqueId(), items -> {
-            final ArrayList<Entity> entities = new ArrayList<>();
-            for (final ItemEntity item : items) {
-                entities.add((Entity) item);
-            }
-
-            if (isPlayer) {
-                // Forge and Vanilla always clear items on player death BEFORE drops occur
-                // This will also provide the highest compatibility with mods such as Tinkers Construct
-                entityPlayer.inventory.clear();
-            }
-
-            try (final CauseStackManager.StackFrame internal = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                internal.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
-            }
-
-            // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
-            // This avoids many issues with mods such as Tinkers Construct's soulbound items.
-        });
-        context.getCapturedEntitySupplier()
-            .acceptAndClearIfNotEmpty(entities -> this.standardSpawnCapturedEntities(context, entities));
-
+        final boolean hasCaptures = true;
         // Forge always fires a living drop event even if nothing was captured
         // This allows mods such as Draconic Evolution to add items to the drop list
         if (!hasCaptures) {
@@ -132,9 +108,6 @@ final class EntityDeathState extends EntityPhaseState<EntityDeathContext> {
             }
         }
 
-
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
     }
 }

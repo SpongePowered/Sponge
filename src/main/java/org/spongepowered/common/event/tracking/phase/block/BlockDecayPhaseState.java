@@ -27,25 +27,15 @@ package org.spongepowered.common.event.tracking.phase.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 final class BlockDecayPhaseState extends BlockPhaseState {
 
@@ -69,38 +59,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @Override
     public void unwind(final GeneralizedContext context) {
-        final LocatableBlock locatable = context.getSource(LocatableBlock.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
-        final ServerLocation worldLocation = locatable.getServerLocation();
-        final ServerWorldBridge mixinWorld = (ServerWorldBridge) worldLocation.getWorld();
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
-
-        context.getCapturedItemsSupplier()
-            .acceptAndClearIfNotEmpty(items -> {
-                final List<Entity> entities = items.stream()
-                    .map(entity -> (Entity) entity)
-                    .collect(Collectors.toList());
-                PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
-            });
-        context.getCapturedEntitySupplier()
-            .acceptAndClearIfNotEmpty(entities -> {
-                PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
-
-            });
-
-        context.getBlockItemDropSupplier()
-            .acceptAndClearIfNotEmpty(drops -> {
-                drops.asMap().forEach((key, value) -> {
-                    PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), context);
-                });
-            });
-
-
     }
 
     @Override

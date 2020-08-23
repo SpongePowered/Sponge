@@ -27,8 +27,6 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.network.IPacket;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
@@ -40,10 +38,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class CloseWindowState extends BasicPacketState {
 
@@ -70,7 +64,7 @@ public final class CloseWindowState extends BasicPacketState {
             stackManager.popCause();
         }
 
-        if (context.getCapturedItemsSupplier().isEmpty() && context.getTransactor().isEmpty()) {
+        if (context.getTransactor().isEmpty()) {
             return;
         }
 
@@ -78,15 +72,15 @@ public final class CloseWindowState extends BasicPacketState {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             // items
-            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
-                final List<Entity> entities = items
-                    .stream()
-                    .map(entity -> (Entity) entity)
-                    .collect(Collectors.toList());
-                if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
-                }
-            });
+//            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
+//                final List<Entity> entities = items
+//                    .stream()
+//                    .map(entity -> (Entity) entity)
+//                    .collect(Collectors.toList());
+//                if (!entities.isEmpty()) {
+//                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
+//                }
+//            });
         }
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.

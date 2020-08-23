@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.util;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -78,6 +79,7 @@ import org.spongepowered.common.inventory.lens.impl.minecraft.SingleGridLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -86,8 +88,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class ContainerUtil {
 
@@ -123,10 +123,8 @@ public final class ContainerUtil {
         final IPhaseState<?> currentState = context.state;
         if (((IPhaseState) currentState).tracksBlockSpecificDrops(context)) {
             // this is where we could perform item stack pre-merging.
-            // For development reasons, not performing any pre-merging except after the entity item spawns.
-
-            // Don't do pre-merging - directly spawn in item
-            final Multimap<BlockPos, ItemEntity> multimap = context.getBlockItemDropSupplier().get();
+            // TODO - figure out how inventory drops will work?
+            final Multimap<BlockPos, ItemEntity> multimap = ImmutableMultimap.of();
             final BlockPos pos = new BlockPos(x, y, z);
             final Collection<ItemEntity> itemStacks = multimap.get(pos);
             for (int j = 0; j < inventory.getSizeInventory(); j++) {

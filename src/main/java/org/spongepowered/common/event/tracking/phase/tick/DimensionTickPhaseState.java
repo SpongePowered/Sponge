@@ -33,7 +33,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.ArrayList;
-import net.minecraft.entity.item.ItemEntity;
 
 class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     DimensionTickPhaseState() {
@@ -51,22 +50,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     public void unwind(final DimensionContext phaseContext) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
             TrackingUtil.processBlockCaptures(phaseContext);
-
-            phaseContext.getCapturedEntitySupplier()
-                    .acceptAndClearIfNotEmpty(entities ->
-                        SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext)
-                    );
-            phaseContext.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(entities -> {
-                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (final ItemEntity entity : entities) {
-                            capturedEntities.add((Entity) entity);
-                        }
-                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, phaseContext);
-                    });
         }
     }
 
@@ -88,11 +72,6 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
-    }
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
     }
 
     @Override

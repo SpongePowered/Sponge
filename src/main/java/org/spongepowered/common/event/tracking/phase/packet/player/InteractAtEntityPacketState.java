@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CUseEntityPacket;
@@ -32,28 +31,15 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 public final class InteractAtEntityPacketState extends BasicPacketState {
 
@@ -104,40 +90,6 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
         }
 
 
-        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                SpongeCommonEventFactory.callSpawnEntity(entities, context);
-            });
-            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final List<Entity> items = entities.stream().map(entity1 -> (Entity) entity1).collect(Collectors.toList());
-                SpongeCommonEventFactory.callSpawnEntity(items, context);
-            });
-            context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
-                for (Map.Entry<UUID, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
-                    final UUID entityUuid = entry.getKey();
-                    final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityByUuid(entityUuid);
-                    if (entityFromUuid != null) {
-                        final List<Entity> entities = entry.getValue()
-                            .stream()
-                            .map(entity1 -> (Entity) entity1)
-                            .collect(Collectors.toList());
-                        if (!entities.isEmpty()) {
-                            // TODO - Remove the frame modifications to uncomment this line so we can simplify our code.
-                            // SpongeCommonEventFactory.callDropItemCustom(entities, context);
-                            DropItemEvent.Custom event =
-                                SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
-                                    entities);
-                            SpongeCommon.postEvent(event);
-                            if (!event.isCancelled()) {
-                                processSpawnedEntities(player, event);
-                            }
-                        }
-                    }
-                }
-            });
-        }
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);

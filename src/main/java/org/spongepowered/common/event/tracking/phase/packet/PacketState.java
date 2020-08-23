@@ -150,21 +150,9 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         }
     }
 
-    @Override
-    public boolean spawnEntityOrCapture(final P context, final Entity entity) {
-        return this.shouldCaptureEntity()
-        ? context.getCapturedEntities().add(entity)
-        : this.spawnEntity(context, entity);
-    }
 
     public boolean shouldCaptureEntity() {
         return false;
-    }
-
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return this.shouldCaptureEntity();
     }
 
 

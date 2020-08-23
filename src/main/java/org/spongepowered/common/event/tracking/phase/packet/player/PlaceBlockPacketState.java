@@ -47,7 +47,6 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -117,13 +116,13 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final ServerPlayerEntity player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = context.getItemUsedSnapshot();
-        context.getCapturedEntitySupplier()
-            .acceptAndClearIfNotEmpty(entities -> {
-                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
-                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
-                }
-            });
+//        context.getCapturedEntitySupplier()
+//            .acceptAndClearIfNotEmpty(entities -> {
+//                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+//                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
+//                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+//                }
+//            });
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
         // Swap the items used, the item used is what we want to "restore" it to the player
         final Hand hand = (Hand) (Object) context.getHandUsed();

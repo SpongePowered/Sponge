@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.player;
 
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
@@ -45,21 +42,7 @@ final class PlayerLogoutPhaseState extends PooledPhaseState<GeneralizedContext> 
 
     @Override
     public void unwind(final GeneralizedContext phaseContext) {
-        final Player player = phaseContext.getSource(Player.class)
-            .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing a player leaving, but we're not!", phaseContext));
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            phaseContext.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
-                SpongeCommonEventFactory.callDropItemDispense(items, phaseContext);
-            });
-            phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-
-            });
-
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(phaseContext);
-        }
+        TrackingUtil.processBlockCaptures(phaseContext);
     }
 
     private final String desc = TrackingUtil.phaseStateToString("Player", this);

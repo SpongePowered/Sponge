@@ -41,7 +41,6 @@ import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -147,11 +146,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
 
     @Override
     public void unwind(final G context) {
-        final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
-        if (spawnedEntities.isEmpty()) {
-            return;
-        }
-        SpongeCommonEventFactory.callSpawnEntitySpawner(spawnedEntities, context);
+
     }
 
     @Override
@@ -166,11 +161,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
 
     @Override
     public boolean tracksCreatorsAndNotifiers() {
-        return false;
-    }
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
         return false;
     }
 

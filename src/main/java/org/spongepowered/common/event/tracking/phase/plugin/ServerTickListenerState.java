@@ -24,16 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 final class ServerTickListenerState extends ListenerPhaseState<ServerTickListenerContext> {
 
@@ -50,24 +42,10 @@ final class ServerTickListenerState extends ListenerPhaseState<ServerTickListene
 
     @Override
     public void unwind(final ServerTickListenerContext phaseContext) {
-
-        final Object listener = phaseContext.getSource(Object.class)
-            .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
-
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(phaseContext);
-        // This could be happening regardless whether block bulk captures are done or not.
-        // Would depend on whether entity captures are done.
-        phaseContext.getBlockItemDropSupplier()
-            .acceptAndClearIfNotEmpty(map -> map.asMap().forEach((key, value) -> {
-                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    frame.pushCause(listener);
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-                    SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
-                }
-            }));
+
     }
 
     @Override
@@ -77,11 +55,6 @@ final class ServerTickListenerState extends ListenerPhaseState<ServerTickListene
 
     @Override
     public boolean doesBulkBlockCapture(final ServerTickListenerContext context) {
-        return false;
-    }
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
         return false;
     }
 

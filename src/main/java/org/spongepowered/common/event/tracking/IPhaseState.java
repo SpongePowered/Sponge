@@ -54,7 +54,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -69,7 +68,6 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
@@ -259,64 +257,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default boolean spawnItemOrCapture(final C phaseContext, final Entity entity, final ItemEntity entityitem) {
         if (this.doesCaptureEntityDrops(phaseContext)) {
-            if (this.tracksEntitySpecificDrops()) {
-                // We are capturing per entity drop
-                // This has to be handled specially for the entity in forge environments to
-                // specifically syncronize the list used for sponge's tracking and forge's partial tracking
-                SpongeImplHooks.capturePerEntityItemDrop(phaseContext, entity, entityitem);
-            } else {
-                // We are adding to a general list - usually for EntityPhase.State.DEATH
-                phaseContext.getCapturedItemsSupplier().get().add(entityitem);
-            }
             // Return the item, even if it wasn't spawned in the world.
             return true;
         }
         return false;
-    }
-    /**
-     * Specifically used when block changes have taken place in place (after block events are thrown),
-     * some captures may take place, and those captures may need to be "depth first" processed. Imagining
-     * that every block change that is bulk captured would be iterated and the changes from those block changes
-     * iterated in a fashion of a "Depth First" iteration of a tree. This is to propogate Minecraft block
-     * physics correctly and allow mechanics to function that otherwise would not function correctly.
-     *
-     * Case in point: Once we had done the "breadth first" strategy of processing, which broke redstone
-     * contraptions, but allowed some "interesting" new contraptions, including but not excluded to a new
-     * easy machine that could create quantum redstone clocks where redstone would be flipped twice in a
-     * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
-     *
-     * @param context The context to re-check for captures
-     * @param depth THe current processing depth
-     */
-    default void performOnBlockAddedSpawns(final C context, final int depth) {
-
-    }
-    /**
-     * Specifically used when block changes have taken place in place (after block events are thrown),
-     * some captures may take place, and those captures may need to be "depth first" processed. Imagining
-     * that every block change that is bulk captured would be iterated and the changes from those block changes
-     * iterated in a fashion of a "Depth First" iteration of a tree. This is to propogate Minecraft block
-     * physics correctly and allow mechanics to function that otherwise would not function correctly.
-     *
-     * Case in point: Once we had done the "breadth first" strategy of processing, which broke redstone
-     * contraptions, but allowed some "interesting" new contraptions, including but not excluded to a new
-     * easy machine that could create quantum redstone clocks where redstone would be flipped twice in a
-     * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
-     *
-     * Due the recursive nature of the "depth first" strategy, certain mod blocks may
-     * cause this method to infinite recurse if they generate new transactions on every pass through.
-     * To avoid a StackOverflowError (which causes us to lose all of the associated context),
-     * we track the current depth . If the processing depth exceeeds a configurable threshold,
-     * processing is aborted, and the current tracker state and phase data are logged.
-     * @param context The context to re-check for captures
-     * @param newState
-     * @param changeFlag
-     * @param currentDepth The current processing depth, to prevenet stack overflows
-     */
-    default void performPostBlockNotificationsAndNeighborUpdates(final C context,
-        final BlockState newState, final SpongeBlockChangeFlag changeFlag,
-        final int currentDepth) {
-
     }
 
     /**
@@ -469,14 +413,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    /**
-     * Gets whether this state will capture entity spawns during block changes.
-     * Not 100% sure
-     * @return
-     */
-    default boolean doesCaptureEntitySpawns() {
-        return false;
-    }
     /**
      * An alternative to {@link #doesBulkBlockCapture(PhaseContext)} to where if capturing is expressly
      * disabled, we can still track the block change through normal methods, and throw events,
@@ -785,7 +721,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Specifically captures a block change by {@link ChunkMixin_Tracker#bridge$setBlockState(BlockPos, BlockState, BlockState, BlockChangeFlag)}
+     * Specifically captures a block change by {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier#logBlockChange(SpongeBlockSnapshot, BlockState, BlockChangeFlag)}
      * such that the change of a {@link BlockState} will be appropriately logged, along with any changes of tile entities being removed
      * or added, likewise, this will avoid duplicating transactions later after the fact, in the event that multiple changes are taking
      * place, including but not withstanding, tile entity replacements after the fact.

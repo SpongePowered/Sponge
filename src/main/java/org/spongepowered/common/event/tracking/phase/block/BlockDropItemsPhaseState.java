@@ -24,22 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import net.minecraft.entity.item.ItemEntity;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 
 final class BlockDropItemsPhaseState extends BlockPhaseState {
@@ -70,30 +62,6 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
     @SuppressWarnings({"unchecked", "Duplicates", "RedundantCast"})
     @Override
     public void unwind(final GeneralizedContext context) {
-
-        context.getCapturedItemsSupplier()
-            .acceptAndClearIfNotEmpty(items -> {
-                final ArrayList<Entity> entities = new ArrayList<>();
-                for (final ItemEntity item : items) {
-                    entities.add((Entity) item);
-                }
-                SpongeCommonEventFactory.callDropItemDestruct(entities, context);
-            });
-        context.getBlockItemDropSupplier()
-            .acceptAndClearIfNotEmpty(drops -> {
-                drops.asMap().forEach((key, value) -> {
-                    PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    SpongeCommonEventFactory.callDropItemDestruct(new ArrayList<>((Collection<? extends Entity>) (Collection<?>) value), context);
-                });
-            });
-        context.getCapturedEntitySupplier()
-            .acceptAndClearIfNotEmpty(entities -> SpongeCommonEventFactory.callSpawnEntity(entities, context));
-        final SpongeBlockSnapshot blockSnapshot = context.getSource(SpongeBlockSnapshot.class)
-            .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", context));
-        final Optional<ServerWorldBridge> maybeWorld = blockSnapshot.getServerWorld().map(worldserver -> (ServerWorldBridge) worldserver);
-
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
     }
 
