@@ -197,7 +197,7 @@ dependencies {
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig(project(":SpongeAPI"))
-    launchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+    launchConfig("org.spongepowered:plugin-spi:0.1.2-SNAPSHOT")
     launchConfig("org.spongepowered:mixin:$mixinVersion")
     launchConfig("org.checkerframework:checker-qual:3.4.1")
     launchConfig("com.google.guava:guava:21.0") {
@@ -509,7 +509,7 @@ project("SpongeVanilla") {
         vanillaModLauncherConfig("org.spongepowered:mixin:$mixinVersion")
         vanillaModLauncherConfig("org.ow2.asm:asm-util:6.2")
         vanillaModLauncherConfig("org.ow2.asm:asm-tree:6.2")
-        vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+        vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.2-SNAPSHOT")
         vanillaModLauncherConfig("javax.inject:javax.inject:1")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.11.2")
@@ -847,7 +847,7 @@ if (spongeForge != null) {
             forgeLaunchConfig("org.spongepowered:mixin:$mixinVersion")
             forgeLaunchConfig("org.ow2.asm:asm-util:6.2")
             forgeLaunchConfig("org.ow2.asm:asm-tree:6.2")
-            forgeLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+            forgeLaunchConfig("org.spongepowered:plugin-spi:0.1.2-SNAPSHOT")
             forgeLaunchConfig("javax.inject:javax.inject:1")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
