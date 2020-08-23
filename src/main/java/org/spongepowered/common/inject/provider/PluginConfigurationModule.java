@@ -49,13 +49,10 @@ public final class PluginConfigurationModule extends AbstractModule {
     @Override
     protected void configure() {
         this.bind(Path.class).annotatedWith(ConfigDirAnnotation.NON_SHARED).toProvider(NonSharedDirAsPath.class);
-        this.bind(File.class).annotatedWith(ConfigDirAnnotation.NON_SHARED).toProvider(NonSharedDirAsFile.class);
         // Plugin-private directory config file
         this.bind(Path.class).annotatedWith(DefaultConfigAnnotation.NON_SHARED).toProvider(NonSharedPathAsPath.class);
-        this.bind(File.class).annotatedWith(DefaultConfigAnnotation.NON_SHARED).toProvider(NonSharedPathAsFile.class);
         // Shared-directory config file
         this.bind(Path.class).annotatedWith(DefaultConfigAnnotation.SHARED).toProvider(SharedDirAsPath.class);
-        this.bind(File.class).annotatedWith(DefaultConfigAnnotation.SHARED).toProvider(SharedDirAsFile.class);
         // Loader for shared-directory config file
         this.bind(COMMENTED_CONFIGURATION_NODE_LOADER).annotatedWith(DefaultConfigAnnotation.SHARED).toProvider(SharedCommentedConfigurationNode.class);
         // Loader for plugin-private directory config file
@@ -79,20 +76,6 @@ public final class PluginConfigurationModule extends AbstractModule {
     }
 
     /**
-     * Provides a non-shared (private) directory.
-     *
-     * {@literal @}ConfigDir(sharedRoot = false) File configDir;
-     */
-    public static class NonSharedDirAsFile extends PathAsFileProvider {
-
-        @Inject
-        void init(@ConfigDir(sharedRoot = false) Provider<Path> path) {
-            this.path = path;
-        }
-
-    }
-
-    /**
      * Provides a configuration path within a non-shared (private) directory.
      *
      * {@literal @}DefaultConfig(sharedRoot = false) Path configPath;
@@ -109,20 +92,6 @@ public final class PluginConfigurationModule extends AbstractModule {
     }
 
     /**
-     * Provides a configuration file within a non-shared (private) directory.
-     *
-     * {@literal @}DefaultConfig(sharedRoot = false) File configFile;
-     */
-    public static class NonSharedPathAsFile extends PathAsFileProvider {
-
-        @Inject
-        void init(@DefaultConfig(sharedRoot = false) Provider<Path> path) {
-            this.path = path;
-        }
-
-    }
-
-    /**
      * Provides a configuration path within a shared directory.
      *
      * {@literal @}DefaultConfig(sharedRoot = true) Path configFile;
@@ -134,20 +103,6 @@ public final class PluginConfigurationModule extends AbstractModule {
         @Override
         public Path get() {
             return PluginConfigManager.getSharedRoot(this.container).getConfigPath();
-        }
-
-    }
-
-    /**
-     * Provides a configuration file within a shared directory.
-     *
-     * {@literal @}DefaultConfig(sharedRoot = true) File configFile;
-     */
-    static class SharedDirAsFile extends PathAsFileProvider {
-
-        @Inject
-        void init(@DefaultConfig(sharedRoot = true) Provider<Path> path) {
-            this.path = path;
         }
 
     }
