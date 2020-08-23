@@ -26,12 +26,14 @@ package org.spongepowered.common.inventory.lens.impl.comp;
 
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 
 public class CraftingInventoryLens extends DefaultIndexedLens {
 
@@ -41,19 +43,12 @@ public class CraftingInventoryLens extends DefaultIndexedLens {
     private final CraftingGridInventoryLens craftingGrid;
 
     public CraftingInventoryLens(int outputSlotIndex, int gridBase, int width, int height, SlotLensProvider slots) {
-        super(gridBase, width * height + 1, slots);
+        super(gridBase, width * height + 1, 1, CraftingInventory.class, slots);
         this.outputSlotIndex = outputSlotIndex;
         this.outputSlot = new CraftingOutputSlotLens(slots.getSlotLens(this.outputSlotIndex), FilteringSlotLens.ItemStackFilter.filterNone());;
         this.craftingGrid = new CraftingGridInventoryLens(this.base, width, height, slots);
-        this.size += 1; // output slot
-        // Avoid the init() method in the superclass calling our init() too early
-        this.init(slots);
-    }
-
-    private void init(SlotLensProvider slots) {
-        this.addSpanningChild(this.outputSlot);
-        this.addSpanningChild(this.craftingGrid);
-        this.addChild(new DefaultIndexedLens(0, this.size, slots));
+        this.addChild(this.outputSlot, KeyValuePair.slotIndex(0));
+        this.addChild(this.craftingGrid);
     }
 
     public CraftingGridInventoryLens getCraftingGrid() {

@@ -100,7 +100,6 @@ public interface IRecipeMixin_API<C extends IInventory> {
         return this.shadow$isDynamic();
     }
 
-    @Intrinsic
     default RecipeType<? extends Recipe> recipe$getType() {
         return (RecipeType) this.shadow$getType();
     }

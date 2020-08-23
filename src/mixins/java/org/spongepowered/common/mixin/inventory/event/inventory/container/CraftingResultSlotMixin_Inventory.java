@@ -177,6 +177,7 @@ public abstract class CraftingResultSlotMixin_Inventory extends Slot {
         ((TrackedContainerBridge) container).bridge$setLastCraft(event);
         ((TrackedContainerBridge) container).bridge$setFirePreview(true);
         this.impl$craftedStack = null;
+        ((TrackedInventoryBridge) thePlayer.openContainer).bridge$setCaptureInventory(true);
 
         final List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) container).bridge$getPreviewTransactions();
         if (this.field_75239_a.isEmpty()) {

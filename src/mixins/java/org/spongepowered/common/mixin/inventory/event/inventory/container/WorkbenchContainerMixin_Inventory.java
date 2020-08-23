@@ -97,6 +97,10 @@ public abstract class WorkbenchContainerMixin_Inventory {
         List<SlotTransaction> craftPreviewTransactions = container.bridge$getPreviewTransactions();
         if (container.bridge$firePreview() && !craftPreviewTransactions.isEmpty()) {
             // TODO can we just check the craftingInventory variable?
+            for (net.minecraft.inventory.container.Slot slot : player.openContainer.inventorySlots) {
+
+            }
+
             final Inventory inv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
             if (!(inv instanceof CraftingInventory)) {
                 SpongeCommon.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.openContainer.getClass().getName());

@@ -38,6 +38,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
@@ -130,14 +131,15 @@ public final class InventoryTest implements LoadableModule {
             if (event instanceof ClickContainerEvent) {
                 this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), ((ClickContainerEvent) event).getContainer().getClass().getSimpleName());
                 final Transaction<ItemStackSnapshot> cursor = ((ClickContainerEvent) event).getCursorTransaction();
-                this.plugin.getLogger().info("Cursor: {}x{}->{}x{}", cursor.getOriginal().getType(), cursor.getOriginal().getQuantity(),
+                this.plugin.getLogger().info("  Cursor: {}x{}->{}x{}", cursor.getOriginal().getType(), cursor.getOriginal().getQuantity(),
                         cursor.getFinal().getType(), cursor.getFinal().getQuantity());
             } else {
                 this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), event.getInventory().getClass().getSimpleName());
             }
             for (final SlotTransaction slotTrans : event.getTransactions()) {
-                this.plugin.getLogger().info("SlotTr: {}x{}->{}x{}[{}]", slotTrans.getOriginal().getType(), slotTrans.getOriginal().getQuantity(),
-                        slotTrans.getFinal().getType(), slotTrans.getFinal().getQuantity(), slotTrans.getSlot().get(Keys.SLOT_INDEX).get());
+                final Optional<Integer> integer = slotTrans.getSlot().get(Keys.SLOT_INDEX);
+                this.plugin.getLogger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.getOriginal().getType(), slotTrans.getOriginal().getQuantity(),
+                        slotTrans.getFinal().getType(), slotTrans.getFinal().getQuantity(), integer.get());
             }
         }
 
@@ -151,6 +153,14 @@ public final class InventoryTest implements LoadableModule {
                 final ItemStackSnapshot item = ((TransferInventoryEvent.Post) event).getTransferredItem();
                 this.plugin.getLogger().info("[{}] -> [{}] {}x{}", sourceIdx, targetIdx, item.getType(), item.getQuantity());
             }
+        }
+
+        @Listener
+        public void onCraft(CraftItemEvent event) {
+//            this.plugin.getLogger().info("{} size: {} recipe: {} ",
+//                    event.getClass().getSimpleName(),
+//                    event.getCraftingInventory().capacity(),
+//                    event.getRecipe().map(Recipe::getKey).map(ResourceKey::asString).orElse("no recipe"));
         }
     }
 
