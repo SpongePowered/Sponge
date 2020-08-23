@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.api.mcp.server.management;
 
 import net.minecraft.server.management.ProfileBanEntry;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.api.util.ban.BanType;
-import org.spongepowered.api.util.ban.BanTypes;
+import org.spongepowered.api.service.ban.Ban;
+import org.spongepowered.api.service.ban.BanType;
+import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ProfileBanEntry.class)

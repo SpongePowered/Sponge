@@ -25,8 +25,8 @@
 package org.spongepowered.common.ban;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.api.util.ban.BanType;
+import org.spongepowered.api.service.ban.Ban;
+import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.common.SpongeCatalogType;
 
 public final class SpongeBanType extends SpongeCatalogType implements BanType {

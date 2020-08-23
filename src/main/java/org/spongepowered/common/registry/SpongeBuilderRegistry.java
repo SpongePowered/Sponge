@@ -91,7 +91,7 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.util.ResettableBuilder;
-import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
