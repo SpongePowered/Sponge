@@ -22,23 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler;
+package org.spongepowered.vanilla.applaunch.handler.dev;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
-import org.spongepowered.vanilla.applaunch.Main;
+import cpw.mods.gross.Java9ClassLoaderUtil;
+import cpw.mods.modlauncher.api.ILaunchHandlerService;
+import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
+import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 
-public final class ClientDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
+
+/**
+ * The Sponge {@link ILaunchHandlerService launch handler} for development environments.
+ */
+public abstract class AbstractVanillaDevLaunchHandler extends AbstractVanillaLaunchHandler {
 
     @Override
-    public String name() {
-        return "sponge_client_dev";
-    }
+    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
+            if (url.toString().contains("mixin") && url.toString().endsWith(".jar")) {
+                continue;
+            }
 
-    @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.ClientLauncher", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
-                .invoke(null, Main.getPluginEngine(), Boolean.TRUE, arguments);
+            try {
+                builder.addTransformationPath(Paths.get(url.toURI()));
+            } catch (final URISyntaxException ex) {
+                log.error("Failed to add Mixin transformation path", ex);
+            }
+        }
+
+        super.configureTransformationClassLoader(builder);
     }
 }

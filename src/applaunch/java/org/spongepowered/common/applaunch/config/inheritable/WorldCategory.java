@@ -174,7 +174,7 @@ public class WorldCategory {
     public void setMobSpawnRange(int range) {
         this.mobSpawnRange = range;
     }
-    
+
     public boolean getDenyChunkRequests() {
         return this.denyChunkRequests;
     }

@@ -31,6 +31,11 @@ import org.spongepowered.asm.util.Constants;
 public final class MixinServiceVanillaModLauncher extends MixinServiceModLauncher {
 
     @Override
+    public boolean isValid() {
+        return true;
+    }
+
+    @Override
     public ContainerHandleModLauncher getPrimaryContainer() {
         return new ContainerHandleVanillaModLauncher(this.getName());
     }

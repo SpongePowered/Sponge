@@ -28,7 +28,7 @@ import com.google.inject.Stage;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 
 public final class DedicatedServerLauncher extends VanillaLauncher {
 

@@ -25,54 +25,63 @@
 package org.spongepowered.vanilla.applaunch;
 
 import cpw.mods.modlauncher.Launcher;
-import joptsimple.ArgumentAcceptingOptionSpec;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-import joptsimple.util.PathConverter;
-import joptsimple.util.PathProperties;
-import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.vanilla.applaunch.util.ArgumentList;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.util.ArgumentList;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 public final class Main {
 
-    private static VanillaPluginEngine pluginEngine;
+    private static Main instance;
 
-    public static void main(final String[] args) throws IOException {
-        final OptionParser parser = new OptionParser();
-        final ArgumentAcceptingOptionSpec<Path> gameDir = parser.accepts("gameDir", "Alternative game directory").withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Paths.get("."));
-        parser.allowsUnrecognizedOptions();
-        final OptionSet optionSet = parser.parse(args);
+    private final Logger logger;
+    private final VanillaPluginEngine pluginEngine;
 
-        final Path gameDirectory = optionSet.valueOf(gameDir);
+    public Main() {
+        Main.instance = this;
+        this.logger = LogManager.getLogger("App Launch");
+        this.pluginEngine = new VanillaPluginEngine(new PluginEnvironment());
+    }
+
+    public static void main(final String[] args) throws Exception {
+        VanillaCommandLine.configure(args);
+        new Main().run();
+    }
+
+    public static Main getInstance() {
+        return Main.instance;
+    }
+
+    public void run() throws IOException {
         final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
-        final PluginEnvironment pluginEnvironment = new PluginEnvironment();
-        pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
-        pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> gameDirectory);
-        final Path modsDirectory = gameDirectory.resolve("mods");
+
+        this.pluginEngine.getPluginEnvironment().getBlackboard()
+                .getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
+        this.pluginEngine.getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> VanillaCommandLine.gameDirectory);
+
+        SpongeConfigs.initialize(this.pluginEngine.getPluginEnvironment());
+        final Path modsDirectory = VanillaCommandLine.gameDirectory.resolve("mods");
         if (Files.notExists(modsDirectory)) {
             Files.createDirectories(modsDirectory);
         }
-        // TODO Read in plugin directories from CLI/Config
-        pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, gameDirectory.resolve("plugins")));
-        pluginEnvironment.getBlackboard().getOrCreate(SpongeConfigs.IS_VANILLA_PLATFORM, () -> true);
+        this.pluginEngine.getPluginEnvironment().getBlackboard()
+                .getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, VanillaCommandLine
+                        .gameDirectory.resolve("plugins")));
 
-        SpongeConfigs.initialize(pluginEnvironment);
-        Main.pluginEngine = new VanillaPluginEngine(pluginEnvironment);
-
-        final ArgumentList lst = ArgumentList.from(args);
+        this.logger.info("Transitioning to ModLauncher, please wait...");
+        final ArgumentList lst = ArgumentList.from(VanillaCommandLine.RAW_ARGS);
         Launcher.main(lst.getArguments());
     }
 
-    public static VanillaPluginEngine getPluginEngine() {
-        return Main.pluginEngine;
+    public VanillaPluginEngine getPluginEngine() {
+        return this.pluginEngine;
     }
 }

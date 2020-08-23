@@ -38,6 +38,7 @@ import org.spongepowered.plugin.jvm.locator.ResourceType;
 import org.spongepowered.vanilla.applaunch.Main;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -53,7 +55,7 @@ import java.util.function.Predicate;
  */
 public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerService {
 
-    protected static final Logger log = LogManager.getLogger("Sponge Launch");
+    protected static final Logger log = LogManager.getLogger("Launch");
 
     /**
      * A list of packages to exclude from the {@link TransformingClassLoader transforming class loader},
@@ -80,9 +82,30 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        builder.setClassBytesLocator(this.getResourceLocator());
+    }
 
-        builder.setClassBytesLocator(s -> {
-            for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> serviceCandidates : Main.getPluginEngine().getCandidates().entrySet()) {
+    @Override
+    public Callable<Void> launchService(final String[] arguments, final ITransformingClassLoader launchClassLoader) {
+        log.info("Transitioning to Sponge launcher, please wait...");
+
+        launchClassLoader.addTargetPackageFilter(klass -> {
+            for (final String pkg : EXCLUDED_PACKAGES) {
+                if (klass.startsWith(pkg)) return false;
+            }
+            return true;
+        });
+
+        return () -> {
+            this.launchService0(arguments, launchClassLoader);
+            return null;
+        };
+    }
+
+    protected Function<String, Optional<URL>> getResourceLocator() {
+        return s -> {
+            for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> serviceCandidates :
+                    Main.getInstance().getPluginEngine().getCandidates().entrySet()) {
                 for (final PluginCandidate<PluginResource> candidate : serviceCandidates.getValue()) {
                     final PluginResource resource = candidate.getResource();
 
@@ -104,24 +127,6 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             }
 
             return Optional.empty();
-            }
-        );
-    }
-
-    @Override
-    public Callable<Void> launchService(final String[] arguments, final ITransformingClassLoader launchClassLoader) {
-        log.info("Transitioning to Sponge launcher, please wait...");
-
-        launchClassLoader.addTargetPackageFilter(klass -> {
-            for (final String pkg : EXCLUDED_PACKAGES) {
-                if (klass.startsWith(pkg)) return false;
-            }
-            return true;
-        });
-
-        return () -> {
-            this.launchService0(arguments, launchClassLoader);
-            return null;
         };
     }
 

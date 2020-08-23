@@ -31,7 +31,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
-import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;

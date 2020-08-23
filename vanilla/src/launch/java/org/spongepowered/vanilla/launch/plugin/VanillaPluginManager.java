@@ -33,7 +33,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginLoader;
 import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.launch.VanillaLauncher;
 
 import java.util.ArrayList;
@@ -53,6 +53,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
     private final List<PluginContainer> sortedPlugins;
 
     public VanillaPluginManager() {
+        final ClassLoader classLoader = this.getClass().getClassLoader();
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();

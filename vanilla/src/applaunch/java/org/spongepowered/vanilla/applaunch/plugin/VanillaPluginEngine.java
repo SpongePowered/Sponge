@@ -22,10 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.plugin.loader;
+package org.spongepowered.vanilla.applaunch.plugin;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.spongepowered.common.applaunch.plugin.loader.PluginEngine;
+import org.spongepowered.common.applaunch.plugin.PluginEngine;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginLanguageService;
@@ -33,6 +32,7 @@ import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.PluginResourceLocatorService;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -52,9 +52,9 @@ public final class VanillaPluginEngine implements PluginEngine {
 
     public VanillaPluginEngine(final PluginEnvironment pluginEnvironment) {
         this.pluginEnvironment = pluginEnvironment;
-        this.locatorServices = new Object2ObjectOpenHashMap<>();
-        this.languageServices = new Object2ObjectOpenHashMap<>();
-        this.locatorResources = new Object2ObjectOpenHashMap<>();
+        this.locatorServices = new HashMap<>();
+        this.languageServices = new HashMap<>();
+        this.locatorResources = new HashMap<>();
         this.pluginCandidates = new IdentityHashMap<>();
     }
 

@@ -22,34 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler;
+package org.spongepowered.vanilla.applaunch;
 
-import cpw.mods.gross.Java9ClassLoaderUtil;
-import cpw.mods.modlauncher.api.ILaunchHandlerService;
-import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Paths;
+public enum VanillaLaunchTargets {
+    CLIENT_DEVELOPMENT("sponge_client_dev"),
+    CLIENT_PRODUCTION("sponge_client_prod"),
+    SERVER_DEVELOPMENT("sponge_server_dev"),
+    SERVER_PRODUCTION("sponge_server_prod");
 
-/**
- * The Sponge {@link ILaunchHandlerService launch handler} for development environments.
- */
-public abstract class AbstractVanillaDevLaunchHandler extends AbstractVanillaLaunchHandler {
+    private final String launchTarget;
 
-    @Override
-    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
-            if (url.toString().contains("mixin") && url.toString().endsWith(".jar")) {
-                continue;
-            }
+    VanillaLaunchTargets(final String launchTarget) {
+        this.launchTarget = launchTarget;
+    }
 
-            try {
-                builder.addTransformationPath(Paths.get(url.toURI()));
-            } catch (final URISyntaxException ex) {
-                log.error("Failed to add Mixin transformation path", ex);
-            }
+    public String getLaunchTarget() {
+        return this.launchTarget;
+    }
+
+    public static VanillaLaunchTargets from(final String launchTarget) {
+
+        switch (launchTarget) {
+            case "sponge_client_dev":
+                return CLIENT_DEVELOPMENT;
+            case "sponge_client_prod":
+                return CLIENT_PRODUCTION;
+            case "sponge_server_dev":
+                return SERVER_DEVELOPMENT;
+            case "sponge_server_prod":
+                return SERVER_PRODUCTION;
         }
 
-        super.configureTransformationClassLoader(builder);
+        return null;
     }
 }

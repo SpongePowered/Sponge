@@ -22,35 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.vanilla.applaunch;
 
-import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+public final class Constants {
 
-public final class ClientLauncher extends VanillaLauncher {
-
-    protected ClientLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
-        super(pluginEngine, injectionStage);
+    public static final class Libraries {
+        public static final String MINECRAFT_VERSION_TARGET = "1.14.4";
+        public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+        public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
+        public static final String MINECRAFT_SERVER_PATH_PREFIX = Libraries.MINECRAFT_PATH_PREFIX + "/server";
+        public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
+        public static final String MCP_CONFIG_NAME = "mcp_config";
+        public static final String MCP_CONFIG_PREFIX_URL = "https://files.minecraftforge.net/maven/de/oceanlabs/mcp/" + Libraries.MCP_CONFIG_NAME;
+        public static final String MCP_CONFIG_PATH_PREFIX = "de/oceanlabs/mcp/" + Libraries.MCP_CONFIG_NAME;
+        public static final String MCP_JOINED_PATH = "config/joined.tsrg";
     }
 
-    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(pluginEngine, isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.launchPlatform(args);
-    }
-
-    @Override
-    public boolean isDedicatedServer() {
-        return false;
-    }
-
-    public void launchPlatform(final String[] args) {
-        super.onLaunch();
-        this.getLogger().info("Loading Sponge, please wait...");
-
-        SpongeBootstrap.perform("Client", () -> Main.main(args));
+    public static final class ManifestAttributes {
+        public static final String LAUNCH_TARGET = "Launch-Target";
     }
 }

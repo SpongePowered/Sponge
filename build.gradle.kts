@@ -435,7 +435,6 @@ project("SpongeVanilla") {
 
     val vanillaMinecraftConfig by configurations.named("minecraft")
     val vanillaAppLaunchConfig by configurations.register("applaunch") {
-        extendsFrom(vanillaMinecraftConfig)
     }
 
     val vanillaMain by sourceSets.named("main") {
@@ -552,6 +551,7 @@ project("SpongeVanilla") {
         }
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
         add(vanillaLaunch.implementationConfigurationName, vanillaAppLaunchConfig)
+        add(vanillaLaunch.implementationConfigurationName, vanillaMinecraftConfig)
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
@@ -579,6 +579,8 @@ project("SpongeVanilla") {
             exclude(group = "com.google.guava", module = "guava")
             exclude(group = "org.checkerframework", module = "checker-qual")
         }
+        vanillaAppLaunchConfig("org.cadixdev:lorenz:0.6.0-SNAPSHOT")
+        vanillaAppLaunchConfig("org.cadixdev:atlas:0.3.0-SNAPSHOT")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
@@ -594,7 +596,9 @@ project("SpongeVanilla") {
         }
         vanillaAppLaunchImplementation(vanillaAppLaunchConfig)
         vanillaMixinsImplementation(vanillaAppLaunchConfig)
+        vanillaMixinsImplementation(vanillaMinecraftConfig)
         vanillaAccessorsImplementation(vanillaAppLaunchConfig)
+        vanillaAccessorsImplementation(vanillaMinecraftConfig)
 
         // Annotation Processor
         vanillaAccessorsAnnotationProcessor(vanillaAppLaunchImplementation)
@@ -714,14 +718,15 @@ project("SpongeVanilla") {
             from(vanillaAccessorsJar)
         }
         shadowJar {
+            mergeServiceFiles()
             val generateImplementationVersionString = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
 
             archiveClassifier.set("universal")
             manifest {
                 attributes(mapOf(
+                        "Main-Class" to "org.spongepowered.vanilla.applaunch.launcher.AppLauncher",
+                        "MixinConfigs" to "mixins.common.api.json,mixins.common.core.json,mixins.common.inventory.json,mixins.common.tracker.json",
                         "Launch-Target" to "sponge_server_prod",
-                        "Mappings-Channel" to mcpType,
-                        "Mappings-Version" to mcpMappings,
                         "Specification-Title" to "SpongeCommon",
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
@@ -741,6 +746,7 @@ project("SpongeVanilla") {
             from(vanillaAppLaunchJar)
             from(vanillaMixinsJar)
             from(vanillaAccessorsJar)
+            from(vanillaAppLaunchConfig)
             dependencies {
                 include(project(":"))
                 include(project(":SpongeAPI"))
@@ -768,18 +774,19 @@ project("SpongeVanilla") {
                 include(dependency("org.mariadb.jdbc:mariadb-java-client:2.0.3"))
                 include(dependency("com.h2database:h2:1.4.196"))
                 include(dependency("org.xerial:sqlite-jdbc:3.20.0"))
-
-                include(dependency("org.ow2.asm:asm.*"))
-                include(dependency("org.spongepowered:mixin"))
                 include(dependency("org.apache.logging.log4j:log4j-slf4j-impl"))
                 include(dependency("org.apache.logging.log4j:log4j-api"))
 
-                // Now for ModLauncher and launching in general
-                include(dependency("net.minecraftforge:accesstransformers"))
+                // And now the vanilla dependencies
                 include(dependency("cpw.mods:grossjava9hacks"))
                 include(dependency("cpw.mods:modlauncher"))
                 include(dependency("net.minecraftforge:mergetool"))
                 include(dependency("net.sf.jopt-simple:jopt-simple"))
+                include(dependency("org.cadixdev:lorenz"))
+                include(dependency("org.cadixdev:atlas"))
+                include(dependency("org.ow2.asm:asm-commons"))
+                include(dependency("org.cadixdev:bombe"))
+                include(dependency("org.cadixdev:bombe-jar"))
             }
         }
         reobf {
