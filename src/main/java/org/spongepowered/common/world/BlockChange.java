@@ -35,7 +35,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.applaunch.config.inheritable.LoggingCategory;
+import org.spongepowered.common.applaunch.config.inheritable.LoggingCategory;
 
 @DefaultQualifier(NonNull.class)
 public enum BlockChange {

@@ -31,8 +31,8 @@ import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.applaunch.config.common.TimingsCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.common.TimingsCategory;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;

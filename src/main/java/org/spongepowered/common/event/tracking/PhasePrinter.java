@@ -34,10 +34,10 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.applaunch.config.core.ConfigHandle;
-import org.spongepowered.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.applaunch.config.common.CommonConfig;
-import org.spongepowered.applaunch.config.common.PhaseTrackerCategory;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.common.CommonConfig;
+import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 

@@ -28,7 +28,7 @@ import com.google.inject.Stage;
 import net.minecraft.client.main.Main;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.launch.plugin.loader.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.loader.VanillaPluginEngine;
 
 public final class ClientLauncher extends VanillaLauncher {
 

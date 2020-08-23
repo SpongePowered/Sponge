@@ -35,11 +35,11 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.applaunch.config.core.ConfigHandle;
-import org.spongepowered.applaunch.config.core.InheritableConfigHandle;
-import org.spongepowered.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.config.customdata.CustomDataConfig;
-import org.spongepowered.applaunch.config.inheritable.WorldConfig;
+import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 

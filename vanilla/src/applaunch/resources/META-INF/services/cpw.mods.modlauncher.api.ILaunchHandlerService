@@ -1,0 +1,2 @@
+org.spongepowered.vanilla.applaunch.handler.ServerDevLaunchHandler
+org.spongepowered.vanilla.applaunch.handler.ClientDevLaunchHandler

@@ -28,8 +28,8 @@ import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import ninja.leaping.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.applaunch.config.core.Config;
-import org.spongepowered.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collections;

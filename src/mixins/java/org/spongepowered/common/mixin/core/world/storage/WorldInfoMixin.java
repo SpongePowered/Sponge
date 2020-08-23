@@ -60,10 +60,10 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.applaunch.config.core.InheritableConfigHandle;
-import org.spongepowered.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.applaunch.config.inheritable.WorldConfig;
+import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 

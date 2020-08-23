@@ -29,7 +29,7 @@ import net.minecraft.network.handshake.client.CHandshakePacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 @Mixin(CHandshakePacket.class)
 public abstract class CHandshakeMixin_Bungee {

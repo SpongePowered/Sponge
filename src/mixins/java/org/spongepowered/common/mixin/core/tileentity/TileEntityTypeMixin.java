@@ -35,7 +35,7 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.config.tracker.BlockEntityTrackerCategory;
 import org.spongepowered.common.config.tracker.BlockEntityTrackerModCategory;
 import org.spongepowered.common.config.tracker.TrackerConfig;

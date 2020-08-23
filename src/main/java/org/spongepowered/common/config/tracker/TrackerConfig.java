@@ -25,7 +25,7 @@
 package org.spongepowered.common.config.tracker;
 
 import ninja.leaping.configurate.objectmapping.Setting;
-import org.spongepowered.applaunch.config.core.Config;
+import org.spongepowered.common.applaunch.config.core.Config;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
