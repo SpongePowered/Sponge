@@ -36,8 +36,11 @@ import org.spongepowered.vanilla.applaunch.VanillaLaunchTargets;
 import org.spongepowered.vanilla.applaunch.pipeline.ProductionServerAppPipeline;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -46,6 +49,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public final class ServerProdLaunchHandler extends AbstractVanillaProdLaunchHandler {
+
+    private FileSystem serverFileSystem;
 
     @Override
     public String name() {
@@ -58,18 +63,20 @@ public final class ServerProdLaunchHandler extends AbstractVanillaProdLaunchHand
                 .resolve(ProductionServerAppPipeline.MINECRAFT_VERSION_TARGET).resolve(ProductionServerAppPipeline.MINECRAFT_SERVER_JAR_NAME +
                         "_remapped.jar");
 
-        final URL remappedUrl;
         try {
-            remappedUrl = remappedJar.toUri().toURL();
-        } catch (final MalformedURLException e) {
+            this.serverFileSystem = FileSystems.newFileSystem(remappedJar, null);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
 
         return s -> {
             // Is it Minecraft itself?
             if (s.startsWith("net/minecraft")) {
-                return Optional.of(remappedUrl);
+                try {
+                    return Optional.of(this.serverFileSystem.getPath(s).toUri().toURL());
+                } catch (final MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             // Is it plugins?
