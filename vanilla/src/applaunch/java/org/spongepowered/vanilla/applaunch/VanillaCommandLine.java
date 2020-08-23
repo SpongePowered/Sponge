@@ -46,9 +46,16 @@ public final class VanillaCommandLine {
             .withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Paths.get("."));
     private static final ArgumentAcceptingOptionSpec<Path> LIBRARIES_DIRECTORY_ARG = PARSER.accepts("librariesDir", "Alternative libraries directory")
             .withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Paths.get("libraries"));
+    private static final ArgumentAcceptingOptionSpec<Boolean> DOWNLOAD_MINECRAFT_JAR = PARSER.accepts("downloadMinecraftJar", "If true, we'll "
+            + "download the Minecraft jar.").withOptionalArg().ofType(Boolean.class).defaultsTo(Boolean.TRUE);
+    private static final ArgumentAcceptingOptionSpec<Boolean> CHECK_MINECRAFT_JAR_HASH = PARSER.accepts("checkMinecraftJarHash", "If true, we'll "
+            + "verify the Minecraft jar hash (to protect against corruption/etc).").withOptionalArg().ofType(Boolean.class).defaultsTo(Boolean.TRUE);
+    private static final ArgumentAcceptingOptionSpec<Boolean> DOWNLOAD_SRG_MAPPINGS = PARSER.accepts("downloadSrgMappings", "If true, we'll "
+            + "download the SRG mappings").withOptionalArg().ofType(Boolean.class).defaultsTo(Boolean.TRUE);
 
-    public static VanillaLaunchTargets LAUNCH_TARGET;
-    public static Path GAME_DIRECTORY, LIBRARIES_DIRECTORY;
+    public static VanillaLaunchTargets launchTarget;
+    public static Path gameDirectory, librariesDirectory;
+    public static boolean downloadMinecraftJar, checkMinecraftJarHash, downloadSrgMappings;
 
     public static String[] configure(String[] args) throws IOException {
         VanillaCommandLine.PARSER.allowsUnrecognizedOptions();
@@ -70,8 +77,8 @@ public final class VanillaCommandLine {
             throw new RuntimeException("No launch target has been specified! Check your run configs/manifest...");
         }
 
-        VanillaCommandLine.LAUNCH_TARGET = VanillaLaunchTargets.from(launchTarget);
-        if (VanillaCommandLine.LAUNCH_TARGET == null) {
+        VanillaCommandLine.launchTarget = VanillaLaunchTargets.from(launchTarget);
+        if (VanillaCommandLine.launchTarget == null) {
             throw new RuntimeException("Invalid launch target specified!");
         }
 
@@ -83,8 +90,11 @@ public final class VanillaCommandLine {
             args = temp;
         }
 
-        VanillaCommandLine.GAME_DIRECTORY = options.valueOf(VanillaCommandLine.GAME_DIRECTORY_ARG);
-        VanillaCommandLine.LIBRARIES_DIRECTORY = options.valueOf(VanillaCommandLine.LIBRARIES_DIRECTORY_ARG);
+        VanillaCommandLine.gameDirectory = options.valueOf(VanillaCommandLine.GAME_DIRECTORY_ARG);
+        VanillaCommandLine.librariesDirectory = options.valueOf(VanillaCommandLine.LIBRARIES_DIRECTORY_ARG);
+        VanillaCommandLine.downloadMinecraftJar = options.valueOf(VanillaCommandLine.DOWNLOAD_MINECRAFT_JAR);
+        VanillaCommandLine.checkMinecraftJarHash = options.valueOf(VanillaCommandLine.CHECK_MINECRAFT_JAR_HASH);
+        VanillaCommandLine.downloadSrgMappings = options.valueOf(VanillaCommandLine.DOWNLOAD_SRG_MAPPINGS);
 
         return args;
     }

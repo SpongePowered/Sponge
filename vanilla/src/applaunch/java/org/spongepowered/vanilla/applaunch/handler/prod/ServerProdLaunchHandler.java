@@ -54,7 +54,7 @@ public final class ServerProdLaunchHandler extends AbstractVanillaProdLaunchHand
 
     @Override
     protected Function<String, Optional<URL>> getResourceLocator() {
-        final Path remappedJar = VanillaCommandLine.LIBRARIES_DIRECTORY.resolve(ProductionServerAppPipeline.MINECRAFT_PATH_PREFIX)
+        final Path remappedJar = VanillaCommandLine.librariesDirectory.resolve(ProductionServerAppPipeline.MINECRAFT_PATH_PREFIX)
                 .resolve(ProductionServerAppPipeline.MINECRAFT_VERSION_TARGET).resolve(ProductionServerAppPipeline.MINECRAFT_SERVER_JAR_NAME +
                         "_remapped.jar");
 

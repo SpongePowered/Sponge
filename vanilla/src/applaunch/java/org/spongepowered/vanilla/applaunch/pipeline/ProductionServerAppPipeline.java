@@ -68,9 +68,9 @@ public final class ProductionServerAppPipeline extends AppPipeline {
     public void prepare() throws Exception {
         super.prepare();
 
-        this.downloadMinecraft(VanillaCommandLine.LIBRARIES_DIRECTORY);
-        final Path srgZip = this.downloadSRG(VanillaCommandLine.LIBRARIES_DIRECTORY);
-        this.remapMinecraft(VanillaCommandLine.LIBRARIES_DIRECTORY, srgZip);
+        this.downloadMinecraft(VanillaCommandLine.librariesDirectory);
+        final Path srgZip = this.downloadSRG(VanillaCommandLine.librariesDirectory);
+        this.remapMinecraft(VanillaCommandLine.librariesDirectory, srgZip);
     }
 
     private void downloadMinecraft(final Path librariesDirectory) throws IOException, NoSuchAlgorithmException {
@@ -110,43 +110,54 @@ public final class ProductionServerAppPipeline extends AppPipeline {
                 ProductionServerAppPipeline.MINECRAFT_VERSION_TARGET).resolve(ProductionServerAppPipeline.MINECRAFT_SERVER_JAR_NAME + ".jar");
 
         if (Files.notExists(downloadTarget)) {
+            if (!VanillaCommandLine.downloadMinecraftJar) {
+                throw new IOException(String.format("The Minecraft jar is not located at '%s' and downloading it has been turned off.", downloadTarget));
+            }
             this.downloadCheckHash(version.downloads.server.url, downloadTarget, version.downloads.server.sha1);
         } else {
-            this.logger.info("Detected existing Minecraft Server jar, verifying hashes...");
-            final MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+            if (VanillaCommandLine.checkMinecraftJarHash) {
+                this.logger.info("Detected existing Minecraft Server jar, verifying hashes...");
+                final MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
 
-            // Pipe the download stream into the file and compute the SHA-1
-            final byte[] bytes = Files.readAllBytes(downloadTarget);
-            final String fileSha1 = this.toHexString(sha1.digest(bytes));
+                // Pipe the download stream into the file and compute the SHA-1
+                final byte[] bytes = Files.readAllBytes(downloadTarget);
+                final String fileSha1 = this.toHexString(sha1.digest(bytes));
 
-            if (version.downloads.server.sha1.equals(fileSha1)) {
-                this.logger.info("Minecraft Server jar verified!");
+                if (version.downloads.server.sha1.equals(fileSha1)) {
+                    this.logger.info("Minecraft Server jar verified!");
+                } else {
+                    Files.delete(downloadTarget);
+                    this.logger.error("Checksum verification failed: Expected {}, {}. Deleting cached Minecraft Server jar...",
+                            version.downloads.server.sha1, fileSha1);
+                }
             } else {
-                Files.delete(downloadTarget);
-                this.logger.error("Checksum verification failed: Expected {}, {}. Deleting cached Minecraft Server jar...",
-                        version.downloads.server.sha1, fileSha1);
+                this.logger.info("Detected existing Minecraft Server jar. Skipping hash check as that is turned off...");
             }
         }
     }
 
     private Path downloadSRG(final Path librariesDirectory) throws IOException {
         this.logger.info("Setting up MCP config for Minecraft {}", ProductionServerAppPipeline.MINECRAFT_VERSION_TARGET);
-        final Path targetPath = librariesDirectory.resolve(ProductionServerAppPipeline.MCP_CONFIG_PATH_PREFIX).resolve(ProductionServerAppPipeline
+        final Path downloadTarget = librariesDirectory.resolve(ProductionServerAppPipeline.MCP_CONFIG_PATH_PREFIX).resolve(ProductionServerAppPipeline
                         .MINECRAFT_VERSION_TARGET).resolve(ProductionServerAppPipeline.MCP_CONFIG_NAME + "-" + ProductionServerAppPipeline
                         .MINECRAFT_VERSION_TARGET + ".zip");
-        if (Files.notExists(targetPath)) {
+        if (Files.notExists(downloadTarget)) {
             final URL mcpConfigUrl = new URL(ProductionServerAppPipeline.MCP_CONFIG_PREFIX_URL + "/" + ProductionServerAppPipeline
                     .MINECRAFT_VERSION_TARGET + "/" + ProductionServerAppPipeline.MCP_CONFIG_NAME + "-" + ProductionServerAppPipeline
                     .MINECRAFT_VERSION_TARGET + ".zip");
             // TODO Figure out how to sha1 check the zip file
-            this.download(mcpConfigUrl, targetPath);
+            if (VanillaCommandLine.downloadSrgMappings) {
+                this.download(mcpConfigUrl, downloadTarget);
+            } else {
+                throw new IOException(String.format("MCP config was not located at '%s' and downloading it has been turned off.", downloadTarget));
+            }
         } else {
             this.logger.info("Detected existing MCP mappings, verifying hashes...");
             // TODO Figure out how to sha1 check the zip file
             this.logger.info("MCP mappings verified!");
         }
 
-        return targetPath;
+        return downloadTarget;
     }
 
     private void remapMinecraft(final Path librariesDirectory, final Path srgZip) throws IOException {
@@ -223,11 +234,15 @@ public final class ProductionServerAppPipeline extends AppPipeline {
 
         final String fileSha1 = this.toHexString(sha1.digest());
 
-        if (expected.equals(fileSha1)) {
-            this.logger.info("Successfully downloaded " + name + " and verified checksum!");
+        if (VanillaCommandLine.checkMinecraftJarHash) {
+            if (expected.equals(fileSha1)) {
+                this.logger.info("Successfully downloaded " + name + " and verified checksum!");
+            } else {
+                Files.delete(path);
+                throw new IOException("Checksum verification failed: Expected " + expected + ", got " + fileSha1);
+            }
         } else {
-            Files.delete(path);
-            throw new IOException("Checksum verification failed: Expected " + expected + ", got " + fileSha1);
+            this.logger.info("Skipping hash check as that is turned off...");
         }
     }
 

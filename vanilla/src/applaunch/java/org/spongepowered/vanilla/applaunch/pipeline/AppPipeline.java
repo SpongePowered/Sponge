@@ -52,15 +52,15 @@ public class AppPipeline {
         final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
 
         this.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
-        this.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> VanillaCommandLine.GAME_DIRECTORY);
+        this.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> VanillaCommandLine.gameDirectory);
 
         SpongeConfigs.initialize(this.pluginEnvironment);
-        final Path modsDirectory = VanillaCommandLine.GAME_DIRECTORY.resolve("mods");
+        final Path modsDirectory = VanillaCommandLine.gameDirectory.resolve("mods");
         if (Files.notExists(modsDirectory)) {
             Files.createDirectories(modsDirectory);
         }
         this.pluginEnvironment.getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, VanillaCommandLine
-                .GAME_DIRECTORY.resolve("plugins")));
+                .gameDirectory.resolve("plugins")));
     }
 
     public void start(final String[] args) {

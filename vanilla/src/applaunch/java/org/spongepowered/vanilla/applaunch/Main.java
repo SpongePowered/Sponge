@@ -35,7 +35,7 @@ public final class Main {
     
     public static void main(String[] args) throws Exception {
         final String[] launchArgs = VanillaCommandLine.configure(args);
-        switch (VanillaCommandLine.LAUNCH_TARGET) {
+        switch (VanillaCommandLine.launchTarget) {
             case CLIENT_DEVELOPMENT:
             case SERVER_DEVELOPMENT:
                 Main.appPipeline = new AppPipeline();
