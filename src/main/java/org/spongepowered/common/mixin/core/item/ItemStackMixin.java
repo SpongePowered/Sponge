@@ -132,17 +132,17 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
             for (DataView dataView : manipulatorViews) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
-            final NBTTagCompound spongeCompound = shadow$getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
+            final NBTTagCompound spongeCompound = this.shadow$getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
             spongeCompound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else if (!this.failedData.isEmpty()) {
             final NBTTagList newList = new NBTTagList();
             for (DataView failedDatum : this.failedData) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
             }
-            final NBTTagCompound spongeCompound = shadow$getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
+            final NBTTagCompound spongeCompound = this.shadow$getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
             spongeCompound.setTag(Constants.Sponge.FAILED_CUSTOM_DATA, newList);
         } else {
-            if (shadow$hasTagCompound()) {
+            if (this.shadow$hasTagCompound()) {
                 this.shadow$getTagCompound().removeTag(Constants.Sponge.SPONGE_DATA);
                 if (this.shadow$getTagCompound().isEmpty()) {
                     this.shadow$setTagCompound(null);
@@ -251,7 +251,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     // Add our manipulators when creating copies from this ItemStack:
     @Inject(method = "copy", at = @At("RETURN"))
-    private void impl$onCopy(CallbackInfoReturnable<ItemStack> info) {
+    private void impl$copySpongeDataOnSplit(CallbackInfoReturnable<ItemStack> info) {
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (this.bridge$hasManipulators()) { // no manipulators? no problem.
             for (DataManipulator<?, ?> manipulator : this.manipulators) {
@@ -261,7 +261,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Inject(method = "splitStack", at = @At("RETURN"))
-    private void impl$onSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
+    private void impl$copySpongeDataOnSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (this.bridge$hasManipulators()) {
             for (DataManipulator<?, ?> manipulator : this.manipulators) {
@@ -273,8 +273,8 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void impl$onRead(NBTTagCompound compound, CallbackInfo info) {
-        if (shadow$hasTagCompound() && shadow$getTagCompound().hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            DataUtil.readCustomData(shadow$getTagCompound().getCompoundTag(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
+        if (this.shadow$hasTagCompound() && this.shadow$getTagCompound().hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            DataUtil.readCustomData(this.shadow$getTagCompound().getCompoundTag(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
         }
 
         // Prune empty stack tag compound if its empty to enable stacking.
@@ -297,8 +297,8 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
         if (this.stackTagCompound != compound) {
             this.manipulators.clear();
         }
-        if (shadow$hasTagCompound() && shadow$getTagCompound().hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            DataUtil.readCustomData(shadow$getTagCompound().getCompoundTag(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
+        if (this.shadow$hasTagCompound() && this.shadow$getTagCompound().hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
+            DataUtil.readCustomData(this.shadow$getTagCompound().getCompoundTag(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
         }
     }
 
