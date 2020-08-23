@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.management;
 
-import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.api.util.ban.BanType;
-import org.spongepowered.api.util.ban.BanTypes;
+import org.spongepowered.api.service.ban.Ban;
+import org.spongepowered.api.service.ban.BanType;
+import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.server.management.IPBanEntryBridge;
 

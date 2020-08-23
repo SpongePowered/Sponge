@@ -143,7 +143,7 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.api.util.ban.BanType;
+import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
