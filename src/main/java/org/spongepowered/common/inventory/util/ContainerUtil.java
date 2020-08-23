@@ -212,6 +212,8 @@ public final class ContainerUtil {
                     if (delegated instanceof GridInventoryLens) {
                         if (((GridInventoryLens) delegated).getWidth() == 9) {
                             chestHeight += ((GridInventoryLens) delegated).getHeight();
+                        } else {
+                            chestHeight = -1;
                         }
                     } else {
                         chestHeight = -1;

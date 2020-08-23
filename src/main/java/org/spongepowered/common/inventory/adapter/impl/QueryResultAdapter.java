@@ -25,7 +25,6 @@
 package org.spongepowered.common.inventory.adapter.impl;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
@@ -34,17 +33,13 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-/**
- * Base Adapter implementation for {@link ItemStack} based Inventories.
- */
-public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplementedAdapterInventory, InventoryBridge, Inventory {
+public class QueryResultAdapter implements InventoryAdapter, DefaultImplementedAdapterInventory, InventoryBridge, Inventory {
 
     private final Fabric fabric;
     protected final SlotLensProvider slotLenses;
@@ -56,7 +51,7 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
 
     protected Inventory parent;
 
-    public BasicInventoryAdapter(final Fabric fabric, @Nullable final Lens root, @Nullable final Inventory parent) {
+    public QueryResultAdapter(final Fabric fabric, @Nullable final Lens root, @Nullable final Inventory parent) {
         this.fabric = fabric;
         this.parent = parent == null ? this : parent;
         this.slotLenses = this.initSlotsLenses(fabric, parent);
@@ -93,14 +88,13 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
     @Override
     public List<Slot> slots() {
         if (this.slotCollection == null) {
-            this.slotCollection = SlotCollection.of(this, this);
+            this.slotCollection = SlotCollection.of(this.parent, this);
         }
         return this.slotCollection.slots();
     }
 
     @Override
     public List<Inventory> children() {
-        // TODO react to lens changes?
         if (this.children == null) {
             this.children = this.impl$generateChildren();
         }
@@ -114,10 +108,6 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
             return Optional.empty();
         }
         return Optional.of(slots.get(ordinal));
-    }
-
-    public static Optional<Slot> forSlot(final Fabric fabric, final SlotLens slotLens, final Inventory parent) {
-        return slotLens == null ? Optional.empty() : Optional.ofNullable(slotLens.getAdapter(fabric, parent));
     }
 
     @Override

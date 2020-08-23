@@ -44,7 +44,7 @@ public class EquipmentSlotLens extends FilteringSlotLens {
     public EquipmentSlotLens(Lens parent, SlotLens lens, EquipmentType type) {
         super(lens, equipmentTypeFilter(type), EquipmentSlotAdapter.class);
         this.equipmentTypeFilter = e -> e == type;
-        this.parent = parent;
+        this.setParent(parent);
     }
 
     private static FilteringSlotLens.ItemStackFilter equipmentTypeFilter(EquipmentType type) {

@@ -32,6 +32,7 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
@@ -61,7 +62,11 @@ public class SlotCollection {
             if (child instanceof SlotLens) {
                 list.add((SlotAdapter) child.getAdapter(fabric, this.parent));
             } else if (child.getSpanningChildren().size() > 0) {
-                this.traverseSpanningTree(fabric, child, list);
+                if (child instanceof DelegatingLens) {
+                    this.traverseSpanningTree(fabric.fabric$offset(child.base()), child, list);
+                } else {
+                    this.traverseSpanningTree(fabric, child, list);
+                }
             }
         }
         return list;

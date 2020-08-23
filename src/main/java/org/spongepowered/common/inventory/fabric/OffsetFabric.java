@@ -40,6 +40,9 @@ public class OffsetFabric implements Fabric {
     }
 
     public static Fabric of(Fabric fabric, int by) {
+        if (by == 0) {
+            return fabric;
+        }
         if (fabric instanceof OffsetFabric) {
             by = ((OffsetFabric) fabric).offset + by;
             fabric = ((OffsetFabric) fabric).fabric;
@@ -84,5 +87,10 @@ public class OffsetFabric implements Fabric {
     @Override
     public void fabric$markDirty() {
         this.fabric.fabric$markDirty();
+    }
+
+    @Override
+    public String toString() {
+        return this.fabric.toString() + " offset: " + this.offset;
     }
 }

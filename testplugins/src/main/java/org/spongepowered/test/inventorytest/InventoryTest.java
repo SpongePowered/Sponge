@@ -26,9 +26,11 @@ package org.spongepowered.test.inventorytest;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -47,10 +49,12 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
@@ -81,7 +85,28 @@ public final class InventoryTest implements LoadableModule {
 
         @Listener
         public void onInteractContainerOpen(final InteractContainerEvent.Open event) {
-            final Optional<Component> component = event.getContainer().get(Keys.DISPLAY_NAME);
+            final Container container = event.getContainer();
+            final Hotbar hotbarFromContain = container.query(Hotbar.class).orElse(null);
+            final Hotbar hotbarFromPrimary = container.query(PrimaryPlayerInventory.class).get().query(Hotbar.class).orElse(null);
+            final Inventory stoneFromContain = hotbarFromContain.query(QueryTypes.ITEM_TYPE, ItemTypes.STONE.get());
+            final Inventory stoneFromPrimary = hotbarFromPrimary.query(QueryTypes.ITEM_TYPE, ItemTypes.STONE.get());
+
+            final Inventory slotIndex0 = container.query(KeyValueMatcher.of(Keys.SLOT_INDEX, 0));
+            this.plugin.getLogger().info("{} slots: {}", "SlotIndex 0 ", slotIndex0.capacity());
+            final Inventory slotPos1_1 = container.query(KeyValueMatcher.of(Keys.SLOT_POSITION, Vector2i.from(1,1)));
+            this.plugin.getLogger().info("{} slots: {}", "SlotPos 1 1", slotPos1_1.capacity());
+            final Inventory slotPos0_6 = container.query(PrimaryPlayerInventory.class).get().query(KeyValueMatcher.of(Keys.SLOT_POSITION, Vector2i.from(0, 6)));
+            this.plugin.getLogger().info("{} slots: {}", "SlotPos 0 6", slotPos0_6.capacity());
+
+            // TODO equality check fails with the default TextComponent
+            final Inventory foobarInv = container.query(KeyValueMatcher.of(Keys.DISPLAY_NAME, TextComponent.of("Foobar")));
+            this.plugin.getLogger().info("{} slots: {}", "Foobar Title", foobarInv.capacity());
+            final Inventory max1Quantity = container.query(KeyValueMatcher.of(Keys.MAX_STACK_SIZE, 1));
+            this.plugin.getLogger().info("{} slots: {}", "Max quantity 1", max1Quantity.capacity());
+            final Inventory grids = container.query(QueryTypes.INVENTORY_TYPE, GridInventory.class);
+            this.plugin.getLogger().info("{} count: {}", "grids ", grids.children().size()); // contains duplicate slots
+            final Optional<Component> component = container.get(Keys.DISPLAY_NAME);
+
             final String title = component.map(c -> PlainComponentSerializer.plain().serialize(c)).orElse("No Title");
             this.plugin.getLogger().info("{} [{}]", event.getClass().getSimpleName(), title);
         }
