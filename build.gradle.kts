@@ -36,6 +36,8 @@ val minecraftVersion: String by project
 val recommendedVersion: String by project
 
 val mixinVersion: String by project
+val pluginSpiVersion: String by project
+val guavaVersion: String by project
 
 minecraft {
     mappings(mcpType, mcpMappings)
@@ -221,10 +223,10 @@ dependencies {
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig(project(":SpongeAPI"))
-    launchConfig("org.spongepowered:plugin-spi:0.1.2-SNAPSHOT")
+    launchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
     launchConfig("org.spongepowered:mixin:$mixinVersion")
     launchConfig("org.checkerframework:checker-qual:3.4.1")
-    launchConfig("com.google.guava:guava:21.0") {
+    launchConfig("com.google.guava:guava:$guavaVersion") {
         exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
         exclude(group = "com.google.j2objc", module = "j2objc-annotations")
@@ -239,11 +241,24 @@ dependencies {
     add(launch.get().implementationConfigurationName, launchConfig)
 
     // Applaunch -- initialization that needs to occur without game access
-    applaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT")
+    applaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
-    applaunchConfig("org.spongepowered:configurate-core:3.7.1")
-    applaunchConfig("org.spongepowered:configurate-hocon:3.7.1")
-    applaunchConfig("org.spongepowered:configurate-json:3.7.1")
+    applaunchConfig("com.google.guava:guava:$guavaVersion")
+    applaunchConfig("org.spongepowered:configurate-core:3.7.1") {
+        exclude(group = "com.google.inject", module = "guice")
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+    }
+    applaunchConfig("org.spongepowered:configurate-hocon:3.7.1") {
+        exclude(group = "org.spongepowered", module = "configurate-core")
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+    }
+    applaunchConfig("org.spongepowered:configurate-json:3.7.1") {
+        exclude(group = "org.spongepowered", module = "configurate-core")
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+    }
     applaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
     add(applaunch.get().implementationConfigurationName, applaunchConfig)
 
@@ -542,15 +557,28 @@ project("SpongeVanilla") {
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
         vanillaAppLaunchConfig("org.ow2.asm:asm-util:6.2")
         vanillaAppLaunchConfig("org.ow2.asm:asm-tree:6.2")
-        vanillaAppLaunchConfig("org.spongepowered:plugin-spi:0.1.2-SNAPSHOT")
+        vanillaAppLaunchConfig("com.google.guava:guava:$guavaVersion")
+        vanillaAppLaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
         vanillaAppLaunchConfig("javax.inject:javax.inject:1")
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
         vanillaAppLaunchConfig("com.zaxxer:HikariCP:2.6.3")
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
-        vanillaAppLaunchConfig("org.spongepowered:configurate-core:3.7.1")
-        vanillaAppLaunchConfig("org.spongepowered:configurate-hocon:3.7.1")
-        vanillaAppLaunchConfig("org.spongepowered:configurate-json:3.7.1")
+        vanillaAppLaunchConfig("org.spongepowered:configurate-core:3.7.1") {
+            exclude(group = "com.google.guava", module = "guava")
+            exclude(group = "com.google.inject", module = "guice")
+            exclude(group = "org.checkerframework", module = "checker-qual")
+        }
+        vanillaAppLaunchConfig("org.spongepowered:configurate-hocon:3.7.1") {
+            exclude(group = "org.spongepowered", module = "configurate-core")
+            exclude(group = "com.google.guava", module = "guava")
+            exclude(group = "org.checkerframework", module = "checker-qual")
+        }
+        vanillaAppLaunchConfig("org.spongepowered:configurate-json:3.7.1") {
+            exclude(group = "org.spongepowered", module = "configurate-core")
+            exclude(group = "com.google.guava", module = "guava")
+            exclude(group = "org.checkerframework", module = "checker-qual")
+        }
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
@@ -889,7 +917,7 @@ if (spongeForge != null) {
             forgeLaunchConfig("org.spongepowered:mixin:$mixinVersion")
             forgeLaunchConfig("org.ow2.asm:asm-util:6.2")
             forgeLaunchConfig("org.ow2.asm:asm-tree:6.2")
-            forgeLaunchConfig("org.spongepowered:plugin-spi:0.1.2-SNAPSHOT")
+            forgeLaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
             forgeLaunchConfig("javax.inject:javax.inject:1")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
