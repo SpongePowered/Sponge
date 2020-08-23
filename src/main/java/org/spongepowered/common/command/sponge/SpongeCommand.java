@@ -25,25 +25,34 @@
 package org.spongepowered.common.command.sponge;
 
 import co.aikar.timings.Timings;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.util.math.MathHelper;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
+import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -56,9 +65,13 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.io.File;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -68,6 +81,7 @@ public class SpongeCommand {
     protected static final String LONG_INDENT = SpongeCommand.INDENT + SpongeCommand.INDENT;
     protected static final TextComponent INDENT_COMPONENT = TextComponent.of(SpongeCommand.INDENT);
     protected static final TextComponent LONG_INDENT_COMPONENT = TextComponent.of(SpongeCommand.LONG_INDENT);
+    protected static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
 
     private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", TypeTokens.PLUGIN_CONTAINER_TOKEN);
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", TypeTokens.COMMAND_MAPPING);
@@ -125,6 +139,13 @@ public class SpongeCommand {
         // /sponge timings
         final Command.Parameterized timingsCommand = this.timingsSubcommand();
 
+        // /sponge tps
+        final Command.Parameterized tpsCommand = Command.builder()
+                .setPermission("sponge.command.tps")
+                .setShortDescription(TextComponent.of("Provides TPS (ticks per second) data for loaded worlds."))
+                .setExecutor(this::tpsExecutor)
+                .build();
+
         // /sponge version
         final Command.Parameterized versionCommand = Command.builder()
                 .setPermission("sponge.command.version")
@@ -149,6 +170,7 @@ public class SpongeCommand {
                 .child(heapCommand, "heap")
                 .child(pluginsCommand, "plugins")
                 .child(timingsCommand, "timings")
+                .child(tpsCommand, "tps")
                 .child(versionCommand, "version")
                 .child(whichCommand, "which");
 
@@ -357,6 +379,39 @@ public class SpongeCommand {
                         })
                         .build(), "cost")
                 .build();
+    }
+
+    private CommandResult tpsExecutor(final CommandContext context) {
+         final List<Component> tps = new ArrayList<>();
+          // Uncomment when per-world TPS is in and working.
+//        for (final ServerWorld world : Sponge.getServer().getWorldManager().getWorlds()) {
+//            // Add code to get the average here.
+//            final TextComponent.Builder builder =
+//                    TextComponent.builder("World [")
+//                            .append(TextComponent.of(world.getKey().asString(), NamedTextColor.DARK_GREEN))
+//                            .append(TextComponent.of("]"));
+//            tps.add(this.appendTickTime(((MinecraftServerBridge) SpongeCommon.getServer()).bridge$getWorldTickTimes()));
+//        }
+
+        tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimeArray, TextComponent.builder("Overall TPS: ")).build());
+
+        SpongeCommon.getGame().getServiceProvider()
+                .paginationService()
+                .builder()
+                .contents(tps)
+                .title(TextComponent.of("Server TPS", NamedTextColor.WHITE))
+                .padding(TextComponent.of("-", NamedTextColor.WHITE))
+                .sendTo(context.getCause().getAudience());
+
+        return CommandResult.success();
+    }
+
+    private TextComponent.Builder appendTickTime(final long[] tickTimes, final TextComponent.Builder builder) {
+        final double averageTickTime = MathHelper.average(tickTimes) * 1.0E-6D;
+        builder.append(TextComponent.of(THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
+                .append(", Mean: ")
+                .append(THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED);
+        return builder;
     }
 
     @NonNull
