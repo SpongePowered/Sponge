@@ -30,6 +30,7 @@ import net.minecraft.util.HandSide;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.common.accessor.entity.player.PlayerAbilitiesAccessor;
+import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
 import org.spongepowered.common.accessor.util.FoodStatsAccessor;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
@@ -119,6 +120,9 @@ public final class PlayerData {
                             ((FoodStatsAccessor) h.getFoodStats()).accessor$setFoodSaturationLevel(v.floatValue());
                             return true;
                         })
+                    .create(Keys.SLEEP_TIMER)
+                        .get(PlayerEntity::getSleepTimer)
+                        .set((p, i) -> ((PlayerEntityAccessor) p).accessor$setSleepTimer(i))
                     .create(Keys.WALKING_SPEED)
                         .get(h -> (double) h.abilities.getWalkSpeed())
                         .set((h, v) -> {
