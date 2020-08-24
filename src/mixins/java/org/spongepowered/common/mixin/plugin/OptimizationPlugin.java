@@ -83,27 +83,12 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
     }
 
-    public static final Function<OptimizationCategory, Boolean> EIGEN_ONLY = (optimization) -> {
-        if (optimization.usePandaRedstone() && optimization.useEigenRedstone()) {
-            // Disable panda redstone if eigen is enabled.
-            optimization.setPandaRedstone(false);
-        }
-        return optimization.useEigenRedstone() && !optimization.usePandaRedstone();
-    };
-    public static final Function<OptimizationCategory, Boolean> PANDA_ONLY = (optimization) -> {
-        if (optimization.usePandaRedstone() && optimization.useEigenRedstone()) {
-            SpongeCommon.getLogger().warn("Cannot enable both Panda Redstone and Eigen Redstone, use one or the other! Change optimizations.panda=true");
-            optimization.setPandaRedstone(false);
-        }
-        return optimization.usePandaRedstone() && !optimization.useEigenRedstone();
-    };
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean>> builder()
             .put("org.spongepowered.common.mixin.optimization.SpongeImplHooksMixin_Item_Pre_Merge",
                     OptimizationCategory::doDropsPreMergeItemDrops)
-            .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Eigen", EIGEN_ONLY)
-            .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", EIGEN_ONLY)
-            .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Panda", PANDA_ONLY)
+            .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Eigen", OptimizationCategory::useEigenRedstone)
+            .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", OptimizationCategory::useEigenRedstone)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixinTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)
             .put("org.spongepowered.common.mixin.invalid.optimization.world.gen.structure.MapGenStructureMixin_Structure_Saving",

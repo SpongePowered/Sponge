@@ -53,13 +53,6 @@ public class OptimizationCategory {
     @Setting(value = "eigen-redstone", comment = "Uses theosib's redstone algorithms to completely overhaul the way redstone works.")
     private EigenRedstoneCategory eigenRedstonCategory = new EigenRedstoneCategory();
 
-    @Setting(value = "panda-redstone", comment = "If 'true', uses Panda4494's redstone implementation which improves performance. \n"
-                                                 + "See https://bugs.mojang.com/browse/MC-11193 for more information. \n"
-                                                 + "Note: This optimization has a few issues which are explained in the bug report. \n"
-                                                 + "We strongly recommend using eigen redstone over this implementation as this will\n"
-                                                 + "be removed in a future release.")
-    private boolean pandaRedstone = false;
-
     @Setting(value = "faster-thread-checks", comment = "If 'true', allows for Sponge to make better assumptinos on single threaded\n"
                                                        + "operations with relation to various checks for server threaded operations.\n"
                                                        + "This is default to true due to Sponge being able to precisely inject when\n"
@@ -152,16 +145,8 @@ public class OptimizationCategory {
         return this.eigenRedstonCategory.isEnabled();
     }
 
-    public boolean usePandaRedstone() {
-        return this.pandaRedstone;
-    }
-
     public boolean useFastThreadChecks() {
         return this.fasterThreadChecks;
-    }
-
-    public void setPandaRedstone(boolean pandaRedstone) {
-        this.pandaRedstone = pandaRedstone;
     }
 
     public boolean isOptimizeHoppers() {
