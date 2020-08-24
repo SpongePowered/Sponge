@@ -718,12 +718,14 @@ project("SpongeVanilla") {
             from(vanillaAccessorsJar)
         }
         shadowJar {
+            mergeServiceFiles()
             val generateImplementationVersionString = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
 
             archiveClassifier.set("universal")
             manifest {
                 attributes(mapOf(
                         "Main-Class" to "org.spongepowered.vanilla.applaunch.Main",
+                        "MixinConfigs" to "mixins.common.api.json,mixins.common.core.json,mixins.common.inventory.json,mixins.common.tracker.json",
                         "Launch-Target" to "sponge_server_prod",
                         "Specification-Title" to "SpongeCommon",
                         "Specification-Vendor" to "SpongePowered",
@@ -773,8 +775,6 @@ project("SpongeVanilla") {
                 include(dependency("com.h2database:h2:1.4.196"))
                 include(dependency("org.xerial:sqlite-jdbc:3.20.0"))
 
-                include(dependency("org.ow2.asm:asm.*"))
-                include(dependency("org.spongepowered:mixin"))
                 include(dependency("org.apache.logging.log4j:log4j-slf4j-impl"))
                 include(dependency("org.apache.logging.log4j:log4j-api"))
 

@@ -24,7 +24,9 @@
  */
 package org.spongepowered.vanilla.applaunch.handler.prod;
 
+import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginResource;
@@ -38,11 +40,13 @@ import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,31 +56,42 @@ public final class ServerProdLaunchHandler extends AbstractVanillaProdLaunchHand
 
     private FileSystem serverFileSystem;
 
+    private final Path remappedJar = VanillaCommandLine.librariesDirectory.resolve(ProductionServerAppPipeline.MINECRAFT_PATH_PREFIX)
+            .resolve(ProductionServerAppPipeline.MINECRAFT_VERSION_TARGET).resolve(ProductionServerAppPipeline.MINECRAFT_SERVER_JAR_NAME +
+                    "_remapped.jar");
+
     @Override
     public String name() {
         return VanillaLaunchTargets.SERVER_PRODUCTION.getLaunchTarget();
     }
 
     @Override
+    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        final Path path;
+        try {
+            path = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (final URISyntaxException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        builder.addTransformationPath(path);
+        builder.addTransformationPath(this.remappedJar);
+
+        super.configureTransformationClassLoader(builder);
+    }
+
+    @Override
     protected Function<String, Optional<URL>> getResourceLocator() {
-        final Path remappedJar = VanillaCommandLine.librariesDirectory.resolve(ProductionServerAppPipeline.MINECRAFT_PATH_PREFIX)
-                .resolve(ProductionServerAppPipeline.MINECRAFT_VERSION_TARGET).resolve(ProductionServerAppPipeline.MINECRAFT_SERVER_JAR_NAME +
-                        "_remapped.jar");
 
         try {
-            this.serverFileSystem = FileSystems.newFileSystem(remappedJar, null);
+            this.serverFileSystem = FileSystems.newFileSystem(this.remappedJar, null);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         return s -> {
-            // Is it Minecraft itself?
-            if (s.startsWith("net/minecraft")) {
-                try {
-                    return Optional.of(this.serverFileSystem.getPath(s).toUri().toURL());
-                } catch (final MalformedURLException e) {
-                    throw new RuntimeException(e);
-                }
+            if (s.startsWith("org/spongepowered/api") || s.startsWith("org/spongepowered/common") || s.startsWith("org/spongepowered/vanilla")) {
+                return Optional.empty();
             }
 
             // Is it plugins?
@@ -100,6 +115,16 @@ public final class ServerProdLaunchHandler extends AbstractVanillaProdLaunchHand
                         }
                     }
                 }
+            }
+
+            // Is it Minecraft?
+            try {
+                final Path path = this.serverFileSystem.getPath(s);
+                if (Files.exists(path)) {
+                    return Optional.of(path.toUri().toURL());
+                }
+            } catch (final MalformedURLException e) {
+                throw new RuntimeException(e);
             }
 
             return Optional.empty();

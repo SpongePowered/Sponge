@@ -53,6 +53,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
     private final List<PluginContainer> sortedPlugins;
 
     public VanillaPluginManager() {
+        final ClassLoader classLoader = this.getClass().getClassLoader();
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();

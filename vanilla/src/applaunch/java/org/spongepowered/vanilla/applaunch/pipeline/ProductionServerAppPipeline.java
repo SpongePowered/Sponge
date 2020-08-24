@@ -38,6 +38,7 @@ import org.spongepowered.vanilla.applaunch.pipeline.model.VersionManifest;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
@@ -66,6 +67,10 @@ public final class ProductionServerAppPipeline extends AppPipeline {
 
     @Override
     public void prepare() throws Exception {
+        final ProdClassLoader classLoader = new ProdClassLoader(new URL[0], Thread.currentThread().getContextClassLoader());
+        Thread.currentThread().setContextClassLoader(classLoader);
+        classLoader.addURL(VanillaCommandLine.librariesDirectory.resolve("org/spongepowered/mixin/mixin.jar").toUri().toURL());
+
         super.prepare();
 
         this.downloadMinecraft(VanillaCommandLine.librariesDirectory);
@@ -254,5 +259,17 @@ public final class ProductionServerAppPipeline extends AppPipeline {
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    private static class ProdClassLoader extends URLClassLoader {
+
+        public ProdClassLoader(final URL[] urls, final ClassLoader parent) {
+            super(urls, parent);
+        }
+
+        @Override
+        public void addURL(URL url) {
+            super.addURL(url);
+        }
     }
 }

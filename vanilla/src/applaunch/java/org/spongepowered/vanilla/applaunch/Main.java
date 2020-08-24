@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.applaunch;
 
+import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.vanilla.applaunch.pipeline.AppPipeline;
 import org.spongepowered.vanilla.applaunch.pipeline.ProductionServerAppPipeline;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
