@@ -40,7 +40,8 @@ import org.spongepowered.common.profile.query.NameQuery;
 import org.spongepowered.common.profile.query.UniqueIdQuery;
 import org.spongepowered.common.SpongeServer;
 
-import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -103,7 +104,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
     }
 
     @Override
-    public CompletableFuture<Collection<GameProfile>> getAllById(Iterable<UUID> uniqueIds, boolean useCache) {
+    public CompletableFuture<Map<UUID, Optional<GameProfile>>> getAllById(Iterable<UUID> uniqueIds, boolean useCache) {
         return this.submitTask(new UniqueIdQuery.MultiGet(this.cache, checkNotNull(uniqueIds, "unique ids"), useCache));
     }
 
@@ -113,7 +114,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
     }
 
     @Override
-    public CompletableFuture<Collection<GameProfile>> getAllByName(Iterable<String> names, boolean useCache) {
+    public CompletableFuture<Map<String, Optional<GameProfile>>> getAllByName(Iterable<String> names, boolean useCache) {
         return this.submitTask(new NameQuery.MultiGet(this.cache, checkNotNull(names, "names"), useCache));
     }
 

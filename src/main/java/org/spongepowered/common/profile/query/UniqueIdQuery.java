@@ -35,6 +35,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public abstract class UniqueIdQuery<T> extends Query<T> {
@@ -62,12 +64,12 @@ public abstract class UniqueIdQuery<T> extends Query<T> {
                 }
             }
 
-            final List<GameProfile> gameProfiles = this.fromUniqueIds(Collections.singleton(this.uniqueId));
-            return gameProfiles.isEmpty() ? GameProfile.of(this.uniqueId, null) : gameProfiles.get(0);
+            final Map<UUID, Optional<GameProfile>> gameProfiles = this.fromUniqueIds(Collections.singleton(this.uniqueId));
+            return gameProfiles.isEmpty() ? GameProfile.of(this.uniqueId, null) : gameProfiles.values().iterator().next().orElse(GameProfile.of(this.uniqueId, null));
         }
     }
 
-    public static final class MultiGet extends UniqueIdQuery<Collection<GameProfile>> {
+    public static final class MultiGet extends UniqueIdQuery<Map<UUID, Optional<GameProfile>>> {
 
         private final Iterator<UUID> iterator;
 
@@ -77,9 +79,9 @@ public abstract class UniqueIdQuery<T> extends Query<T> {
         }
 
         @Override
-        public Collection<GameProfile> call() throws Exception {
+        public Map<UUID, Optional<GameProfile>> call() throws Exception {
             if (!this.iterator.hasNext()) {
-                return ImmutableSet.of();
+                return Collections.emptyMap();
             }
 
             return this.fromUniqueIds(Sets.newHashSet(this.iterator));
