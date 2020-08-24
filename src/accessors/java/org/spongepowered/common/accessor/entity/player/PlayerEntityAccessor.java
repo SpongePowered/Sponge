@@ -47,4 +47,6 @@ public interface PlayerEntityAccessor {
     @Accessor("MAIN_HAND") static DataParameter<Byte> accessor$getMainHand() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
+
+    @Accessor("sleepTimer") void accessor$setSleepTimer(int sleepTimer);
 }
