@@ -139,7 +139,7 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/item/ItemStack;getCount()I"))
     public void onRightClick(PlayerEntity player, World worldIn, ItemStack stack, Hand hand, CallbackInfoReturnable<ActionResultType> cir) {
-        InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, stack, hand, null, null);
+        final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, stack, hand, null, null);
         if (event.isCancelled()) {
             cir.setReturnValue(ActionResultType.FAIL);
         }
@@ -147,8 +147,8 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
 
     @Inject(method = "func_225416_a", cancellable = true, at = @At(value = "HEAD"))
     public void onLeftClickBlock(BlockPos p_225416_1_, CPlayerDiggingPacket.Action p_225416_2_, Direction p_225416_3_, int p_225416_4_, CallbackInfo ci) {
-        BlockSnapshot snapshot = ((ServerWorld) (this.world)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
-        InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(this.player, this.player.getHeldItem(Hand.MAIN_HAND), snapshot, Hand.MAIN_HAND, p_225416_3_, null);
+        final BlockSnapshot snapshot = ((ServerWorld) (this.world)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
+        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(this.player, this.player.getHeldItem(Hand.MAIN_HAND), snapshot, Hand.MAIN_HAND, p_225416_3_, null);
         if (event.isCancelled()) {
             ci.cancel();
         }
