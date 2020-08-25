@@ -100,6 +100,7 @@ import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
