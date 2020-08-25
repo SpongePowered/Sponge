@@ -81,7 +81,7 @@ public final class BlockData {
                     .create(Keys.IS_PASSABLE)
                         .get(h -> !h.getMaterial().blocksMovement())
                     .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> ((BlockAccessor) h).accessor$getBlockHardness() < 0)
+                        .get(h -> ((BlockAccessor) h.getBlock()).accessor$getBlockHardness() < 0)
                     .create(Keys.IS_FLAMMABLE)
                         .get(h -> ((FireBlockAccessor) Blocks.FIRE).accessor$func_220274_q(h) > 0)
                     .create(Keys.IS_SOLID)

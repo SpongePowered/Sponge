@@ -27,6 +27,7 @@ package org.spongepowered.test.datatest;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -43,7 +44,12 @@ import org.spongepowered.api.data.type.AttachmentSurfaces;
 import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.FoxTypes;
+import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
+import org.spongepowered.api.data.type.PistonTypes;
+import org.spongepowered.api.data.type.PortionTypes;
+import org.spongepowered.api.data.type.ProfessionTypes;
+import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.data.type.SpellTypes;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.SetValue;
@@ -53,6 +59,7 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -139,12 +146,12 @@ public final class DataTest  {
         this.checkOfferData(zombiePigman, Keys.ANGER_LEVEL, 10);
 
         final ItemStack goldenApple = ItemStack.of(ItemTypes.ENCHANTED_GOLDEN_APPLE);
-        final List<PotionEffect> expectedEffects = Arrays.asList(
+        final List<PotionEffect> notchAppleEffects = Arrays.asList(
                 PotionEffect.builder().potionType(PotionEffectTypes.REGENERATION).amplifier(1).ambient(false).duration(400).build(),
                 PotionEffect.builder().potionType(PotionEffectTypes.RESISTANCE).amplifier(0).ambient(false).duration(6000).build(),
                 PotionEffect.builder().potionType(PotionEffectTypes.FIRE_RESISTANCE).amplifier(0).ambient(false).duration(6000).build(),
                 PotionEffect.builder().potionType(PotionEffectTypes.ABSORPTION).amplifier(3).ambient(false).duration(2400).build());
-        this.checkGetWeightedData(goldenApple, Keys.APPLICABLE_POTION_EFFECTS, expectedEffects);
+        this.checkGetWeightedData(goldenApple, Keys.APPLICABLE_POTION_EFFECTS, notchAppleEffects);
 
         this.checkOfferListData(goldenApple, Keys.APPLIED_ENCHANTMENTS, Arrays.asList(Enchantment.of(EnchantmentTypes.SHARPNESS, 5)));
         this.checkOfferListData(goldenApple, Keys.APPLIED_ENCHANTMENTS, Arrays.asList(Enchantment.of(EnchantmentTypes.PROTECTION, 4)));
@@ -171,8 +178,8 @@ public final class DataTest  {
         this.checkGetData(ravager, Keys.ATTACK_TIME, 0);
         this.checkOfferData(ravager, Keys.ATTACK_TIME, 5);
 
-        final ItemStack bookStack = ItemStack.of(ItemTypes.WRITTEN_BOOK);
-        this.checkOfferData(bookStack, Keys.AUTHOR, TextComponent.of("You"));
+        final ItemStack writtenBookStack = ItemStack.of(ItemTypes.WRITTEN_BOOK);
+        this.checkOfferData(writtenBookStack, Keys.AUTHOR, TextComponent.of("You"));
 
         BlockState logState = BlockTypes.OAK_LOG.get().getDefaultState();
         this.checkWithData(logState, Keys.AXIS, Axis.Y);
@@ -304,8 +311,10 @@ public final class DataTest  {
 
         final ItemStack leatherBoots = ItemStack.of(ItemTypes.LEATHER_BOOTS);
         final ItemStack potion = ItemStack.of(ItemTypes.POTION);
+        final ItemStack splashPotion = ItemStack.of(ItemTypes.SPLASH_POTION);
         this.checkOfferData(leatherBoots, Keys.COLOR, Color.BLACK);
         this.checkOfferData(potion, Keys.COLOR, Color.WHITE);
+        this.checkOfferData(splashPotion, Keys.COLOR, Color.RED);
 
         // TODO COMMAND
 
@@ -395,7 +404,7 @@ public final class DataTest  {
 //        this.checkGetData(bannerStack, Keys.DYE_COLOR, DyeColors.RED.get());
 //        this.checkGetData(BlockTypes.BLUE_CONCRETE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
 //        // TODO banner blockentity
-//        final Entity tropicalFish = world.createEntity(EntityTypes.TROPICAL_FISH.get(), position);
+        final Entity tropicalFish = world.createEntity(EntityTypes.TROPICAL_FISH.get(), position);
 //        this.checkOfferData(tropicalFish, Keys.DYE_COLOR, DyeColors.CYAN.get());
 
         final Entity panda = world.createEntity(EntityTypes.PANDA.get(), position);
@@ -486,8 +495,8 @@ public final class DataTest  {
         this.checkOfferData(playerHeadStack, Keys.GAME_PROFILE, player.getProfile());
         // TODO Block Keys.GAME_PROFILE
 
-        this.checkGetData(bookStack, Keys.GENERATION, 0);
-        this.checkOfferData(bookStack, Keys.GENERATION, 2);
+        this.checkGetData(writtenBookStack, Keys.GENERATION, 0);
+        this.checkOfferData(writtenBookStack, Keys.GENERATION, 2);
 
         final BlockState melonStemState = BlockTypes.MELON_STEM.get().getDefaultState();
         final BlockState cactusState = BlockTypes.CACTUS.get().getDefaultState();
@@ -757,7 +766,7 @@ public final class DataTest  {
         this.checkGetData(waterBlockState, Keys.IS_REPLACEABLE, true);
         this.checkGetData(dirtState, Keys.IS_REPLACEABLE, false);
 
-        this.checkGetData(ravager, Keys.IS_ROARING, false);
+//        this.checkGetData(ravager, Keys.IS_ROARING, false);
 
         this.checkOfferData(panda, Keys.IS_ROLLING_AROUND, true);
 // TODO AbstractHorseEntityBridge
@@ -767,6 +776,260 @@ public final class DataTest  {
         this.checkOfferData(enderman, Keys.IS_SCREAMING, true);
 
         this.checkOfferData(sheep, Keys.IS_SHEARED, true);
+
+        this.checkOfferData(sheep, Keys.IS_SILENT, true);
+
+        this.checkOfferData(wolf, Keys.IS_SITTING, true);
+        this.checkOfferData(cat, Keys.IS_SITTING, true);
+//        this.checkOfferData(panda, Keys.IS_SITTING, true);
+//        this.checkOfferData(fox, Keys.IS_SITTING, true);
+
+        final Entity bat = world.createEntity(EntityTypes.BAT.get(), position);
+        this.checkOfferData(bat, Keys.IS_SLEEPING, true);
+        this.checkOfferData(fox, Keys.IS_SLEEPING, true);
+//        this.checkGetData(player, Keys.IS_SLEEPING, true);
+
+//        this.checkOfferData(player, Keys.IS_SLEEPING_IGNORED, true);
+
+        this.checkOfferData(armorStand, Keys.IS_SMALL, true);
+
+        this.checkGetData(player, Keys.IS_SNEAKING, false);
+
+        this.checkOfferData(panda, Keys.IS_SNEEZING, true);
+
+//        this.checkWithData(dirtState, Keys.IS_SNOWY, true);
+
+        this.checkGetData(dirtState, Keys.IS_SOLID, true);
+        this.checkGetData(obisidanState, Keys.IS_SOLID, true);
+        this.checkGetData(waterBlockState, Keys.IS_SOLID, false);
+
+        this.checkGetData(player, Keys.IS_SPRINTING, false);
+
+        final Entity polarBear = world.createEntity(EntityTypes.POLAR_BEAR.get(), position);
+        this.checkOfferData(polarBear, Keys.IS_STANDING, true);
+
+        this.checkGetData(ravager, Keys.IS_STUNNED, false);
+
+        this.checkGetData(dirtState, Keys.IS_SURROGATE_BLOCK, false);
+
+        // TODO Keys.IS_TAKING_DISABLED
+
+        this.checkOfferData(cat, Keys.IS_TAMED, true);
+        this.checkOfferData(wolf, Keys.IS_TAMED, true);
+
+        final Entity villager = world.createEntity(EntityTypes.VILLAGER.get(), position);
+        this.checkGetData(villager, Keys.IS_TRADING, false);
+
+        final Entity ocelot = world.createEntity(EntityTypes.OCELOT.get(), position);
+        this.checkOfferData(ocelot, Keys.IS_TRUSTING, true);
+
+        this.checkOfferData(jungleAxe, Keys.IS_UNBREAKABLE, true);
+        this.checkGetData(obisidanState, Keys.IS_UNBREAKABLE, false);
+        final BlockState bedrockState = BlockTypes.BEDROCK.get().getDefaultState();
+        this.checkGetData(bedrockState, Keys.IS_UNBREAKABLE, true);
+
+//        this.checkOfferData(panda, Keys.IS_UNHAPPY, true);
+
+        this.checkWithData(acaciaStairs, Keys.IS_WATERLOGGED, true);
+
+        this.checkOfferData(wolf, Keys.IS_WET, true);
+        final BlockState spongeState = BlockTypes.SPONGE.get().getDefaultState();
+        final BlockState wetSpongeState = BlockTypes.WET_SPONGE.get().getDefaultState();
+//        this.checkGetData(spongeState, Keys.IS_WET, false);
+//        this.checkGetData(wetSpongeState, Keys.IS_WET, true);
+        this.checkGetData(sheep, Keys.IS_WET, false);
+
+//        this.checkGetData(jungleAxe, Keys.ITEM_DURABILITY, ..);
+
+        this.checkOfferData(itemEntity, Keys.ITEM_STACK_SNAPSHOT, jungleAxe.createSnapshot());
+
+        final Entity itemFrame = world.createEntity(EntityTypes.ITEM_FRAME.get(), position);
+        this.checkOfferData(itemFrame, Keys.ITEM_STACK_SNAPSHOT, stoneStack.createSnapshot());
+        // TODO JukeBox
+        // TODO Lectern
+        final Entity potionEntity = world.createEntity(EntityTypes.POTION.get(), position);
+        this.checkOfferData(potionEntity, Keys.ITEM_STACK_SNAPSHOT, splashPotion.createSnapshot()); // TODO unset original value causes logging error
+
+        // TODO Keys.KNOCKBACK_STRENGTH
+
+        this.checkOfferData(panda, Keys.KNOWN_GENE, PandaGenes.AGGRESSIVE.get());
+
+        this.checkOfferData(sheep, Keys.LAST_ATTACKER, player);
+
+        // TODO Keys.LAST_COMMAND_OUTPUT
+
+//        this.checkOfferData(player, Keys.LAST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
+//        this.checkOfferData(player, Keys.LAST_DATE_PLAYED, Instant.now().minus(1, TemporalUnits.DAYS));
+        final User user = Sponge.getServer().getUserManager().get(player.getUniqueId()).get();
+//        this.checkOfferData(user, Keys.LAST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
+//        this.checkOfferData(user, Keys.LAST_DATE_PLAYED, Instant.now().minus(1, TemporalUnits.DAYS));
+
+        final BlockState snowState = BlockTypes.SNOW.get().getDefaultState();
+        final BlockState cakeState = BlockTypes.CAKE.get().getDefaultState();
+        this.checkWithData(snowState, Keys.LAYER, 4);
+        this.checkWithData(cakeState, Keys.LAYER, 4);
+
+        // TODO Keys.LEASH_HOLDER
+
+        // TODO Keys.LEFT_ARM_ROTATION
+        // TODO Keys.LEFT_LEG_ROTATION
+
+        final Entity vex = world.createEntity(EntityTypes.VEX.get(), position);
+        this.checkOfferData(vex, Keys.LIFE_TICKS, 10);
+
+        this.checkGetData(dirtState, Keys.LIGHT_EMISSION, 0);
+        final BlockState glowstoneState = BlockTypes.GLOWSTONE.get().getDefaultState();
+        this.checkGetData(glowstoneState, Keys.LIGHT_EMISSION, 15);
+
+        final Entity llama = world.createEntity(EntityTypes.LLAMA.get(), position);
+//        this.checkOfferData(llama, Keys.LLAMA_TYPE, LlamaTypes.BROWN.get());
+
+        // TODO Keys.LOCK_TOKEN on BlockEntity
+//        this.checkOfferData(jungleAxe, Keys.LOCK_TOKEN, "Key");
+        this.checkOfferListData(jungleAxe, Keys.LORE, Arrays.asList(TextComponent.of("Loreline1"), TextComponent.of("Loreline2")));
+
+// TODO NPE?
+//        this.checkGetData(dirtState, Keys.MATTER_STATE, MatterStates.SOLID.get());
+//        this.checkGetData(waterBlockState, Keys.MATTER_STATE, MatterStates.LIQUID.get());
+//        this.checkGetData(BlockTypes.AIR.get().getDefaultState(), Keys.MATTER_STATE, MatterStates.GAS.get());
+
+//        this.checkOfferData(player, Keys.MAX_AIR, 20);
+
+        // TODO Keys.MAX_BURN_TIME
+        // TODO Keys.MAX_COOK_TIME
+
+        this.checkGetData(jungleAxe, Keys.MAX_DURABILITY, 59);
+
+        this.checkOfferData(fallingBlock, Keys.MAX_FALL_DAMAGE, 50.0);
+
+        this.checkOfferData(sheep, Keys.MAX_HEALTH, 100.0);
+
+        // TODO Keys.MAX_NEARBY_ENTITIES
+        // TODO Keys.MAX_SPAWN_DELAY
+
+//        this.checkOfferData(boat, Keys.MAX_SPEED, 1.0);
+
+        // MAX_STACK_SIZE
+
+        final Entity minecartEntity = world.createEntity(EntityTypes.MINECART.get(), position);
+//        this.checkOfferData(minecartEntity, Keys.MINECART_BLOCK_OFFSET, 1);
+
+        // TODO Keys.MIN_SPAWN_DELAY
+
+        final BlockState farmlandState = BlockTypes.FARMLAND.get().getDefaultState();
+        this.checkWithData(farmlandState, Keys.MOISTURE, 1);
+
+        final Entity mooshroom = world.createEntity(EntityTypes.MOOSHROOM.get(), position);
+        this.checkOfferData(mooshroom, Keys.MOOSHROOM_TYPE, MooshroomTypes.BROWN.get());
+        this.checkOfferData(mooshroom, Keys.MOOSHROOM_TYPE, MooshroomTypes.RED.get());
+
+        final ItemStack musicDiscStack = ItemStack.of(ItemTypes.MUSIC_DISC_11);
+//        this.checkGetData(musicDiscStack, Keys.MUSIC_DISC, MusicDiscs.ELEVEN.get());
+
+        // TODO Keys.NEXT_ENTITY_TO_SPAWN
+
+        final BlockState noteBlockState = BlockTypes.NOTE_BLOCK.get().getDefaultState();
+// TODO missing supplier
+//        this.checkWithData(noteBlockState, Keys.NOTE_PITCH, NotePitches.E1.get());
+
+//        this.checkOfferData(sheep, Keys.NOTIFIER, player.getUniqueId());
+
+//        this.checkOfferData(boat, Keys.OCCUPIED_DECELERATION, 2.0);
+
+        this.checkGetData(sheep, Keys.ON_GROUND, false);
+
+// TODO failed offer?
+//        this.checkOfferListData(writtenBookStack, Keys.PAGES, Arrays.asList(TextComponent.of("Page 1"), TextComponent.of("Page 2")));
+
+        final Entity parrot = world.createEntity(EntityTypes.PARROT.get(), position);
+// TODO missing supplier
+//        this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_AND_BLUE.get());
+
+// TODO missing ParticleEffect.Builder registration
+//        this.checkOfferData(areaEffectCloud, Keys.PARTICLE_EFFECT, ParticleEffect.builder().type(ParticleTypes.BUBBLE.get()).build());
+
+        // TODO Keys.PASSED_COOK_TIME
+
+        this.checkGetListData(donkey, Keys.PASSENGERS, Arrays.asList(wolf));
+
+//        this.checkOfferData(tropicalFish, Keys.PATTERN_COLOR, DyeColors.CYAN.get());
+
+        final Entity phantom = world.createEntity(EntityTypes.PHANTOM.get(), position);
+//        this.checkOfferData(phantom, Keys.PHANTOM_PHASE, PhantomPhases.CIRCLING.get());
+//        this.checkOfferData(phantom, Keys.PHANTOM_PHASE, PhantomPhases.SWOOPING.get());
+
+//        this.checkOfferData(itemEntity, Keys.PICKUP_DELAY, 5);
+
+        // TODO Keys.PICKUP_RULE
+
+        this.checkWithData(pistonState, Keys.PISTON_TYPE, PistonTypes.NORMAL.get());
+        this.checkWithData(pistonState, Keys.PISTON_TYPE, PistonTypes.STICKY.get());
+
+        this.checkOfferSetData(stoneStack, Keys.PLACEABLE_BLOCK_TYPES, new HashSet<>(Arrays.asList(BlockTypes.OBSIDIAN.get())));
+
+        final ItemStack writableBookStack = ItemStack.of(ItemTypes.WRITABLE_BOOK);
+//        this.checkOfferListData(writableBookStack, Keys.PLAIN_PAGES, Arrays.asList("Page 1", "Page 2"));
+
+        // Keys.PLUGIN_CONTAINER
+
+        final Set<Direction> directionSet = new HashSet<>(Arrays.asList(Direction.DOWN, Direction.NORTH));
+        this.checkGetSetData(mushroomBlockState.with(Keys.PORES, directionSet).get(), Keys.PORES, directionSet);
+
+        this.checkWithData(bedState, Keys.PORTION_TYPE, PortionTypes.BOTTOM.get());
+        this.checkWithData(bedState, Keys.PORTION_TYPE, PortionTypes.TOP.get());
+        final BlockState doorState = BlockTypes.ACACIA_DOOR.get().getDefaultState();
+        this.checkWithData(doorState, Keys.PORTION_TYPE, PortionTypes.TOP.get());
+
+//        this.checkOfferData(minecartEntity, Keys.POTENTIAL_MAX_SPEED, 20.0);
+
+        this.checkOfferListData(sheep, Keys.POTION_EFFECTS, notchAppleEffects);
+        this.checkOfferListData(potion, Keys.POTION_EFFECTS, notchAppleEffects);
+        this.checkOfferListData(splashPotion, Keys.POTION_EFFECTS, notchAppleEffects);
+        this.checkOfferListData(areaEffectCloud, Keys.POTION_EFFECTS, notchAppleEffects);
+
+// TODO missing PotionTypes providers
+//        this.checkOfferData(potion, Keys.POTION_TYPE, PotionTypes.AWKWARD.get());
+//        this.checkOfferData(splashPotion, Keys.POTION_TYPE, PotionTypes.MUNDANE.get());
+
+        final BlockState redstoneWireState = BlockTypes.REDSTONE_WIRE.get().getDefaultState();
+        this.checkWithData(redstoneWireState, Keys.POWER, 10);
+
+        // TODO Keys.PRIMARY_POTION_EFFECT_TYPE
+
+        this.checkOfferData(villager, Keys.PROFESSION_TYPE, ProfessionTypes.ARMORER.get());
+        this.checkOfferData(villager, Keys.PROFESSION_LEVEL, 4);
+
+        final Entity rabbit = world.createEntity(EntityTypes.RABBIT.get(), position);
+// TODO missing RabbitTypes providers
+//        this.checkOfferData(rabbit, Keys.RABBIT_TYPE, RabbitTypes.GOLD.get());
+
+        this.checkOfferData(areaEffectCloud, Keys.RADIUS, 20.0);
+        this.checkOfferData(areaEffectCloud, Keys.RADIUS_ON_USE, -1.0);
+        this.checkOfferData(areaEffectCloud, Keys.RADIUS_PER_TICK, 0.0);
+        this.checkOfferData(areaEffectCloud, Keys.RADIUS_PER_TICK, 0.0);
+
+        // TODO this.checkOfferData(ravager, Keys.RAID_WAVE, );
+
+        final BlockState railState = BlockTypes.RAIL.get().getDefaultState();
+        this.checkWithData(railState, Keys.RAIL_DIRECTION, RailDirections.ASCENDING_EAST.get());
+
+        this.checkOfferData(areaEffectCloud, Keys.REAPPLICATION_DELAY, 1);
+
+        final BlockState repeaterState = BlockTypes.REPEATER.get().getDefaultState();
+        this.checkWithData(repeaterState, Keys.REDSTONE_DELAY, 2);
+
+        this.checkOfferData(sheep, Keys.REMAINING_AIR, 1);
+
+        // TODO Keys.REMAINING_BREW_TIME
+
+        // TODO Keys.REMAINING_SPAWN_DELAY
+
+        this.checkGetData(goldenApple, Keys.REPLENISHED_FOOD, 4);
+        this.checkGetData(goldenApple, Keys.REPLENISHED_SATURATION, (double) 9.6f);
+
+//        this.checkGetData(dirtState, Keys.REPRESENTED_INSTRUMENT, InstrumentTypes.XYLOPHONE.get());
+
+        // TODO Keys.REQUIRED_PLAYER_RANGE
     }
 
 
