@@ -543,32 +543,35 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractItemEvent.Secondary callInteractItemEventSecondary(final CauseStackManager.StackFrame frame, final PlayerEntity player,
+    public static InteractItemEvent.Secondary callInteractItemEventSecondary(final PlayerEntity player,
         final ItemStack stack, final Hand hand,
         @Nullable final Vector3d hitVec, final Object hitTarget) {
-        if (SpongeImplHooks.isFakePlayer(player)) {
-            frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
-        } else {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
-        }
 
-        if (hitTarget instanceof Entity) {
-            frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
-        } else if (hitTarget instanceof BlockSnapshot) {
-            frame.addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            if (SpongeImplHooks.isFakePlayer(player)) {
+                frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
+            } else {
+                frame.pushCause(player);
+                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
+            }
+
+            if (hitTarget instanceof Entity) {
+                frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) hitTarget));
+            } else if (hitTarget instanceof BlockSnapshot) {
+                frame.addContext(EventContextKeys.BLOCK_HIT, (BlockSnapshot) hitTarget);
+            }
+            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
+            if (!stack.isEmpty()) {
+                frame.addContext(EventContextKeys.USED_ITEM, snapshot);
+            }
+            final HandType handType = (HandType) (Object) hand;
+            frame.addContext(EventContextKeys.USED_HAND, handType);
+            final InteractItemEvent.Secondary event = SpongeEventFactory.createInteractItemEventSecondary(frame.getCurrentCause(),
+                    Optional.ofNullable(hitVec), snapshot);
+            SpongeCommon.postEvent(event);
+            return event;
         }
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
-        if (!stack.isEmpty()) {
-            frame.addContext(EventContextKeys.USED_ITEM, snapshot);
-        }
-        final HandType handType = (HandType) (Object) hand;
-        frame.addContext(EventContextKeys.USED_HAND, handType);
-        final InteractItemEvent.Secondary event = SpongeEventFactory.createInteractItemEventSecondary(frame.getCurrentCause(),
-                Optional.ofNullable(hitVec), snapshot);
-        SpongeCommon.postEvent(event);
-        return event;
 
     }
 
@@ -607,14 +610,14 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractBlockEvent.Secondary createInteractBlockEventSecondary(
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(
         final PlayerEntity player, final ItemStack heldItem, @Nullable final Vector3d hitVec,
             final BlockSnapshot targetBlock, final Direction targetSide, final Hand hand) {
-        return createInteractBlockEventSecondary(player, heldItem, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED,
+        return callInteractBlockEventSecondary(player, heldItem, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED,
                 hitVec, targetBlock, targetSide, hand);
     }
 
-    public static InteractBlockEvent.Secondary createInteractBlockEventSecondary(final PlayerEntity player, final ItemStack heldItem, final Tristate originalUseBlockResult, final Tristate useBlockResult,
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(final PlayerEntity player, final ItemStack heldItem, final Tristate originalUseBlockResult, final Tristate useBlockResult,
             final Tristate originalUseItemResult, final Tristate useItemResult, @Nullable final Vector3d hitVec, final BlockSnapshot targetBlock,
             final Direction targetSide, final Hand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -635,6 +638,7 @@ public final class SpongeCommonEventFactory {
             final InteractBlockEvent.Secondary event = SpongeEventFactory.createInteractBlockEventSecondary(frame.getCurrentCause(),
                     originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, targetBlock, Optional.ofNullable(hitVec),
                     targetSide);
+            SpongeCommon.postEvent(event);
             return event;
         }
     }
