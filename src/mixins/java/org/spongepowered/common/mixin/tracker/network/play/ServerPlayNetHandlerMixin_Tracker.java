@@ -182,7 +182,7 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
             locals = LocalCapture.CAPTURE_FAILHARD
     )
     public void onRightClickEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
-        InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
+        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
         if (event.isCancelled()) {
             ci.cancel();
         }
@@ -194,7 +194,7 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
             locals = LocalCapture.CAPTURE_FAILHARD
     )
     public void onRightClickAtEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
-        InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
+        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
         if (event.isCancelled()) {
             ci.cancel();
         }
@@ -206,7 +206,7 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
             locals = LocalCapture.CAPTURE_FAILHARD
     )
     public void onLeftClickEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
-        InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
+        final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
         if (event.isCancelled()) {
             ci.cancel();
         }
