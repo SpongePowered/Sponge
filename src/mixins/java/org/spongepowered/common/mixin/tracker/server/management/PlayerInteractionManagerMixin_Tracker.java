@@ -28,33 +28,73 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.network.play.client.CPlayerDiggingPacket;
+import net.minecraft.network.play.server.SPlayerDiggingPacket;
 import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(PlayerInteractionManager.class)
-public class PlayerInteractionManagerMixin_Tracker {
+public abstract class PlayerInteractionManagerMixin_Tracker {
 
     @Shadow public ServerPlayerEntity player;
     @Shadow public net.minecraft.world.server.ServerWorld world;
+
+    @Shadow private GameType gameType;
+
+    @Shadow public abstract boolean isCreative();
+
+    @Shadow public net.minecraft.world.server.ServerWorld world;
+
+    @Shadow public abstract void func_225415_a(BlockPos p_225415_1_, CPlayerDiggingPacket.Action p_225415_2_);
+
+    @Shadow private int ticks;
+
+    @Shadow private int initialDamage;
+
+    @Shadow private boolean isDestroyingBlock;
+
+    @Shadow private BlockPos destroyPos;
+
+    @Shadow private int durabilityRemainingOnBlock;
+
+    @Shadow private boolean receivedFinishDiggingPacket;
+
+    @Shadow private BlockPos delayedDestroyPos;
+
+    @Shadow private int initialBlockDamage;
 
     // Handle Spectator opening a Container
     @Inject(method = "func_219441_a", cancellable = true,
@@ -93,6 +133,72 @@ public class PlayerInteractionManagerMixin_Tracker {
             }
         }
         return result;
+    }
+
+    @Inject(method = "processRightClick", cancellable = true,
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/item/ItemStack;getCount()I"))
+    public void onRightClick(PlayerEntity player, World worldIn, ItemStack stack, Hand hand, CallbackInfoReturnable<ActionResultType> cir) {
+        InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, stack, hand, null, null);
+        if (event.isCancelled()) {
+            cir.setReturnValue(ActionResultType.FAIL);
+        }
+    }
+
+    @Inject(method = "func_225416_a", cancellable = true, at = @At(value = "HEAD"))
+    public void onLeftClickBlock(BlockPos p_225416_1_, CPlayerDiggingPacket.Action p_225416_2_, Direction p_225416_3_, int p_225416_4_, CallbackInfo ci) {
+        BlockSnapshot snapshot = ((ServerWorld) (this.world)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
+        InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(this.player, this.player.getHeldItem(Hand.MAIN_HAND), snapshot, Hand.MAIN_HAND, p_225416_3_, null);
+        if (event.isCancelled()) {
+            ci.cancel();
+        }
+    }
+
+    /**
+     * @author Morph
+     * @reason Fire interact block event.
+     */
+    @Overwrite
+    public ActionResultType func_219441_a(PlayerEntity playerIn, World worldIn, ItemStack stackIn, Hand handIn, BlockRayTraceResult blockRaytraceResultIn) {
+        BlockPos blockpos = blockRaytraceResultIn.getPos();
+        BlockState blockstate = worldIn.getBlockState(blockpos);
+        // Sponge start
+        BlockSnapshot snapshot = ((ServerWorld) (worldIn)).createSnapshot(VecHelper.toVector3i(blockpos));
+        Vector3d hitVec = Vector3d.from(blockRaytraceResultIn.getHitVec().getX(), blockRaytraceResultIn.getHitVec().getY(), blockRaytraceResultIn.getHitVec().getZ());
+        InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(playerIn, stackIn, hitVec, snapshot, null, handIn);
+        if (event.isCancelled()) {
+            return ActionResultType.FAIL;
+        }
+        Tristate useItem = event.getUseItemResult();
+        Tristate useBlock = event.getUseBlockResult();
+        // Sponge end
+        if (this.gameType == GameType.SPECTATOR) {
+            INamedContainerProvider inamedcontainerprovider = blockstate.getContainer(worldIn, blockpos);
+            if (inamedcontainerprovider != null) {
+                playerIn.openContainer(inamedcontainerprovider);
+                return ActionResultType.SUCCESS;
+            } else {
+                return ActionResultType.PASS;
+            }
+        } else {
+            boolean flag = !playerIn.getHeldItemMainhand().isEmpty() || !playerIn.getHeldItemOffhand().isEmpty();
+            boolean flag1 = playerIn.isSneaking() && flag;
+            if (!flag1 && useBlock != Tristate.FALSE && blockstate.onBlockActivated(worldIn, playerIn, handIn, blockRaytraceResultIn)) { // Sponge - check useBlockResult
+                return ActionResultType.SUCCESS;
+            } else if (!stackIn.isEmpty() && useItem != Tristate.FALSE && !playerIn.getCooldownTracker().hasCooldown(stackIn.getItem())) { // Sponge - check useItemResult
+                ItemUseContext itemusecontext = new ItemUseContext(playerIn, handIn, blockRaytraceResultIn);
+                if (this.isCreative()) {
+                    int i = stackIn.getCount();
+                    ActionResultType actionresulttype = stackIn.onItemUse(itemusecontext);
+                    stackIn.setCount(i);
+                    return actionresulttype;
+                } else {
+                    return stackIn.onItemUse(itemusecontext);
+                }
+            } else {
+                return ActionResultType.PASS;
+            }
+        }
     }
 
 
