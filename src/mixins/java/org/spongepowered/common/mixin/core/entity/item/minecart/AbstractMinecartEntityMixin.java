@@ -30,6 +30,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
+import org.spongepowered.api.entity.vehicle.minecart.MinecartEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
@@ -120,7 +121,7 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             frame.pushCause(source);
-            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), (Minecart) this, new ArrayList<>(), 0, amount);
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), (MinecartEntity) this, new ArrayList<>(), 0, amount);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
