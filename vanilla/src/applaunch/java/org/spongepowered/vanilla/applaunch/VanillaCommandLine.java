@@ -53,11 +53,12 @@ public final class VanillaCommandLine {
     private static final ArgumentAcceptingOptionSpec<Boolean> DOWNLOAD_SRG_MAPPINGS = PARSER.accepts("downloadSrgMappings", "If true, we'll "
             + "download the SRG mappings").withOptionalArg().ofType(Boolean.class).defaultsTo(Boolean.TRUE);
 
+    public static String[] RAW_ARGS;
     public static VanillaLaunchTargets launchTarget;
     public static Path gameDirectory, librariesDirectory;
     public static boolean downloadMinecraftJar, checkMinecraftJarHash, downloadSrgMappings;
 
-    public static String[] configure(String[] args) throws IOException {
+    public static void configure(String[] args) throws IOException {
         VanillaCommandLine.PARSER.allowsUnrecognizedOptions();
 
         final OptionSet options = VanillaCommandLine.PARSER.parse(args);
@@ -96,7 +97,7 @@ public final class VanillaCommandLine {
         VanillaCommandLine.checkMinecraftJarHash = options.valueOf(VanillaCommandLine.CHECK_MINECRAFT_JAR_HASH);
         VanillaCommandLine.downloadSrgMappings = options.valueOf(VanillaCommandLine.DOWNLOAD_SRG_MAPPINGS);
 
-        return args;
+        VanillaCommandLine.RAW_ARGS = args;
     }
 
     private VanillaCommandLine() {

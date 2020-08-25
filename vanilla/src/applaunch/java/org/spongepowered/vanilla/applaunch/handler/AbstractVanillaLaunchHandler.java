@@ -104,7 +104,8 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
     protected Function<String, Optional<URL>> getResourceLocator() {
         return s -> {
-            for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> serviceCandidates : Main.getPluginEngine().getCandidates().entrySet()) {
+            for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> serviceCandidates :
+                    Main.getInstance().getPluginEngine().getCandidates().entrySet()) {
                 for (final PluginCandidate<PluginResource> candidate : serviceCandidates.getValue()) {
                     final PluginResource resource = candidate.getResource();
 

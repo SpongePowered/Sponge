@@ -724,7 +724,7 @@ project("SpongeVanilla") {
             archiveClassifier.set("universal")
             manifest {
                 attributes(mapOf(
-                        "Main-Class" to "org.spongepowered.vanilla.applaunch.Main",
+                        "Main-Class" to "org.spongepowered.vanilla.applaunch.launcher.AppLauncher",
                         "MixinConfigs" to "mixins.common.api.json,mixins.common.core.json,mixins.common.inventory.json,mixins.common.tracker.json",
                         "Launch-Target" to "sponge_server_prod",
                         "Specification-Title" to "SpongeCommon",
@@ -779,7 +779,6 @@ project("SpongeVanilla") {
                 include(dependency("org.apache.logging.log4j:log4j-api"))
 
                 // And now the vanilla dependencies
-                include(dependency("net.minecraftforge:accesstransformers"))
                 include(dependency("cpw.mods:grossjava9hacks"))
                 include(dependency("cpw.mods:modlauncher"))
                 include(dependency("net.minecraftforge:mergetool"))

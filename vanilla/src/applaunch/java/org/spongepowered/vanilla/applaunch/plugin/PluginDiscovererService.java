@@ -29,11 +29,16 @@ import com.google.common.collect.Maps;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
+import net.minecraftforge.accesstransformer.AccessTransformerEngine;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.vanilla.applaunch.Main;
 
+import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +51,7 @@ public final class PluginDiscovererService implements ITransformationService {
 
     private static final String NAME = "plugin_discoverer";
 
-    private static final VanillaPluginEngine pluginEngine = Main.getPluginEngine();
+    private static final VanillaPluginEngine pluginEngine = Main.getInstance().getPluginEngine();
 
     @Nonnull
     @Override
@@ -56,7 +61,7 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public void initialize(final IEnvironment environment) {
-        Main.getPluginEngine().initialize();
+        Main.getInstance().getPluginEngine().initialize();
     }
 
     @Override
@@ -94,6 +99,13 @@ public final class PluginDiscovererService implements ITransformationService {
         PluginDiscovererService.pluginEngine.discoverLanguageServices();
         PluginDiscovererService.pluginEngine.getLanguageServices().forEach((k, v) -> PluginDiscovererService.pluginEngine.getPluginEnvironment()
                 .getLogger().info("Plugin language loader '{}' found.", k));
+
+        try {
+            final Path path = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+            AccessTransformerEngine.INSTANCE.addResource(FileSystems.newFileSystem(path, null).getPath("META-INF/common_at.cfg"), "common_at.cfg");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Nonnull

@@ -24,40 +24,22 @@
  */
 package org.spongepowered.vanilla.applaunch.handler.prod;
 
-import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
-import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.PluginLanguageService;
-import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
-import org.spongepowered.plugin.jvm.locator.ResourceType;
+import org.spongepowered.vanilla.applaunch.Constants;
 import org.spongepowered.vanilla.applaunch.Main;
 import org.spongepowered.vanilla.applaunch.VanillaCommandLine;
 import org.spongepowered.vanilla.applaunch.VanillaLaunchTargets;
-import org.spongepowered.vanilla.applaunch.pipeline.ProductionServerAppPipeline;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
 
 public final class ServerProdLaunchHandler extends AbstractVanillaProdLaunchHandler {
 
-    private FileSystem serverFileSystem;
-
-    private final Path remappedJar = VanillaCommandLine.librariesDirectory.resolve(ProductionServerAppPipeline.MINECRAFT_PATH_PREFIX)
-            .resolve(ProductionServerAppPipeline.MINECRAFT_VERSION_TARGET).resolve(ProductionServerAppPipeline.MINECRAFT_SERVER_JAR_NAME +
+    private final Path remappedJar = VanillaCommandLine.librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX)
+            .resolve(Constants.Libraries.MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME +
                     "_remapped.jar");
 
     @Override
@@ -81,60 +63,9 @@ public final class ServerProdLaunchHandler extends AbstractVanillaProdLaunchHand
     }
 
     @Override
-    protected Function<String, Optional<URL>> getResourceLocator() {
-
-        try {
-            this.serverFileSystem = FileSystems.newFileSystem(this.remappedJar, null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return s -> {
-            if (s.startsWith("org/spongepowered/api") || s.startsWith("org/spongepowered/common") || s.startsWith("org/spongepowered/vanilla")) {
-                return Optional.empty();
-            }
-
-            // Is it plugins?
-            for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> serviceCandidates : Main
-                    .getPluginEngine().getCandidates().entrySet()) {
-                for (final PluginCandidate<PluginResource> candidate : serviceCandidates.getValue()) {
-                    final PluginResource resource = candidate.getResource();
-
-                    if (resource instanceof JVMPluginResource) {
-                        if (((JVMPluginResource) resource).getType() != ResourceType.JAR) {
-                            continue;
-                        }
-                    }
-
-                    final Path resolved = resource.getFileSystem().getPath(s);
-                    if (Files.exists(resolved)) {
-                        try {
-                            return Optional.of(resolved.toUri().toURL());
-                        } catch (final MalformedURLException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    }
-                }
-            }
-
-            // Is it Minecraft?
-            try {
-                final Path path = this.serverFileSystem.getPath(s);
-                if (Files.exists(path)) {
-                    return Optional.of(path.toUri().toURL());
-                }
-            } catch (final MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
-
-            return Optional.empty();
-        };
-    }
-
-    @Override
     protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
         Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance())
                 .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
-                .invoke(null, Main.getPluginEngine(), Boolean.TRUE, arguments);
+                .invoke(null, Main.getInstance().getPluginEngine(), Boolean.TRUE, arguments);
     }
 }

@@ -40,6 +40,6 @@ public final class ClientDevLaunchHandler extends AbstractVanillaDevLaunchHandle
     protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
         Class.forName("org.spongepowered.vanilla.launch.ClientLauncher", true, launchClassLoader.getInstance())
                 .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
-                .invoke(null, Main.getPluginEngine(), Boolean.TRUE, arguments);
+                .invoke(null, Main.getInstance().getPluginEngine(), Boolean.TRUE, arguments);
     }
 }

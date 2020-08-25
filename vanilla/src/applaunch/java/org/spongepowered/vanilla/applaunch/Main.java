@@ -24,36 +24,64 @@
  */
 package org.spongepowered.vanilla.applaunch;
 
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.applaunch.pipeline.AppPipeline;
-import org.spongepowered.vanilla.applaunch.pipeline.ProductionServerAppPipeline;
+import cpw.mods.modlauncher.Launcher;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.plugin.PluginEnvironment;
+import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.util.ArgumentList;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 
 public final class Main {
 
-    private static AppPipeline appPipeline;
-    private static VanillaPluginEngine pluginEngine;
-    
-    public static void main(String[] args) throws Exception {
-        final String[] launchArgs = VanillaCommandLine.configure(args);
-        switch (VanillaCommandLine.launchTarget) {
-            case CLIENT_DEVELOPMENT:
-            case SERVER_DEVELOPMENT:
-                Main.appPipeline = new AppPipeline();
-                break;
-            case SERVER_PRODUCTION:
-                Main.appPipeline = new ProductionServerAppPipeline();
-                break;
-            default:
-                throw new RuntimeException("Plebizou doesn't want to do a production SpongeVanilla client :'(");
-        }
+    private static Main instance;
 
-        Main.appPipeline.prepare();
-        Main.pluginEngine = new VanillaPluginEngine(Main.appPipeline.getPluginEnvironment());
-        Main.appPipeline.start(launchArgs);
+    private final Logger logger;
+    private final VanillaPluginEngine pluginEngine;
+
+    public Main() {
+        Main.instance = this;
+        this.logger = LogManager.getLogger("App Launch");
+        this.pluginEngine = new VanillaPluginEngine(new PluginEnvironment());
     }
 
-    public static VanillaPluginEngine getPluginEngine() {
-        return Main.pluginEngine;
+    public static void main(final String[] args) throws Exception {
+        VanillaCommandLine.configure(args);
+        new Main().run();
+    }
+
+    public static Main getInstance() {
+        return Main.instance;
+    }
+
+    public void run() throws IOException {
+        final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
+
+        this.pluginEngine.getPluginEnvironment().getBlackboard()
+                .getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
+        this.pluginEngine.getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> VanillaCommandLine.gameDirectory);
+
+        SpongeConfigs.initialize(this.pluginEngine.getPluginEnvironment());
+        final Path modsDirectory = VanillaCommandLine.gameDirectory.resolve("mods");
+        if (Files.notExists(modsDirectory)) {
+            Files.createDirectories(modsDirectory);
+        }
+        this.pluginEngine.getPluginEnvironment().getBlackboard()
+                .getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, VanillaCommandLine
+                        .gameDirectory.resolve("plugins")));
+
+        this.logger.info("Transitioning to ModLauncher, please wait...");
+        final ArgumentList lst = ArgumentList.from(VanillaCommandLine.RAW_ARGS);
+        Launcher.main(lst.getArguments());
+    }
+
+    public VanillaPluginEngine getPluginEngine() {
+        return this.pluginEngine;
     }
 }

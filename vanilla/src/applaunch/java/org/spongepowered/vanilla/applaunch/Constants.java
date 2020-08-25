@@ -22,24 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.dev;
+package org.spongepowered.vanilla.applaunch;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.vanilla.applaunch.VanillaLaunchTargets;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
-import org.spongepowered.vanilla.applaunch.Main;
+public final class Constants {
 
-public final class ServerDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
-
-    @Override
-    public String name() {
-        return VanillaLaunchTargets.SERVER_DEVELOPMENT.getLaunchTarget();
+    public static final class Libraries {
+        public static final String MINECRAFT_VERSION_TARGET = "1.14.4";
+        public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+        public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
+        public static final String MINECRAFT_SERVER_PATH_PREFIX = Libraries.MINECRAFT_PATH_PREFIX + "/server";
+        public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
+        public static final String MCP_CONFIG_NAME = "mcp_config";
+        public static final String MCP_CONFIG_PREFIX_URL = "https://files.minecraftforge.net/maven/de/oceanlabs/mcp/" + Libraries.MCP_CONFIG_NAME;
+        public static final String MCP_CONFIG_PATH_PREFIX = "de/oceanlabs/mcp/" + Libraries.MCP_CONFIG_NAME;
+        public static final String MCP_JOINED_PATH = "config/joined.tsrg";
     }
 
-    @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
-                .invoke(null, Main.getInstance().getPluginEngine(), Boolean.TRUE, arguments);
+    public static final class ManifestAttributes {
+        public static final String LAUNCH_TARGET = "Launch-Target";
     }
 }
