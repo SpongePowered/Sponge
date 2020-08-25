@@ -364,13 +364,15 @@ class UserDiscoverer {
         // watcher has found any more (or removed any).
         synchronized (updateCache) {
             updateCache.clear(); // just in case
-            for (WatchEvent event : watchKey.pollEvents()) {
-                @SuppressWarnings("unchecked") WatchEvent<Path> ev = (WatchEvent<Path>) event;
-                Path file = ev.context();
-                String filename = file.getFileName().toString();
+            for (final WatchEvent event : UserDiscoverer.watchKey.pollEvents()) {
+                @SuppressWarnings("unchecked") final WatchEvent<Path> ev = (WatchEvent<Path>) event;
+                final Path file = ev.context();
+                if (file != null) {
+                    final String filename = file.getFileName().toString();
 
-                // We don't determine the UUIDs yet, we'll only do that if we need to.
-                updateCache.computeIfAbsent(filename, f -> new MutableWatchEvent()).set(ev.kind());
+                    // We don't determine the UUIDs yet, we'll only do that if we need to.
+                    UserDiscoverer.updateCache.computeIfAbsent(filename, f -> new MutableWatchEvent()).set(ev.kind());
+                }
             }
 
             for (Map.Entry<String, MutableWatchEvent> entry : updateCache.entrySet()) {
