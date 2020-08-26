@@ -223,19 +223,6 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logExploitRespawnInvisibility(final PlayerEntity player) {
-        if (player.getEntityWorld().isRemote()) {
-            return;
-        }
-
-        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.get().getLogging().logExploitRespawnInvisibility) {
-            logInfo("[EXPLOIT] Player '{0}' attempted to perform a respawn invisibility exploit to surrounding players.",
-                    player.getName());
-            logStack(configAdapter);
-        }
-    }
-
     public static boolean checkBoundingBoxSize(@Nullable final Entity entity, final AxisAlignedBB aabb) {
         if (entity == null || entity.getEntityWorld().isRemote()) {
             return false;

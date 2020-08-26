@@ -54,8 +54,6 @@ public final class LoggingCategory {
     private boolean entityDeathLogging = false;
     @Setting(value = "exploit-itemstack-name-overflow", comment = "Log when server receives exploited packet with itemstack name exceeding string limit.")
     public boolean logExploitItemStackNameOverflow = false;
-    @Setting(value = "exploit-respawn-invisibility", comment = "Log when player attempts to respawn invisible to surrounding players.")
-    public boolean logExploitRespawnInvisibility = false;
     @Setting(value = "log-stacktraces", comment = "Add stack traces to dev logging")
     private boolean logWithStackTraces = false;
     @Setting(value = "entity-collision-checks", comment = "Whether to log entity collision/count checks")
