@@ -255,14 +255,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public boolean kick(final Component message) {
-        Component messageToSend = message;
+        Component messageToSend;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final KickPlayerEvent kickPlayerEvent = SpongeEventFactory.createKickPlayerEvent(
                     frame.getCurrentCause(),
                     message,
                     message,
-                    (ServerPlayer) this,
-                    false
+                    (ServerPlayer) this
             );
             if (Sponge.getEventManager().post(kickPlayerEvent)) {
                 return false;

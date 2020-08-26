@@ -87,13 +87,8 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
         }
     }
 
-    private void impl$disconnectClient(final Optional<Component> disconnectMessage) {
-        final ITextComponent reason;
-        if (disconnectMessage.isPresent()) {
-            reason = SpongeAdventure.asVanilla(disconnectMessage.get());
-        } else {
-            reason = new TranslationTextComponent("disconnect.disconnected");
-        }
+    private void impl$disconnectClient(final Component disconnectMessage) {
+        final ITextComponent reason = SpongeAdventure.asVanilla(disconnectMessage);
         this.impl$closeConnection(reason);
     }
 
@@ -102,10 +97,10 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
         final Component disconnectMessage = TextComponent.of("You are not allowed to log in to this server.");
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
-                cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this, false);
+                cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this);
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
-            this.impl$disconnectClient(event.isMessageCancelled() ? Optional.empty() : Optional.of(event.getMessage()));
+            this.impl$disconnectClient(event.getMessage());
         }
         return event.isCancelled();
     }
