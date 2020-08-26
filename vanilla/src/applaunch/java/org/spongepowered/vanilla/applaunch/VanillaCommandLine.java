@@ -29,7 +29,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.util.PathConverter;
 import joptsimple.util.PathProperties;
-import org.spongepowered.vanilla.applaunch.pipeline.ManifestAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,9 +67,11 @@ public final class VanillaCommandLine {
         if (launchTarget == null) {
             // Try the manifest before we give up
             try (final InputStream stream = VanillaCommandLine.class.getClassLoader().getResourceAsStream("META-INF/MANIFEST.MF")) {
-                final Manifest manifest = new Manifest(stream);
-                launchTarget = manifest.getMainAttributes().getValue(ManifestAttributes.LAUNCH_TARGET);
-                manifestTarget = true;
+                if (stream != null) {
+                    final Manifest manifest = new Manifest(stream);
+                    launchTarget = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.LAUNCH_TARGET);
+                    manifestTarget = true;
+                }
             }
         }
 

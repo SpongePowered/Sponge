@@ -29,16 +29,11 @@ import com.google.common.collect.Maps;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
-import net.minecraftforge.accesstransformer.AccessTransformerEngine;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.vanilla.applaunch.Main;
 
-import java.net.URISyntaxException;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,16 +42,16 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-public final class PluginDiscovererService implements ITransformationService {
+public final class PluginService implements ITransformationService {
 
-    private static final String NAME = "plugin_discoverer";
+    private static final String NAME = "plugin";
 
     private static final VanillaPluginEngine pluginEngine = Main.getInstance().getPluginEngine();
 
     @Nonnull
     @Override
     public String name() {
-        return PluginDiscovererService.NAME;
+        return PluginService.NAME;
     }
 
     @Override
@@ -71,8 +66,8 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
-        PluginDiscovererService.pluginEngine.locatePluginResources();
-        PluginDiscovererService.pluginEngine.createPluginCandidates();
+        PluginService.pluginEngine.locatePluginResources();
+        PluginService.pluginEngine.createPluginCandidates();
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
@@ -91,26 +86,34 @@ public final class PluginDiscovererService implements ITransformationService {
 
     @Override
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
-        PluginDiscovererService.pluginEngine.getPluginEnvironment().getLogger().info("SpongePowered PLUGIN Subsystem Version={} Service=ModLauncher",
-                PluginDiscovererService.pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.VERSION).get());
-        PluginDiscovererService.pluginEngine.discoverLocatorServices();
-        PluginDiscovererService.pluginEngine.getLocatorServices().forEach((k, v) -> PluginDiscovererService.pluginEngine.getPluginEnvironment()
+        PluginService.pluginEngine.getPluginEnvironment().getLogger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
+            PluginService.pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.VERSION).get(), this.getCodeSource());
+        PluginService.pluginEngine.discoverLocatorServices();
+        PluginService.pluginEngine.getLocatorServices().forEach((k, v) -> PluginService.pluginEngine.getPluginEnvironment()
                 .getLogger().info("Plugin resource locator '{}' found.", k));
-        PluginDiscovererService.pluginEngine.discoverLanguageServices();
-        PluginDiscovererService.pluginEngine.getLanguageServices().forEach((k, v) -> PluginDiscovererService.pluginEngine.getPluginEnvironment()
+        PluginService.pluginEngine.discoverLanguageServices();
+        PluginService.pluginEngine.getLanguageServices().forEach((k, v) -> PluginService.pluginEngine.getPluginEnvironment()
                 .getLogger().info("Plugin language loader '{}' found.", k));
 
-        try {
-            final Path path = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
-            AccessTransformerEngine.INSTANCE.addResource(FileSystems.newFileSystem(path, null).getPath("META-INF/common_at.cfg"), "common_at.cfg");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+//        try {
+//            final Path path = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+//            AccessTransformerEngine.INSTANCE.addResource(FileSystems.newFileSystem(path, null).getPath("META-INF/common_at.cfg"), "common_at.cfg");
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
     }
 
     @Nonnull
     @Override
     public List<ITransformer> transformers() {
         return ImmutableList.of();
+    }
+
+    private String getCodeSource() {
+        try {
+            return this.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
+        } catch (Throwable th) {
+            return "Unknown";
+        }
     }
 }

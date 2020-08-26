@@ -26,6 +26,8 @@ package org.spongepowered.vanilla.applaunch.launcher;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.cadixdev.atlas.Atlas;
 import org.cadixdev.bombe.jar.asm.JarEntryRemappingTransformer;
 import org.cadixdev.lorenz.MappingSet;
@@ -58,17 +60,27 @@ import java.util.List;
 
 public final class AppLauncher {
 
+    static {
+        System.setProperty("log4j.configurationFile", "log4j2_launcher.xml");
+    }
+
     // From http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java
     private static final char[] hexArray = "0123456789abcdef".toCharArray();
+
+    private final Logger logger;
 
     public static void main(final String[] args) throws Exception {
         new AppLauncher().run(args);
     }
 
+    public AppLauncher() {
+        this.logger = LogManager.getLogger("Launcher");
+    }
+
     public void run(final String[] args) throws Exception {
         VanillaCommandLine.configure(args);
 
-        System.out.println("Checking libraries, please wait...");
+        this.logger.info("Checking libraries, please wait...");
         this.downloadMinecraft(VanillaCommandLine.librariesDirectory);
         final Path srgZip = this.downloadSRG(VanillaCommandLine.librariesDirectory);
         this.remapMinecraft(VanillaCommandLine.librariesDirectory, srgZip);
@@ -100,7 +112,7 @@ public final class AppLauncher {
     }
 
     private void downloadMinecraft(final Path librariesDirectory) throws IOException, NoSuchAlgorithmException {
-        System.out.println("Downloading the versions manifest...");
+        this.logger.info("Downloading the versions manifest...");
 
         VersionManifest.Version foundVersionManifest = null;
 
@@ -142,7 +154,7 @@ public final class AppLauncher {
             this.downloadCheckHash(version.downloads.server.url, downloadTarget, version.downloads.server.sha1);
         } else {
             if (VanillaCommandLine.checkMinecraftJarHash) {
-                System.out.println("Detected existing Minecraft Server jar, verifying hashes...");
+                this.logger.info("Detected existing Minecraft Server jar, verifying hashes...");
                 final MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
 
                 // Pipe the download stream into the file and compute the SHA-1
@@ -150,20 +162,20 @@ public final class AppLauncher {
                 final String fileSha1 = this.toHexString(sha1.digest(bytes));
 
                 if (version.downloads.server.sha1.equals(fileSha1)) {
-                    System.out.println("Minecraft Server jar verified!");
+                    this.logger.info("Minecraft Server jar verified!");
                 } else {
                     Files.delete(downloadTarget);
                     System.err.println(String.format("Checksum verification failed: Expected %s, %s. Deleting cached Minecraft Server jar...",
                             version.downloads.server.sha1, fileSha1));
                 }
             } else {
-                System.out.println("Detected existing Minecraft Server jar. Skipping hash check as that is turned off...");
+                this.logger.info("Detected existing Minecraft Server jar. Skipping hash check as that is turned off...");
             }
         }
     }
 
     private Path downloadSRG(final Path librariesDirectory) throws IOException {
-        System.out.println(String.format("Setting up MCP config for Minecraft %s", Constants.Libraries.MINECRAFT_VERSION_TARGET));
+        this.logger.info("Setting up MCP config for Minecraft {}", Constants.Libraries.MINECRAFT_VERSION_TARGET);
         final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MCP_CONFIG_PATH_PREFIX).resolve(Constants.Libraries
                 .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MCP_CONFIG_NAME + "-" + Constants.Libraries
                 .MINECRAFT_VERSION_TARGET + ".zip");
@@ -178,27 +190,27 @@ public final class AppLauncher {
                 throw new IOException(String.format("MCP config was not located at '%s' and downloading it has been turned off.", downloadTarget));
             }
         } else {
-            System.out.println("Detected existing MCP mappings, verifying hashes...");
+            this.logger.info("Detected existing MCP mappings, verifying hashes...");
             // TODO Figure out how to sha1 check the zip file
-            System.out.println("MCP mappings verified!");
+            this.logger.info("MCP mappings verified!");
         }
 
         return downloadTarget;
     }
 
     private void remapMinecraft(final Path librariesDirectory, final Path srgZip) throws IOException {
-        System.out.println("Checking if we need to remap Minecraft...");
+        this.logger.info("Checking if we need to remap Minecraft...");
         final Path inputJar = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX).resolve(Constants.Libraries
                 .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
         final Path outputJar = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX).resolve(Constants.Libraries
                 .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_" + "remapped.jar");
 
         if (Files.exists(outputJar)) {
-            System.out.println("Remapped Minecraft detected, skipping...");
+            this.logger.info("Remapped Minecraft detected, skipping...");
             return;
         }
 
-        System.out.println("Remapping Minecraft to SRG. This may take a while...");
+        this.logger.info("Remapping Minecraft to SRG. This may take a while...");
         try (final FileSystem fileSystem = FileSystems.newFileSystem(srgZip, null)) {
             final Path srgFile = fileSystem.getPath(Constants.Libraries.MCP_JOINED_PATH);
             final MappingSet mappings = new MappingSet();
@@ -223,8 +235,8 @@ public final class AppLauncher {
 
         final String name = path.getFileName().toString();
 
-        System.out.println("Downloading " + name + ". This could take a while...");
-        System.out.println(String.format("URL -> <%s>", url));
+        this.logger.info("Downloading {}. This could take a while...", name);
+        this.logger.info("URL -> <{}>", url);
 
         // Pipe the download stream into the file and compute the SHA-1
         try (final ReadableByteChannel in = Channels.newChannel(url.openStream()); final FileChannel out = FileChannel.open(path,
@@ -247,8 +259,8 @@ public final class AppLauncher {
 
         final String name = path.getFileName().toString();
 
-        System.out.println("Downloading " + name + ". This could take a while...");
-        System.out.println(String.format("URL -> <%s>", url));
+        this.logger.info("Downloading {}. This could take a while...", name);
+        this.logger.info("URL -> <{}>", url);
 
         final MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
 
@@ -262,13 +274,13 @@ public final class AppLauncher {
 
         if (VanillaCommandLine.checkMinecraftJarHash) {
             if (expected.equals(fileSha1)) {
-                System.out.println("Successfully downloaded " + name + " and verified checksum!");
+                this.logger.info("Successfully downloaded {} and verified checksum!", name);
             } else {
                 Files.delete(path);
-                throw new IOException("Checksum verification failed: Expected " + expected + ", got " + fileSha1);
+                throw new IOException(String.format("Checksum verification failed: Expected '%s', got '%s'.", expected, fileSha1));
             }
         } else {
-            System.out.println("Skipping hash check as that is turned off...");
+            this.logger.info("Skipping hash check as that is turned off...");
         }
     }
 

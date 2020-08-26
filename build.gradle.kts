@@ -774,7 +774,6 @@ project("SpongeVanilla") {
                 include(dependency("org.mariadb.jdbc:mariadb-java-client:2.0.3"))
                 include(dependency("com.h2database:h2:1.4.196"))
                 include(dependency("org.xerial:sqlite-jdbc:3.20.0"))
-
                 include(dependency("org.apache.logging.log4j:log4j-slf4j-impl"))
                 include(dependency("org.apache.logging.log4j:log4j-api"))
 
