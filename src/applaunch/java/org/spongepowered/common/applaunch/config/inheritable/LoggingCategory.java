@@ -52,8 +52,6 @@ public final class LoggingCategory {
     private boolean entityDespawnLogging = false;
     @Setting(value = "entity-death", comment = "Log when living entities are destroyed")
     private boolean entityDeathLogging = false;
-    @Setting(value = "exploit-sign-command-updates", comment = "Log when server receives exploited packet to update a sign containing commands from player with no permission.")
-    public boolean logExploitSignCommandUpdates = false;
     @Setting(value = "exploit-itemstack-name-overflow", comment = "Log when server receives exploited packet with itemstack name exceeding string limit.")
     public boolean logExploitItemStackNameOverflow = false;
     @Setting(value = "exploit-respawn-invisibility", comment = "Log when player attempts to respawn invisible to surrounding players.")

@@ -208,22 +208,6 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logExploitSignCommandUpdates(final PlayerEntity player, final TileEntity tileEntity, final String command) {
-        if (player.getEntityWorld().isRemote()) {
-            return;
-        }
-
-        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.get().getLogging().logExploitSignCommandUpdates) {
-            logInfo("[EXPLOIT] Player '{0}' attempted to exploit sign in dimension '{1}' located at '{2}' with command '{3}'",
-                    player.getName(),
-                    tileEntity.getWorld().getDimension().getType(),
-                    tileEntity.getPos().getX() + ", " + tileEntity.getPos().getY() + ", " + tileEntity.getPos().getZ(),
-                    command);
-            logStack(configAdapter);
-        }
-    }
-
     public static void logExploitItemNameOverflow(final PlayerEntity player, final int length) {
         if (player.getEntityWorld().isRemote()) {
             return;
