@@ -48,11 +48,6 @@ public class BlockTrackerModCategory {
     }
 
     public BlockTrackerModCategory(String modId) {
-        if (modId.equals("minecraft")) {
-        }
-        if (modId.equals("extrautils2")) {
-            this.blockBulkCaptureMap.put("redstoneclock", false);
-        }
     }
 
     public boolean isEnabled() {
