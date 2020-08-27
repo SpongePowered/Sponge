@@ -63,7 +63,7 @@
         "util.text.TextComponentMixin",
         "util.text.TranslationTextComponentMixin",
         "world.BossInfoMixin",
-        "world.ServerBossInfoMixin",
+        "world.server.ServerBossInfoMixin",
         "world.TeleporterMixin",
         "world.WorldMixin",
         "world.WorldSettingsMixin",

@@ -34,9 +34,8 @@ public final class UpdateWorldRendererEffect implements ProcessingSideEffect {
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag) {
         if (oldState.state != newState) {
-            pipeline.getServerWorld().func_225319_b(oldState.pos, oldState.state, newState);
+            pipeline.getServerWorld().markBlockRangeForRenderUpdate(oldState.pos, oldState.state, newState);
         }
         return EffectResult.NULL_PASS;
     }
-
 }

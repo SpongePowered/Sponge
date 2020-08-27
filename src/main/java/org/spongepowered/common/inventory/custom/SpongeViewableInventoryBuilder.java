@@ -351,7 +351,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         containerTypeInfo.put(ContainerTypes.BEACON.get(), // 1 internal slot
                 ContainerTypeInfo.of(0, 3,
                         (id, i, p, vi) -> new BeaconContainer(id, i, vi.getData(), toPos(p))));
-        containerTypeInfo.put(ContainerTypes.CARTOGRAPHY.get(),  // 2 internal slots
+        containerTypeInfo.put(ContainerTypes.CARTOGRAPHY_TABLE.get(),  // 2 internal slots
                 ContainerTypeInfo.of(0, 0,
                         (id, i, p, vi) -> new CartographyContainer(id, i, toPos(p))));
         containerTypeInfo.put(ContainerTypes.CRAFTING.get(), // 3x3+1 10 internal slots

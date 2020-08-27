@@ -62,7 +62,7 @@ public abstract class WorkbenchContainerMixin_Inventory {
      *
      * old method name: Container#slotChangedCraftingGrid
      */
-    @Inject(method = "func_217066_a", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+    @Inject(method = "updateCraftingResult", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/CraftResultInventory;setInventorySlotContents(ILnet/minecraft/item/ItemStack;)V"))
     private static void beforeSlotChangedCraftingGrid(int p_217066_0_, final World p_217066_1_, final PlayerEntity p_217066_2_,
             final net.minecraft.inventory.CraftingInventory p_217066_3_, final CraftResultInventory p_217066_4_, final CallbackInfo ci,
@@ -87,7 +87,7 @@ public abstract class WorkbenchContainerMixin_Inventory {
      *
      * old method name: Container#slotChangedCraftingGrid
      */
-    @Inject(method = "func_217066_a", cancellable = true,
+    @Inject(method = "updateCraftingResult", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;sendPacket(Lnet/minecraft/network/IPacket;)V"))
     private static void afterSlotChangedCraftingGrid(int p_217066_0_,
             final World world, final PlayerEntity player, final net.minecraft.inventory.CraftingInventory craftingInventory, final CraftResultInventory output, final CallbackInfo ci) {

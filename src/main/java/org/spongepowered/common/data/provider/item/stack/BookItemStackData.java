@@ -59,7 +59,7 @@ public final class BookItemStackData {
                             }
                             return SpongeAdventure.legacySection(tag.getString(Constants.Item.Book.ITEM_BOOK_AUTHOR));
                         })
-                        .set((h, v) -> h.setTagInfo(Constants.Item.Book.ITEM_BOOK_AUTHOR, new StringNBT(SpongeAdventure.legacySection(v))))
+                        .set((h, v) -> h.setTagInfo(Constants.Item.Book.ITEM_BOOK_AUTHOR, StringNBT.valueOf(SpongeAdventure.legacySection(v))))
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.GENERATION)
                         .get(h -> {
@@ -69,7 +69,7 @@ public final class BookItemStackData {
                             }
                             return tag.getInt(Constants.Item.Book.ITEM_BOOK_GENERATION);
                         })
-                        .set((h, v) -> h.setTagInfo(Constants.Item.Book.ITEM_BOOK_GENERATION, new IntNBT(v)))
+                        .set((h, v) -> h.setTagInfo(Constants.Item.Book.ITEM_BOOK_GENERATION, IntNBT.valueOf(v)))
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.PAGES)
                         .get(h -> get(h, iv -> GsonComponentSerializer.gson().deserialize(iv)))

@@ -264,7 +264,7 @@ public final class ContainerUtil {
                     // In case we do not find the InventoryCrafting later assume it is directly after the SlotCrafting
                     // e.g. for IC2 ContainerIndustrialWorkbench
                     crafting.base = index + 1;
-                    crafting.grid = ((CraftingResultSlotAccessor) slot).accessor$getField_75239_a();
+                    crafting.grid = ((CraftingResultSlotAccessor) slot).accessor$getCraftMatrix();
                 }
             }
         }
@@ -301,7 +301,7 @@ public final class ContainerUtil {
         } else if (container instanceof BrewingStandContainerAccessor) {
             return carrierOrNull(((BrewingStandContainerAccessor) container).accessor$getTileBrewingStand());
         } else if (container instanceof BeaconContainer) {
-            return (Carrier) ((BeaconContainerAccessor) container).accessor$getBeaconPosition().apply(World::getTileEntity).orElse(null);
+            return (Carrier) ((BeaconContainerAccessor) container).accessor$getWorldPosCallable().apply(World::getTileEntity).orElse(null);
         } else if (container instanceof HorseInventoryContainerAccessor) {
             return (Carrier) ((HorseInventoryContainerAccessor) container).accessor$getHorse();
         } else if (container instanceof MerchantContainerAccessor && ((MerchantContainerAccessor) container).accessor$getMerchant() instanceof Carrier) {

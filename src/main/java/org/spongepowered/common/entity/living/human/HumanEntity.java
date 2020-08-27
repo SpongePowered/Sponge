@@ -232,7 +232,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void onDeath(@Nullable final DamageSource cause) {
         super.onDeath(cause);
-        this.setPosition(this.posX, this.posY, this.posZ);
+        this.setPosition(this.getPosX(), this.getPosY(), this.getPosZ());
         double motionX = 0.0D;
         double motionY = 0.1D;
         double motionZ = 0.0D;
@@ -445,12 +445,11 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         final SSpawnPlayerPacketAccessor accessor = (SSpawnPlayerPacketAccessor) packet;
         accessor.accessor$setEntityId(this.getEntityId());
         accessor.accessor$setUniqueId(this.fakeProfile.getId());
-        accessor.accessor$setX(this.posX);
-        accessor.accessor$setY(this.posY);
-        accessor.accessor$setZ(this.posZ);
+        accessor.accessor$setX(this.getPosX());
+        accessor.accessor$setY(this.getPosY());
+        accessor.accessor$setZ(this.getPosZ());
         accessor.accessor$setYaw((byte) ((int) (this.rotationYaw * 256.0F / 360.0F)));
         accessor.accessor$setPitch((byte) ((int) (this.rotationPitch * 256.0F / 360.0F)));
-        accessor.accessor$setWatcher(this.getDataManager());
         return packet;
     }
 
@@ -518,9 +517,9 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         // Borrowed from Skeleton
         // TODO Figure out how to API this out
         final ArrowEntity entitytippedarrow = new ArrowEntity(this.world, this);
-        final double d0 = target.posX - this.posX;
-        final double d1 = target.getBoundingBox().minY + target.getHeight() / 3.0F - entitytippedarrow.posY;
-        final double d2 = target.posZ - this.posZ;
+        final double d0 = target.getPosX() - this.getPosX();
+        final double d1 = target.getBoundingBox().minY + target.getHeight() / 3.0F - entitytippedarrow.getPosY();
+        final double d2 = target.getPosZ() - this.getPosZ();
         final double d3 = MathHelper.sqrt(d0 * d0 + d2 * d2);
         entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.world.getDifficulty().getId() * 4);
         // These names are wrong
@@ -545,6 +544,4 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         this.playSound(SoundEvents.ENTITY_ARROW_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
         this.world.addEntity(entitytippedarrow);
     }
-
-
 }

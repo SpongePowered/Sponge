@@ -53,22 +53,22 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
 
     @Redirect(method = "tick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
-    private boolean tracker$switchContextForDecay(final net.minecraft.world.World worldIn, final BlockPos pos,
-                                       final net.minecraft.block.BlockState state, final int flags) {
+                    target = "Lnet/minecraft/world/server/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
+    private boolean tracker$switchContextForDecay(net.minecraft.world.server.ServerWorld serverWorld, BlockPos pos,
+            net.minecraft.block.BlockState newState, int flags) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         final PhaseContext<?> currentContext = instance.getPhaseContext();
         final IPhaseState<?> currentState = currentContext.state;
         try (final PhaseContext<?> context = currentState.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(instance)
                                            .source(new SpongeLocatableBlockBuilder()
-                                               .world((ServerWorld) worldIn)
+                                               .world((ServerWorld) serverWorld)
                                                .position(pos.getX(), pos.getY(), pos.getZ())
-                                               .state((BlockState) state)
+                                               .state((BlockState) newState)
                                                .build())) {
             if (context != null) {
                 context.buildAndSwitch();
             }
-            return worldIn.setBlockState(pos, state, flags);
+            return serverWorld.setBlockState(pos, newState, flags);
         }
     }
 
@@ -85,7 +85,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
      * @param pos The position
      */
     @Overwrite
-    public void randomTick(net.minecraft.block.BlockState state, net.minecraft.world.World worldIn, BlockPos pos, Random random) {
+    public void randomTick(net.minecraft.block.BlockState state, net.minecraft.world.server.ServerWorld worldIn, BlockPos pos, Random random) {
         if (!state.get(PERSISTENT) && state.get(DISTANCE) == 7) {
             // Sponge Start - PhaseTracker checks and phase entry
             if (!((WorldBridge) worldIn).bridge$isFake()) {

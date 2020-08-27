@@ -95,53 +95,37 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     // @formatter:off
 
-    @Shadow @Nullable private Entity ridingEntity;
-    @Shadow @Final private List<Entity> passengers;
     @Shadow public net.minecraft.world.World world;
-    @Shadow public double posX;
-    @Shadow public double posY;
-    @Shadow public double posZ;
-    @Shadow private Vec3d motion;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
-    @Shadow public boolean velocityChanged;
-    @Shadow public boolean onGround;
     @Shadow public boolean removed;
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
-    @Shadow public float fallDistance;
     @Shadow @Final protected Random rand;
-    @Shadow private int fire;
-    @Shadow public int hurtResistantTime;
     @Shadow @Final protected EntityDataManager dataManager;
     @Shadow public DimensionType dimension;
-    @Shadow private boolean invulnerable;
     @Shadow public float prevRotationYaw;
     @Shadow protected int portalCounter;
-    @Shadow public boolean forceSpawn;
     @Shadow public boolean collided;
-    @Shadow public boolean collidedHorizontally;
-    @Shadow public boolean collidedVertically;
+
+    @Shadow public abstract void shadow$setPosition(double x, double y, double z);
+    @Shadow public abstract double shadow$getPosX();
+    @Shadow public abstract double shadow$getPosZ();
+    @Shadow public abstract double shadow$getPosY();
 
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
-    @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
     @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int shadow$getEntityId();
     @Shadow public abstract boolean shadow$isBeingRidden();
-    @Shadow public abstract Entity shadow$getRidingEntity();
     @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow protected abstract void shadow$removePassenger(Entity passenger);
     @Shadow public abstract boolean shadow$isInvisible();
     @Shadow public abstract void shadow$setInvisible(boolean invisible);
     @Shadow protected abstract int shadow$getFireImmuneTicks();
     @Shadow public abstract EntityType<?> shadow$getType();
-    @Shadow public abstract boolean shadow$isInvulnerableTo(DamageSource source);
     @Shadow public abstract void shadow$setMotion(Vec3d motionIn);
-    @Shadow public abstract boolean shadow$isSprinting();
     @Shadow public abstract Vec3d shadow$getMotion();
-    @Shadow public abstract boolean shadow$isOnSameTeam(Entity entityIn);
-    @Shadow public abstract double shadow$getDistanceSq(Entity entityIn);
     @Shadow public abstract boolean shadow$isInWater();
     @Shadow public abstract boolean shadow$isPassenger();
     @Shadow public abstract void shadow$setPositionAndUpdate(double x, double y, double z);
@@ -156,15 +140,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     // @formatter:on
 
     private boolean impl$isConstructing = true;
-    @Nullable private Component impl$displayName;
-    @Nullable private BlockPos impl$lastCollidedBlockPos;
-    private boolean impl$collision = false;
     private boolean impl$untargetable = false;
-    private boolean impl$isVanished = false;
-    private boolean impl$pendingVisibilityUpdate = false;
-    private int impl$customFireImmuneTicks = this.shadow$getFireImmuneTicks();
-    private boolean impl$skipSettingCustomNameTag = false;
-    private int impl$visibilityTicks = 0;
 
     // @formatter:on
 
@@ -202,9 +178,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
                 destinationWorld = (net.minecraft.world.server.ServerWorld) event.getDestinationWorld();
 
-                this.posX = repositionEvent.getDestinationPosition().getX();
-                this.posY = repositionEvent.getDestinationPosition().getY();
-                this.posZ = repositionEvent.getDestinationPosition().getZ();
+                this.shadow$setPosition(repositionEvent.getDestinationPosition().getX(),
+                        repositionEvent.getDestinationPosition().getY(), repositionEvent.getDestinationPosition().getZ());
             } else {
                 final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
                         (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()),
@@ -213,16 +188,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     return false;
                 }
 
-                this.posX = event.getDestinationPosition().getX();
-                this.posY = event.getDestinationPosition().getY();
-                this.posZ = event.getDestinationPosition().getZ();
+                this.shadow$setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
+                        event.getDestinationPosition().getZ());
             }
 
-            if (!destinationWorld.getChunkProvider().chunkExists((int) this.posX >> 4, (int) this.posZ >> 4)) {
+            if (!destinationWorld.getChunkProvider().chunkExists((int) this.shadow$getPosX() >> 4, (int) this.shadow$getPosZ() >> 4)) {
                 // Roll back the position
-                this.posX = originalPosition.x;
-                this.posY = originalPosition.y;
-                this.posZ = originalPosition.z;
+                this.shadow$setPosition(originalPosition.x, originalPosition.y, originalPosition.z);
                 return false;
             }
 
@@ -232,12 +204,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             ((PlatformServerWorldBridge) this.shadow$getEntityWorld()).bridge$removeEntity((Entity) (Object) this, true);
             this.bridge$revive();
             this.shadow$setWorld(destinationWorld);
-            destinationWorld.func_217460_e((Entity) (Object) this);
+            destinationWorld.addFromAnotherDimension((Entity) (Object) this);
 
             originalWorld.resetUpdateEntityTick();
             destinationWorld.resetUpdateEntityTick();
 
-            final ChunkPos chunkPos = new ChunkPos((int) this.posX >> 4, (int) this.posZ >> 4);
+            final ChunkPos chunkPos = new ChunkPos((int) this.shadow$getPosX() >> 4, (int) this.shadow$getPosZ() >> 4);
             destinationWorld.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((Entity) (Object) this).getEntityId());
         }
 
@@ -812,8 +784,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     */
     /**
-     * @param stack
-     * @param offsetY
      * @return
      * @author gabizou - January 30th, 2016
      * @author blood - May 12th, 2016

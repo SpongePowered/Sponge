@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.api.mcp.world.raid;
 
 import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.entity.monster.AbstractRaiderEntity;
-import net.minecraft.world.ServerBossInfo;
 import net.minecraft.world.World;
 import net.minecraft.world.raid.Raid;
+import net.minecraft.world.server.ServerBossInfo;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -50,13 +50,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Mixin(Raid.class)
 public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
 
-    @Shadow public abstract World shadow$getWorld();
-    @Shadow public abstract float shadow$getCurrentHealth();
-    @Shadow public abstract int shadow$func_221315_l();
-
-    @Shadow @Final public Map<Integer, Set<AbstractRaiderEntity>> raiders;
+    @Shadow @Final private Map<Integer, Set<AbstractRaiderEntity>> raiders;
     @Shadow @Final @Mutable private ServerBossInfo bossInfo;
     @Shadow private Raid.Status status;
+
+    @Shadow public abstract World shadow$getWorld();
+    @Shadow public abstract float shadow$getCurrentHealth();
+    @Shadow public abstract int shadow$getGroupsSpawned();
 
     @Override
     public ServerWorld getWorld() {
@@ -69,7 +69,7 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
     }
 
     @Override
-    public void setBossBar(BossBar bossBar) {
+    public void setBossBar(final BossBar bossBar) {
         checkNotNull(bossBar, "BossBar cannot be null.");
         this.bossInfo = SpongeAdventure.asVanillaServer(bossBar);
     }
@@ -81,7 +81,7 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
 
     @Override
     public Optional<RaidWave> getCurrentWave() {
-        return Optional.ofNullable(((RaidBridge) this).bridge$getWaves().get(this.shadow$func_221315_l()));
+        return Optional.ofNullable(((RaidBridge) this).bridge$getWaves().get(this.shadow$getGroupsSpawned()));
     }
 
     @Override

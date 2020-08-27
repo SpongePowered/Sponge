@@ -32,11 +32,11 @@ import net.minecraft.world.dimension.DimensionType;
 
 public interface PacketHooks {
 
-    default SJoinGamePacket createSJoinGamePacket(final ServerPlayerEntity entity, final GameType gameType, final boolean isHardcore,
-            final DimensionType dimensionType, final int maxPlayers, final WorldType generatorType, final int viewDistance,
-            final boolean isReducedDebugMode) {
+    default SJoinGamePacket createSJoinGamePacket(final ServerPlayerEntity entity, final GameType gameType, final long seed, final boolean hardcoreMode,
+            final DimensionType dimensionType, final int maxPlayers, final WorldType worldType, final int viewDistance,
+            final boolean reducedDebugInfo, final boolean enableRespawnScreen) {
 
-        return new SJoinGamePacket(entity.getEntityId(), gameType, isHardcore, dimensionType, maxPlayers, generatorType, viewDistance,
-                isReducedDebugMode);
+        return new SJoinGamePacket(entity.getEntityId(), gameType, seed, hardcoreMode, dimensionType, maxPlayers, worldType, viewDistance,
+                reducedDebugInfo, enableRespawnScreen);
     }
 }

@@ -55,7 +55,7 @@ public final class ContainerTypeSupplier {
             .registerSupplier(ContainerType.class, "merchant", () -> (ContainerType) net.minecraft.inventory.container.ContainerType.MERCHANT)
             .registerSupplier(ContainerType.class, "shulker_box", () -> (ContainerType) net.minecraft.inventory.container.ContainerType.SHULKER_BOX)
             .registerSupplier(ContainerType.class, "smoker", () -> (ContainerType) net.minecraft.inventory.container.ContainerType.SMOKER)
-            .registerSupplier(ContainerType.class, "cartography", () -> (ContainerType) net.minecraft.inventory.container.ContainerType.CARTOGRAPHY)
+            .registerSupplier(ContainerType.class, "cartography_table", () -> (ContainerType) net.minecraft.inventory.container.ContainerType.CARTOGRAPHY_TABLE)
             .registerSupplier(ContainerType.class, "stonecutter", () -> (ContainerType) net.minecraft.inventory.container.ContainerType.STONECUTTER)
         ;
     }

@@ -531,7 +531,8 @@ public final class PhaseTracker implements CauseStackManager {
             return false;
         }
         // Forge End
-        final IChunk ichunk = world.getChunk(MathHelper.floor(entity.posX / 16.0D), MathHelper.floor(entity.posZ / 16.0D), ChunkStatus.FULL, entity.forceSpawn);
+        final IChunk ichunk = world.getChunk(MathHelper.floor(entity.getPosX() / 16.0D), MathHelper.floor(entity.getPosZ() / 16.0D), ChunkStatus.FULL,
+                entity.forceSpawn);
         if (!(ichunk instanceof Chunk)) {
             return false;
         }
@@ -612,7 +613,8 @@ public final class PhaseTracker implements CauseStackManager {
         final ServerWorld worldServer = (ServerWorld) world;
         // Sponge End - continue with vanilla mechanics
 
-        @Nullable final IChunk ichunk = worldServer.getChunk(MathHelper.floor(minecraftEntity.posX / 16.0D), MathHelper.floor(minecraftEntity.posZ / 16.0D), ChunkStatus.FULL, minecraftEntity.forceSpawn);
+        @Nullable final IChunk ichunk = worldServer.getChunk(MathHelper.floor(minecraftEntity.getPosX() / 16.0D),
+                MathHelper.floor(minecraftEntity.getPosZ() / 16.0D), ChunkStatus.FULL, minecraftEntity.forceSpawn);
         if (!(ichunk instanceof Chunk)) {
             return false;
         }

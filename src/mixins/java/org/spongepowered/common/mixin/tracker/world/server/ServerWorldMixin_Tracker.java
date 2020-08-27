@@ -33,6 +33,7 @@ import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.Entity;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -45,7 +46,9 @@ import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -108,6 +111,7 @@ import java.util.function.Supplier;
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implements TrackedWorldBridge {
 
+    @Shadow @Final private MinecraftServer server;
     private final LinkedBlockingDeque<ScheduledBlockChange> tracker$scheduledChanges = new LinkedBlockingDeque<>();
 
 
@@ -207,15 +211,15 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "tickBlock",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/block/BlockState;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
-    private void tracker$wrapBlockTick(final BlockState blockState, final World worldIn, final BlockPos pos, final Random random) {
+            target = "Lnet/minecraft/block/BlockState;tick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
+    private void tracker$wrapBlockTick(BlockState blockState, ServerWorld worldIn, BlockPos posIn, Random randomIn) {
         final PhaseContext<?> currentContext = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState currentState = currentContext.state;
         if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
-            blockState.tick(worldIn, pos, random);
+            blockState.tick(worldIn, posIn, randomIn);
             return;
         }
-        TrackingUtil.updateTickBlock(this, blockState, pos, random);
+        TrackingUtil.updateTickBlock(this, blockState, posIn, randomIn);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -238,25 +242,21 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      * to {@code ServerWorld#tickBlock(NextTickListEntry)}, so it's either we customize the ScheduledTickList
      * or we wrap in this method here.
      *
-     * @param blockState The block state being ticked
-     * @param worldIn The world (this world)
-     * @param pos The position of the block state
-     * @param random The random (world.rand)
      * @author gabizou - January 11th, 2020 - Minecraft 1.14.3
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "tickEnvironment",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/block/BlockState;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
-    private void tracker$wrapBlockRandomTick(final BlockState blockState, final World worldIn, final BlockPos pos, final Random random) {
+            target = "Lnet/minecraft/block/BlockState;randomTick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
+    private void tracker$wrapBlockRandomTick(BlockState blockState, ServerWorld worldIn, BlockPos posIn, Random randomIn) {
         try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
             final IPhaseState phaseState = context.state;
             if (phaseState.alreadyCapturingBlockTicks(context)) {
-                blockState.randomTick(worldIn, pos, this.rand);
+                blockState.randomTick(worldIn, posIn, this.rand);
             } else {
-                TrackingUtil.randomTickBlock(this, blockState, pos, this.rand);
+                TrackingUtil.randomTickBlock(this, blockState, posIn, this.rand);
             }
         }
     }
@@ -422,7 +422,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         if (state.doesBulkBlockCapture(current)) {
             final BlockPos immutable = tileEntity.getPos().toImmutable();
             if (tileEntity.getWorld() != (ServerWorld) (Object) this) {
-                tileEntity.setWorld((ServerWorld) (Object) this);
+                tileEntity.setWorldAndPos((ServerWorld) (Object) this, immutable);
             }
             final Chunk chunk = this.shadow$getChunkAt(immutable);
             if (current.getBlockTransactor().logTileAddition(tileEntity, () -> (ServerWorld) (Object) this, chunk)) {
@@ -451,9 +451,10 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         }
         if (proposed != null) {
             if (proposed.getWorld() != (ServerWorld) (Object) this) {
-                proposed.setWorld((ServerWorld) (Object) this);
+                proposed.setWorldAndPos((ServerWorld) (Object) this, immutable);
+            } else {
+                proposed.setPos(pos);
             }
-            proposed.setPos(pos);
         }
         // Otherwise, let's go on and check if we're recording transactions,
         // and if so, log the tile entity removal (may associate with an existing transaction,

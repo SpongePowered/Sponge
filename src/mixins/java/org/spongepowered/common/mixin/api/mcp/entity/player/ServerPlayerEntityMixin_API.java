@@ -51,7 +51,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.advancement.Advancement;
@@ -147,7 +147,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
 
         if (!packets.isEmpty()) {
-            if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
+            if (position.sub(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ()).lengthSquared() < (long) radius * (long) radius) {
                 for (final IPacket<?> packet : packets) {
                     this.connection.sendPacket(packet);
                 }
@@ -497,7 +497,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void playSound(final Sound sound) {
-        this.playSound(sound, this.posX, this.posY, this.posZ);
+        this.playSound(sound, this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ());
     }
 
     @Override
@@ -535,5 +535,4 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         Objects.requireNonNull(book, "book");
         BookUtil.fakeBookView(book, Collections.singletonList(this));
     }
-
 }

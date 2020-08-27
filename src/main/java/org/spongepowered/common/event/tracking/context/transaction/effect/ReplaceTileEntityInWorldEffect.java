@@ -27,13 +27,9 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ServerMultiWorld;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-
-import java.util.Iterator;
 
 public final class ReplaceTileEntityInWorldEffect implements ProcessingSideEffect {
     @Override

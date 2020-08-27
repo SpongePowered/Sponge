@@ -165,7 +165,6 @@
         "world.WorldTypeAccessor",
         "world.border.WorldBorderAccessor",
         "world.chunk.ChunkAccessor",
-        "world.chunk.storage.RegionFileAccessor",
         "world.dimension.DimensionAccessor",
         "world.dimension.DimensionTypeAccessor",
         "world.end.DragonFightManagerAccessor",

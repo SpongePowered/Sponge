@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.entity.item;
 
 import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.math.Rotations;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -76,4 +77,6 @@ public interface ArmorStandEntityAccessor {
     @Invoker("setNoBasePlate") void accessor$setNoBasePlate(boolean noBasePlate);
 
     @Invoker("setMarker") void accessor$setMarker(boolean marker);
+
+    @Invoker("isDisabled") boolean accessor$isDisabled(EquipmentSlotType slotIn);
 }

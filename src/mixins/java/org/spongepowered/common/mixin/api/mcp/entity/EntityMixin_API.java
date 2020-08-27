@@ -35,7 +35,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.Keys;
@@ -78,27 +77,22 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     // @formatter:off
 
-    @Shadow public double posX;
-    @Shadow public double posY;
-    @Shadow public double posZ;
-    @Shadow public Vec3d motion;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
     @Shadow public boolean removed;
-    @Shadow private EntitySize size;
-    @Shadow protected Random rand;
+    @Final @Shadow protected Random rand;
     @Shadow public int ticksExisted;
-    @Shadow public int fire;
     @Shadow public DimensionType dimension;
     @Shadow protected UUID entityUniqueID;
     @Shadow @Final private net.minecraft.entity.EntityType<?> type;
 
+    @Shadow public abstract double shadow$getPosX();
+    @Shadow public abstract double shadow$getPosY();
+    @Shadow public abstract double shadow$getPosZ();
     @Shadow public abstract net.minecraft.world.World shadow$getEntityWorld();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
     @Shadow public abstract void shadow$remove();
-    @Shadow public abstract int shadow$getAir();
-    @Shadow public abstract void shadow$setAir(int air);
     @Shadow public abstract UUID shadow$getUniqueID();
     @Shadow public abstract void shadow$setFire(int seconds);
     @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
@@ -107,7 +101,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
     @Shadow public abstract boolean shadow$writeUnlessRemoved(CompoundNBT compound);
-    @Shadow @Nullable public abstract Team shadow$getTeam();
 
     // @formatter:on
 
@@ -118,7 +111,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public Vector3d getPosition() {
-        return new Vector3d(this.posX, this.posY, this.posZ);
+        return new Vector3d(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ());
     }
 
     @Override
@@ -293,7 +286,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         try {
             final CompoundNBT compound = new CompoundNBT();
             this.shadow$writeUnlessRemoved(compound);
-            final Entity entity = net.minecraft.entity.EntityType.func_220335_a(compound, this.shadow$getEntityWorld(), (createdEntity) -> {
+            final Entity entity = net.minecraft.entity.EntityType.loadEntityAndExecute(compound, this.shadow$getEntityWorld(), (createdEntity) -> {
                 compound.putUniqueId(Constants.UUID, createdEntity.getUniqueID());
                 createdEntity.read(compound);
                 return createdEntity;

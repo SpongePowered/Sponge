@@ -138,7 +138,7 @@ public final class NetherPortalType extends VanillaPortalType {
             }
 
             if (!worldChange) {
-                ((EntityAccessor) entity).accessor$setLastPortalPos(new BlockPos(mEntity.posX, mEntity.posY, mEntity.posZ));
+                ((EntityAccessor) entity).accessor$setLastPortalPos(new BlockPos(mEntity.getPosX(), mEntity.getPosY(), mEntity.getPosZ()));
                 ((EntityAccessor) entity).accessor$setTimeUntilPortal(Integer.MAX_VALUE);
 
                 return true;

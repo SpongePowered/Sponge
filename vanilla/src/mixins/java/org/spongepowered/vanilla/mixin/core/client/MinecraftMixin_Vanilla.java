@@ -48,6 +48,17 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
 
     @Shadow @Nullable private IntegratedServer integratedServer;
 
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void vanilla$callStartedEngineAndLoadedGame(CallbackInfo ci) {
+        // Save config now that registries have been initialized
+        ConfigHandle.setSaveSuppressed(false);
+
+        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        lifecycle.callStartedEngineEvent(this);
+        
+        lifecycle.callLoadedGameEvent();
+    }
+
     @Inject(method = "run", at = @At("HEAD"))
     private void vanilla$establishRegistriesAndStartingEngine(CallbackInfo ci) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
@@ -63,27 +74,14 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
     }
 
-    @Inject(method = "init", at = @At("RETURN"))
-    private void vanilla$callStartedEngineAndLoadedGame(CallbackInfo ci) {
-        // Save config now that registries have been initialized
-        ConfigHandle.setSaveSuppressed(false);
-
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
-        lifecycle.callStartedEngineEvent(this);
-
-        // TODO Minecraft 1.14 - For now, fire LoadedGameEvent right away but this may not be the best place..
-
-        lifecycle.callLoadedGameEvent();
-    }
-
-    @Redirect(method = "func_213231_b", at = @At(value = "FIELD", target = ("Lnet/minecraft/client/Minecraft;"
-        + "integratedServer:Lnet/minecraft/server/integrated/IntegratedServer;"), opcode = Opcodes.PUTFIELD))
+    @Redirect(method = "unloadWorld(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;integratedServer:Lnet/minecraft/server/integrated/IntegratedServer;", opcode =
+            Opcodes.PUTFIELD))
     private void vanilla$storeTemporaryServerRed(Minecraft minecraft, IntegratedServer server) {
         ((MinecraftBridge) minecraft).bridge$setTemporaryIntegratedServer(this.integratedServer);
         this.integratedServer = null;
     }
 
-    @Inject(method = "func_213231_b", at = @At("TAIL"))
+    @Inject(method = "unloadWorld(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("TAIL"))
     private void vanilla$nullServerRefAndPhaseTracker(Screen screenIn, CallbackInfo ci) {
         ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
         try {

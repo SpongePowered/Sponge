@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.accessor.world.end;
 
-import net.minecraft.world.ServerBossInfo;
 import net.minecraft.world.end.DragonFightManager;
+import net.minecraft.world.server.ServerBossInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 

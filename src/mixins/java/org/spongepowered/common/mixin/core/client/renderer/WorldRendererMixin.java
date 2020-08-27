@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.client.renderer;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.world.dimension.EndDimension;
@@ -39,12 +40,12 @@ public abstract class WorldRendererMixin {
 
     @Shadow @Final private Minecraft mc;
 
-    @Shadow protected abstract void renderSkyEnd();
+    @Shadow protected abstract void shadow$renderSkyEnd(MatrixStack matrixStackIn);
 
-    @Inject(method = "renderSky(F)V", at = @At("HEAD"), cancellable = true)
-    private void impl$renderEndSkyboxForAllEndDimensions(float partialTicks, CallbackInfo ci) {
+    @Inject(method = "renderSkyEnd", at = @At("HEAD"), cancellable = true)
+    private void impl$renderEndSkyboxForAllEndDimensions(MatrixStack matrixStackIn, CallbackInfo ci) {
         if (this.mc.world.dimension instanceof EndDimension) {
-            this.renderSkyEnd();
+            this.shadow$renderSkyEnd(matrixStackIn);
             ci.cancel();
         }
     }

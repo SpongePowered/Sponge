@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.api.mcp.world;
 
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ICollisionReader;
+import net.minecraft.world.ILightReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
@@ -45,7 +47,6 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -65,9 +66,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
     @Deprecated @Shadow boolean shadow$chunkExists(int p_217354_1_, int p_217354_2_);
     @Shadow int shadow$getHeight(Heightmap.Type p_201676_1_, int p_201676_2_, int p_201676_3_);
     @Shadow int shadow$getSkylightSubtracted();
-    @Shadow net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow int shadow$getSeaLevel();
-    @Shadow boolean shadow$isCollisionBoxesEmpty(net.minecraft.entity.Entity p_195586_1_, AxisAlignedBB p_195586_2_);
     @Shadow boolean shadow$hasWater(BlockPos p_201671_1_);
     @Deprecated @Shadow boolean shadow$isAreaLoaded(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
     @Shadow net.minecraft.world.dimension.Dimension shadow$getDimension();
@@ -84,17 +83,17 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     @Override
     default WorldBorder getBorder() {
-        return (WorldBorder) this.shadow$getWorldBorder();
+        return (WorldBorder) ((ICollisionReader) this).getWorldBorder();
     }
 
     @Override
     default boolean isInBorder(final Entity entity) {
-        return this.shadow$getWorldBorder().contains(((net.minecraft.entity.Entity) entity).getBoundingBox());
+        return ((ICollisionReader) this).getWorldBorder().contains(((net.minecraft.entity.Entity) entity).getBoundingBox());
     }
 
     @Override
     default boolean canSeeSky(final int x, final int y, final int z) {
-        return ((IWorldReader) this).isSkyLightMax(new BlockPos(x, y, z));
+        return ((ILightReader) this).canSeeSky(new BlockPos(x, y, z));
     }
 
     @Override
@@ -117,11 +116,6 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
     @Intrinsic
     default int readable$getSeaLevel() {
         return this.shadow$getSeaLevel();
-    }
-
-    @Override
-    default boolean isCollisionBoxesEmpty(@Nullable final Entity entity, final AABB aabb) {
-        return this.shadow$isCollisionBoxesEmpty((net.minecraft.entity.Entity) entity, VecHelper.toMinecraftAABB(aabb));
     }
 
     @Override
@@ -156,13 +150,6 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         throw new UnsupportedOperationException(
             "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
-
-// causes conflicting default methods
-//    @Override
-//    default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
-//        throw new UnsupportedOperationException(
-//            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
-//    }
 
     @Override
     default <T extends Entity> Collection<? extends T> getEntities(final Class<? extends T> entityClass, final AABB box,

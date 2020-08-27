@@ -28,12 +28,18 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.palette.UpgradeData;
+import net.minecraft.world.ITickList;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeContainer;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkSection;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
@@ -55,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
@@ -78,11 +85,12 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     private final net.minecraft.world.chunk.Chunk[] impl$neighbors = new net.minecraft.world.chunk.Chunk[4];
     private long impl$cacheKey;
 
-    @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/util/math/ChunkPos;[Lnet/minecraft/world/biome/Biome;)V",
+    @Inject(method = "<init>(Lnet/minecraft/world/World;Lnet/minecraft/util/math/ChunkPos;Lnet/minecraft/world/biome/BiomeContainer;Lnet/minecraft/util/palette/UpgradeData;Lnet/minecraft/world/ITickList;Lnet/minecraft/world/ITickList;J[Lnet/minecraft/world/chunk/ChunkSection;Ljava/util/function/Consumer;)V",
             at = @At("RETURN"))
-    private void impl$onConstruct(
-        final World worldIn, final ChunkPos p_i49945_2_, final Biome[] p_i49945_3_, final CallbackInfo ci) {
-        this.impl$cacheKey = ChunkPos.asLong(p_i49945_2_.x, p_i49945_2_.z);
+    private void impl$onConstruct(World p_i225781_1_, ChunkPos p_i225781_2_, BiomeContainer p_i225781_3_, UpgradeData p_i225781_4_,
+            ITickList<Block> p_i225781_5_, ITickList<Fluid> p_i225781_6_, long p_i225781_7_, ChunkSection[] p_i225781_9_,
+            Consumer<Chunk> p_i225781_10_, CallbackInfo ci) {
+        this.impl$cacheKey = ChunkPos.asLong(p_i225781_2_.x, p_i225781_2_.z);
     }
 
     @Override

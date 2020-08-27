@@ -22,26 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.mixin.api.mcp.entity.passive;
 
-import net.minecraft.util.ClassInheritanceMultiMap;
+import net.minecraft.entity.passive.BeeEntity;
+import org.spongepowered.api.entity.living.animal.Bee;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(ClassInheritanceMultiMap.class)
-public abstract class ClassInheritanceMultiMapMixin {
-
-    /**
-     * @author Minecrell
-     * @author i509VCB - February 23rd, 2020 - 1.14.4
-     *
-     * @reason Adds support for finding values by searching for one of their interfaces.
-     */
-    @Redirect(method = "getByClass",
-            at = @At(value = "INVOKE", target = "Ljava/lang/Class;isAssignableFrom(Ljava/lang/Class;)Z", remap = false))
-    private boolean impl$isAssignableFromOrInterface(final Class<?> baseClass, final Class<?> clazz) {
-        return clazz.isInterface() || baseClass.isAssignableFrom(clazz);
-    }
+@Mixin(BeeEntity.class)
+public abstract class BeeMixin_API implements Bee {
 
 }

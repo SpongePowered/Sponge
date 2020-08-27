@@ -1127,7 +1127,7 @@ public final class Constants {
             final ListNBT nbttaglist = new ListNBT();
 
             for (final double d1 : numbers) {
-                nbttaglist.add(new DoubleNBT(d1));
+                nbttaglist.add(DoubleNBT.valueOf(d1));
             }
 
             return nbttaglist;
@@ -1137,7 +1137,7 @@ public final class Constants {
             final ListNBT nbttaglist = new ListNBT();
 
             for (final float f : numbers) {
-                nbttaglist.add(new FloatNBT(f));
+                nbttaglist.add(FloatNBT.valueOf(f));
             }
 
             return nbttaglist;

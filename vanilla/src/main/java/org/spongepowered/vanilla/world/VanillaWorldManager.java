@@ -44,11 +44,14 @@ import net.minecraft.world.ForcedChunksSaveData;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
+import net.minecraft.world.biome.FuzzedBiomeMagnifier;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
+import net.minecraft.world.storage.CommandStorage;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.SessionLockException;
@@ -62,6 +65,7 @@ import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
@@ -650,6 +654,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
 
+            worldInfo.func_230145_a_(this.server.getServerModName(), this.server.func_230045_q_().isPresent());
+
             final ServerWorld serverWorld = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
                     dimensionType, this.server.getProfiler(), chunkStatusListener);
 
@@ -684,7 +690,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setServerTime(Util.milliTime());
         chunkProvider.registerTicket(TicketType.START, spawnChunkPos, 11, Unit.INSTANCE);
 
-        while (chunkProvider.func_217229_b() != 441) {
+        while (chunkProvider.getLoadedChunksCount() != 441) {
             ((MinecraftServerAccessor_Vanilla) this.server).accessor$setServerTime(Util.milliTime() + 10L);
             ((MinecraftServerAccessor_Vanilla) this.server).accessor$runScheduledTasks();
         }
@@ -712,7 +718,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     private DimensionType createDimensionType(final ResourceKey key, final SpongeDimensionType logicType, final String worldDirectory,
             final int dimensionId) {
         final DimensionType registeredType = DimensionTypeAccessor.accessor$construct(dimensionId, "", worldDirectory, logicType.getDimensionFactory(),
-                logicType.hasSkylight());
+                logicType.hasSkylight(), logicType == DimensionTypes.OVERWORLD.get() ? ColumnFuzzedBiomeMagnifier.INSTANCE : FuzzedBiomeMagnifier.INSTANCE);
         DimensionTypeAccessor.accessor$register(key.getFormatted(), registeredType);
 
         ((DimensionTypeBridge) registeredType).bridge$setSpongeDimensionType(logicType);
@@ -801,12 +807,20 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     private void performPostLoadWorldLogic(final ServerWorld serverWorld, final WorldSettings defaultSettings, final Path worldDirectory,
             final IChunkStatusListener listener) {
 
+        final boolean isDefaultWorld = serverWorld.getDimension().getType() == DimensionType.OVERWORLD;
+
         if (serverWorld.getWorldInfo().getGameType() == GameType.NOT_SET) {
             serverWorld.getWorldInfo().setGameType(this.server.getGameType());
         }
 
         // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$func_213204_a(serverWorld.getSavedData());
+
+        // TODO Dualspiral, look this over...Per world commands?
+        if (isDefaultWorld) {
+            ((MinecraftServerAccessor) this.server).accessor$setfield_229733_al(new CommandStorage(serverWorld.getSavedData()));
+        }
+
         serverWorld.getWorldBorder().copyFrom(serverWorld.getWorldInfo());
         if (!serverWorld.getWorldInfo().isInitialized()) {
             try {
@@ -829,7 +843,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         // Initialize PlayerData in PlayerList, add WorldBorder listener. We change the method in PlayerList to handle per-world border
         this.server.getPlayerList().func_212504_a(serverWorld);
-        if (serverWorld.dimension.getType() == DimensionType.OVERWORLD) {
+        if (isDefaultWorld) {
             ((SpongeUserManager) ((Server) this.server).getUserManager()).init();
         }
 
@@ -840,7 +854,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.server.ServerWorld) serverWorld));
 
-        if (serverWorld.dimension.getType() == DimensionType.OVERWORLD || ((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad()) {
+        if (isDefaultWorld || ((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad()) {
             this.loadSpawnChunks(serverWorld, listener);
         }
     }

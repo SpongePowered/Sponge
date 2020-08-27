@@ -67,10 +67,6 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
     //@formatter:off
     @Shadow @Final public PlayerInventory inventory;
 
-    @Shadow public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {
-        throw new UnsupportedOperationException("Shadowed");
-    }
-
     @Shadow public abstract void shadow$addStat(Stat<?> stat);
     @Shadow public abstract void shadow$addStat(ResourceLocation stat);
     @Shadow public abstract ITextComponent shadow$getDisplayName();
@@ -145,9 +141,9 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             ((PlayerEntityBridge) this).bridge$shouldRestoreInventory(false);
             final PlayerEntity player = (PlayerEntity) (PlayerEntityBridge) this;
 
-            final double posX1 = player.posX;
-            final double posY1 = player.posY - 0.3 + player.getEyeHeight();
-            final double posZ1 = player.posZ;
+            final double posX1 = player.getPosX();
+            final double posY1 = player.getPosY() - 0.3 + player.getEyeHeight();
+            final double posZ1 = player.getPosZ();
             // Now the real fun begins.
             final ItemStack item;
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);

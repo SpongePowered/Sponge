@@ -143,7 +143,7 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
         method = "setInventorySlotContents",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;func_214005_h()I"
+            target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;getCookTime()I"
         )
     )
     private void impl$interruptSmelt(final CallbackInfo ci) {
@@ -161,7 +161,7 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;func_214007_c(Lnet/minecraft/item/crafting/IRecipe;)V"
+                target = "Lnet/minecraft/tileentity/AbstractFurnaceTileEntity;smelt(Lnet/minecraft/item/crafting/IRecipe;)V"
             ),
             to = @At(
                 value = "INVOKE",
@@ -185,7 +185,7 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
 
     // Finish
     @Inject(
-        method = "func_214007_c",
+        method = "smelt",
         locals = LocalCapture.CAPTURE_FAILHARD,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;shrink(I)V"))
     private void impl$afterSmeltItem(final IRecipe<?> recipe, final CallbackInfo ci) {

@@ -40,7 +40,7 @@ public final class EntityTypeSupplier {
     private EntityTypeSupplier() {
     }
 
-    // TODO Minecraft 1.14 - Figure out how to turn back on serialization for Human
+    // TODO Minecraft 1.15 - Figure out how to turn back on serialization for Human
     private static net.minecraft.entity.EntityType<HumanEntity> createHumanType() {
         final ResourceKey key = ResourceKey.sponge("human");
         final net.minecraft.entity.EntityType<HumanEntity> entityType = net.minecraft.entity.EntityType.Builder.create(HumanEntity::new, EntityClassification.CREATURE)
@@ -56,6 +56,7 @@ public final class EntityTypeSupplier {
             .registerSupplier(EntityType.class, "armor_stand", () -> (EntityType) net.minecraft.entity.EntityType.ARMOR_STAND)
             .registerSupplier(EntityType.class, "arrow", () -> (EntityType) net.minecraft.entity.EntityType.ARROW)
             .registerSupplier(EntityType.class, "bat", () -> (EntityType) net.minecraft.entity.EntityType.BAT)
+            .registerSupplier(EntityType.class, "bee", () -> (EntityType) net.minecraft.entity.EntityType.BEE)
             .registerSupplier(EntityType.class, "blaze", () -> (EntityType) net.minecraft.entity.EntityType.BLAZE)
             .registerSupplier(EntityType.class, "boat", () -> (EntityType) net.minecraft.entity.EntityType.BOAT)
             .registerSupplier(EntityType.class, "cat", () -> (EntityType) net.minecraft.entity.EntityType.CAT)
@@ -154,6 +155,8 @@ public final class EntityTypeSupplier {
             .registerSupplier(EntityType.class, "lightning_bolt", () -> (EntityType) net.minecraft.entity.EntityType.LIGHTNING_BOLT)
             .registerSupplier(EntityType.class, "player", () -> (EntityType) net.minecraft.entity.EntityType.PLAYER)
             .registerSupplier(EntityType.class, "fishing_bobber", () -> (EntityType) net.minecraft.entity.EntityType.FISHING_BOBBER)
+
+            // Beep boop
             .registerSupplier(EntityType.class, "human", () -> (EntityType) HUMAN)
         ;
     }

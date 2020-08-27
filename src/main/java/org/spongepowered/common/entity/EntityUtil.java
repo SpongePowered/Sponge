@@ -206,8 +206,8 @@ public final class EntityUtil {
         // We send dimension change for portals before loading chunks
         if (!isPortal) {
             // Sponge Start - Allow the platform to handle how dimension changes are sent down
-            ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(toWorld.dimension.getType(), worldinfo.getGenerator(), player
-                    .interactionManager.getGameType());
+            ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(toWorld.dimension.getType(), WorldInfo.byHashing(worldinfo.getSeed()),
+                    worldinfo.getGenerator(), player.interactionManager.getGameType());
         }
         player.dimension = toWorld.dimension.getType();
         // Sponge End
@@ -222,7 +222,7 @@ public final class EntityUtil {
         // Sponge End
 
         player.setWorld(toWorld);
-        toWorld.func_217447_b(player);
+        toWorld.addRespawnedPlayer(player);
         if (isPortal) {
             ((ServerPlayerEntityAccessor) player).accessor$func_213846_b(toWorld);
         }
@@ -247,7 +247,7 @@ public final class EntityUtil {
         ((ServerPlayerEntityAccessor) player).accessor$setLastFoodLevel(-1);
 
         if (!isPortal) {
-            player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+            player.connection.setPlayerLocation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, player.rotationPitch);
             player.connection.captureCurrentPosition();
         }
 
@@ -316,20 +316,6 @@ public final class EntityUtil {
         return true;
     }
 
-
-    private static Vec3d getPositionEyes(final Entity entity, final float partialTicks)
-    {
-        if (partialTicks == 1.0F)
-        {
-            return new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
-        }
-
-        final double interpX = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks;
-        final double interpY = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks + entity.getEyeHeight();
-        final double interpZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
-        return new Vec3d(interpX, interpY, interpZ);
-    }
-
     /**
      * A simple redirected static util method for {@link Entity#entityDropItem(ItemStack, float)}.
      * What this does is ensures that any possibly required wrapping of captured drops is performed.
@@ -350,7 +336,7 @@ public final class EntityUtil {
         // Now the real fun begins.
         final ItemStack item;
         final double posX = xPos;
-        final double posY = entity.posY + offsetY;
+        final double posY = entity.getPosY() + offsetY;
         final double posZ = zPos;
 
         // FIRST we want to throw the DropItemEvent.PRE

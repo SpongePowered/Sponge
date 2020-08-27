@@ -39,10 +39,12 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 public final class VanillaPacketHooks implements PacketHooks {
 
     @Override
-    public SJoinGamePacket createSJoinGamePacket(ServerPlayerEntity entity, GameType gameType, boolean isHardcore, DimensionType dimensionType,
-            int maxPlayers, WorldType generatorType, int viewDistance, boolean isReducedDebugMode) {
+    public SJoinGamePacket createSJoinGamePacket(final ServerPlayerEntity entity, final GameType gameType, final long seed,
+            final boolean hardcodeMode, final DimensionType dimensionType, final int maxPlayers, final WorldType generatorType,
+            final int viewDistance, final boolean isReducedDebugMode, final boolean enableRespawnScreen) {
         if (((ServerPlayerEntityBridge) entity).bridge$getClientType() == ClientType.SPONGE_VANILLA) {
-            return new SJoinGamePacket(entity.getEntityId(), gameType, isHardcore, dimensionType, maxPlayers, generatorType, viewDistance, isReducedDebugMode);
+            return new SJoinGamePacket(entity.getEntityId(), gameType, seed, hardcodeMode, dimensionType, maxPlayers, generatorType, viewDistance,
+                    isReducedDebugMode, enableRespawnScreen);
         } else {
             DimensionType clientType;
             final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
@@ -54,8 +56,8 @@ public final class VanillaPacketHooks implements PacketHooks {
                 clientType = DimensionType.THE_END;
             }
 
-            return new SJoinGamePacket(entity.getEntityId(), gameType, isHardcore, clientType, maxPlayers, generatorType, viewDistance,
-                    isReducedDebugMode);
+            return new SJoinGamePacket(entity.getEntityId(), gameType, seed, hardcodeMode, clientType, maxPlayers, generatorType, viewDistance,
+                    isReducedDebugMode, enableRespawnScreen);
         }
     }
 }

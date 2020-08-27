@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.dimension;
 
 import net.minecraft.world.World;
+import net.minecraft.world.biome.IBiomeMagnifier;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +41,8 @@ public interface DimensionTypeAccessor {
 
     @Accessor("directory") String accessor$getDirectory();
 
-    @Invoker("<init>") static DimensionType accessor$construct(int id, String suffix, String directoryName, BiFunction<World, DimensionType, ? extends Dimension> factory, boolean hasSkylight) {
+    @Invoker("<init>") static DimensionType accessor$construct(int id, String suffix, String directoryName, BiFunction<World, DimensionType, ?
+            extends Dimension> factory, boolean hasSkylight, IBiomeMagnifier biomeMagnifier) {
         throw new RuntimeException("Accessor was not mixed!");
     }
 

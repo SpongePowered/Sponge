@@ -70,8 +70,9 @@ import javax.annotation.Nullable;
 public abstract class CraftingResultSlotMixin_Inventory extends Slot {
 
     @Shadow @Final private PlayerEntity player;
-    @Shadow @Final private net.minecraft.inventory.CraftingInventory field_75239_a; // craftMatrix
     @Shadow private int amountCrafted;
+
+    @Shadow @Final private net.minecraft.inventory.CraftingInventory craftMatrix;
 
     public CraftingResultSlotMixin_Inventory(final IInventory inventoryIn, final int index, final int xPosition, final int yPosition) {
         super(inventoryIn, index, xPosition, yPosition);
@@ -96,8 +97,9 @@ public abstract class CraftingResultSlotMixin_Inventory extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void beforeTake(final PlayerEntity thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
-        if (this.impl$lastRecipe == null || !((IRecipe) this.impl$lastRecipe).matches(this.field_75239_a, thePlayer.world)) {
-            this.impl$lastRecipe = ((CraftingRecipe) thePlayer.world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, this.field_75239_a, thePlayer.world).orElse(null));
+        if (this.impl$lastRecipe == null || !((IRecipe) this.impl$lastRecipe).matches(this.craftMatrix, thePlayer.world)) {
+            this.impl$lastRecipe = ((CraftingRecipe) thePlayer.world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, this.craftMatrix,
+                    thePlayer.world).orElse(null));
         }
         if (((TrackedContainerBridge) thePlayer.openContainer).bridge$isShiftCrafting()) {
             ((TrackedContainerBridge) thePlayer.openContainer).bridge$detectAndSendChanges(true);
@@ -126,11 +128,6 @@ public abstract class CraftingResultSlotMixin_Inventory extends Slot {
         return worldIn.getRecipeManager().getRecipeNonNull(recipeTypeIn, inventoryIn, worldIn);
     }
 
-    /**
-     * Create CraftItemEvent.Post result is also handled by
-     * {@link ContainerMixin_Inventory#redirectTransferStackInSlot} or
-     * {@link ContainerMixin_Inventory#redirectOnTakeThrow}
-     */
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))
     private void afterTake(final PlayerEntity thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
         if (((WorldBridge) thePlayer.world).bridge$isFake()) {
@@ -180,7 +177,7 @@ public abstract class CraftingResultSlotMixin_Inventory extends Slot {
         ((TrackedInventoryBridge) thePlayer.openContainer).bridge$setCaptureInventory(true);
 
         final List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) container).bridge$getPreviewTransactions();
-        if (this.field_75239_a.isEmpty()) {
+        if (this.craftMatrix.isEmpty()) {
             return; // CraftMatrix is empty and/or no transaction present. Do not fire Preview.
         }
 
@@ -192,7 +189,7 @@ public abstract class CraftingResultSlotMixin_Inventory extends Slot {
             last = previewTransactions.get(0);
         }
 
-        Optional<ICraftingRecipe> newRecipe = thePlayer.world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, this.field_75239_a, thePlayer.world);
+        Optional<ICraftingRecipe> newRecipe = thePlayer.world.getRecipeManager().getRecipe(IRecipeType.CRAFTING, this.craftMatrix, thePlayer.world);
 
         InventoryEventFactory.callCraftEventPre(thePlayer, craftingInventory, last, (CraftingRecipe) newRecipe.orElse(null), container, previewTransactions);
         previewTransactions.clear();

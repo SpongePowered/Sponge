@@ -45,18 +45,18 @@ import org.spongepowered.math.vector.Vector3i;
 @Mixin(EnchantmentContainer.class)
 public abstract class EnchantmentContainerMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {
 
-    @Shadow @Final private IWorldPosCallable field_217006_g;
+    @Shadow @Final private IWorldPosCallable worldPosCallable;
 
     @Override
     public ServerLocation getLocation() {
-        return this.field_217006_g.apply((world, pos) ->
+        return this.worldPosCallable.apply((world, pos) ->
                 ServerLocation.of(((ServerWorld) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
         ).orElse(null);
     }
 
     @Override
     public World<?> getWorld() {
-        return this.field_217006_g.apply((world, pos) -> (World<?>) world).orElse(null);
+        return this.worldPosCallable.apply((world, pos) -> (World<?>) world).orElse(null);
     }
 
 }

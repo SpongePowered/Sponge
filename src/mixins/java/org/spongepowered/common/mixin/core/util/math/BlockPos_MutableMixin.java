@@ -31,16 +31,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.util.math.BlockPosBridge;
 
-@Mixin(BlockPos.MutableBlockPos.class)
+@Mixin(BlockPos.Mutable.class)
 @Implements(@Interface(iface = BlockPosBridge.class, prefix = "inline$", unique = true))
-public abstract class BlockPos_MutableBlockPosMixin extends BlockPos implements BlockPosBridge {
+public abstract class BlockPos_MutableMixin extends BlockPos implements BlockPosBridge {
 
     @Shadow protected int x;
     @Shadow protected int y;
     @Shadow protected int z;
 
     // NOT USED
-    public BlockPos_MutableBlockPosMixin(final int xIn, final int yIn, final int zIn) {
+    public BlockPos_MutableMixin(final int xIn, final int yIn, final int zIn) {
         super(xIn, yIn, zIn);
     }
 

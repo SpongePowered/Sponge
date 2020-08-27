@@ -42,14 +42,14 @@ import java.util.stream.Collector;
 public final class NbtCollectors {
 
     private static final Collector<INBT, ?, ListNBT> TO_TAG_LIST = toTagList(value -> value);
-    private static final Collector<Long, ?, ListNBT> TO_LONG_TAG_LIST = toTagList(LongNBT::new);
-    private static final Collector<Integer, ?, ListNBT> TO_INT_TAG_LIST = toTagList(IntNBT::new);
-    private static final Collector<Byte, ?, ListNBT> TO_BYTE_TAG_LIST = toTagList(ByteNBT::new);
-    private static final Collector<Short, ?, ListNBT> TO_SHORT_TAG_LIST = toTagList(ShortNBT::new);
-    private static final Collector<Boolean, ?, ListNBT> TO_BOOLEAN_TAG_LIST = toTagList(value -> new ByteNBT((byte) (value ? 1 : 0)));
-    private static final Collector<Double, ?, ListNBT> TO_DOUBLE_TAG_LIST = toTagList(DoubleNBT::new);
-    private static final Collector<Float, ?, ListNBT> TO_FLOAT_TAG_LIST = toTagList(FloatNBT::new);
-    private static final Collector<String, ?, ListNBT> TO_STRING_TAG_LIST = toTagList(StringNBT::new);
+    private static final Collector<Long, ?, ListNBT> TO_LONG_TAG_LIST = toTagList(LongNBT::valueOf);
+    private static final Collector<Integer, ?, ListNBT> TO_INT_TAG_LIST = toTagList(IntNBT::valueOf);
+    private static final Collector<Byte, ?, ListNBT> TO_BYTE_TAG_LIST = toTagList(ByteNBT::valueOf);
+    private static final Collector<Short, ?, ListNBT> TO_SHORT_TAG_LIST = toTagList(ShortNBT::valueOf);
+    private static final Collector<Boolean, ?, ListNBT> TO_BOOLEAN_TAG_LIST = toTagList(ByteNBT::valueOf);
+    private static final Collector<Double, ?, ListNBT> TO_DOUBLE_TAG_LIST = toTagList(DoubleNBT::valueOf);
+    private static final Collector<Float, ?, ListNBT> TO_FLOAT_TAG_LIST = toTagList(FloatNBT::valueOf);
+    private static final Collector<String, ?, ListNBT> TO_STRING_TAG_LIST = toTagList(StringNBT::valueOf);
 
     private static final Collector<INBT, ?, List<String>> TO_STRING_LIST = toList(INBT::getString);
 

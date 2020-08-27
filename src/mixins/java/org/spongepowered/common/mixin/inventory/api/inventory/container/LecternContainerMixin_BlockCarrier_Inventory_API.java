@@ -37,16 +37,16 @@ import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
 @Mixin(LecternContainer.class)
 public abstract class LecternContainerMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {
 
-    @Shadow @Final private IInventory field_217018_c;
+    @Shadow @Final private IInventory lecternInventory;
 
     @Override
     public ServerLocation getLocation() {
-        return ((BlockEntity) this.field_217018_c).getServerLocation();
+        return ((BlockEntity) this.lecternInventory).getServerLocation();
     }
 
     @Override
     public World<?> getWorld() {
-        return ((BlockEntity) this.field_217018_c).getWorld();
+        return ((BlockEntity) this.lecternInventory).getWorld();
     }
 
 }

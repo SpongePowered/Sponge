@@ -100,12 +100,11 @@ public abstract class AbstractArrowEntityMixin extends EntityMixin {
                     final BlockPos blockpos = blockraytraceresult.getPos();
                     BlockState blockstate = this.world.getBlockState(blockraytraceresult.getPos());
                     this.inBlockState = blockstate;
-                    Vec3d vec3d = blockraytraceresult.getHitVec().subtract(this.posX, this.posY, this.posZ);
+                    Vec3d vec3d = blockraytraceresult.getHitVec().subtract(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ());
                     this.shadow$setMotion(vec3d);
-                    Vec3d vec3d1 = vec3d.normalize().scale((double)0.05F);
-                    this.posX -= vec3d1.x;
-                    this.posY -= vec3d1.y;
-                    this.posZ -= vec3d1.z;
+                    Vec3d vec3d1 = vec3d.normalize().scale(0.05F);
+                    this.shadow$setPosition(this.shadow$getPosX() - vec3d1.x, this.shadow$getPosY() - vec3d1.y, this.shadow$getPosZ() -
+                            vec3d1.z);
                     this.inGround = true;
                     this.arrowShake = 7;
                     this.shadow$setIsCritical(false);

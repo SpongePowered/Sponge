@@ -132,7 +132,9 @@ public abstract class ItemFireworkMixin {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);
-                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), ServerLocation.of((ServerWorld) world, player.posX, player.posY, player.posZ), new Vector3d(0, 0, 0), EntityTypes.FIREWORK_ROCKET.get());
+                final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
+                        ServerLocation.of((ServerWorld) world, player.getPosX(), player.getPosY(), player.getPosZ()), new Vector3d(0, 0, 0),
+                        EntityTypes.FIREWORK_ROCKET.get());
                 return SpongeCommon.postEvent(event);
             }
         }
@@ -140,7 +142,7 @@ public abstract class ItemFireworkMixin {
     }
 
     @Inject(method = "onItemUse",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
@@ -150,7 +152,7 @@ public abstract class ItemFireworkMixin {
         }
     }
     @Inject(method = "onItemRightClick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )

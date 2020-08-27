@@ -95,7 +95,10 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
     private void impl$ThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, final RayTraceResult rayTraceResult, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
-            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(), ServerLocation.of((ServerWorld) worldIn, playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
+            final ConstructEntityEvent.Pre event =
+                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                            ServerLocation.of((ServerWorld) worldIn, playerIn.getPosX(), playerIn.getPosY() + (double) (playerIn.getSize(playerIn
+                                    .getPose()).height / 2.0F), playerIn.getPosZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }
@@ -104,20 +107,16 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
 
     /**
      * In production, the RayTraceResult is lost.
-     *
-     * @param worldIn
-     * @param playerIn
-     * @param handIn
-     * @param cir
-     * @param used
-     * @param targetPos
      */
     @SuppressWarnings("Duplicates")
     @Surrogate
     private void impl$ThrowForPreEvent(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
-            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(), ServerLocation.of((ServerWorld) worldIn, playerIn.posX, playerIn.posY + (double) (playerIn.getSize(playerIn.getPose()).height / 2.0F), playerIn.posZ), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
+            final ConstructEntityEvent.Pre event =
+                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                            ServerLocation.of((ServerWorld) worldIn, playerIn.getPosX(), playerIn.getPosY() + (double) (playerIn.getSize(playerIn
+                                    .getPose()).height / 2.0F), playerIn.getPosZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.postEvent(event)) {
                 cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, used));
             }
@@ -145,7 +144,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
     @Inject(method = "onItemRightClick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"
+            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"
         ),
         slice = @Slice(
             from = @At(
@@ -174,15 +173,6 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
      * into the LVT.... So.... Don't care which one is actually on the stack, it might be the one from
      * {@link #implThrowForPreEvent(World, EntityPlayer, EnumHand, CallbackInfoReturnable, ItemStack, BlockPos)}
      * or some other injection. Either way, this one works in production.
-     *
-     * @param worldIn
-     * @param playerIn
-     * @param handIn
-     * @param cir
-     * @param playerStack
-     * @param targetPos
-     * @param enderEye
-     * @param preEventCir
      */
     @Surrogate
     private void implSetShooter(final World worldIn, final PlayerEntity playerIn, final Hand handIn,

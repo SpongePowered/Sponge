@@ -53,8 +53,8 @@ import org.spongepowered.math.vector.Vector3i;
 @Mixin(PlayerInteractionManager.class)
 public class PlayerInteractionManagerMixin_Tracker {
 
-
     @Shadow public ServerPlayerEntity player;
+    @Shadow public net.minecraft.world.server.ServerWorld world;
 
     // Handle Spectator opening a Container
     @Inject(method = "func_219441_a", cancellable = true,
@@ -76,11 +76,11 @@ public class PlayerInteractionManagerMixin_Tracker {
     // Handle non-Spectator opening a Container
     @Redirect(method = "func_219441_a",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/block/BlockState;onBlockActivated(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/math/BlockRayTraceResult;)Z"))
-    public boolean afterOpenContainer(BlockState blockState, World worldIn, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+                    target = "Lnet/minecraft/block/BlockState;onBlockActivated(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/math/BlockRayTraceResult;)Lnet/minecraft/util/ActionResultType;"))
+    public ActionResultType afterOpenContainer(BlockState blockState, World worldIn, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         final Container lastOpenContainer = player.openContainer;
-        final boolean result = blockState.onBlockActivated(worldIn, player, handIn, hit);
-        if (result && lastOpenContainer != player.openContainer) {
+        final ActionResultType result = blockState.onBlockActivated(worldIn, player, handIn, hit);
+        if (result.isSuccess() && lastOpenContainer != player.openContainer) {
             final Vector3i pos = VecHelper.toVector3i(hit.getPos());
             final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
             try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -88,7 +88,7 @@ public class PlayerInteractionManagerMixin_Tracker {
                 frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld) (worldIn)).createSnapshot(pos));
                 ((ContainerBridge) player.openContainer).bridge$setOpenLocation(location);
                 if (!InventoryEventFactory.callInteractContainerOpenEvent((ServerPlayerEntity) player)) {
-                    return false;
+                    return ActionResultType.FAIL;
                 }
             }
         }

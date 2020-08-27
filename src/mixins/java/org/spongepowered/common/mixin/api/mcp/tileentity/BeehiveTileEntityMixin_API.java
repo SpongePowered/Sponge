@@ -22,14 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.chunk.storage;
+package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.world.chunk.storage.RegionFile;
+import net.minecraft.tileentity.BeehiveTileEntity;
+import org.spongepowered.api.block.entity.Beehive;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(RegionFile.class)
-public interface RegionFileAccessor {
+@Mixin(BeehiveTileEntity.class)
+public abstract class BeehiveTileEntityMixin_API implements Beehive {
 
-    @Accessor("offsets") int[] accessor$getOffsets();
 }

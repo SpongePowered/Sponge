@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.raid;
 import net.minecraft.entity.monster.AbstractRaiderEntity;
 import net.minecraft.world.raid.Raid;
 import org.spongepowered.api.raid.RaidWave;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,9 +43,9 @@ import java.util.Set;
 @Mixin(Raid.class)
 public abstract class RaidMixin implements RaidBridge {
 
-    @Shadow private Map<Integer, Set<AbstractRaiderEntity>> raiders;
+    @Final @Shadow private Map<Integer, Set<AbstractRaiderEntity>> raiders;
 
-    private Map<Integer, RaidWave> impl$waves = new HashMap<>();
+    private final Map<Integer, RaidWave> impl$waves = new HashMap<>();
 
     // Minecraft's raids have no real concept of a wave object but instead have two maps containing raiders. We make a Wave object for the API.
     @Inject(method = "<init>*", at = @At("TAIL"))
