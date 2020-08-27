@@ -22,19 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.core.world.server;
 
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.play.server.SUpdateBossInfoPacket;
 import net.minecraft.world.BossInfo;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.world.server.ServerBossInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.mixin.core.world.BossInfoMixin;
 
 import java.util.Set;
 
@@ -84,7 +85,7 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
     // Convert to using BossBar.Listener
 
     @Redirect(method = {"setPercent", "setColor", "setOverlay", "setDarkenSky", "setPlayEndBossMusic", "setCreateFog", "setName"},
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ServerBossInfo;sendUpdate(Lnet/minecraft/network/play/server/SUpdateBossInfoPacket$Operation;)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerBossInfo;sendUpdate(Lnet/minecraft/network/play/server/SUpdateBossInfoPacket$Operation;)V"))
     private void redirectUpdatePacket(final ServerBossInfo $this, final SUpdateBossInfoPacket.Operation op) {
         // This becomes a no-op, the Adventure BossBar's listener calls this update operation
     }

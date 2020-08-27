@@ -106,15 +106,12 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Shadow protected @Final WorldInfo worldInfo;
     @Shadow @Final public List<TileEntity> loadedTileEntityList;
 
-    @Shadow public abstract Biome shadow$getBiome(BlockPos p_180494_1_);
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract net.minecraft.world.chunk.Chunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
     @Shadow public abstract boolean shadow$setBlockState(BlockPos p_180501_1_, BlockState p_180501_2_, int p_180501_3_);
     @Shadow public abstract boolean shadow$removeBlock(BlockPos p_217377_1_, boolean p_217377_2_);
-    @Shadow public abstract boolean shadow$destroyBlock(BlockPos p_175655_1_, boolean p_175655_2_);
     @Shadow public abstract int shadow$getHeight(Heightmap.Type p_201676_1_, int p_201676_2_, int p_201676_3_);
-    @Shadow public abstract int shadow$getLightFor(LightType p_175642_1_, BlockPos p_175642_2_);
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos p_175625_1_);
@@ -132,7 +129,6 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Shadow public abstract Dimension shadow$getDimension();
     @Shadow public abstract Random shadow$getRandom();
     @Shadow public abstract boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<BlockState> p_217375_2_);
-    @Shadow public abstract BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
 
     private Context impl$context;
 
@@ -209,7 +205,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
         if (chunkProvider instanceof ServerChunkProvider) {
             final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerChunkProvider) chunkProvider).chunkManager;
             final List<Chunk> chunks = new ArrayList<>();
-            chunkManager.accessor$getLoadedChunksIterable().forEach(holder -> chunks.add((Chunk) holder.func_219298_c()));
+            chunkManager.accessor$getLoadedChunksIterable().forEach(holder -> chunks.add((Chunk) holder.getChunkIfComplete()));
             return chunks;
         }
         return Collections.emptyList();

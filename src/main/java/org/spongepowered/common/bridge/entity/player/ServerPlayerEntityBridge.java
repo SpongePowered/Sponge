@@ -133,8 +133,8 @@ public interface ServerPlayerEntityBridge {
     default void bridge$sendDimensionData(final NetworkManager manager, final DimensionType dimensionType) {
     }
 
-    default void bridge$sendChangeDimension(final DimensionType type, final WorldType generator, final GameType gameType) {
-        ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(type, generator, gameType));
+    default void bridge$sendChangeDimension(final DimensionType type, final long hashedSeed, final WorldType generator, final GameType gameType) {
+        ((ServerPlayerEntity) this).connection.sendPacket(new SRespawnPacket(type, hashedSeed, generator, gameType));
     }
 
     default void bridge$sendViewerEnvironment(final SpongeDimensionType dimensionType) {

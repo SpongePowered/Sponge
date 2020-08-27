@@ -79,7 +79,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow public abstract net.minecraft.world.server.ServerWorld shadow$getServerWorld();
     @Shadow public abstract void shadow$setSpectatingEntity(Entity p_175399_1_);
     @Shadow public abstract void shadow$stopRiding();
-    @Shadow protected abstract void shadow$func_213846_b(net.minecraft.world.server.ServerWorld p_213846_1_);
 
     // @formatter:on
 
@@ -178,9 +177,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
                 destinationWorld = (net.minecraft.world.server.ServerWorld) event.getDestinationWorld();
 
-                this.posX = repositionEvent.getDestinationPosition().getX();
-                this.posY = repositionEvent.getDestinationPosition().getY();
-                this.posZ = repositionEvent.getDestinationPosition().getZ();
+                this.shadow$setPosition(repositionEvent.getDestinationPosition().getX(), repositionEvent.getDestinationPosition().getY(),
+                        repositionEvent.getDestinationPosition().getZ());
             } else {
                 final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
                         (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()),
@@ -189,19 +187,17 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                     return false;
                 }
 
-                this.posX = event.getDestinationPosition().getX();
-                this.posY = event.getDestinationPosition().getY();
-                this.posZ = event.getDestinationPosition().getZ();
+                this.shadow$setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(), event.getDestinationPosition().getZ());
             }
 
             ((ServerPlayerEntity) (Object) this).stopRiding();
             ((ServerPlayerEntity) (Object) this).setSpectatingEntity((Entity) (Object) this);
 
             if (((ServerPlayerEntity) (Object) this).isSleeping()) {
-                ((ServerPlayerEntity) (Object) this).wakeUpPlayer(true, true, false);
+                ((ServerPlayerEntity) (Object) this).stopSleepInBed(true, true);
             }
 
-            final ChunkPos chunkPos = new ChunkPos((int) this.posX >> 4, (int) this.posZ >> 4);
+            final ChunkPos chunkPos = new ChunkPos((int) this.shadow$getPosX() >> 4, (int) this.shadow$getPosZ() >> 4);
             destinationWorld.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((ServerPlayerEntity) (Object) this).getEntityId());
             ((ServerPlayerEntity) (Object) this).stopRiding();
 
@@ -209,7 +205,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) (Object) this, this.shadow$getServerWorld(),
                         (net.minecraft.world.server.ServerWorld) location.getWorld(), destinationWorld, false);
             } else {
-                this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
+                this.connection.setPlayerLocation(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ(), this.rotationYaw,
+                        this.rotationPitch);
                 this.connection.captureCurrentPosition();
             }
         }
@@ -263,7 +260,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 this.shadow$stopRiding();
 
                 if (player.isSleeping()) {
-                    player.wakeUpPlayer(true, true, false);
+                    player.stopSleepInBed(true, true);
                 }
 
                 player.connection.setPlayerLocation(actualX, actualY, actualZ, (float) actualYaw, (float) actualPitch);
@@ -290,9 +287,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                     return;
                 }
 
-                this.posX = posEvent.getDestinationPosition().getX();
-                this.posY = posEvent.getDestinationPosition().getY();
-                this.posZ = posEvent.getDestinationPosition().getZ();
+                this.shadow$setPosition(posEvent.getDestinationPosition().getX(), posEvent.getDestinationPosition().getY(),
+                        posEvent.getDestinationPosition().getZ());
 
                 if (!SpongeCommon.postEvent(rotateEvent)) {
                     this.rotationYaw = (float) rotateEvent.getToRotation().getX();

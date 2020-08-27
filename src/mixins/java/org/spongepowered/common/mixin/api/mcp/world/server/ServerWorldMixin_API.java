@@ -39,12 +39,11 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.ServerTickList;
-import net.minecraft.world.Teleporter;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.raid.Raid;
 import net.minecraft.world.raid.RaidManager;
 import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerTickList;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.SessionLockException;
@@ -84,7 +83,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -161,7 +159,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
         final File worldDirectory = this.shadow$getSaveHandler().getWorldDirectory();
         if (worldDirectory == null) {
             new PrettyPrinter(60).add("A Server World has a null save directory!").centre().hr()
-                    .add("%s : %s", "World Name", ((SaveHandlerAccessor) this.shadow$getSaveHandler()).accessor$getName())
+                    .add("%s : %s", "World Name", ((SaveHandlerAccessor) this.shadow$getSaveHandler()).accessor$getWorldId())
                     .add("%s : %s", "Dimension", this.getProperties().getDimensionType())
                     .add("Please report this to sponge developers so they may potentially fix this")
                     .trace(System.err, SpongeCommon.getLogger(), Level.ERROR);

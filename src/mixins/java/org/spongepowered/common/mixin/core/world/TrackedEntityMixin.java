@@ -45,7 +45,7 @@ import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.accessor.network.datasync.EntityDataManagerAccessor;
-import org.spongepowered.common.network.SpoofedEntityDataManager;
+import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -151,7 +151,7 @@ public abstract class TrackedEntityMixin {
         final Entity player = ((EntityDataManagerAccessor) manager).accessor$getEntity();
         if (player instanceof ServerPlayerEntityBridge) {
             if (((ServerPlayerEntityBridge) player).bridge$isHealthScaled()) {
-                return new SpoofedEntityDataManager(manager, player);
+                throw new MissingImplementationException("TrackedEntityMixin", "scaledHealthSendMetadata");
             }
         }
         return manager;

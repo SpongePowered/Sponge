@@ -91,7 +91,7 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
                 containerToCompound(container.getView(entry.getKey()).get(), inner);
                 compound.put(key, inner);
             } else if (value instanceof Boolean) {
-                compound.put(key + BOOLEAN_IDENTIFIER, new ByteNBT(((Boolean) value) ? (byte) 1 : 0));
+                compound.put(key + BOOLEAN_IDENTIFIER, ByteNBT.valueOf((Boolean) value));
             } else {
                 compound.put(key, getBaseFromObject(value));
             }
@@ -99,24 +99,24 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static INBT getBaseFromObject(Object value) {
+    private static INBT getBaseFromObject(final Object value) {
         checkNotNull(value);
         if (value instanceof Boolean) {
-            return new ByteNBT((Boolean) value ? (byte) 1 : 0);
+            return ByteNBT.valueOf((Boolean) value);
         } else if (value instanceof Byte) {
-            return new ByteNBT((Byte) value);
+            return ByteNBT.valueOf((Byte) value);
         } else if (value instanceof Short) {
-            return new ShortNBT((Short) value);
+            return ShortNBT.valueOf((Short) value);
         } else if (value instanceof Integer) {
-            return new IntNBT((Integer) value);
+            return IntNBT.valueOf((Integer) value);
         } else if (value instanceof Long) {
-            return new LongNBT((Long) value);
+            return LongNBT.valueOf((Long) value);
         } else if (value instanceof Float) {
-            return new FloatNBT((Float) value);
+            return FloatNBT.valueOf((Float) value);
         } else if (value instanceof Double) {
-            return new DoubleNBT((Double) value);
+            return DoubleNBT.valueOf((Double) value);
         } else if (value instanceof String) {
-            return new StringNBT((String) value);
+            return StringNBT.valueOf((String) value);
         } else if (value.getClass().isArray()) {
             if (value instanceof byte[]) {
                 return new ByteArrayNBT((byte[]) value);
@@ -219,7 +219,7 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
                 view.set(of(key), ((ByteArrayNBT) base).getByteArray());
                 break;
             case Constants.NBT.TAG_STRING:
-                view.set(of(key), ((StringNBT) base).getString());
+                view.set(of(key), base.getString());
                 break;
             case Constants.NBT.TAG_LIST:
                 ListNBT list = (ListNBT) base;

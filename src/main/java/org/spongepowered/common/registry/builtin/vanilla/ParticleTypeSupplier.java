@@ -93,6 +93,10 @@ public final class ParticleTypeSupplier {
             .registerSupplier(ParticleType.class, "dolphin", () -> (ParticleType) ParticleTypes.DOLPHIN)
             .registerSupplier(ParticleType.class, "campfire_cosy_smoke", () -> (ParticleType) ParticleTypes.CAMPFIRE_COSY_SMOKE)
             .registerSupplier(ParticleType.class, "campfire_signal_smoke", () -> (ParticleType) ParticleTypes.CAMPFIRE_SIGNAL_SMOKE)
+            .registerSupplier(ParticleType.class, "dripping_honey", () -> (ParticleType) ParticleTypes.DRIPPING_HONEY)
+            .registerSupplier(ParticleType.class, "falling_honey", () -> (ParticleType) ParticleTypes.FALLING_HONEY)
+            .registerSupplier(ParticleType.class, "landing_honey", () -> (ParticleType) ParticleTypes.LANDING_HONEY)
+            .registerSupplier(ParticleType.class, "falling_nectar", () -> (ParticleType) ParticleTypes.FALLING_NECTAR)
         ;
     }
 }

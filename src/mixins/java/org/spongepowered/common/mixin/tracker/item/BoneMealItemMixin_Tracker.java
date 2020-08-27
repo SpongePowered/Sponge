@@ -30,6 +30,7 @@ import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -56,15 +57,6 @@ public abstract class BoneMealItemMixin_Tracker {
      * {@link ChangeBlockEvent.Grow} without specifying the cases
      * where the phase blockState needs to throw the event during another
      * phases's capturing.
-     *
-     * @param iGrowable The growable (usually the block blockState's block)
-     * @param worldIn The world to grow
-     * @param rand The random provided by the world
-     * @param pos The position to grow at
-     * @param blockState The block blockState where the growable was from
-     * @param stack The item stack in use, useful for the context
-     * @param sameWorld The same world as worldIn
-     * @param target The target position, same as pos
      */
 
     @SuppressWarnings({"unchecked", "Duplicates", "rawtypes"})
@@ -74,31 +66,32 @@ public abstract class BoneMealItemMixin_Tracker {
         method = "applyBonemeal",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/block/IGrowable;grow(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"
+            target = "Lnet/minecraft/block/IGrowable;grow(Lnet/minecraft/world/server/ServerWorld;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;)V"
         ),
         require = 0, // Will be removed once the above github issue is resolved with a proper solution
         // Even though we're in a group, expecting this to succeed in forge environments will not work since there is a different mixin
         expect = 0
     )
-    private static void tracker$wrapGrowWithPhaseEntry(IGrowable iGrowable, World worldIn, Random rand, BlockPos pos, BlockState blockState, ItemStack stack, World sameWorld, BlockPos target) {
+    private static void tracker$wrapGrowWithPhaseEntry(IGrowable iGrowable, ServerWorld worldIn, Random rand, BlockPos pos, BlockState state,
+            ItemStack stack) {
         if (((WorldBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_GROW) {
-            iGrowable.grow(worldIn, rand, pos, blockState);
+            iGrowable.grow(worldIn, rand, pos, state);
             return;
         }
 
         final PhaseContext<?> current = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState state = current.state;
-        final boolean doesBulk = state.doesBulkBlockCapture(current);
-        final boolean doesEvent = state.doesBlockEventTracking(current);
+        final IPhaseState phaseState = current.state;
+        final boolean doesBulk = phaseState.doesBulkBlockCapture(current);
+        final boolean doesEvent = phaseState.doesBlockEventTracking(current);
         if (doesBulk || doesEvent) {
             // We can enter the new phase state.
             try (GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(PhaseTracker.SERVER)
                 .provideItem(stack)
                 .world(worldIn)
-                .block(blockState)
+                .block(state)
                 .pos(pos)) {
                 context.buildAndSwitch();
-                iGrowable.grow(worldIn, rand, pos, blockState);
+                iGrowable.grow(worldIn, rand, pos, state);
             }
         }
 

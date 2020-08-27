@@ -91,7 +91,7 @@ public final class ArmorStandData {
                         .get(h -> Sponge.getRegistry().getCatalogRegistry()
                             .streamAllOf(EquipmentType.class)
                             .filter(t -> (Object) t instanceof EquipmentSlotType)
-                            .collect(Collectors.toMap(t -> t, t -> h.isDisabled((EquipmentSlotType) (Object) t))))
+                            .collect(Collectors.toMap(t -> t, t -> ((ArmorStandEntityAccessor) h).accessor$isDisabled((EquipmentSlotType) (Object) t))))
                         .set((h, v) -> {
                             int chunk = 0;
 

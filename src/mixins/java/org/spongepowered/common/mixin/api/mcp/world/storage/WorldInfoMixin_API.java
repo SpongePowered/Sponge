@@ -445,7 +445,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     public <V> void setGameRule(final GameRule<V> gameRule, V value) {
         // TODO Minecraft 1.14 - Boy, this is baaaad....
         final GameRules.RuleValue<?> mValue = this.shadow$getGameRulesInstance().get((GameRules.RuleKey<?>) (Object) gameRule);
-        ((GameRules_RuleValueAccessor) mValue).accessor$func_223553_a(value.toString());
+        ((GameRules_RuleValueAccessor) mValue).accessor$setStringValue(value.toString());
     }
 
     @Override

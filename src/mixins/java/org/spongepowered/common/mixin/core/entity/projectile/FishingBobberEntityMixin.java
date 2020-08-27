@@ -142,15 +142,16 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
                     ItemStack itemstack = (ItemStack) (Object) transaction.getFinal().createStack();
                     // Sponge end
 
-                    ItemEntity entityitem = new ItemEntity(this.world, this.posX, this.posY, this.posZ, itemstack);
-                    double d0 = this.angler.posX - this.posX;
-                    double d1 = this.angler.posY - this.posY;
-                    double d2 = this.angler.posZ - this.posZ;
+                    ItemEntity entityitem = new ItemEntity(this.world, this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ(), itemstack);
+                    double d0 = this.angler.getPosX() - this.shadow$getPosX();
+                    double d1 = this.angler.getPosY() - this.shadow$getPosY();
+                    double d2 = this.angler.getPosZ() - this.shadow$getPosZ();
                     double d3 = MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                     //double d4 = 0.1D;
                     entityitem.setMotion(d0 * 0.1D, d1 * 0.1D + MathHelper.sqrt(d3) * 0.08D, d2 * 0.1D);
                     this.world.addEntity(entityitem);
-                    this.angler.world.addEntity(new ExperienceOrbEntity(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,
+                    this.angler.world.addEntity(new ExperienceOrbEntity(this.angler.world, this.angler.getPosX(), this.angler.getPosY() + 0.5D,
+                            this.angler.getPosZ() + 0.5D,
                             this.rand.nextInt(6) + 1));
                     Item item = itemstack.getItem();
 

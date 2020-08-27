@@ -195,7 +195,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
         // TODO - archetypes should solve the problem of calling the correct constructor
         if (type == net.minecraft.entity.EntityType.ENDER_PEARL) {
             final ArmorStandEntity tempEntity = new ArmorStandEntity(thisWorld, x, y, z);
-            tempEntity.posY -= tempEntity.getEyeHeight();
+            tempEntity.setPosition(tempEntity.getPosX(), tempEntity.getPosY() - tempEntity.getEyeHeight(), tempEntity.getPosZ());
             entity = new EnderPearlEntity(thisWorld, tempEntity);
             ((EnderPearl) entity).offer(Keys.SHOOTER, UnknownProjectileSource.UNKNOWN);
         }

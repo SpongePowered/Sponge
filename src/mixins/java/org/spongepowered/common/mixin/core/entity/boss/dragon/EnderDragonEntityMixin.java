@@ -83,7 +83,7 @@ public abstract class EnderDragonEntityMixin extends MobEntityMixin {
     @Nullable
     private Vec3d impl$getTargetLocationOrNull(IPhase iPhase) {
         Vec3d target = iPhase.getTargetLocation();
-        if (target != null && target.x == this.posX && target.z == this.posZ) {
+        if (target != null && target.x == this.shadow$getPosX() && target.z == this.shadow$getPosZ()) {
             return null; // Skips the movement code
         }
         return target;

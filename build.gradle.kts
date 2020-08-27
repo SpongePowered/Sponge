@@ -510,9 +510,9 @@ project("SpongeVanilla") {
                 workingDirectory(vanillaProject.file("./run"))
                 args.addAll(listOf(
                         "--launchTarget", "sponge_client_dev",
-                        "--version", "1.14.4",
+                        "--version", "1.15.2",
                         "--accessToken", "0",
-                        "--assetIndex", "1.14",
+                        "--assetIndex", "1.15",
                         "--assetsDir", (tasks.findByName("downloadAssets") as net.minecraftforge.gradle.common.task.DownloadAssets).output.absolutePath
                 ))
                 property("org.lwjgl.system.SharedLibraryExtractDirectory", "lwjgl_dll")
@@ -890,7 +890,7 @@ if (spongeForge != null) {
                 create("client") {
                     environment("target", "client")
                     workingDirectory(forgeProject.file("./run"))
-                    args.addAll(listOf("--launchTarget", "sponge_client_dev", "--version", "1.14.4", "--accessToken", "0"))
+                    args.addAll(listOf("--launchTarget", "sponge_client_dev", "--version", "1.15.2", "--accessToken", "0"))
                     main = "org.spongepowered.forge.modlauncher.Main"
                 }
             }

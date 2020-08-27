@@ -41,8 +41,7 @@ import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
 @Mixin(ChatVisibility.class)
 public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.entity.living.player.chat.ChatVisibility {
 
-    @Shadow private @Final String field_221257_f;
-
+    @Shadow @Final private String resourceKey;
     private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -57,7 +56,7 @@ public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.e
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.field_221257_f);
+        return TranslatableComponent.of(this.resourceKey);
     }
 
     @Override

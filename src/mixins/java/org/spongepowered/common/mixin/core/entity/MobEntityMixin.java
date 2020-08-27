@@ -293,8 +293,8 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
             method = "checkDespawn()V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/IEntityReader;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
-    private PlayerEntity impl$getClosestPlayerForSpawning(final IEntityReader world, final net.minecraft.entity.Entity entity, final double distance) {
+                    target = "Lnet/minecraft/world/World;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
+    private PlayerEntity impl$getClosestPlayerForSpawning(World world, net.minecraft.entity.Entity entityIn, double distance) {
         double bestDistance = -1.0D;
         PlayerEntity result = null;
 
@@ -303,7 +303,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
                 continue;
             }
 
-            final double playerDistance = player.getDistanceSq(entity.posX, entity.posY, entity.posZ);
+            final double playerDistance = player.getDistanceSq(entityIn.getPosX(), entityIn.getPosY(), entityIn.getPosZ());
 
             if ((distance < 0.0D || playerDistance < distance * distance) && (bestDistance == -1.0D || playerDistance < bestDistance)) {
                 bestDistance = playerDistance;

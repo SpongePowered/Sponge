@@ -29,7 +29,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.common.accessor.entity.passive.PandaEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.MissingImplementationException;
 
 public final class PandaData {
 
@@ -58,20 +57,20 @@ public final class PandaData {
                         .get(PandaEntity::func_213539_dW)
                         .set(PandaEntity::func_213581_u)
                     .create(Keys.IS_UNHAPPY)
-                        .get(h -> h.func_213544_dV() > 0)
+                        .get(h -> h.getUnhappyCounter() > 0)
                     .create(Keys.KNOWN_GENE)
                         .get(h -> ((PandaGene) (Object) h.getMainGene()))
                         .set((h, v) -> h.setMainGene((PandaEntity.Type) (Object) v))
                     .create(Keys.SNEEZING_TIME)
-                        .get(PandaEntity::func_213585_ee)
-                        .set(PandaEntity::func_213562_s)
+                        .get(PandaEntity::getSneezeCounter)
+                        .set(PandaEntity::setSneezeCounter)
                     .create(Keys.UNHAPPY_TIME)
-                        .get(PandaEntity::func_213544_dV)
-                        .set(PandaEntity::func_213588_r)
+                        .get(PandaEntity::getUnhappyCounter)
+                        .set(PandaEntity::setUnhappyCounter)
                 .asMutable(PandaEntityAccessor.class)
                     .create(Keys.EATING_TIME)
-                        .get(PandaEntityAccessor::accessor$func_213559_es)
-                        .set(PandaEntityAccessor::accessor$func_213571_t);
+                        .get(PandaEntityAccessor::accessor$getEatCounter)
+                        .set(PandaEntityAccessor::accessor$setEatCounter);
     }
     // @formatter:on
 }

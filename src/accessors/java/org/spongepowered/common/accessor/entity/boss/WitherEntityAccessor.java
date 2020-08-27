@@ -25,7 +25,7 @@
 package org.spongepowered.common.accessor.entity.boss;
 
 import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.world.server.ServerBossInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 

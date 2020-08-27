@@ -808,7 +808,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Inject(method = "attemptTeleport", at = @At("HEAD"))
     private void impl$snapshotPositionBeforeVanillaTeleportLogic(double x, double y, double z, boolean changeState,
             CallbackInfoReturnable<Boolean> cir) {
-        this.impl$preTeleportPosition = new Vector3d(this.posX, this.posY, this.posZ);
+        this.impl$preTeleportPosition = new Vector3d(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ());
     }
 
     @Inject(method = "attemptTeleport", at = @At(value = "RETURN", ordinal = 0, shift = At.Shift.BY, by = 2), cancellable = true)
@@ -824,7 +824,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             }
 
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
-                    (org.spongepowered.api.entity.Entity) this, this.impl$preTeleportPosition, new Vector3d(this.posX, this.posY, this.posZ),
+                    (org.spongepowered.api.entity.Entity) this, this.impl$preTeleportPosition, new Vector3d(this.shadow$getPosX(), this.shadow$getPosY(),
+                            this.shadow$getPosZ()),
                     new Vector3d(x, y, z));
 
             if (SpongeCommon.postEvent(event)) {

@@ -32,5 +32,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(WorkbenchContainer.class)
 public interface WorkbenchContainerAccessor {
 
-    @Accessor("field_75162_e") CraftingInventory accessor$getCraftingInventory();
+    @Accessor("craftMatrix") CraftingInventory accessor$getCraftMatrix();
 }

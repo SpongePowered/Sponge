@@ -106,11 +106,11 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
             return this.shadow$getRecipe(IRecipeType.CAMPFIRE_COOKING, (IInventory) inventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof WorkbenchContainer) {
-            final CraftingInventory craftingInventory = ((WorkbenchContainerAccessor) inventory).accessor$getCraftingInventory();
+            final CraftingInventory craftingInventory = ((WorkbenchContainerAccessor) inventory).accessor$getCraftMatrix();
             return this.shadow$getRecipe(IRecipeType.CRAFTING, craftingInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof PlayerContainer) {
-            final CraftingInventory craftingInventory = ((PlayerContainerAccessor) inventory).accessor$getCraftingInventory();
+            final CraftingInventory craftingInventory = ((PlayerContainerAccessor) inventory).accessor$getCraftMatrix();
             return this.shadow$getRecipe(IRecipeType.CRAFTING, craftingInventory, (net.minecraft.world.World) world).map(Recipe.class::cast);
         }
         if (inventory instanceof StonecutterContainer) {

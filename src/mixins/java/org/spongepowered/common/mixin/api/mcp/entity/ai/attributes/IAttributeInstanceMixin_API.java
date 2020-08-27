@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Mixin(IAttributeInstance.class)
@@ -48,13 +49,16 @@ public interface IAttributeInstanceMixin_API extends Attribute {
     @Shadow double shadow$getBaseValue();
     @Shadow void shadow$setBaseValue(double baseValue);
     @Shadow double shadow$getValue();
-    @Shadow Collection<net.minecraft.entity.ai.attributes.AttributeModifier> shadow$getModifiers();
-    @Shadow Collection<net.minecraft.entity.ai.attributes.AttributeModifier> shadow$func_220368_a(net.minecraft.entity.ai.attributes.AttributeModifier.Operation p_220368_1_);
     @Shadow net.minecraft.entity.ai.attributes.AttributeModifier shadow$getModifier(UUID uuid);
     @Shadow boolean shadow$hasModifier(net.minecraft.entity.ai.attributes.AttributeModifier modifier);
     @Shadow void shadow$applyModifier(net.minecraft.entity.ai.attributes.AttributeModifier modifier);
     @Shadow void shadow$removeModifier(net.minecraft.entity.ai.attributes.AttributeModifier modifier);
     @Shadow void shadow$removeModifier(UUID uuid);
+
+    @Shadow Set<net.minecraft.entity.ai.attributes.AttributeModifier> shadow$func_225504_a_(
+            net.minecraft.entity.ai.attributes.AttributeModifier.Operation p_225504_1_);
+
+    @Shadow Set<net.minecraft.entity.ai.attributes.AttributeModifier> shadow$func_225505_c_();
 
     @Override
     default AttributeType getType() {
@@ -78,12 +82,12 @@ public interface IAttributeInstanceMixin_API extends Attribute {
 
     @Override
     default Collection<AttributeModifier> getModifiers() {
-        return (Collection) this.shadow$getModifiers();
+        return (Collection) this.shadow$func_225505_c_();
     }
 
     @Override
     default Collection<AttributeModifier> getModifiers(final AttributeOperation operation) {
-        return (Collection) this.shadow$func_220368_a((net.minecraft.entity.ai.attributes.AttributeModifier.Operation) (Object) operation);
+        return (Collection) this.shadow$func_225504_a_((net.minecraft.entity.ai.attributes.AttributeModifier.Operation) (Object) operation);
     }
 
     @Override

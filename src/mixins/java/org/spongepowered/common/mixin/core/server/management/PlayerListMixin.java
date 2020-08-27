@@ -127,9 +127,7 @@ public abstract class PlayerListMixin {
             mcPlayer.dimension = DimensionType.OVERWORLD;
             mcWorld = server.getWorld(mcPlayer.dimension);
             final BlockPos spawnPoint = mcWorld.getSpawnPoint();
-            mcPlayer.posX = spawnPoint.getX() + 0.5;
-            mcPlayer.posY = spawnPoint.getY() + 0.5;
-            mcPlayer.posZ = spawnPoint.getZ() + 0.5;
+            mcPlayer.setPosition(spawnPoint.getX() + 0.5, spawnPoint.getY() + 0.5, spawnPoint.getZ() + 0.5);
         }
 
         mcPlayer.setWorld(mcWorld);
@@ -181,12 +179,12 @@ public abstract class PlayerListMixin {
     }
 
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "NEW", target = "net/minecraft/network/play/server/SJoinGamePacket"))
-    private SJoinGamePacket impl$onInitPlayer_sendFakeDimensionTypeForVanillaClient(final int entityId, final GameType gameType,
-            final boolean isHardcore, final DimensionType dimensionType, final int maxPlayers, final WorldType generatorType,
-            final int viewDistance, final boolean isReducedDebugMode, final NetworkManager manager, final ServerPlayerEntity entity) {
+    private SJoinGamePacket impl$onInitPlayer_sendFakeDimensionTypeForVanillaClient(final int entityId, final GameType gameType, final long seed,
+            final boolean hardcoreMode, final DimensionType dimensionType, final int maxPlayers, final WorldType worldType, final int viewDistance,
+            final boolean reducedDebugInfo, final boolean enableRespawnScreen, final NetworkManager manager, final ServerPlayerEntity entity) {
         ((ServerPlayerEntityBridge) entity).bridge$sendDimensionData(manager, dimensionType);
-        return PlatformHooks.getInstance().getPacketHooks().createSJoinGamePacket(entity, gameType, isHardcore, dimensionType, maxPlayers, generatorType,
-                viewDistance, isReducedDebugMode);
+        return PlatformHooks.getInstance().getPacketHooks().createSJoinGamePacket(entity, gameType, seed, hardcoreMode, dimensionType, maxPlayers,
+                worldType, viewDistance, reducedDebugInfo, enableRespawnScreen);
     }
 
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE",

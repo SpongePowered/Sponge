@@ -82,10 +82,8 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
     @Shadow public abstract boolean shadow$isSpectator();
     // @formatter:on
 
-
     @Nullable
     private Boolean tracker$keepInventory = null;
-
 
     /**
      * @author blood - May 12th, 2016
@@ -187,31 +185,6 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
             this.tracker$keepInventory = event.getKeepInventory();
         } // Sponge - brackets
     }
-
-    /**
-     * @author Aaron1101 August 11th, 2018
-     * @author gabizou - February 10th, 2020 - Minecraft 1.14.3
-     * @reason Wrap the method in a try-with-resources for a EntityPhase.State.PLAYER_WAKE_UP
-     */
-    @Overwrite
-    public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {
-        // Sponge start - enter phase
-        try (final BasicEntityContext basicEntityContext = EntityPhase.State.PLAYER_WAKE_UP.createPhaseContext(PhaseTracker.SERVER)
-                .source(this)) {
-            basicEntityContext.buildAndSwitch();
-            // Sponge end
-
-            if (this.shadow$isSleeping()) {
-                this.shadow$getServerWorld().getChunkProvider().sendToTrackingAndSelf((ServerPlayerEntity) (Object) this, new SAnimateHandPacket((ServerPlayerEntity) (Object) this, 2));
-            }
-
-            super.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
-            if (this.connection != null) {
-                this.connection.setPlayerLocation(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
-            }
-        } // Sponge - add bracket to close 'try' block
-    }
-
 
     @Nullable
     private PhaseContext<?> tracker$createDeathContext(final DamageSource cause, final boolean tracksEntityDeaths) {

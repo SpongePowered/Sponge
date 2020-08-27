@@ -25,13 +25,10 @@
 package org.spongepowered.common.bridge.world.chunk;
 
 import net.minecraft.util.BitArray;
-import net.minecraft.world.chunk.IBlockStatePalette;
 
 public interface BlockStateContainerBridge {
 
     int bridge$getBits();
-
-    IBlockStatePalette<?> bridge$getPalette();
 
     BitArray bridge$getStorage();
 }

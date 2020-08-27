@@ -29,6 +29,7 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.Cause;
@@ -78,27 +79,17 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
     }
 
     /**
-     * @author gabizou - July 26th, 2018\
-     * @author i509VCB - February 11th, 2020 - 1.14.4
-     * @author Faithcaio - 2020-05-24 - update for 1.14
-     *
      * @reason Makes enderman check for block changes before they can place their blocks.
      * This allows plugins to cancel the event regardless without issue.
-     *
-     * @param blockState The block state being placed
-     * @param world The world
-     * @param pos the position
-
-     * @return True if the state is a full cube, and the event didnt get cancelled
      */
     @Redirect(method = "func_220836_a(Lnet/minecraft/world/IWorldReader;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)Z",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/block/BlockState;func_224756_o(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean impl$onPlaceBlockCancel(final BlockState blockState, final IBlockReader world, final BlockPos pos) {
-        if (blockState.func_224756_o(world, pos)) {
+            target = "Lnet/minecraft/block/BlockState;isCollisionShapeOpaque(Lnet/minecraft/world/IBlockReader;Lnet/minecraft/util/math/BlockPos;)Z"))
+    private boolean impl$onPlaceBlockCancel(BlockState blockState, IBlockReader blockReaderIn, BlockPos blockPosIn) {
+        if (blockState.isCollisionShapeOpaque(blockReaderIn, blockPosIn)) {
             // Sponge start
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
-                final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
+                final ServerLocation location = ServerLocation.of((ServerWorld) blockReaderIn, blockPosIn.getX(), blockPosIn.getY(), blockPosIn.getZ());
                 final List<ServerLocation> list = new ArrayList<>(1);
                 list.add(location);
                 final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();

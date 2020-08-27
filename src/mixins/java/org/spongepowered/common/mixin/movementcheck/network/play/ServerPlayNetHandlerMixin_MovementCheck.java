@@ -61,7 +61,7 @@ public abstract class ServerPlayNetHandlerMixin_MovementCheck {
     @ModifyConstant(method = "processVehicleMove", constant = @Constant(doubleValue = 100, ordinal = 0), slice =
         @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;lengthSquared()D", ordinal = 1),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;func_217264_d()Z", ordinal = 0))
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;isServerOwner()Z", ordinal = 0))
     )
     private double movementCheck$onVehicleMovedTooQuicklyCheck(double val) {
         if (SpongeGameConfigs.getForWorld(this.player.world).get().getMovementChecks().playerVehicleMovedTooQuickly()) {

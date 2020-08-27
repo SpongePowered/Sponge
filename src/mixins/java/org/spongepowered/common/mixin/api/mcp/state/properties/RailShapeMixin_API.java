@@ -41,12 +41,11 @@ import org.spongepowered.plugin.PluginContainer;
 @Mixin(RailShape.class)
 public abstract class RailShapeMixin_API implements RailDirection {
 
-    @Shadow @Final private int meta;
     private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setKey(String enumName, int ordinal, int meta, String name, CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), name.toLowerCase());
+    private void api$setKey(String enumName, int ordinal, String p_i225774_3_, CallbackInfo ci) {
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), p_i225774_3_.toLowerCase());
     }
 
     @Override
@@ -57,8 +56,7 @@ public abstract class RailShapeMixin_API implements RailDirection {
     @Override
     public RailDirection cycleNext() {
         final SimpleRegistry<RailDirection> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(RailDirection.class);
-        final int meta = this.meta;
-        RailDirection next = registry.getByValue(meta + 1);
+        RailDirection next = registry.getByValue(((RailShape) (Object) this).ordinal() + 1);
         if (next == null) {
             next = registry.getByValue(0);
         }

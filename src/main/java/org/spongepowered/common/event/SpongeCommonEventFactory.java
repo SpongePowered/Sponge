@@ -648,9 +648,9 @@ public final class SpongeCommonEventFactory {
             return;
         }
 
-        final double deltaX = entity.prevPosX - entity.posX;
-        final double deltaY = entity.prevPosY - entity.posY;
-        final double deltaZ = entity.prevPosZ - entity.posZ;
+        final double deltaX = entity.prevPosX - entity.getPosX();
+        final double deltaY = entity.prevPosY - entity.getPosY();
+        final double deltaZ = entity.prevPosZ - entity.getPosZ();
         final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
         if (deltaChange < 1f / 256) {
             return;
@@ -661,17 +661,14 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(), (Entity) entity,
-                    new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.posX, entity.posY, entity.posZ),
-                    new Vector3d(entity.posX, entity.posY, entity.posZ));
+                    new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.getPosX(), entity.getPosY(), entity.getPosZ()),
+                    new Vector3d(entity.getPosX(), entity.getPosY(), entity.getPosZ()));
 
             if (SpongeCommon.postEvent(event)) {
-                entity.posX = entity.prevPosX;
-                entity.posY = entity.prevPosY;
-                entity.posZ = entity.prevPosZ;
+                entity.setPosition(entity.prevPosX, entity.prevPosY, entity.prevPosZ);
             } else {
-                entity.posX = event.getDestinationPosition().getX();
-                entity.posY = event.getDestinationPosition().getY();
-                entity.posZ = event.getDestinationPosition().getZ();
+                entity.setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
+                        event.getDestinationPosition().getZ());
             }
         }
     }

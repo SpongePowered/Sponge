@@ -52,7 +52,7 @@ import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.BossInfo;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
@@ -302,7 +302,7 @@ public final class SpongeAdventure {
     public static ListNBT listTagJson(final List<Component> components) {
         final ListNBT nbt = new ListNBT();
         for (final Component component : components) {
-            nbt.add(new StringNBT(json(component)));
+            nbt.add(StringNBT.valueOf(json(component)));
         }
         return nbt;
     }
