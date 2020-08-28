@@ -30,10 +30,22 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class AudienceFactory implements Audiences.Factory {
+
     @Override
     public Audience onlinePlayers() {
         return Audience.of((List<ServerPlayer>) (List) SpongeCommon.getServer().getPlayerList().getPlayers());
+    }
+
+    @Override
+    public Audience withPermission(String permission) {
+        final List<ServerPlayer> players = SpongeCommon.getServer().getPlayerList().getPlayers().stream()
+                .map(p -> (ServerPlayer) p)
+                .filter(p -> p.hasPermission(permission))
+                .collect(Collectors.toList());
+        return Audience.of(players);
+
     }
 }
