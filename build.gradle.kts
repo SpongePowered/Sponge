@@ -216,8 +216,8 @@ dependencies {
     implementation("javax.inject:javax.inject:1")
 
     // ASM - required for generating event listeners
-    implementation("org.ow2.asm:asm-util:6.2")
-    implementation("org.ow2.asm:asm-tree:6.2")
+    implementation("org.ow2.asm:asm-util:7.2")
+    implementation("org.ow2.asm:asm-tree:7.2")
 
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
@@ -236,8 +236,8 @@ dependencies {
     launchConfig("com.google.inject:guice:4.1.0")
     launchConfig("javax.inject:javax.inject:1")
     launchConfig("com.google.code.gson:gson:2.8.0")
-    launchConfig("org.ow2.asm:asm-tree:6.2")
-    launchConfig("org.ow2.asm:asm-util:6.2")
+    launchConfig("org.ow2.asm:asm-tree:7.2")
+    launchConfig("org.ow2.asm:asm-util:7.2")
     add(launch.get().implementationConfigurationName, launchConfig)
 
     // Applaunch -- initialization that needs to occur without game access
@@ -555,8 +555,8 @@ project("SpongeVanilla") {
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
-        vanillaAppLaunchConfig("org.ow2.asm:asm-util:6.2")
-        vanillaAppLaunchConfig("org.ow2.asm:asm-tree:6.2")
+        vanillaAppLaunchConfig("org.ow2.asm:asm-util:7.2")
+        vanillaAppLaunchConfig("org.ow2.asm:asm-tree:7.2")
         vanillaAppLaunchConfig("com.google.guava:guava:$guavaVersion")
         vanillaAppLaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
         vanillaAppLaunchConfig("javax.inject:javax.inject:1")
@@ -584,10 +584,10 @@ project("SpongeVanilla") {
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
-        vanillaAppLaunchConfig("cpw.mods:modlauncher:4.1.+") {
+        vanillaAppLaunchConfig("cpw.mods:modlauncher:6.1.+") {
             exclude(group = "org.apache.logging.log4j")
         }
-        vanillaAppLaunchConfig("org.ow2.asm:asm-commons:6.2")
+        vanillaAppLaunchConfig("org.ow2.asm:asm-commons:7.2")
         vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.1.+") {
             exclude(group = "org.apache.logging.log4j")
         }
@@ -922,8 +922,8 @@ if (spongeForge != null) {
             add(forgeLaunch.implementationConfigurationName, project(":SpongeAPI"))
 
             forgeLaunchConfig("org.spongepowered:mixin:$mixinVersion")
-            forgeLaunchConfig("org.ow2.asm:asm-util:6.2")
-            forgeLaunchConfig("org.ow2.asm:asm-tree:6.2")
+            forgeLaunchConfig("org.ow2.asm:asm-util:7.2")
+            forgeLaunchConfig("org.ow2.asm:asm-tree:7.2")
             forgeLaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
             forgeLaunchConfig("javax.inject:javax.inject:1")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
