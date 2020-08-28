@@ -47,6 +47,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.persistence.DataStore;
+import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
@@ -120,6 +121,7 @@ import org.spongepowered.common.data.SpongeKeyValueMatcherBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.key.SpongeKeyBuilder;
 import org.spongepowered.common.data.persistence.SpongeDataStoreBuilder;
+import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
@@ -224,7 +226,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .register(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
 //            .register(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
-//            .register(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
+            .register(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
             .register(RandomWalkingGoal.Builder.class, SpongeRandomWalkingGoalBuilder::new)
             .register(AvoidLivingGoal.Builder.class, SpongeAvoidLivingGoalBuilder::new)
             .register(RunAroundLikeCrazyGoal.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
