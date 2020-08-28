@@ -29,7 +29,7 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.List;
 
-interface CachedParticleEffect {
+interface CachedParticlePacket {
 
     void process(Vector3d position, List<IPacket<?>> output);
 }
