@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 public final class SpongeParticleEffect implements ParticleEffect {
 
-    @Nullable CachedParticleEffect cachedParticle;
+    @Nullable CachedParticlePacket cachedPacket;
 
     private final ParticleType type;
     private final Map<ParticleOption<?>, Object> options;
