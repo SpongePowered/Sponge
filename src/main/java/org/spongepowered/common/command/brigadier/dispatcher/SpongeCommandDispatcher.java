@@ -215,8 +215,8 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
     }
 
     private ParseResults<CommandSource> parseNodes(
-            final boolean isRoot,
-            final boolean isSuggestion, // needed for handling what we do with defaults.
+            final boolean isRoot, // Sponge: used in permission checks
+            final boolean isSuggestion, // Sponge: needed for handling what we do with defaults.
             final CommandNode<CommandSource> node,
             final SpongeStringReader originalReader,
             final SpongeCommandContextBuilder contextSoFar) {
@@ -268,6 +268,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                     }
                     reader.unskipWhitespace();
                 } else if (reader.canRead()) {
+                // if (reader.canRead()) {
                 // Sponge End
                     if (reader.peek() != CommandDispatcher.ARGUMENT_SEPARATOR_CHAR) {
                         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherExpectedArgumentSeparator().createWithContext(reader);
@@ -286,6 +287,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             // Sponge Start: if we have a node that can parse an empty, we
             // must let it do so.
             if (this.shouldContinueTraversing(reader, child)) {
+            // if (reader.canRead(child.getRedirect() == null ? 2 : 1)) {
             // Sponge End
                 reader.skip();
                 // Sponge Start: redirect is now in a local variable as we use it a fair bit
