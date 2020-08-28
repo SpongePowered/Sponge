@@ -101,7 +101,7 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
         final HashMap<Key<?>, Object> map = new HashMap<>();
         map.put(Keys.AREA_EFFECT_CLOUD_AGE, dataHolder.ticksExisted);
         map.put(Keys.AREA_EFFECT_CLOUD_COLOR, Color.ofRgb(dataHolder.getColor()));
-        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS, dataHolder.getRadius());
+        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS, (double) dataHolder.getRadius());
         final EntityAreaEffectCloudAccessor mixinAreaEffect = (EntityAreaEffectCloudAccessor) dataHolder;
         final List<net.minecraft.potion.PotionEffect> potionEffects = mixinAreaEffect.getPotionEffects();
         final List<PotionEffect> effects = new ArrayList<>(potionEffects.size());
@@ -109,8 +109,8 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
             effects.add((PotionEffect) potionEffect);
         }
         map.put(Keys.POTION_EFFECTS, effects);
-        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, mixinAreaEffect.getRadiusOnUse());
-        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS_PER_TICK, mixinAreaEffect.getRadiusPerTick());
+        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, (double) mixinAreaEffect.getRadiusOnUse());
+        map.put(Keys.AREA_EFFECT_CLOUD_RADIUS_PER_TICK, (double) mixinAreaEffect.getRadiusPerTick());
         map.put(Keys.AREA_EFFECT_CLOUD_DURATION, dataHolder.getDuration());
         map.put(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, mixinAreaEffect.getDurationOnUse());
         map.put(Keys.AREA_EFFECT_CLOUD_REAPPLICATION_DELAY, mixinAreaEffect.getReapplicationDelay());
