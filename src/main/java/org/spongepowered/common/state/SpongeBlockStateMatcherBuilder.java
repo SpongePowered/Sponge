@@ -22,30 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.block;
+package org.spongepowered.common.state;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.arguments.BlockStateArgument;
-import net.minecraft.command.arguments.BlockStateParser;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.state.StateMatcher;
 
-import java.util.Locale;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Optional;
 
-public class BlockStateSerializerDeserializer {
+public final class SpongeBlockStateMatcherBuilder extends AbstractStateMatcherBuilder<@NonNull BlockState, @NonNull BlockType> {
 
-    public static String serialize(final BlockState state) {
-        return BlockStateParser.toString((net.minecraft.block.BlockState) state);
-    }
-
-    public static Optional<BlockState> deserialize(final String string) {
-        final String state = Objects.requireNonNull(string, "Id cannot be null!").toLowerCase(Locale.ENGLISH);
-        try {
-            return Optional.of((BlockState) BlockStateArgument.blockState().parse(new StringReader(state)).getState());
-        } catch (final CommandSyntaxException e) {
-            return Optional.empty();
+    @Override
+    @NonNull
+    public StateMatcher<@NonNull BlockState> build() throws IllegalStateException {
+        if (this.type == null) {
+            throw new IllegalStateException("BlockType cannot be null");
         }
+        return new SpongeBlockStateMatcher(this.type, new ArrayList<>(this.requiredProperties),
+                new HashMap<>(this.properties),
+                new ArrayList<>(this.keyValueMatchers));
     }
+
+    @Override
+    public StateMatcher.Builder<@NonNull BlockState, @NonNull BlockType> from(@NonNull final StateMatcher<@NonNull BlockState> value) {
+        if (!(value instanceof SpongeBlockStateMatcher)) {
+            throw new IllegalArgumentException("BlockStateMatcher must be a SpongeBlockStateMatcher");
+        }
+        return super.from(value);
+    }
+
 }

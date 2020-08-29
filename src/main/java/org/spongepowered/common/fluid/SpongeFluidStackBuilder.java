@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.fluid;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Key;
@@ -42,55 +39,54 @@ import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.common.util.Constants;
 
 import java.util.LinkedHashMap;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> implements FluidStack.Builder {
+public class SpongeFluidStackBuilder extends AbstractDataBuilder<@NonNull FluidStack> implements FluidStack.Builder {
 
     FluidType fluidType;
     int volume = 1;
     @Nullable DataContainer extra; // we have to retain this information
-    @Nullable LinkedHashMap<Key<?>, Object> keyValues;
+    @Nullable LinkedHashMap<Key<@NonNull ?>, Object> keyValues;
 
     public SpongeFluidStackBuilder() {
         super(FluidStack.class, 1);
     }
 
     @Override
-    public FluidStack.Builder fluid(FluidType fluidType) {
-        this.fluidType = checkNotNull(fluidType, "FluidType cannot be null!");
+    public FluidStack.@NonNull Builder fluid(@NonNull final FluidType fluidType) {
+        this.fluidType = Objects.requireNonNull(fluidType, "FluidType cannot be null!");
         return this;
     }
 
     @Override
-    public FluidStack.Builder volume(int volume) {
-        checkArgument(volume > 0, "A FluidStack's volume has to be greater than zero!");
+    public FluidStack.@NonNull Builder volume(final int volume) {
+        if (volume <= 0) {
+            throw new IllegalArgumentException("A FluidStack's volume has to be greater than zero!");
+        }
         this.volume = volume;
         return this;
     }
 
     @Override
-    public FluidStack.Builder from(FluidStackSnapshot fluidStackSnapshot) {
-        checkArgument(fluidStackSnapshot instanceof SpongeFluidStackSnapshot, "Invalid implementation found of FluidStackSnapshot!");
-        this.fluidType = fluidStackSnapshot.getFluid();
-        this.volume = fluidStackSnapshot.getVolume();
-        final DataContainer container = fluidStackSnapshot.toContainer();
-        if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            this.extra = container.getView(Constants.Sponge.UNSAFE_NBT).get().copy();
-        }
-        return this;
+    public FluidStack.@NonNull Builder from(@NonNull final FluidStackSnapshot fluidStackSnapshot) {
+        return this.from(fluidStackSnapshot.createStack());
     }
 
     @Override
+    @NonNull
     public FluidStack build() {
-        checkNotNull(this.fluidType, "Fluidtype cannot be null!");
-        checkState(this.volume >= 0, "Volume must be at least zero!");
+        Objects.requireNonNull(this.fluidType, "Fluidtype cannot be null!");
+        if (this.volume < 0) {
+            throw new IllegalStateException("Volume must be at least zero!");
+        }
         return new SpongeFluidStack(this);
     }
 
     @Override
-    public FluidStack.Builder from(FluidStack value) {
+    public FluidStack.@NonNull Builder from(final FluidStack value) {
         this.fluidType = value.getFluid();
         this.volume = value.getVolume();
         final DataContainer container = value.toContainer();
@@ -101,7 +97,8 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
     }
 
     @Override
-    protected Optional<FluidStack> buildContent(DataView container) throws InvalidDataException {
+    @NonNull
+    protected Optional<FluidStack> buildContent(final DataView container) throws InvalidDataException {
         if (!container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
             return Optional.empty();
         }
@@ -122,7 +119,7 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
     }
 
     @Override
-    public FluidStack.Builder reset() {
+    public FluidStack.@NonNull Builder reset() {
         this.fluidType = null;
         this.volume = 0;
         this.extra = null;
@@ -130,11 +127,11 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
     }
 
     @Override
-    public <V> FluidStack.Builder add(Key<? extends Value<V>> key, V value) {
+    public <V> FluidStack.@NonNull Builder add(@NonNull final Key<@NonNull ? extends Value<V>> key, @NonNull final V value) {
         if (this.keyValues == null) {
             this.keyValues = new LinkedHashMap<>();
         }
-        this.keyValues.put(checkNotNull(key, "Key cannot be null!"), checkNotNull(value, "Value cannot be null!"));
+        this.keyValues.put(Objects.requireNonNull(key, "Key cannot be null!"), Objects.requireNonNull(value, "Value cannot be null!"));
         return this;
     }
 

@@ -62,6 +62,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
+    @NonNull
     public FluidType getFluid() {
         return this.fluidType;
     }
@@ -72,6 +73,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
+    @NonNull
     public FluidStack createStack() {
         return new SpongeFluidStackBuilder().from(this).build();
     }
@@ -82,6 +84,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
+    @NonNull
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
@@ -113,6 +116,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
+    @NonNull
     public FluidStackSnapshot copy() {
         return new SpongeFluidStackSnapshot(this.fluidType, this.volume, this.extraData);
     }
@@ -123,7 +127,8 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
-    public FluidStackSnapshot withRawData(final DataView container) throws InvalidDataException {
+    @NonNull
+    public FluidStackSnapshot withRawData(@NonNull final DataView container) throws InvalidDataException {
         final FluidStack stack = this.createStack();
         stack.setRawData(container);
         return stack.createSnapshot();

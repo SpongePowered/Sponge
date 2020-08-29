@@ -49,6 +49,7 @@ import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.state.StateMatcher;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.util.Ticks;
@@ -76,6 +77,7 @@ import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
+import org.spongepowered.common.state.SpongeStateMatcherFactory;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
@@ -147,6 +149,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(GameProfile.Factory.class, new SpongeGameProfileFactory())
             .registerFactory(ProfileProperty.Factory.class, new SpongeProfilePropertyFactory())
             .registerFactory(RayTrace.Factory.class, new SpongeRayTraceFactory())
+            .registerFactory(StateMatcher.Factory.class, new SpongeStateMatcherFactory())
         ;
     }
 

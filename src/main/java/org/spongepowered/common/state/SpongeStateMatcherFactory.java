@@ -22,30 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.block;
+package org.spongepowered.common.state;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.arguments.BlockStateArgument;
-import net.minecraft.command.arguments.BlockStateParser;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.fluid.FluidState;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.state.StateMatcher;
 
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+public final class SpongeStateMatcherFactory implements StateMatcher.Factory {
 
-public class BlockStateSerializerDeserializer {
-
-    public static String serialize(final BlockState state) {
-        return BlockStateParser.toString((net.minecraft.block.BlockState) state);
+    @Override
+    public StateMatcher.@NonNull Builder<@NonNull BlockState, @NonNull BlockType> blockStateMatcherBuilder() {
+        return new SpongeBlockStateMatcherBuilder();
     }
 
-    public static Optional<BlockState> deserialize(final String string) {
-        final String state = Objects.requireNonNull(string, "Id cannot be null!").toLowerCase(Locale.ENGLISH);
-        try {
-            return Optional.of((BlockState) BlockStateArgument.blockState().parse(new StringReader(state)).getState());
-        } catch (final CommandSyntaxException e) {
-            return Optional.empty();
-        }
+    @Override
+    public StateMatcher.@NonNull Builder<@NonNull FluidState, @NonNull FluidType> fluidStateMatcherBuilder() {
+        return new SpongeFluidStateMatcherBuilder();
     }
+
 }
