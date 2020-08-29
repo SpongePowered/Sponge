@@ -28,9 +28,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import net.minecraft.util.Hand;
+import net.minecraft.world.GameRules;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -69,6 +72,9 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
     @Shadow protected abstract void shadow$spawnDrops(DamageSource damageSourceIn);
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
     @Shadow public float attackedAtYaw;
+
+    @Shadow public abstract ItemStack getHeldItem(Hand p_184586_1_);
+
     // @formatter:on
     private int tracker$deathEventsPosted;
 

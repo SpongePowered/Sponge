@@ -178,18 +178,6 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
 
     @Inject(method = "processUseEntity", cancellable = true,
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;interactOn(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"),
-            locals = LocalCapture.CAPTURE_FAILHARD
-    )
-    public void onRightClickEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
-        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
-        if (event.isCancelled()) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "processUseEntity", cancellable = true,
-            at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/entity/Entity;applyPlayerInteraction(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"),
             locals = LocalCapture.CAPTURE_FAILHARD
     )
