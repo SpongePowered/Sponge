@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.builtin.vanilla;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.particles.ParticleTypes;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.util.Direction;
@@ -106,6 +107,9 @@ public final class ParticleTypeSupplier {
 
         registry
             .registerCatalogAndSupplier(ParticleType.class, "fire_smoke",
-                () -> new NumericalParticleType(2000, ResourceKey.sponge("fire_smoke"), ImmutableMap.of(ParticleOptions.DIRECTION.get(), Direction.UP)));
+                () -> new NumericalParticleType(2000, ResourceKey.sponge("fire_smoke"), ImmutableMap.of(ParticleOptions.DIRECTION.get(), Direction.UP)))
+            .registerCatalogAndSupplier(ParticleType.class, "break_block",
+                () -> new NumericalParticleType(2001, ResourceKey.sponge("break_block"), ImmutableMap.of(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().getDefaultState())))
+        ;
     }
 }
