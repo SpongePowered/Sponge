@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.registry.builtin.vanilla;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.accessor.entity.EntityTypeAccessor;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.util.Constants;
@@ -42,12 +44,11 @@ public final class EntityTypeSupplier {
 
     // TODO Minecraft 1.15 - Figure out how to turn back on serialization for Human
     private static net.minecraft.entity.EntityType<HumanEntity> createHumanType() {
-        final ResourceKey key = ResourceKey.sponge("human");
-        final net.minecraft.entity.EntityType<HumanEntity> entityType = net.minecraft.entity.EntityType.Builder.create(HumanEntity::new, EntityClassification.CREATURE)
-                .size(Constants.Entity.Player.PLAYER_WIDTH, Constants.Entity.Player.PLAYER_HEIGHT)
-                .disableSerialization()
-                .build(key.getFormatted());
-        return Registry.register(Registry.ENTITY_TYPE, (ResourceLocation) (Object) key, entityType);
+        final net.minecraft.entity.EntityType.Builder<Entity> builder = (net.minecraft.entity.EntityType.Builder<Entity>) (Object)
+                net.minecraft.entity.EntityType.Builder.create(HumanEntity::new, EntityClassification.CREATURE)
+                        .size(Constants.Entity.Player.PLAYER_WIDTH, Constants.Entity.Player.PLAYER_HEIGHT)
+                        .disableSerialization();
+        return (net.minecraft.entity.EntityType<HumanEntity>) (Object) EntityTypeAccessor.accessor$register("sponge:human", builder);
     }
 
     public static void registerSuppliers(final SpongeCatalogRegistry registry) {
@@ -157,7 +158,7 @@ public final class EntityTypeSupplier {
             .registerSupplier(EntityType.class, "fishing_bobber", () -> (EntityType) net.minecraft.entity.EntityType.FISHING_BOBBER)
 
             // Beep boop
-            .registerSupplier(EntityType.class, "human", () -> (EntityType) HUMAN)
+            .registerSupplier(EntityType.class, "human", () -> (EntityType) EntityTypeSupplier.HUMAN)
         ;
     }
 }

@@ -76,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -117,22 +118,32 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     protected void registerAttributes() {
         super.registerAttributes();
+
+        // PlayerEntity
         this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
+        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.1F);
+        this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
+        this.getAttributes().registerAttribute(SharedMonsterAttributes.LUCK);
     }
 
     @Override
     protected void registerData() {
-        // EntityLivingBase
+        // LivingEntity
         this.dataManager.register(LivingEntityAccessor.accessor$getLivingFlags(), Byte.valueOf((byte)0));
+        this.dataManager.register(LivingEntityAccessor.accessor$getHealth(), Float.valueOf(1.0F));
         this.dataManager.register(LivingEntityAccessor.accessor$getPotionEffects(), Integer.valueOf(0));
         this.dataManager.register(LivingEntityAccessor.accessor$getHideParticles(), Boolean.valueOf(false));
         this.dataManager.register(LivingEntityAccessor.accessor$getArrowCountInEntity(), Integer.valueOf(0));
-        this.dataManager.register(LivingEntityAccessor.accessor$getHealth(), Float.valueOf(1.0F));
-        // EntityPlayer
+        this.dataManager.register(LivingEntityAccessor.accessor$getBeeStringCount(), Integer.valueOf(0));
+        this.dataManager.register(LivingEntityAccessor.accessor$getBedPosition(), Optional.empty());
+
+        // PlayerEntity
         this.dataManager.register(PlayerEntityAccessor.accessor$getAbsorption(), Float.valueOf(0.0F));
         this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerScore(), Integer.valueOf(0));
         this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerModelFlag(), Byte.valueOf((byte)0));
         this.dataManager.register(PlayerEntityAccessor.accessor$getMainHand(), Byte.valueOf((byte)1));
+        this.dataManager.register(PlayerEntityAccessor.accessor$getLeftShoulderEntity(), new CompoundNBT());
+        this.dataManager.register(PlayerEntityAccessor.accessor$getRightShoulderEntity(), new CompoundNBT());
     }
 
     @Override
@@ -484,21 +495,13 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
      * @param packets All packets to send in a single tick
      */
     public void pushPackets(@Nullable final ServerPlayerEntity player, final IPacket<?>... packets) {
+        final List<Stream<IPacket<?>>> queue;
         if (player == null) {
-            List<Stream<IPacket<?>>> queue = this.playerPacketMap.get(null);
-            if (queue == null) {
-                queue = new ArrayList<>();
-                this.playerPacketMap.put(null, queue);
-            }
-            queue.add(Stream.of(packets));
+            queue = this.playerPacketMap.computeIfAbsent(null, k -> new ArrayList<>());
         } else {
-            List<Stream<IPacket<?>>> queue = this.playerPacketMap.get(player.getUniqueID());
-            if (queue == null) {
-                queue = new ArrayList<>();
-                this.playerPacketMap.put(player.getUniqueID(), queue);
-            }
-            queue.add(Stream.of(packets));
+            queue = this.playerPacketMap.computeIfAbsent(player.getUniqueID(), k -> new ArrayList<>());
         }
+        queue.add(Stream.of(packets));
     }
 
     /**
@@ -509,7 +512,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
      */
     public Stream<IPacket<?>> popQueuedPackets(@Nullable final ServerPlayerEntity player) {
         final List<Stream<IPacket<?>>> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
-        return queue == null || queue.isEmpty() ? null : queue.remove(0);
+        return queue == null || queue.isEmpty() ? Stream.empty() : queue.remove(0);
     }
 
     @Override

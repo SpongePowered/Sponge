@@ -119,8 +119,7 @@ public final class EntityUtil {
         if (portal instanceof WrappedITeleporterPortalType) {
             // Use platform teleporter hook
             result = ((WrappedITeleporterPortalType) portal).getTeleporter().bridge$placeEntity(entity, fromWorld, toWorld, entity.rotationYaw,
-                    PortalHelper
-                    .createVanillaEntityPortalLogic(entity, entity.getPositionVec(), fromWorld, toWorld, portal));
+                    PortalHelper.createVanillaEntityPortalLogic(entity, entity.getPositionVec(), fromWorld, toWorld, portal));
 
             if (result == null) {
                 return new DimensionChangeResult<>(entity, false, true);

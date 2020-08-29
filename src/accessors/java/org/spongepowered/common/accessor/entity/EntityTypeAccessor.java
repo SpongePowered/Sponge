@@ -22,40 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.entity.player;
+package org.spongepowered.common.accessor.entity;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(PlayerEntity.class)
-public interface PlayerEntityAccessor {
+@Mixin(EntityType.class)
+public interface EntityTypeAccessor {
 
-    @Accessor("ABSORPTION") static DataParameter<Float> accessor$getAbsorption() {
+    @Invoker("register") static EntityType<Entity> accessor$register(String key, EntityType.Builder<Entity> builder) {
         throw new IllegalStateException("Untransformed Accessor!");
     }
-
-    @Accessor("PLAYER_SCORE") static DataParameter<Integer> accessor$getPlayerScore() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
-    @Accessor("PLAYER_MODEL_FLAG") static DataParameter<Byte> accessor$getPlayerModelFlag() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
-    @Accessor("MAIN_HAND") static DataParameter<Byte> accessor$getMainHand() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
-    @Accessor("LEFT_SHOULDER_ENTITY") static DataParameter<CompoundNBT> accessor$getLeftShoulderEntity() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
-    @Accessor("RIGHT_SHOULDER_ENTITY") static DataParameter<CompoundNBT> accessor$getRightShoulderEntity() {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
-
-    @Accessor("sleepTimer") void accessor$setSleepTimer(int sleepTimer);
 }

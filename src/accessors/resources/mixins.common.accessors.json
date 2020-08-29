@@ -177,7 +177,8 @@
         "world.server.ServerWorldAccessor",
         "world.spawner.AbstractSpawnerAccessor",
         "world.storage.SaveHandlerAccessor",
-        "entity.item.BoatEntityAccessor"
+        "entity.item.BoatEntityAccessor",
+        "entity.EntityTypeAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",
