@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.effect.particle;
 
+import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleType;
@@ -35,12 +36,12 @@ import java.util.Optional;
 public final class NumericalParticleType extends SpongeCatalogType implements ParticleType {
 
     private final int id;
-    private final Map<ParticleOption<?>, Object> defaultOptions;
+    private final ImmutableMap<ParticleOption<?>, Object> defaultOptions;
 
     public NumericalParticleType(int id, ResourceKey key, Map<ParticleOption<?>, Object> defaultOptions) {
         super(key);
         this.id = id;
-        this.defaultOptions = defaultOptions;
+        this.defaultOptions = ImmutableMap.copyOf(defaultOptions);
     }
 
     public int getId() {

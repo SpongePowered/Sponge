@@ -37,6 +37,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
@@ -89,16 +90,22 @@ public class SpongeParticleHelper {
         }
     }
 
-    private static NumericalCachedPacket getNumericalPacket(final ParticleEffect effect, final NumericalParticleType type) {
-        // TODO
-        throw new UnsupportedOperationException();
+    private static CachedParticlePacket getNumericalPacket(final ParticleEffect effect, final NumericalParticleType type) {
+        int effectId = type.getId();
+
+        if (type == ParticleTypes.FIRE_SMOKE.get()) {
+            final Direction direction = effect.getOptionOrDefault(ParticleOptions.DIRECTION).get();
+            return new NumericalCachedPacket(effectId, getDirectionId(direction), false);
+        }
+
+        return EmptyCachedPacket.INSTANCE;
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     private static CachedParticlePacket getNamedPacket(final ParticleEffect effect, final net.minecraft.particles.ParticleType<?> internalType) {
         // Named particles always support OFFSET and QUANTITY.
-        final Vector3f offset = effect.getOption(ParticleOptions.OFFSET).map(Vector3d::toFloat).orElse(Vector3f.ZERO);
-        final int quantity = effect.getOption(ParticleOptions.QUANTITY).orElse(1);
+        final Vector3f offset = effect.getOptionOrDefault(ParticleOptions.OFFSET).get().toFloat();
+        final int quantity = effect.getOptionOrDefault(ParticleOptions.QUANTITY).get();
 
         if (internalType instanceof BasicParticleType) {
             // Simple named particle without any additional supported options.

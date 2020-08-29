@@ -24,8 +24,13 @@
  */
 package org.spongepowered.common.registry.builtin.vanilla;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.particles.ParticleTypes;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.effect.particle.NumericalParticleType;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
 public final class ParticleTypeSupplier {
@@ -98,5 +103,9 @@ public final class ParticleTypeSupplier {
             .registerSupplier(ParticleType.class, "landing_honey", () -> (ParticleType) ParticleTypes.LANDING_HONEY)
             .registerSupplier(ParticleType.class, "falling_nectar", () -> (ParticleType) ParticleTypes.FALLING_NECTAR)
         ;
+
+        registry
+            .registerCatalogAndSupplier(ParticleType.class, "fire_smoke",
+                () -> new NumericalParticleType(2000, ResourceKey.sponge("fire_smoke"), ImmutableMap.of(ParticleOptions.DIRECTION.get(), Direction.UP)));
     }
 }
