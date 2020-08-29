@@ -26,7 +26,8 @@ public final class ParticleOptionStreamGenerator {
                 new SpongeParticleOption<>(ResourceKey.sponge("offset"), Vector3d.class),
                 new SpongeParticleOption<>(ResourceKey.sponge("potion_effect_type"), PotionEffectType.class),
                 new SpongeParticleOption<>(ResourceKey.sponge("quantity"), Integer.class,
-                        value -> value < 1 ? new IllegalArgumentException("Quantity must be at least one") : null)
+                        value -> value < 1 ? new IllegalArgumentException("Quantity must be at least one") : null),
+                new SpongeParticleOption<>(ResourceKey.sponge("velocity"), Vector3d.class)
         );
     }
 }
