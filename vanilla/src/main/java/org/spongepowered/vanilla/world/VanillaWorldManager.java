@@ -497,6 +497,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
     @Override
     public void adjustWorldForDifficulty(final ServerWorld world, final Difficulty newDifficulty, final boolean forceDifficulty) {
+        if (world.getWorldInfo().isDifficultyLocked() && !forceDifficulty) {
+            return;
+        }
         if (forceDifficulty) {
             // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
             if (!((WorldInfoBridge) world.getWorldInfo()).bridge$hasCustomDifficulty()) {
