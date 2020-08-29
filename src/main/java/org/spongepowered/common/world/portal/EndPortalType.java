@@ -42,7 +42,7 @@ public final class EndPortalType extends VanillaPortalType {
     @Override
     public void generatePortal(final ServerLocation location) {
         Objects.requireNonNull(location);
-        PortalHelper.generateEndPortal((ServerWorld) location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), false);
+        PortalHelper.generateEndPortal((ServerWorld) location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), true);
     }
 
     @Override

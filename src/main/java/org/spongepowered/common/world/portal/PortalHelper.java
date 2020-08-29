@@ -485,7 +485,7 @@ public final class PortalHelper {
             z = event.getDestinationPosition().getZ();
 
             // Only create the obsidian platform if this not inter-world, not the API nether portal, and we're going to Vanilla's The End
-            if (!isSameWorld && (!(portal instanceof NetherPortalType) && toWorld.getDimension().getType() == DimensionType.THE_END)) {
+            if (!isSameWorld && (!(portal instanceof NetherPortalType) && toWorld.getDimension() instanceof EndDimension)) {
                 PortalHelper.generateEndObsidianPlatform(toWorld, (int) x, (int) y, (int) z);
                 player.setMotion(Vec3d.ZERO);
             // Only set the entered nether position if we've spawned in a portal, it isn't inter-world, not the API nether portal, and we're going
