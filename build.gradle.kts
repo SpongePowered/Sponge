@@ -1,16 +1,8 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        maven("https://files.minecraftforge.net/maven")
-        maven("https://repo-new.spongepowered.org/repository/maven-public")
-        maven("https://repo.spongepowered.org/maven")
-        mavenCentral()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
-    }
-}
+import org.apache.commons.io.FileUtils
+import java.io.FileInputStream
+import java.util.StringJoiner
+import java.security.MessageDigest
+import kotlin.experimental.and
 
 plugins {
     id("net.minecraftforge.gradle")
@@ -20,11 +12,7 @@ plugins {
     eclipse
     id("net.minecrell.licenser") version "0.4.1"
     id("com.github.johnrengelman.shadow") version "5.2.0"
-}
-
-
-apply {
-    plugin("org.spongepowered.mixin")
+    id("org.spongepowered.mixin")
 }
 
 val apiProject = project.project("SpongeAPI")
@@ -270,7 +258,7 @@ dependencies {
     add(mixins.get().implementationConfigurationName, mixinsConfig)
     add(mixins.get().implementationConfigurationName, project(":SpongeAPI"))
 }
-configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
+mixin {
     add("mixins", "spongecommon.mixins.refmap.json")
     add("accessors", "spongecommon.accessors.refmap.json")
 }
@@ -382,6 +370,8 @@ allprojects {
         }
     }
 }
+data class ProjectDep(val group: String, val module: String, val version: String)
+
 
 val testplugins: Project? = subprojects.find { "testplugins".equals(it.name) }
 if (testplugins != null) {
@@ -613,7 +603,7 @@ project("SpongeVanilla") {
         }
     }
 
-    configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
+    mixin {
         add(vanillaMixins, "spongevanilla.mixins.refmap.json")
         add(vanillaAccessors, "spongevanilla.accessors.refmap.json")
     }
@@ -717,6 +707,12 @@ project("SpongeVanilla") {
             from(vanillaMixinsJar)
             from(vanillaAccessorsJar)
         }
+        val emitDependencies by registering(OutputDependenciesToJson::class) {
+            group = "sponge"
+            val confName = vanillaAppLaunchConfig.name
+            configuration = confName
+            outputFile.set(File(vanillaProject.buildDir, "libraries.json"))
+        }
         shadowJar {
             mergeServiceFiles()
             val generateImplementationVersionString = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
@@ -747,6 +743,7 @@ project("SpongeVanilla") {
             from(vanillaMixinsJar)
             from(vanillaAccessorsJar)
             from(vanillaAppLaunchConfig)
+            from(emitDependencies)
             dependencies {
                 include(project(":"))
                 include(project(":SpongeAPI"))
@@ -797,6 +794,7 @@ project("SpongeVanilla") {
             create("universalJar")
             create("shadowJar")
         }
+
     }
 
     license {
@@ -810,6 +808,70 @@ project("SpongeVanilla") {
         include("**/*.java")
         newLine = false
     }
+}
+open class OutputDependenciesToJson(): DefaultTask() {
+
+    @get:org.gradle.api.tasks.Input
+    var configuration: String = "main"
+
+    @get:org.gradle.api.tasks.OutputFile
+    val outputFile: RegularFileProperty = project.objects.fileProperty()
+
+    @org.gradle.api.tasks.TaskAction
+    fun generateDependenciesJson() {
+        val stringBuilder = StringBuilder("{\n \"dependencies\":\n")
+        val depJoiner = StringJoiner(",\n", "  [\n", "\n  ]\n")
+
+        val foundConfig = project.configurations.findByName(configuration)
+        if (foundConfig == null) {
+            return
+        }
+        foundConfig.resolvedConfiguration.getFirstLevelModuleDependencies()
+                .filter { dependency -> dependency.getModuleName() != "SpongeAPI" }
+                .forEach { dependency ->
+                    //Get file input stream for reading the file content
+                    val depFile = dependency.getModuleArtifacts().first().file
+                    val digest = MessageDigest.getInstance("MD5")
+                    //Get file input stream for reading the file content
+                    val fis = FileInputStream(depFile)
+
+                    //Create byte array to read data in chunks
+
+                    //Create byte array to read data in chunks
+                    val byteArray = ByteArray(1024)
+                    var bytesCount = 0
+
+                    //Read file data and update in message digest
+                    while (fis.read(byteArray).also { bytesCount = it } != -1) {
+                        digest.update(byteArray, 0, bytesCount)
+                    }
+                    fis.close()
+
+                    val bytes: ByteArray = digest.digest()
+
+                    //This bytes[] has bytes in decimal format;
+                    //Convert it to hexadecimal format
+
+                    //This bytes[] has bytes in decimal format;
+                    //Convert it to hexadecimal format
+                    val sb: java.lang.StringBuilder = StringBuilder()
+                    val zeroF: Byte = 0xFF.toByte()
+                    for (i in bytes.indices) {
+                        sb.append(Integer.toString((bytes[i] and zeroF) + 0x100, 16).substring(1))
+                    }
+                    val depBuilder = StringJoiner(",\n", "    {\n", "\n    }")
+                    depBuilder.add("      \"group\": \"${dependency.getModuleGroup()}\"")
+                    depBuilder.add("      \"module\": \"${dependency.getModuleName()}\"")
+                    depBuilder.add("      \"version\": \"${dependency.getModuleVersion()}\"")
+                    depBuilder.add("      \"md5\": \"${sb.toString()}\"")
+                    depJoiner.add(depBuilder.toString())
+                }
+        stringBuilder.append(depJoiner.toString())
+        stringBuilder.append("}\n")
+        val output = outputFile.asFile.get()
+        FileUtils.write(output, stringBuilder.toString())
+    }
+
 }
 val spongeForge: Project? = subprojects.find { "SpongeForge".equals(it.name) }
 if (spongeForge != null) {
@@ -947,7 +1009,7 @@ if (spongeForge != null) {
             }
         }
 
-        configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
+        mixin {
             add(forgeMixins, "spongeforge.mixins.refmap.json")
             add(forgeAccessors, "spongeforge.accessors.refmap.json")
         }
