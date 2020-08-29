@@ -112,6 +112,7 @@ import org.spongepowered.api.data.type.TropicalFishShape;
 import org.spongepowered.api.data.type.VillagerType;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -157,44 +158,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogEventImpl;
-import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.CatTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.CatalogedValueParameterStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.ClickTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.ClientCompletionKeyStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
-import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.DimensionTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.DismountTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.EquipmentGroupStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.EquipmentTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.EventContextKeyStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.GeneratorModifierTypeRegistrar;
-import org.spongepowered.common.registry.builtin.sponge.GoalExecutorTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.GoalTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.HorseColorStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.HorseStyleStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.IAttributeTypeRegistrar;
-import org.spongepowered.common.registry.builtin.sponge.KeyStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.LlamaTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.MovementTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.ParrotTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.PhaseTypeRegistrar;
-import org.spongepowered.common.registry.builtin.sponge.PortalTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.QueryTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.RabbitTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.SelectorSortAlgorithmStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.SelectorTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.SerializationBehaviorStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.*;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
@@ -522,6 +486,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(MovementType.class, ResourceKey.sponge("movement_type"), MovementTypeStreamGenerator.stream(), true, true)
             .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true, false)
             .generateRegistry(PandaGene.class, ResourceKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true, false)
+            .generateRegistry(ParticleOption.class, ResourceKey.sponge("particle_option"), ParticleOptionStreamGenerator.stream(), true, false)
             .generateRegistry(PhantomPhase.class, ResourceKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true, false)
             .generateRegistry(PickupRule.class, ResourceKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true, false)
             .generateRegistry(PistonType.class, ResourceKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true, false)
