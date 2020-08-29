@@ -78,16 +78,16 @@ public abstract class TrackedEntityMixin {
      * @param consumer The consumer (a method handle for EntityTracker#sendToAllTracking)
      * @param ci The callback info
      */
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$wrapConsumer(ServerWorld world, Entity tracked, int update, boolean sendVelocity, Consumer<IPacket<?>> consumer, CallbackInfo ci) {
-        this.packetConsumer = (packet)  -> {
-            if (this.trackedEntity instanceof VanishableBridge) {
-                if (!((VanishableBridge) this.trackedEntity).bridge$isVanished()) {
-                    consumer.accept(packet);
-                }
-            }
-        };
-    }
+//    @Inject(method = "<init>", at = @At("TAIL"))
+//    private void impl$wrapConsumer(ServerWorld world, Entity tracked, int update, boolean sendVelocity, Consumer<IPacket<?>> consumer, CallbackInfo ci) {
+//        this.packetConsumer = (packet)  -> {
+//            if (this.trackedEntity instanceof VanishableBridge) {
+//                if (!((VanishableBridge) this.trackedEntity).bridge$isVanished()) {
+//                    consumer.accept(packet);
+//                }
+//            }
+//        };
+//    }
 
 
     /**
@@ -136,25 +136,25 @@ public abstract class TrackedEntityMixin {
         // for any player specific packets to send.
     }
 
-    @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SEntityPropertiesPacket;<init>(ILjava/util/Collection;)V"))
-    private Collection<IAttributeInstance> impl$injectScaledHealth(Collection<IAttributeInstance> set) {
-        if (this.trackedEntity instanceof ServerPlayerEntity) {
-            if (((ServerPlayerEntityBridge) this.trackedEntity).bridge$isHealthScaled()) {
-                ((ServerPlayerEntityBridge) this.trackedEntity).bridge$injectScaledHealth(set);
-            }
-        }
-        return set;
-    }
-
-    @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SEntityMetadataPacket;<init>(ILnet/minecraft/network/datasync/EntityDataManager;Z)V"))
-    private EntityDataManager impl$provideSpoofedDataManagerForScaledHealth(EntityDataManager manager) {
-        final Entity player = ((EntityDataManagerAccessor) manager).accessor$getEntity();
-        if (player instanceof ServerPlayerEntityBridge) {
-            if (((ServerPlayerEntityBridge) player).bridge$isHealthScaled()) {
-                throw new MissingImplementationException("TrackedEntityMixin", "scaledHealthSendMetadata");
-            }
-        }
-        return manager;
-    }
+//    @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SEntityPropertiesPacket;<init>(ILjava/util/Collection;)V"))
+//    private Collection<IAttributeInstance> impl$injectScaledHealth(Collection<IAttributeInstance> set) {
+//        if (this.trackedEntity instanceof ServerPlayerEntity) {
+//            if (((ServerPlayerEntityBridge) this.trackedEntity).bridge$isHealthScaled()) {
+//                ((ServerPlayerEntityBridge) this.trackedEntity).bridge$injectScaledHealth(set);
+//            }
+//        }
+//        return set;
+//    }
+//
+//    @ModifyArg(method = "sendMetadata", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/server/SEntityMetadataPacket;<init>(ILnet/minecraft/network/datasync/EntityDataManager;Z)V"))
+//    private EntityDataManager impl$provideSpoofedDataManagerForScaledHealth(EntityDataManager manager) {
+//        final Entity player = ((EntityDataManagerAccessor) manager).accessor$getEntity();
+//        if (player instanceof ServerPlayerEntityBridge) {
+//            if (((ServerPlayerEntityBridge) player).bridge$isHealthScaled()) {
+//                throw new MissingImplementationException("TrackedEntityMixin", "scaledHealthSendMetadata");
+//            }
+//        }
+//        return manager;
+//    }
 
 }

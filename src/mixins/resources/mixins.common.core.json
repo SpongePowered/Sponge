@@ -65,6 +65,7 @@
         "world.BossInfoMixin",
         "world.server.ServerBossInfoMixin",
         "world.TeleporterMixin",
+        "world.TrackedEntityMixin",
         "world.WorldMixin",
         "world.WorldSettingsMixin",
         "world.chunk.ChunkMixin",
