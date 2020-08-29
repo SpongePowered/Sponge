@@ -31,6 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.entity.EndGateway;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.data.DataHolder;
@@ -50,7 +51,13 @@ import org.spongepowered.api.data.type.PistonTypes;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.type.ProfessionTypes;
 import org.spongepowered.api.data.type.RailDirections;
+import org.spongepowered.api.data.type.SlabPortions;
 import org.spongepowered.api.data.type.SpellTypes;
+import org.spongepowered.api.data.type.StairShapes;
+import org.spongepowered.api.data.type.ToolTypes;
+import org.spongepowered.api.data.type.TropicalFishShapes;
+import org.spongepowered.api.data.type.VillagerTypes;
+import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
@@ -58,21 +65,30 @@ import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.explosive.EnderCrystal;
+import org.spongepowered.api.entity.living.animal.Sheep;
+import org.spongepowered.api.entity.living.animal.Turtle;
+import org.spongepowered.api.entity.living.monster.Patroller;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.TemporalUnits;
+import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
@@ -1030,9 +1046,171 @@ public final class DataTest  {
 //        this.checkGetData(dirtState, Keys.REPRESENTED_INSTRUMENT, InstrumentTypes.XYLOPHONE.get());
 
         // TODO Keys.REQUIRED_PLAYER_RANGE
+
+        // Keys.RESPAWN_LOCATIONS
+
+        this.checkOfferData(armorStand, Keys.RIGHT_ARM_ROTATION, Vector3d.UP);
+        this.checkOfferData(armorStand, Keys.RIGHT_LEG_ROTATION, Vector3d.UP);
+
+        this.checkOfferData(ravager, Keys.ROARING_TIME, 20);
+
+//        this.checkOfferData(itemFrame, Keys.ROTATION, Rotations.LEFT.get());
+
+        this.checkOfferData(player, Keys.SATURATION, 20.0);
+
+        this.checkGetData(sheep, Keys.SCALE, 1.0);
+
+        // Keys.SCOREBOARD_TAGS
+
+        // Keys.SECONDARY_POTION_EFFECT_TYPE
+
+        this.checkOfferData(fox, Keys.SECOND_TRUSTED, player.getUniqueId());
+
+        // Keys.SHOOTER
+
+        final Entity endCrystal = world.createEntity(EntityTypes.END_CRYSTAL.get(), position);
+        this.checkOfferData(endCrystal, Keys.SHOW_BOTTOM, true);
+
+        // Keys.SIGN_LINES
+
+        final Entity slime = world.createEntity(EntityTypes.SLIME.get(), position);
+        this.checkOfferData(slime, Keys.SIZE, 10);
+
+        final Entity human = world.createEntity(EntityTypes.HUMAN.get(), position);
+        // TODO HumanEntity#getSkinProperty NPE / offer not working?
+        //        this.checkOfferData(human, Keys.SKIN_PROFILE_PROPERTY, player.get(Keys.SKIN_PROFILE_PROPERTY).get());
+
+        this.checkOfferData(dolphin, Keys.SKIN_MOISTURE, 1);
+
+        // Keys.SKY_LIGHT
+
+        final BlockState slabState = BlockTypes.BIRCH_SLAB.get().getDefaultState();
+//        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.BOTTOM.get());
+//        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.FULL.get());
+
+        this.checkOfferData(player, Keys.SLEEP_TIMER, 20);
+
+        // Keys.SLOT_INDEX
+        // Keys.SLOT_POSITION
+        // Keys.SLOT_SIDE
+
+//        this.checkOfferData(minecartEntity, Keys.SLOWS_UNOCCUPIED, false);
+
+        this.checkOfferData(panda, Keys.SNEEZING_TIME, 2);
+
+        // Keys.SPAWNABLE_ENTITIES
+        // Keys.SPAWN_COUNT
+        // Keys.SPAWN_RANGE
+
+        this.checkOfferData(player, Keys.SPECTATOR_TARGET, sheep);
+        this.checkOfferData(player, Keys.SPECTATOR_TARGET, player);
+
+        this.checkWithData(acaciaStairs, Keys.STAIR_SHAPE, StairShapes.INNER_LEFT.get());
+        this.checkWithData(acaciaStairs, Keys.STAIR_SHAPE, StairShapes.OUTER_LEFT.get());
+        this.checkWithData(acaciaStairs, Keys.STAIR_SHAPE, StairShapes.STRAIGHT.get());
+
+        // Keys.STATISTICS
+
+        final ItemStack enchantedBook = ItemStack.of(ItemTypes.ENCHANTED_BOOK);
+        this.checkOfferListData(enchantedBook, Keys.STORED_ENCHANTMENTS, Arrays.asList(Enchantment.of(EnchantmentTypes.SHARPNESS, 5), Enchantment.of(EnchantmentTypes.PROTECTION, 4)));
+
+        this.checkOfferData(llama, Keys.STRENGTH, 10);
+
+        // Keys.STRUCTURE_AUTHOR
+        // Keys.STRUCTURE_IGNORE_ENTITIES
+        // Keys.STRUCTURE_INTEGRITY
+        // Keys.STRUCTURE_MODE
+        // Keys.STRUCTURE_POSITION
+        // Keys.STRUCTURE_POWERED
+        // Keys.STRUCTURE_SEED
+        // Keys.STRUCTURE_SHOW_AIR
+        // Keys.STRUCTURE_SHOW_BOUNDING_BOX
+        // Keys.STRUCTURE_SIZE
+
+        this.checkOfferData(sheep, Keys.STUCK_ARROWS, 10);
+
+        this.checkOfferData(ravager, Keys.STUNNED_TIME, 20);
+
+        // Keys.SUCCESS_COUNT
+
+        // Keys.SUSPENDED
+
+//        this.checkOfferData(minecartEntity, Keys.SWIFTNESS, 2.0);
+
+        this.checkOfferData(horse, Keys.TAMER, player.getUniqueId());
+        this.checkOfferData(wolf, Keys.TAMER, player.getUniqueId());
+        this.checkOfferData(parrot, Keys.TAMER, player.getUniqueId());
+
+// TODO missing dataprovider       this.checkOfferData(zombiePigman, Keys.TARGET_ENTITY, player);
+        this.checkOfferData(shulkerBullet, Keys.TARGET_ENTITY, sheep);
+        // FishingBobber
+
+        final Entity eyeOfEnder = world.createEntity(EntityTypes.EYE_OF_ENDER.get(), position);
+//        this.checkOfferData(eyeOfEnder, Keys.TARGET_LOCATION, position);
+
+        this.checkOfferData(ravager, Keys.TARGET_POSITION, blockPos);
+        this.checkOfferData(turtle, Keys.TARGET_POSITION, blockPos);
+        // EndGateway
+        this.checkOfferData(endCrystal, Keys.TARGET_POSITION, blockPos);
+
+        // Keys.TICKS_REMAINING
+        this.checkGetData(jungleAxe, Keys.TOOL_TYPE, ToolTypes.WOOD.get());
+
+        // Keys.TRACKS_OUTPUT
+
+        final TradeOffer tradeOffer = TradeOffer.builder()
+                .firstBuyingItem(ItemStack.of(ItemTypes.EMERALD))
+                .sellingItem(jungleAxe)
+                .build();
+        this.checkOfferListData(villager, Keys.TRADE_OFFERS, Arrays.asList(tradeOffer));
+//        world.spawnEntity(villager);
+
+//        this.checkOfferData(villager, Keys.TRANSIENT, true);
+
+//        this.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
+
+        this.checkOfferData(panda, Keys.UNHAPPY_TIME, 20);
+
+        // Keys.UNIQUE_ID
+
+//        this.checkOfferData(boat, Keys.UNOCCUPIED_DECELERATION, 2.0);
+
+        final BlockState tntState = BlockTypes.TNT.get().getDefaultState();
+        this.checkWithData(tntState, Keys.UNSTABLE, true);
+
+        // Keys.UPDATE_GAME_PROFILE
+
+        // Keys.VANISH
+        // Keys.VANISH_IGNORES_COLLISION
+        // Keys.VANISH_PREVENTS_TARGETING
+
+        this.checkOfferData(sheep, Keys.VELOCITY, Vector3d.UP);
+
+//        this.checkOfferData(villager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
+        final Entity zombieVillager = world.createEntity(EntityTypes.ZOMBIE_VILLAGER.get(), position);
+//        this.checkOfferData(zombieVillager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
+
+        this.checkOfferData(areaEffectCloud, Keys.WAIT_TIME, 1);
+
+        this.checkOfferData(player, Keys.WALKING_SPEED, 1.0);
+        this.checkOfferData(sheep, Keys.WALKING_SPEED, 1.0);
+
+        this.checkOfferData(eyeOfEnder, Keys.WILL_SHATTER, true);
+
+        // Keys.WIRE_ATTACHMENTS
+        // Keys.WIRE_ATTACHMENT_EAST
+        // Keys.WIRE_ATTACHMENT_NORTH
+        // Keys.WIRE_ATTACHMENT_SOUTH
+        // Keys.WIRE_ATTACHMENT_WEST
+
+        final Entity wither = world.createEntity(EntityTypes.WITHER.get(), position);
+        this.checkOfferListData(wither, Keys.WITHER_TARGETS, Arrays.asList(player));
+
+        final Entity evoker = world.createEntity(EntityTypes.EVOKER.get(), position);
+        this.checkOfferData(evoker, Keys.WOLOLO_TARGET, (Sheep) sheep);
+
+        this.checkOfferData(boat, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
     }
-
-
 
     private <T> void checkOfferSetData(final DataHolder.Mutable holder, final Supplier<Key<SetValue<T>>> key, final Set<T> value) {
         final DataTransactionResult result = holder.offer(key, value);
