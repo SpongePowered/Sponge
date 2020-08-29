@@ -93,9 +93,15 @@ public class SpongeParticleHelper {
     private static CachedParticlePacket getNumericalPacket(final ParticleEffect effect, final NumericalParticleType type) {
         int effectId = type.getId();
 
-        if (type == ParticleTypes.FIRE_SMOKE.get()) {
+        if (type == ParticleTypes.FIRE_SMOKE.get()) { // id: 2000
             final Direction direction = effect.getOptionOrDefault(ParticleOptions.DIRECTION).get();
             return new NumericalCachedPacket(effectId, getDirectionId(direction), false);
+        } else if (type == ParticleTypes.BREAK_BLOCK.get()) { // id: 2001
+            final int stateId = getBlockStateId(effect, type.getDefaultOption(ParticleOptions.BLOCK_STATE));
+            if (stateId == 0) {
+                return EmptyCachedPacket.INSTANCE;
+            }
+            return new NumericalCachedPacket(effectId, stateId, false);
         }
 
         return EmptyCachedPacket.INSTANCE;
@@ -170,7 +176,7 @@ public class SpongeParticleHelper {
         }
     }
 
-    private static int getBlockStateId(final SpongeParticleEffect effect, final Optional<BlockState> defaultBlockState) {
+    private static int getBlockStateId(final ParticleEffect effect, final Optional<BlockState> defaultBlockState) {
         final Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
         if (blockState.isPresent()) {
             // Use the provided block state option.
