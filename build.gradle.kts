@@ -4,20 +4,6 @@ import java.util.StringJoiner
 import java.security.MessageDigest
 import kotlin.experimental.and
 
-buildscript {
-    repositories {
-        mavenLocal()
-        maven("https://files.minecraftforge.net/maven")
-        maven("https://repo-new.spongepowered.org/repository/maven-public")
-        maven("https://repo.spongepowered.org/maven")
-        mavenCentral()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
-    }
-}
-
 plugins {
     id("net.minecraftforge.gradle")
     `maven-publish`
@@ -26,11 +12,7 @@ plugins {
     eclipse
     id("net.minecrell.licenser") version "0.4.1"
     id("com.github.johnrengelman.shadow") version "5.2.0"
-}
-
-
-apply {
-    plugin("org.spongepowered.mixin")
+    id("org.spongepowered.mixin")
 }
 
 val apiProject = project.project("SpongeAPI")
@@ -276,7 +258,7 @@ dependencies {
     add(mixins.get().implementationConfigurationName, mixinsConfig)
     add(mixins.get().implementationConfigurationName, project(":SpongeAPI"))
 }
-configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
+mixin {
     add("mixins", "spongecommon.mixins.refmap.json")
     add("accessors", "spongecommon.accessors.refmap.json")
 }
@@ -621,7 +603,7 @@ project("SpongeVanilla") {
         }
     }
 
-    configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
+    mixin {
         add(vanillaMixins, "spongevanilla.mixins.refmap.json")
         add(vanillaAccessors, "spongevanilla.accessors.refmap.json")
     }
@@ -729,7 +711,7 @@ project("SpongeVanilla") {
             group = "sponge"
             val confName = vanillaAppLaunchConfig.name
             configuration = confName
-            outputFile.set(File(vanillaProject.buildDir, "$confName.json"))
+            outputFile.set(File(vanillaProject.buildDir, "libraries.json"))
         }
         shadowJar {
             mergeServiceFiles()
@@ -1027,7 +1009,7 @@ if (spongeForge != null) {
             }
         }
 
-        configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {
+        mixin {
             add(forgeMixins, "spongeforge.mixins.refmap.json")
             add(forgeAccessors, "spongeforge.accessors.refmap.json")
         }
