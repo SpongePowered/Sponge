@@ -263,6 +263,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Overwrite
     public final void teleportKeepLoaded(double x, double y, double z) {
         if (this.world instanceof net.minecraft.world.server.ServerWorld) {
+            // Sponge start
             final PhaseTracker server = PhaseTracker.SERVER;
             boolean hasMovementContext = true;
             if (!server.getCurrentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
@@ -277,6 +278,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
             if (!hasMovementContext) {
                 server.popCause();
+                // check
                 server.removeContext(EventContextKeys.MOVEMENT_TYPE);
             }
 
@@ -285,6 +287,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
 
             final Vector3d destinationPosition = event.getDestinationPosition();
+            // Sponge end
             ChunkPos chunkpos = new ChunkPos(new BlockPos(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ()));
             ((net.minecraft.world.server.ServerWorld)this.world).getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkpos, 0,
                     this.shadow$getEntityId());
