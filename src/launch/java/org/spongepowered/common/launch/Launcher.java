@@ -145,24 +145,10 @@ public abstract class Launcher {
     }
 
     protected void onLaunch() {
-        this.createInternalPlugins();
+        this.createPlatformPlugins(this.pluginEngine);
     }
 
-    private void createInternalPlugins() {
-        final Path gameDirectory = this.pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY).get();
-        try {
-            final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(Launcher.class.getResourceAsStream("/META-INF/plugins.json"));
-            for (final PluginMetadata metadata : read) {
-                this.pluginManager.addPlugin(new DummyPluginContainer(metadata, gameDirectory, this.logger, this));
-            }
-        } catch (final IOException e) {
-            throw new RuntimeException("Could not load metadata information for the common implementation! This should be impossible!");
-        }
-
-        this.createPlatformPlugins(gameDirectory);
-    }
-
-    protected abstract void createPlatformPlugins(final Path gameDirectory);
+    protected abstract void createPlatformPlugins(final PluginEngine engine);
 
     public final void auditMixins() {
         MixinEnvironment.getCurrentEnvironment().audit();

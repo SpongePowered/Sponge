@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.launch.plugin;
 
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
@@ -91,6 +92,14 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
         this.plugins.put(plugin.getMetadata().getId(), plugin);
         this.instancesToPlugins.put(plugin.getInstance(), plugin);
+        this.sortedPlugins.add(plugin);
+    }
+
+    @Override
+    public void addDummyPlugin(DummyPluginContainer plugin) {
+        Objects.requireNonNull(plugin);
+
+        this.plugins.put(plugin.getMetadata().getId(), plugin);
         this.sortedPlugins.add(plugin);
     }
 

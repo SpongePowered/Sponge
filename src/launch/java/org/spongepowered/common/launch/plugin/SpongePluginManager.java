@@ -30,4 +30,6 @@ import org.spongepowered.plugin.PluginContainer;
 public interface SpongePluginManager extends PluginManager {
 
     void addPlugin(PluginContainer plugin);
+
+    void addDummyPlugin(DummyPluginContainer plugin);
 }
