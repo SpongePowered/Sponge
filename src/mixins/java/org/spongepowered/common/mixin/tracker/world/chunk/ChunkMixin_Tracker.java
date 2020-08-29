@@ -112,8 +112,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public ChunkPipeline bridge$createChunkPipeline(final BlockPos pos, final BlockState newState, final BlockState currentState,
-        final SpongeBlockChangeFlag flag
-    ) {
+            final SpongeBlockChangeFlag flag) {
         final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
         if (isFake) {
             throw new IllegalStateException("Cannot call ChunkBridge.bridge$buildChunkPipeline in non-Server managed worlds");
@@ -127,9 +126,9 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         // Sponge - get the moving flag from our flag construct
         ChunkSection chunksection = this.sections[yPos >> 4];
         if (chunksection == EMPTY_SECTION) {
-            if (newState.isAir()) {
-                return null;
-            }
+//            if (newState.isAir()) {
+//                return null;
+//            }
 
             chunksection = new ChunkSection(yPos >> 4 << 4);
             this.sections[yPos >> 4] = chunksection;

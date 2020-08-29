@@ -42,8 +42,8 @@ public abstract class WorldRendererMixin {
 
     @Shadow protected abstract void shadow$renderSkyEnd(MatrixStack matrixStackIn);
 
-    @Inject(method = "renderSkyEnd", at = @At("HEAD"), cancellable = true)
-    private void impl$renderEndSkyboxForAllEndDimensions(MatrixStack matrixStackIn, CallbackInfo ci) {
+    @Inject(method = "renderSky(Lcom/mojang/blaze3d/matrix/MatrixStack;F)V", at = @At("HEAD"), cancellable = true)
+    private void impl$renderEndSkyboxForAllEndDimensions(MatrixStack matrixStackIn, float partialTicks, CallbackInfo ci) {
         if (this.mc.world.dimension instanceof EndDimension) {
             this.shadow$renderSkyEnd(matrixStackIn);
             ci.cancel();
