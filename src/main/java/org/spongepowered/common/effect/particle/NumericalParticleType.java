@@ -25,7 +25,9 @@
 package org.spongepowered.common.effect.particle;
 
 import com.google.common.collect.ImmutableMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.common.SpongeCatalogType;
@@ -37,11 +39,21 @@ public final class NumericalParticleType extends SpongeCatalogType implements Pa
 
     private final int id;
     private final ImmutableMap<ParticleOption<?>, Object> defaultOptions;
+    @Nullable
+    private final DataCalculator dataCalculator;
 
-    public NumericalParticleType(int id, ResourceKey key, Map<ParticleOption<?>, Object> defaultOptions) {
+    public NumericalParticleType(int id, ResourceKey key, Map<ParticleOption<?>, Object> defaultOptions, @Nullable DataCalculator dataCalculator) {
         super(key);
         this.id = id;
         this.defaultOptions = ImmutableMap.copyOf(defaultOptions);
+        this.dataCalculator = dataCalculator;
+    }
+
+    public NumericalParticleType(int id, ResourceKey key) {
+        super(key);
+        this.id = id;
+        this.defaultOptions = ImmutableMap.of();
+        this.dataCalculator = null;
     }
 
     public int getId() {
@@ -57,5 +69,17 @@ public final class NumericalParticleType extends SpongeCatalogType implements Pa
     @Override
     public Map<ParticleOption<?>, Object> getDefaultOptions() {
         return this.defaultOptions;
+    }
+
+    public int getData(ParticleEffect effect) {
+        if (this.dataCalculator == null) {
+            return 0;
+        } else {
+            return this.dataCalculator.getData(effect);
+        }
+    }
+
+    public interface DataCalculator {
+        int getData(ParticleEffect effect);
     }
 }

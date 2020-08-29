@@ -29,8 +29,12 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.play.server.SPlaySoundEventPacket;
 import net.minecraft.network.play.server.SSpawnParticlePacket;
 import net.minecraft.particles.*;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Potion;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -93,18 +97,7 @@ public class SpongeParticleHelper {
     private static CachedParticlePacket getNumericalPacket(final ParticleEffect effect, final NumericalParticleType type) {
         int effectId = type.getId();
 
-        if (type == ParticleTypes.FIRE_SMOKE.get()) { // id: 2000
-            final Direction direction = effect.getOptionOrDefault(ParticleOptions.DIRECTION).get();
-            return new NumericalCachedPacket(effectId, getDirectionId(direction), false);
-        } else if (type == ParticleTypes.BREAK_BLOCK.get()) { // id: 2001
-            final int stateId = getBlockStateId(effect, type.getDefaultOption(ParticleOptions.BLOCK_STATE));
-            if (stateId == 0) {
-                return EmptyCachedPacket.INSTANCE;
-            }
-            return new NumericalCachedPacket(effectId, stateId, false);
-        }
-
-        return EmptyCachedPacket.INSTANCE;
+        return new NumericalCachedPacket(effectId, type.getData(effect), false);
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
@@ -150,7 +143,7 @@ public class SpongeParticleHelper {
         return EmptyCachedPacket.INSTANCE;
     }
 
-    private static int getDirectionId(Direction direction) {
+    public static int getDirectionId(Direction direction) {
         if (direction.isSecondaryOrdinal()) {
             direction = Direction.getClosest(direction.asOffset(), Direction.Division.ORDINAL);
         }
@@ -176,7 +169,7 @@ public class SpongeParticleHelper {
         }
     }
 
-    private static int getBlockStateId(final ParticleEffect effect, final Optional<BlockState> defaultBlockState) {
+    public static int getBlockStateId(final ParticleEffect effect, final Optional<BlockState> defaultBlockState) {
         final Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
         if (blockState.isPresent()) {
             // Use the provided block state option.

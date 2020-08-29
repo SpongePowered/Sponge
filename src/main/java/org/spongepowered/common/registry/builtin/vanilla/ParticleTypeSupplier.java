@@ -26,18 +26,26 @@ package org.spongepowered.common.registry.builtin.vanilla;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Potion;
+import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.effect.particle.NumericalParticleType;
+import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
 public final class ParticleTypeSupplier {
 
     private ParticleTypeSupplier() {
     }
+
+    // @formatter:off
 
     public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
@@ -107,9 +115,36 @@ public final class ParticleTypeSupplier {
 
         registry
             .registerCatalogAndSupplier(ParticleType.class, "fire_smoke",
-                () -> new NumericalParticleType(2000, ResourceKey.sponge("fire_smoke"), ImmutableMap.of(ParticleOptions.DIRECTION.get(), Direction.UP)))
+                () -> new NumericalParticleType(2000, ResourceKey.sponge("fire_smoke"), ImmutableMap.of(ParticleOptions.DIRECTION.get(), Direction.UP),
+                        effect -> {
+                            final Direction direction = effect.getOptionOrDefault(ParticleOptions.DIRECTION).get();
+                            return SpongeParticleHelper.getDirectionId(direction);
+                        }))
             .registerCatalogAndSupplier(ParticleType.class, "break_block",
-                () -> new NumericalParticleType(2001, ResourceKey.sponge("break_block"), ImmutableMap.of(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().getDefaultState())))
+                () -> new NumericalParticleType(2001, ResourceKey.sponge("break_block"), ImmutableMap.of(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().getDefaultState()),
+                        effect -> SpongeParticleHelper.getBlockStateId(effect, effect.getType().getDefaultOption(ParticleOptions.BLOCK_STATE))))
+            .registerCatalogAndSupplier(ParticleType.class, "splash_potion",
+                () -> new NumericalParticleType(2002, ResourceKey.sponge("splash_potion"), ImmutableMap.of(ParticleOptions.POTION_EFFECT_TYPE.get(), PotionEffectTypes.ABSORPTION.get()),
+                        effect -> {
+                            final Effect effectType = (Effect) effect.getOptionOrDefault(ParticleOptions.POTION_EFFECT_TYPE).get();
+                            for (final Potion potionType : Registry.POTION) {
+                                for (final EffectInstance potionEffect : potionType.getEffects()) {
+                                    if (potionEffect.getPotion() == effectType) {
+                                        return Registry.POTION.getId(potionType);
+                                    }
+                                }
+                            }
+                            return 0;
+                        }))
+            .registerCatalogAndSupplier(ParticleType.class, "break_eye_of_ender",
+                () -> new NumericalParticleType(2003, ResourceKey.sponge("break_eye_of_ender")))
+            .registerCatalogAndSupplier(ParticleType.class, "mobspawner_flames",
+                () -> new NumericalParticleType(2004, ResourceKey.sponge("mobspawner_flames")))
+            .registerCatalogAndSupplier(ParticleType.class, "fertilizer",
+                () -> new NumericalParticleType(2005, ResourceKey.sponge("fertilizer"), ImmutableMap.of(ParticleOptions.QUANTITY.get(), 1),
+                        effect -> effect.getOptionOrDefault(ParticleOptions.QUANTITY).get()))
+            .registerCatalogAndSupplier(ParticleType.class, "dragon_breath_attack",
+                () -> new NumericalParticleType(2006, ResourceKey.sponge("dragon_breath_attack")))
         ;
     }
 }
