@@ -50,7 +50,7 @@ import java.util.Optional;
 public class SpongeParticleHelper {
 
     public static void sendPackets(ParticleEffect particleEffect, Vector3d position, int radius, DimensionType type, PlayerList playerList) {
-        final List<IPacket<?>> packets = getPackets(particleEffect, position);
+        final List<IPacket<?>> packets = toPackets(particleEffect, position);
 
         if (!packets.isEmpty()) {
             final double x = position.getX();
@@ -63,7 +63,7 @@ public class SpongeParticleHelper {
         }
     }
 
-    public static List<IPacket<?>> getPackets(final ParticleEffect effect, final Vector3d position) {
+    public static List<IPacket<?>> toPackets(final ParticleEffect effect, final Vector3d position) {
         SpongeParticleEffect spongeEffect = (SpongeParticleEffect) effect;
 
         CachedParticlePacket cachedPacket = spongeEffect.cachedPacket;

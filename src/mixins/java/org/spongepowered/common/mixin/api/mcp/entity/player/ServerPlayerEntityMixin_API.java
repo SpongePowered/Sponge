@@ -147,7 +147,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         Preconditions.checkNotNull(position, "The position cannot be null");
         Preconditions.checkArgument(radius > 0, "The radius has to be greater then zero!");
 
-        final List<IPacket<?>> packets = SpongeParticleHelper.getPackets(particleEffect, position);
+        final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
 
         if (!packets.isEmpty()) {
             if (position.sub(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ()).lengthSquared() < (long) radius * (long) radius) {
