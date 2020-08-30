@@ -102,23 +102,28 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
 
     @Override
     public boolean acceptTileAddition(final TileEntity tileEntity) {
-        if (!this.affectedPosition.equals(tileEntity.getPos())) {
-            return false;
+        if (this.queuedAdd == tileEntity) {
+            return true;
         }
         if (this.queuedAdd != null) {
             return false;
-
+        }
+        if (!this.affectedPosition.equals(tileEntity.getPos())) {
+            return false;
         }
         this.queuedAdd = tileEntity;
         return true;
     }
 
     @Override
-    public boolean acceptTileRemoval(final TileEntity tileentity) {
-        if (!this.affectedPosition.equals(tileentity.getPos())) {
-            return false;
+    public boolean acceptTileRemoval(final @Nullable TileEntity tileentity) {
+        if (this.queuedRemoval == tileentity) {
+            return true;
         }
         if (this.queuedRemoval != null) {
+            return false;
+        }
+        if (!this.affectedPosition.equals(tileentity.getPos())) {
             return false;
         }
         this.queuedRemoval = tileentity;
@@ -127,7 +132,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
 
     @Override
     public boolean acceptTileReplacement(final @Nullable TileEntity existing, final TileEntity proposed) {
-        return existing != null && this.acceptTileRemoval(existing) && this.acceptTileAddition(proposed);
+        return this.acceptTileRemoval(existing) && this.acceptTileAddition(proposed);
     }
 
     @Override

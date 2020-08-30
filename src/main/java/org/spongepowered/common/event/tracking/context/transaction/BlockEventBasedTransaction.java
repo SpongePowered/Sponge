@@ -158,11 +158,6 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
     protected abstract SpongeBlockSnapshot getOriginalSnapshot();
 
     @Override
-    public boolean canBatchWith(final GameTransaction<@NonNull ?> next) {
-        return next instanceof org.spongepowered.common.event.tracking.context.transaction.BlockEventBasedTransaction;
-    }
-
-    @Override
     public final boolean markCancelledTransactions(final ChangeBlockEvent event,
         final ImmutableList<? extends GameTransaction<ChangeBlockEvent>> blockTransactions
     ) {

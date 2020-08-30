@@ -29,11 +29,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
@@ -80,7 +78,6 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
         this.deducedSpawnType = deducedSpawnType;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
         return Optional.empty();
@@ -109,12 +106,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
 
     @Override
     public void restore() {
-
-    }
-
-    @Override
-    public boolean canBatchWith(@Nullable final GameTransaction<@NonNull ?> next) {
-        return false;
+        this.worldSupplier.get().removeEntity(this.entityToSpawn);
     }
 
     @Override
@@ -122,5 +114,10 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
         final ImmutableList<? extends GameTransaction<SpawnEntityEvent>> gameTransactions
     ) {
         return false;
+    }
+
+    @Override
+    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final SpawnEntityEvent event) {
+
     }
 }

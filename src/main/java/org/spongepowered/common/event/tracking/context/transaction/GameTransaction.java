@@ -65,6 +65,10 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
             .toString();
     }
 
+    public TransactionType getTransactionType() {
+        return this.transactionType;
+    }
+
 
     Deque<ResultingTransactionBySideEffect> getEffects() {
         if (this.sideEffects == null) {
@@ -97,7 +101,7 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
 
     public abstract void addToPrinter(PrettyPrinter printer);
 
-    public boolean acceptTileRemoval(final TileEntity tileentity) {
+    public boolean acceptTileRemoval(final @Nullable TileEntity tileentity) {
         return false;
     }
 
@@ -113,16 +117,24 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
 
     public abstract void restore();
 
-    public abstract boolean canBatchWith(@Nullable final GameTransaction<@NonNull ?> next);
-
-    public boolean avoidsEvent() {
-        return false;
-    }
-
     public void markCancelled() {
         this.cancelled = true;
+        if (this.sideEffects != null) {
+            for (final ResultingTransactionBySideEffect sideEffect : this.sideEffects) {
+                if (sideEffect.head != null) {
+                    @Nullable GameTransaction<@NonNull ?> node = sideEffect.head;
+                    while (node != null) {
+                        node.markCancelled();
+                        node = node.next;
+                    }
+                }
+            }
+        }
     }
 
     public abstract boolean markCancelledTransactions(E event, ImmutableList<? extends GameTransaction<E>> transactions);
 
+    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final E event) {
+
+    }
 }

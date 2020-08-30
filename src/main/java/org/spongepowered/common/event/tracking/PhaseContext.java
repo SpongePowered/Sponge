@@ -69,14 +69,14 @@ import java.util.function.Supplier;
 @DefaultQualifier(NonNull.class)
 public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
 
-    @MonotonicNonNull private static PhaseContext<?> EMPTY;
+    @MonotonicNonNull private static PhaseContext<@NonNull ?> EMPTY;
     protected final PhaseTracker createdTracker;
     @MonotonicNonNull private TransactionalCaptureSupplier transactor;
 
     /**
      * Default flagged empty PhaseContext that can be used for stubbing in corner cases.
      */
-    public static PhaseContext<?> empty() {
+    public static PhaseContext<@NonNull ?> empty() {
         if (PhaseContext.EMPTY == null) {
             PhaseContext.EMPTY = new GeneralizedContext(GeneralPhase.State.COMPLETE, new PhaseTracker()).markEmpty();
         }

@@ -30,7 +30,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -129,16 +128,6 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     @Override
     public void restore() {
 
-    }
-
-    @Override
-    public boolean canBatchWith(@Nullable final GameTransaction<@NonNull ?> next) {
-        return next instanceof org.spongepowered.common.event.tracking.context.transaction.NeighborNotification;
-    }
-
-    @Override
-    public boolean avoidsEvent() {
-        return true;
     }
 
     @Override
