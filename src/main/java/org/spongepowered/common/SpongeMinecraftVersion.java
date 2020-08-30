@@ -26,6 +26,9 @@ package org.spongepowered.common;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.MinecraftVersion;
+import org.spongepowered.common.util.Constants;
+
+import java.util.OptionalInt;
 
 public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, MinecraftVersion {
 
@@ -60,6 +63,11 @@ public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, M
     @Override
     public boolean isLegacy() {
         return false;
+    }
+
+    @Override
+    public OptionalInt getDataVersion() {
+        return OptionalInt.of(Constants.MINECRAFT_DATA_VERSION);
     }
 
     @Override
