@@ -43,7 +43,12 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -54,6 +59,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -102,6 +108,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -545,7 +552,38 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             CrashReportCategory.addBlockInfo(crashreportcategory, immutableTarget, targetBlockState);
             throw new ReportedException(crashreport);
         }
+    }
 
+    @Inject(method = "addEntity0(Lnet/minecraft/entity/Entity;)Z",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getPosX()D"),
+        cancellable = true
+    )
+    private void tracker$throwPreEventAndRecord(final Entity entityIn, final CallbackInfoReturnable<Boolean> cir) {
+        if (this.bridge$isFake()) {
+            return;
+        }
+        final PhaseTracker tracker = PhaseTracker.SERVER;
+        if (tracker.getSidedThread() != Thread.currentThread()) {
+            // TODO - async entity spawn logging
+            return;
+        }
+
+        final Cause currentCause = tracker.getCurrentCause();
+
+        final SpawnEntityEvent.Pre pre = SpongeEventFactory.createSpawnEntityEventPre(
+            currentCause,
+            Collections.singletonList(entityIn)
+        );
+        Sponge.getEventManager().post(pre);
+        if (pre.isCancelled()) {
+            cir.setReturnValue(false);
+        }
+
+        final PhaseContext<@NonNull ?> current = tracker.getPhaseContext();
+
+        if (current.allowsBulkEntityCaptures()) {
+            current.getTransactor().logEntitySpawn(current, this, entityIn);
+        }
 
     }
 }

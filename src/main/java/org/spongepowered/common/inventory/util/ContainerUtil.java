@@ -42,6 +42,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
@@ -119,14 +120,11 @@ public final class ContainerUtil {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void performBlockInventoryDrops(final ServerWorld worldServer, final double x, final double y, final double z, final IInventory inventory) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<?> currentState = context.state;
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
+        final IPhaseState<@NonNull ?> currentState = context.state;
         if (((IPhaseState) currentState).tracksBlockSpecificDrops(context)) {
             // this is where we could perform item stack pre-merging.
             // TODO - figure out how inventory drops will work?
-            final Multimap<BlockPos, ItemEntity> multimap = ImmutableMultimap.of();
-            final BlockPos pos = new BlockPos(x, y, z);
-            final Collection<ItemEntity> itemStacks = multimap.get(pos);
             for (int j = 0; j < inventory.getSizeInventory(); j++) {
                 final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(j);
                 if (!itemStack.isEmpty()) {
@@ -143,7 +141,7 @@ public final class ContainerUtil {
                         entityitem.setMotion(RANDOM.nextGaussian() * 0.05,
                                 RANDOM.nextGaussian() * 0.05 + 0.2,
                                 RANDOM.nextGaussian() * 0.05);
-                        itemStacks.add(entityitem);
+                        worldServer.addEntity(entityitem);
                     }
                 }
             }

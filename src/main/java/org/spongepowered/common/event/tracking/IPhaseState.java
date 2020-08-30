@@ -49,9 +49,11 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -61,6 +63,7 @@ import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
+import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -77,6 +80,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * A literal phase state of which the {@link World} is currently running
@@ -699,5 +704,22 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param phaseContext The appropriate phase context
      */
     default void markTeleported(final C phaseContext) {
+    }
+
+    default Supplier<SpawnType> getSpawnTypeForTransaction(final C context, final Entity entityToSpawn) {
+        if (entityToSpawn instanceof ItemEntity) {
+            return SpawnTypes.DROPPED_ITEM;
+        }
+        return SpawnTypes.PASSIVE;
+    }
+
+    default SpawnEntityEvent createSpawnEvent(final C context,
+        final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
+        final Cause currentCause) {
+        return SpongeEventFactory.createSpawnEntityEvent(currentCause,
+            collect.stream()
+                .map(Tuple::getFirst)
+                .collect(Collectors.toList())
+        );
     }
 }
