@@ -75,7 +75,7 @@ public class ChangeBlockTest implements LoadableModule {
     }
 
 
-    private class ChangeBlockListener {
+    public class ChangeBlockListener {
         @Listener
         public void onChangeBlock(final ChangeBlockEvent.Post post) {
             final Logger pluginLogger = ChangeBlockTest.this.plugin.getLogger();
