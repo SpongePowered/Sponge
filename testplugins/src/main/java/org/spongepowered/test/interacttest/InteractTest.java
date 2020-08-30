@@ -28,6 +28,7 @@ import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -54,9 +55,14 @@ public class InteractTest implements LoadableModule {
 
     public static class InteractListener {
         @Listener
-        public void onInteractItem(final InteractBlockEvent event) {
+        public void onInteractBlock(final InteractBlockEvent event) {
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.builder().append("/* Event: ").append(event.getClass().getSimpleName()).build());
+            Sponge.getServer().getBroadcastAudience().sendMessage(
+                    TextComponent.builder().append("/* Hand: ")
+                            .append(event.getContext().get(EventContextKeys.USED_HAND).map(h -> h.getKey().getFormatted()).orElse("UNKNOWN"))
+                            .build()
+            );
             Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
             Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
         }
@@ -64,13 +70,23 @@ public class InteractTest implements LoadableModule {
         public void onInteractItem(final InteractItemEvent event) {
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.builder().append("/* Event: ").append(event.getClass().getSimpleName()).build());
+            Sponge.getServer().getBroadcastAudience().sendMessage(
+                    TextComponent.builder().append("/* Hand: ")
+                            .append(event.getContext().get(EventContextKeys.USED_HAND).map(h -> h.getKey().getFormatted()).orElse("UNKNOWN"))
+                            .build()
+            );
             Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
             Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
         }
         @Listener
-        public void onInteractItem(final InteractEntityEvent event) {
+        public void onInteractEntity(final InteractEntityEvent event) {
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.builder().append("/* Event: ").append(event.getClass().getSimpleName()).build());
+            Sponge.getServer().getBroadcastAudience().sendMessage(
+                    TextComponent.builder().append("/* Hand: ")
+                            .append(event.getContext().get(EventContextKeys.USED_HAND).map(h -> h.getKey().getFormatted()).orElse("UNKNOWN"))
+                            .build()
+            );
             Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
             Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
         }
