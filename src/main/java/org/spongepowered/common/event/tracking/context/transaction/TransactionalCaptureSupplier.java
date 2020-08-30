@@ -357,6 +357,35 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return new ReplaceTileEntity(proposed, existing, snapshot);
     }
 
+    public EffectTransactor logBlockDrops(
+        final PhaseContext<@NonNull ?> context, final World serverWorld, final BlockPos pos, final BlockState state,
+        final @Nullable TileEntity tileEntity) {
+        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) serverWorld);
+        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
+            state,
+            pos,
+            BlockChangeFlags.NONE,
+            tileEntity,
+            worldSupplier,
+            Optional::empty, Optional::empty
+        );
+        original.blockChange = BlockChange.MODIFY;
+        final PrepareBlockDropsTransaction transaction = new PrepareBlockDropsTransaction(pos, state, original);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
+    }
+
+    public void completeBlockDrops(@Nullable final EffectTransactor context) {
+        if (this.effect != null) {
+            if (this.effect.effect == PrepareBlockDrops.getInstance()) {
+                if (context != null) {
+                    context.close();
+                }
+            }
+        }
+    }
+
     private RemoveTileEntity createTileRemovalTransaction(final TileEntity tileentity,
         final Supplier<ServerWorld> worldSupplier
     ) {

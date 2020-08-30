@@ -61,7 +61,6 @@ import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -75,7 +74,6 @@ import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
@@ -721,5 +719,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
                 .map(Tuple::getFirst)
                 .collect(Collectors.toList())
         );
+    }
+
+    default boolean recordsEntitySpawns(C context) {
+        return true;
     }
 }
