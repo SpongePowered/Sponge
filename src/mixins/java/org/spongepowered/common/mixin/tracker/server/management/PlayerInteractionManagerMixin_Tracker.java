@@ -118,7 +118,7 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
 
     @Inject(method = "processRightClick", cancellable = true,
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/item/ItemStack;getCount()I"))
+                    target = "Lnet/minecraft/item/ItemStack;getCount()I", ordinal = 0))
     public void onRightClick(PlayerEntity player, World worldIn, ItemStack stack, Hand hand, CallbackInfoReturnable<ActionResultType> cir) {
         final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, stack, hand, null, null);
         if (event.isCancelled()) {
