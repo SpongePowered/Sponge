@@ -24,19 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
 
@@ -71,19 +66,6 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
         explosionContext.creator(((ServerPlayer) player).getUser());
         explosionContext.notifier(((ServerPlayer) player).getUser());
         explosionContext.source(player);
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final PlayerTickContext context, final Entity entity) {
-        final Player player = context.getSource(Player.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", context));
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-            final List<Entity> entities = new ArrayList<>(1);
-            entities.add(entity);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
     }
 
     @Override

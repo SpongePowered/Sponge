@@ -26,12 +26,10 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -39,16 +37,11 @@ import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -109,39 +102,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.source(tickingTile);
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final TileEntityTickContext context, final Entity entity) {
-        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
-            .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
-        final TileEntityBridge mixinTileEntity = (TileEntityBridge) tickingTile;
-
-        // If we do allow events, but there are no event listeners, just spawn.
-        // Otherwise, if we forbid events, we want to spawn anyways, don't throw an event.
-        if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
-            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
-        }
-        // Separate experience from other entities
-        if (entity instanceof ExperienceOrbEntity) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(tickingTile.getLocatableBlock());
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                context.addCreatorAndNotifierToCauseStack(frame);
-                final ArrayList<Entity> exp = new ArrayList<>();
-                exp.add(entity);
-                return SpongeCommonEventFactory.callSpawnEntity(exp, context);
-            }
-        }
-        final List<Entity> nonExpEntities = new ArrayList<>(1);
-        nonExpEntities.add(entity);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(tickingTile.getLocatableBlock());
-            frame.addContext(EventContextKeys.SPAWN_TYPE, mixinTileEntity.bridge$getTickedSpawnType());
-            context.addCreatorAndNotifierToCauseStack(frame);
-            return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
-
-        }
     }
 
     @Override

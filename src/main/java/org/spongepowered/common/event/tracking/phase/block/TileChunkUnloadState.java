@@ -24,16 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
-import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
 /**
@@ -50,16 +44,6 @@ public class TileChunkUnloadState extends BlockPhaseState {
     @Override
     public boolean doesBulkBlockCapture(final GeneralizedContext context) {
         return false;
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final GeneralizedContext context, final Entity entity) {
-        final ArrayList<Entity> entities = new ArrayList<>(1);
-        entities.add(entity);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()){
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
     }
 
     @Override

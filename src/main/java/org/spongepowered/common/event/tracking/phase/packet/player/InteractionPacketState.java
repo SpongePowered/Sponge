@@ -95,11 +95,6 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final InteractionPacketContext context, final Entity entity) {
-        return context.captureEntity(entity);
-    }
-
-    @Override
     public boolean shouldCaptureEntity() {
         return true;
     }
@@ -159,86 +154,6 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
         
         ((LivingEntityAccessor) player).accessor$setActiveItemStack(endActiveItem);
-    }
-
-    private void throwEntitySpawnEvents(final InteractionPacketContext phaseContext, final ServerPlayerEntity player, final ItemStackSnapshot usedSnapshot,
-        final BlockSnapshot firstBlockChange, final Collection<Entity> entities) {
-        final List<Entity> projectiles = new ArrayList<>(entities.size());
-        final List<Entity> spawnEggs = new ArrayList<>(entities.size());
-        final List<Entity> xpOrbs = new ArrayList<>(entities.size());
-        final List<Entity> normalPlacement = new ArrayList<>(entities.size());
-        final List<Entity> items = new ArrayList<>(entities.size());
-        for (final Entity entity : entities) {
-            if (entity instanceof Projectile || entity instanceof ThrowableEntity) {
-                projectiles.add(entity);
-            } else if (usedSnapshot.getType() instanceof SpawnEggItem) {
-                spawnEggs.add(entity);
-            } else if (entity instanceof ItemEntity) {
-                items.add(entity);
-            } else if (entity instanceof ExperienceOrbEntity) {
-                xpOrbs.add(entity);
-            } else {
-                normalPlacement.add(entity);
-            }
-        }
-        if (!projectiles.isEmpty()) {
-            if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame frame2 = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
-                    frame2.pushCause(usedSnapshot);
-                    SpongeCommonEventFactory.callSpawnEntity(projectiles, phaseContext);
-                }
-            } else {
-                processEntities(player, projectiles);
-            }
-        }
-        if (!spawnEggs.isEmpty()) {
-            if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame frame2 = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    frame2.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
-                    frame2.pushCause(usedSnapshot);
-                    SpongeCommonEventFactory.callSpawnEntity(spawnEggs, phaseContext);
-                }
-            } else {
-                processEntities(player, spawnEggs);
-            }
-        }
-        if (!items.isEmpty()) {
-            if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
-                final DropItemEvent.Dispense dispense = SpongeEventFactory
-                    .createDropItemEventDispense(PhaseTracker.getCauseStackManager().getCurrentCause(), items);
-                if (!SpongeCommon.postEvent(dispense)) {
-                    processSpawnedEntities(player, dispense);
-                }
-            } else {
-                processEntities(player, items);
-            }
-        }
-        if (!xpOrbs.isEmpty()) {
-            if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame stackFrame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    if (firstBlockChange != null) {
-                        stackFrame.pushCause(firstBlockChange);
-                    }
-                    stackFrame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                    SpongeCommonEventFactory.callSpawnEntity(xpOrbs, phaseContext);
-                }
-            } else {
-                processEntities(player, xpOrbs);
-            }
-        }
-        if (!normalPlacement.isEmpty()) {
-            if (ShouldFire.SPAWN_ENTITY_EVENT) {
-                try (final CauseStackManager.StackFrame stackFrame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    if (firstBlockChange != null) {
-                        stackFrame.pushCause(firstBlockChange);
-                    }
-                    SpongeCommonEventFactory.callSpawnEntity(normalPlacement, phaseContext);
-                }
-            } else {
-                processEntities(player, normalPlacement);
-            }
-        }
     }
 
     @Override

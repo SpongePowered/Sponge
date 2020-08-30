@@ -24,15 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-
-import java.util.ArrayList;
 
 class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
 
@@ -47,16 +41,6 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 //            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
             TrackingUtil.processBlockCaptures(phaseContext);
-        }
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final TickContext.General context, final Entity entity) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-            final ArrayList<Entity> entities = new ArrayList<>();
-            entities.add(entity);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
     }
 

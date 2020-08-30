@@ -29,22 +29,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.IGrowable;
-import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -52,7 +45,6 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -135,27 +127,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         context.applyNotifierIfAvailable(explosionContext::notifier);
         final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
         explosionContext.source(locatableBlock);
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final BlockTickContext context, final Entity entity) {
-        final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
-        if (!context.allowsEntityEvents() || !ShouldFire.SPAWN_ENTITY_EVENT) { // We don't want to throw an event if we don't need to.
-            return EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
-        }
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(locatableBlock);
-            if (entity instanceof ExperienceOrbEntity) {
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
-                entities.add(entity);
-                return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-            }
-            final List<org.spongepowered.api.entity.Entity> nonExpEntities = new ArrayList<>(1);
-            nonExpEntities.add(entity);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-            return SpongeCommonEventFactory.callSpawnEntity(nonExpEntities, context);
-        }
     }
 
 

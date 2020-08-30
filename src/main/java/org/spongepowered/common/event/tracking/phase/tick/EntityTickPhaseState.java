@@ -25,12 +25,9 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.FallingBlockEntity;
 import net.minecraft.entity.item.HangingEntity;
 import net.minecraft.entity.item.ItemFrameEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.CombatEntry;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -39,19 +36,14 @@ import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.Ageable;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.common.accessor.entity.item.ItemFrameEntityAccessor;
 import org.spongepowered.common.accessor.util.CombatEntryAccessor;
 import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -59,7 +51,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -225,52 +216,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
             context.applyOwnerIfAvailable(explosionContext::creator);
         }
         explosionContext.source(context.getSource(Entity.class).orElseThrow(() -> new IllegalStateException("Ticking a non Entity")));
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final EntityTickContext context, final Entity entity) {
-        // Always need our source
-        final Entity tickingEntity = context.getSource(Entity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
-
-        // Now to actually do something....
-        // It kinda sucks we have to make the cause frame here, but if we're already here, we are
-        // effectively already going to throw an event, and we're configured not to bulk capture.
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            context.addCreatorAndNotifierToCauseStack(frame);
-            frame.pushCause(tickingEntity);
-            if (entity instanceof ExperienceOrbEntity) {
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-                this.appendContextOfPossibleEntityDeath(tickingEntity, frame);
-                final List<Entity> experience = new ArrayList<>(1);
-                experience.add(entity);
-
-                return SpongeCommonEventFactory.callSpawnEntity(experience, context);
-            } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
-                if (tickingEntity instanceof AnimalEntity) {
-                    final PlayerEntity playerInLove = ((AnimalEntity) tickingEntity).getLoveCause();
-                    if (playerInLove != null) {
-                        frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
-                    }
-                }
-                final List<Entity> breeding = new ArrayList<>(1);
-                breeding.add(entity);
-                return SpongeCommonEventFactory.callSpawnEntity(breeding, context);
-
-            } else if (entity instanceof Projectile) {
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
-                final List<Entity> projectile = new ArrayList<>(1);
-                projectile.add(entity);
-                return SpongeCommonEventFactory.callSpawnEntity(projectile, context);
-
-            }
-            final List<Entity> nonExp = new ArrayList<>(1);
-            nonExp.add(entity);
-
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-            return SpongeCommonEventFactory.callSpawnEntity(nonExp, context);
-        }
     }
 
     @Override

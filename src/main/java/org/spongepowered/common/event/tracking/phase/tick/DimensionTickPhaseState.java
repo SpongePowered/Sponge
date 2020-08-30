@@ -24,15 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-
-import java.util.ArrayList;
 
 class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
     DimensionTickPhaseState() {
@@ -51,26 +47,6 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
             TrackingUtil.processBlockCaptures(phaseContext);
-        }
-    }
-
-    /*
-    @author - gabizou
-    non-javadoc
-    This is a stopgap to get dragon respawns working. Since there's 4 classes that interweave themselves
-    between various states including but not withstanding: respawning endercrystals, respawning the dragon,
-    locating the crystals, etc. it's best to not capture the spawns and simply spawn them in directly.
-    This is a todo until the dragon phases are completely configured and correctly managed (should be able to at some point restore
-    traditional ai logic to the dragon without the necessity for the dragon being summoned the manual way).
-
-     */
-    @Override
-    public boolean spawnEntityOrCapture(final DimensionContext context, final Entity entity) {
-        final ArrayList<Entity> entities = new ArrayList<>(1);
-        entities.add(entity);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
     }
 

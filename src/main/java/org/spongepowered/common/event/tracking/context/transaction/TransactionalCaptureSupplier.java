@@ -467,7 +467,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 accumilator = ImmutableList.builder();
                 batchDecider = null;
                 TransactionalCaptureSupplier.generateEventForTransaction(pointer, parent, context, builder, (ImmutableList) transactions);
-            } else if (!batchDecider.canBatchWith(pointer)) {
+            } else if (batchDecider != pointer && !batchDecider.canBatchWith(pointer)) {
                 final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
                 TransactionalCaptureSupplier.generateEventForTransaction(batchDecider, parent, context, builder, (ImmutableList) transactions);

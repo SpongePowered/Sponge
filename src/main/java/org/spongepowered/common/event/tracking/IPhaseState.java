@@ -212,58 +212,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     void unwind(C phaseContext);
 
     /**
-     * Based on whether this state is allowed to capture entity spawns in bulk
-     * for later processing in {@link #unwind(PhaseContext)}, or whether entities
-     * are to be spawned directly after throwing an event is used here. By default,
-     * this will create and call a single {@link SpawnEntityEvent} and then spawn
-     * the entity. Other states may override and provide their own custom handling
-     * based on various situations (like world generation).
-     *
-     * <p>NOTE: This method should only be called and handled if and only if {@link IPhaseState#doesAllowEntitySpawns()}
-     * returns {@code true}. Violation of this will have unforeseen consequences.</p>
-     *
-     *
-     * @param context The current context
-     * @param entity The entity being captured
-     * @return True if the entity was successfully captured
-     */
-    default boolean spawnEntityOrCapture(final C context, final org.spongepowered.api.entity.Entity entity) {
-        final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
-        entities.add(entity);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
-    }
-
-    /**
-     * A phase specific method that determines whether it is needed to capture the entity based onto the
-     * entity-specific lists of drops, or a generalized list of drops.
-     *
-     * Cases for entity specific drops:
-     * - Explosions
-     * - Entity deaths
-     * - Commands killing mass entities and those entities dropping items
-     *
-     * Cases for generalized drops:
-     * - Phase states for specific entity deaths
-     * - Phase states for generalization, like packet handling
-     * - Using items
-     *
-     * @param phaseContext The current context
-     * @param entity The entity performing the drop or "source" of the drop
-     * @param entityitem The item to be dropped
-     * @return True if we are capturing, false if we are to let the item spawn
-     */
-    default boolean spawnItemOrCapture(final C phaseContext, final Entity entity, final ItemEntity entityitem) {
-        if (this.doesCaptureEntityDrops(phaseContext)) {
-            // Return the item, even if it wasn't spawned in the world.
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Used to create any extra specialized events for {@link ChangeBlockEvent.Post} as necessary.
      * An example of this being used specially is for explosions needing to create a child classed
      * post event.
@@ -288,20 +236,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> snapshotTransaction,
         final C context) { }
-
-    /**
-     * During {@link UnwindingState#unwind(UnwindingPhaseContext)}, this delegates to the "unwinding" state to perform
-     * any extra handling with contexts to spawn entities that were captured.
-     *
-     * @param unwindingContext
-     * @param entities
-     */
-    default void postProcessSpawns(final C unwindingContext, final ArrayList<org.spongepowered.api.entity.Entity> entities) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-            SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);
-        }
-    }
 
     /**
      * Specifically gets whether this state ignores any attempts at storing
@@ -501,24 +435,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default boolean ignoresItemPreMerging() {
         return false;
-    }
-
-    /**
-     * Gets whether this state will capture the provided position block change, or not.
-     * This does not bypass the creation of the block changes, it just bypasses whether
-     * the block change is going to be captured. May be qualified for removal pending some
-     * cleanup with block captures and method duplications.
-     *
-     * @param phaseContext
-     * @param pos
-     * @param currentState
-     * @param newState
-     * @param flags
-     * @return
-     */
-    default boolean shouldCaptureBlockChangeOrSkip(final C phaseContext, final BlockPos pos, final BlockState currentState,
-        final BlockState newState, final BlockChangeFlag flags) {
-        return true;
     }
 
     /**
