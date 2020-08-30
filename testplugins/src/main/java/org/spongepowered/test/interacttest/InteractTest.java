@@ -52,7 +52,7 @@ public class InteractTest implements LoadableModule {
     }
 
 
-    private static class InteractListener {
+    public static class InteractListener {
         @Listener
         public void onInteractItem(final InteractBlockEvent event) {
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
