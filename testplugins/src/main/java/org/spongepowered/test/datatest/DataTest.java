@@ -308,9 +308,9 @@ public final class DataTest  {
         this.checkOfferData(ravager, Keys.CAN_JOIN_RAID, false);
 
         // TODO missing data provider
-//        final Entity boat = world.createEntity(EntityTypes.BOAT.get(), position);
-//        this.checkGetData(boat, Keys.CAN_MOVE_ON_LAND, true);
-//        this.checkOfferData(boat, Keys.CAN_MOVE_ON_LAND, false);
+        final Entity boat = world.createEntity(EntityTypes.BOAT.get(), position);
+        this.checkOfferData(boat, Keys.CAN_MOVE_ON_LAND, true);
+        this.checkOfferData(boat, Keys.CAN_MOVE_ON_LAND, false);
 
         this.checkGetData(fallingBlock, Keys.CAN_PLACE_AS_BLOCK, true);
         this.checkOfferData(fallingBlock, Keys.CAN_PLACE_AS_BLOCK, false);
@@ -729,7 +729,6 @@ public final class DataTest  {
 
         this.checkOfferData(fox, Keys.IS_INTERESTED, true);
 
-        final Entity boat = world.createEntity(EntityTypes.BOAT.get(), position);
         this.checkGetData(boat, Keys.IS_IN_WATER, false);
 
         final Entity vindicator = world.createEntity(EntityTypes.VINDICATOR.get(), position);
@@ -928,7 +927,7 @@ public final class DataTest  {
         // TODO Keys.MAX_NEARBY_ENTITIES
         // TODO Keys.MAX_SPAWN_DELAY
 
-//        this.checkOfferData(boat, Keys.MAX_SPEED, 1.0);
+        this.checkOfferData(boat, Keys.MAX_SPEED, 1.0);
 
         // MAX_STACK_SIZE
 
@@ -955,7 +954,7 @@ public final class DataTest  {
 
 //        this.checkOfferData(sheep, Keys.NOTIFIER, player.getUniqueId());
 
-//        this.checkOfferData(boat, Keys.OCCUPIED_DECELERATION, 2.0);
+        this.checkOfferData(boat, Keys.OCCUPIED_DECELERATION, 2.0);
 
         this.checkGetData(sheep, Keys.ON_GROUND, false);
 
@@ -1178,7 +1177,7 @@ public final class DataTest  {
 
         // Keys.UNIQUE_ID
 
-//        this.checkOfferData(boat, Keys.UNOCCUPIED_DECELERATION, 2.0);
+        this.checkOfferData(boat, Keys.UNOCCUPIED_DECELERATION, 2.0);
 
         final BlockState tntState = BlockTypes.TNT.get().getDefaultState();
         this.checkWithData(tntState, Keys.UNSTABLE, true);

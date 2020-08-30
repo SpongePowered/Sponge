@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.common.accessor.entity.item.BoatEntityAccessor;
+import org.spongepowered.common.bridge.entity.item.BoatBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import javax.annotation.Nullable;
@@ -47,7 +48,24 @@ public final class BoatData {
                         .setAnd((h, v) -> getFor(v) != null)
                 .asMutable(BoatEntityAccessor.class)
                     .create(Keys.IS_IN_WATER)
-                        .get(h -> h.accessor$getStatus() == BoatEntity.Status.IN_WATER);
+                        .get(h -> h.accessor$getStatus() == BoatEntity.Status.IN_WATER)
+                .asMutable(BoatBridge.class)
+                    .create(Keys.MAX_SPEED)
+                        .get(BoatBridge::bridge$getMaxSpeed)
+                        .set(BoatBridge::bridge$setMaxSpeed)
+                .asMutable(BoatBridge.class)
+                    .create(Keys.CAN_MOVE_ON_LAND)
+                        .get(BoatBridge::bridge$getMoveOnLand)
+                        .set(BoatBridge::bridge$setMoveOnLand)
+                .asMutable(BoatBridge.class)
+                    .create(Keys.OCCUPIED_DECELERATION)
+                        .get(BoatBridge::bridge$getOccupiedDecelerationSpeed)
+                        .set(BoatBridge::bridge$setOccupiedDecelerationSpeed)
+                .asMutable(BoatBridge.class)
+                    .create(Keys.UNOCCUPIED_DECELERATION)
+                        .get(BoatBridge::bridge$getUnoccupiedDecelerationSpeed)
+                        .set(BoatBridge::bridge$setUnoccupiedDecelerationSpeed)
+        ;
     }
     // @formatter:on
 

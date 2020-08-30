@@ -27,6 +27,7 @@
         "entity.EntityMixin",
         "entity.EntityTypeMixin",
         "entity.LivingEntityMixin",
+        "entity.item.BoatEntityMixin",
         "entity.item.EnderPearlEntityMixin",
         "entity.item.minecart.AbstractMinecartEntityMixin",
         "entity.item.minecart.MinecartCommandBlockEntityMixin",
