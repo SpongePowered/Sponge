@@ -28,9 +28,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
@@ -46,19 +51,22 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.item.ItemStack.class)
 public abstract class ItemStackMixin implements CustomDataHolderBridge {       // conflict from overriding ValueContainer#copy() from DataHolder
@@ -75,13 +83,13 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     @SuppressWarnings({"rawtypes", "Duplicates"})
     @Override
-    public DataTransactionResult bridge$offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
+    public DataTransactionResult bridge$offerCustom(final DataManipulator<?, ?> manipulator, final MergeFunction function) {
         if (this.shadow$isEmpty()) {
             return DataTransactionResult.failResult(manipulator.getValues());
         }
 
         @Nullable DataManipulator<?, ?> existingManipulator = null;
-        for (DataManipulator<?, ?> existing : this.manipulators) {
+        for (final DataManipulator<?, ?> existing : this.manipulators) {
             if (manipulator.getClass().isInstance(existing)) {
                 existingManipulator = existing;
                 break;
@@ -101,7 +109,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public void bridge$addFailedData(ImmutableList<DataView> failedData) {
+    public void bridge$addFailedData(final ImmutableList<DataView> failedData) {
         this.failedData.addAll(failedData);
         resyncCustomToTag();
     }
@@ -113,11 +121,11 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> bridge$getCustom(Class<T> customClass) {
+    public <T extends DataManipulator<?, ?>> Optional<T> bridge$getCustom(final Class<T> customClass) {
         if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
-        for (DataManipulator<?, ?> existing : this.manipulators) {
+        for (final DataManipulator<?, ?> existing : this.manipulators) {
             if (customClass.isInstance(existing)) {
                 return Optional.of((T) existing.copy());
             }
@@ -129,14 +137,14 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
         if (!this.manipulators.isEmpty()) {
             final NBTTagList newList = new NBTTagList();
             final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(this.bridge$getCustomManipulators());
-            for (DataView dataView : manipulatorViews) {
+            for (final DataView dataView : manipulatorViews) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
             final NBTTagCompound spongeCompound = this.shadow$getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
             spongeCompound.setTag(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else if (!this.failedData.isEmpty()) {
             final NBTTagList newList = new NBTTagList();
-            for (DataView failedDatum : this.failedData) {
+            for (final DataView failedDatum : this.failedData) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
             }
             final NBTTagCompound spongeCompound = this.shadow$getOrCreateSubCompound(Constants.Sponge.SPONGE_DATA);
@@ -152,12 +160,12 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public DataTransactionResult bridge$removeCustom(Class<? extends DataManipulator<?, ?>> customClass) {
+    public DataTransactionResult bridge$removeCustom(final Class<? extends DataManipulator<?, ?>> customClass) {
         if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
         @Nullable DataManipulator<?, ?> manipulator = null;
-        for (DataManipulator<?, ?> existing : this.manipulators) {
+        for (final DataManipulator<?, ?> existing : this.manipulators) {
             if (customClass.isInstance(existing)) {
                 manipulator = existing;
             }
@@ -184,11 +192,11 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public <E> DataTransactionResult bridge$offerCustom(Key<? extends BaseValue<E>> key, E value) {
+    public <E> DataTransactionResult bridge$offerCustom(final Key<? extends BaseValue<E>> key, final E value) {
         if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
-        for (DataManipulator<?, ?> manipulator : this.manipulators) {
+        for (final DataManipulator<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(((Value) manipulator.getValue((Key) key).get()).asImmutable());
@@ -202,7 +210,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public DataTransactionResult bridge$removeCustom(Key<?> key) {
+    public DataTransactionResult bridge$removeCustom(final Key<?> key) {
         final Iterator<DataManipulator<?, ?>> iterator = this.manipulators.iterator();
         while (iterator.hasNext()) {
             final DataManipulator<?, ?> manipulator = iterator.next();
@@ -219,7 +227,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public boolean bridge$supportsCustom(Key<?> key) {
+    public boolean bridge$supportsCustom(final Key<?> key) {
         if (this.shadow$isEmpty()) {
             return false;
         }
@@ -228,7 +236,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public <E> Optional<E> bridge$getCustom(Key<? extends BaseValue<E>> key) {
+    public <E> Optional<E> bridge$getCustom(final Key<? extends BaseValue<E>> key) {
         if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
@@ -239,7 +247,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Override
-    public <E, V extends BaseValue<E>> Optional<V> bridge$getCustomValue(Key<V> key) {
+    public <E, V extends BaseValue<E>> Optional<V> bridge$getCustomValue(final Key<V> key) {
         if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
@@ -251,20 +259,20 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     // Add our manipulators when creating copies from this ItemStack:
     @Inject(method = "copy", at = @At("RETURN"))
-    private void impl$copySpongeDataOnSplit(CallbackInfoReturnable<ItemStack> info) {
+    private void impl$copySpongeDataOnSplit(final CallbackInfoReturnable<ItemStack> info) {
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (this.bridge$hasManipulators()) { // no manipulators? no problem.
-            for (DataManipulator<?, ?> manipulator : this.manipulators) {
+            for (final DataManipulator<?, ?> manipulator : this.manipulators) {
                 ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
             }
         }
     }
 
     @Inject(method = "splitStack", at = @At("RETURN"))
-    private void impl$copySpongeDataOnSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
+    private void impl$copySpongeDataOnSplit(final int amount, final CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (this.bridge$hasManipulators()) {
-            for (DataManipulator<?, ?> manipulator : this.manipulators) {
+            for (final DataManipulator<?, ?> manipulator : this.manipulators) {
                 ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator.copy(), MergeFunction.IGNORE_ALL);
             }
         }
@@ -272,7 +280,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
 
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
-    private void impl$onRead(NBTTagCompound compound, CallbackInfo info) {
+    private void impl$onRead(final NBTTagCompound compound, final CallbackInfo info) {
         if (this.shadow$hasTagCompound() && this.shadow$getTagCompound().hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             DataUtil.readCustomData(this.shadow$getTagCompound().getCompoundTag(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
         }
@@ -293,12 +301,34 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge {       /
     }
 
     @Inject(method = "setTagCompound", at = @At("RETURN"))
-    private void impl$onSet(NBTTagCompound compound, CallbackInfo callbackInfo) {
+    private void impl$onSet(final NBTTagCompound compound, final CallbackInfo callbackInfo) {
         if (this.stackTagCompound != compound) {
             this.manipulators.clear();
         }
         if (this.shadow$hasTagCompound() && this.shadow$getTagCompound().hasKey(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
             DataUtil.readCustomData(this.shadow$getTagCompound().getCompoundTag(Constants.Sponge.SPONGE_DATA), ((org.spongepowered.api.item.inventory.ItemStack) this));
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
+    private void impl$capturePlayerUsingItemstack(final World worldIn, final IBlockState blockIn, final BlockPos pos, final EntityPlayer playerIn,
+        final CallbackInfo ci) {
+        if (!((WorldBridge) worldIn).bridge$isFake()) {
+            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+            final IPhaseState state = currentContext.state;
+            state.capturePlayerUsingStackToBreakBlock((org.spongepowered.api.item.inventory.ItemStack) this, (EntityPlayerMP) playerIn, currentContext);
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Inject(method = "onBlockDestroyed", at = @At("RETURN"))
+    private void impl$nullOutCapturedPlayer(final World worldIn, final IBlockState blockIn, final BlockPos pos, final EntityPlayer playerIn,
+        final CallbackInfo ci) {
+        if (!((WorldBridge) worldIn).bridge$isFake()) {
+            final PhaseContext<?> currentContext = PhaseTracker.getInstance().getCurrentContext();
+            final IPhaseState state = currentContext.state;
+            state.capturePlayerUsingStackToBreakBlock((org.spongepowered.api.item.inventory.ItemStack) this, null, currentContext);
         }
     }
 
