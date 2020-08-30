@@ -22,37 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch;
+package org.spongepowered.vanilla.installer.model.sponge;
 
-public enum VanillaLaunchTargets {
-    CLIENT_DEVELOPMENT("sponge_client_dev"),
-    CLIENT_PRODUCTION("sponge_client_prod"),
-    SERVER_DEVELOPMENT("sponge_server_dev"),
-    SERVER_PRODUCTION("sponge_server_prod");
+import java.net.URL;
+import java.util.List;
 
-    private final String launchTarget;
+public final class SonatypeResponse {
 
-    VanillaLaunchTargets(final String launchTarget) {
-        this.launchTarget = launchTarget;
+    public List<Item> items;
+    public String continuationToken;
+
+    public static final class Item {
+        public URL downloadUrl;
+        public String path, id, repository, format;
+        public Checksum checksum;
     }
 
-    public String getLaunchTarget() {
-        return this.launchTarget;
-    }
-
-    public static VanillaLaunchTargets from(final String launchTarget) {
-
-        switch (launchTarget) {
-            case "sponge_client_dev":
-                return CLIENT_DEVELOPMENT;
-            case "sponge_client_prod":
-                return CLIENT_PRODUCTION;
-            case "sponge_server_dev":
-                return SERVER_DEVELOPMENT;
-            case "sponge_server_prod":
-                return SERVER_PRODUCTION;
-        }
-
-        return null;
+    public static final class Checksum {
+        public String sha1, md5;
     }
 }

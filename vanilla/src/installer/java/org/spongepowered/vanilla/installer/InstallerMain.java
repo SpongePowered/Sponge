@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.launcher;
+package org.spongepowered.vanilla.installer;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -33,15 +33,15 @@ import org.cadixdev.bombe.jar.asm.JarEntryRemappingTransformer;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.lorenz.asm.LorenzRemapper;
 import org.cadixdev.lorenz.io.MappingFormats;
-import org.spongepowered.vanilla.applaunch.Constants;
-import org.spongepowered.vanilla.applaunch.VanillaCommandLine;
-import org.spongepowered.vanilla.applaunch.launcher.model.Version;
-import org.spongepowered.vanilla.applaunch.launcher.model.VersionManifest;
+import org.spongepowered.vanilla.installer.model.mojang.Version;
+import org.spongepowered.vanilla.installer.model.mojang.VersionManifest;
+import org.spongepowered.vanilla.installer.model.sponge.Libraries;
+import org.spongepowered.vanilla.installer.model.sponge.SonatypeResponse;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.management.ManagementFactory;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
@@ -58,10 +58,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class AppLauncher {
+public final class InstallerMain {
 
     static {
-        System.setProperty("log4j.configurationFile", "log4j2_launcher.xml");
+        System.setProperty("log4j.configurationFile", "log4j2_installer.xml");
     }
 
     // From http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java
@@ -70,49 +70,103 @@ public final class AppLauncher {
     private final Logger logger;
 
     public static void main(final String[] args) throws Exception {
-        new AppLauncher().run(args);
+        new InstallerMain().run(args);
     }
 
-    public AppLauncher() {
-        this.logger = LogManager.getLogger("Launcher");
+    public InstallerMain() {
+        this.logger = LogManager.getLogger("Installer");
     }
 
     public void run(final String[] args) throws Exception {
         VanillaCommandLine.configure(args);
 
-        this.logger.info("Checking libraries, please wait...");
-        this.downloadMinecraft(VanillaCommandLine.librariesDirectory);
+        this.logger.info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...", VanillaCommandLine.librariesDirectory);
+        final List<Path> dependencies = this.downloadDependencies(VanillaCommandLine.librariesDirectory);
+        final Path gameJar = this.downloadMinecraft(VanillaCommandLine.librariesDirectory);
         final Path srgZip = this.downloadSRG(VanillaCommandLine.librariesDirectory);
         this.remapMinecraft(VanillaCommandLine.librariesDirectory, srgZip);
 
+        this.logger.info("Environment has been verified.");
+
         final String javaHome = System.getProperty("java.home");
         final String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        String classpath = System.getProperty("java.class.path");
+        final StringBuilder builder = new StringBuilder(System.getProperty("java.class.path"));
 
-        final Path srgJar = VanillaCommandLine.librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX)
-                .resolve(Constants.Libraries.MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME +
-                        "_remapped.jar").toAbsolutePath();
-        final Path mixinJar = VanillaCommandLine.librariesDirectory.resolve("org/spongepowered/mixin/mixin.jar");
-        final Path accessTransformersJar = VanillaCommandLine.librariesDirectory.resolve("net/minecraftforge/accesstransformer/accesstransformers"
-                + ".jar");
-        classpath = classpath + ";" + srgJar.toString() + ";" + mixinJar.toAbsolutePath().toString() + ";" + accessTransformersJar.toAbsolutePath()
-                        .toString();
+        for (final Path depFile : dependencies) {
+            builder.append(depFile.toString()).append(";");
+        }
+
+        builder.append(gameJar).append(";");
 
         final String className = "org.spongepowered.vanilla.applaunch.Main";
         final List<String> command = new ArrayList<>();
         command.add(javaBin);
-        command.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5100");
         command.add("-cp");
-        command.add(classpath);
+        command.add(builder.toString());
         command.add(className);
         command.addAll(Arrays.asList(VanillaCommandLine.RAW_ARGS));
-        final ProcessBuilder builder = new ProcessBuilder(command);
-        final Process process = builder.inheritIO().start();
+        final ProcessBuilder processBuilder = new ProcessBuilder(command);
+        final Process process = processBuilder.inheritIO().start();
         process.waitFor();
     }
 
-    private void downloadMinecraft(final Path librariesDirectory) throws IOException, NoSuchAlgorithmException {
-        this.logger.info("Downloading the versions manifest...");
+    private List<Path> downloadDependencies(final Path librariesDirectory) throws IOException, NoSuchAlgorithmException {
+        this.logger.info("Checking dependencies, please wait...");
+        final Gson gson = new Gson();
+
+        Libraries dependencies;
+        try (final JsonReader reader = new JsonReader(new InputStreamReader(this.getClass().getResourceAsStream("/libraries.json")))) {
+            dependencies = gson.fromJson(reader, Libraries.class);
+        }
+
+        final List<Path> downloadedDeps = new ArrayList<>();
+
+        for (final Libraries.Dependency dependency : dependencies.dependencies) {
+            final String groupPath = dependency.group.replace(".", "/");
+            final Path depDirectory =
+                    librariesDirectory.resolve(groupPath).resolve(dependency.module).resolve(dependency.version);
+            Files.createDirectories(depDirectory);
+            final Path depFile = depDirectory.resolve(dependency.module + "-" + dependency.version + ".jar");
+            if (Files.exists(depFile)) {
+                this.logger.info("Detected existing '{}', verifying hashes...", depFile);
+
+                final MessageDigest md5 = MessageDigest.getInstance("MD5");
+
+                // Pipe the download stream into the file and compute the SHA-1
+                final byte[] bytes = Files.readAllBytes(depFile);
+                final String fileMd5 = this.toHexString(md5.digest(bytes));
+
+                if (dependency.md5.equals(fileMd5)) {
+                    this.logger.info("'{}' verified!", depFile);
+                } else {
+                    this.logger.error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
+                            dependency.md5, fileMd5, depFile);
+                    Files.delete(depFile);
+
+                    final SonatypeResponse response = this.getResponseFor(gson, dependency);
+
+                    final SonatypeResponse.Item item = response.items.get(0);
+                    final URL url = item.downloadUrl;
+
+                    this.downloadCheckHash(url, depFile, MessageDigest.getInstance("MD5"), item.checksum.md5, true);
+                }
+            } else {
+                final SonatypeResponse response = this.getResponseFor(gson, dependency);
+
+                final SonatypeResponse.Item item = response.items.get(0);
+                final URL url = item.downloadUrl;
+
+                this.downloadCheckHash(url, depFile, MessageDigest.getInstance("MD5"), item.checksum.md5, true);
+            }
+
+            downloadedDeps.add(depFile);
+        }
+
+        return downloadedDeps;
+    }
+
+    private Path downloadMinecraft(final Path librariesDirectory) throws IOException, NoSuchAlgorithmException {
+        this.logger.info("Downloading the Minecraft versions manifest...");
 
         VersionManifest.Version foundVersionManifest = null;
 
@@ -151,7 +205,8 @@ public final class AppLauncher {
                 throw new IOException(
                         String.format("The Minecraft jar is not located at '%s' and downloading it has been turned off.", downloadTarget));
             }
-            this.downloadCheckHash(version.downloads.server.url, downloadTarget, version.downloads.server.sha1);
+            this.downloadCheckHash(version.downloads.server.url, downloadTarget, MessageDigest.getInstance("SHA-1"), version.downloads.server.sha1,
+                    false);
         } else {
             if (VanillaCommandLine.checkMinecraftJarHash) {
                 this.logger.info("Detected existing Minecraft Server jar, verifying hashes...");
@@ -164,14 +219,18 @@ public final class AppLauncher {
                 if (version.downloads.server.sha1.equals(fileSha1)) {
                     this.logger.info("Minecraft Server jar verified!");
                 } else {
+                    this.logger.error("Checksum verification failed: Expected {}, {}. Deleting cached Minecraft Server jar...",
+                            version.downloads.server.sha1, fileSha1);
                     Files.delete(downloadTarget);
-                    System.err.println(String.format("Checksum verification failed: Expected %s, %s. Deleting cached Minecraft Server jar...",
-                            version.downloads.server.sha1, fileSha1));
+                    this.downloadCheckHash(version.downloads.server.url, downloadTarget, MessageDigest.getInstance("SHA-1"),
+                            version.downloads.server.sha1, false);
                 }
             } else {
                 this.logger.info("Detected existing Minecraft Server jar. Skipping hash check as that is turned off...");
             }
         }
+
+        return downloadTarget;
     }
 
     private Path downloadSRG(final Path librariesDirectory) throws IOException {
@@ -185,7 +244,7 @@ public final class AppLauncher {
                     .MINECRAFT_VERSION_TARGET + ".zip");
             // TODO Figure out how to sha1 check the zip file
             if (VanillaCommandLine.downloadSrgMappings) {
-                this.download(mcpConfigUrl, downloadTarget);
+                this.download(mcpConfigUrl, downloadTarget, false);
             } else {
                 throw new IOException(String.format("MCP config was not located at '%s' and downloading it has been turned off.", downloadTarget));
             }
@@ -196,6 +255,22 @@ public final class AppLauncher {
         }
 
         return downloadTarget;
+    }
+
+    private SonatypeResponse getResponseFor(final Gson gson, final Libraries.Dependency dependency) throws IOException {
+        final URL requestUrl = new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL, dependency.md5, dependency.group,
+                dependency.module, dependency.version));
+
+        final HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("User-Agent", "Sponge-Downloader");
+
+        connection.connect();
+
+        try (final JsonReader reader = new JsonReader(new InputStreamReader(connection.getInputStream()))) {
+            return gson.fromJson(reader, SonatypeResponse.class);
+        }
     }
 
     private void remapMinecraft(final Path librariesDirectory, final Path srgZip) throws IOException {
@@ -230,18 +305,31 @@ public final class AppLauncher {
      * @param path The local path
      * @throws IOException If there is a problem while downloading the file
      */
-    private void download(final URL url, final Path path) throws IOException {
+    private void download(final URL url, final Path path, final boolean requiresRequest) throws IOException {
         Files.createDirectories(path.getParent());
 
         final String name = path.getFileName().toString();
 
-        this.logger.info("Downloading {}. This could take a while...", name);
+        this.logger.info("Downloading {}. This may take a while...", name);
         this.logger.info("URL -> <{}>", url);
 
-        // Pipe the download stream into the file and compute the SHA-1
-        try (final ReadableByteChannel in = Channels.newChannel(url.openStream()); final FileChannel out = FileChannel.open(path,
-                StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-            out.transferFrom(in, 0, Long.MAX_VALUE);
+        if (!requiresRequest) {
+            try (final ReadableByteChannel in = Channels.newChannel(url.openStream()); final FileChannel out = FileChannel.open(path,
+                    StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+                out.transferFrom(in, 0, Long.MAX_VALUE);
+            }
+        } else {
+            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("User-Agent", "Sponge-Downloader");
+
+            connection.connect();
+
+            try (final ReadableByteChannel in = Channels.newChannel(connection.getInputStream()); final FileChannel out = FileChannel.open(path,
+                    StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+                out.transferFrom(in, 0, Long.MAX_VALUE);
+            }
         }
     }
 
@@ -252,25 +340,37 @@ public final class AppLauncher {
      * @param path The local path
      * @param expected The SHA-1 expected digest
      * @throws IOException If there is a problem while downloading the file
-     * @throws NoSuchAlgorithmException Never because the JVM is required to support SHA-1
      */
-    private void downloadCheckHash(final URL url, final Path path, final String expected) throws IOException, NoSuchAlgorithmException {
+    private void downloadCheckHash(final URL url, final Path path, final MessageDigest digest, final String expected, boolean requiresRequest) throws IOException {
         Files.createDirectories(path.getParent());
 
         final String name = path.getFileName().toString();
 
-        this.logger.info("Downloading {}. This could take a while...", name);
+        this.logger.info("Downloading {}. This may take a while...", name);
         this.logger.info("URL -> <{}>", url);
 
-        final MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+        if (!requiresRequest) {
+            // Pipe the download stream into the file and compute the hash
+            try (final DigestInputStream stream = new DigestInputStream(url.openStream(), digest); final ReadableByteChannel in = Channels
+                    .newChannel(stream); final FileChannel out = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+                out.transferFrom(in, 0, Long.MAX_VALUE);
+            }
+        } else {
+            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("User-Agent", "Sponge-Downloader");
 
-        // Pipe the download stream into the file and compute the SHA-1
-        try (final DigestInputStream stream = new DigestInputStream(url.openStream(), sha1); final ReadableByteChannel in = Channels
-                .newChannel(stream); final FileChannel out = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-            out.transferFrom(in, 0, Long.MAX_VALUE);
+            connection.connect();
+
+            // Pipe the download stream into the file and compute the hash
+            try (final DigestInputStream stream = new DigestInputStream(connection.getInputStream(), digest); final ReadableByteChannel in = Channels
+                    .newChannel(stream); final FileChannel out = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+                out.transferFrom(in, 0, Long.MAX_VALUE);
+            }
         }
 
-        final String fileSha1 = this.toHexString(sha1.digest());
+        final String fileSha1 = this.toHexString(digest.digest());
 
         if (VanillaCommandLine.checkMinecraftJarHash) {
             if (expected.equals(fileSha1)) {
