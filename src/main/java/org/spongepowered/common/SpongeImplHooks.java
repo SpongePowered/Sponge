@@ -36,7 +36,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
@@ -72,14 +71,9 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.world.server.SpongeWorldManager;
-
-import java.util.Collection;
 
 /**
  * Contains default Vanilla implementations for features that are only
@@ -196,13 +190,6 @@ public class SpongeImplHooks {
 
     // Item stack merging
 
-    public static void addItemStackToListForSpawning(final Collection<ItemDropData> dropData, @Nullable final ItemDropData drop) {
-        // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
-        if (drop != null) {
-            dropData.add(drop);
-        }
-    }
-
     public static int getMaxSpawnPackSize(final MobEntity mob) {
         return mob.getMaxSpawnedInChunk();
     }
@@ -276,14 +263,6 @@ public class SpongeImplHooks {
     public static InventoryAdapter findInventoryAdapter(final Object inventory) {
         SpongeCommon.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         throw new IllegalArgumentException("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
-    }
-
-    public static void onTileEntityInvalidate(final TileEntity tileEntity) {
-        tileEntity.remove();
-    }
-
-    public static void capturePerEntityItemDrop(final PhaseContext<?> phaseContext, final Entity owner, final ItemEntity item) {
-        phaseContext.getPerEntityItemEntityDropSupplier().get().put(owner.getUniqueID(), item);
     }
 
     /**

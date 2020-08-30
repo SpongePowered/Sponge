@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
@@ -35,10 +34,9 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeImplHooks;
@@ -46,13 +44,11 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -96,17 +92,6 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final BlockEventTickContext context, final Entity entity) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-
-            final List<Entity> entities = new ArrayList<>(1);
-            entities.add(entity);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
-    }
-
-    @Override
     public void postBlockTransactionApplication(final BlockChange blockChange,
         final Transaction<? extends BlockSnapshot> snapshotTransaction, final BlockEventTickContext context) {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
@@ -126,14 +111,6 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
             TrackingUtil.processBlockCaptures(context);
-            context.getCapturedItemsSupplier()
-                    .acceptAndClearIfNotEmpty(items -> {
-                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                        for (final ItemEntity entity : items) {
-                            capturedEntities.add((Entity) entity);
-                        }
-                        SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
-                    });
         }
     }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
@@ -42,19 +41,7 @@ final class EventListenerPhaseState extends ListenerPhaseState<EventListenerPhas
 
     @Override
     public void unwind(final EventListenerPhaseContext phaseContext) {
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(phaseContext);
-
-        // TODO - determine if entities are needed to be captured.
-        phaseContext.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-            if (!this.hasPrintedEntities) {
-                SpongeCommon.getLogger()
-                    .warn("Unexpected entities captured during a plugin listener. If this message pops up, please let sponge developers know");
-                this.hasPrintedEntities = true;
-            }
-        });
-
     }
 
 }

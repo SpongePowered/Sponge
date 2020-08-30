@@ -68,7 +68,6 @@ import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NonNullArrayList;
@@ -268,16 +267,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
     @Override
     default boolean spawnEntity(final Entity entity) {
         Preconditions.checkNotNull(entity, "The entity cannot be null!");
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState<?> state = phaseTracker.getCurrentState();
-        if (!state.alreadyCapturingEntitySpawns()) {
-            try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext(PhaseTracker.SERVER)) {
-                context.buildAndSwitch();
-                phaseTracker.spawnEntityWithCause((org.spongepowered.api.world.World<?>) (Object) this, entity);
-                return true;
-            }
-        }
-        return phaseTracker.spawnEntityWithCause((org.spongepowered.api.world.World<?>) (Object) this, entity);
+            return ((IWorld) this).addEntity((net.minecraft.entity.Entity) entity);
     }
 
     // MutableBlockVolume

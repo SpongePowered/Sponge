@@ -43,7 +43,12 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -54,6 +59,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -73,7 +79,9 @@ import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.ScheduledBlockChange;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.RemoveTileEntity;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToLoadedListInWorldEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToTickableListEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToWorldWhileProcessingEffect;
@@ -100,6 +108,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -111,9 +120,9 @@ import java.util.function.Supplier;
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implements TrackedWorldBridge {
 
+    // @formatting:off
     @Shadow @Final private MinecraftServer server;
-    private final LinkedBlockingDeque<ScheduledBlockChange> tracker$scheduledChanges = new LinkedBlockingDeque<>();
-
+    // @formatting:on
 
     @Inject(method = "onEntityAdded", at = @At("TAIL"))
     private void tracker$setEntityTrackedInWorld(final net.minecraft.entity.Entity entityIn, final CallbackInfo ci) {
@@ -150,7 +159,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         )
     )
     private void tracker$wrapGlobalEntityTicking(final ServerWorld serverWorld, final Consumer<Entity> consumer, final Entity entity) {
-        final PhaseContext<?> currentContext = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
         if (currentContext.state.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(consumer, entity);
             return;
@@ -174,7 +183,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     private void tracker$wrapNormalEntityTick(final ServerWorld serverWorld, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
-        final IPhaseState<?> currentState = PhaseTracker.SERVER.getCurrentState();
+        final IPhaseState<@NonNull ?> currentState = PhaseTracker.SERVER.getCurrentState();
         if (currentState.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(entityUpdateConsumer, entity);
             return;
@@ -204,8 +213,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      *
      * @param blockState The block state being ticked
      * @param worldIn The world (this world)
-     * @param pos The position of the block state
-     * @param random The random (world.rand)
+     * @param posIn The position of the block
+     * @param randomIn The world random
      * @author gabizou - January 11th, 2020 - Minecraft 1.14.3
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -213,7 +222,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;tick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
     private void tracker$wrapBlockTick(BlockState blockState, ServerWorld worldIn, BlockPos posIn, Random randomIn) {
-        final PhaseContext<?> currentContext = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState currentState = currentContext.state;
         if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
             blockState.tick(worldIn, posIn, randomIn);
@@ -227,7 +236,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/fluid/IFluidState;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
     private void tracker$wrapFluidTick(final IFluidState fluidState, final World worldIn, final BlockPos pos) {
-        final PhaseContext<?> currentContext = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState currentState = currentContext.state;
         if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
             fluidState.tick(worldIn, pos);
@@ -251,7 +260,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     private void tracker$wrapBlockRandomTick(BlockState blockState, ServerWorld worldIn, BlockPos posIn, Random randomIn) {
         try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
-            final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
+            final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
             final IPhaseState phaseState = context.state;
             if (phaseState.alreadyCapturingBlockTicks(context)) {
                 blockState.randomTick(worldIn, posIn, this.rand);
@@ -366,8 +375,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      *     <li>The current {@link IPhaseState} must be allowing to record transactions with an applicable {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier}</li>
      * </ul>
      * After which, we may be able to appropriately associate the {@link TileEntity}
-     * being removed with either an existing {@link GameTransaction.ChangeBlock},
-     * or generate a new {@link GameTransaction.RemoveTileEntity} transaction
+     * being removed with either an existing {@link ChangeBlock},
+     * or generate a new {@link RemoveTileEntity} transaction
      * that would otherwise be able to associate with either the current {@link IPhaseState} or a parent {@link GameTransaction}
      * if this call is the result of a {@link org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect}..
      *
@@ -394,7 +403,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final PhaseContext<?> current = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState state = current.state;
         if (state.doesBulkBlockCapture(current)) {
-            if (current.getBlockTransactor().logTileRemoval(tileentity, () -> (ServerWorld) (Object) this)) {
+            if (current.getTransactor().logTileRemoval(tileentity, () -> (ServerWorld) (Object) this)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
                     .addEffect(new RemoveTileEntityFromWorldEffect())
                     .addEffect(new RemoveTileEntityFromChunkEffect())
@@ -425,7 +434,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
                 tileEntity.setWorldAndPos((ServerWorld) (Object) this, immutable);
             }
             final Chunk chunk = this.shadow$getChunkAt(immutable);
-            if (current.getBlockTransactor().logTileAddition(tileEntity, () -> (ServerWorld) (Object) this, chunk)) {
+            if (current.getTransactor().logTileAddition(tileEntity, () -> (ServerWorld) (Object) this, chunk)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
                     .addEffect(new AddTileEntityToWorldWhileProcessingEffect())
                     .addEffect(new AddTileEntityToLoadedListInWorldEffect())
@@ -463,7 +472,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final IPhaseState state = current.state;
         if (state.doesBulkBlockCapture(current)) {
             final @Nullable TileEntity existing = this.shadow$getChunkAt(immutable).getTileEntity(immutable);
-            if (current.getBlockTransactor().logTileReplacement(immutable, existing, proposed, () -> (ServerWorld) (Object) this)) {
+            if (current.getTransactor().logTileReplacement(immutable, existing, proposed, () -> (ServerWorld) (Object) this)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
                     .addEffect(new RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect())
                     .addEffect(new ReplaceTileEntityInWorldEffect())
@@ -522,7 +531,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             final WeakReference<ServerWorld> worldReference = new WeakReference<>((ServerWorld) (Object) this);
             final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldReference.get(), "ServerWorld dereferenced");
             final @Nullable TileEntity existingTile = targetChunk.getTileEntity(immutableTarget, Chunk.CreateEntityType.CHECK);
-            peek.getBlockTransactor().logNeighborNotification(worldSupplier, immutableFrom, blockIn, immutableTarget, targetBlockState, existingTile);
+            peek.getTransactor().logNeighborNotification(worldSupplier, immutableFrom, blockIn, immutableTarget, targetBlockState, existingTile);
 
             state.associateNeighborStateNotifier(peek, immutableFrom, targetBlockState.getBlock(), immutableTarget, ((ServerWorld) (Object) this), PlayerTracker.Type.NOTIFIER);
             // Sponge End
@@ -543,7 +552,38 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             CrashReportCategory.addBlockInfo(crashreportcategory, immutableTarget, targetBlockState);
             throw new ReportedException(crashreport);
         }
+    }
 
+    @Inject(method = "addEntity0(Lnet/minecraft/entity/Entity;)Z",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;getPosX()D"),
+        cancellable = true
+    )
+    private void tracker$throwPreEventAndRecord(final Entity entityIn, final CallbackInfoReturnable<Boolean> cir) {
+        if (this.bridge$isFake()) {
+            return;
+        }
+        final PhaseTracker tracker = PhaseTracker.SERVER;
+        if (tracker.getSidedThread() != Thread.currentThread()) {
+            // TODO - async entity spawn logging
+            return;
+        }
+
+        final Cause currentCause = tracker.getCurrentCause();
+
+        final SpawnEntityEvent.Pre pre = SpongeEventFactory.createSpawnEntityEventPre(
+            currentCause,
+            Collections.singletonList(entityIn)
+        );
+        Sponge.getEventManager().post(pre);
+        if (pre.isCancelled()) {
+            cir.setReturnValue(false);
+        }
+
+        final PhaseContext<@NonNull ?> current = tracker.getPhaseContext();
+
+        if (current.allowsBulkEntityCaptures()) {
+            current.getTransactor().logEntitySpawn(current, this, entityIn);
+        }
 
     }
 }

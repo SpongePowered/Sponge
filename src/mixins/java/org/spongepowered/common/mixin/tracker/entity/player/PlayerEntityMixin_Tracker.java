@@ -150,9 +150,6 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             final List<ItemStackSnapshot> original = new ArrayList<>();
             original.add(snapshot);
 
-            final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
-            @SuppressWarnings("RawTypeCanBeGeneric") final IPhaseState currentState = phaseContext.state;
-
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 
                 item = SpongeCommonEventFactory.throwDropItemAndConstructEvent((PlayerEntity) (PlayerEntityBridge) this, posX1, posY1, posZ1, snapshot, original, frame);
@@ -187,11 +184,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
                     final float f6 = 0.02F * this.rand.nextFloat();
                     itemEntity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
                 }
-                // FIFTH - Capture the entity maybe?
-                if (currentState.spawnItemOrCapture(phaseContext, (PlayerEntity) (PlayerEntityBridge) this, itemEntity)) {
-                    return itemEntity;
-                }
-                // TODO - Investigate whether player drops are adding to the stat list in captures.
+
                 final ItemStack stack = itemEntity.getItem();
                 player.world.addEntity(itemEntity);
 

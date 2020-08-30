@@ -33,8 +33,8 @@ import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
-import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
@@ -50,12 +50,23 @@ import java.util.function.Supplier;
 
 public final class ChunkPipeline implements BlockPipeline {
 
+    public static final ChunkPipeline NULL_RETURN = new ChunkPipeline();
+
     private final @Nullable Supplier<Chunk> chunkSupplier;
     private final @Nullable Supplier<ServerWorld> serverWorld;
     private final @Nullable Supplier<ChunkSection> sectionSupplier;
     private final boolean wasEmpty;
     private final List<ResultingTransactionBySideEffect> chunkEffects;
-    final GameTransaction.ChangeBlock transaction;
+    final ChangeBlock transaction;
+
+    private ChunkPipeline() {
+        this.chunkSupplier = null;
+        this.serverWorld = null;
+        this.sectionSupplier = null;
+        this.wasEmpty = true;
+        this.chunkEffects = Collections.emptyList();
+        this.transaction = null;
+    }
 
     ChunkPipeline(final Builder builder) {
         this.chunkSupplier = builder.chunkSupplier;
@@ -88,6 +99,7 @@ public final class ChunkPipeline implements BlockPipeline {
         return Objects.requireNonNull(this.sectionSupplier, "ChunkSection Supplier is null in ChunkPipeline").get();
     }
 
+    @Nullable
     public BlockState processChange(final PhaseContext<?> context, final BlockState currentState, final BlockState proposedState,
         final BlockPos pos
     ) {
@@ -101,7 +113,7 @@ public final class ChunkPipeline implements BlockPipeline {
         final PipelineCursor formerState = new PipelineCursor(currentState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.chunkEffects) {
-            try (final EffectTransactor ignored = context.pushTransactor(effect)) {
+            try (final EffectTransactor ignored = context.getTransactor().pushEffect(effect)) {
                 final EffectResult result = effect.effect.processSideEffect(
                     this,
                     formerState,
@@ -131,10 +143,10 @@ public final class ChunkPipeline implements BlockPipeline {
         @Nullable Supplier<Chunk> chunkSupplier;
         @Nullable Supplier<ChunkSection> sectionSupplier;
         boolean wasSectionEmpty;
-        GameTransaction.@MonotonicNonNull ChangeBlock transaction;
+        @MonotonicNonNull ChangeBlock transaction;
         List<ResultingTransactionBySideEffect> effects;
 
-        public Builder kickOff(final GameTransaction.ChangeBlock transaction) {
+        public Builder kickOff(final ChangeBlock transaction) {
             this.transaction = Objects.requireNonNull(transaction, "ChangeBlock transaction cannot be null!");
             return this;
         }

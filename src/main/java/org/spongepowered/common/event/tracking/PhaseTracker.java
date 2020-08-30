@@ -31,19 +31,11 @@ import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ThrowableEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -51,27 +43,15 @@ import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
-import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.launch.Launcher;
@@ -273,7 +253,7 @@ public final class PhaseTracker implements CauseStackManager {
                     frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.FORCED);
                     for (final net.minecraft.entity.Entity entity : entities) {
                         // At this point, we don't care what the causes are...
-                        PhaseTracker.getInstance().spawnEntityWithCause((World<?>) entity.getEntityWorld(), (Entity) entity);
+                        entity.getEntityWorld().addEntity(entity);
                     }
                 }
 
@@ -476,163 +456,6 @@ public final class PhaseTracker implements CauseStackManager {
         printer.print(new PrintStream(stream));
 
         return stream.toString();
-    }
-
-    // --------------------- DELEGATED WORLD METHODS -------------------------
-
-    /**
-     * This is the replacement of {@link net.minecraft.world.World#addEntity(net.minecraft.entity.Entity)}
-     * where it captures into phases. The causes and relations are processed by the phases.
-     *
-     * The difference between {@link #spawnEntityWithCause(World, Entity)} is that it bypasses
-     * any phases and directly throws a spawn entity event.
-     *
-     * @param world The world
-     * @param entity The entity
-     * @return True if the entity spawn was successful
-     */
-    @SuppressWarnings("rawtypes")
-    public boolean spawnEntity(final ServerWorld world, final net.minecraft.entity.Entity entity) {
-        checkNotNull(entity, "Entity cannot be null!");
-        // Sponge Start - Check if restoring blocks, don't want entities to be spawned
-        if (entity instanceof ItemEntity && SpongeImplHooks.isRestoringBlocks(world)) {
-            return false;
-        }
-        // Sponge End
-        if (entity.removed) {
-            // Vanilla raw logger usage, Sponge uses the accessor, same thing.
-            // LOGGER.warn("Tried to add entity {} but it was marked as removed already", (Object)EntityType.getKey(entityIn.getType()));
-            ServerWorldAccessor.accessor$LOGGER().warn("Tried to add entity {} but it was marked as removed already", EntityType.getKey(entity.getType()));
-            return false;
-        }
-
-        // Sponge Start - handle construction phases
-        if (((EntityBridge) entity).bridge$isConstructing()) {
-            ((EntityBridge) entity).bridge$fireConstructors();
-        }
-
-        final PhaseContext<?> context = this.stack.peek();
-        final IPhaseState<?> phaseState = context.state;
-        final boolean isForced = entity.forceSpawn || entity instanceof PlayerEntity;
-
-        // Certain phases disallow entity spawns (such as block restoration)
-        if (!isForced && !phaseState.doesAllowEntitySpawns()) {
-            return false;
-        }
-        // Sponge End
-        // } else if (this.hasDuplicateEntity(entityIn)) { // Sponge can't use the direct method, it's private.
-        if (((ServerWorldAccessor) world).accessor$hasDuplicateEntity(entity)) {
-            return false;
-        }
-        // Forge needs their event here for EntityJoinWorldEvent
-        // if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.EntityJoinWorldEvent(entity, this)))
-        //    return false;
-        if (SpongeImplHooks.canEntityJoinWorld(entity, world)) {
-            return false;
-        }
-        // Forge End
-        final IChunk ichunk = world.getChunk(MathHelper.floor(entity.getPosX() / 16.0D), MathHelper.floor(entity.getPosZ() / 16.0D), ChunkStatus.FULL,
-                entity.forceSpawn);
-        if (!(ichunk instanceof Chunk)) {
-            return false;
-        }
-
-
-        // Sponge start - check for vanilla owner
-        if (entity instanceof ThrowableEntity) {
-            final ThrowableEntity throwable = (ThrowableEntity) entity;
-            final LivingEntity thrower = throwable.getThrower();
-            if (thrower != null) {
-                final User user;
-                if (thrower instanceof CreatorTrackedBridge) {
-                    user = ((CreatorTrackedBridge) thrower).tracked$getCreatorReference().orElse(null);
-                } else {
-                    user = (User) thrower;
-                }
-                if (user != null) {
-                    context.creator = user;
-                    if (entity instanceof CreatorTrackedBridge) {
-                        ((CreatorTrackedBridge) entity).tracked$setCreatorReference(user);
-                    } else {
-                        ((Entity) entity).offer(Keys.CREATOR, user.getUniqueId());
-                    }
-                }
-            }
-        }
-        // Sponge end
-        // Sponge Start
-        // First, check if the owning world is a remote world. Then check if the spawn is forced.
-        // Finally, if all checks are true, then let the phase process the entity spawn. Most phases
-        // will not actively capture entity spawns, but will still throw events for them. Some phases
-        // capture all entities until the phase is marked for completion.
-        if (!isForced) {
-            if (ShouldFire.SPAWN_ENTITY_EVENT
-                || (ShouldFire.CHANGE_BLOCK_EVENT
-                    // This bottom part of the if is due to needing to be able to capture block entity spawns
-                    // while block events are being listened to
-                    && ((IPhaseState) phaseState).doesBulkBlockCapture(context)
-                    && ((IPhaseState) phaseState).tracksBlockSpecificDrops(context)
-                    && context.getCaptureBlockPos().getPos().isPresent())) {
-                try {
-                    return ((IPhaseState) phaseState).spawnEntityOrCapture(context, (Entity) entity);
-                } catch (final Exception | NoClassDefFoundError e) {
-                    // Just in case something really happened, we should print a nice exception for people to
-                    // paste us
-                    PhasePrinter.printExceptionSpawningEntity(this, context, e);
-                    return false;
-                }
-            }
-        }
-        final net.minecraft.entity.Entity customEntity = SpongeImplHooks.getCustomEntityIfItem(entity);
-        final net.minecraft.entity.Entity finalEntityToSpawn = customEntity == null ? entity : customEntity;
-        // Sponge end - continue on with the checks.
-        ichunk.addEntity(entity);
-        // world.onEntityAdded(entity); // Vanilla has a privaate method, Forge makes it public, accessors go!
-        ((ServerWorldAccessor) world).accessor$onEntityAdded(finalEntityToSpawn);
-        return true;
-
-    }
-
-    /**
-     * The core implementation of {@link World#spawnEntity(Entity)} that
-     * bypasses any sort of cause tracking and throws an event directly
-     *
-     * @param world The world
-     * @param entity The entity
-     * @return True if entity was spawned, false if not
-     */
-    public boolean spawnEntityWithCause(final World<?> world, final Entity entity) {
-        checkNotNull(entity, "Entity cannot be null!");
-
-        // Sponge Start - handle construction phases
-        if (((EntityBridge) entity).bridge$isConstructing()) {
-            ((EntityBridge) entity).bridge$fireConstructors();
-        }
-
-        final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final ServerWorld worldServer = (ServerWorld) world;
-        // Sponge End - continue with vanilla mechanics
-
-        @Nullable final IChunk ichunk = worldServer.getChunk(MathHelper.floor(minecraftEntity.getPosX() / 16.0D),
-                MathHelper.floor(minecraftEntity.getPosZ() / 16.0D), ChunkStatus.FULL, minecraftEntity.forceSpawn);
-        if (!(ichunk instanceof Chunk)) {
-            return false;
-        }
-
-        // Sponge Start - throw an event
-        final List<Entity> entities = new ArrayList<>(1); // We need to use an arraylist so that filtering will work.
-        entities.add(entity);
-
-        final SpawnEntityEvent.Custom
-            event =
-            SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
-        SpongeCommon.postEvent(event);
-        if (entity instanceof PlayerEntity || !event.isCancelled()) {
-            EntityUtil.processEntitySpawn(entity, Optional::empty);
-        }
-        // Sponge end
-
-        return true;
     }
 
     public void ensureEmpty() {

@@ -24,19 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 final class WorldTickListenerState extends ListenerPhaseState<WorldTickListenerContext> {
 
@@ -57,21 +46,21 @@ final class WorldTickListenerState extends ListenerPhaseState<WorldTickListenerC
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
         TrackingUtil.processBlockCaptures(phaseContext);
-        phaseContext.getBlockItemDropSupplier()
-            .acceptAndClearIfNotEmpty(map -> map.asMap().forEach((key, value) -> {
-                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-                    final LocatableBlock
-                        block =
-                        new SpongeLocatableBlockBuilder().world((ServerWorld) phaseContext.getWorld()).position(key.getX(), key.getY(),
-                            key.getZ()).build();
-                    frame.pushCause(container);
-                    frame.pushCause(block);
-                    final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-                    SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
-                }
-
-            }));
+//        phaseContext.getBlockItemDropSupplier()
+//            .acceptAndClearIfNotEmpty(map -> map.asMap().forEach((key, value) -> {
+//                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+//                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+//                    final LocatableBlock
+//                        block =
+//                        new SpongeLocatableBlockBuilder().world((ServerWorld) phaseContext.getWorld()).position(key.getX(), key.getY(),
+//                            key.getZ()).build();
+//                    frame.pushCause(container);
+//                    frame.pushCause(block);
+//                    final List<Entity> items = value.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
+//                    SpongeCommonEventFactory.callDropItemDestruct(items, phaseContext);
+//                }
+//
+//            }));
     }
 
     @Override

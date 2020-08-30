@@ -27,6 +27,7 @@ package org.spongepowered.common.bridge.world.chunk;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -46,6 +47,7 @@ public interface TrackedChunkBridge {
      * @param flag The change flags, for snapshot creation
      * @return The original block state at the position (redundant with currentState)
      */
+    @NonNull
     ChunkPipeline bridge$createChunkPipeline(BlockPos pos, BlockState newState, BlockState currentState, SpongeBlockChangeFlag flag);
 
     /**

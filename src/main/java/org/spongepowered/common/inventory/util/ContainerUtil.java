@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.util;
 
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -41,6 +42,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
@@ -78,6 +80,7 @@ import org.spongepowered.common.inventory.lens.impl.minecraft.SingleGridLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -86,8 +89,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class ContainerUtil {
 
@@ -119,16 +120,11 @@ public final class ContainerUtil {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void performBlockInventoryDrops(final ServerWorld worldServer, final double x, final double y, final double z, final IInventory inventory) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<?> currentState = context.state;
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
+        final IPhaseState<@NonNull ?> currentState = context.state;
         if (((IPhaseState) currentState).tracksBlockSpecificDrops(context)) {
             // this is where we could perform item stack pre-merging.
-            // For development reasons, not performing any pre-merging except after the entity item spawns.
-
-            // Don't do pre-merging - directly spawn in item
-            final Multimap<BlockPos, ItemEntity> multimap = context.getBlockItemDropSupplier().get();
-            final BlockPos pos = new BlockPos(x, y, z);
-            final Collection<ItemEntity> itemStacks = multimap.get(pos);
+            // TODO - figure out how inventory drops will work?
             for (int j = 0; j < inventory.getSizeInventory(); j++) {
                 final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(j);
                 if (!itemStack.isEmpty()) {
@@ -145,7 +141,7 @@ public final class ContainerUtil {
                         entityitem.setMotion(RANDOM.nextGaussian() * 0.05,
                                 RANDOM.nextGaussian() * 0.05 + 0.2,
                                 RANDOM.nextGaussian() * 0.05);
-                        itemStacks.add(entityitem);
+                        worldServer.addEntity(entityitem);
                     }
                 }
             }

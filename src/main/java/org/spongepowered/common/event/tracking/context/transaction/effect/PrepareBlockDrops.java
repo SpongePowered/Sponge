@@ -22,12 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context;
+package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.block.BlockState;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-public final class CapturedItemsSupplier extends CapturedSupplier<ItemEntity> {
+public final class PrepareBlockDrops implements ProcessingSideEffect {
 
-    public CapturedItemsSupplier() {
+    private static final class Holder {
+        static final PrepareBlockDrops INSTANCE = new PrepareBlockDrops();
     }
+    public static PrepareBlockDrops getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    PrepareBlockDrops() {}
+
+    @Override
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
+        final BlockState newState, final SpongeBlockChangeFlag flag) {
+
+        return EffectResult.NULL_PASS;
+    }
+
 }

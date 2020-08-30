@@ -54,12 +54,11 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 public class BasicInventoryPacketState extends PacketState<InventoryPacketContext> {
 
@@ -171,9 +170,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
         final int usedButton = packetIn.getUsedButton();
         final List<Entity> capturedItems = new ArrayList<>();
-        context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> items.stream().map(entity -> (Entity) entity).forEach(capturedItems::add));
-        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(capturedItems::addAll);
-
         // MAKE SURE THAT THIS IS KEPT IN SYNC WITH THE REST OF THE METHOD
         // If you add any logic that does something even if no event listenres
         // are registered, add it here.

@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
@@ -36,11 +37,14 @@ final class EventByTransaction<T extends Event & Cancellable> {
     final T event;
     final ImmutableList<GameTransaction<T>> transactions;
     final GameTransaction<T> decider;
+    @Nullable final GameTransaction<@NonNull ?> parent;
 
     EventByTransaction(final T event,
         final ImmutableList<GameTransaction<T>> transactions,
+        @Nullable final GameTransaction<@NonNull ?> parent,
         final GameTransaction<T> decider
     ) {
+        this.parent = parent;
         this.event = event;
         this.transactions = transactions;
         this.decider = decider;
@@ -51,5 +55,9 @@ final class EventByTransaction<T extends Event & Cancellable> {
         for (GameTransaction<T> transaction : this.transactions) {
             transaction.markCancelled();
         }
+    }
+
+    public boolean isParentOrDeciderCancelled() {
+        return this.decider.cancelled || (this.parent != null && this.parent.cancelled);
     }
 }

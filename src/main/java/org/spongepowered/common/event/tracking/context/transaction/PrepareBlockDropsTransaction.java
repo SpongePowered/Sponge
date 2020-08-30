@@ -22,57 +22,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.block;
+package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.PooledPhaseState;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.PrettyPrinter;
 
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
-public class BlockPhaseState extends PooledPhaseState<GeneralizedContext> implements IPhaseState<GeneralizedContext> {
+public final class PrepareBlockDropsTransaction extends BlockEventBasedTransaction {
 
-    private final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> BLOCK_MODIFIER =
-        super.getFrameModifier().andThen((frame, ctx) -> {
+    private final SpongeBlockSnapshot originalState;
 
-
-        });
-
-    BlockPhaseState() {
+    PrepareBlockDropsTransaction(
+        final BlockPos affectedPosition, final BlockState originalState, final SpongeBlockSnapshot original
+    ) {
+        super(affectedPosition, originalState);
+        this.originalState = original;
     }
 
     @Override
-    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
-        return new GeneralizedContext(this, tracker);
+    protected SpongeBlockSnapshot getResultingSnapshot() {
+        return this.originalState;
     }
 
     @Override
-    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
-        return this.BLOCK_MODIFIER;
+    protected SpongeBlockSnapshot getOriginalSnapshot() {
+        return this.originalState;
     }
 
     @Override
-    public void unwind(final GeneralizedContext context) {
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
+        return Optional.empty();
+    }
+
+    @Override
+    public void addToPrinter(final PrettyPrinter printer) {
 
     }
 
     @Override
-    public boolean doesDenyChunkRequests(final GeneralizedContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean includesDecays() {
-        return true;
-    }
-
-    private final String desc = TrackingUtil.phaseStateToString("Block", this);
-
-    @Override
-    public String toString() {
-        return this.desc;
+    public void restore() {
+        this.originalState.restore(true, BlockChangeFlagManager.fromNativeInt(Constants.BlockChangeFlags.FORCED_RESTORE));
     }
 }

@@ -316,65 +316,6 @@ public final class EntityUtil {
     }
 
     /**
-     * A simple redirected static util method for {@link Entity#entityDropItem(ItemStack, float)}.
-     * What this does is ensures that any possibly required wrapping of captured drops is performed.
-     * Likewise, it ensures that the phase state is set up appropriately.
-     *
-     * @param entity The entity dropping the item
-     * @param itemStack The itemstack to spawn
-     * @param offsetY The offset y coordinate
-     * @return The item entity
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Nullable
-    public static ItemEntity entityOnDropItem(final Entity entity, final ItemStack itemStack, final float offsetY, final double xPos, final double zPos) {
-        if (itemStack.isEmpty()) {
-            // Sanity check, just like vanilla
-            return null;
-        }
-        // Now the real fun begins.
-        final ItemStack item;
-        final double posX = xPos;
-        final double posY = entity.getPosY() + offsetY;
-        final double posZ = zPos;
-
-        // FIRST we want to throw the DropItemEvent.PRE
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
-        final List<ItemStackSnapshot> original = new ArrayList<>();
-        original.add(snapshot);
-
-        // Gather phase states to determine whether we're merging or capturing later
-        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<?> currentState = phaseContext.state;
-
-        // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            // Perform the event throws first, if they return false, return null
-            item = SpongeCommonEventFactory.throwDropItemAndConstructEvent(entity, posX, posY, posZ, snapshot, original, frame);
-
-            if (item == null || item.isEmpty()) {
-                return null;
-            }
-
-
-            // This is where we could perform item pre merging, and cancel before we create a new entity.
-            // For now, we aren't performing pre merging.
-
-            final ItemEntity entityitem = new ItemEntity(entity.world, posX, posY, posZ, item);
-            entityitem.setDefaultPickupDelay();
-
-            // FIFTH - Capture the entity maybe?
-            if (((IPhaseState) currentState).spawnItemOrCapture(phaseContext, entity, entityitem)) {
-                return entityitem;
-            }
-            // FINALLY - Spawn the entity in the world if all else didn't fail
-            EntityUtil.processEntitySpawn((org.spongepowered.api.entity.Entity) entityitem, Optional::empty);
-            return entityitem;
-        }
-    }
-
-
-    /**
      * This is used to create the "dropping" motion for items caused by players. This
      * specifically was being used (and should be the correct math) to drop from the
      * player, when we do item stack captures preventing entity items being created.

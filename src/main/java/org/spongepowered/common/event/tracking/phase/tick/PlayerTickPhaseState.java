@@ -24,20 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.entity.item.ItemEntity;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
 
@@ -55,21 +49,12 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", context));
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-            context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                SpongeCommonEventFactory.callSpawnEntity(entities, context);
-            });
+//            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+//            context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
+//                SpongeCommonEventFactory.callSpawnEntity(entities, context);
+//            });
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                for (final ItemEntity entity : entities) {
-                    capturedEntities.add((Entity) entity);
-                }
 
-                SpongeCommonEventFactory.callSpawnEntity(capturedEntities, context);
-            });
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
             TrackingUtil.processBlockCaptures(context);
         }
     }
@@ -81,24 +66,6 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
         explosionContext.creator(((ServerPlayer) player).getUser());
         explosionContext.notifier(((ServerPlayer) player).getUser());
         explosionContext.source(player);
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final PlayerTickContext context, final Entity entity) {
-        final Player player = context.getSource(Player.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", context));
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-            final List<Entity> entities = new ArrayList<>(1);
-            entities.add(entity);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
-    }
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return false;
     }
 
     @Override

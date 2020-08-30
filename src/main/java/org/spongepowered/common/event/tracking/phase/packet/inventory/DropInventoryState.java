@@ -24,22 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import java.util.ArrayList;
 
 public final class DropInventoryState extends BasicInventoryPacketState {
 
@@ -55,20 +50,20 @@ public final class DropInventoryState extends BasicInventoryPacketState {
             // TODO - Determine if we need to pass the supplier or perform some parameterized
             //  process if not empty method on the capture object.
             TrackingUtil.processBlockCaptures(context);
-            context.getCapturedItemsSupplier()
-                .acceptAndClearIfNotEmpty(items -> {
-
-                    final ArrayList<Entity> entities = new ArrayList<>();
-                    for (ItemEntity item : items) {
-                        entities.add((Entity) item);
-                    }
-                    final DropItemEvent.Dispense dropItemEvent =
-                        SpongeEventFactory.createDropItemEventDispense(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
-                    SpongeCommon.postEvent(dropItemEvent);
-                    if (!dropItemEvent.isCancelled()) {
-                        processSpawnedEntities(player, dropItemEvent);
-                    }
-                });
+//            context.getCapturedItemsSupplier()
+//                .acceptAndClearIfNotEmpty(items -> {
+//
+//                    final ArrayList<Entity> entities = new ArrayList<>();
+//                    for (ItemEntity item : items) {
+//                        entities.add((Entity) item);
+//                    }
+//                    final DropItemEvent.Dispense dropItemEvent =
+//                        SpongeEventFactory.createDropItemEventDispense(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
+//                    SpongeCommon.postEvent(dropItemEvent);
+//                    if (!dropItemEvent.isCancelled()) {
+//                        processSpawnedEntities(player, dropItemEvent);
+//                    }
+//                });
 
             final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
             mixinContainer.bridge$setCaptureInventory(false);
