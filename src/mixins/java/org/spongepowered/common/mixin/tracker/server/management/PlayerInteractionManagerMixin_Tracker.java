@@ -163,7 +163,7 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
         } else {
             boolean flag = !playerIn.getHeldItemMainhand().isEmpty() || !playerIn.getHeldItemOffhand().isEmpty();
             boolean flag1 = playerIn.isSneaking() && flag;
-            if (useBlock != Tristate.FALSE && !flag1) {
+            if (useBlock != Tristate.FALSE && !flag1) { // Sponge check useBlock
                 ActionResultType actionresulttype = blockstate.onBlockActivated(worldIn, playerIn, handIn, blockRaytraceResultIn);
                 if (actionresulttype.isSuccessOrConsume()) {
                     return actionresulttype;
