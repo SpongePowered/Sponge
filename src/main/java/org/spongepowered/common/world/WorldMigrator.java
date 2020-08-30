@@ -32,9 +32,7 @@ import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.common.SpongeImpl;
 
 import java.io.IOException;
-import java.nio.file.CopyOption;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -123,74 +121,6 @@ public final class WorldMigrator {
                 SpongeImpl.getLogger().info("[{}] worlds have been migrated back to Vanilla's format.", migrated.size());
             } else {
                 SpongeImpl.getLogger().info("No worlds were found in need of migration.");
-            }
-        }
-
-        // Previous to 1/10/2018, Sponge accidentally used the wrong save folder for client saves (put them on the root instead of saves/my_save).
-        // This fixes this issue by moving over the folders and deleting them on the root
-        if (Sponge.getPlatform().getType().isClient()) {
-            try {
-                Files.newDirectoryStream(worldContainer.getParent()).forEach((saveFolder) -> {
-                    final boolean isWorld = Files.exists(saveFolder.resolve("level.dat"));
-                    if (isWorld) {
-                        final Path invalidSaveDataFolder = saveFolder.getParent().getParent().resolve(saveFolder.getFileName().toString());
-                        try {
-                            if (Files.isDirectory(invalidSaveDataFolder)) {
-                                Files.walkFileTree(invalidSaveDataFolder, new SimpleFileVisitor<Path>() {
-
-                                    @Override
-                                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                                        if (invalidSaveDataFolder != dir) {
-                                            Path validFile = null;
-
-                                            for (int i = 2; i < dir.getNameCount(); i++) {
-                                                if (validFile == null) {
-                                                    validFile = saveFolder.resolve(dir.getName(i));
-                                                } else {
-                                                    validFile = validFile.resolve(dir.getName(i));
-                                                }
-                                            }
-
-                                            if (validFile != null && Files.notExists(validFile)) {
-                                                Files.createDirectories(validFile);
-                                            }
-                                        }
-
-                                        return super.preVisitDirectory(dir, attrs);
-                                    }
-
-                                    @Override
-                                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                                        // Directories are made above
-                                        if (!Files.isDirectory(file)) {
-                                            Path validFile = null;
-
-                                            for (int i = 2; i < file.getNameCount(); i++) {
-                                                if (validFile == null) {
-                                                    validFile = saveFolder.resolve(file.getName(i));
-                                                } else {
-                                                    validFile = validFile.resolve(file.getName(i));
-                                                }
-                                            }
-
-                                            // Only move non-existing files in the proper directory
-                                            if (validFile != null && Files.notExists(validFile)) {
-                                                com.google.common.io.Files.move(file.toFile(), validFile.toFile());
-                                            }
-                                        }
-                                        return super.visitFile(file, attrs);
-                                    }
-                                });
-
-                                FileUtils.deleteDirectory(invalidSaveDataFolder.toFile());
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }
