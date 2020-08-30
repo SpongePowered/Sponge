@@ -29,13 +29,11 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -44,7 +42,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.event.tracking.context.CaptureBlockPos;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -89,9 +86,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     protected boolean isCompleted = false;
     // Only used in hard debugging instances.
     @Nullable private StackTraceElement[] stackTrace;
-
-    // Per block captures (useful for things like explosions to capture multiple targets at a time)
-    @Nullable CaptureBlockPos captureBlockPos;
 
     // General
     @Nullable protected User creator;
@@ -139,7 +133,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
     }
 
     private void checkBlockSuppliers() {
-        checkState(this.captureBlockPos == null, "CaptureBlockPos is already set!");
     }
 
     public P addBlockCaptures() {
@@ -336,13 +329,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         return this.transactor;
     }
 
-    public CaptureBlockPos getCaptureBlockPos() throws IllegalStateException {
-        if (this.captureBlockPos == null) {
-            throw TrackingUtil.throwWithContext("Intended to capture a block position!", this).get();
-        }
-        return this.captureBlockPos;
-    }
-
     public boolean hasCaptures() {
         if (this.transactor != null && !this.transactor.isEmpty()) {
             return true;
@@ -354,11 +340,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         }
 
         return false;
-    }
-
-    public Optional<BlockPos> getBlockPosition() {
-        return this.getCaptureBlockPos()
-            .getPos();
     }
 
     public void addCreatorAndNotifierToCauseStack(final CauseStackManager.StackFrame frame) {
@@ -456,12 +437,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         if (this.transactor != null) {
             this.transactor.reset();
         }
-
-        if (this.captureBlockPos != null) {
-            this.captureBlockPos.setPos(null);
-            this.captureBlockPos.setWorld((ServerWorld) null);
-        }
-
     }
 
     public void printTrace(final PrettyPrinter printer) {
@@ -469,16 +444,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
             printer.add("Entrypoint:")
                 .add(this.stackTrace);
         }
-    }
-
-    public boolean allowsBlockPosCapturing() {
-        return this.captureBlockPos != null;
-    }
-
-    public boolean captureEntity(final Entity entity) {
-
-        // Throw an exception if we're not capturing at all but the state says we do?
-        throw new IllegalStateException("Expected to capture entities, but we aren't capturing them.");
     }
 
     @Nullable
