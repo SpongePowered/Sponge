@@ -208,6 +208,7 @@ import org.spongepowered.common.registry.builtin.vanilla.ParticleTypeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.SoundEventSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.TileEntityTypeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.VillagerProfessionSupplier;
+import org.spongepowered.common.registry.builtin.vanilla.VillagerTypeSupplier;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.ArrayList;
@@ -631,6 +632,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         SoundEventSupplier.registerSuppliers(this);
         TileEntityTypeSupplier.registerSuppliers(this);
         VillagerProfessionSupplier.registerSuppliers(this);
+        VillagerTypeSupplier.registerSuppliers(this);
     }
 
     public <T extends CatalogType, E> SpongeCatalogRegistry generateRegistry(final Class<T> catalogClass, final ResourceKey key, final Stream<E> valueStream, final boolean generateSuppliers, final boolean isDynamic) {

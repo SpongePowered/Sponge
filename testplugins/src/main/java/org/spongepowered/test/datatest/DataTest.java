@@ -57,8 +57,11 @@ import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.api.data.type.ToolTypes;
 import org.spongepowered.api.data.type.TropicalFishShapes;
 import org.spongepowered.api.data.type.VillagerTypes;
+import org.spongepowered.api.data.type.WireAttachmentType;
+import org.spongepowered.api.data.type.WireAttachmentTypes;
 import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.MapValue;
 import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
@@ -99,8 +102,10 @@ import org.spongepowered.plugin.jvm.Plugin;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -1186,22 +1191,27 @@ public final class DataTest  {
 
         this.checkOfferData(sheep, Keys.VELOCITY, Vector3d.UP);
 
-//        this.checkOfferData(villager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
+        this.checkOfferData(villager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
         final Entity zombieVillager = world.createEntity(EntityTypes.ZOMBIE_VILLAGER.get(), position);
-//        this.checkOfferData(zombieVillager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
+        this.checkOfferData(zombieVillager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
 
         this.checkOfferData(areaEffectCloud, Keys.WAIT_TIME, 1);
 
-        this.checkOfferData(player, Keys.WALKING_SPEED, 1.0);
-        this.checkOfferData(sheep, Keys.WALKING_SPEED, 1.0);
+        this.checkOfferData(player, Keys.WALKING_SPEED, 0.1);
+        this.checkOfferData(sheep, Keys.WALKING_SPEED, 0.2);
 
         this.checkOfferData(eyeOfEnder, Keys.WILL_SHATTER, true);
 
-        // Keys.WIRE_ATTACHMENTS
-        // Keys.WIRE_ATTACHMENT_EAST
-        // Keys.WIRE_ATTACHMENT_NORTH
-        // Keys.WIRE_ATTACHMENT_SOUTH
-        // Keys.WIRE_ATTACHMENT_WEST
+        this.checkWithData(redstoneWireState, Keys.WIRE_ATTACHMENT_EAST, WireAttachmentTypes.NONE.get());
+        this.checkWithData(redstoneWireState, Keys.WIRE_ATTACHMENT_NORTH, WireAttachmentTypes.UP.get());
+        this.checkWithData(redstoneWireState, Keys.WIRE_ATTACHMENT_SOUTH, WireAttachmentTypes.SIDE.get());
+        this.checkWithData(redstoneWireState, Keys.WIRE_ATTACHMENT_WEST, WireAttachmentTypes.UP.get());
+        final Map<Direction, WireAttachmentType> map = new HashMap<>();
+        map.put(Direction.NORTH, WireAttachmentTypes.NONE.get());
+        map.put(Direction.EAST, WireAttachmentTypes.NONE.get());
+        map.put(Direction.SOUTH, WireAttachmentTypes.NONE.get());
+        map.put(Direction.WEST, WireAttachmentTypes.UP.get());
+        this.checkGetMapData(redstoneWireState.with(Keys.WIRE_ATTACHMENT_WEST, WireAttachmentTypes.UP.get()).get(), Keys.WIRE_ATTACHMENTS, map);
 
         final Entity wither = world.createEntity(EntityTypes.WITHER.get(), position);
         this.checkOfferListData(wither, Keys.WITHER_TARGETS, Arrays.asList(player));
@@ -1267,6 +1277,10 @@ public final class DataTest  {
     }
 
     private <T> void checkGetSetData(final DataHolder holder, final Supplier<Key<SetValue<T>>> key, final Set<T> expected) {
+        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    }
+
+    private <K, V> void checkGetMapData(final DataHolder holder, final Supplier<Key<MapValue<K, V>>> key, final Map<K, V> expected) {
         this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
