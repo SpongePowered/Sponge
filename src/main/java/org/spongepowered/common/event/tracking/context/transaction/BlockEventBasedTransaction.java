@@ -45,7 +45,9 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEvent> {
 
@@ -86,11 +88,15 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
         for (int i = 0; i < BlockEventBasedTransaction.EVENT_COUNT; i++) {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
-        // Bug is here- use the multimap
-        final ImmutableList<Transaction<BlockSnapshot>> eventTransactions = transactions.stream()
-            .map(transaction -> (BlockEventBasedTransaction) transaction)
-            .map(transaction -> {
-                final List<SpongeBlockSnapshot> snapshots = positions.get(transaction.affectedPosition);
+
+        final ImmutableList<Transaction<BlockSnapshot>> eventTransactions = positions.asMap().values()
+            .stream()
+            .map(spongeBlockSnapshots -> {
+                if (spongeBlockSnapshots.size() < 2) {
+                    // Error case
+                    return Optional.<Transaction<BlockSnapshot>>empty();
+                }
+                final List<SpongeBlockSnapshot> snapshots = new ArrayList<>(spongeBlockSnapshots);
                 final SpongeBlockSnapshot original = snapshots.get(0);
                 final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
                 final ImmutableList<BlockSnapshot> intermediary;
@@ -101,8 +107,11 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                 }
                 final Transaction<BlockSnapshot> eventTransaction = new Transaction<>(original, result, intermediary);
                 transactionBuilders[original.blockChange.ordinal()].add(eventTransaction);
-                return eventTransaction;
-            }).collect(ImmutableList.toImmutableList());
+                return Optional.of(eventTransaction);
+            })
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(ImmutableList.toImmutableList());
         for (int i = 0; i < BlockEventBasedTransaction.EVENT_COUNT; i++) {
             transactionArrays[i] = transactionBuilders[i].build();
         }
@@ -149,7 +158,7 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
     protected abstract SpongeBlockSnapshot getOriginalSnapshot();
 
     @Override
-    public boolean canBatchWith(final @Nullable GameTransaction<@NonNull ?> next) {
+    public boolean canBatchWith(final GameTransaction<@NonNull ?> next) {
         return next instanceof org.spongepowered.common.event.tracking.context.transaction.BlockEventBasedTransaction;
     }
 
