@@ -157,10 +157,8 @@ public final class DataTest  {
         this.checkGetData(sheep, Keys.AGE, 0);
         this.checkOfferData(player, Keys.AGE, 10);
 
-        // TODO missing impl
-//        final Entity minecart = world.createEntity(EntityTypes.MINECART.get(), position);
-//        this.checkGetData(minecart, Keys.AIRBORNE_VELOCITY_MODIFIER, Vector3d.ZERO);
-//        this.checkOfferData(minecart, Keys.AIRBORNE_VELOCITY_MODIFIER, Vector3d.UP);
+        final Entity minecartEntity = world.createEntity(EntityTypes.MINECART.get(), position);
+        this.checkOfferData(minecartEntity, Keys.AIRBORNE_VELOCITY_MODIFIER, Vector3d.UP);
 
         final Entity zombiePigman = world.createEntity(EntityTypes.ZOMBIE_PIGMAN.get(), position);
         this.checkGetData(zombiePigman, Keys.ANGER_LEVEL, 0);
@@ -255,6 +253,7 @@ public final class DataTest  {
         final Entity fallingBlock = world.createEntity(EntityTypes.FALLING_BLOCK.get(), position);
         final BlockState sandState = BlockTypes.SAND.get().getDefaultState();
         this.checkOfferData(fallingBlock, Keys.BLOCK_STATE, sandState);
+        this.checkOfferData(minecartEntity, Keys.BLOCK_STATE, dirtState);
 
         // TODO Keys.BLOCK_TEMPERATURE
 
@@ -307,7 +306,6 @@ public final class DataTest  {
         this.checkOfferData(ravager, Keys.CAN_JOIN_RAID, true);
         this.checkOfferData(ravager, Keys.CAN_JOIN_RAID, false);
 
-        // TODO missing data provider
         final Entity boat = world.createEntity(EntityTypes.BOAT.get(), position);
         this.checkOfferData(boat, Keys.CAN_MOVE_ON_LAND, true);
         this.checkOfferData(boat, Keys.CAN_MOVE_ON_LAND, false);
@@ -373,7 +371,8 @@ public final class DataTest  {
         this.checkGetData(leavesState, Keys.DECAY_DISTANCE, 7);
         this.checkWithData(leavesState, Keys.DECAY_DISTANCE, 2);
 
-        // TODO Keys.DERAILED_VELOCITY_MODIFIER
+        this.checkOfferData(minecartEntity, Keys.DERAILED_VELOCITY_MODIFIER, Vector3d.RIGHT);
+
 
         // TODO missing ItemEntityBridge
         // TODO also other dataholders
@@ -755,6 +754,7 @@ public final class DataTest  {
         this.checkWithData(bedState, Keys.IS_OCCUPIED, false);
 
         this.checkGetData(furnaceMinecart, Keys.IS_ON_RAIL, false);
+        this.checkGetData(minecartEntity, Keys.IS_ON_RAIL, false);
 
         this.checkWithData(fenceGateState, Keys.IS_OPEN, true);
         this.checkWithData(fenceGateState, Keys.IS_OPEN, false);
@@ -931,8 +931,7 @@ public final class DataTest  {
 
         // MAX_STACK_SIZE
 
-        final Entity minecartEntity = world.createEntity(EntityTypes.MINECART.get(), position);
-//        this.checkOfferData(minecartEntity, Keys.MINECART_BLOCK_OFFSET, 1);
+        this.checkOfferData(minecartEntity, Keys.MINECART_BLOCK_OFFSET, 1);
 
         // TODO Keys.MIN_SPAWN_DELAY
 
@@ -1000,7 +999,7 @@ public final class DataTest  {
         final BlockState doorState = BlockTypes.ACACIA_DOOR.get().getDefaultState();
         this.checkWithData(doorState, Keys.PORTION_TYPE, PortionTypes.TOP.get());
 
-//        this.checkOfferData(minecartEntity, Keys.POTENTIAL_MAX_SPEED, 20.0);
+        this.checkOfferData(minecartEntity, Keys.POTENTIAL_MAX_SPEED, 20.0);
 
         this.checkOfferListData(sheep, Keys.POTION_EFFECTS, notchAppleEffects);
         this.checkOfferListData(potion, Keys.POTION_EFFECTS, notchAppleEffects);
@@ -1098,7 +1097,7 @@ public final class DataTest  {
         // Keys.SLOT_POSITION
         // Keys.SLOT_SIDE
 
-//        this.checkOfferData(minecartEntity, Keys.SLOWS_UNOCCUPIED, false);
+        this.checkOfferData(minecartEntity, Keys.SLOWS_UNOCCUPIED, false);
 
         this.checkOfferData(panda, Keys.SNEEZING_TIME, 2);
 
@@ -1139,7 +1138,8 @@ public final class DataTest  {
 
         // Keys.SUSPENDED
 
-//        this.checkOfferData(minecartEntity, Keys.SWIFTNESS, 2.0);
+        this.checkOfferData(minecartEntity, Keys.VELOCITY, Vector3d.FORWARD);
+        this.checkOfferData(minecartEntity, Keys.SWIFTNESS, 2.0);
 
         this.checkOfferData(horse, Keys.TAMER, player.getUniqueId());
         this.checkOfferData(wolf, Keys.TAMER, player.getUniqueId());

@@ -29,6 +29,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class AbstractMinecartData {
@@ -56,7 +57,25 @@ public final class AbstractMinecartData {
                     .create(Keys.MINECART_BLOCK_OFFSET)
                         .get(AbstractMinecartEntity::getDisplayTileOffset)
                         .setAnd(AbstractMinecartData::setBlockOffset)
-                        .deleteAnd(h -> setBlockOffset(h, h.getDefaultDisplayTileOffset()));
+                        .deleteAnd(h -> setBlockOffset(h, h.getDefaultDisplayTileOffset()))
+                    .create(Keys.SWIFTNESS)
+                        .get(m -> m.getMotion().length())
+                        .set((m, v) -> m.setMotion(m.getMotion().normalize().scale(v)))
+                        .supports(m -> m.getMotion().lengthSquared() > 0)
+                .asMutable(MinecartEntityBridge.class)
+                    .create(Keys.AIRBORNE_VELOCITY_MODIFIER)
+                        .get(MinecartEntityBridge::bridge$getAirborneMod)
+                        .set(MinecartEntityBridge::bridge$setAirborneMod)
+                    .create(Keys.SLOWS_UNOCCUPIED)
+                        .get(MinecartEntityBridge::bridge$getSlowWhenEmpty)
+                        .set(MinecartEntityBridge::bridge$setSlowWhenEmpty)
+                    .create(Keys.DERAILED_VELOCITY_MODIFIER)
+                        .get(MinecartEntityBridge::bridge$getDerailedMod)
+                        .set(MinecartEntityBridge::bridge$setDerailedMod)
+                    .create(Keys.POTENTIAL_MAX_SPEED)
+                        .get(MinecartEntityBridge::bridge$getMaxSpeed)
+                        .set(MinecartEntityBridge::bridge$setMaxSpeed)
+                    ;
     }
     // @formatter:on
 
