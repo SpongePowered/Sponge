@@ -36,6 +36,7 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -111,6 +112,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
+    @NonNull
     public ChunkPipeline bridge$createChunkPipeline(final BlockPos pos, final BlockState newState, final BlockState currentState,
             final SpongeBlockChangeFlag flag) {
         final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
@@ -125,17 +127,17 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final int zPos = pos.getZ() & 15;
         // Sponge - get the moving flag from our flag construct
         ChunkSection chunksection = this.sections[yPos >> 4];
-        if (chunksection == EMPTY_SECTION) {
-//            if (newState.isAir()) {
-//                return null;
-//            }
+        if (chunksection == ChunkMixin_Tracker.EMPTY_SECTION) {
+            if (newState.isAir()) {
+                return ChunkPipeline.NULL_RETURN;
+            }
 
             chunksection = new ChunkSection(yPos >> 4 << 4);
             this.sections[yPos >> 4] = chunksection;
         }
 
         // Sponge Start - Build out the BlockTransaction
-        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState state = context.state;
         final @Nullable TileEntity existing = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
         // Build a transaction maybe?

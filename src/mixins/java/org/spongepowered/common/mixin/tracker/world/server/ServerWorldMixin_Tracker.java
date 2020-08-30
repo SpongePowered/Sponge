@@ -120,9 +120,9 @@ import java.util.function.Supplier;
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implements TrackedWorldBridge {
 
+    // @formatting:off
     @Shadow @Final private MinecraftServer server;
-    private final LinkedBlockingDeque<ScheduledBlockChange> tracker$scheduledChanges = new LinkedBlockingDeque<>();
-
+    // @formatting:on
 
     @Inject(method = "onEntityAdded", at = @At("TAIL"))
     private void tracker$setEntityTrackedInWorld(final net.minecraft.entity.Entity entityIn, final CallbackInfo ci) {
@@ -159,7 +159,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         )
     )
     private void tracker$wrapGlobalEntityTicking(final ServerWorld serverWorld, final Consumer<Entity> consumer, final Entity entity) {
-        final PhaseContext<?> currentContext = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
         if (currentContext.state.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(consumer, entity);
             return;
@@ -183,7 +183,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     private void tracker$wrapNormalEntityTick(final ServerWorld serverWorld, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
-        final IPhaseState<?> currentState = PhaseTracker.SERVER.getCurrentState();
+        final IPhaseState<@NonNull ?> currentState = PhaseTracker.SERVER.getCurrentState();
         if (currentState.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(entityUpdateConsumer, entity);
             return;
@@ -213,8 +213,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
      *
      * @param blockState The block state being ticked
      * @param worldIn The world (this world)
-     * @param pos The position of the block state
-     * @param random The random (world.rand)
+     * @param posIn The position of the block
+     * @param randomIn The world random
      * @author gabizou - January 11th, 2020 - Minecraft 1.14.3
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -222,7 +222,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;tick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
     private void tracker$wrapBlockTick(BlockState blockState, ServerWorld worldIn, BlockPos posIn, Random randomIn) {
-        final PhaseContext<?> currentContext = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState currentState = currentContext.state;
         if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
             blockState.tick(worldIn, posIn, randomIn);
@@ -236,7 +236,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/fluid/IFluidState;tick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
     private void tracker$wrapFluidTick(final IFluidState fluidState, final World worldIn, final BlockPos pos) {
-        final PhaseContext<?> currentContext = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState currentState = currentContext.state;
         if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
             fluidState.tick(worldIn, pos);
@@ -260,7 +260,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     private void tracker$wrapBlockRandomTick(BlockState blockState, ServerWorld worldIn, BlockPos posIn, Random randomIn) {
         try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
-            final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
+            final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
             final IPhaseState phaseState = context.state;
             if (phaseState.alreadyCapturingBlockTicks(context)) {
                 blockState.randomTick(worldIn, posIn, this.rand);

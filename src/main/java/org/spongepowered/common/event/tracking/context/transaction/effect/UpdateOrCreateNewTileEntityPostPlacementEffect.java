@@ -28,6 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.block.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -49,7 +50,7 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
         final SpongeBlockChangeFlag flag) {
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final Chunk chunk = pipeline.getAffectedChunk();
-        final TileEntity maybeNewTileEntity = chunk.getTileEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
+        final @Nullable TileEntity maybeNewTileEntity = chunk.getTileEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
         if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
             if (maybeNewTileEntity == null) {
                 // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
