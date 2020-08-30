@@ -76,26 +76,6 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
 
     @Shadow public abstract boolean isCreative();
 
-    @Shadow public net.minecraft.world.server.ServerWorld world;
-
-    @Shadow public abstract void func_225415_a(BlockPos p_225415_1_, CPlayerDiggingPacket.Action p_225415_2_);
-
-    @Shadow private int ticks;
-
-    @Shadow private int initialDamage;
-
-    @Shadow private boolean isDestroyingBlock;
-
-    @Shadow private BlockPos destroyPos;
-
-    @Shadow private int durabilityRemainingOnBlock;
-
-    @Shadow private boolean receivedFinishDiggingPacket;
-
-    @Shadow private BlockPos delayedDestroyPos;
-
-    @Shadow private int initialBlockDamage;
-
     // Handle Spectator opening a Container
     @Inject(method = "func_219441_a", cancellable = true,
             at = @At(value = "INVOKE", shift = At.Shift.AFTER,
@@ -183,15 +163,25 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
         } else {
             boolean flag = !playerIn.getHeldItemMainhand().isEmpty() || !playerIn.getHeldItemOffhand().isEmpty();
             boolean flag1 = playerIn.isSneaking() && flag;
-            if (!flag1 && useBlock != Tristate.FALSE && blockstate.onBlockActivated(worldIn, playerIn, handIn, blockRaytraceResultIn)) { // Sponge - check useBlockResult
-                return ActionResultType.SUCCESS;
-            } else if (!stackIn.isEmpty() && useItem != Tristate.FALSE && !playerIn.getCooldownTracker().hasCooldown(stackIn.getItem())) { // Sponge - check useItemResult
+            if (useBlock != Tristate.FALSE && !flag1) {
+                ActionResultType actionresulttype = blockstate.onBlockActivated(worldIn, playerIn, handIn, blockRaytraceResultIn);
+                if (actionresulttype.isSuccessOrConsume()) {
+                    return actionresulttype;
+                }
+            }
+
+            if (!stackIn.isEmpty() && !playerIn.getCooldownTracker().hasCooldown(stackIn.getItem())) {
+                // Sponge start
+                if (useItem == Tristate.FALSE) {
+                    return ActionResultType.PASS;
+                }
+                // Sponge end
                 ItemUseContext itemusecontext = new ItemUseContext(playerIn, handIn, blockRaytraceResultIn);
                 if (this.isCreative()) {
                     int i = stackIn.getCount();
-                    ActionResultType actionresulttype = stackIn.onItemUse(itemusecontext);
+                    ActionResultType actionresulttype1 = stackIn.onItemUse(itemusecontext);
                     stackIn.setCount(i);
-                    return actionresulttype;
+                    return actionresulttype1;
                 } else {
                     return stackIn.onItemUse(itemusecontext);
                 }
