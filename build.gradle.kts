@@ -1,3 +1,4 @@
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import java.io.FileInputStream
 import java.util.StringJoiner
@@ -830,40 +831,17 @@ open class OutputDependenciesToJson(): DefaultTask() {
                 .filter { dependency -> dependency.getModuleName() != "SpongeAPI" }
                 .forEach { dependency ->
                     //Get file input stream for reading the file content
-                    val depFile = dependency.getModuleArtifacts().first().file
-                    val digest = MessageDigest.getInstance("MD5")
+                    val depFile = dependency.getModuleArtifacts().filter { it.file.path.endsWith(".jar") }.first().file
                     //Get file input stream for reading the file content
                     val fis = FileInputStream(depFile)
-
-                    //Create byte array to read data in chunks
-
-                    //Create byte array to read data in chunks
-                    val byteArray = ByteArray(1024)
-                    var bytesCount = 0
-
-                    //Read file data and update in message digest
-                    while (fis.read(byteArray).also { bytesCount = it } != -1) {
-                        digest.update(byteArray, 0, bytesCount)
-                    }
+                    val md5Hash = DigestUtils.md5Hex(fis)
                     fis.close()
 
-                    val bytes: ByteArray = digest.digest()
-
-                    //This bytes[] has bytes in decimal format;
-                    //Convert it to hexadecimal format
-
-                    //This bytes[] has bytes in decimal format;
-                    //Convert it to hexadecimal format
-                    val sb: java.lang.StringBuilder = StringBuilder()
-                    val zeroF: Byte = 0xFF.toByte()
-                    for (i in bytes.indices) {
-                        sb.append(Integer.toString((bytes[i] and zeroF) + 0x100, 16).substring(1))
-                    }
                     val depBuilder = StringJoiner(",\n", "    {\n", "\n    }")
                     depBuilder.add("      \"group\": \"${dependency.getModuleGroup()}\"")
                     depBuilder.add("      \"module\": \"${dependency.getModuleName()}\"")
                     depBuilder.add("      \"version\": \"${dependency.getModuleVersion()}\"")
-                    depBuilder.add("      \"md5\": \"${sb.toString()}\"")
+                    depBuilder.add("      \"md5\": \"$md5Hash\"")
                     depJoiner.add(depBuilder.toString())
                 }
         stringBuilder.append(depJoiner.toString())
