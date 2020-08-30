@@ -104,7 +104,6 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void shadow$initiateShutdown(boolean p_71263_1_);
     @Shadow public abstract int shadow$getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
-    @Shadow public abstract void shadow$sendMessage(ITextComponent p_145747_1_);
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
@@ -331,7 +330,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public void sendMessage(final Component message, final MessageType type) {
-        this.shadow$sendMessage(SpongeAdventure.asVanilla(message));
+        this.shadow$getPlayerList().sendMessage(SpongeAdventure.asVanilla(message));
     }
 
 }
