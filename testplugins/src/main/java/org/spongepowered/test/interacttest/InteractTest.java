@@ -57,22 +57,22 @@ public class InteractTest implements LoadableModule {
         public void onInteractItem(final InteractBlockEvent event) {
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.builder().append("/* Event: ").append(event.getClass().getSimpleName()).build());
-            Sponge.getServer().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
-            Sponge.getServer().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
+            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
+            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
         }
         @Listener
         public void onInteractItem(final InteractItemEvent event) {
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.builder().append("/* Event: ").append(event.getClass().getSimpleName()).build());
-            Sponge.getServer().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
-            Sponge.getServer().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
+            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
+            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
         }
         @Listener
         public void onInteractItem(final InteractEntityEvent event) {
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
             Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.builder().append("/* Event: ").append(event.getClass().getSimpleName()).build());
-            Sponge.getServer().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
-            Sponge.getServer().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
+            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
+            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
         }
     }
 }
