@@ -49,8 +49,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.tracker.entity.LivingEntityMixin_Tracker;
@@ -98,8 +96,8 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
         }
         // Sponge end
         super.onDeath(cause);
+        this.shadow$recenterBoundingBox();
 
-        this.shadow$setPosition(this.posX, this.posY, this.posZ);
         if (!this.shadow$isSpectator()) {
             this.shadow$spawnDrops(cause);
         }

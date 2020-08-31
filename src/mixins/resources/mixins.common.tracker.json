@@ -12,6 +12,7 @@
         "block.BlockMixin_Tracker",
         "entity.EntityMixin_Tracker",
         "entity.EntityTypeMixin_Tracker",
+        "entity.LivingEntityMixin_Tracker",
         "entity.player.PlayerInventoryMixin_Tracker",
         "event.TraitMixin_Tracked_Inventory",
         "network.PacketThreadUtilMixin_Tracker",
