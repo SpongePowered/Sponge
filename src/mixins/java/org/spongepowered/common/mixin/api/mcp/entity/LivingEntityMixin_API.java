@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
@@ -81,13 +81,13 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType) {
-        return ProjectileUtil.launch(checkNotNull(projectileType, "projectileType"), this, null);
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType) {
+        return ProjectileUtil.launch(requireNonNull(projectileType, "projectileType"), this, null);
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType, Vector3d velocity) {
-        return ProjectileUtil.launch(checkNotNull(projectileType, "projectileType"), this, checkNotNull(velocity, "velocity"));
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType, final Vector3d velocity) {
+        return ProjectileUtil.launch(requireNonNull(projectileType, "projectileType"), this, requireNonNull(velocity, "velocity"));
     }
 
     @Override

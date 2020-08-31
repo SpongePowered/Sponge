@@ -110,7 +110,7 @@ public class ProjectileLaunchTest {
 
                     final ProjectileSource projectileSource = nearbyProjectileSources.iterator().next();
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
-                    Optional<? extends Projectile> launched = projectileSource.launchProjectileTo((EntityType<Projectile>) entityType, player);
+                    final Optional<? extends Projectile> launched = projectileSource.launchProjectileTo((EntityType<Projectile>) entityType, player);
                     if (launched.isPresent()) {
                         player.sendMessage(TextComponent.builder()
                                 .append("You made a ").append(((Entity) projectileSource).getType().key().asString())
@@ -128,7 +128,7 @@ public class ProjectileLaunchTest {
                 .build();
         event.register(this.plugin, launchToMeCommand, "launchtome");
 
-        Parameter.Value<ServerLocation> dispenserParameter = Parameter.location()
+        final Parameter.Value<ServerLocation> dispenserParameter = Parameter.location()
                 .setKey("dispenser")
                 .build();
         final Command.Parameterized triggerDispenserCommand = Command.builder()
@@ -141,7 +141,7 @@ public class ProjectileLaunchTest {
                         return CommandResult.error(TextComponent.of("Could not find dispenser"));
                     }
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
-                    Optional<? extends Projectile> launched = ((Dispenser) dispenser).launchProjectile((EntityType<Projectile>) entityType);
+                    final Optional<? extends Projectile> launched = ((Dispenser) dispenser).launchProjectile((EntityType<Projectile>) entityType);
                     if (launched.isPresent()) {
                         launched.get().offer(Keys.SHOOTER, player);
                         player.sendMessage(TextComponent.builder()

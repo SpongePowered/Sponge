@@ -60,9 +60,9 @@ public final class DispenserSourceLogic implements ProjectileSourceLogic<Dispens
         }
         final Optional<P> projectile = logic.createProjectile(source, projectileType, source.getLocation());
         if (projectile.isPresent()) {
-            Direction enumfacing = DispenserSourceLogic.getFacing((DispenserTileEntity) source);
-            net.minecraft.entity.Entity projectileEntity = (net.minecraft.entity.Entity) projectile.get();
-            BlockPos adjustedPosition = projectileEntity.getPosition().add(enumfacing.getDirectionVec());
+            final Direction enumfacing = DispenserSourceLogic.getFacing((DispenserTileEntity) source);
+            final net.minecraft.entity.Entity projectileEntity = (net.minecraft.entity.Entity) projectile.get();
+            final BlockPos adjustedPosition = projectileEntity.getPosition().add(enumfacing.getDirectionVec());
             projectileEntity.setPosition(adjustedPosition.getX(), adjustedPosition.getY(), adjustedPosition.getZ());
         }
         return projectile;

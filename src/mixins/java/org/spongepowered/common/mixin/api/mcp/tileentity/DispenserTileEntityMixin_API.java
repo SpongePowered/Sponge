@@ -41,12 +41,12 @@ import java.util.Optional;
 public abstract class DispenserTileEntityMixin_API extends LockableLootTileEntityMixin_API<Dispenser> implements Dispenser {
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType) {
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType) {
         return ProjectileUtil.launch(checkNotNull(projectileType, "projectileType"), this, null);
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType, Vector3d velocity) {
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType, final Vector3d velocity) {
         return ProjectileUtil.launch(checkNotNull(projectileType, "projectileType"), this, checkNotNull(velocity, "velocity"));
     }
 
