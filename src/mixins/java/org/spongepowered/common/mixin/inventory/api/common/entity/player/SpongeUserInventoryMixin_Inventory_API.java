@@ -41,9 +41,8 @@ import org.spongepowered.common.inventory.adapter.impl.comp.PrimaryPlayerInvento
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @SuppressWarnings("rawtypes")
 @Mixin(SpongeUserInventory.class)
@@ -58,7 +57,7 @@ public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInve
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(final SpongeUser playerIn, final CallbackInfo ci) {
-        this.impl$carrier = ((User) playerIn);
+        this.impl$carrier = playerIn;
     }
 
     @Override

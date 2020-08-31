@@ -41,6 +41,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
@@ -454,8 +455,8 @@ public class PhaseContext<P extends PhaseContext<P>> implements AutoCloseable {
         if (this.creator != null) {
             return this.creator;
         }
-        if (this.source != null && this.source instanceof User) {
-            return (User) this.source;
+        if (this.source != null && this.source instanceof ServerPlayerEntityBridge) {
+            return ((ServerPlayerEntityBridge) this.source).bridge$getUser();
         }
         return null;
     }

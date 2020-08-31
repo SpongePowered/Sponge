@@ -76,17 +76,17 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -118,6 +118,7 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -358,7 +359,7 @@ public final class SpongeCommonEventFactory {
                 }
             }
 
-            final User creator = phaseContext.getCreator().orElse((User) player);
+            final User creator = phaseContext.getCreator().orElse(((ServerPlayerEntityBridge) player).bridge$getUser());
             if (creator != null) {
                 frame.addContext(EventContextKeys.CREATOR, creator);
             }
@@ -481,8 +482,8 @@ public final class SpongeCommonEventFactory {
             hand, @Nullable final Vector3d hitVec) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) entity));
             if (!stack.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
@@ -501,8 +502,8 @@ public final class SpongeCommonEventFactory {
             final Hand hand, @Nullable final Vector3d hitVec) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             frame.addContext(EventContextKeys.ENTITY_HIT, (Entity) entity);
             if (!stack.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
@@ -521,8 +522,8 @@ public final class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, (User) player);
-                frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             }
 
             if (hitTarget instanceof Entity) {
@@ -549,8 +550,8 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
         } else {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
         }
 
         if (hitTarget instanceof Entity) {
@@ -584,8 +585,8 @@ public final class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, (User) player);
-                frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             }
 
             frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
@@ -621,8 +622,8 @@ public final class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, (User) player);
-                frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             }
 
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);

@@ -38,27 +38,27 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.world.chunk.Chunk.class)
 public abstract class ChunkMixin_Tracker implements ChunkBridge {
@@ -243,7 +243,7 @@ public abstract class ChunkMixin_Tracker implements ChunkBridge {
             // get player if online
             final PlayerEntity player = this.shadow$getWorld().getPlayerByUuid(userUniqueId);
             if (player != null) {
-                return Optional.of((User) player);
+                return Optional.ofNullable(((ServerPlayerEntityBridge) player).bridge$getUser());
             }
             // player is not online, get or create user from storage
             return this.tracker$getUserFromId(userUniqueId);

@@ -30,9 +30,9 @@ import net.minecraft.network.play.client.CUseEntityPacket;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
@@ -76,7 +76,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
             return;
         }
         if (entity instanceof CreatorTrackedBridge) {
-            ((CreatorTrackedBridge) entity).tracked$setCreatorReference((User) player);
+            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerEntityBridge) player).bridge$getUser());
         } else {
             ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
         }
