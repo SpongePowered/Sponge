@@ -78,6 +78,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemType;
@@ -146,10 +147,9 @@ public final class DataTest  {
         // TODO launchProjectile is abstract
 //        final Optional<Arrow> arrow = player.launchProjectile(Arrow.class, player.getHeadDirection());
 //        this.checkOfferData(arrow.get(), Keys.ACCELERATION, Vector3d.UP);
-        // TODO Keys.ACTIVE_ITEM is only when actually using items
+        // TODO Keys.ACTIVE_ITEM is only when actually using itemsd
         // Test: get during event + setting empty & remove
 
-        // TODO check serialize
         this.checkOfferData(player, Keys.AFFECTS_SPAWNING, false);
         this.checkOfferData(player, Keys.AFFECTS_SPAWNING, true);
 

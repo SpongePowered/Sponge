@@ -65,6 +65,7 @@
         "util.text.TranslationTextComponentMixin",
         "world.BossInfoMixin",
         "world.server.ServerBossInfoMixin",
+        "world.spawner.AbstractSpawnerMixin",
         "world.TeleporterMixin",
         "world.TrackedEntityMixin",
         "world.WorldMixin",
