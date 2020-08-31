@@ -41,7 +41,13 @@ public final class SpellcastingIllagerData {
                 .asMutable(SpellcastingIllagerEntityAccessor.class)
                     .create(Keys.CASTING_TIME)
                         .get(SpellcastingIllagerEntityAccessor::accessor$getSpellTicks)
-                        .set(SpellcastingIllagerEntityAccessor::accessor$setSpellTicks)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setSpellTicks(v);
+                            return true;
+                        })
                 .asMutable(SpellcastingIllagerEntity.class)
                     .create(Keys.CURRENT_SPELL)
                         .get(h -> (SpellType) (Object) ((SpellcastingIllagerEntityAccessor) h).accessor$getSpellType())

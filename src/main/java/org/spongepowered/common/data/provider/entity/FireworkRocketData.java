@@ -57,11 +57,15 @@ public final class FireworkRocketData {
                             }
                             return null;
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
                             final ItemStack item = FireworkUtils.getItem(h);
                             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
                             fireworks.putByte(Constants.Item.Fireworks.FLIGHT, v.byteValue());
                             ((FireworkRocketEntityAccessor) h).accessor$setLifeTime(10 * v.byteValue() + ((EntityAccessor) h).accessor$getRand().nextInt(6) + ((EntityAccessor) h).accessor$getRand().nextInt(7));
+                            return true;
                         });
     }
     // @formatter:on

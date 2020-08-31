@@ -69,7 +69,13 @@ public final class BookItemStackData {
                             }
                             return tag.getInt(Constants.Item.Book.ITEM_BOOK_GENERATION);
                         })
-                        .set((h, v) -> h.setTagInfo(Constants.Item.Book.ITEM_BOOK_GENERATION, IntNBT.valueOf(v)))
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.setTagInfo(Constants.Item.Book.ITEM_BOOK_GENERATION, IntNBT.valueOf(v));
+                            return true;
+                        })
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.PAGES)
                         .get(h -> get(h, iv -> GsonComponentSerializer.gson().deserialize(iv)))

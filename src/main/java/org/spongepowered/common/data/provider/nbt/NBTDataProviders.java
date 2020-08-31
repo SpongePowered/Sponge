@@ -35,6 +35,6 @@ public final class NBTDataProviders extends DataProviderRegistratorBuilder {
 
     @Override
     public void register() {
-        PlayerData.register(this.registrator);
+        NBTComponentData.register(this.registrator);
     }
 }

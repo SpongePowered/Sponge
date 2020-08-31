@@ -39,7 +39,13 @@ public final class ChickenData {
                 .asMutable(ChickenEntity.class)
                     .create(Keys.EGG_TIME)
                         .get(h -> h.timeUntilNextEgg)
-                        .set((h, v) -> h.timeUntilNextEgg = v);
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.timeUntilNextEgg = v;
+                            return true;
+                        });
     }
     // @formatter:on
 }

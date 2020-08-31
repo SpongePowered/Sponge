@@ -26,7 +26,7 @@ package org.spongepowered.common.data.holder.nbt;
 
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.common.data.holder.SpongeDataHolder;
-import org.spongepowered.common.data.provider.nbt.NbtDataType;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
 
 public interface NbtCompoundDataHolder extends SpongeDataHolder {
 
@@ -39,10 +39,10 @@ public interface NbtCompoundDataHolder extends SpongeDataHolder {
     CompoundNBT getNbtCompound();
 
     /**
-     * Gets the {@link NbtDataType} which this
+     * Gets the {@link NBTDataType} which this
      * nbt data holder contains data for.
      *
      * @return The nbt data type
      */
-    NbtDataType getNbtDataType();
+    NBTDataType getNbtDataType();
 }
