@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlags;
@@ -42,10 +43,10 @@ import java.util.function.BiConsumer;
 public final class ReplaceTileEntity extends BlockEventBasedTransaction {
 
     final TileEntity added;
-    final TileEntity removed;
+    final @Nullable TileEntity removed;
     final SpongeBlockSnapshot removedSnapshot;
 
-    ReplaceTileEntity(final TileEntity added, final TileEntity removed,
+    ReplaceTileEntity(final TileEntity added, final @Nullable TileEntity removed,
         final SpongeBlockSnapshot attachedSnapshot
     ) {
         super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
@@ -77,7 +78,7 @@ public final class ReplaceTileEntity extends BlockEventBasedTransaction {
         printer.add("ReplaceTileEntity")
             .add(" %s : %s", "Position", this.affectedPosition)
             .add(" %s : %s", "Added", this.added)
-            .add(" %s : %s", "Removed", this.removed)
+            .add(" %s : %s", "Removed", this.removed == null ? "null" : this.removed)
         ;
     }
 
