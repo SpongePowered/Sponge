@@ -94,10 +94,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
-        return Optional.of((context, frame) -> {
-            context.addCreatorAndNotifierToCauseStack(frame);
-            frame.pushCause(this.original);
-        });
+        return Optional.of(PhaseContext::addCreatorAndNotifierToCauseStack);
     }
 
     @Override
