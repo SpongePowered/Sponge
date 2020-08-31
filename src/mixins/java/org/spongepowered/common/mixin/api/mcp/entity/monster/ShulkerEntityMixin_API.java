@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import net.minecraft.entity.monster.ShulkerEntity;
 import org.spongepowered.api.data.value.Value;
@@ -54,6 +54,7 @@ public abstract class ShulkerEntityMixin_API extends GolemEntityMixin_API implem
 
     @Override
     public <T extends Projectile> Optional<T> launchProjectileTo(final EntityType<T> projectileType, final Entity target) {
-        return ProjectileLauncher.launchWithArgs(checkNotNull(projectileType, "projectileType"), Shulker.class, this, null, checkNotNull(target, "target"));
+        return ProjectileLauncher.launchWithArgs(requireNonNull(projectileType, "projectileType"), Shulker.class,
+                this, null, requireNonNull(target, "target"));
     }
 }
