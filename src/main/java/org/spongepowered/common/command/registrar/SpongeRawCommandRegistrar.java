@@ -73,7 +73,6 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
                 this,
                 container,
                 command.commandTree(),
-                command::canExecute,
                 primaryAlias,
                 secondaryAliases
         );

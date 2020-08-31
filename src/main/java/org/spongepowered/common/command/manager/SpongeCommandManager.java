@@ -35,7 +35,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
@@ -97,7 +96,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -152,12 +150,10 @@ public final class SpongeCommandManager implements CommandManager {
 
     @Override
     @NonNull
-    @SuppressWarnings("unchecked")
     public CommandMapping registerAlias(
             @NonNull final CommandRegistrar<?> registrar,
             @NonNull final PluginContainer container,
             final CommandTreeNode.@NonNull Root parameterTree,
-            @NonNull final Predicate<CommandCause> requirement,
             @NonNull final String primaryAlias,
             @NonNull final String @NonNull ... secondaryAliases)
             throws CommandFailedRegistrationException {
@@ -165,22 +161,7 @@ public final class SpongeCommandManager implements CommandManager {
         aliases.add(primaryAlias);
         Collections.addAll(aliases, secondaryAliases);
         final String namespaced = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
-        final CommandMapping mapping = this.registerAliasWithNamespacing(registrar, container, namespaced, aliases, parameterTree);
-
-        // In general, this won't be executed as we will intercept it before this point. However,
-        // this is as a just in case - a mod redirect or something.
-        final com.mojang.brigadier.Command<CommandSource> command = context -> {
-            final org.spongepowered.api.command.parameter.CommandContext spongeContext =
-                    (org.spongepowered.api.command.parameter.CommandContext) context;
-            final String[] command1 = context.getInput().split(" ", 2);
-            try {
-                return registrar.process(spongeContext.getCause(), mapping, command1[0], command1.length == 2 ? command1[1] : "").getResult();
-            } catch (final CommandException e) {
-                throw new SimpleCommandExceptionType(SpongeAdventure.asVanilla(e.getText())).create();
-            }
-        };
-
-        return mapping;
+        return this.registerAliasWithNamespacing(registrar, container, namespaced, aliases, parameterTree);
     }
 
     @NonNull
