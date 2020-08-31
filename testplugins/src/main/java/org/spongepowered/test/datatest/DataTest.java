@@ -79,6 +79,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.projectile.arrow.Arrow;
+import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemType;
@@ -156,9 +157,10 @@ public final class DataTest  {
         final Entity sheep = world.createEntity(EntityTypes.SHEEP.get(), position);
         this.checkGetData(sheep, Keys.AGE, 0);
         this.checkOfferData(player, Keys.AGE, 10);
+        // TODO check fail on negative values
 
         final Entity minecartEntity = world.createEntity(EntityTypes.MINECART.get(), position);
-        this.checkOfferData(minecartEntity, Keys.AIRBORNE_VELOCITY_MODIFIER, Vector3d.UP);
+        this.checkOfferData(minecartEntity, Keys.AIRBORNE_VELOCITY_MODIFIER, new Vector3d(2, 0.5, 2)); // falls at ~50% flies at -200%
 
         final Entity zombiePigman = world.createEntity(EntityTypes.ZOMBIE_PIGMAN.get(), position);
         this.checkGetData(zombiePigman, Keys.ANGER_LEVEL, 0);

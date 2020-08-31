@@ -28,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.enchantment.Enchantment;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -105,18 +107,17 @@ public final class BookPagesItemStackData {
     }
 
     private static Enchantment enchantmentFromNbt(final CompoundNBT compound) {
-        final short enchantmentId = compound.getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
-        final short level = compound.getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
-
-        final EnchantmentType enchantment = (EnchantmentType) Registry.ENCHANTMENT.getByValue(enchantmentId);
+        final String enchantmentId = compound.getString(Constants.Item.ITEM_ENCHANTMENT_ID);
+        final int level = compound.getInt(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
+        final EnchantmentType enchantment = (EnchantmentType) Registry.ENCHANTMENT.getValue(ResourceLocation.tryCreate(enchantmentId)).orElse(null);
         return enchantment == null ? null : new SpongeEnchantment(enchantment, level);
     }
 
     private static CompoundNBT enchantmentToNbt(final Enchantment enchantment) {
         final CompoundNBT compound = new CompoundNBT();
-        compound.putShort(Constants.Item.ITEM_ENCHANTMENT_ID, (short) Registry.ENCHANTMENT.getId(
-                (net.minecraft.enchantment.Enchantment) enchantment.getType()));
-        compound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
+        final String enchantmentId = String.valueOf(Registry.ENCHANTMENT.getKey((net.minecraft.enchantment.Enchantment) enchantment.getType()));
+        compound.putString(Constants.Item.ITEM_ENCHANTMENT_ID, enchantmentId);
+        compound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) ((byte) enchantment.getLevel()));
         return compound;
     }
 }
