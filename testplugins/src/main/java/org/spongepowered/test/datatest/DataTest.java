@@ -31,6 +31,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.EndGateway;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -95,6 +96,7 @@ import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -141,6 +143,9 @@ public final class DataTest  {
         final ServerWorld world = player.getWorld();
         final Vector3d position = player.getPosition();
         final Vector3i blockPos = position.toInt();
+        final ServerLocation location = world.getLocation(blockPos);
+
+        final BlockState oldState = world.getBlock(blockPos);
 
         this.checkOfferData(player, Keys.ABSORPTION, 0.0);
         this.checkOfferData(player, Keys.ABSORPTION, 10.0);
@@ -154,7 +159,7 @@ public final class DataTest  {
         this.checkOfferData(player, Keys.AFFECTS_SPAWNING, false);
         this.checkOfferData(player, Keys.AFFECTS_SPAWNING, true);
 
-        final Entity sheep = world.createEntity(EntityTypes.SHEEP.get(), position);
+        Entity sheep = world.createEntity(EntityTypes.SHEEP.get(), position);
         this.checkGetData(sheep, Keys.AGE, 0);
         this.checkOfferData(player, Keys.AGE, 10);
         // TODO check fail on negative values
@@ -184,14 +189,9 @@ public final class DataTest  {
         final Entity painting = world.createEntity(EntityTypes.PAINTING.get(), position);
         this.checkGetData(painting, Keys.ART_TYPE, ArtTypes.KEBAB.get()); // TODO test offer (only works on valid painting)
 
-        world.setBlock(blockPos, BlockTypes.LAPIS_BLOCK.get().getDefaultState());
-        world.setBlock(blockPos.add(0, 0, -1), BlockTypes.LEVER.get().getDefaultState());
-        this.checkGetData(world.getBlock(blockPos), Keys.ATTACHMENT_SURFACE, null);
-        BlockState leverState = world.getBlock(blockPos.add(0, 0, -1));
+        final BlockState leverState = BlockTypes.LEVER.get().getDefaultState();
         this.checkWithData(leverState, Keys.ATTACHMENT_SURFACE, AttachmentSurfaces.WALL.get());
         this.checkWithData(leverState, Keys.ATTACHMENT_SURFACE, AttachmentSurfaces.FLOOR.get());
-        world.setBlock(blockPos, BlockTypes.AIR.get().getDefaultState());
-        world.setBlock(blockPos.add(0, 0, -1), BlockTypes.AIR.get().getDefaultState());
 
         // TODO         Keys.ATTACK_DAMAGE
 
@@ -206,7 +206,7 @@ public final class DataTest  {
         this.checkWithData(logState, Keys.AXIS, Axis.Y);
         this.checkWithData(logState, Keys.AXIS, Axis.X);
 
-        this.checkOfferData(sheep, Keys.BABY_TICKS, 50);
+        this.checkOfferData(sheep, Keys.BABY_TICKS, 20);
         this.checkOfferData(sheep, Keys.BABY_TICKS, 0);
 
         final List<BannerPatternLayer> pattern = Arrays.asList(BannerPatternLayer.of(BannerPatternShapes.BASE, DyeColors.BLACK), BannerPatternLayer.of(BannerPatternShapes.RHOMBUS, DyeColors.ORANGE));
@@ -219,10 +219,11 @@ public final class DataTest  {
         this.checkGetListData(bannerStack, Keys.BANNER_PATTERN_LAYERS,  Collections.emptyList());
         this.checkOfferListData(bannerStack, Keys.BANNER_PATTERN_LAYERS, pattern);
 
-// TODO NPE when generating event
-//        world.setBlock(blockPos, BlockTypes.RED_BANNER.get().getDefaultState());
-//        final BlockEntity blockEntity = world.getBlockEntity(blockPos).get();
-//        this.checkOfferListData(blockEntity, Keys.BANNER_PATTERN_LAYERS, pattern);
+        world.setBlock(blockPos, BlockTypes.RED_BANNER.get().getDefaultState());
+        final BlockEntity blockEntity = world.getBlockEntity(blockPos).get();
+        this.checkOfferListData(blockEntity, Keys.BANNER_PATTERN_LAYERS, pattern);
+
+        // Keys.BASE_COLOR
 
         this.checkGetData(sheep, Keys.BASE_SIZE, (double)0.9f);
         this.checkGetData(player, Keys.BASE_SIZE, (double)0.6f);
@@ -239,8 +240,7 @@ public final class DataTest  {
         final Entity guardian = world.createEntity(EntityTypes.GUARDIAN.get(), position);
         this.checkOfferData(guardian, Keys.BEAM_TARGET_ENTITY, player);
 
-// TODO World.get(IIIKey) is abstract
-//        final ServerLocation location = world.getLocation(blockPos);
+// TODO LocationBasedDataHolder get(int,int,int,key) is abstract
 //        this.checkGetData(location, Keys.BIOME_TEMPERATURE, world.getBiome(blockPos).getTemperature());
 
         final BlockState obisidanState = BlockTypes.OBSIDIAN.get().getDefaultState();
@@ -1221,6 +1221,8 @@ public final class DataTest  {
         this.checkOfferData(evoker, Keys.WOLOLO_TARGET, (Sheep) sheep);
 
         this.checkOfferData(boat, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
+
+        world.setBlock(blockPos, oldState);
     }
 
     private <T> void checkOfferSetData(final DataHolder.Mutable holder, final Supplier<Key<SetValue<T>>> key, final Set<T> value) {

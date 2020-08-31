@@ -29,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ICollisionReader;
 import net.minecraft.world.ILightReader;
 import net.minecraft.world.IWorldReader;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
@@ -38,6 +39,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.volume.game.ReadableRegion;
@@ -71,6 +73,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
     @Deprecated @Shadow boolean shadow$isAreaLoaded(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
     @Shadow net.minecraft.world.dimension.Dimension shadow$getDimension();
     @Shadow boolean shadow$containsAnyLiquid(AxisAlignedBB bb);
+    @Shadow Biome shadow$getBiome(BlockPos p_226691_1_);
 
     //@formatter:on
 
@@ -187,4 +190,8 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         return this.shadow$getHeight((Heightmap.Type) (Object) type, x, z);
     }
 
+    @Override
+    default BiomeType getBiome(int x, int y, int z) {
+        return (BiomeType) this.shadow$getBiome(new BlockPos(x, y, z));
+    }
 }
