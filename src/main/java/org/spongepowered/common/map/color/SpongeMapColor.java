@@ -45,15 +45,15 @@ public class SpongeMapColor implements MapColor {
     }
 
     public byte getMCColor() {
-        return (byte) ((((SpongeMapColorType)type).getBaseColor() * Constants.Map.MAP_SHADES) + shade);
+        return (byte) ((((SpongeMapColorType) this.type).getBaseColor() * Constants.Map.MAP_SHADES) + this.shade);
     }
 
     public int getShade() {
-        return shade;
+        return this.shade;
     }
 
     @Override
-    public MapColorType getType() {return type;}
+    public MapColorType getType() {return this.type;}
 
     @Override
     public Color getColor() {
@@ -65,18 +65,18 @@ public class SpongeMapColor implements MapColor {
     }
 
     private int addShade(int color) {
-        return Math.floorDiv(color * Constants.Map.SHADE_MULTIPLIER[shade], Constants.Map.SHADE_DIVIDER);
+        return Math.floorDiv(color * Constants.Map.SHADE_MULTIPLIER[this.shade], Constants.Map.SHADE_DIVIDER);
     }
 
     @Override
     public int getContentVersion() {
-        return 0;
+        return 1;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(DataQuery.of("colorIndex"), ((SpongeMapColorType)type).getBaseColor())
-                .set(DataQuery.of("shade"), shade);
+                .set(DataQuery.of("colorIndex"), ((SpongeMapColorType) this.type).getBaseColor())
+                .set(DataQuery.of("shade"), this.shade);
     }
 }

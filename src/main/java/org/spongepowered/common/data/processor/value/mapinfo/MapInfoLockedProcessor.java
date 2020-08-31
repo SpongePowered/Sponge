@@ -32,10 +32,10 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.map.SpongeMapInfo;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -47,14 +47,14 @@ public class MapInfoLockedProcessor extends AbstractSingleDataSingleTargetProces
 
     @Override
     protected boolean set(MapInfo mapInfo, Boolean value) {
-        SpongeMapInfo spongeMapInfo = (SpongeMapInfo)mapInfo;
-        spongeMapInfo.setLocked(value);
+        MapDataBridge spongeMapInfo = (MapDataBridge) mapInfo;
+        spongeMapInfo.bridge$setLocked(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(MapInfo mapInfo) {
-        return Optional.of(((SpongeMapInfo)mapInfo).isLocked());
+        return Optional.of(((MapDataBridge) mapInfo).bridge$isLocked());
     }
 
     @Override

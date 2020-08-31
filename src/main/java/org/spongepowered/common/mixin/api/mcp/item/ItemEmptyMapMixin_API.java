@@ -34,9 +34,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.Player;
@@ -45,18 +43,15 @@ import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.MapInfo;
-import org.spongepowered.api.world.map.MapStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
 import org.spongepowered.common.map.MapUtil;
-import org.spongepowered.common.map.SpongeMapInfo;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -99,7 +94,7 @@ public abstract class ItemEmptyMapMixin_API {
                 return ItemStack.EMPTY;
             }
 
-            org.spongepowered.api.item.inventory.ItemStack newMap = (org.spongepowered.api.item.inventory.ItemStack)new ItemStack(Items.FILLED_MAP, 1, ((SpongeMapInfo)optMapInfo.get()).getMapId());
+            org.spongepowered.api.item.inventory.ItemStack newMap = (org.spongepowered.api.item.inventory.ItemStack)new ItemStack(Items.FILLED_MAP, 1, ((MapDataBridge)optMapInfo.get()).bridge$getMapId());
             return (ItemStack) newMap;
         }
     }

@@ -35,11 +35,11 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapInfoItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.map.SpongeMapInfo;
 
 import java.util.Optional;
 
@@ -58,7 +58,7 @@ public class ItemMapInfoDataProcessor extends AbstractItemSingleDataProcessor<Ma
         if (((org.spongepowered.api.item.inventory.ItemStack)dataHolder).getType() != ItemTypes.FILLED_MAP) {
             return false;
         }
-        dataHolder.setItemDamage(((SpongeMapInfo)value).getMapId());
+        dataHolder.setItemDamage(((MapDataBridge)value).bridge$getMapId());
         return true;
     }
 

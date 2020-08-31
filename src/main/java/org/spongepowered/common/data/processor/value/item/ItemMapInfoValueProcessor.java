@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.value.item;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -34,11 +33,11 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeMapInfoItemData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.map.SpongeMapInfo;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -58,7 +57,7 @@ public class ItemMapInfoValueProcessor extends AbstractSpongeValueProcessor<Item
         if (container.getType() != ItemTypes.FILLED_MAP) {
             return false;
         }
-        container.toContainer().set(Constants.ItemStack.DAMAGE_VALUE, ((SpongeMapInfo)value).getMapId());
+        ((net.minecraft.item.ItemStack)container).setItemDamage(((MapDataBridge)value).bridge$getMapId());
         return true;
     }
 

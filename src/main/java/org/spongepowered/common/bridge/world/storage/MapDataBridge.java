@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.storage;
 
+import org.spongepowered.api.map.decoration.MapDecoration;
+
+import java.util.Set;
+import java.util.UUID;
+
 // Partially implemented in Common, rest implemented in Vanilla/Forge
 public interface MapDataBridge {
 
@@ -31,7 +36,19 @@ public interface MapDataBridge {
 
     void bridge$setDimensionId(int dimensionId);
 
-    void updateMap(int x, int y);
+    void bridge$updateWholeMap();
 
-    void updateWholeMap();
+    int bridge$getMapId();
+
+    void bridge$setMapId(int id);
+
+    boolean bridge$isLocked();
+
+    void bridge$setLocked(boolean locked);
+
+    void bridge$setDecorations(Set<MapDecoration> newDecorations);
+
+    Set<MapDecoration> bridge$getDecorations();
+
+    UUID bridge$getUniqueId();
 }

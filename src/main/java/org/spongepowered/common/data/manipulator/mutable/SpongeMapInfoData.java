@@ -47,7 +47,6 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.map.canvas.SpongeMapByteCanvas;
-import org.spongepowered.common.map.SpongeMapInfo;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 
@@ -99,7 +98,7 @@ public class SpongeMapInfoData extends AbstractData<MapInfoData, ImmutableMapInf
                 mapData.unlimitedTracking,
                 mapData.scale,
                 new SpongeMapByteCanvas(mapData.colors),
-                ((SpongeMapInfo)mapData).isLocked(),
+                ((MapDataBridge) mapData).bridge$isLocked(),
                 mapData.mapDecorations.values().stream()
                     .map(value -> (MapDecoration)value)
                     .collect(Collectors.toSet())

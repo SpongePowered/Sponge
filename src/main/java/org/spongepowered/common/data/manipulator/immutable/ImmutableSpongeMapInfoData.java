@@ -178,6 +178,6 @@ public class ImmutableSpongeMapInfoData extends AbstractImmutableData<ImmutableM
 
     @Override
     public int getContentVersion() {
-        return 0;
+        return 1;
     }
 }

@@ -1161,6 +1161,8 @@ public final class Constants {
         public static final String DECORATIONS_KEY = "Decorations";
         // Key in the map for getting the highest map number
         public static final String ID_COUNTS_KEY = "map";
+        // Used to add a UUID to maps. Prefixed with sponge- to show it is added by sponge
+        public static final String SPONGE_UUID_KEY = "sponge-uuid";
 
         // Doesn't particulary matter what this is, just something that identifies it
         public static final String DECORATION_KEY_PREFIX = "sponge-";

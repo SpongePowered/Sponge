@@ -48,9 +48,9 @@ public class MapInfoLocationValueProcessor extends AbstractSingleDataSingleTarge
 
     @Override
     protected boolean set(MapInfo mapInfo, Vector2i value) {
-        MapData mapData = (MapData)mapInfo;
+        MapData mapData = (MapData) mapInfo;
         // This also sets xCenter and zCenter.
-        mapData.calculateMapCenter(value.getX(), value.getX(), mapData.scale);
+        mapData.calculateMapCenter(value.getX(), value.getY(), mapData.scale);
         mapData.markDirty();
         return true;
     }

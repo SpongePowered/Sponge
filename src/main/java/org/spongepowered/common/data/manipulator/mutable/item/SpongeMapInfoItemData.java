@@ -34,15 +34,17 @@ import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeMapInfoItemData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.util.Constants;
 
 public class SpongeMapInfoItemData extends AbstractSingleData<MapInfo, MapInfoItemData, ImmutableMapInfoItemData> implements MapInfoItemData {
 
     public static MapInfo getDefaultMapInfo() {
-        return (MapInfo)new MapData("map-1");
+        return (MapInfo) new MapData(Constants.Map.MAP_PREFIX + "0");
     }
 
     public SpongeMapInfoItemData() {
-        // Not great, but won't persist anywhere
+        // This means someone has got the default for which map (also used for registration)
+        // an ItemStack refers to. So we give them map 0.
         this(getDefaultMapInfo());
     }
 

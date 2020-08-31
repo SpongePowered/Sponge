@@ -28,6 +28,7 @@ import com.google.common.primitives.Bytes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
@@ -36,18 +37,23 @@ import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
-import java.awt.*;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
+public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> implements MapCanvas.Builder {
     // If its being used to build from a DataView, or is blank
     // We don't want to create a big array.
     @Nullable
     private SpongeMapByteCanvas canvas = null;
+
+    public SpongeMapCanvasBuilder() {
+        super(MapCanvas.class, 1);
+    }
 
     @Override
     public MapCanvas.Builder paintAll(MapColor color) {
@@ -104,21 +110,21 @@ public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
                 palette.put(spongeMapColor.getColor().getRgb(), spongeMapColor);
             }
         }
-        if (canvas == null) {
-            canvas = new SpongeMapByteCanvas();
+        if (this.canvas == null) {
+            this.canvas = new SpongeMapByteCanvas();
         }
         for (int i = 0; i < pixels.length; i++) {
             SpongeMapColor color = palette.get(pixels[i]);
             if (color == null) {
                 throw new IllegalStateException("Can not find a matching color for rgb value: " + pixels[i] + ". The MapCanvas will have painted all pixels up to this point.");
             }
-            canvas.setPixel(i, color.getMCColor());
+            this.canvas.setPixel(i, color.getMCColor());
         }
         return this;
     }
 
     @Override
-    public Optional<MapCanvas> build(DataView container) throws InvalidDataException {
+    protected Optional<MapCanvas> buildContent(DataView container) throws InvalidDataException {
         if (!container.contains(DataQuery.of("MapColors"))) {
             return Optional.empty();
         }
@@ -130,9 +136,9 @@ public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
 
     @Override
     public MapCanvas build() {
-        if (canvas == null) {
+        if (this.canvas == null) {
             return SpongeEmptyCanvas.INSTANCE;
         }
-        return canvas;
+        return this.canvas;
     }
 }

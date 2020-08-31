@@ -32,7 +32,9 @@ import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorTypes;
 import org.spongepowered.common.util.Constants;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
@@ -69,7 +71,7 @@ public class SpongeEmptyCanvas implements SpongeMapCanvas {
 
     @Override
     public int getContentVersion() {
-        return 0;
+        return 1;
     }
 
     @Override

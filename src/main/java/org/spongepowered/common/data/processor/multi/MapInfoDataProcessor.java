@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.multi;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -34,6 +35,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMapInfoData;
 import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
+import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.world.World;
@@ -43,9 +45,9 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
 import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.map.canvas.SpongeMapByteCanvas;
-import org.spongepowered.common.map.SpongeMapInfo;
 import org.spongepowered.common.world.WorldManager;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -61,7 +63,7 @@ public class MapInfoDataProcessor extends AbstractMultiDataSingleTargetProcessor
     @Override
     public boolean set(MapInfo mapInfo, Map<Key<?>, Object> keyValues) {
         MapData mapData = (MapData)mapInfo;
-        SpongeMapInfo spongeMapInfo = (SpongeMapInfo)mapInfo;
+        MapDataBridge spongeMapInfo = (MapDataBridge) mapInfo;
 
         Vector2i location = (Vector2i)keyValues.get(Keys.MAP_LOCATION);
         mapData.xCenter = location.getX();
@@ -72,8 +74,8 @@ public class MapInfoDataProcessor extends AbstractMultiDataSingleTargetProcessor
         mapData.trackingPosition = (boolean)keyValues.get(Keys.MAP_TRACKS_PLAYERS);
         mapData.unlimitedTracking = (boolean)keyValues.get(Keys.MAP_UNLIMITED_TRACKING);
         mapData.scale = ((Integer)keyValues.get(Keys.MAP_SCALE)).byteValue();
-        spongeMapInfo.setLocked((boolean)keyValues.get(Keys.MAP_LOCKED));
-        spongeMapInfo.setDecorations((Set<MapDecoration>)keyValues.get(Keys.MAP_DECORATIONS));
+        spongeMapInfo.bridge$setLocked((boolean)keyValues.get(Keys.MAP_LOCKED));
+        spongeMapInfo.bridge$setDecorations((Set<MapDecoration>) keyValues.get(Keys.MAP_DECORATIONS));
         mapData.markDirty();
         return true;
     }
@@ -83,16 +85,16 @@ public class MapInfoDataProcessor extends AbstractMultiDataSingleTargetProcessor
         Map<Key<?>, Object> values = Maps.newIdentityHashMap();
 
         MapData mapData = (MapData)mapInfo;
-        SpongeMapInfo spongeMapInfo = (SpongeMapInfo)mapInfo;
+        MapDataBridge spongeMapInfo = (MapDataBridge) mapInfo;
 
         values.put(Keys.MAP_LOCATION, new Vector2i(mapData.xCenter, mapData.zCenter));
-        values.put(Keys.MAP_WORLD, (World)WorldManager.getWorldByDimensionId(((MapDataBridge)mapData).bridge$getDimensionId()).get());
+        values.put(Keys.MAP_WORLD, (World)WorldManager.getWorldByDimensionId(((MapDataBridge) mapData).bridge$getDimensionId()).get());
         values.put(Keys.MAP_TRACKS_PLAYERS, mapData.trackingPosition);
         values.put(Keys.MAP_UNLIMITED_TRACKING, mapData.unlimitedTracking);
         values.put(Keys.MAP_SCALE, (int)mapData.scale);
         values.put(Keys.MAP_CANVAS, new SpongeMapByteCanvas(mapData.colors));
-        values.put(Keys.MAP_LOCKED, spongeMapInfo.isLocked());
-        values.put(Keys.MAP_DECORATIONS, spongeMapInfo.getDecorations());
+        values.put(Keys.MAP_LOCKED, spongeMapInfo.bridge$isLocked());
+        values.put(Keys.MAP_DECORATIONS, spongeMapInfo.bridge$getDecorations());
 
         return values;
     }
@@ -124,7 +126,8 @@ public class MapInfoDataProcessor extends AbstractMultiDataSingleTargetProcessor
         data.set(Keys.MAP_SCALE, DataUtil.getData(container, Keys.MAP_SCALE));
         data.set(Keys.MAP_CANVAS, DataUtil.getData(container, Keys.MAP_CANVAS));
         data.set(Keys.MAP_LOCKED, DataUtil.getData(container, Keys.MAP_LOCKED));
-        data.set(Keys.MAP_DECORATIONS, DataUtil.getData(container, Keys.MAP_DECORATIONS));
+        // We need to convert from List to Set here.
+        data.set(Keys.MAP_DECORATIONS, new HashSet<>(DataUtil.getData(container, Keys.MAP_DECORATIONS)));
 
         return Optional.of(data);
     }

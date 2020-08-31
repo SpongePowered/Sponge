@@ -31,9 +31,12 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -58,15 +61,19 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.map.MapStorage;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Plugin(
         id = "maptest",
@@ -74,8 +81,13 @@ import java.util.Set;
 )
 public class MapTest {
 
+
+    private static Logger logger;
+
     @Inject
-    private Logger logger;
+    public MapTest(Logger logger) {
+        MapTest.logger = logger;
+    }
 
     public static boolean blueMapsEnabled = false;
 
@@ -91,6 +103,14 @@ public class MapTest {
         createDefaultCommand("adddecoration", new AddRedDecorations());
         createDefaultCommand("setalldirectionsdown", new SetAllDecorationsFacingDown());
         createDefaultCommand("togglebluemaps", new ToggleBlueMaps());
+        createDefaultCommand("getmapuuid", new GetMapUniqueId());
+        createDefaultCommand("testmapserialization", new TestMapInfoSerialization());
+        createDefaultCommand("testpluginmapcreation", new CreateNewMap());
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+                .executor(new GetMapFromUniqueId())
+                .arguments(GenericArguments.uuid(Text.of("uuid")))
+                .build(), "getmapfromuuid");
     }
 
     @Listener
@@ -314,13 +334,15 @@ public class MapTest {
 
         @Override
         public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-            Set<MapInfo> mapInfos = Sponge.getServer().getMapStorage()
+            Collection<MapInfo> mapInfos = Sponge.getServer().getMapStorage()
                     .map(MapStorage::getAllMapInfos)
                     .get();
             ConsoleSource console = Sponge.getServer().getConsole();
             console.sendMessage(Text.of(mapInfos.size()));
-            for (MapInfo mapInfo : mapInfos) {
-                console.sendMessage(Text.of(mapInfo.get(Keys.MAP_LOCATION).get()));
+            List<MapInfo> list = new ArrayList<>(mapInfos);
+            list.sort(Comparator.comparingInt(info -> info.toContainer().getInt(DataQuery.of("UnsafeMapId")).get()));
+            for (MapInfo mapInfo : list) {
+                console.sendMessage(Text.of("id: " + mapInfo.toContainer().getInt(DataQuery.of("UnsafeMapId")).get() + " loc: " + mapInfo.get(Keys.MAP_LOCATION).get()));
             }
             return CommandResult.success();
         }
@@ -403,6 +425,96 @@ public class MapTest {
                     .append(blueMapsEnabled ? Text.of(TextColors.GREEN, "ON")
                             : Text.of(TextColors.RED, "OFF"))
                     .build());
+            return CommandResult.success();
+        }
+    }
+
+    public static class GetMapUniqueId implements CommandExecutor {
+        @Override
+        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+            if (!(src instanceof Player)) {
+                throw new CommandException(Text.of("You must be a player to use this command"));
+            }
+            Player player = (Player)src;
+            Optional<ItemStack> map = player.getItemInHand(HandTypes.MAIN_HAND).filter(itemStack -> itemStack.getType() == ItemTypes.FILLED_MAP);
+            if (!map.isPresent()) {
+                throw new CommandException(Text.of("You must hold a map in your hand!"));
+            }
+            Text uuid = Text.of(map.get().require(Keys.MAP_INFO).getUniqueId().toString());
+            src.sendMessage(uuid);
+            logger.info("map uuid: " + uuid);
+            return CommandResult.success();
+        }
+    }
+
+    public static class GetMapFromUniqueId implements CommandExecutor {
+
+        @Override
+        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+            if (!(src instanceof Player)) {
+                throw new CommandException(Text.of("You must be a player to use this command"));
+            }
+            UUID uuid = args.<UUID>getOne(Text.of("uuid")).get();
+            Player player = (Player)src;
+            ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP, 1);
+            MapInfo mapInfo = Sponge.getServer().getMapStorage().get().getMapInfo(uuid)
+                    .orElseThrow(() -> new CommandException(Text.of("UUID " + uuid + " was not a valid map uuid!")));
+            itemStack.offer(Keys.MAP_INFO, mapInfo);
+            player.getInventory().offer(itemStack);
+            return CommandResult.success();
+        }
+    }
+
+    public static class TestMapInfoSerialization implements CommandExecutor {
+
+        @Override
+        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+            MapInfo mapInfo = null;
+            if (src instanceof Player) {
+                Player player = (Player) src;
+                mapInfo = player.getItemInHand(HandTypes.MAIN_HAND).filter(item -> item.getType() == ItemTypes.FILLED_MAP)
+                        .map(item -> item.require(Keys.MAP_INFO))
+                        .orElse(null);
+            }
+            MapStorage mapStorage = Sponge.getServer().getMapStorage().get();
+            if (mapInfo == null) {
+                mapInfo = mapStorage.getAllMapInfos()
+                        .stream().findAny()
+                        .orElse(mapStorage.createNewMapInfo().get());
+            }
+
+            DataView dataView = mapInfo.toContainer();
+            logger.info("before: " + dataView);
+            dataView.set(DataQuery.of("MapData").then(Keys.MAP_LOCKED.getQuery()), true)
+                    .set(DataQuery.of("UnsafeMapId"), 10);
+            logger.info("setting to: " + dataView);
+            mapInfo.setRawData(dataView);
+            logger.info("after: " + mapInfo.toContainer());
+            return CommandResult.success();
+        }
+    }
+
+    public static class CreateNewMap implements CommandExecutor {
+
+        @Override
+        public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+            if (!(src instanceof Player)) {
+                throw new CommandException(Text.of("You must be a player to use this command"));
+            }
+            Player player = (Player) src;
+            MapInfo mapInfo = Sponge.getServer().getMapStorage()
+                    .orElseThrow(() -> new CommandException(Text.of("MapStorage was not available")))
+                    .createNewMapInfo()
+                    .orElseThrow(() -> new CommandException(Text.of("Map creation was cancelled!")));
+            ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP, 1);
+            MapCanvas canvas = MapCanvas.builder()
+                    .paintAll(MapColor.of(MapColorTypes.RED))
+                    .build();
+            mapInfo.offer(Keys.MAP_CANVAS, canvas);
+            mapInfo.offer(Keys.MAP_LOCKED, true);
+            mapInfo.offer(Keys.MAP_LOCATION, player.getPosition().toInt().toVector2(true));
+            itemStack.offer(Keys.MAP_INFO, mapInfo);
+            player.getInventory().offer(itemStack);
             return CommandResult.success();
         }
     }

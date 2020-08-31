@@ -26,6 +26,7 @@ package org.spongepowered.common.map.color;
 
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.color.MapColor;
@@ -37,10 +38,14 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 
-public class SpongeMapColorBuilder implements MapColor.Builder {
+public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> implements MapColor.Builder {
     @Nullable
     private MapColorType color = null;
     private int shade = 0;
+
+    public SpongeMapColorBuilder() {
+        super(MapColor.class, 1);
+    }
 
     @Override
     public MapColor.Builder base() {
@@ -79,9 +84,9 @@ public class SpongeMapColorBuilder implements MapColor.Builder {
     }
 
     @Override
-    public Optional<MapColor> build(DataView container) throws InvalidDataException {
+    protected Optional<MapColor> buildContent(DataView container) throws InvalidDataException {
         if (!container.contains(DataQuery.of("mapIndex"))
-        || !container.contains(DataQuery.of("shade"))) {
+                || !container.contains(DataQuery.of("shade"))) {
             return Optional.empty();
         }
         int colorInt = container.getInt(DataQuery.of("mapIndex")).get();

@@ -32,13 +32,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.map.SpongeMapInfo;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 
 @Mixin(ItemMap.class)
 public class ItemMapMixin_API {
     @Inject(method = "updateMapData", at = @At(value = "HEAD"), cancellable = true)
     public void cancelUpdateIfShouldntUpdate(World worldIn, Entity viewer, MapData data, CallbackInfo ci) {
-        if (((SpongeMapInfo)data).isLocked()) {
+        if (((MapDataBridge)data).bridge$isLocked()) {
             ci.cancel();
         }
     }

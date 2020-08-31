@@ -1817,10 +1817,4 @@ public class SpongeCommonEventFactory {
         SpongeImpl.postEvent(event);
         return event;
     }
-
-    public static CreateMapEvent callCreateMapEvent(final Cause cause, MapInfo mapInfo) {
-        final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
-        SpongeImpl.postEvent(event);
-        return event;
-    }
 }

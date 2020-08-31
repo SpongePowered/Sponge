@@ -59,7 +59,7 @@ public abstract class MapStorageBridgeMixin implements MapStorageBridge {
     @Nonnull
     @Override
     public Optional<Integer> bridge$getHighestMapId() {
-        Short num = idCounts.get("map");
+        Number num = idCounts.get("map");
         if (num == null) {
             return Optional.empty();
         }

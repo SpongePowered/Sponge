@@ -25,8 +25,9 @@
 package org.spongepowered.common.map.decoration;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.decoration.MapDecoration;
@@ -38,15 +39,16 @@ import org.spongepowered.common.util.Constants;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
+public class SpongeMapDecorationBuilder extends AbstractDataBuilder<MapDecoration> implements MapDecoration.Builder {
     @Nullable
     private MapDecorationType type = null;
     private int x;
     private int y;
     @Nullable private Direction dir = null;
+
+    public SpongeMapDecorationBuilder() {
+        super(MapDecoration.class, 1);
+    }
 
     @Override
     public MapDecoration.Builder type(MapDecorationType type) {
@@ -74,21 +76,21 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
 
     @Override
     public MapDecoration.Builder x(int x) throws IllegalStateException {
-        checkState(MapUtil.isInMapDecorationBounds(x), "x not in bounds");
+        Preconditions.checkState(MapUtil.isInMapDecorationBounds(x), "x not in bounds");
         this.x = x;
         return this;
     }
 
     @Override
     public MapDecoration.Builder y(int y) throws IllegalStateException {
-        checkState(MapUtil.isInMapDecorationBounds(y), "y not in bounds");
+        Preconditions.checkState(MapUtil.isInMapDecorationBounds(y), "y not in bounds");
         this.y = y;
         return this;
     }
 
     @Override
     public MapDecoration.Builder rotation(Direction direction) {
-        checkState(direction.isCardinal()
+        Preconditions.checkState(direction.isCardinal()
                 || direction.isOrdinal()
                 || direction.isSecondaryOrdinal(),
                 "Direction given in MapDecorationBuilder.rotation was not a cardinal, ordinal or secondary ordinal");
@@ -98,8 +100,8 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
 
     @Override
     public MapDecoration.Builder position(Vector2i position) throws IllegalStateException {
-        checkState(MapUtil.isInMapDecorationBounds(position.getX()), "x not in bounds");
-        checkState(MapUtil.isInMapDecorationBounds(position.getY()), "y not in bounds");
+        Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.getX()), "x not in bounds");
+        Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.getY()), "y not in bounds");
         this.x = position.getX();
         this.y = position.getY();
         return this;
@@ -107,15 +109,15 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
 
     @Override
     public MapDecoration build() throws IllegalStateException {
-        checkNotNull(type, "Type has not been set");
-        checkNotNull(this.dir, "Direction has not been set");
-        return (SpongeMapDecoration)new net.minecraft.world.storage.MapDecoration(
+        Preconditions.checkNotNull(type, "Type has not been set");
+        Preconditions.checkNotNull(this.dir, "Direction has not been set");
+        return (MapDecoration) new net.minecraft.world.storage.MapDecoration(
                 ((SpongeMapDecorationType)type).getType(),
                 (byte)this.x, (byte)this.y, Constants.Map.DIRECTION_CONVERSION_MAP.get(this.dir));
     }
 
     @Override
-    public Optional<MapDecoration> build(DataView container) throws InvalidDataException {
-        return SpongeMapDecoration.fromContainer(container);
+    protected Optional<MapDecoration> buildContent(DataView container) throws InvalidDataException {
+        return MapUtil.mapDecorationFromContainer(container);
     }
 }

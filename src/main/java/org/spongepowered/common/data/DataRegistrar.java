@@ -58,6 +58,9 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.map.MapCanvas;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
@@ -136,6 +139,9 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.ItemStackSnapshotDuplicateManipulatorUpdater;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
+import org.spongepowered.common.map.canvas.SpongeMapCanvasBuilder;
+import org.spongepowered.common.map.color.SpongeMapColorBuilder;
+import org.spongepowered.common.map.decoration.SpongeMapDecorationBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
@@ -207,6 +213,11 @@ public final class DataRegistrar {
         dataManager.registerBuilder(TradeOffer.class, new SpongeTradeOfferBuilder());
 
         dataManager.registerBuilder(PotionEffect.class, new SpongePotionBuilder());
+
+        // Map stuff
+        dataManager.registerBuilder(MapCanvas.class, new SpongeMapCanvasBuilder());
+        dataManager.registerBuilder(MapColor.class, new SpongeMapColorBuilder());
+        dataManager.registerBuilder(MapDecoration.class, new SpongeMapDecorationBuilder());
 
         // Content Updaters
         dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());

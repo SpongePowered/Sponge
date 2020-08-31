@@ -22,25 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.storage;
+package org.spongepowered.common.bridge.world.storage;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
-import org.spongepowered.common.util.Constants;
+public interface MapDecorationBridge {
 
-@Mixin(net.minecraft.world.storage.MapData.class)
-public abstract class MapDataBridgeMixin implements MapDataBridge {
-    @Shadow public abstract void updateMapData(int x, int y);
+	/**
+	 * If this MapDecoration should be saved to disk,
+	 * not necessary if it would be recalculated.
+	 * @param persistent if should be saved to disk
+	 */
+	void bridge$setPersistent(boolean persistent);
 
-    @Override
-    public void updateMap(int x, int y) {
-        updateMapData(x, y);
-    }
+	/**
+	 * If this MapDecoration will be saved to disk
+	 * @return if this MapDecoration will be saved to disk
+	 */
+	boolean bridge$isPersistent();
 
-    @Override
-    public void updateWholeMap() {
-        updateMapData(0,0);
-        updateMapData(Constants.Map.MAP_MAX_INDEX, Constants.Map.MAP_MAX_INDEX);
-    }
+	/**
+	 * Sets the key used in the decoration map of a MapData
+	 * This can be compared using == since they are the same String
+	 * @param key String to set as key
+	 */
+	void bridge$setKey(String key);
+
+	/**
+	 * Gets the key used in the decoration map of a MapData
+	 * This can be compared using == since they are the same String
+	 * @return String key
+	 */
+	String bridge$getKey();
 }

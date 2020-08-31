@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.value.mapinfo;
 
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMapInfoData;
 import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
@@ -34,11 +33,11 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.decoration.MapDecoration;
+import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
-import org.spongepowered.common.map.SpongeMapInfo;
 
 import java.util.Optional;
 import java.util.Set;
@@ -50,13 +49,13 @@ public class MapInfoDecorationValueProcessor extends AbstractSingleDataSingleTar
 
     @Override
     protected boolean set(MapInfo dataHolder, Set<MapDecoration> value) {
-        ((SpongeMapInfo)dataHolder).setDecorations(value);
+        ((MapDataBridge) dataHolder).bridge$setDecorations(value);
         return true;
     }
 
     @Override
     protected Optional<Set<MapDecoration>> getVal(MapInfo dataHolder) {
-        return Optional.of(((SpongeMapInfo)dataHolder).getDecorations());
+        return Optional.of(((MapDataBridge) dataHolder).bridge$getDecorations());
     }
 
     @Override

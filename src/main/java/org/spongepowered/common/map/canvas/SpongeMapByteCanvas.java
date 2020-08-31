@@ -32,11 +32,13 @@ import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.map.color.MapColorTypes;
+import org.spongepowered.common.map.MapUtil;
 import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
 import org.spongepowered.common.util.Constants;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
@@ -49,7 +51,6 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
 
     SpongeMapByteCanvas() {
         this.canvas = new byte[Constants.Map.MAP_SIZE];
-        //Arrays.fill(canvas, Byte.MIN_VALUE);
     }
 
     public SpongeMapByteCanvas(byte[] canvas) {
@@ -65,10 +66,10 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
     }
 
     public void paint(int startX, int endX, int startY, int endY, MapColor mapColor) {
-        checkState(isInRange(startX), "startX out of bounds");
-        checkState(isInRange(endX), "endX out of bounds");
-        checkState(isInRange(startY), "startY out of bounds");
-        checkState(isInRange(endY), "endY out of bounds");
+        checkState(MapUtil.isInCanvasBounds(startX), "startX out of bounds");
+        checkState(MapUtil.isInCanvasBounds(endX), "endX out of bounds");
+        checkState(MapUtil.isInCanvasBounds(startY), "startY out of bounds");
+        checkState(MapUtil.isInCanvasBounds(endY), "endY out of bounds");
 
         byte color = ((SpongeMapColor)mapColor).getMCColor();
         for (int x = startX; x <= endX; x++) {
@@ -78,22 +79,13 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
         }
     }
 
-    /**
-     * Checks if x or y can fit on the map
-     * @param i int x or y
-     * @return if this would not be out of bounds
-     */
-    private boolean isInRange(int i) {
-        return 0 <= i && i <= Constants.Map.MAP_MAX_INDEX;
-    }
-
     public void applyToMapData(MapData mapData) {
         mapData.colors = canvas;
     }
 
     @Override
     public int getContentVersion() {
-        return 0;
+        return 1;
     }
 
     @Override
@@ -103,8 +95,8 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
 
     @Override
     public MapColor getColor(int x, int y) {
-        checkState(isInRange(x), "x is out of bounds");
-        checkState(isInRange(y), "y is out of bounds");
+        checkState(MapUtil.isInCanvasBounds(x), "x is out of bounds");
+        checkState(MapUtil.isInCanvasBounds(y), "y is out of bounds");
         return getColor(y * Constants.Map.MAP_PIXELS + x);
     }
 

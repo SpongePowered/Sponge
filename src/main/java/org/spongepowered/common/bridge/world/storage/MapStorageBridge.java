@@ -40,7 +40,13 @@ public interface MapStorageBridge {
     void bridge$setHighestMapId(short id);
 
     /**
-     * Gets the highest known map id
+     * Gets the highest known map id.
+     *
+     * This will not be available if no maps exist.
+     * Any map id returned by this exists, though it does not
+     * necessarily mean there are that amount of maps+1 as we *only*
+     * know about the highest id.
+     *
      * @return Highest map id, if present
      */
     Optional<Integer> bridge$getHighestMapId();

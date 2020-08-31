@@ -60,16 +60,16 @@ public class MapInfoCanvasValueProcessor extends AbstractSingleDataSingleTargetP
 
     @Override
     protected boolean set(MapInfo mapInfo, MapCanvas value) {
-        MapData mapData = (MapData)mapInfo;
+        MapData mapData = (MapData) mapInfo;
 
-        ((SpongeMapCanvas)value).applyToMapData(mapData);
-        ((MapDataBridge)mapData).updateWholeMap();
+        ((SpongeMapCanvas) value).applyToMapData(mapData);
+        ((MapDataBridge) mapData).bridge$updateWholeMap();
         return true;
     }
 
     @Override
     protected Optional<MapCanvas> getVal(MapInfo mapInfo) {
-        MapData mapData = (MapData)mapInfo;
+        MapData mapData = (MapData) mapInfo;
         return Optional.of(new SpongeMapByteCanvas(mapData.colors));
     }
 
