@@ -65,8 +65,4 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
         TrackingUtil.processBlockCaptures(context);
     }
 
-    @Override
-    public boolean tracksBlockSpecificDrops(final GeneralizedContext context) {
-        return true;
-    }
 }

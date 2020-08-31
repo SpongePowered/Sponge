@@ -43,10 +43,6 @@ import javax.annotation.Nullable;
 public final class InteractEntityPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
-    }
-    @Override
     public boolean isPacketIgnored(IPacket<?> packetIn, ServerPlayerEntity packetPlayer) {
         final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
@@ -70,11 +66,6 @@ public final class InteractEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
-        return true;
-    }
-
-    @Override
     public void unwind(BasicPacketContext phaseContext) {
 
         final ServerPlayerEntity player = phaseContext.getPacketPlayer();
@@ -90,11 +81,6 @@ public final class InteractEntityPacketState extends BasicPacketState {
             ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
         }
         TrackingUtil.processBlockCaptures(phaseContext);
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
 }

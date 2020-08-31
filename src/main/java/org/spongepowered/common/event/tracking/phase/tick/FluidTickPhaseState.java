@@ -113,17 +113,6 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         explosionContext.source(locatableBlock);
     }
 
-
-    /**
-     * Specifically overridden here because some states have defaults and don't check the context.
-     * @param context The context
-     * @return True if bulk block captures are usable for this entity type (default true)
-     */
-    @Override
-    public boolean doesBulkBlockCapture(final BlockTickContext context) {
-        return context.allowsBulkBlockCaptures();
-    }
-
     /**
      * Specifically overridden here because some states have defaults and don't check the context.
      * @param context The context
@@ -132,11 +121,6 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     @Override
     public boolean doesBlockEventTracking(final BlockTickContext context) {
         return context.allowsBlockEvents();
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(final BlockTickContext context) {
-        return true; // Maybe make this configurable as well.
     }
 
     @Override

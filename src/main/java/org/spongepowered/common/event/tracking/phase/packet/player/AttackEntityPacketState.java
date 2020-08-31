@@ -95,8 +95,4 @@ public final class AttackEntityPacketState extends BasicPacketState {
         TrackingUtil.processBlockCaptures(context);
     }
 
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
-    }
 }

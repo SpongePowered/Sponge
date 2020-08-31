@@ -81,11 +81,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public boolean alreadyProcessingBlockItemDrops() {
-        return true;
-    }
-
-    @Override
     public boolean allowsGettingQueuedRemovedTiles() {
         return true;
     }
@@ -119,11 +114,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
-    }
-
-    @Override
-    public boolean doesBulkBlockCapture(final UnwindingPhaseContext context) {
-        return context.allowsBulkBlockCaptures();
     }
 
     /**

@@ -29,7 +29,6 @@ import net.minecraft.block.IGrowable;
 import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -81,9 +80,8 @@ public abstract class BoneMealItemMixin_Tracker {
 
         final PhaseContext<?> current = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState phaseState = current.state;
-        final boolean doesBulk = phaseState.doesBulkBlockCapture(current);
         final boolean doesEvent = phaseState.doesBlockEventTracking(current);
-        if (doesBulk || doesEvent) {
+        if (doesEvent) {
             // We can enter the new phase state.
             try (GrowablePhaseContext context = BlockPhase.State.GROWING.createPhaseContext(PhaseTracker.SERVER)
                 .provideItem(stack)

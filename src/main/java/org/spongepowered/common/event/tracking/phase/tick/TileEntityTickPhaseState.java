@@ -67,16 +67,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(final TileEntityTickContext context) {
-        return true;
-    }
-
-    @Override
     LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
         return context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over a TileEntity!", context))
@@ -133,11 +123,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
     @Override
     public boolean doesCaptureNeighborNotifications(final TileEntityTickContext context) {
-        return context.allowsBulkBlockCaptures();
-    }
-
-    @Override
-    public boolean doesBulkBlockCapture(final TileEntityTickContext context) {
         return context.allowsBulkBlockCaptures();
     }
 

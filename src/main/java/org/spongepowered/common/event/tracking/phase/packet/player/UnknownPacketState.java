@@ -34,21 +34,6 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 public final class UnknownPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
-    }
-
-    @Override
-    public boolean tracksBlockSpecificDrops(BasicPacketContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
-    }
-
-    @Override
     public void unwind(BasicPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
 

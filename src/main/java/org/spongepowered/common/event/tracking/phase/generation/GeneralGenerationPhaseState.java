@@ -97,15 +97,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
         return true;
     }
 
-    @Override
-    public boolean doesBulkBlockCapture(final G context) {
-        return false;
-    }
-
-    @Override
-    public boolean alreadyProcessingBlockItemDrops() {
-        return true;
-    }
 
     @Override
     public boolean isWorldGeneration() {

@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.projectile.ThrowableEntity;
-import net.minecraft.item.SpawnEggItem;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.util.math.BlockPos;
@@ -36,30 +32,22 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public final class InteractionPacketState extends PacketState<InteractionPacketContext> {
@@ -100,22 +88,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(final InteractionPacketContext context) {
-        return true;
-    }
-
-    @Override
     public boolean doesCaptureNeighborNotifications(final InteractionPacketContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean tracksBlockSpecificDrops(final InteractionPacketContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean alreadyProcessingBlockItemDrops() {
         return true;
     }
 
@@ -154,11 +127,6 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         }
         
         ((LivingEntityAccessor) player).accessor$setActiveItemStack(endActiveItem);
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
 }

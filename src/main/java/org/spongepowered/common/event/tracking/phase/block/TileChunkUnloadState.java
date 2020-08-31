@@ -41,13 +41,4 @@ public class TileChunkUnloadState extends BlockPhaseState {
         return (BiConsumer<CauseStackManager.StackFrame, GeneralizedContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER;
     }
 
-    @Override
-    public boolean doesBulkBlockCapture(final GeneralizedContext context) {
-        return false;
-    }
-
-    @Override
-    public boolean alreadyProcessingBlockItemDrops() {
-        return true;
-    }
 }

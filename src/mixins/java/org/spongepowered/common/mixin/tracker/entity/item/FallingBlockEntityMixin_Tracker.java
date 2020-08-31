@@ -72,7 +72,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
      *
      * @param ci
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "tick()V",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/World;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z",
@@ -96,7 +96,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
         // if the processing succeeded or not.
         final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         // By this point, we should have some sort of captured block
-        if (((IPhaseState) currentContext.state).doesBulkBlockCapture(currentContext)) {
+        if (((IPhaseState) currentContext.state).doesBlockEventTracking(currentContext)) {
             if (!TrackingUtil.processBlockCaptures(currentContext)) {
                 // So, it's been cancelled, we want to absolutely remove this entity.
                 // And we want to stop the entity update at this point.

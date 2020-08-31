@@ -100,11 +100,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         this.stateMask = stateMask;
     }
 
-    @Override
-    public boolean doesBulkBlockCapture(final InventoryPacketContext context) {
-        return false;
-    }
-
     @Nullable
     public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
             final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {

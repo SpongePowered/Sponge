@@ -71,11 +71,6 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops(final InventoryPacketContext context) {
-        return true;
-    }
-
-    @Override
     public void unwind(final InventoryPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
         //final ItemStack usedStack = context.getItemUsed();
@@ -172,11 +167,6 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             // the event call, somehow should not release this frame until after the event is posted
             return event;
         }
-    }
-
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
     }
 
 }

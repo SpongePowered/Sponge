@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.inventory.util;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -39,7 +37,6 @@ import net.minecraft.inventory.container.ChestContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.tileentity.ChestTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -82,7 +79,6 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +118,7 @@ public final class ContainerUtil {
     public static void performBlockInventoryDrops(final ServerWorld worldServer, final double x, final double y, final double z, final IInventory inventory) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState<@NonNull ?> currentState = context.state;
-        if (((IPhaseState) currentState).tracksBlockSpecificDrops(context)) {
+        if (((IPhaseState) currentState).doesBlockEventTracking(context)) {
             // this is where we could perform item stack pre-merging.
             // TODO - figure out how inventory drops will work?
             for (int j = 0; j < inventory.getSizeInventory(); j++) {

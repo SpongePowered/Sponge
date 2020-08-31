@@ -59,7 +59,7 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
         super(GeneralPhase.Post.UNWINDING, unwindingContext.createdTracker);
         this.unwindingState = unwindingState;
         this.unwindingContext = unwindingContext;
-        this.setBulkBlockCaptures(((IPhaseState) unwindingState).doesBulkBlockCapture(unwindingContext));
+        this.setBlockEvents(((IPhaseState) unwindingState).doesBlockEventTracking(unwindingContext));
         // Basically put, the post state needs to understand that if we're expecting potentially chained block changes
         // to worlds, AND we're potentially getting any neighbor notification requests OR tile entity requests,
         // we'll need to switch on to capture such objects. If for example, we do not track tile changes, but we track

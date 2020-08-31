@@ -59,11 +59,6 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
         return true;
     }
 
-    @Override
-    public boolean tracksBlockSpecificDrops(final L context) {
-        return true;
-    }
-
 
     @Override
     public void appendNotifierToBlockEvent(final L context, final PhaseContext<?> currentContext,

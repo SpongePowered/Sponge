@@ -119,21 +119,6 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         return false;
     }
 
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return false;
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(final P context) {
-        return false;
-    }
-
-    @Override
-    public boolean doesBulkBlockCapture(final P context) {
-        return true;
-    }
-
 
     public boolean shouldCaptureEntity() {
         return false;

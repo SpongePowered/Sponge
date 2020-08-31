@@ -38,16 +38,6 @@ import javax.annotation.Nullable;
 abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState<C> implements IPhaseState<C> {
 
     @Override
-    public boolean doesCaptureEntityDrops(final C context) {
-        return true;
-    }
-
-    @Override
-    public boolean tracksBlockSpecificDrops(final C context) {
-        return true;
-    }
-
-    @Override
     public boolean isTicking() {
         return true;
     }

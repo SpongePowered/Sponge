@@ -53,17 +53,8 @@ final class CompletePhase extends GeneralState<GeneralizedContext> {
     }
 
     @Override
-    public boolean doesBulkBlockCapture(final GeneralizedContext context) {
-        return false;
-    }
-
-    @Override
     public boolean doesBlockEventTracking(final GeneralizedContext context) {
         return false;
     }
 
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
-    }
 }

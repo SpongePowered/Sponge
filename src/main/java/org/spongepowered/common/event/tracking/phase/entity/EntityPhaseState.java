@@ -44,11 +44,6 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
     private final String desc = TrackingUtil.phaseStateToString("Entity", this);
 
     @Override
-    public boolean doesCaptureEntityDrops(final E context) {
-        return true;
-    }
-
-    @Override
     public void unwind(final E context) {
 
     }
@@ -77,11 +72,6 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
             PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.ENTITY_DEATH);
             SpongeCommonEventFactory.callSpawnEntity(experience, context);
         }
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
     @Override

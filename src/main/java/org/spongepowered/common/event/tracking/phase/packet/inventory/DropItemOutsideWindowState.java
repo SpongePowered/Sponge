@@ -31,8 +31,8 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
@@ -43,20 +43,14 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public final class DropItemOutsideWindowState extends BasicInventoryPacketState {
 
     public DropItemOutsideWindowState(final int stateid) {
         super(stateid);
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(final InventoryPacketContext context) {
-        return true;
     }
 
     @Override
@@ -92,8 +86,4 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
         }
     }
 
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
-    }
 }

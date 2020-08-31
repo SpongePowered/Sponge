@@ -218,21 +218,6 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         explosionContext.source(context.getSource(Entity.class).orElseThrow(() -> new IllegalStateException("Ticking a non Entity")));
     }
 
-    @Override
-    public boolean alreadyProcessingBlockItemDrops() {
-        return true;
-    }
-
-    /**
-     * Specifically overridden here because some states have defaults and don't check the context.
-     * @param context The context
-     * @return True if bulk block captures are usable for this entity type (default true)
-     */
-    @Override
-    public boolean doesBulkBlockCapture(final EntityTickContext context) {
-        return context.allowsBulkBlockCaptures();
-    }
-
     /**
      * Specifically overridden here because some states have defaults and don't check the context.
      * @param context The context

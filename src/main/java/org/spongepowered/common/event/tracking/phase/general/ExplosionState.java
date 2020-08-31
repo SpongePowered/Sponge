@@ -56,22 +56,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public boolean tracksBlockSpecificDrops(final ExplosionContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean requiresBlockPosTracking() {
-        return true;
-    }
-
-    @Override
     public boolean alreadyCapturingEntitySpawns() {
-        return true;
-    }
-
-    @Override
-    public boolean alreadyProcessingBlockItemDrops() {
         return true;
     }
 
@@ -113,11 +98,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     public ChangeBlockEvent.Post createChangeBlockPostEvent(final ExplosionContext context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
         final Cause cause) {
         return SpongeEventFactory.createExplosionEventPost(cause, context.getSpongeExplosion(), transactions);
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
 }

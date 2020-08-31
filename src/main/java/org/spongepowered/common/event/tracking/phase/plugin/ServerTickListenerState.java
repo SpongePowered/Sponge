@@ -54,16 +54,6 @@ final class ServerTickListenerState extends ListenerPhaseState<ServerTickListene
     }
 
     @Override
-    public boolean doesBulkBlockCapture(final ServerTickListenerContext context) {
-        return false;
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(final ServerTickListenerContext context) {
-        return false;
-    }
-
-    @Override
     public String toString() {
         return this.desc;
     }

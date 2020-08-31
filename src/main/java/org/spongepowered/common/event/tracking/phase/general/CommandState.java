@@ -72,11 +72,6 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     }
 
     @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
-    }
-
-    @Override
     public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
         final CommandPhaseContext context) {
         // We want to investigate if there is a user on the cause stack
@@ -114,11 +109,6 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
             }
         }
         TrackingUtil.processBlockCaptures(phaseContext);
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
     }
 
 }

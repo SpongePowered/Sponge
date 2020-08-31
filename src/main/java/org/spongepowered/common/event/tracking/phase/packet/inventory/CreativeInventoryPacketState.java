@@ -31,19 +31,6 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 public final class CreativeInventoryPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
-        // We specifically capture because the entities are already
-        // being captured in a drop event, and therefor will be
-        // spawned manually into the world by the creative event handling.
-        return true;
-    }
-
-    @Override
     public void unwind(BasicPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
 //        context.getCapturedItemsSupplier()

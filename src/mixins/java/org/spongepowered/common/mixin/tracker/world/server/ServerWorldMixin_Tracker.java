@@ -77,7 +77,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.ScheduledBlockChange;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
@@ -113,7 +112,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -402,15 +400,13 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // or create a new transaction.
         final PhaseContext<?> current = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState state = current.state;
-        if (state.doesBulkBlockCapture(current)) {
-            if (current.getTransactor().logTileRemoval(tileentity, () -> (ServerWorld) (Object) this)) {
-                final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
-                    .addEffect(new RemoveTileEntityFromWorldEffect())
-                    .addEffect(new RemoveTileEntityFromChunkEffect())
-                    .build();
-                pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), 0,immutable, tileentity));
-                return;
-            }
+        if (current.getTransactor().logTileRemoval(tileentity, () -> (ServerWorld) (Object) this)) {
+            final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
+                .addEffect(new RemoveTileEntityFromWorldEffect())
+                .addEffect(new RemoveTileEntityFromChunkEffect())
+                .build();
+            pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), 0,immutable, tileentity));
+            return;
         }
         super.shadow$removeTileEntity(immutable);
     }
@@ -428,7 +424,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // or create a new transaction.
         final PhaseContext<?> current = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState state = current.state;
-        if (state.doesBulkBlockCapture(current)) {
+        if (state.doesBlockEventTracking(current)) {
             final BlockPos immutable = tileEntity.getPos().toImmutable();
             if (tileEntity.getWorld() != (ServerWorld) (Object) this) {
                 tileEntity.setWorldAndPos((ServerWorld) (Object) this, immutable);
@@ -470,7 +466,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // or create a new transaction.
         final PhaseContext<?> current = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState state = current.state;
-        if (state.doesBulkBlockCapture(current)) {
+        if (state.doesBlockEventTracking(current)) {
             final @Nullable TileEntity existing = this.shadow$getChunkAt(immutable).getTileEntity(immutable);
             if (current.getTransactor().logTileReplacement(immutable, existing, proposed, () -> (ServerWorld) (Object) this)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
