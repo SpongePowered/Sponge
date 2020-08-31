@@ -32,7 +32,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.CombatEntry;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -49,6 +53,8 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.common.accessor.util.CombatEntryAccessor;
+import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -57,6 +63,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -376,6 +383,50 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
     }
 
+    @SuppressWarnings({"ConstantConditions"})
+    @Nullable
+    public EffectTransactor ensureEntityDropTransactionEffect(final Entity entity) {
+        if (this.tail != null) {
+            if (this.tail.acceptEntityDrops(entity)) {
+                return null;
+            }
+        }
+        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) entity.world);
+        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final CompoundNBT tag = new CompoundNBT();
+        entity.writeWithoutTypeId(tag);
+        final @Nullable DamageSource lastAttacker;
+        if (entity instanceof LivingEntity) {
+            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).accessor$getBestCombatEntry();
+            if (entry != null) {
+                final DamageSource damageSource = ((CombatEntryAccessor) entry).accessor$getDamageSrc();
+                if (damageSource != null) {
+                    lastAttacker = damageSource;
+                } else {
+                    lastAttacker = null;
+                }
+            } else {
+                lastAttacker = null;
+            }
+        } else {
+            lastAttacker = null;
+        }
+        final WeakReference<@Nullable DamageSource> ref = new WeakReference<>(lastAttacker);
+        final Supplier<Optional<DamageSource>> attacker = () -> {
+            final @Nullable DamageSource damageSource = ref.get();
+            // Yes, I know, we're effectively
+            if (damageSource == null) {
+                return Optional.empty();
+            }
+            return Optional.of(damageSource);
+        };
+        final EntityPerformingDropsTransaction transaction = new EntityPerformingDropsTransaction(worldSupplier, entity, tag, attacker);
+        this.logTransaction(transaction);
+        final EffectTransactor effectTransactor = this.pushEffect(
+            new ResultingTransactionBySideEffect(EntityPerformingDropsEffect.getInstance()));
+        return effectTransactor;
+    }
+
     public void completeBlockDrops(@Nullable final EffectTransactor context) {
         if (this.effect != null) {
             if (this.effect.effect == PrepareBlockDrops.getInstance()) {
@@ -516,7 +567,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 accumilator.add(pointer);
                 batchDecider = pointer;
                 continue;
-            } else if (pointer.hasAnyPrimaryChildrenTransactions() || pointer.next == null) {
+            } else if (pointer.hasAnyPrimaryChildrenTransactions() || pointer.isUnbatchable() || pointer.next == null) {
                 accumilator.add(pointer);
                 final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();

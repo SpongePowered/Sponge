@@ -34,6 +34,7 @@ public final class TransactionType {
     public static final TransactionType BLOCK = new Builder().setIsPrimary(true).setName("BLOCK").build();
     public static final TransactionType NEIGHBOR_NOTIFICATION = new Builder().setIsPrimary(false).setName("NEIGHBOR_NOTIFICATION").build();
     public static final TransactionType SPAWN_ENTITY = new Builder().setIsPrimary(false).setName("SPAWN_ENTITY").build();
+    public static final TransactionType ENTITY_DEATH_DROPS = new Builder().setIsPrimary(false).setName("ENTITY_DROPS").build();
 
     private final boolean isPrimary;
     private final String name;

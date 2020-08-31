@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -113,6 +114,14 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
         return false;
     }
 
+    public boolean acceptEntityDrops(final Entity entity) {
+        return false;
+    }
+
+    public boolean isUnbatchable() {
+        return false;
+    }
+
     public abstract E generateEvent(PhaseContext<@NonNull ?> context, ImmutableList<GameTransaction<E>> transactions, Cause currentCause);
 
     public abstract void restore();
@@ -137,4 +146,5 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
     public void postProcessEvent(final PhaseContext<@NonNull ?> context, final E event) {
 
     }
+
 }
