@@ -27,10 +27,11 @@ package org.spongepowered.common.entity.projectile;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
+
 import java.util.Optional;
 
 public interface ProjectileSourceLogic<T extends ProjectileSource> {
 
-    <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, T source, EntityType<P> projectileClass, Object... args);
+    <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, T source, EntityType<P> projectileType, Object... args);
 
 }

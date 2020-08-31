@@ -40,12 +40,12 @@ public final class UnknownProjectileSource implements ProjectileSource {
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileClass) {
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType) {
         return Optional.empty();
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileClass, Vector3d velocity) {
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType, Vector3d velocity) {
         return Optional.empty();
     }
 

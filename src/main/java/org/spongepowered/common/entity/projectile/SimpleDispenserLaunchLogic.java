@@ -28,13 +28,14 @@ import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class SimpleDispenserLaunchLogic<P extends Projectile> extends SimpleEntityLaunchLogic<P> {
 
-    public SimpleDispenserLaunchLogic(Supplier<EntityType<P>> projectileClass) {
-        super(projectileClass);
+    public SimpleDispenserLaunchLogic(Supplier<EntityType<P>> projectileType) {
+        super(projectileType);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class SimpleDispenserLaunchLogic<P extends Projectile> extends SimpleEnti
             return ret;
         }
         if (source instanceof Dispenser) {
-            return ProjectileUtil.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileClass);
+            return ProjectileUtil.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileType.get());
         }
         return ret;
     }

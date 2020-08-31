@@ -36,10 +36,10 @@ import java.util.function.Supplier;
 
 public class SimpleEntityLaunchLogic<P extends Projectile> implements ProjectileLogic<P> {
 
-    protected final EntityType<P> projectileClass;
+    protected final Supplier<EntityType<P>> projectileType;
 
-    public SimpleEntityLaunchLogic(Supplier<EntityType<P>> projectileClass) {
-        this.projectileClass = projectileClass.get();
+    public SimpleEntityLaunchLogic(Supplier<EntityType<P>> projectileType) {
+        this.projectileType = projectileType;
     }
 
     @Override
@@ -48,16 +48,14 @@ public class SimpleEntityLaunchLogic<P extends Projectile> implements Projectile
             return Optional.empty();
         }
         ServerLocation loc = ((Entity) source).getServerLocation().add(0, ((net.minecraft.entity.Entity) source).getHeight() / 2, 0);
-        Optional<P> projectile;
         if (source instanceof LivingEntity) {
-            projectile = this.createProjectile((LivingEntity) source, loc);
+            return this.createProjectile((LivingEntity) source, loc);
         } else {
-            projectile = this.createProjectile(source, this.projectileClass, loc);
+            return this.createProjectile(source, this.projectileType.get(), loc);
         }
-        return projectile;
     }
 
     protected Optional<P> createProjectile(LivingEntity source, ServerLocation loc) {
-        return this.createProjectile((ProjectileSource) source, this.projectileClass, loc);
+        return this.createProjectile((ProjectileSource) source, this.projectileType.get(), loc);
     }
 }

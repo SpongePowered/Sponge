@@ -40,7 +40,7 @@ public class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> {
     @SuppressWarnings("unchecked")
     @Override
     public <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, Shulker source, EntityType<P> projectileType, Object... args) {
-        if (EntityTypes.SHULKER_BULLET.get() == projectileType && args.length == 1 && args[0] instanceof Entity) {
+        if (projectileType == EntityTypes.SHULKER_BULLET.get() && args.length == 1 && args[0] instanceof Entity) {
             ShulkerEntity shulker = (ShulkerEntity) source;
             ShulkerBulletEntity bullet = new ShulkerBulletEntity(shulker.world, shulker, (Entity) args[0], shulker.getAttachmentFacing().getAxis());
             shulker.world.addEntity(bullet);

@@ -30,6 +30,7 @@ import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -37,15 +38,15 @@ public class SimpleItemLaunchLogic<P extends Projectile> extends SimpleEntityLau
 
     private final Item item;
 
-    public SimpleItemLaunchLogic(Supplier<EntityType<P>> projectileClass, Item item) {
-        super(projectileClass);
+    public SimpleItemLaunchLogic(Supplier<EntityType<P>> projectileType, Item item) {
+        super(projectileType);
         this.item = item;
     }
 
     @Override
     public Optional<P> launch(ProjectileSource source) {
         if (source instanceof DispenserTileEntity) {
-            return ProjectileUtil.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileClass, this.item);
+            return ProjectileUtil.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileType.get(), this.item);
         }
         return super.launch(source);
     }

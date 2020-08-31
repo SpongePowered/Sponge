@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.LivingEntity;
@@ -78,19 +80,19 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
         return values;
     }
 
-
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType) {
-        return ProjectileUtil.launch(Preconditions.checkNotNull(projectileType, "projectile type"), this, null);
+        return ProjectileUtil.launch(checkNotNull(projectileType, "projectileType"), this, null);
     }
 
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType, Vector3d velocity) {
-        return ProjectileUtil.launch(Preconditions.checkNotNull(projectileType, "projectile type"), this, Preconditions.checkNotNull(velocity, "velocity"));
+        return ProjectileUtil.launch(checkNotNull(projectileType, "projectileType"), this, checkNotNull(velocity, "velocity"));
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectileTo(EntityType<T> projectileType, Entity target) {
-        return ProjectileUtil.launchWithArgs(Preconditions.checkNotNull(projectileType, "projectile type"), (Class) this.getClass(), this, null, Preconditions.checkNotNull(target, "target"));
+    public <T extends Projectile> Optional<T> launchProjectileTo(final EntityType<T> projectileType, final Entity target) {
+        // TODO implement this for all LivingEntities ?
+        return Optional.empty();
     }
 }
