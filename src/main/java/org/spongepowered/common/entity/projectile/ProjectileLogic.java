@@ -35,7 +35,7 @@ public interface ProjectileLogic<T extends Projectile> {
 
     Optional<T> launch(ProjectileSource source);
 
-    default Optional<T> createProjectile(ProjectileSource source, EntityType<T> projectileType, ServerLocation loc) {
+    default Optional<T> createProjectile(final ProjectileSource source, final EntityType<T> projectileType, final ServerLocation loc) {
         return ProjectileLauncher.defaultLaunch(source, projectileType, loc);
     }
 }

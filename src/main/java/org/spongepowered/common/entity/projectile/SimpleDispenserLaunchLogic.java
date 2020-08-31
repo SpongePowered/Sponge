@@ -34,13 +34,13 @@ import java.util.function.Supplier;
 
 public class SimpleDispenserLaunchLogic<P extends Projectile> extends SimpleEntityLaunchLogic<P> {
 
-    public SimpleDispenserLaunchLogic(Supplier<EntityType<P>> projectileType) {
+    public SimpleDispenserLaunchLogic(final Supplier<EntityType<P>> projectileType) {
         super(projectileType);
     }
 
     @Override
-    public Optional<P> launch(ProjectileSource source) {
-        Optional<P> ret = super.launch(source);
+    public Optional<P> launch(final ProjectileSource source) {
+        final Optional<P> ret = super.launch(source);
         if (ret.isPresent()) {
             return ret;
         }

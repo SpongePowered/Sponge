@@ -38,16 +38,16 @@ public class SimpleEntityLaunchLogic<P extends Projectile> implements Projectile
 
     protected final Supplier<EntityType<P>> projectileType;
 
-    public SimpleEntityLaunchLogic(Supplier<EntityType<P>> projectileType) {
+    public SimpleEntityLaunchLogic(final Supplier<EntityType<P>> projectileType) {
         this.projectileType = projectileType;
     }
 
     @Override
-    public Optional<P> launch(ProjectileSource source) {
+    public Optional<P> launch(final ProjectileSource source) {
         if (!(source instanceof Entity)) {
             return Optional.empty();
         }
-        ServerLocation loc = ((Entity) source).getServerLocation().add(0, ((net.minecraft.entity.Entity) source).getHeight() / 2, 0);
+        final ServerLocation loc = ((Entity) source).getServerLocation().add(0, ((net.minecraft.entity.Entity) source).getHeight() / 2, 0);
         if (source instanceof LivingEntity) {
             return this.createProjectile((LivingEntity) source, loc);
         } else {
@@ -55,7 +55,7 @@ public class SimpleEntityLaunchLogic<P extends Projectile> implements Projectile
         }
     }
 
-    protected Optional<P> createProjectile(LivingEntity source, ServerLocation loc) {
+    protected Optional<P> createProjectile(final LivingEntity source, final ServerLocation loc) {
         return this.createProjectile((ProjectileSource) source, this.projectileType.get(), loc);
     }
 }

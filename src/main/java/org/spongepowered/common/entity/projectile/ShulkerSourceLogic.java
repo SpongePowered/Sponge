@@ -35,14 +35,16 @@ import org.spongepowered.api.entity.projectile.Projectile;
 
 import java.util.Optional;
 
-public class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> {
+public final class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, Shulker source, EntityType<P> projectileType, Object... args) {
+    public <P extends Projectile> Optional<P> launch(final ProjectileLogic<P> logic, final Shulker source,
+            final EntityType<P> projectileType, final Object... args) {
         if (projectileType == EntityTypes.SHULKER_BULLET.get() && args.length == 1 && args[0] instanceof Entity) {
-            ShulkerEntity shulker = (ShulkerEntity) source;
-            ShulkerBulletEntity bullet = new ShulkerBulletEntity(shulker.world, shulker, (Entity) args[0], shulker.getAttachmentFacing().getAxis());
+            final ShulkerEntity shulker = (ShulkerEntity) source;
+            final ShulkerBulletEntity bullet =
+                    new ShulkerBulletEntity(shulker.world, shulker, (Entity) args[0], shulker.getAttachmentFacing().getAxis());
             shulker.world.addEntity(bullet);
             shulker.playSound(SoundEvents.ENTITY_SHULKER_SHOOT,
                     2.0F, (shulker.world.rand.nextFloat() - shulker.world.rand.nextFloat()) * 0.2F + 1.0F);

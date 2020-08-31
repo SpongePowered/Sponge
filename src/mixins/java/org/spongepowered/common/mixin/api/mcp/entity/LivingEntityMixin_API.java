@@ -82,12 +82,12 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType) {
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType) {
         return ProjectileLauncher.launch(checkNotNull(projectileType, "projectileType"), this, null);
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType, Vector3d velocity) {
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType, final Vector3d velocity) {
         return ProjectileLauncher.launch(checkNotNull(projectileType, "projectileType"), this, checkNotNull(velocity, "velocity"));
     }
 

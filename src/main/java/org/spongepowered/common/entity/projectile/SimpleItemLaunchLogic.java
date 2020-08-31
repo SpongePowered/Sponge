@@ -38,13 +38,13 @@ public class SimpleItemLaunchLogic<P extends Projectile> extends SimpleEntityLau
 
     private final Item item;
 
-    public SimpleItemLaunchLogic(Supplier<EntityType<P>> projectileType, Item item) {
+    public SimpleItemLaunchLogic(final Supplier<EntityType<P>> projectileType, final Item item) {
         super(projectileType);
         this.item = item;
     }
 
     @Override
-    public Optional<P> launch(ProjectileSource source) {
+    public Optional<P> launch(final ProjectileSource source) {
         if (source instanceof DispenserTileEntity) {
             return ProjectileLauncher.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileType.get(), this.item);
         }
