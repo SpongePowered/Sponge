@@ -22,25 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.placeholder;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.common.world.SpongeSerializationBehavior;
+import org.spongepowered.api.placeholder.PlaceholderContext;
 
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-public final class SerializationBehaviorStreamGenerator {
+import javax.annotation.Nullable;
 
-    private SerializationBehaviorStreamGenerator() {
+public final class SpongePlaceholderContext implements PlaceholderContext {
+
+    @Nullable final Supplier<Object> associatedObjectSupplier;
+    @Nullable private final String argument;
+
+    public SpongePlaceholderContext(@Nullable final Supplier<Object> associatedObjectSupplier, @Nullable final String argument) {
+        this.associatedObjectSupplier = associatedObjectSupplier;
+        this.argument = argument;
     }
 
-    public static Stream<SerializationBehavior> stream() {
-        return Stream.of(
-                new SpongeSerializationBehavior(ResourceKey.sponge("automatic")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("manual")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("metadata_only")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("none"))
-        );
+    @Override
+    public Optional<Object> getAssociatedObject() {
+        if (this.associatedObjectSupplier == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(this.associatedObjectSupplier.get());
     }
+
+    @Override
+    public Optional<String> getArgumentString() {
+        return Optional.ofNullable(this.argument);
+    }
+
+    @Nullable
+    Supplier<Object> getAssociatedObjectSupplier() {
+        return this.associatedObjectSupplier;
+    }
+
 }

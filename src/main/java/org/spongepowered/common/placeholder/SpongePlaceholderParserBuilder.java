@@ -1,3 +1,4 @@
+
 /*
  * This file is part of Sponge, licensed under the MIT License (MIT).
  *
@@ -22,25 +23,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.placeholder;
 
+import com.google.common.base.Preconditions;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.common.world.SpongeSerializationBehavior;
+import org.spongepowered.api.placeholder.PlaceholderContext;
+import org.spongepowered.api.placeholder.PlaceholderParser;
 
-import java.util.stream.Stream;
+import java.util.function.Function;
 
-public final class SerializationBehaviorStreamGenerator {
+import javax.annotation.Nullable;
 
-    private SerializationBehaviorStreamGenerator() {
+public class SpongePlaceholderParserBuilder implements PlaceholderParser.Builder {
+
+    @Nullable private ResourceKey key;
+    @Nullable private Function<PlaceholderContext, Component> parser;
+
+    @Override
+    public PlaceholderParser.Builder key(final ResourceKey resourceKey) {
+        this.key = resourceKey;
+        return this;
     }
 
-    public static Stream<SerializationBehavior> stream() {
-        return Stream.of(
-                new SpongeSerializationBehavior(ResourceKey.sponge("automatic")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("manual")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("metadata_only")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("none"))
-        );
+    @Override
+    public PlaceholderParser.Builder parser(final Function<PlaceholderContext, Component> parser) {
+        this.parser = parser;
+        return this;
     }
+
+    @Override
+    public PlaceholderParser build() throws IllegalStateException {
+        Preconditions.checkState(this.key != null, "Key must be set");
+        Preconditions.checkState(this.parser != null, "Parser must be set");
+        return new SpongePlaceholderParser(this.key, this.parser);
+    }
+
+    @Override
+    public PlaceholderParser.Builder reset() {
+        this.key = null;
+        this.parser = null;
+        return this;
+    }
+
 }

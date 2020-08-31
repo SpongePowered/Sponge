@@ -134,6 +134,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.query.QueryType;
+import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
@@ -187,6 +188,7 @@ import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ParrotTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.PhaseTypeRegistrar;
+import org.spongepowered.common.registry.builtin.sponge.PlaceholderParserStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.PortalTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.QueryTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.RabbitTypeStreamGenerator;
@@ -526,6 +528,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(PhantomPhase.class, ResourceKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true, false)
             .generateRegistry(PickupRule.class, ResourceKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true, false)
             .generateRegistry(PistonType.class, ResourceKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true, false)
+            .generateRegistry(PlaceholderParser.class, ResourceKey.sponge("placeholder"), PlaceholderParserStreamGenerator.stream(), true, true)
             .generateRegistry(PortalType.class, ResourceKey.minecraft("portal_type"), PortalTypeStreamGenerator.stream(), true, true)
             .generateRegistry(PortionType.class, ResourceKey.minecraft("portion_type"), Arrays.stream(Half.values()), true, false)
             .generateRegistry(QueryType.class, ResourceKey.sponge("query_type"), QueryTypeStreamGenerator.stream(), true, true)

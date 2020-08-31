@@ -22,25 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.placeholder;
 
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.common.world.SpongeSerializationBehavior;
+import org.spongepowered.api.placeholder.PlaceholderContext;
+import org.spongepowered.api.placeholder.PlaceholderParser;
 
-import java.util.stream.Stream;
+import java.util.function.Function;
 
-public final class SerializationBehaviorStreamGenerator {
+public class SpongePlaceholderParser implements PlaceholderParser {
 
-    private SerializationBehaviorStreamGenerator() {
+    private final ResourceKey key;
+    private final Function<PlaceholderContext, Component> function;
+
+    public SpongePlaceholderParser(final ResourceKey key, final Function<PlaceholderContext, Component> function) {
+        this.key = key;
+        this.function = function;
     }
 
-    public static Stream<SerializationBehavior> stream() {
-        return Stream.of(
-                new SpongeSerializationBehavior(ResourceKey.sponge("automatic")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("manual")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("metadata_only")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("none"))
-        );
+    @Override
+    public Component parse(final PlaceholderContext placeholderContext) {
+        return this.function.apply(placeholderContext);
     }
+
+    @Override
+    public ResourceKey getKey() {
+        return this.key;
+    }
+
 }

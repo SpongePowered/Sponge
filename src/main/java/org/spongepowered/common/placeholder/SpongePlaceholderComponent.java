@@ -22,25 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.builtin.sponge;
+package org.spongepowered.common.placeholder;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.common.world.SpongeSerializationBehavior;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.placeholder.PlaceholderComponent;
+import org.spongepowered.api.placeholder.PlaceholderContext;
+import org.spongepowered.api.placeholder.PlaceholderParser;
 
-import java.util.stream.Stream;
+public class SpongePlaceholderComponent implements PlaceholderComponent {
 
-public final class SerializationBehaviorStreamGenerator {
+    private final PlaceholderParser parser;
+    private final PlaceholderContext context;
 
-    private SerializationBehaviorStreamGenerator() {
+    public SpongePlaceholderComponent(final PlaceholderParser parser, final PlaceholderContext context) {
+        this.parser = parser;
+        this.context = context;
     }
 
-    public static Stream<SerializationBehavior> stream() {
-        return Stream.of(
-                new SpongeSerializationBehavior(ResourceKey.sponge("automatic")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("manual")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("metadata_only")),
-                new SpongeSerializationBehavior(ResourceKey.sponge("none"))
-        );
+    @Override
+    public PlaceholderContext getContext() {
+        return this.context;
     }
+
+    @Override
+    public PlaceholderParser getParser() {
+        return this.parser;
+    }
+
+    @Override
+    public Component asComponent() {
+        return this.parser.parse(this.context);
+    }
+
 }
