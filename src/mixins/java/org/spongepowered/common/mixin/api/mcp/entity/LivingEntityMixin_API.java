@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -33,11 +35,16 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.entity.projectile.ProjectileLauncher;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 import java.util.Set;
@@ -74,4 +81,19 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
         return values;
     }
 
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType) {
+        return ProjectileLauncher.launch(checkNotNull(projectileType, "projectileType"), this, null);
+    }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType, Vector3d velocity) {
+        return ProjectileLauncher.launch(checkNotNull(projectileType, "projectileType"), this, checkNotNull(velocity, "velocity"));
+    }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectileTo(final EntityType<T> projectileType, final Entity target) {
+        // TODO implement this for all LivingEntities ?
+        return Optional.empty();
+    }
 }

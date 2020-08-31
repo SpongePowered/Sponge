@@ -275,6 +275,7 @@
         "mcp.tileentity.ComparatorTileEntityMixin_API",
         "mcp.tileentity.ConduitTileEntityMixin_API",
         "mcp.tileentity.DaylightDetectorTileEntityMixin_API",
+        "mcp.tileentity.DispenserTileEntityMixin_API",
         "mcp.tileentity.EnchantmentTableTileEntityMixin_API",
         "mcp.tileentity.EnderChestTileEntityMixin_API",
         "mcp.tileentity.EndGatewayTileEntityMixin_API",

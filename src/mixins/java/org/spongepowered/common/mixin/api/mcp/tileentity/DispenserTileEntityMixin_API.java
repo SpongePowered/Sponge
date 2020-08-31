@@ -22,16 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.tileentity;
+package org.spongepowered.common.mixin.api.mcp.tileentity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.tileentity.DispenserTileEntity;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
-import org.spongepowered.common.mixin.api.mcp.tileentity.LockableLootTileEntityMixin_API;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
@@ -40,13 +41,18 @@ import java.util.Optional;
 public abstract class DispenserTileEntityMixin_API extends LockableLootTileEntityMixin_API<Dispenser> implements Dispenser {
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, null);
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType) {
+        return ProjectileLauncher.launch(checkNotNull(projectileType, "projectileType"), this, null);
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, checkNotNull(velocity, "velocity"));
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType, Vector3d velocity) {
+        return ProjectileLauncher.launch(checkNotNull(projectileType, "projectileType"), this, checkNotNull(velocity, "velocity"));
+    }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectileTo(final EntityType<T> projectileType, final Entity target) {
+        return Optional.empty();
     }
 
 }

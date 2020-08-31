@@ -24,31 +24,18 @@
  */
 package org.spongepowered.common.entity.projectile;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.ShulkerEntity;
-import net.minecraft.entity.projectile.ShulkerBulletEntity;
-import net.minecraft.util.SoundEvents;
-import org.spongepowered.api.entity.living.golem.Shulker;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.ShulkerBullet;
+import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.api.world.ServerLocation;
 
 import java.util.Optional;
 
-public class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> {
+public interface ProjectileLogic<T extends Projectile> {
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, Shulker source, Class<P> projectileClass, Object... args) {
-        if (projectileClass == ShulkerBullet.class && args.length == 1 && args[0] instanceof Entity) {
-            ShulkerEntity shulker = (ShulkerEntity) source;
-            ShulkerBulletEntity bullet = new ShulkerBulletEntity(shulker.world, shulker, (Entity) args[0], shulker.getAttachmentFacing().getAxis());
-            shulker.world.addEntity(bullet);
-            shulker.playSound(SoundEvents.ENTITY_SHULKER_SHOOT,
-                    2.0F, (shulker.world.rand.nextFloat() - shulker.world.rand.nextFloat()) * 0.2F + 1.0F);
+    Optional<T> launch(ProjectileSource source);
 
-            return Optional.of((P) bullet);
-        }
-
-        return ProjectileLauncher.launch(projectileClass, source, null);
+    default Optional<T> createProjectile(ProjectileSource source, EntityType<T> projectileType, ServerLocation loc) {
+        return ProjectileLauncher.defaultLaunch(source, projectileType, loc);
     }
 }

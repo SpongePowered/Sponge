@@ -24,26 +24,14 @@
  */
 package org.spongepowered.common.entity.projectile;
 
-import org.spongepowered.api.block.entity.carrier.Dispenser;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
+
 import java.util.Optional;
 
-public class SimpleDispenserLaunchLogic<P extends Projectile> extends SimpleEntityLaunchLogic<P> {
+public interface ProjectileSourceLogic<T extends ProjectileSource> {
 
-    public SimpleDispenserLaunchLogic(Class<P> projectileClass) {
-        super(projectileClass);
-    }
+    <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, T source, EntityType<P> projectileType, Object... args);
 
-    @Override
-    public Optional<P> launch(ProjectileSource source) {
-        Optional<P> ret = super.launch(source);
-        if (ret.isPresent()) {
-            return ret;
-        }
-        if (source instanceof Dispenser) {
-            return ProjectileLauncher.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileClass);
-        }
-        return ret;
-    }
 }

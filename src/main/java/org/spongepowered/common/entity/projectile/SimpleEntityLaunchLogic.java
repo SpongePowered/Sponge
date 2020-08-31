@@ -24,12 +24,38 @@
  */
 package org.spongepowered.common.entity.projectile;
 
+import net.minecraft.entity.LivingEntity;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.api.world.ServerLocation;
+
 import java.util.Optional;
+import java.util.function.Supplier;
 
-public interface ProjectileSourceLogic<T extends ProjectileSource> {
+public class SimpleEntityLaunchLogic<P extends Projectile> implements ProjectileLogic<P> {
 
-    <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, T source, Class<P> projectileClass, Object... args);
+    protected final Supplier<EntityType<P>> projectileType;
 
+    public SimpleEntityLaunchLogic(Supplier<EntityType<P>> projectileType) {
+        this.projectileType = projectileType;
+    }
+
+    @Override
+    public Optional<P> launch(ProjectileSource source) {
+        if (!(source instanceof Entity)) {
+            return Optional.empty();
+        }
+        ServerLocation loc = ((Entity) source).getServerLocation().add(0, ((net.minecraft.entity.Entity) source).getHeight() / 2, 0);
+        if (source instanceof LivingEntity) {
+            return this.createProjectile((LivingEntity) source, loc);
+        } else {
+            return this.createProjectile(source, this.projectileType.get(), loc);
+        }
+    }
+
+    protected Optional<P> createProjectile(LivingEntity source, ServerLocation loc) {
+        return this.createProjectile((ProjectileSource) source, this.projectileType.get(), loc);
+    }
 }
