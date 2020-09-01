@@ -79,7 +79,8 @@
         "world.server.ServerChunkProviderMixin",
         "world.server.ServerWorldMixin",
         "world.storage.SaveHandlerMixin",
-        "world.storage.WorldInfoMixin"
+        "world.storage.WorldInfoMixin",
+        "entity.passive.horse.LlamaEntityMixin"
     ],
     "client": [
         "client.entity.player.AbstractClientPlayerEntityMixin",

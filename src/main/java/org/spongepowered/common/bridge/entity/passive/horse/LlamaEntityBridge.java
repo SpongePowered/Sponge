@@ -22,33 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.bridge.entity.passive.horse;
 
-import net.minecraft.entity.passive.horse.LlamaEntity;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.LlamaType;
-import org.spongepowered.common.accessor.entity.passive.horse.LlamaEntityAccessor;
-import org.spongepowered.common.bridge.entity.passive.horse.LlamaEntityBridge;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.type.SpongeLlamaType;
 
-public final class LlamaData {
+public interface LlamaEntityBridge {
 
-    private LlamaData() {
-    }
+    LlamaType bridge$getLlamaType();
 
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(LlamaEntity.class)
-                    .create(Keys.STRENGTH)
-                        .get(LlamaEntity::getStrength)
-                        .set((h, v) -> ((LlamaEntityAccessor) h).accessor$setStrength(v))
-                .asMutable(LlamaEntityBridge.class)
-                    .create(Keys.LLAMA_TYPE)
-                        .get(LlamaEntityBridge::bridge$getLlamaType)
-                        .set(LlamaEntityBridge::bridge$setLlamaType);
-    }
-    // @formatter:on
+    void bridge$setLlamaType(LlamaType type);
 }

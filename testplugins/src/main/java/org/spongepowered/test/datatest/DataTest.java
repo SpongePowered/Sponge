@@ -50,6 +50,7 @@ import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.FoxTypes;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
 import org.spongepowered.api.data.type.PistonTypes;
@@ -926,7 +927,7 @@ public final class DataTest  {
         this.checkGetData(glowstoneState, Keys.LIGHT_EMISSION, 15);
 
         final Entity llama = world.createEntity(EntityTypes.LLAMA.get(), position);
-//        this.checkOfferData(llama, Keys.LLAMA_TYPE, LlamaTypes.BROWN.get());
+        this.checkOfferData(llama, Keys.LLAMA_TYPE, LlamaTypes.BROWN.get());
 
         // TODO Keys.LOCK_TOKEN on BlockEntity
 //        this.checkOfferData(jungleAxe, Keys.LOCK_TOKEN, "Key");
