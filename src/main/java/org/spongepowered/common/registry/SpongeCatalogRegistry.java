@@ -221,6 +221,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -246,7 +247,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
     @Override
     public <T extends CatalogType, E extends T> Supplier<E> provideSupplier(final Class<T> catalogClass, final String suggestedId) {
-        Preconditions.checkNotNull(suggestedId);
+        Objects.requireNonNull(suggestedId);
 
         final Map<String, Supplier<CatalogType>> catalogSuppliers = this.suppliers.get(catalogClass);
         if (catalogSuppliers == null) {
@@ -263,7 +264,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
     @Override
     public <T extends CatalogType> Optional<T> get(final Class<T> typeClass, final net.kyori.adventure.key.Key key) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
         if (registry == null) {
@@ -297,7 +298,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
     @Override
     public <T extends CatalogType> Collection<T> getAllFor(final Class<T> typeClass, final String namespace) {
-        Preconditions.checkNotNull(namespace);
+        Objects.requireNonNull(namespace);
 
         final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
         final List<T> types = new ArrayList<>();
@@ -312,7 +313,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
     @Override
     public <T extends CatalogType> Stream<T> streamAllFor(final Class<T> typeClass, final String namespace) {
-        Preconditions.checkNotNull(namespace);
+        Objects.requireNonNull(namespace);
 
         final Registry<CatalogType> registry = this.registriesByType.get(typeClass);
         final Stream<T> stream;
@@ -330,7 +331,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     public <T extends CatalogType, E extends T> SpongeCatalogRegistry registerCatalogAndSupplier(final Class<E> catalogClass, final String suggestedId, Supplier<E> supplier) {
-        Preconditions.checkNotNull(supplier);
+        Objects.requireNonNull(supplier);
 
         // Typically this isn't safe but for fake vanilla registries we can do it
         final E value = supplier.get();
@@ -342,7 +343,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     public <T extends CatalogType, E extends T> SpongeCatalogRegistry registerSupplier(final Class<E> catalogClass, final String suggestedId, final Supplier<E> supplier) {
-        Preconditions.checkNotNull(supplier);
+        Objects.requireNonNull(supplier);
 
         final Map<String, Supplier<CatalogType>> catalogSuppliers = this.suppliers.computeIfAbsent((Class<CatalogType>) (Object) catalogClass, k -> new Object2ObjectArrayMap<>());
         if (catalogSuppliers.containsKey(suggestedId)) {
@@ -354,14 +355,14 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key, final boolean isDynamic) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         return this.registerRegistry(catalogClass, key, null, false, isDynamic);
     }
 
     public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key,
             @Nullable final Supplier<Set<T>> defaultsSupplier, final boolean generateSuppliers, final boolean isDynamic) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         if (this.registries.get(key) != null) {
             throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered for '%s!", catalogClass, key));
@@ -389,8 +390,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     public <T extends CatalogType> SpongeCatalogRegistry registerRegistry(final Class<T> catalogClass, final ResourceKey key, final Registry<T> registry) {
-        Preconditions.checkNotNull(key);
-        Preconditions.checkNotNull(registry);
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(registry);
 
         this.registries.put(key, (Registry<CatalogType>) registry);
         this.registriesByType.put((Class<CatalogType>) catalogClass, (Registry<CatalogType>) registry);
@@ -398,13 +399,13 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     private <T extends CatalogType> SpongeCatalogRegistry generateCallbackRegistry(final Class<T> catalogClass, final ResourceKey key, final BiConsumer<ResourceLocation, T> callback) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         if (this.registries.containsKey(key)) {
             throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered for '%s!", catalogClass, key));
         }
 
-        final Registry<CatalogType> registry =  (Registry<CatalogType>) new CallbackRegistry<>(callback);
+        final Registry<CatalogType> registry = (Registry<CatalogType>) new CallbackRegistry<>(callback);
         this.registries.put(key, registry);
         this.registriesByType.put((Class<CatalogType>) catalogClass, registry);
         this.dynamicCatalogs.add(catalogClass);
@@ -414,7 +415,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
     private <T extends CatalogType, U> SpongeCatalogRegistry registerMappedRegistry(final Class<T> catalogClass, final ResourceKey key,
             @Nullable final Supplier<Set<Tuple<T, U>>> defaultsSupplier, final boolean generateSuppliers, final boolean isDynamic) {
-        Preconditions.checkNotNull(key);
+        Objects.requireNonNull(key);
 
         if (this.registries.containsKey(key)) {
             throw new DuplicateRegistrationException(String.format("Catalog '%s' already has a registry registered for '%s!", catalogClass, key));
@@ -431,7 +432,8 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
                 registry.registerMapping(kv.getFirst(), kv.getSecond());
 
                 if (generateSuppliers) {
-                    SpongeCatalogRegistry.this.suppliers.computeIfAbsent((Class<CatalogType>) catalogClass, k -> new HashMap<>()).put(key.getValue(), kv::getFirst);
+                    SpongeCatalogRegistry.this.suppliers.computeIfAbsent((Class<CatalogType>) catalogClass, k -> new HashMap<>()).put(kv.getFirst()
+                            .getKey().getValue(), kv::getFirst);
                 }
             });
         }
@@ -456,7 +458,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     }
 
     public <C extends CatalogType> C registerCatalog(final C catalogType) {
-        Preconditions.checkNotNull(catalogType);
+        Objects.requireNonNull(catalogType);
 
         final Registry<C> registry = (Registry<C>) this.registriesByType.get(catalogType.getClass());
         if (registry == null) {
