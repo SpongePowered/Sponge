@@ -83,6 +83,9 @@ import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import org.spongepowered.api.placeholder.PlaceholderComponent;
+import org.spongepowered.api.placeholder.PlaceholderContext;
+import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.registry.BuilderRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
@@ -90,8 +93,8 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.service.ban.Ban;
+import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
@@ -157,6 +160,9 @@ import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingReci
 import org.spongepowered.common.item.recipe.crafting.SpongeSpecialCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeStoneCutterRecipeBuilder;
 import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder;
+import org.spongepowered.common.placeholder.SpongePlaceholderComponentBuilder;
+import org.spongepowered.common.placeholder.SpongePlaceholderContextBuilder;
+import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
@@ -282,6 +288,10 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(Selector.Builder.class, SpongeSelectorFactory::createBuilder)
             .register(DataStore.Builder.class, SpongeDataStoreBuilder::new)
             .register(KeyValueMatcher.Builder.class, SpongeKeyValueMatcherBuilder::new)
+            .register(PlaceholderParser.Builder.class, SpongePlaceholderParserBuilder::new)
+            .register(PlaceholderContext.Builder.class, SpongePlaceholderContextBuilder::new)
+            .register(PlaceholderComponent.Builder.class, SpongePlaceholderComponentBuilder::new)
+
         ;
     }
 }

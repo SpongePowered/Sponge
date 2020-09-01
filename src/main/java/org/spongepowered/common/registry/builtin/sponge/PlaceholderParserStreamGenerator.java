@@ -49,7 +49,7 @@ public final class PlaceholderParserStreamGenerator {
                                 .orElse(TextComponent.empty()))
                         .build(),
                 new SpongePlaceholderParserBuilder()
-                        .key(ResourceKey.resolve("current_world"))
+                        .key(ResourceKey.sponge("current_world"))
                         .parser(placeholderText ->
                                 TextComponent.of(
                                     placeholderText.getAssociatedObject().filter(x -> x instanceof Locatable)
