@@ -53,6 +53,7 @@ import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
+import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.api.data.type.PistonTypes;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.type.ProfessionTypes;
@@ -987,7 +988,7 @@ public final class DataTest  {
 
         final Entity parrot = world.createEntity(EntityTypes.PARROT.get(), position);
 // TODO missing supplier
-//        this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_AND_BLUE.get());
+        this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_AND_BLUE.get());
 
 // TODO missing ParticleEffect.Builder registration
 //        this.checkOfferData(areaEffectCloud, Keys.PARTICLE_EFFECT, ParticleEffect.builder().type(ParticleTypes.BUBBLE.get()).build());
