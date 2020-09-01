@@ -47,6 +47,7 @@ import org.spongepowered.api.data.type.AttachmentSurfaces;
 import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.type.ChestAttachmentType;
+import org.spongepowered.api.data.type.CatTypes;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.FoxTypes;
 import org.spongepowered.api.data.type.HandTypes;
@@ -337,10 +338,9 @@ public final class DataTest  {
         final Entity illusioner = world.createEntity(EntityTypes.ILLUSIONER.get(), position);
         this.checkGetData(illusioner, Keys.CASTING_TIME, 0);
 
-// TODO missing provider?
-//        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.ALL_BLACK.get());
-//        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.JELLIE.get());
-//        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.WHITE.get());
+        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.ALL_BLACK.get());
+        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.JELLIE.get());
+        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.WHITE.get());
 
         // TODO
 //        world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
