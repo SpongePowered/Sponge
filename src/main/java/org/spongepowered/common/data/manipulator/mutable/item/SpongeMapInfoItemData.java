@@ -54,7 +54,7 @@ public class SpongeMapInfoItemData extends AbstractSingleData<MapInfo, MapInfoIt
 
     @Override
     public Value<MapInfo> mapInfo() {
-        return new SpongeValue<>(Keys.MAP_INFO, getDefaultMapInfo(), this.getValue());
+        return new SpongeValue<>(Keys.MAP_INFO, SpongeMapInfoItemData.getDefaultMapInfo(), this.getValue());
     }
 
     @Override
