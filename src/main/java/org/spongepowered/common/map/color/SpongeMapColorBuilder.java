@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.map.color;
 
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -36,8 +37,6 @@ import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkState;
-
 public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> implements MapColor.Builder {
     @Nullable
     private MapColorType color = null;
@@ -49,25 +48,25 @@ public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> impleme
 
     @Override
     public MapColor.Builder base() {
-        shade = 0;
+        this.shade = 0;
         return this;
     }
 
     @Override
     public MapColor.Builder dark() {
-        shade = 1;
+        this.shade = 1;
         return this;
     }
 
     @Override
     public MapColor.Builder darker() {
-        shade = 2;
+        this.shade = 2;
         return this;
     }
 
     @Override
     public MapColor.Builder darkest() {
-        shade = 3;
+        this.shade = 3;
         return this;
     }
 
@@ -79,8 +78,8 @@ public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> impleme
 
     @Override
     public MapColor build() throws IllegalStateException {
-        checkState(color != null, "Color has not been set yet");
-        return new SpongeMapColor(color, shade);
+        Preconditions.checkState(this.color != null, "Color has not been set yet");
+        return new SpongeMapColor(this.color, this.shade);
     }
 
     @Override
@@ -99,8 +98,8 @@ public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> impleme
     @Override
     public DataBuilder<MapColor> from(MapColor value) {
         SpongeMapColor mapColorBridge = (SpongeMapColor)value;
-        color = mapColorBridge.getType();
-        shade = mapColorBridge.getShade();
+        this.color = mapColorBridge.getType();
+        this.shade = mapColorBridge.getShade();
         return this;
     }
 }

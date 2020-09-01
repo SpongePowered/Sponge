@@ -92,12 +92,12 @@ public abstract class MapInfoMixin_API implements MapInfo {
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Constants.Map.MAP_ID, ((MapDataBridge) this).bridge$getMapId())
-                .set(Constants.Map.MAP_DATA, getMapInfoData());
+                .set(Constants.Map.MAP_DATA, this.getMapInfoData());
     }
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        return Sets.newHashSet(getMapInfoData());
+        return Sets.newHashSet(this.getMapInfoData());
     }
 
 }

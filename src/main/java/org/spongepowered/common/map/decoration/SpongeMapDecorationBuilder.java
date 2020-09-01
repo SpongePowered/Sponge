@@ -109,7 +109,7 @@ public class SpongeMapDecorationBuilder extends AbstractDataBuilder<MapDecoratio
 
     @Override
     public MapDecoration build() throws IllegalStateException {
-        Preconditions.checkNotNull(type, "Type has not been set");
+        Preconditions.checkNotNull(this.type, "Type has not been set");
         Preconditions.checkNotNull(this.dir, "Direction has not been set");
         return (MapDecoration) new net.minecraft.world.storage.MapDecoration(
                 ((SpongeMapDecorationType)type).getType(),

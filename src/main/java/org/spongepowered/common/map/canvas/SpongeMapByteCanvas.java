@@ -119,7 +119,7 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
         int pos = 0;
         for (int y = 0; y < Constants.Map.MAP_PIXELS; y++, pos += Constants.Map.MAP_PIXELS) {
             for (int x = 0; x < Constants.Map.MAP_PIXELS; x++, pos++) {
-                image.setRGB(x, y, getColor(x,y).getColor().getRgb());
+                image.setRGB(x, y, this.getColor(x,y).getColor().getRgb());
             }
         }
         return image;
@@ -131,7 +131,7 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
         int pos = 0;
         for (int y = 0; y < Constants.Map.MAP_PIXELS; y++, pos += Constants.Map.MAP_PIXELS) {
             for (int x = 0; x < Constants.Map.MAP_PIXELS; x++, pos++) {
-                MapColor foundColor = getColor(x,y);
+                MapColor foundColor = this.getColor(x,y);
                 Color paintColor = foundColor.getType() == MapColorTypes.AIR ? color
                         : foundColor.getColor().asJavaColor();
                 image.setRGB(x, y, paintColor.getRGB());

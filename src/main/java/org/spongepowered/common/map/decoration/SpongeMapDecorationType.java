@@ -33,13 +33,13 @@ public class SpongeMapDecorationType implements MapDecorationType {
     private String name;
 
     public SpongeMapDecorationType(MapDecoration.Type mapDecorationType, String id, String name) {
-        type = mapDecorationType;
+        this.type = mapDecorationType;
         this.id = id;
         this.name = name;
     }
 
     public MapDecoration.Type getType() {
-        return type;
+        return this.type;
     }
 
     @Override

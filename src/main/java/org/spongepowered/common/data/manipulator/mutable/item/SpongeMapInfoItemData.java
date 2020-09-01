@@ -45,7 +45,7 @@ public class SpongeMapInfoItemData extends AbstractSingleData<MapInfo, MapInfoIt
     public SpongeMapInfoItemData() {
         // This means someone has got the default for which map (also used for registration)
         // an ItemStack refers to. So we give them map 0.
-        this(getDefaultMapInfo());
+        this(SpongeMapInfoItemData.getDefaultMapInfo());
     }
 
     public SpongeMapInfoItemData(MapInfo mapInfo) {
@@ -54,7 +54,7 @@ public class SpongeMapInfoItemData extends AbstractSingleData<MapInfo, MapInfoIt
 
     @Override
     public Value<MapInfo> mapInfo() {
-        return new SpongeValue<>(Keys.MAP_INFO, getDefaultMapInfo(), getValue());
+        return new SpongeValue<>(Keys.MAP_INFO, getDefaultMapInfo(), this.getValue());
     }
 
     @Override
@@ -64,7 +64,7 @@ public class SpongeMapInfoItemData extends AbstractSingleData<MapInfo, MapInfoIt
 
     @Override
     public MapInfoItemData copy() {
-        return new SpongeMapInfoItemData(getValue());
+        return new SpongeMapInfoItemData(this.getValue());
     }
 
     @Override
@@ -75,6 +75,6 @@ public class SpongeMapInfoItemData extends AbstractSingleData<MapInfo, MapInfoIt
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Keys.MAP_INFO.getQuery(), getValue());
+                .set(Keys.MAP_INFO.getQuery(), this.getValue());
     }
 }

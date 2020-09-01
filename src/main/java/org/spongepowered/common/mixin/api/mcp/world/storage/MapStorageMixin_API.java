@@ -28,7 +28,6 @@ import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldSavedData;
 import org.spongepowered.api.map.MapInfo;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -62,7 +61,7 @@ public abstract class MapStorageMixin_API implements org.spongepowered.api.world
      * Bear in mind minecraft has its own cache so repeating this isn't too bad.
      * (getOrLoad only loads the file when needed)
      */
-    private void fullyLoadCache() {
+    private void api$fullyLoadCache() {
         Number highestId = idCounts.get(Constants.Map.ID_COUNTS_KEY); // Prefer intValue() as it means max map ids can be changed to int/long without breaking this
         if (highestId == null) {
             return;
@@ -78,7 +77,7 @@ public abstract class MapStorageMixin_API implements org.spongepowered.api.world
 
     @Override
     public Collection<MapInfo> getAllMapInfos() {
-        fullyLoadCache();
+        this.api$fullyLoadCache();
         return this.uuidCache.values();
     }
 
@@ -86,7 +85,7 @@ public abstract class MapStorageMixin_API implements org.spongepowered.api.world
     public Optional<MapInfo> getMapInfo(UUID uuid) {
         Optional<MapInfo> mapInfo = Optional.ofNullable(this.uuidCache.get(uuid));
         if (!mapInfo.isPresent()) {
-            fullyLoadCache();
+            this.api$fullyLoadCache();
             mapInfo = Optional.ofNullable(this.uuidCache.get(uuid));
         }
         return mapInfo;

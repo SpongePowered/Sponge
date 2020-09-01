@@ -46,23 +46,23 @@ public class ImmutableSpongeMapInfoItemData extends AbstractImmutableSingleData<
 
     @Override
     public ImmutableValue<MapInfo> mapInfo() {
-        return new ImmutableSpongeValue<>(Keys.MAP_INFO, SpongeMapInfoItemData.getDefaultMapInfo(), getValue());
+        return new ImmutableSpongeValue<>(Keys.MAP_INFO, SpongeMapInfoItemData.getDefaultMapInfo(), this.getValue());
     }
 
     @Override
     protected ImmutableValue<?> getValueGetter() {
-        return mapInfo();
+        return this.mapInfo();
     }
 
     @Override
     public MapInfoItemData asMutable() {
-        return new SpongeMapInfoItemData(getValue());
+        return new SpongeMapInfoItemData(this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Keys.MAP_INFO.getQuery(), getValue());
+                .set(Keys.MAP_INFO.getQuery(), this.getValue());
     }
 
 }
