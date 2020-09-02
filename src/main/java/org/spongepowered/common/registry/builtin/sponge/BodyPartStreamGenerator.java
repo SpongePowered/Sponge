@@ -37,11 +37,11 @@ public final class BodyPartStreamGenerator {
 
     public static Stream<BodyPart> stream() {
         return Stream.of(
+            new SpongeBodyPart(ResourceKey.minecraft("chest")),
             new SpongeBodyPart(ResourceKey.minecraft("head")),
-            new SpongeBodyPart(ResourceKey.minecraft("body")),
             new SpongeBodyPart(ResourceKey.minecraft("left_arm")),
-            new SpongeBodyPart(ResourceKey.minecraft("right_arm")),
             new SpongeBodyPart(ResourceKey.minecraft("left_leg")),
+            new SpongeBodyPart(ResourceKey.minecraft("right_arm")),
             new SpongeBodyPart(ResourceKey.minecraft("right_leg"))
         );
     }

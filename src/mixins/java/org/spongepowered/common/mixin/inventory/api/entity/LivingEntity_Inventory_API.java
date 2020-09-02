@@ -22,37 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api;
+package org.spongepowered.common.mixin.inventory.api.entity;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.inventory.container.Container;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.CarriedBridge;
-import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
-import org.spongepowered.common.inventory.custom.CustomInventory;
+import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
-import java.util.Optional;
-
-/**
- * Implements {@link CarriedInventory} using {@link CarriedBridge}
- */
-@Mixin(value = {
-    Container.class,
-    CarriedWrapperInventory.class,
-    CustomInventory.class,
-    ArmorStandEntity.class
-})
-public abstract class TraitMixin_Carried_Inventory_API implements CarriedInventory<Carrier> {
-
-    @Override
-    public Optional<Carrier> getCarrier() {
-        if (this instanceof CarriedBridge) {
-            return ((CarriedBridge) this).bridge$getCarrier();
-        }
-        return Optional.empty();
-    }
+@Mixin(LivingEntity.class)
+public abstract class LivingEntity_Inventory_API implements DefaultImplementedAdapterInventory {
 
 }

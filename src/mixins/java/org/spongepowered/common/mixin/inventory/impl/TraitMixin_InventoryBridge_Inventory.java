@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.inventory.impl;
 
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -62,9 +64,10 @@ import javax.annotation.Nullable;
         SpongeUserInventory.class,
         CraftingInventory.class,
         CraftResultInventory.class,
-        ContainerMinecartEntity.class
+        ContainerMinecartEntity.class,
+        ArmorStandEntity.class
 }, priority = 999)
-public abstract class TraitMixin_InventoryBrige_Inventory implements InventoryAdapter, InventoryBridge {
+public abstract class TraitMixin_InventoryBridge_Inventory implements InventoryAdapter, InventoryBridge {
 
     @Nullable private SlotLensProvider impl$provider;
     @Nullable private Lens impl$lens;

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,7 +32,11 @@ import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.mixin.inventory.api.inventory.EquipmentSlotTypeMixin_Inventory_API;
 import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Optional;
@@ -62,12 +65,16 @@ public abstract class TraitMixin_Equipable_Inventory_API implements Equipable {
 
     @Override
     public Optional<ItemStack> getEquipped(final EquipmentType type) {
-        throw new MissingImplementationException("TraitMixin_Equipable_Inventory_API", "getEquipped");
+        final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
+        final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
+        return Optional.of(ItemStackUtil.fromNative(lens.getStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getSlotIndex())));
     }
 
     @Override
     public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
-        throw new MissingImplementationException("TraitMixin_Equipable_Inventory_API", "equip");
+        final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
+        final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
+        return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getSlotIndex(), ItemStackUtil.toNative(equipment));
     }
 
 }

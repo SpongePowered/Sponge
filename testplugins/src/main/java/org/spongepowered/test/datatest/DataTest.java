@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test.datatest;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -44,6 +45,8 @@ import org.spongepowered.api.data.type.ArmorMaterials;
 import org.spongepowered.api.data.type.ArtTypes;
 import org.spongepowered.api.data.type.AttachmentSurfaces;
 import org.spongepowered.api.data.type.BannerPatternShapes;
+import org.spongepowered.api.data.type.BodyParts;
+import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.FoxTypes;
 import org.spongepowered.api.data.type.MooshroomTypes;
@@ -72,6 +75,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.explosive.EnderCrystal;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.animal.Sheep;
 import org.spongepowered.api.entity.living.animal.Turtle;
 import org.spongepowered.api.entity.living.monster.Patroller;
@@ -87,7 +91,11 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
+import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Color;
@@ -252,17 +260,22 @@ public final class DataTest  {
 
         // TODO Keys.BLOCK_LIGHT
 
-        final Entity fallingBlock = world.createEntity(EntityTypes.FALLING_BLOCK.get(), position);
+        final Entity fallingBlock = world.createEntity(EntityTypes.FALLING_BLOCK.get(), position.add(0,5,0));
         final BlockState sandState = BlockTypes.SAND.get().getDefaultState();
         this.checkOfferData(fallingBlock, Keys.BLOCK_STATE, sandState);
         this.checkOfferData(minecartEntity, Keys.BLOCK_STATE, dirtState);
 
         // TODO Keys.BLOCK_TEMPERATURE
 
-// TODO missing BodyPart registration
-        final Entity armorStand = world.createEntity(EntityTypes.ARMOR_STAND.get(), position);
-//        armorStand.offer(Keys.BODY_ROTATIONS, ImmutableMap.of(BodyParts.CHEST.get(), Vector3d.RIGHT));
-//        world.spawnEntity(armorStand);
+        final ArmorStand armorStand = (ArmorStand) world.createEntity(EntityTypes.ARMOR_STAND.get(), position);
+        armorStand.equip(EquipmentTypes.CHEST.get(), ItemStack.of(ItemTypes.LEATHER_CHESTPLATE));
+        armorStand.equip(EquipmentTypes.FEET.get(), ItemStack.of(ItemTypes.CHAINMAIL_BOOTS));
+        armorStand.equip(EquipmentTypes.HEAD.get(), ItemStack.of(ItemTypes.GOLDEN_HELMET));
+        armorStand.equip(EquipmentTypes.LEGS.get(), ItemStack.of(ItemTypes.DIAMOND_LEGGINGS));
+        armorStand.equip(EquipmentTypes.MAIN_HAND.get(), ItemStack.of(ItemTypes.DIAMOND));
+        armorStand.equip(EquipmentTypes.OFF_HAND.get(), ItemStack.of(ItemTypes.DIAMOND));
+
+        armorStand.offer(Keys.BODY_ROTATIONS, ImmutableMap.of(BodyParts.CHEST.get(), Vector3d.RIGHT));
 
         // TODO wither.get(Keys.BOSS_BAR)
 
@@ -328,7 +341,7 @@ public final class DataTest  {
 //        final Optional<ChestAttachmentType> chestAttachmentType = world.get(blockPos, Keys.CHEST_ATTACHMENT_TYPE);
 //        world.setBlock(blockPos.add(0, 0, 1), BlockTypes.CHEST.get().getDefaultState());
 
-        // TODO Keys.CHEST_ROTATION
+        this.checkOfferData(armorStand, Keys.CHEST_ROTATION, Vector3d.from(0, 90, 0));
 
         final ItemStack leatherBoots = ItemStack.of(ItemTypes.LEATHER_BOOTS);
         final ItemStack potion = ItemStack.of(ItemTypes.POTION);
@@ -532,11 +545,11 @@ public final class DataTest  {
         this.checkGetData(dirtState, Keys.HARDNESS, 0.5);
         this.checkGetData(bricksState, Keys.HARDNESS, 2.0);
 
-        this.checkOfferData(armorStand, Keys.HAS_ARMS, true);
         this.checkOfferData(armorStand, Keys.HAS_ARMS, false);
+        this.checkOfferData(armorStand, Keys.HAS_ARMS, true);
 
-        this.checkGetData(armorStand, Keys.HAS_BASE_PLATE, true);
         this.checkOfferData(armorStand, Keys.HAS_BASE_PLATE, false);
+        this.checkOfferData(armorStand, Keys.HAS_BASE_PLATE, true);
 
         this.checkGetData(donkey, Keys.HAS_CHEST, false);
         this.checkOfferData(donkey, Keys.HAS_CHEST, true);
@@ -548,6 +561,7 @@ public final class DataTest  {
         this.checkOfferData(dolphin, Keys.HAS_FISH, true);
 
         this.checkOfferData(armorStand, Keys.HAS_MARKER, true);
+        this.checkOfferData(armorStand, Keys.HAS_MARKER, false);
 
         final BlockState mushroomBlockState = BlockTypes.BROWN_MUSHROOM_BLOCK.get().getDefaultState();
         this.checkGetData(mushroomBlockState, Keys.HAS_PORES_DOWN, true);
@@ -559,8 +573,8 @@ public final class DataTest  {
 
         this.checkOfferData(player, Keys.HAS_VIEWED_CREDITS, true);
 
-        // TODO armorStand Keys.HEAD_ROTATION
-        this.checkOfferData(sheep, Keys.HEAD_ROTATION, position);
+        this.checkOfferData(armorStand, Keys.HEAD_ROTATION, Vector3d.from(0, 90, 0));
+        this.checkOfferData(sheep, Keys.HEAD_ROTATION, Vector3d.from(0, 90, 0));
 
         // TODO Keys.HEALING_CRYSTAL
 
@@ -814,6 +828,7 @@ public final class DataTest  {
 //        this.checkOfferData(player, Keys.IS_SLEEPING_IGNORED, true);
 
         this.checkOfferData(armorStand, Keys.IS_SMALL, true);
+        this.checkOfferData(armorStand, Keys.IS_SMALL, false);
 
         this.checkGetData(player, Keys.IS_SNEAKING, false);
 
@@ -893,8 +908,8 @@ public final class DataTest  {
 
         // TODO Keys.LEASH_HOLDER
 
-        // TODO Keys.LEFT_ARM_ROTATION
-        // TODO Keys.LEFT_LEG_ROTATION
+        this.checkOfferData(armorStand, Keys.LEFT_ARM_ROTATION, Vector3d.from(0, -90, -90));
+        this.checkOfferData(armorStand, Keys.LEFT_LEG_ROTATION, Vector3d.from(0, -90, -45));
 
         final Entity vex = world.createEntity(EntityTypes.VEX.get(), position);
         this.checkOfferData(vex, Keys.LIFE_TICKS, 10);
@@ -1054,8 +1069,8 @@ public final class DataTest  {
 
         // Keys.RESPAWN_LOCATIONS
 
-        this.checkOfferData(armorStand, Keys.RIGHT_ARM_ROTATION, Vector3d.UP);
-        this.checkOfferData(armorStand, Keys.RIGHT_LEG_ROTATION, Vector3d.UP);
+        this.checkOfferData(armorStand, Keys.RIGHT_ARM_ROTATION, Vector3d.from(0, 90, 90));
+        this.checkOfferData(armorStand, Keys.RIGHT_LEG_ROTATION, Vector3d.from(0, 90, 45));
 
         this.checkOfferData(ravager, Keys.ROARING_TIME, 20);
 

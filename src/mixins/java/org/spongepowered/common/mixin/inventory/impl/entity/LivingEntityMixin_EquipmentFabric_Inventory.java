@@ -27,16 +27,31 @@ package org.spongepowered.common.mixin.inventory.impl.entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.inventory.CarriedBridge;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
+import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.HeldHandSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fabric, InventoryBridge {
+public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fabric, InventoryBridge, LensGeneratorBridge, CarriedBridge {
 
     @Shadow public abstract ItemStack getItemStackFromSlot(EquipmentSlotType slotIn);
 
@@ -92,5 +107,25 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
 
     @Override
     public void fabric$markDirty() {
+    }
+
+    @Override
+    public SlotLensProvider lensGeneratorBridge$generateSlotLensProvider() {
+        return new LensRegistrar.BasicSlotLensProvider(this.fabric$getSize());
+    }
+
+    @Override
+    public Lens lensGeneratorBridge$generateLens(SlotLensProvider slotLensProvider) {
+        Map<EquipmentType, SlotLens> equipmentLenses = new LinkedHashMap<>();
+        for (int i = 0, slotsLength = SLOTS.length; i < slotsLength; i++) {
+            EquipmentSlotType slot = SLOTS[i];
+            equipmentLenses.put((EquipmentType) (Object) slot, slotLensProvider.getSlotLens(i));
+        }
+        return new EquipmentInventoryLens(equipmentLenses);
+    }
+
+    @Override
+    public Optional<Carrier> bridge$getCarrier() {
+        return Optional.of((Carrier) this);
     }
 }
