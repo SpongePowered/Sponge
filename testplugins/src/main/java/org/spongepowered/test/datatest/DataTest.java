@@ -406,14 +406,12 @@ public final class DataTest  {
 
         // TODO Keys.DIRECTION for other dataholders
         this.checkGetData(painting, Keys.DIRECTION, Direction.SOUTH);
-        // TODO offer fails
-//        this.checkOfferData(painting, Keys.DIRECTION, Direction.NORTH);
-//        this.checkOfferData(painting, Keys.DIRECTION, Direction.UP);
-// TODO missing provider?
-//        final Entity shulkerEntity = world.createEntity(EntityTypes.SHULKER.get(), position);
-//        this.checkGetData(shulkerEntity, Keys.DIRECTION, Direction.SOUTH);
-//        this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.NORTH);
-//        this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.UP);
+        this.checkOfferData(painting, Keys.DIRECTION, Direction.NORTH);
+
+        final Entity shulkerEntity = world.createEntity(EntityTypes.SHULKER.get(), position);
+        this.checkGetData(shulkerEntity, Keys.DIRECTION, Direction.DOWN);
+        this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.NORTH);
+        this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.UP);
         final Entity shulkerBullet = world.createEntity(EntityTypes.SHULKER_BULLET.get(), position);
         this.checkGetData(shulkerBullet, Keys.DIRECTION, Direction.NONE);
         this.checkOfferData(shulkerBullet, Keys.DIRECTION, Direction.NORTH);
