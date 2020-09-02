@@ -444,7 +444,7 @@ public final class DataTest  {
 //        this.checkGetData(BlockTypes.BLUE_CONCRETE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
 //        // TODO banner blockentity
         final Entity tropicalFish = world.createEntity(EntityTypes.TROPICAL_FISH.get(), position);
-//        this.checkOfferData(tropicalFish, Keys.DYE_COLOR, DyeColors.CYAN.get());
+        this.checkOfferData(tropicalFish, Keys.DYE_COLOR, DyeColors.CYAN.get());
 
         final Entity panda = world.createEntity(EntityTypes.PANDA.get(), position);
         this.checkOfferData(panda, Keys.EATING_TIME, 10);

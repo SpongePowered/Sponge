@@ -27,7 +27,11 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.TropicalFishShape;
+import org.spongepowered.common.accessor.entity.passive.fish.TropicalFishEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import java.util.Arrays;
 
 public final class TropicalFishData {
 
@@ -39,18 +43,48 @@ public final class TropicalFishData {
         registrator
                 .asMutable(TropicalFishEntity.class)
                     // Fish variant is: size | pattern << 8 | bodyColor << 16 | patternColor << 24
-                    .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) net.minecraft.item.DyeColor.byId((h.getVariant() >> 16) & 0xFF))
+                    .create(Keys.TROPICAL_FISH_SHAPE)
+                        .get(h -> (TropicalFishShape) (Object) TropicalFishData.getType(h))
                         .set((h, v) -> {
-                            final int dyeId = ((net.minecraft.item.DyeColor) (Object) h).getId() << 16;
-                            h.setVariant(h.getVariant() & 0xFF00FFFF | dyeId << 16);
+                            final net.minecraft.item.DyeColor baseColor = TropicalFishData.getBaseColor(h);
+                            final net.minecraft.item.DyeColor patternColor = TropicalFishData.getPatternColor(h);
+                            h.setVariant(((TropicalFishEntityAccessor.pack(((TropicalFishEntity.Type) (Object) v), patternColor, baseColor))));
+                        })
+                    .create(Keys.DYE_COLOR)
+                        .get(h -> (DyeColor) (Object) TropicalFishData.getBaseColor(h))
+                        .set((h, v) -> {
+                            final net.minecraft.item.DyeColor patternColor = TropicalFishData.getPatternColor(h);
+                            final TropicalFishEntity.Type type = TropicalFishData.getType(h);
+                            h.setVariant(((TropicalFishEntityAccessor.pack(type, patternColor, (net.minecraft.item.DyeColor) (Object) v))));
                         })
                     .create(Keys.PATTERN_COLOR)
-                        .get(h -> (DyeColor) (Object) net.minecraft.item.DyeColor.byId((h.getVariant() >> 24) & 0xFF))
+                        .get(h -> (DyeColor) (Object) TropicalFishData.getPatternColor(h))
                         .set((h, v) -> {
-                            final int dyeId = ((net.minecraft.item.DyeColor) (Object) h).getId() << 24;
-                            h.setVariant(h.getVariant() & 0x00FFFFFF | dyeId << 24);
+                            final net.minecraft.item.DyeColor baseColor = TropicalFishData.getBaseColor(h);
+                            final TropicalFishEntity.Type type = TropicalFishData.getType(h);
+                            h.setVariant(((TropicalFishEntityAccessor.pack(type, (net.minecraft.item.DyeColor) (Object) v, baseColor))));
                         });
     }
     // @formatter:on
+
+    private static net.minecraft.item.DyeColor getBaseColor(final TropicalFishEntity fishy) {
+        return net.minecraft.item.DyeColor.byId((fishy.getVariant() & 16711680) >> 16);
+    }
+
+    private static net.minecraft.item.DyeColor getPatternColor(final TropicalFishEntity fishy) {
+        return net.minecraft.item.DyeColor.byId((fishy.getVariant() & -16777216) >> 24);
+    }
+
+    private static int getSize(final TropicalFishEntity fishy) {
+        return Math.min(fishy.getVariant() & 255, 1);
+    }
+
+    private static int getPattern(final TropicalFishEntity fishy) {
+        return Math.min(fishy.getVariant() & '\uff00' >> 8, 5);
+    }
+
+    private static TropicalFishEntity.Type getType(final TropicalFishEntity fishy) {
+        return TropicalFishEntity.Type.values()[TropicalFishData.getSize(fishy) + 6 * TropicalFishData.getPattern(fishy)];
+    }
+
 }

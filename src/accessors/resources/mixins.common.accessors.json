@@ -178,7 +178,8 @@
         "world.spawner.AbstractSpawnerAccessor",
         "world.storage.SaveHandlerAccessor",
         "entity.item.BoatEntityAccessor",
-        "entity.EntityTypeAccessor"
+        "entity.EntityTypeAccessor",
+        "entity.passive.fish.TropicalFishEntityAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",
