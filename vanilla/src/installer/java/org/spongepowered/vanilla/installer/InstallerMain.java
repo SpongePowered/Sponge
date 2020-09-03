@@ -41,6 +41,7 @@ import org.spongepowered.vanilla.installer.model.sponge.SonatypeResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -58,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public final class InstallerMain {
 
@@ -81,7 +83,8 @@ public final class InstallerMain {
     public void run(final String[] args) throws Exception {
         VanillaCommandLine.configure(args);
 
-        this.logger.info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...", VanillaCommandLine.librariesDirectory);
+        this.logger.info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...",
+            VanillaCommandLine.librariesDirectory.toAbsolutePath());
         final List<Path> dependencies = this.downloadDependencies(VanillaCommandLine.librariesDirectory);
         final Path gameJar = this.downloadMinecraft(VanillaCommandLine.librariesDirectory);
         final Path srgZip = this.downloadSRG(VanillaCommandLine.librariesDirectory);
@@ -91,26 +94,22 @@ public final class InstallerMain {
 
         final String javaHome = System.getProperty("java.home");
         final String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        final StringJoiner classpathJoiner = new StringJoiner(File.pathSeparator, "", File.pathSeparator);
+        final String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
+        final String depsClasspath = dependencies.stream().map(Path::toString).collect(Collectors.joining(File.pathSeparator));
+        final String classpath = System.getProperty("java.class.path") + File.pathSeparator + depsClasspath + File.pathSeparator +
+            gameJar.toAbsolutePath().toString();
 
-        classpathJoiner.add(System.getProperty("java.class.path"));
-
-        for (final Path depFile : dependencies) {
-            classpathJoiner.add(depFile.toString());
-        }
-
-        classpathJoiner.add(gameJar.toString());
-        this.logger.debug("Setting classpath to: " + classpathJoiner.toString());
+        this.logger.debug("Setting classpath to: " + classpath);
 
         final String className = "org.spongepowered.vanilla.applaunch.Main";
         final List<String> command = new ArrayList<>();
         command.add(javaBin);
+        command.add(jvmArgs);
         command.add("-cp");
-        command.add(classpathJoiner.toString());
+        command.add(classpath);
         command.add(className);
         command.addAll(Arrays.asList(VanillaCommandLine.RAW_ARGS));
 
-        this.logger.debug("Launching JVM with flags: '{}'", command);
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
         final Process process = processBuilder.inheritIO().start();
         process.waitFor();
