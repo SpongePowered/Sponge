@@ -457,10 +457,10 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return registry;
     }
 
-    public <C extends CatalogType> C registerCatalog(final C catalogType) {
+    public <C extends CatalogType> C registerCatalog(final TypeToken<C> catalog, final C catalogType) {
         Objects.requireNonNull(catalogType);
 
-        final Registry<C> registry = (Registry<C>) this.registriesByType.get(catalogType.getClass());
+        final Registry<C> registry = (Registry<C>) this.registriesByType.get(catalog.getRawType());
         if (registry == null) {
             throw new UnknownTypeException(String.format("Catalog '%s' with id '%s' has no registry registered!", catalogType.getClass(), catalogType.getKey()));
         }
