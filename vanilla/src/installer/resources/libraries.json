@@ -179,6 +179,18 @@
       "module": "math",
       "version": "2.0.0-SNAPSHOT",
       "md5": "c567809a305818dd8ba776eca27db595"
+    },
+    {
+      "group": "com.typesafe",
+      "module": "config",
+      "version": "1.4.0",
+      "md5": "a666ffa41f51fa17dac3fed532cf5f22"
+    },
+    {
+      "group": "aopalliance",
+      "module": "aopalliance",
+      "version": "1.0",
+      "md5": "04177054e180d09e3998808efa0401c7"
     }
   ]
 }
