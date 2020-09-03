@@ -64,6 +64,11 @@ public abstract class LivingEntityMixin_Inventory {
 
     private final EnumMap<EquipmentSlotType, SlotLens> slotLens = new EnumMap<>(EquipmentSlotType.class);
 
+    @Surrogate
+    private void onGetItemStackFromSlot(CallbackInfo ci, EquipmentSlotType var3[], int var4, int var5, EquipmentSlotType equipmentslottype, ItemStack itemstack) {
+        this.onGetItemStackFromSlot(ci, 0, 0, var3, var4, var5, equipmentslottype, itemstack);
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "tick", locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getItemStackFromSlot(Lnet/minecraft/inventory/EquipmentSlotType;)Lnet/minecraft/item/ItemStack;"))
