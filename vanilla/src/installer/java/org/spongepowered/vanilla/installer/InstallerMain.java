@@ -92,6 +92,8 @@ public final class InstallerMain {
         final String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         final StringBuilder builder = new StringBuilder(System.getProperty("java.class.path"));
 
+        builder.append(";");
+
         for (final Path depFile : dependencies) {
             builder.append(depFile.toString()).append(";");
         }
@@ -105,6 +107,8 @@ public final class InstallerMain {
         command.add(builder.toString());
         command.add(className);
         command.addAll(Arrays.asList(VanillaCommandLine.RAW_ARGS));
+
+        this.logger.debug("Launching JVM with flags: '{}'", command);
         final ProcessBuilder processBuilder = new ProcessBuilder(command);
         final Process process = processBuilder.inheritIO().start();
         process.waitFor();
@@ -145,6 +149,11 @@ public final class InstallerMain {
 
                     final SonatypeResponse response = this.getResponseFor(gson, dependency);
 
+                    if (response.items.isEmpty()) {
+                        this.logger.error("No data received from '{}'!", new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL, dependency.md5, dependency.group,
+                                dependency.module, dependency.version)));
+                        continue;
+                    }
                     final SonatypeResponse.Item item = response.items.get(0);
                     final URL url = item.downloadUrl;
 
@@ -152,6 +161,12 @@ public final class InstallerMain {
                 }
             } else {
                 final SonatypeResponse response = this.getResponseFor(gson, dependency);
+
+                if (response.items.isEmpty()) {
+                    this.logger.error("No data received from '{}'!", new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL, dependency.md5, dependency.group,
+                            dependency.module, dependency.version)));
+                    continue;
+                }
 
                 final SonatypeResponse.Item item = response.items.get(0);
                 final URL url = item.downloadUrl;

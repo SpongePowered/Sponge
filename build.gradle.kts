@@ -711,7 +711,7 @@ project("SpongeVanilla") {
             archiveClassifier.set("universal")
             manifest {
                 attributes(mapOf(
-                        "Main-Class" to "org.spongepowered.vanilla.applaunch.launcher.LauncherMain",
+                        "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
                         "Launch-Target" to "sponge_server_prod",
                         "Specification-Title" to "SpongeCommon",
                         "Specification-Vendor" to "SpongePowered",
@@ -733,7 +733,6 @@ project("SpongeVanilla") {
             from(vanillaMixinsJar)
             from(vanillaAccessorsJar)
             from(vanillaInstallerConfig)
-            from(emitDependencies)
             dependencies {
                 include(project(":"))
                 include(project(":SpongeAPI"))
