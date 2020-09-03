@@ -57,6 +57,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 
 public final class InstallerMain {
 
@@ -90,21 +91,22 @@ public final class InstallerMain {
 
         final String javaHome = System.getProperty("java.home");
         final String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        final StringBuilder builder = new StringBuilder(System.getProperty("java.class.path"));
+        final StringJoiner classpathJoiner = new StringJoiner(File.pathSeparator, "", File.pathSeparator);
 
-        builder.append(";");
+        classpathJoiner.add(System.getProperty("java.class.path"));
 
         for (final Path depFile : dependencies) {
-            builder.append(depFile.toString()).append(";");
+            classpathJoiner.add(depFile.toString());
         }
 
-        builder.append(gameJar).append(";");
+        classpathJoiner.add(gameJar.toString());
+        this.logger.debug("Setting classpath to: " + classpathJoiner.toString());
 
         final String className = "org.spongepowered.vanilla.applaunch.Main";
         final List<String> command = new ArrayList<>();
         command.add(javaBin);
         command.add("-cp");
-        command.add(builder.toString());
+        command.add(classpathJoiner.toString());
         command.add(className);
         command.addAll(Arrays.asList(VanillaCommandLine.RAW_ARGS));
 
