@@ -27,8 +27,8 @@
     {
       "group": "org.spongepowered",
       "module": "plugin-spi",
-      "version": "0.1.3-SNAPSHOT",
-      "md5": "025db7261bb541f0d4bc6b8bcfda5145"
+      "version": "0.1.4-SNAPSHOT",
+      "md5": "44835ff6e930d8507c3f47fefa51185d"
     },
     {
       "group": "org.spongepowered",

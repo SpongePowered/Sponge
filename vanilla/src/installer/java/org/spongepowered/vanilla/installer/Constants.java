@@ -42,6 +42,7 @@ public final class Constants {
     }
 
     public static final class ManifestAttributes {
+        public static final String AT = "AT";
         public static final String LAUNCH_TARGET = "Launch-Target";
     }
 }

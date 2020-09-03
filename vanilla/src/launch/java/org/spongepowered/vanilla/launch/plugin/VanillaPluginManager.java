@@ -122,7 +122,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
                     // TODO Print nasty message or do something about the dupe otherwise?
                     continue;
                 }
-                
+
                 plugin = pluginLoader.createPluginContainer(candidate, engine.getPluginEnvironment()).orElse(null);
                 if (plugin == null) {
                     engine.getPluginEnvironment().getLogger().debug("Language service '{}' returned a null plugin container for '{}'.",

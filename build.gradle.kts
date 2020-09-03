@@ -711,6 +711,7 @@ project("SpongeVanilla") {
             archiveClassifier.set("universal")
             manifest {
                 attributes(mapOf(
+                        "AT" to "common_at.cfg",
                         "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
                         "Launch-Target" to "sponge_server_prod",
                         "Specification-Title" to "SpongeCommon",

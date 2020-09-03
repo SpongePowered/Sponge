@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.spawner;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.EntityPredicates;
+import net.minecraft.world.IEntityReader;
 import net.minecraft.world.World;
 import net.minecraft.world.spawner.AbstractSpawner;
 import org.spongepowered.asm.mixin.Mixin;
@@ -91,10 +92,10 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
         return this.spawnRange;
     }
 
-    @Redirect(method = "isActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isPlayerWithin(DDDD)Z"))
-    public boolean onIsPlayerWithin(World world, double x, double y, double z, double distance) {
+    @Redirect(method = "isActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IEntityReader;isPlayerWithin(DDDD)Z"))
+    public boolean impl$checkAffectsSpawningOnPlayer(IEntityReader reader, double x, double y, double z, double distance) {
         // Like vanilla but filter out players with !bridge$affectsSpawning
-        for(PlayerEntity playerentity : world.getPlayers()) {
+        for (PlayerEntity playerentity : reader.getPlayers()) {
             if (EntityPredicates.NOT_SPECTATING.test(playerentity)
                   && EntityPredicates.IS_LIVING_ALIVE.test(playerentity)
                   && ((PlayerEntityBridge) playerentity).bridge$affectsSpawning()) {
