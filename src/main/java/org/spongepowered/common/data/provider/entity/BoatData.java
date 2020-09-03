@@ -45,7 +45,7 @@ public final class BoatData {
                 .asMutable(BoatEntity.class)
                     .create(Keys.WOOD_TYPE)
                         .get(h -> getFor(h.getBoatType()))
-                        .setAnd((h, v) -> getFor(v) != null)
+                        .set((h, v) -> h.setBoatType(getFor(v)))
                 .asMutable(BoatEntityAccessor.class)
                     .create(Keys.IS_IN_WATER)
                         .get(h -> h.accessor$getStatus() == BoatEntity.Status.IN_WATER)

@@ -1032,6 +1032,9 @@ public final class DataTest  {
 
         // TODO Keys.PRIMARY_POTION_EFFECT_TYPE
 
+        final Entity zombieVillager = world.createEntity(EntityTypes.ZOMBIE_VILLAGER.get(), position);
+        this.checkOfferData(zombieVillager, Keys.PROFESSION_TYPE, ProfessionTypes.CLERIC.get());
+        this.checkOfferData(zombieVillager, Keys.PROFESSION_LEVEL, 1);
         this.checkOfferData(villager, Keys.PROFESSION_TYPE, ProfessionTypes.ARMORER.get());
         this.checkOfferData(villager, Keys.PROFESSION_LEVEL, 4);
 
@@ -1184,7 +1187,6 @@ public final class DataTest  {
                 .sellingItem(jungleAxe)
                 .build();
         this.checkOfferListData(villager, Keys.TRADE_OFFERS, Arrays.asList(tradeOffer));
-//        world.spawnEntity(villager);
 
 //        this.checkOfferData(villager, Keys.TRANSIENT, true);
 
@@ -1208,7 +1210,6 @@ public final class DataTest  {
         this.checkOfferData(sheep, Keys.VELOCITY, Vector3d.UP);
 
         this.checkOfferData(villager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
-        final Entity zombieVillager = world.createEntity(EntityTypes.ZOMBIE_VILLAGER.get(), position);
         this.checkOfferData(zombieVillager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
 
         this.checkOfferData(areaEffectCloud, Keys.WAIT_TIME, 1);
@@ -1236,6 +1237,7 @@ public final class DataTest  {
         this.checkOfferData(evoker, Keys.WOLOLO_TARGET, (Sheep) sheep);
 
         this.checkOfferData(boat, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
+        // TODO WOOD_TYPE for BlockState
 
         world.setBlock(blockPos, oldState);
     }

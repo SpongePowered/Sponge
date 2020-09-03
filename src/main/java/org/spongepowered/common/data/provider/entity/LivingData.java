@@ -181,7 +181,13 @@ public final class LivingData {
                         })
                     .create(Keys.WALKING_SPEED)
                         .get(h -> h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue())
-                        .set((h, v) -> h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(v))
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(v);
+                            return true;
+                        })
                 .asMutable(LivingEntityAccessor.class)
                     .create(Keys.LAST_DAMAGE_RECEIVED)
                         .get(h -> (double) h.accessor$getLastDamage())
