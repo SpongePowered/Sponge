@@ -1164,6 +1164,7 @@ public final class DataTest  {
         this.checkOfferData(horse, Keys.TAMER, player.getUniqueId());
         this.checkOfferData(wolf, Keys.TAMER, player.getUniqueId());
         this.checkOfferData(parrot, Keys.TAMER, player.getUniqueId());
+        this.checkOfferData(parrot, Keys.TAMER, null);
 
 // TODO missing dataprovider       this.checkOfferData(zombiePigman, Keys.TARGET_ENTITY, player);
         this.checkOfferData(shulkerBullet, Keys.TARGET_ENTITY, sheep);
@@ -1178,7 +1179,10 @@ public final class DataTest  {
         this.checkOfferData(endCrystal, Keys.TARGET_POSITION, blockPos);
 
         // Keys.TICKS_REMAINING
+
         this.checkGetData(jungleAxe, Keys.TOOL_TYPE, ToolTypes.WOOD.get());
+        final ItemStack diamondPick = ItemStack.of(ItemTypes.DIAMOND_PICKAXE);
+        this.checkGetData(diamondPick, Keys.TOOL_TYPE, ToolTypes.DIAMOND.get());
 
         // Keys.TRACKS_OUTPUT
 
