@@ -36,7 +36,7 @@ import org.spongepowered.vanilla.accessor.network.login.ServerLoginNetHandlerAcc
 @Mixin(targets = "net/minecraft/network/login/ServerLoginNetHandler$1")
 public abstract class ServerLoginNetHandler_2Mixin_Vanilla extends Thread {
 
-    @Shadow(aliases = {"this$0", "field_151292_a"})
+    @Shadow(aliases = {"this$0", "field_151292_a"}, remap = false)
     @Final
     private ServerLoginNetHandler handler;
 

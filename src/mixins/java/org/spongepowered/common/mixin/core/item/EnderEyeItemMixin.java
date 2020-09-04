@@ -33,6 +33,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.IWorldWriter;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -144,7 +145,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
     @Inject(method = "onItemRightClick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"
+            target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"
         ),
         slice = @Slice(
             from = @At(
@@ -159,7 +160,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT
     )
-    private void impl$setShooter(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
+    private void impl$setShooter(final IWorldWriter worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack, final RayTraceResult result,
         final BlockPos targetPos, final EyeOfEnderEntity enderEye) {
         if (((WorldBridge) worldIn).bridge$isFake()) {

@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.ai.goal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.goal.BreedGoal;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.world.IWorldWriter;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.animal.Animal;
@@ -87,7 +88,7 @@ public abstract class BreedGoalMixin {
 
     @Inject(method = "spawnBaby",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
+            target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z",
             shift = At.Shift.AFTER,
             ordinal = 0),
         cancellable = true)
@@ -100,9 +101,9 @@ public abstract class BreedGoalMixin {
     @Redirect(method = "spawnBaby()V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
+            target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z",
             ordinal = 0))
-    private boolean impl$throwBreedEvent(final World world, final Entity baby) {
+    private boolean impl$throwBreedEvent(final IWorldWriter world, final Entity baby) {
         if (ShouldFire.BREEDING_EVENT_BREED) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 // TODO API 8 is removing this TargetXXXX nonsense so that is why I put the parents into the Cause

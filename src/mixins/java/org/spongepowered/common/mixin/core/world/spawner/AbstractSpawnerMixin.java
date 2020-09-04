@@ -92,14 +92,16 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
         return this.spawnRange;
     }
 
-    @Redirect(method = "isActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IEntityReader;isPlayerWithin(DDDD)Z"))
-    public boolean impl$checkAffectsSpawningOnPlayer(IEntityReader reader, double x, double y, double z, double distance) {
+    @Redirect(method = "isActivated()Z",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/IEntityReader;isPlayerWithin(DDDD)Z"))
+    public boolean onIsPlayerWithin(final IEntityReader world, final double x, final double y, final double z, final double distance) {
         // Like vanilla but filter out players with !bridge$affectsSpawning
-        for (PlayerEntity playerentity : reader.getPlayers()) {
+        for (final PlayerEntity playerentity : world.getPlayers()) {
             if (EntityPredicates.NOT_SPECTATING.test(playerentity)
                   && EntityPredicates.IS_LIVING_ALIVE.test(playerentity)
                   && ((PlayerEntityBridge) playerentity).bridge$affectsSpawning()) {
-                double d0 = playerentity.getDistanceSq(x, y, z);
+                final double d0 = playerentity.getDistanceSq(x, y, z);
                 if (distance < 0.0D || d0 < distance * distance) {
                     return true;
                 }
