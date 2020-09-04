@@ -27,20 +27,15 @@ package org.spongepowered.common.mixin.inventory.impl.entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.inventory.CarriedBridge;
 import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.slot.HeldHandSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
@@ -48,14 +43,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fabric, InventoryBridge, LensGeneratorBridge, CarriedBridge {
+public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fabric, InventoryBridge, LensGeneratorBridge {
 
-    @Shadow public abstract ItemStack getItemStackFromSlot(EquipmentSlotType slotIn);
-
-    @Shadow public abstract void setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack);
+    @Shadow public abstract ItemStack shadow$getItemStackFromSlot(EquipmentSlotType slotIn);
+    @Shadow public abstract void shadow$setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack);
 
     private static final EquipmentSlotType[] SLOTS;
     private static final int MAX_STACK_SIZE = 64;
@@ -80,12 +73,12 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
 
     @Override
     public ItemStack fabric$getStack(int index) {
-        return this.getItemStackFromSlot(SLOTS[index]);
+        return this.shadow$getItemStackFromSlot(SLOTS[index]);
     }
 
     @Override
     public void fabric$setStack(int index, ItemStack stack) {
-        this.setItemStackToSlot(SLOTS[index], stack);
+        this.shadow$setItemStackToSlot(SLOTS[index], stack);
     }
 
     @Override
@@ -101,7 +94,7 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
     @Override
     public void fabric$clear() {
         for (EquipmentSlotType slot : SLOTS) {
-            this.setItemStackToSlot(slot, ItemStack.EMPTY);
+            this.shadow$setItemStackToSlot(slot, ItemStack.EMPTY);
         }
     }
 
@@ -124,8 +117,4 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
         return new EquipmentInventoryLens(equipmentLenses);
     }
 
-    @Override
-    public Optional<Carrier> bridge$getCarrier() {
-        return Optional.of((Carrier) this);
-    }
 }

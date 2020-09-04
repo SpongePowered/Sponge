@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.mixin.inventory.impl;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
-import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.CraftingInventory;
@@ -56,7 +55,6 @@ import javax.annotation.Nullable;
 @Mixin(value = {
         Slot.class,
         PlayerInventory.class,
-        AbstractVillagerEntity.class,
         DoubleSidedInventory.class,
         LockableTileEntity.class,
         CustomInventory.class,
@@ -65,7 +63,8 @@ import javax.annotation.Nullable;
         CraftingInventory.class,
         CraftResultInventory.class,
         ContainerMinecartEntity.class,
-        ArmorStandEntity.class
+        ArmorStandEntity.class,
+        MobEntity.class
 }, priority = 999)
 public abstract class TraitMixin_InventoryBridge_Inventory implements InventoryAdapter, InventoryBridge {
 

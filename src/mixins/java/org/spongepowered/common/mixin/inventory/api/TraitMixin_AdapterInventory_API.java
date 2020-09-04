@@ -22,20 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.api.entity.item;
+package org.spongepowered.common.mixin.inventory.api;
 
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
-import org.spongepowered.api.entity.living.ArmorStand;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
-@Mixin(ArmorStandEntity.class)
-public abstract class ArmorStandEntityMixin_Carrier_Inventory_API implements ArmorStand {
-
-    @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
-        return  (CarriedInventory<? extends Carrier> ) this;
-    }
+@Mixin({
+    ArmorStandEntity.class,
+    MobEntity.class
+})
+public abstract class TraitMixin_AdapterInventory_API implements DefaultImplementedAdapterInventory.WithClear {
 
 }

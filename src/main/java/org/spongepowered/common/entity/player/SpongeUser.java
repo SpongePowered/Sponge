@@ -52,6 +52,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -374,6 +375,11 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     @Override
     public UserInventory getInventory() {
         return this.loadInventory();
+    }
+
+    @Override
+    public EquipmentInventory getEquipment() {
+        return this.getInventory().getEquipment();
     }
 
     @Override

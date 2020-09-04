@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -42,8 +40,7 @@ import java.util.Optional;
 @Mixin(value = {
     Container.class,
     CarriedWrapperInventory.class,
-    CustomInventory.class,
-    ArmorStandEntity.class
+    CustomInventory.class
 })
 public abstract class TraitMixin_Carried_Inventory_API implements CarriedInventory<Carrier> {
 

@@ -49,6 +49,7 @@ import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.FoxTypes;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
 import org.spongepowered.api.data.type.PistonTypes;
@@ -79,6 +80,7 @@ import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.animal.Sheep;
 import org.spongepowered.api.entity.living.animal.Turtle;
 import org.spongepowered.api.entity.living.monster.Patroller;
+import org.spongepowered.api.entity.living.monster.raider.illager.Pillager;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -94,7 +96,9 @@ import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.Axis;
@@ -643,6 +647,7 @@ public final class DataTest  {
         this.checkOfferData(sheep, Keys.IS_ADULT, true);
 
         final Entity blaze = world.createEntity(EntityTypes.BLAZE.get(), position);
+        this.checkOfferData(blaze, Keys.IS_AFLAME, false);
         this.checkOfferData(blaze, Keys.IS_AFLAME, true);
 
         this.checkOfferData(blaze, Keys.IS_AI_ENABLED, true);
@@ -665,10 +670,12 @@ public final class DataTest  {
         this.checkOfferData(ravager, Keys.IS_CELEBRATING, true);
 
         final Entity creeper = world.createEntity(EntityTypes.CREEPER.get(), position);
-        this.checkOfferData(creeper, Keys.IS_CHARGED, true);
         this.checkOfferData(creeper, Keys.IS_CHARGED, false);
+        this.checkOfferData(creeper, Keys.IS_CHARGED, true);
 
-        final Entity pillager = world.createEntity(EntityTypes.PILLAGER.get(), position);
+        final Pillager pillager = (Pillager) world.createEntity(EntityTypes.PILLAGER.get(), position);
+        pillager.setItemInHand(HandTypes.MAIN_HAND, ItemStack.of(ItemTypes.CROSSBOW));
+        this.checkOfferData(pillager, Keys.IS_CHARGING_CROSSBOW, false);
         this.checkOfferData(pillager, Keys.IS_CHARGING_CROSSBOW, true);
 
         final Entity spider = world.createEntity(EntityTypes.SPIDER.get(), position);
