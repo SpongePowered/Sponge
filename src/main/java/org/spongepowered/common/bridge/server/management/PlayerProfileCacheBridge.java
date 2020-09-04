@@ -24,6 +24,25 @@
  */
 package org.spongepowered.common.bridge.server.management;
 
-public interface PlayerProfileCacheBridge {
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.GameProfileCache;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface PlayerProfileCacheBridge extends GameProfileCache {
+
     void bridge$setCanSave(boolean flag);
+
+    void bridge$add(com.mojang.authlib.GameProfile profile, boolean full, boolean signed);
+
+    default void bridge$addBasic(final GameProfile profile) {
+        this.bridge$add(profile, false, false);
+    }
+
+    void bridge$add(GameProfile profile, boolean full, boolean signed);
+
+    Optional<PlayerProfileCache_ProfileEntryBridge> bridge$getEntry(UUID uniqueId);
+
+    Optional<PlayerProfileCache_ProfileEntryBridge> bridge$getEntry(String name);
 }

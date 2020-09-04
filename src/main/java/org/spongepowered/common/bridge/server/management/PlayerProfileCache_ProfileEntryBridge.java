@@ -22,32 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.profile.callback;
+package org.spongepowered.common.bridge.server.management;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.profile.GameProfile;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.ProfileLookupCallback;
+public interface PlayerProfileCache_ProfileEntryBridge {
 
-import java.util.Map;
-import java.util.Optional;
+    void bridge$setIsFull(boolean full);
 
-public final class MapProfileLookupCallback implements ProfileLookupCallback {
+    void bridge$setSigned(boolean signed);
 
-    private final Map<String, Optional<org.spongepowered.api.profile.GameProfile>> profiles;
+    void bridge$set(GameProfile profile, boolean full, boolean signed);
 
-    public MapProfileLookupCallback(Map<String, Optional<org.spongepowered.api.profile.GameProfile>> profiles) {
-        this.profiles = checkNotNull(profiles, "profiles");
-    }
+    GameProfile bridge$getBasic();
 
-    @Override
-    public void onProfileLookupSucceeded(GameProfile profile) {
-        this.profiles.put(profile.getName(), Optional.of((org.spongepowered.api.profile.GameProfile) profile));
-    }
-
-    @Override
-    public void onProfileLookupFailed(GameProfile profile, Exception e) {
-        this.profiles.put(profile.getName(), Optional.empty());
-    }
-
+    @Nullable GameProfile bridge$getFull(boolean signed);
 }

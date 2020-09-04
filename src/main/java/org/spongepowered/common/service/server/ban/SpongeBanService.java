@@ -66,7 +66,6 @@ public final class SpongeBanService implements BanService {
     public Collection<Ban> getBans() {
         final Collection<? extends Ban> bans = this.getProfileBans();
         bans.addAll((Collection) this.getIpBans());
-
         return (Collection<Ban>) bans;
     }
 

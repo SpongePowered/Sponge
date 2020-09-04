@@ -43,43 +43,44 @@ public class UserCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    public SpongeSubject get(String identifier) {
-        UUID uid = this.identToUuid(identifier);
-        if (uid == null) {
+    public SpongeSubject get(final String identifier) {
+        final UUID uuid = this.identityToUuid(identifier);
+        if (uuid == null) {
             throw new IllegalArgumentException("Provided identifier must be a uuid, was " + identifier);
         }
-        return this.get(this.uuidToGameProfile(uid));
+        return this.get(this.uuidToGameProfile(uuid));
     }
 
-    protected SpongeSubject get(GameProfile profile) {
+    protected SpongeSubject get(final GameProfile profile) {
         return new UserSubject(profile, this);
     }
 
-    private GameProfile uuidToGameProfile(UUID uniqueId) {
+    private GameProfile uuidToGameProfile(final UUID uuid) {
         try {
-            return (GameProfile) Sponge.getServer().getGameProfileManager().get(uniqueId, true).get();
-        } catch (Exception e) {
-            SpongeCommon.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
+            return (GameProfile) Sponge.getServer().getGameProfileManager().getBasicProfile(uuid).get();
+        } catch (final Exception e) {
+            SpongeCommon.getLogger().warn("Failed to lookup game profile for {}", uuid, e);
             // TODO: I'm sure this is null for a reason, but it breaks subjects.
             // Temporary.
-            return new GameProfile(uniqueId, null);
+            return new GameProfile(uuid, null);
         }
     }
 
     @Override
-    public boolean isRegistered(String identifier) {
-        UUID uid = this.identToUuid(identifier);
-        if (uid == null) {
+    public boolean isRegistered(final String identifier) {
+        final UUID uuid = this.identityToUuid(identifier);
+        if (uuid == null) {
             return false;
         }
-        GameProfile profile = this.uuidToGameProfile(uid);
+        // Name doesn't matter when getting entries
+        final GameProfile profile = new GameProfile(uuid, null);
         return SpongePermissionService.getOps().getEntry(profile) != null;
     }
 
-    private UUID identToUuid(String identifier) {
+    private UUID identityToUuid(final String identifier) {
         try {
             return UUID.fromString(identifier);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             return null;
         }
     }

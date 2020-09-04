@@ -43,6 +43,8 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
@@ -68,6 +70,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlers;
+import org.spongepowered.common.profile.SpongeGameProfileFactory;
+import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
@@ -138,6 +142,8 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(AndCriterion.Factory.class, SpongeAndCriterion.FACTORY_INSTANCE)
             .registerFactory(Ticks.Factory.class, SpongeTicks.FACTORY_INSTANCE)
             .registerFactory(MinecraftDayTime.Factory.class, SpongeMinecraftDayTime.FACTORY_INSTANCE)
+            .registerFactory(GameProfile.Factory.class, new SpongeGameProfileFactory())
+            .registerFactory(ProfileProperty.Factory.class, new SpongeProfilePropertyFactory())
         ;
     }
 

@@ -74,6 +74,7 @@ import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.service.server.permission.SpongeBridgeSubject;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
@@ -555,7 +556,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public org.spongepowered.api.profile.GameProfile getProfile() {
-        return (org.spongepowered.api.profile.GameProfile) this.profile;
+        return SpongeGameProfile.of(this.profile);
     }
 
     @Override

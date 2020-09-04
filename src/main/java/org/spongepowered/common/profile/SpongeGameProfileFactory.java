@@ -22,29 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.profile.callback;
+package org.spongepowered.common.profile;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.ProfileLookupCallback;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.profile.GameProfile;
 
-import java.util.Optional;
+import java.util.UUID;
 
-public final class SingleProfileLookupCallback implements ProfileLookupCallback {
-
-    private Optional<org.spongepowered.api.profile.GameProfile> result;
+public final class SpongeGameProfileFactory implements GameProfile.Factory {
 
     @Override
-    public void onProfileLookupSucceeded(GameProfile profile) {
-        this.result = Optional.of((org.spongepowered.api.profile.GameProfile) profile);
+    public GameProfile of(final UUID uniqueId, final @Nullable String name) {
+        return new SpongeGameProfile(uniqueId, name);
     }
-
-    @Override
-    public void onProfileLookupFailed(GameProfile profile, Exception exception) {
-        this.result = Optional.empty();
-    }
-
-    public Optional<org.spongepowered.api.profile.GameProfile> getResult() {
-        return this.result;
-    }
-
 }
