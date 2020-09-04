@@ -43,7 +43,7 @@ public final class HorseColorStreamGenerator {
             Tuple.of(new SpongeHorseColor(ResourceKey.minecraft("chestnut"), 2), 2),
             Tuple.of(new SpongeHorseColor(ResourceKey.minecraft("brown"), 3), 3),
             Tuple.of(new SpongeHorseColor(ResourceKey.minecraft("black"), 4), 4),
-            Tuple.of(new SpongeHorseColor(ResourceKey.minecraft("gravy"), 5), 5),
+            Tuple.of(new SpongeHorseColor(ResourceKey.minecraft("gray"), 5), 5),
             Tuple.of(new SpongeHorseColor(ResourceKey.minecraft("dark_brown"), 6), 6)
         );
     }

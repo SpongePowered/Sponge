@@ -51,6 +51,8 @@ import org.spongepowered.api.data.type.CatTypes;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.FoxTypes;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.data.type.HorseColors;
+import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
@@ -612,12 +614,12 @@ public final class DataTest  {
 
         final Entity horse = world.createEntity(EntityTypes.HORSE.get(), position);
 // TODO HorseColor unregistered
-//        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.BLACK.get());
-//        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.WHITE.get());
-//        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.DARK_BROWN.get());
-//        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.NONE.get());
-//        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.WHITE.get());
-//        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.BLACK_DOTS.get());
+        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.BLACK.get());
+        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.WHITE.get());
+        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.DARK_BROWN.get());
+        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.NONE.get());
+        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.WHITE.get());
+        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.BLACK_DOTS.get());
 
         final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
 // TODO missing ItemEntityBridge?
