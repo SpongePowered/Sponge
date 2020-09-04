@@ -31,19 +31,14 @@ import org.spongepowered.common.SpongeCommon;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.Nullable;
-
 public final class GameProfileUtils {
 
-    public static @Nullable GameProfile resolveProfileIfNecessary(@Nullable final GameProfile profile) {
-        if (profile == null) {
-            return null;
-        }
-        if (profile.getPropertyMap().containsKey("textures")) {
+    public static GameProfile resolveProfileIfNecessary(final GameProfile profile) {
+        if (profile.getProperties().stream().anyMatch(property -> property.getName().equals("textures"))) {
             return profile;
         }
         // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
-        final CompletableFuture<GameProfile> future = Sponge.getGame().getServer().getGameProfileManager().fill(profile);
+        final CompletableFuture<GameProfile> future = Sponge.getGame().getServer().getGameProfileManager().getProfile(profile);
         try {
             return future.get();
         } catch (InterruptedException | ExecutionException e) {

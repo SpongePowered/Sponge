@@ -22,32 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.profile.query;
+package org.spongepowered.common.profile;
 
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.profile.GameProfileCache;
+import com.mojang.authlib.properties.Property;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.profile.property.ProfileProperty;
 
-public abstract class GameProfileQuery<T> extends Query<T> {
+public final class SpongeProfilePropertyFactory implements ProfileProperty.Factory {
 
-    protected GameProfileQuery(GameProfileCache cache, boolean useCache) {
-        super(cache, useCache);
+    @Override
+    public ProfileProperty of(final String name, final String value, final @Nullable String signature) {
+        return (ProfileProperty) new Property(name, value, signature);
     }
-
-    public static final class SingleFill extends GameProfileQuery<GameProfile> {
-
-        private final GameProfile profile;
-        private final boolean signed;
-
-        public SingleFill(GameProfileCache cache, GameProfile profile, boolean signed, boolean useCache) {
-            super(cache, useCache);
-            this.profile = profile;
-            this.signed = signed;
-        }
-
-        @Override
-        public GameProfile call() throws Exception {
-            return this.fillProfile(this.profile, this.signed);
-        }
-    }
-
 }

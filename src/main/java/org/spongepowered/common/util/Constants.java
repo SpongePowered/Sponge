@@ -731,6 +731,15 @@ public final class Constants {
         }
     }
 
+    public static final class Profile {
+
+        public static final DataQuery UUID = of("UUID");
+        public static final DataQuery NAME = of("Name");
+        public static final DataQuery PROPERTIES = DataQuery.of("Properties");
+        public static final DataQuery VALUE = DataQuery.of("Value");
+        public static final DataQuery SIGNATURE = DataQuery.of("Signature");
+    }
+
     public static final class Entity {
 
         public static final double DEFAULT_ABSORPTION = 0.0f;

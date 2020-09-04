@@ -27,27 +27,29 @@ package org.spongepowered.common.ban;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.management.IPBanEntry;
 import net.minecraft.server.management.IPBanList;
 import net.minecraft.server.management.ProfileBanEntry;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.IPBanListAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
-import javax.annotation.Nullable;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
 
+import javax.annotation.Nullable;
+
 public final class SpongeBanBuilder implements Ban.Builder {
 
-    private org.spongepowered.api.profile.GameProfile profile;
+    private GameProfile profile;
     private InetAddress address;
     private BanType banType;
     @Nullable private Component reason;
@@ -56,7 +58,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
     @Nullable private Component source;
 
     @Override
-    public Ban.Builder profile(final org.spongepowered.api.profile.GameProfile profile) {
+    public Ban.Builder profile(final GameProfile profile) {
         checkNotNull(profile, "Profile cannot be null!");
         checkState(this.banType == BanTypes.PROFILE.get(),
             "Cannot set a GameProfile if the BanType is not BanTypes.PROFILE!");
@@ -114,23 +116,19 @@ public final class SpongeBanBuilder implements Ban.Builder {
         checkState(this.banType != null, "BanType cannot be null!");
 
         final String sourceName = this.source != null ? SpongeAdventure.legacySection(this.source) : null;
+        final String reason = this.reason != null ? SpongeAdventure.legacySection(this.reason) : null;
 
         if (this.banType == BanTypes.PROFILE.get()) {
             checkState(this.profile != null, "User cannot be null!");
-            return (Ban) new ProfileBanEntry((GameProfile) this.profile, Date.from(this.start), sourceName,
-                this.toDate(this.end),
-                this.reason != null ? SpongeAdventure.legacySection(this.reason) : null);
+            return (Ban) new ProfileBanEntry(SpongeGameProfile.toMcProfile(this.profile.withoutProperties()),
+                    Date.from(this.start), sourceName, this.toDate(this.end), reason);
         }
         checkState(this.address != null, "Address cannot be null!");
 
         // This *should* be a static method, but apparently not...
         final IPBanList ipBans = SpongeCommon.getServer().getPlayerList().getBannedIPs();
-        return (Ban) new IPBanEntry(((IPBanListAccessor) ipBans).accessor$addressToString(
-            new InetSocketAddress(this.address, 0)),
-            Date.from(this.start),
-            sourceName,
-            this.toDate(this.end),
-            this.reason != null ? SpongeAdventure.legacySection(this.reason) : null);
+        return (Ban) new IPBanEntry(((IPBanListAccessor) ipBans).accessor$addressToString(new InetSocketAddress(this.address, 0)),
+                Date.from(this.start), sourceName, this.toDate(this.end), reason);
     }
 
     private Date toDate(final Instant instant) {
@@ -164,7 +162,6 @@ public final class SpongeBanBuilder implements Ban.Builder {
         this.start = Instant.now();
         this.end = null;
         this.source = null;
-
         return this;
     }
 }

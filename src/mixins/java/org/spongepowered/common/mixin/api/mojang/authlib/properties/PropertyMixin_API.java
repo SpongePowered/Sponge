@@ -25,21 +25,50 @@
 package org.spongepowered.common.mixin.api.mojang.authlib.properties;
 
 import com.mojang.authlib.properties.Property;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.profile.property.ProfileProperty;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
+import java.util.StringJoiner;
 
 @Mixin(value = Property.class, remap = false)
 public abstract class PropertyMixin_API implements ProfileProperty {
 
-    @Nullable @Shadow public abstract String shadow$getSignature();
+    @Shadow @Final private String name;
+    @Shadow @Final private String value;
+    @Shadow @Final private @Nullable String signature;
 
     @Override
     public Optional<String> getSignature() { // We don't need to make this @Implements because the signature difference
-        return Optional.ofNullable(this.shadow$getSignature());
+        return Optional.ofNullable(this.signature);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name, this.value, this.signature);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof ProfileProperty)) {
+            return false;
+        }
+        final ProfileProperty other = (ProfileProperty) obj;
+        return other.getName().equals(this.name) &&
+                other.getValue().equals(this.value) &&
+                Objects.equals(other.getSignature().orElse(null), this.signature);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Property.class.getSimpleName() + "[", "]")
+                .add("name='" + this.name + "'")
+                .add("value='" + this.value + "'")
+                .add("signature='" + this.signature + "'")
+                .toString();
     }
 }

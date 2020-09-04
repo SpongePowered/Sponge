@@ -71,6 +71,7 @@ import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.service.permission.SpongeBridgeSubject;
 import org.spongepowered.common.service.permission.SubjectHelper;
 import org.spongepowered.common.util.Constants;
@@ -539,7 +540,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public org.spongepowered.api.profile.GameProfile getProfile() {
-        return (org.spongepowered.api.profile.GameProfile) this.profile;
+        return SpongeGameProfile.of(this.profile);
     }
 
     @Override

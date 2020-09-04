@@ -42,7 +42,8 @@ public final class SkullData {
                 .asMutable(SkullTileEntity.class)
                     .create(Keys.GAME_PROFILE)
                         .get(h -> (GameProfile) ((SkullTileEntityAccessor) h).accessor$getPlayerProfile())
-                        .set((h, v) -> h.setPlayerProfile((com.mojang.authlib.GameProfile) GameProfileUtils.resolveProfileIfNecessary(v)));
+                        .set((h, v) -> h.setPlayerProfile((com.mojang.authlib.GameProfile) GameProfileUtils.resolveProfileIfNecessary(v)))
+                        .delete(h -> h.setPlayerProfile(null));
     }
     // @formatter:on
 }

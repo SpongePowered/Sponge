@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SkullItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.provider.util.GameProfileUtils;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.Constants;
 
 public final class SkullItemStackData {
@@ -46,17 +47,16 @@ public final class SkullItemStackData {
                     .create(Keys.GAME_PROFILE)
                         .get(h -> {
                             final CompoundNBT tag = h.getChildTag(Constants.Item.Skull.ITEM_SKULL_OWNER);
-                            return tag == null ? null : (GameProfile) NBTUtil.readGameProfile(tag);
+                            final GameProfile mcProfile = tag == null ? null : NBTUtil.readGameProfile(tag);
+                            return mcProfile == null ? null : SpongeGameProfile.of(mcProfile);
                         })
                         .set((h, v) -> {
-                            if (v == null) {
-                                h.getTag().remove(Constants.Item.Skull.ITEM_SKULL_OWNER);
-                            } else {
-                                final CompoundNBT tag = NBTUtil.writeGameProfile(new CompoundNBT(),
-                                        (com.mojang.authlib.GameProfile) GameProfileUtils.resolveProfileIfNecessary(v));
+                            final com.mojang.authlib.GameProfile mcProfile =
+                                    SpongeGameProfile.toMcProfile(GameProfileUtils.resolveProfileIfNecessary(v));
+                                final CompoundNBT tag = NBTUtil.writeGameProfile(new CompoundNBT(), mcProfile);
                                 h.setTagInfo(Constants.Item.Skull.ITEM_SKULL_OWNER, tag);
-                            }
                         })
+                        .delete(h -> h.removeChildTag(Constants.Item.Skull.ITEM_SKULL_OWNER))
                         .supports(h -> h.getItem() instanceof SkullItem);
     }
     // @formatter:on

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mojang.authlib;
 
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -36,11 +36,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings({"ConstantConditions", "unchecked", "rawtypes"})
 @Mixin(value = GameProfile.class, remap = false)
 @Implements(value = @Interface(iface = org.spongepowered.api.profile.GameProfile.class, prefix = "profile$"))
 public abstract class GameProfileMixin_API implements org.spongepowered.api.profile.GameProfile {
@@ -52,7 +57,7 @@ public abstract class GameProfileMixin_API implements org.spongepowered.api.prof
 
     @Override
     public UUID getUniqueId() {
-        return this.shadow$getId();
+        return Objects.requireNonNull(this.shadow$getId(), "The unique id isn't initialized.");
     }
 
     @Override
@@ -61,18 +66,23 @@ public abstract class GameProfileMixin_API implements org.spongepowered.api.prof
     }
 
     @Override
-    public Multimap<String, ProfileProperty> getPropertyMap() {
-        return (Multimap<String, ProfileProperty>) (Object) this.shadow$getProperties();
+    public List<ProfileProperty> getProperties() {
+        return ImmutableList.copyOf((Collection) this.shadow$getProperties().values());
     }
 
     @Override
-    public boolean isFilled() {
-        return this.shadow$isComplete();
+    public org.spongepowered.api.profile.GameProfile withoutProperties() {
+        return (org.spongepowered.api.profile.GameProfile) new GameProfile(this.shadow$getId(), this.shadow$getName());
+    }
+
+    @Override
+    public org.spongepowered.api.profile.GameProfile withoutProperties(final Predicate<ProfileProperty> filter) {
+        return null;
     }
 
     @Override
     public int getContentVersion() {
-        return 0;
+        return 1;
     }
 
     @Override
