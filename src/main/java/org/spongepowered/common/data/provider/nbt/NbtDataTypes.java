@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.nbt;
 
-public final class NBTDataTypes {
+public final class NbtDataTypes {
 
-    public static final NBTDataType ENTITY = new NBTDataType("entity");
-    public static final NBTDataType BLOCK_ENTITY = new NBTDataType("block_entity");
+    public static final NbtDataType ENTITY = new NbtDataType("entity");
+    public static final NbtDataType BLOCK_ENTITY = new NbtDataType("block_entity");
 
-    private NBTDataTypes() {
+    private NbtDataTypes() {
     }
 }

@@ -28,11 +28,11 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.MoreObjects;
 
-public final class NBTDataType {
+public final class NbtDataType {
 
     private final String name;
 
-    public NBTDataType(final String name) {
+    public NbtDataType(final String name) {
         requireNonNull(name, "name");
         this.name = name;
     }
