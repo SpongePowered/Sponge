@@ -11,6 +11,7 @@
         "adventure.bossbar.BossBarImplMixin",
         "adventure.text.AbstractComponentMixin",
         "adventure.text.format.StyleMixin",
+        "authlib.properties.PropertyMixin",
         "block.BlockMixin",
         "block.BlockPropertiesMixin",
         "block.BlockStateMixin",
