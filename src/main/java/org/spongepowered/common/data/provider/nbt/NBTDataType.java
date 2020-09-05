@@ -24,11 +24,27 @@
  */
 package org.spongepowered.common.data.provider.nbt;
 
-public final class NbtDataTypes {
+import static java.util.Objects.requireNonNull;
 
-    public static final NbtDataType ENTITY = new NbtDataType("entity");
-    public static final NbtDataType BLOCK_ENTITY = new NbtDataType("block_entity");
+import com.google.common.base.MoreObjects;
 
-    private NbtDataTypes() {
+public final class NBTDataType {
+
+    private final String name;
+
+    public NBTDataType(final String name) {
+        requireNonNull(name, "name");
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("name", this.name)
+                .toString();
     }
 }
