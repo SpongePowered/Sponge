@@ -257,9 +257,11 @@ dependencies {
     add(mixins.get().implementationConfigurationName, mixinsConfig)
     add(mixins.get().implementationConfigurationName, project(":SpongeAPI"))
 }
+val extraSrgs = file("extra.srgs")
 mixin {
     add("mixins", "spongecommon.mixins.refmap.json")
     add("accessors", "spongecommon.accessors.refmap.json")
+    extraMappings(extraSrgs)
 }
 fun debug(logger: Logger, messsage: String) {
     println(message = messsage)

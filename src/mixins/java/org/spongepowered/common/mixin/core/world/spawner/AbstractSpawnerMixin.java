@@ -94,8 +94,8 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
 
     @Redirect(method = "isActivated()Z",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/IEntityReader;isPlayerWithin(DDDD)Z"))
-    public boolean onIsPlayerWithin(final IEntityReader world, final double x, final double y, final double z, final double distance) {
+            target = "Lnet/minecraft/world/World;isPlayerWithin(DDDD)Z"))
+    public boolean onIsPlayerWithin(final World world, final double x, final double y, final double z, final double distance) {
         // Like vanilla but filter out players with !bridge$affectsSpawning
         for (final PlayerEntity playerentity : world.getPlayers()) {
             if (EntityPredicates.NOT_SPECTATING.test(playerentity)
