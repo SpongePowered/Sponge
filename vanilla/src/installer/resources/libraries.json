@@ -151,6 +151,18 @@
       "md5": "3748dcbfaf07cc395ae1d82758a81f7f"
     },
     {
+      "group": "net.kyori",
+      "module": "examination-api",
+      "version": "1.0.0-SNAPSHOT",
+      "md5": "858c2ddc07d94413cf0a5bf49fe65a58"
+    },
+    {
+      "group": "net.kyori",
+      "module": "examination-string",
+      "version": "1.0.0-SNAPSHOT",
+      "md5": "61711bc18d9c795effa5a01556967a44"
+    },
+    {
       "group": "com.google.inject",
       "module": "guice",
       "version": "4.1.0",
