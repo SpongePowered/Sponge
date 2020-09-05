@@ -95,9 +95,9 @@ public final class InstallerMain {
         final String javaHome = System.getProperty("java.home");
         final String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         final String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
-        final String depsClasspath = dependencies.stream().map(Path::toString).collect(Collectors.joining(File.pathSeparator));
+        final String depsClasspath = dependencies.stream().map(p -> p.toAbsolutePath().toString()).collect(Collectors.joining(File.pathSeparator));
         final String classpath = System.getProperty("java.class.path") + File.pathSeparator + depsClasspath + File.pathSeparator +
-            gameJar.toAbsolutePath().toString();
+            gameJar.toAbsolutePath().toString() + File.pathSeparator;
 
         this.logger.debug("Setting classpath to: " + classpath);
 
