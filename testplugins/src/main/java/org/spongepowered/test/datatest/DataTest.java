@@ -610,7 +610,7 @@ public final class DataTest  {
 
         this.checkOfferData(jungleAxe, Keys.HIDE_UNBREAKABLE, true);
 
-        this.checkOfferData(turtle, Keys.HOME_POSITION, blockPos);
+        this.checkOfferData(turtle, Keys.HOME_POSITION, blockPos.add(0, 0, 10));
 
         final Entity horse = world.createEntity(EntityTypes.HORSE.get(), position);
 // TODO HorseColor unregistered
@@ -691,10 +691,10 @@ public final class DataTest  {
         this.checkWithData(fenceState, Keys.IS_CONNECTED_WEST, false);
 
         final BlockState wallState = BlockTypes.ANDESITE_WALL.get().getDefaultState();
-        this.checkWithData(fenceState, Keys.IS_CONNECTED_EAST, true);
-        this.checkWithData(fenceState, Keys.IS_CONNECTED_NORTH, false);
-        this.checkWithData(fenceState, Keys.IS_CONNECTED_SOUTH, true);
-        this.checkWithData(fenceState, Keys.IS_CONNECTED_WEST, false);
+        this.checkWithData(wallState, Keys.IS_CONNECTED_EAST, true);
+        this.checkWithData(wallState, Keys.IS_CONNECTED_NORTH, false);
+        this.checkWithData(wallState, Keys.IS_CONNECTED_SOUTH, true);
+        this.checkWithData(wallState, Keys.IS_CONNECTED_WEST, false);
         this.checkWithData(wallState, Keys.IS_CONNECTED_UP, true);
 
         final BlockState vineState = BlockTypes.VINE.get().getDefaultState();
@@ -723,7 +723,12 @@ public final class DataTest  {
         final BlockState pistonState = BlockTypes.PISTON.get().getDefaultState();
         this.checkWithData(pistonState, Keys.IS_EXTENDED, true);
 
+        this.checkOfferData(fox, Keys.IS_FACEPLANTED, false);
         this.checkOfferData(fox, Keys.IS_FACEPLANTED, true);
+
+        final BlockState portalFrameState = BlockTypes.END_PORTAL_FRAME.get().getDefaultState();
+        this.checkWithData(portalFrameState, Keys.IS_FILLED, true);
+        this.checkWithData(portalFrameState, Keys.IS_FILLED, false);
 
         this.checkGetData(dirtState, Keys.IS_FLAMMABLE, false);
         this.checkGetData(bricksState, Keys.IS_FLAMMABLE, false);
@@ -743,8 +748,9 @@ public final class DataTest  {
 
         this.checkGetData(dirtState, Keys.IS_GRAVITY_AFFECTED, false);
         this.checkGetData(sandState, Keys.IS_GRAVITY_AFFECTED, true);
+        this.checkOfferData(sheep, Keys.IS_GRAVITY_AFFECTED, false);
 
-// TODO provider
+        // TODO provider
 //        this.checkOfferData(cat, Keys.IS_HISSING, true);
 
         this.checkGetData(ravager, Keys.IS_IMMOBILIZED, true);
@@ -1220,7 +1226,7 @@ public final class DataTest  {
         // Keys.VANISH_IGNORES_COLLISION
         // Keys.VANISH_PREVENTS_TARGETING
 
-        this.checkOfferData(sheep, Keys.VELOCITY, Vector3d.UP);
+        this.checkOfferData(sheep, Keys.VELOCITY, Vector3d.UP.mul(0.1));
 
         this.checkOfferData(villager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
         this.checkOfferData(zombieVillager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
@@ -107,6 +108,7 @@ public final class EntityData {
                     .create(Keys.IS_FLYING)
                         .get(h -> h.isAirBorne)
                         .set((h, v) -> h.isAirBorne = v)
+                        .supports(h -> !(h instanceof PlayerEntity))
                     .create(Keys.IS_GLOWING)
                         .get(Entity::isGlowing)
                         .set(Entity::setGlowing)
