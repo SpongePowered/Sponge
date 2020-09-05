@@ -806,8 +806,8 @@ public final class DataTest  {
 
         this.checkOfferData(fox, Keys.IS_POUNCING, true);
 
-//        this.checkWithData(leverState, Keys.IS_POWERED, true);
-//        this.checkWithData(leverState, Keys.IS_POWERED, false);
+        this.checkWithData(leverState, Keys.IS_POWERED, true);
+        this.checkWithData(leverState, Keys.IS_POWERED, false);
 
 //        this.checkOfferData(tntEntity, Keys.IS_PRIMED, true);
 //        this.checkOfferData(tntEntity, Keys.IS_PRIMED, false);
