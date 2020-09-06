@@ -372,9 +372,13 @@ public final class DataTest  {
         final ItemStack waterBucket = ItemStack.of(ItemTypes.WATER_BUCKET);
         this.checkGetData(waterBucket, Keys.CONTAINER_ITEM, ItemTypes.BUCKET.get());
 
-        // TODO Keys.COOLDOWN missing dataprovider?
-//        world.setBlock(blockPos, BlockTypes.HOPPER.get().getDefaultState());
-//        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
+        // Keys.COOLDOWN
+        world.setBlock(blockPos, BlockTypes.HOPPER.get().getDefaultState());
+        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
+        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 10);
+        world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().getDefaultState());
+        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
+        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 15);
 
         // TODO Keys.CREATOR
 
