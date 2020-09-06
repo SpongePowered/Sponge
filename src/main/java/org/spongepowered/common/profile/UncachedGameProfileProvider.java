@@ -53,6 +53,7 @@ import java.net.URL;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -200,9 +201,10 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
                 result.complete(resultMap);
             });
         }
-        final String[] namesArray = Lists.newArrayList(names).toArray(new String[0]);
+        final List<String> nameList = Lists.newArrayList(names);
+        final String[] namesArray = nameList.toArray(new String[0]);
         this.submit(() -> SpongeCommon.getServer().getGameProfileRepository().findProfilesByNames(namesArray, Agent.MINECRAFT,
-                new MapProfileLookupCallback(result)));
+                new MapProfileLookupCallback(result, nameList)));
         return result;
     }
 
@@ -293,10 +295,13 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
     private static final class MapProfileLookupCallback implements ProfileLookupCallback {
 
         private final CompletableFuture<Map<String, GameProfile>> result;
+        private final List<String> nameQueue;
+
         private Map<String, GameProfile> resultMap = new HashMap<>();
 
-        private MapProfileLookupCallback(final CompletableFuture<Map<String, GameProfile>> result) {
+        private MapProfileLookupCallback(final CompletableFuture<Map<String, GameProfile>> result, final List<String> nameQueue) {
             this.result = result;
+            this.nameQueue = nameQueue;
         }
 
         public void complete() {
@@ -307,8 +312,18 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
 
         @Override
         public void onProfileLookupSucceeded(final com.mojang.authlib.GameProfile profile) {
+            String originalName = null;
+            while (originalName == null && !this.nameQueue.isEmpty()) {
+                final String name = this.nameQueue.remove(0);
+                if (name.equalsIgnoreCase(profile.getName())) {
+                    originalName = name;
+                }
+            }
+            if (originalName == null) {
+                throw new IllegalStateException();
+            }
             if (this.resultMap != null) {
-                this.resultMap.put(profile.getName(), SpongeGameProfile.of(profile));
+                this.resultMap.put(originalName, SpongeGameProfile.of(profile));
             }
         }
 
