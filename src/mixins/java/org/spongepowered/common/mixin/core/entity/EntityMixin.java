@@ -148,6 +148,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$collision = true;
     private Component impl$displayName;
     private boolean impl$skipSettingCustomNameTag;
+    private boolean impl$invulnerable = false;
 
     // @formatter:on
 
@@ -475,13 +476,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
+    */
+
     @Override
     public boolean bridge$getIsInvulnerable() {
-        return this.invulnerable;
+        return this.impl$invulnerable;
     }
 
-    */
-/**
+    /**
      * Hooks into vanilla's writeToNBT to call {@link #impl$writeToSpongeCompound}.
      *
      * <p> This makes it easier for other entity mixins to override writeToNBT
@@ -499,7 +501,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     */
-/**
+    /**
      * Hooks into vanilla's readFromNBT to call {@link #impl$readFromSpongeCompound}.
      *
      * <p> This makes it easier for other entity mixins to override readSpongeNBT
@@ -520,7 +522,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     */
-/**
+    /**
      * Read extra data (SpongeData) from the entity's NBT tag. This is
      * meant to be overridden for each impl based mixin that has to store
      * custom fields based on it's implementation. Examples can include:
@@ -829,13 +831,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     public Timing bridge$getTimingsHandler() {
         return ((EntityTypeBridge) this.shadow$getType()).bridge$getTimings();
     }
-/*
+
     @Override
     public void bridge$setInvulnerable(final boolean value) {
-        this.invulnerable = value;
+        this.impl$invulnerable = value;
     }
 
-
+/*
     @Redirect(method = "setFire",
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/entity/Entity;fire:I",

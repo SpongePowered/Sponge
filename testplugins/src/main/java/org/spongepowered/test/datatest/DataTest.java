@@ -637,9 +637,8 @@ public final class DataTest  {
 
         this.checkOfferData(sheep, Keys.INVULNERABILITY_TICKS, 20);
 
-// TODO bridge$getIsInvulnerable is abstract
-//        this.checkOfferData(sheep, Keys.INVULNERABLE, true);
-//        this.checkOfferData(sheep, Keys.INVULNERABLE, false);
+        this.checkOfferData(sheep, Keys.INVULNERABLE, true);
+        this.checkOfferData(sheep, Keys.INVULNERABLE, false);
 
         final BlockState fenceGateState = BlockTypes.ACACIA_FENCE_GATE.get().getDefaultState();
         this.checkGetData(fenceGateState, Keys.IN_WALL, false);
