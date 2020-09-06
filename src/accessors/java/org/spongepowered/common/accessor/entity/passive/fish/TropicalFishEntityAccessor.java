@@ -22,19 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.nbt;
+package org.spongepowered.common.accessor.entity.passive.fish;
 
-import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import net.minecraft.entity.passive.fish.TropicalFishEntity;
+import net.minecraft.item.DyeColor;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-public final class NBTDataProviders extends DataProviderRegistratorBuilder {
+@Mixin(TropicalFishEntity.class)
+public interface TropicalFishEntityAccessor {
 
-    public NBTDataProviders(final DataProviderRegistry registry) {
-        super(registry);
-    }
-
-    @Override
-    public void register() {
-        NBTComponentData.register(this.registrator);
+    @Invoker("pack") static int pack(TropicalFishEntity.Type size, DyeColor pattern, DyeColor bodyColor) {
+        throw new IllegalStateException("Untransformed accessor!");
     }
 }

@@ -22,13 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.nbt;
+package org.spongepowered.common.mixin.core.entity.passive.horse;
 
-public final class NbtDataTypes {
+import net.minecraft.entity.passive.horse.LlamaEntity;
+import org.spongepowered.api.data.type.LlamaType;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.entity.passive.horse.LlamaEntityBridge;
+import org.spongepowered.common.data.type.SpongeLlamaType;
+import org.spongepowered.common.registry.MappedRegistry;
 
-    public static final NbtDataType ENTITY = new NbtDataType("entity");
-    public static final NbtDataType BLOCK_ENTITY = new NbtDataType("block_entity");
+@Mixin(LlamaEntity.class)
+public abstract class LlamaEntityMixin implements LlamaEntityBridge {
 
-    private NbtDataTypes() {
+    @Shadow public abstract int shadow$getVariant();
+    @Shadow public abstract void shadow$setVariant(final int p_190710_1_);
+
+    private static final MappedRegistry<LlamaType, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(LlamaType.class);
+
+    @Override
+    public LlamaType bridge$getLlamaType() {
+        return registry.getReverseMapping(this.shadow$getVariant());
+    }
+
+    @Override
+    public void bridge$setLlamaType(final LlamaType type) {
+        this.shadow$setVariant(((SpongeLlamaType) type).getMetadata());
     }
 }

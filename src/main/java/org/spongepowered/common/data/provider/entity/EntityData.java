@@ -48,7 +48,13 @@ public final class EntityData {
                 .asMutable(Entity.class)
                     .create(Keys.AGE)
                         .get(h -> h.ticksExisted)
-                        .set((h, v) -> h.ticksExisted = v)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.ticksExisted = v;
+                            return true;
+                        })
                     .create(Keys.BASE_SIZE)
                         .get(h -> (double) h.getWidth())
                     .create(Keys.BASE_VEHICLE)
@@ -60,6 +66,9 @@ public final class EntityData {
                     .create(Keys.FIRE_DAMAGE_DELAY)
                         .get(h -> ((EntityAccessor) h).accessor$getFireImmuneTicks())
                         .setAnd((h, v) -> {
+                            if (v < 1) {
+                                return false;
+                            }
                             ((EntityBridge) h).bridge$setFireImmuneTicks(v);
                             return ((EntityAccessor) h).accessor$getFireImmuneTicks() == v;
                         })
@@ -82,11 +91,15 @@ public final class EntityData {
                         .get(h -> (double) h.getHeight())
                     .create(Keys.INVULNERABILITY_TICKS)
                         .get(h -> h.hurtResistantTime)
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
                             h.hurtResistantTime = v;
                             if (h instanceof LivingEntity) {
                                 ((LivingEntity) h).hurtTime = v;
                             }
+                            return true;
                         })
                     .create(Keys.IS_CUSTOM_NAME_VISIBLE)
                         .get(Entity::isCustomNameVisible)

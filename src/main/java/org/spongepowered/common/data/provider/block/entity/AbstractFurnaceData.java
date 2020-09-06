@@ -39,7 +39,13 @@ public final class AbstractFurnaceData {
                 .asMutable(AbstractFurnaceTileEntityAccessor.class)
                     .create(Keys.FUEL)
                         .get(AbstractFurnaceTileEntityAccessor::accessor$getBurnTime)
-                        .set(AbstractFurnaceTileEntityAccessor::accessor$setBurnTime)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setBurnTime(v);
+                            return true;
+                        })
                     .create(Keys.MAX_BURN_TIME)
                         .get(AbstractFurnaceTileEntityAccessor::accessor$getRecipesUsed)
                         .set(AbstractFurnaceTileEntityAccessor::accessor$setRecipesUsed)

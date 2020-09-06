@@ -46,7 +46,13 @@ public final class AreaEffectCloudData {
                         .set((h, v) -> h.setColor(v.getRgb()))
                     .create(Keys.DURATION)
                         .get(AreaEffectCloudEntity::getDuration)
-                        .set(AreaEffectCloudEntity::setDuration)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.setDuration(v);
+                            return true;
+                        })
                     .create(Keys.PARTICLE_EFFECT)
                         .get(h -> {
                             throw new MissingImplementationException("AreaEffectCloudData", "PARTICLE_EFFECT::getter");

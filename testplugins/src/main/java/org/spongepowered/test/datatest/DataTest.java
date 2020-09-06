@@ -47,11 +47,16 @@ import org.spongepowered.api.data.type.AttachmentSurfaces;
 import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.type.ChestAttachmentType;
+import org.spongepowered.api.data.type.CatTypes;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.FoxTypes;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.data.type.HorseColors;
+import org.spongepowered.api.data.type.HorseStyles;
+import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
+import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.api.data.type.PistonTypes;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.type.ProfessionTypes;
@@ -335,10 +340,9 @@ public final class DataTest  {
         final Entity illusioner = world.createEntity(EntityTypes.ILLUSIONER.get(), position);
         this.checkGetData(illusioner, Keys.CASTING_TIME, 0);
 
-// TODO missing provider?
-//        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.ALL_BLACK.get());
-//        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.JELLIE.get());
-//        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.WHITE.get());
+        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.ALL_BLACK.get());
+        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.JELLIE.get());
+        this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.WHITE.get());
 
         // TODO
 //        world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
@@ -404,14 +408,12 @@ public final class DataTest  {
 
         // TODO Keys.DIRECTION for other dataholders
         this.checkGetData(painting, Keys.DIRECTION, Direction.SOUTH);
-        // TODO offer fails
-//        this.checkOfferData(painting, Keys.DIRECTION, Direction.NORTH);
-//        this.checkOfferData(painting, Keys.DIRECTION, Direction.UP);
-// TODO missing provider?
-//        final Entity shulkerEntity = world.createEntity(EntityTypes.SHULKER.get(), position);
-//        this.checkGetData(shulkerEntity, Keys.DIRECTION, Direction.SOUTH);
-//        this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.NORTH);
-//        this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.UP);
+        this.checkOfferData(painting, Keys.DIRECTION, Direction.NORTH);
+
+        final Entity shulkerEntity = world.createEntity(EntityTypes.SHULKER.get(), position);
+        this.checkGetData(shulkerEntity, Keys.DIRECTION, Direction.DOWN);
+        this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.NORTH);
+        this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.UP);
         final Entity shulkerBullet = world.createEntity(EntityTypes.SHULKER_BULLET.get(), position);
         this.checkGetData(shulkerBullet, Keys.DIRECTION, Direction.NONE);
         this.checkOfferData(shulkerBullet, Keys.DIRECTION, Direction.NORTH);
@@ -444,7 +446,7 @@ public final class DataTest  {
 //        this.checkGetData(BlockTypes.BLUE_CONCRETE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
 //        // TODO banner blockentity
         final Entity tropicalFish = world.createEntity(EntityTypes.TROPICAL_FISH.get(), position);
-//        this.checkOfferData(tropicalFish, Keys.DYE_COLOR, DyeColors.CYAN.get());
+        this.checkOfferData(tropicalFish, Keys.DYE_COLOR, DyeColors.CYAN.get());
 
         final Entity panda = world.createEntity(EntityTypes.PANDA.get(), position);
         this.checkOfferData(panda, Keys.EATING_TIME, 10);
@@ -612,12 +614,12 @@ public final class DataTest  {
 
         final Entity horse = world.createEntity(EntityTypes.HORSE.get(), position);
 // TODO HorseColor unregistered
-//        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.BLACK.get());
-//        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.WHITE.get());
-//        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.DARK_BROWN.get());
-//        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.NONE.get());
-//        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.WHITE.get());
-//        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.BLACK_DOTS.get());
+        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.BLACK.get());
+        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.WHITE.get());
+        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.DARK_BROWN.get());
+        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.NONE.get());
+        this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.WHITE.get());
+        this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.BLACK_DOTS.get());
 
         final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
 // TODO missing ItemEntityBridge?
@@ -926,7 +928,7 @@ public final class DataTest  {
         this.checkGetData(glowstoneState, Keys.LIGHT_EMISSION, 15);
 
         final Entity llama = world.createEntity(EntityTypes.LLAMA.get(), position);
-//        this.checkOfferData(llama, Keys.LLAMA_TYPE, LlamaTypes.BROWN.get());
+        this.checkOfferData(llama, Keys.LLAMA_TYPE, LlamaTypes.BROWN.get());
 
         // TODO Keys.LOCK_TOKEN on BlockEntity
 //        this.checkOfferData(jungleAxe, Keys.LOCK_TOKEN, "Key");
@@ -986,7 +988,7 @@ public final class DataTest  {
 
         final Entity parrot = world.createEntity(EntityTypes.PARROT.get(), position);
 // TODO missing supplier
-//        this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_AND_BLUE.get());
+        this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_AND_BLUE.get());
 
 // TODO missing ParticleEffect.Builder registration
 //        this.checkOfferData(areaEffectCloud, Keys.PARTICLE_EFFECT, ParticleEffect.builder().type(ParticleTypes.BUBBLE.get()).build());

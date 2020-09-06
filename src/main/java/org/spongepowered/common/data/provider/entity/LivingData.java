@@ -55,7 +55,13 @@ public final class LivingData {
                 .asMutable(LivingEntity.class)
                     .create(Keys.ABSORPTION)
                         .get(h -> (double) h.getAbsorptionAmount())
-                        .set((h, v) -> h.setAbsorptionAmount(v.floatValue()))
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.setAbsorptionAmount(v.floatValue());
+                            return true;
+                        })
                     .create(Keys.ACTIVE_ITEM)
                         .get(h -> ItemStackUtil.snapshotOf(h.getActiveItemStack()))
                         .setAnd((h, v) -> {
@@ -99,7 +105,13 @@ public final class LivingData {
                         })
                     .create(Keys.FALL_DISTANCE)
                         .get(h -> (double) h.fallDistance)
-                        .set((h, v) -> h.fallDistance = v.floatValue())
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.fallDistance = v.floatValue();
+                            return true;
+                        })
                     .create(Keys.HEAD_ROTATION)
                         .get(h -> new Vector3d(h.rotationPitch, h.getRotationYawHead(), 0))
                         .set((h, v) -> {

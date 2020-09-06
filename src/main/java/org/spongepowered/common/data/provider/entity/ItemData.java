@@ -45,7 +45,13 @@ public final class ItemData {
                 .asMutable(ItemEntityBridge.class)
                     .create(Keys.DESPAWN_DELAY)
                         .get(ItemEntityBridge::bridge$getDespawnDelay)
-                        .set((h, v) -> h.bridge$setDespawnDelay(v, false))
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.bridge$setDespawnDelay(v, false);
+                            return true;
+                        })
                     .create(Keys.INFINITE_DESPAWN_DELAY)
                         .get(ItemEntityBridge::bridge$infiniteDespawnDelay)
                         .set((h, v) -> h.bridge$setDespawnDelay(h.bridge$getDespawnDelay(), v))

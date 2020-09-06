@@ -22,29 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.ai.goal;
+package org.spongepowered.common.data.provider.nbt;
 
-import net.minecraft.entity.MobEntity;
-import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import static java.util.Objects.requireNonNull;
 
-@Mixin(net.minecraft.entity.ai.goal.SwimGoal.class)
-public abstract class SwimGoalMixin {
+import com.google.common.base.MoreObjects;
 
-    @Shadow @Final private MobEntity entity;
+public final class NBTDataType {
 
-    /**
-     * @author Zidane
-     * @reason By default, Vanilla's swim chance is always 0.8f. I expose this.
-     */
-    @Overwrite
-    public void tick() {
-        if (this.entity.getRNG().nextFloat() < ((SwimGoal) this).getSwimChance()) {
-            this.entity.getJumpController().setJumping();
-        }
+    private final String name;
+
+    public NBTDataType(final String name) {
+        requireNonNull(name, "name");
+        this.name = name;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("name", this.name)
+                .toString();
+    }
 }

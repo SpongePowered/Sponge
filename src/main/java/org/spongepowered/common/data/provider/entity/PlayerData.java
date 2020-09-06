@@ -39,7 +39,7 @@ import org.spongepowered.common.data.provider.util.ExperienceHolderUtils;
 
 public final class PlayerData {
 
-    private static final double EXHAUSTION_MAX = 4.0;
+    private static final double EXHAUSTION_MAX = 40.0;
     private static final double SATURATION_MAX = 40.0;
     private static final int FOOD_LEVEL_MAX = 20;
 
@@ -76,21 +76,35 @@ public final class PlayerData {
                         .get(PlayerEntity::xpBarCap)
                     .create(Keys.EXPERIENCE_LEVEL)
                         .get(h -> h.experienceLevel)
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
                             h.experienceTotal = ExperienceHolderUtils.xpAtLevel(v);
                             h.experience = 0;
                             h.experienceLevel = v;
                             ((ServerPlayerEntityBridge) h).bridge$refreshExp();
+                            return true;
                         })
                     .create(Keys.EXPERIENCE_SINCE_LEVEL)
                         .get(h -> ((PlayerEntityBridge) h).bridge$getExperienceSinceLevel())
-                        .set(ExperienceHolderUtils::setExperienceSinceLevel)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            ExperienceHolderUtils.setExperienceSinceLevel(h, v);
+                            return true;
+                        })
                         .delete(h -> ExperienceHolderUtils.setExperience(h, 0))
                     .create(Keys.FLYING_SPEED)
                         .get(h -> (double) h.abilities.getFlySpeed())
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
                             ((PlayerAbilitiesAccessor) h.abilities).accessor$setFlySpeed(v.floatValue());
                             h.sendPlayerAbilities();
+                            return true;
                         })
                     .create(Keys.FOOD_LEVEL)
                         .get(h -> h.getFoodStats().getFoodLevel())

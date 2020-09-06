@@ -30,9 +30,9 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.util.NbtHelper;
 import org.spongepowered.common.util.Constants;
 
-public final class PlayerData {
+public final class NBTComponentData {
 
-    private PlayerData() {
+    private NBTComponentData() {
     }
 
     // @formatter:off

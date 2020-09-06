@@ -22,19 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.nbt;
+package org.spongepowered.common.bridge.entity.passive.horse;
 
-import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.api.data.type.LlamaType;
 
-public final class NBTDataProviders extends DataProviderRegistratorBuilder {
+public interface LlamaEntityBridge {
 
-    public NBTDataProviders(final DataProviderRegistry registry) {
-        super(registry);
-    }
+    LlamaType bridge$getLlamaType();
 
-    @Override
-    public void register() {
-        NBTComponentData.register(this.registrator);
-    }
+    void bridge$setLlamaType(LlamaType type);
 }

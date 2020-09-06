@@ -29,6 +29,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.common.accessor.entity.passive.horse.LlamaEntityAccessor;
+import org.spongepowered.common.bridge.entity.passive.horse.LlamaEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.type.SpongeLlamaType;
 
@@ -41,18 +42,13 @@ public final class LlamaData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(LlamaEntity.class)
-                    .create(Keys.LLAMA_TYPE)
-                        .get(h -> {
-                            final int type = h.getVariant()
-                                    ;
-                            return Sponge.getRegistry().getCatalogRegistry().streamAllOf(LlamaType.class)
-                                    .filter(t -> ((SpongeLlamaType)t).getMetadata() == type)
-                                    .findFirst().orElse(null);
-                        })
-                        .set((h, v) -> h.setVariant(((SpongeLlamaType) v).getMetadata()))
                     .create(Keys.STRENGTH)
                         .get(LlamaEntity::getStrength)
-                        .set((h, v) -> ((LlamaEntityAccessor) h).accessor$setStrength(v));
+                        .set((h, v) -> ((LlamaEntityAccessor) h).accessor$setStrength(v))
+                .asMutable(LlamaEntityBridge.class)
+                    .create(Keys.LLAMA_TYPE)
+                        .get(LlamaEntityBridge::bridge$getLlamaType)
+                        .set(LlamaEntityBridge::bridge$setLlamaType);
     }
     // @formatter:on
 }

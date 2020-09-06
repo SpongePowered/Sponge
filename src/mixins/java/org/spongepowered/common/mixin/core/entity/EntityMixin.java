@@ -141,6 +141,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
+    private boolean impl$isVanished = false;
+    private boolean impl$pendingVisibilityUpdate = false;
+    private int impl$visibilityTicks = 0;
+    private boolean impl$collision = true;
 
     // @formatter:on
 
@@ -434,10 +438,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Inject(method = "tick",
         at = @At("RETURN"))
     private void impl$updateVanishState(final CallbackInfo callbackInfo) {
-        if (this.vanish$pendingVisibilityUpdate && !this.world.isRemote) {
+        if (this.impl$pendingVisibilityUpdate && !this.world.isRemote) {
             final EntityTrackerAccessor trackerAccessor = ((ChunkManagerAccessor) ((ServerWorld) this.world).getChunkProvider().chunkManager).accessor$getEntityTrackers().get(this.shadow$getEntityId());
-            if (trackerAccessor != null && this.vanish$visibilityTicks % 4 == 0) {
-                if (this.vanish$isVanished) {
+            if (trackerAccessor != null && this.impl$visibilityTicks % 4 == 0) {
+                if (this.impl$isVanished) {
                     for (final ServerPlayerEntity entityPlayerMP : trackerAccessor.accessor$getTrackingPlayers()) {
                         entityPlayerMP.connection.sendPacket(new SDestroyEntitiesPacket(this.shadow$getEntityId()));
                         if ((Entity) (Object) this instanceof ServerPlayerEntity) {
@@ -446,8 +450,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                         }
                     }
                 } else {
-                    this.vanish$visibilityTicks = 1;
-                    this.vanish$pendingVisibilityUpdate = false;
+                    this.impl$visibilityTicks = 1;
+                    this.impl$pendingVisibilityUpdate = false;
                     for (final ServerPlayerEntity entityPlayerMP : SpongeCommon.getServer().getPlayerList().getPlayers()) {
                         if ((Entity) (Object) this == entityPlayerMP) {
                             continue;
@@ -460,10 +464,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     }
                 }
             }
-            if (this.vanish$visibilityTicks > 0) {
-                this.vanish$visibilityTicks--;
+            if (this.impl$visibilityTicks > 0) {
+                this.impl$visibilityTicks--;
             } else {
-                this.vanish$pendingVisibilityUpdate = false;
+                this.impl$pendingVisibilityUpdate = false;
             }
         }
     }
@@ -642,7 +646,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
 
     }
-
+*/
 
     @Override
     public boolean bridge$isInvisible() {
@@ -653,31 +657,31 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     public void bridge$setInvisible(final boolean invisible) {
         this.shadow$setInvisible(invisible);
         if (invisible) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
+            final CompoundNBT spongeData = this.data$getSpongeData();
             spongeData.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
         } else {
-            if (((DataCompoundHolder) this).data$hasSpongeDataCompound()) {
-                ((DataCompoundHolder) this).data$getSpongeDataCompound().remove(Constants.Sponge.Entity.IS_INVISIBLE);
+            if (this.data$hasSpongeData()) {
+                this.data$getSpongeData().remove(Constants.Sponge.Entity.IS_INVISIBLE);
             }
         }
     }
 
     @Override
     public boolean bridge$isVanished() {
-        return this.vanish$isVanished;
+        return this.impl$isVanished;
     }
 
     @Override
     public void bridge$setVanished(final boolean vanished) {
-        this.vanish$isVanished = vanished;
-        this.vanish$pendingVisibilityUpdate = true;
-        this.vanish$visibilityTicks = 20;
+        this.impl$isVanished = vanished;
+        this.impl$pendingVisibilityUpdate = true;
+        this.impl$visibilityTicks = 20;
         if (vanished) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
+            final CompoundNBT spongeData = this.data$getSpongeData();
             spongeData.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
         } else {
-            if (((DataCompoundHolder) this).data$hasSpongeDataCompound()) {
-                final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
+            if (this.data$hasSpongeData()) {
+                final CompoundNBT spongeData = this.data$getSpongeData();
                 spongeData.remove(Constants.Sponge.Entity.IS_VANISHED);
                 spongeData.remove(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
                 spongeData.remove(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
@@ -687,16 +691,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public boolean bridge$isUncollideable() {
-        return this.vanish$collision;
+        return this.impl$collision;
     }
 
     @Override
     public void bridge$setUncollideable(final boolean prevents) {
-        this.vanish$collision = prevents;
+        this.impl$collision = prevents;
     }
-
-
-    */
 
     @Override
     public boolean bridge$isUntargetable() {
@@ -719,7 +720,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
     private boolean impl$checkIsSilentOrInvis(final Entity entity) {
-        return entity.isSilent() || this.vanish$isVanished;
+        return entity.isSilent() || this.impl$isVanished;
     }
 
     @Redirect(method = "applyEntityCollision",
@@ -736,7 +737,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private void impl$spawnParticle(final net.minecraft.world.World world, final IParticleData particleTypes,
         final double xCoord, final double yCoord, final double zCoord,
         final double xOffset, final double yOffset, final double zOffset) {
-        if (!this.vanish$isVanished) {
+        if (!this.impl$isVanished) {
             this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
@@ -747,7 +748,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private void impl$runningSpawnParticle(final net.minecraft.world.World world, final IParticleData particleTypes,
         final double xCoord, final double yCoord, final double zCoord,
         final double xOffset, final double yOffset, final double zOffset) {
-        if (!this.vanish$isVanished) {
+        if (!this.impl$isVanished) {
             this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }

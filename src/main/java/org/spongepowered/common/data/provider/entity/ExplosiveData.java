@@ -39,7 +39,13 @@ public final class ExplosiveData {
                 .asMutable(ExplosiveBridge.class)
                     .create(Keys.EXPLOSION_RADIUS)
                         .get(h -> h.bridge$getExplosionRadius().orElse(null))
-                        .set(ExplosiveBridge::bridge$setExplosionRadius);
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.bridge$setExplosionRadius(v);
+                            return true;
+                        });
     }
     // @formatter:on
 }

@@ -57,10 +57,22 @@ public final class FallingBlockData {
                         .set((h, v) -> h.accessor$setFallHurtAmount(v.floatValue()))
                     .create(Keys.FALL_TIME)
                         .get(FallingBlockEntityAccessor::accessor$getFallTime)
-                        .set(FallingBlockEntityAccessor::accessor$setFallTime)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setFallTime(v);
+                            return true;
+                        })
                     .create(Keys.MAX_FALL_DAMAGE)
                         .get(h -> (double) h.accessor$getFallHurtMax())
-                        .set((h, v) -> h.accessor$setFallHurtMax(v.intValue()));
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setFallHurtMax(v.intValue());
+                            return true;
+                        });
     }
     // @formatter:on
 }
