@@ -214,7 +214,7 @@ public final class DataTest  {
 
         final Entity ravager = world.createEntity(EntityTypes.RAVAGER.get(), position);
         this.checkGetData(ravager, Keys.ATTACK_TIME, 0);
-        this.checkOfferData(ravager, Keys.ATTACK_TIME, 5);
+        this.checkOfferData(ravager, Keys.ATTACK_TIME, 200);
 
         final ItemStack writtenBookStack = ItemStack.of(ItemTypes.WRITTEN_BOOK);
         this.checkOfferData(writtenBookStack, Keys.AUTHOR, TextComponent.of("You"));
@@ -424,9 +424,10 @@ public final class DataTest  {
         this.checkWithData(acaciaStairs, Keys.DIRECTION, Direction.WEST);
 
         this.checkOfferData(jungleAxe, Keys.DISPLAY_NAME, TextComponent.of("Jungle Axe"));
-        // TODO bridge$getDisplayNameTex is abstract
-        //        this.checkOfferData(shulkerBullet, Keys.DISPLAY_NAME, TextComponent.of("Angry Shulker Bullet"));
-        // TODO BlockEntity DisplayName
+        this.checkOfferData(shulkerBullet, Keys.DISPLAY_NAME, TextComponent.of("Angry Shulker Bullet"));
+        this.checkOfferData(sheep, Keys.DISPLAY_NAME, TextComponent.of("Special Sheep"));
+        world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
+        this.checkOfferData(location, Keys.DISPLAY_NAME, TextComponent.of("Just a Chest"));
 
         player.get(Keys.DOMINANT_HAND).get();
 
@@ -1166,6 +1167,7 @@ public final class DataTest  {
         // Keys.STRUCTURE_SIZE
 
         this.checkOfferData(sheep, Keys.STUCK_ARROWS, 10);
+        this.checkOfferData(player, Keys.STUCK_ARROWS, 10);
 
         this.checkOfferData(ravager, Keys.STUNNED_TIME, 20);
 

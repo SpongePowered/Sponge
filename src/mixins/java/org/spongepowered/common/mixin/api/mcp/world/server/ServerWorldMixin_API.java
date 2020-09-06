@@ -50,6 +50,10 @@ import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataProvider;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
@@ -67,6 +71,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -285,4 +290,15 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
         return (ScheduledUpdateList<FluidType>) this.pendingFluidTicks;
     }
 
+    @Override
+    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends Value<E>> key, E value) {
+        final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
+        return dataProvider.offer(ServerLocation.of(this, new Vector3d(x, y, z)), value);
+    }
+
+    @Override
+    public <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
+        final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
+        return dataProvider.get(ServerLocation.of(this, new Vector3d(x, y, z)));
+    }
 }

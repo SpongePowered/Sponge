@@ -93,7 +93,7 @@ public abstract class SpongeQuery implements Query {
                 matches.put(entry.getKey(), toRemove.getOrDefault(entry.getKey(), 0));
             } else { // with data if found
                 final SlotLens key = entry.getKey();
-                System.out.println(data); // TODO wrap lens to include data? or put the data on the querylens
+//                System.out.println(data); // TODO wrap lens to include data? or put the data on the querylens
                 matches.put(key, toRemove.getOrDefault(entry.getKey(), 0));
             }
         }

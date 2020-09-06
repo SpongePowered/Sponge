@@ -63,6 +63,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -145,6 +146,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$pendingVisibilityUpdate = false;
     private int impl$visibilityTicks = 0;
     private boolean impl$collision = true;
+    private Component impl$displayName;
+    private boolean impl$skipSettingCustomNameTag;
 
     // @formatter:on
 
@@ -752,6 +755,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
+    */
 
     @Nullable
     @Override
@@ -760,16 +764,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
-    public void bridge$setDisplayName(
-        @Nullable
-        final Component displayName) {
+    public void bridge$setDisplayName(@Nullable final Component displayName) {
         this.impl$displayName = displayName;
 
         this.impl$skipSettingCustomNameTag = true;
         if (this.impl$displayName == null) {
             this.shadow$setCustomName(null);
         } else {
-            this.shadow$setCustomName(SpongeAdventure.vanilla(this.impl$displayName));
+            this.shadow$setCustomName(SpongeAdventure.asVanilla(this.impl$displayName));
         }
 
         this.impl$skipSettingCustomNameTag = false;
@@ -779,11 +781,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         at = @At("RETURN"))
     private void impl$UpdatedisplayNameText(final ITextComponent name, final CallbackInfo ci) {
         if (!this.impl$skipSettingCustomNameTag) {
-            this.impl$displayName = SpongeAdventure.adventure(name);
+            this.impl$displayName = SpongeAdventure.asAdventure(name);
         }
     }
 
-    */
     /**
      * @return
      * @author gabizou - January 30th, 2016
