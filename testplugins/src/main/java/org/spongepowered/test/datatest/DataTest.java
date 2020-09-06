@@ -1123,8 +1123,9 @@ public final class DataTest  {
         // Keys.SKY_LIGHT
 
         final BlockState slabState = BlockTypes.BIRCH_SLAB.get().getDefaultState();
-//        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.BOTTOM.get());
-//        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.FULL.get());
+        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.BOTTOM.get());
+        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.DOUBLE.get());
+        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.TOP.get());
 
         this.checkOfferData(player, Keys.SLEEP_TIMER, 20);
 
