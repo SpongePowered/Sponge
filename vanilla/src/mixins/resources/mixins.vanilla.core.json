@@ -20,7 +20,7 @@
     "mixins": [
         "crash.CrashReportMixin_Vanilla",
         "entity.player.ServerPlayerEntityMixin_Vanilla",
-        "network.login.ServerLoginNetHandler_2Mixin_Vanilla",
+        "network.login.ServerLoginNetHandler_1Mixin_Vanilla",
         "network.login.ServerLoginNetHandlerMixin_Vanilla",
         "network.play.ServerPlayNetHandlerMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",

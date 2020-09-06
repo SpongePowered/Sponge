@@ -50,7 +50,7 @@
         "item.ItemStackMixin",
         "network.NetworkManagerMixin",
         "network.handshake.ServerHandshakeNetHandlerMixin",
-        "network.login.ServerLoginNetHandler_2Mixin",
+        "network.login.ServerLoginNetHandler_1Mixin",
         "network.login.ServerLoginNetHandlerMixin",
         "network.play.ServerPlayNetHandlerMixin",
         "network.rcon.RConConsoleSourceMixin",

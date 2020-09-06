@@ -22,30 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.login;
+package org.spongepowered.vanilla.mixin.core.network.login;
 
 import net.minecraft.network.login.ServerLoginNetHandler;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
+import org.spongepowered.vanilla.accessor.network.login.ServerLoginNetHandlerAccessor_Vanilla;
 
-@Mixin(targets = "net/minecraft/network/login/ServerLoginNetHandler$2")
-public abstract class ServerLoginNetHandler_2Mixin extends Thread {
+@Mixin(targets = "net/minecraft/network/login/ServerLoginNetHandler$1")
+public abstract class ServerLoginNetHandler_1Mixin_Vanilla extends Thread {
 
-    @Shadow(aliases = {"this$0", "field_180221_a"}, remap = false)
+    @Shadow(aliases = {"this$0", "field_151292_a"}, remap = false)
     @Final
     private ServerLoginNetHandler handler;
 
-    @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
-            remap = false, cancellable = true)
-    private void impl$fireAuthEvent(final CallbackInfo ci) {
-        if (((ServerLoginNetHandlerBridge) this.handler).bridge$fireAuthEvent()) {
-            ci.cancel();
+    @Inject(method = "run()V", at = @At(value = "RETURN"), remap = false)
+    private void impl$onReadyToAccept(final CallbackInfo ci) {
+        final ServerLoginNetHandlerAccessor_Vanilla accessor = (ServerLoginNetHandlerAccessor_Vanilla) this.handler;
+        if (accessor.accessor$getState() == ServerLoginNetHandler.State.READY_TO_ACCEPT) {
+            accessor.accessor$setState(ServerLoginNetHandler.State.NEGOTIATING);
         }
     }
 }
