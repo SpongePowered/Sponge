@@ -524,8 +524,7 @@ public final class DataTest  {
         this.checkOfferData(furnaceMinecart, Keys.FUEL, 10);
         // TODO BrewingStand/FurnaceBlockEntity Keys.FUEL
 
-// TODO missing FusedExplosiveBridge
-//        this.checkOfferData(tntEntity, Keys.FUSE_DURATION, 0);
+        this.checkOfferData(tntEntity, Keys.FUSE_DURATION, 10);
 
         final GameMode gameMode = player.get(Keys.GAME_MODE).orElse(GameModes.CREATIVE.get());
         this.checkOfferData(player, Keys.GAME_MODE, GameModes.SURVIVAL.get());
@@ -809,10 +808,9 @@ public final class DataTest  {
         this.checkWithData(leverState, Keys.IS_POWERED, true);
         this.checkWithData(leverState, Keys.IS_POWERED, false);
 
-//        this.checkOfferData(tntEntity, Keys.IS_PRIMED, true);
-//        this.checkOfferData(tntEntity, Keys.IS_PRIMED, false);
+        this.checkGetData(tntEntity, Keys.IS_PRIMED, true);
 
-//        this.checkOfferData(cat, Keys.IS_PURRING, true);
+        //        this.checkOfferData(cat, Keys.IS_PURRING, true);
 //        this.checkOfferData(cat, Keys.IS_RELAXED, true);
 
         this.checkGetData(waterBlockState, Keys.IS_REPLACEABLE, true);
