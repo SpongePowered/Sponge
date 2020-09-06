@@ -35,12 +35,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.ProfileLookupCallback;
-import com.mojang.authlib.yggdrasil.ProfileNotFoundException;
 import com.mojang.util.UUIDTypeAdapter;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.core.util.Throwables;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileProvider;
+import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.SpongeCommon;
 
@@ -103,7 +104,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         Objects.requireNonNull(uniqueId, "uniqueId");
         return Objects.requireNonNull(this.profileCache.get(uniqueId)).thenApply(profile -> {
             if (profile == null) {
-                return null;
+                throw new ProfileNotFoundException(uniqueId.toString());
             }
             return signed ? profile.getSigned() : profile.getUnsigned();
         });
@@ -146,15 +147,31 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
     @Override
     public CompletableFuture<GameProfile> getBasicProfile(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
-        return Objects.requireNonNull(this.profileCache.get(uniqueId)).thenApply(profile ->
-                profile == null ? null : profile.getSigned().withoutProperties());
+        return Objects.requireNonNull(this.profileCache.get(uniqueId)).thenApply(profile -> {
+            if (profile == null) {
+                throw new ProfileNotFoundException(uniqueId.toString());
+            }
+            return profile.getSigned().withoutProperties();
+        });
     }
 
     @Override
     public CompletableFuture<GameProfile> getBasicProfile(final String name, final @Nullable Instant time) {
         Objects.requireNonNull(name, "name");
         if (time != null) {
-            return this.submit(() -> this.requestBasicProfileAt(name, time));
+            return this.submit(() -> {
+                final GameProfile profile;
+                try {
+                    profile = this.requestBasicProfileAt(name, time);
+                } catch (final Exception ex) {
+                    Throwables.rethrow(ex);
+                    return null;
+                }
+                if (profile == null) {
+                    throw new ProfileNotFoundException(name);
+                }
+                return profile;
+            });
         }
         final CompletableFuture<GameProfile> result = new CompletableFuture<>();
         this.submit(() -> SpongeCommon.getServer().getGameProfileRepository().findProfilesByNames(new String[] { name }, Agent.MINECRAFT,
@@ -171,7 +188,10 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
                 final Map<String, GameProfile> resultMap = new HashMap<>();
                 for (final String name : names) {
                     try {
-                        resultMap.put(name, this.requestBasicProfileAt(name, time));
+                        final GameProfile profile = this.requestBasicProfileAt(name, time);
+                        if (profile != null) {
+                            resultMap.put(name, profile);
+                        }
                     } catch (final Exception e) {
                         result.completeExceptionally(e);
                         return;
@@ -262,7 +282,11 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
 
         @Override
         public void onProfileLookupFailed(final com.mojang.authlib.GameProfile profile, final Exception exception) {
-            this.result.completeExceptionally(exception);
+            if (exception instanceof com.mojang.authlib.yggdrasil.ProfileNotFoundException) {
+                this.result.completeExceptionally(new ProfileNotFoundException(profile.getName(), exception.getCause()));
+            } else {
+                this.result.completeExceptionally(exception);
+            }
         }
     }
 
@@ -290,7 +314,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
 
         @Override
         public void onProfileLookupFailed(final com.mojang.authlib.GameProfile profile, final Exception exception) {
-            if (exception instanceof ProfileNotFoundException) {
+            if (exception instanceof com.mojang.authlib.yggdrasil.ProfileNotFoundException) {
                 return;
             }
             this.resultMap = null;
