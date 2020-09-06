@@ -159,6 +159,10 @@ public final class ItemStackData {
                     .create(Keys.MAX_DURABILITY)
                         .get(h -> h.getItem().isDamageable() ? h.getItem().getMaxDamage() : null)
                         .supports(h -> h.getItem().isDamageable())
+                    .create(Keys.ITEM_DURABILITY)
+                        .get(ItemStack::getDamage)
+                        .set(ItemStack::setDamage)
+                        .supports(h -> h.getItem().isDamageable())
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {
                             if (h.getItem().isFood()) {

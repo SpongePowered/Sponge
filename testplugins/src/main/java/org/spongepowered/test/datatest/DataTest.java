@@ -796,7 +796,7 @@ public final class DataTest  {
         this.checkOfferData(vindicator, Keys.IS_PATROLLING, true);
 
         this.checkOfferData(sheep, Keys.IS_PERSISTENT, true);
-        this.checkOfferData(vindicator, Keys.IS_PERSISTENT, false);
+        this.checkOfferData(vindicator, Keys.IS_PERSISTENT, true);
 
 //        this.check...(armorStand, Keys.IS_PLACING_DISABLED, ...);
 
@@ -891,7 +891,7 @@ public final class DataTest  {
 //        this.checkGetData(wetSpongeState, Keys.IS_WET, true);
         this.checkGetData(sheep, Keys.IS_WET, false);
 
-//        this.checkGetData(jungleAxe, Keys.ITEM_DURABILITY, ..);
+        this.checkOfferData(jungleAxe, Keys.ITEM_DURABILITY, 5);
 
         this.checkOfferData(itemEntity, Keys.ITEM_STACK_SNAPSHOT, jungleAxe.createSnapshot());
 
