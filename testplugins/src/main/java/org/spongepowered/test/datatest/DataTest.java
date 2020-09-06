@@ -462,7 +462,9 @@ public final class DataTest  {
         this.checkOfferData(chicken, Keys.EGG_TIME, 0);
         this.checkOfferData(chicken, Keys.EGG_TIME, 5000);
 
-        // TODO Keys.END_GATEWAY_AGE
+        world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().getDefaultState());
+        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, 0L);
+        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, 100L);
 
         // Keys.EQUIPMENT_TYPE is for inventories
         this.checkOfferData(player, Keys.EXHAUSTION, 1.0);
