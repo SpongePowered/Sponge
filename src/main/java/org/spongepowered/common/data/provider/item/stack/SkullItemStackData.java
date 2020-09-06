@@ -31,7 +31,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.GameProfileUtils;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.Constants;
 
@@ -51,10 +50,9 @@ public final class SkullItemStackData {
                             return mcProfile == null ? null : SpongeGameProfile.of(mcProfile);
                         })
                         .set((h, v) -> {
-                            final com.mojang.authlib.GameProfile mcProfile =
-                                    SpongeGameProfile.toMcProfile(GameProfileUtils.resolveProfileIfNecessary(v));
-                                final CompoundNBT tag = NBTUtil.writeGameProfile(new CompoundNBT(), mcProfile);
-                                h.setTagInfo(Constants.Item.Skull.ITEM_SKULL_OWNER, tag);
+                            final com.mojang.authlib.GameProfile mcProfile = SpongeGameProfile.toMcProfile(v);
+                            final CompoundNBT tag = NBTUtil.writeGameProfile(new CompoundNBT(), mcProfile);
+                            h.setTagInfo(Constants.Item.Skull.ITEM_SKULL_OWNER, tag);
                         })
                         .delete(h -> h.removeChildTag(Constants.Item.Skull.ITEM_SKULL_OWNER))
                         .supports(h -> h.getItem() instanceof SkullItem);

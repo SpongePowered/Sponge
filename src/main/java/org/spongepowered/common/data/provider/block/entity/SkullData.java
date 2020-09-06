@@ -26,10 +26,10 @@ package org.spongepowered.common.data.provider.block.entity;
 
 import net.minecraft.tileentity.SkullTileEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.accessor.tileentity.SkullTileEntityAccessor;
+import org.spongepowered.common.bridge.tileentity.SkullTileEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.GameProfileUtils;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 public final class SkullData {
 
@@ -41,9 +41,9 @@ public final class SkullData {
         registrator
                 .asMutable(SkullTileEntity.class)
                     .create(Keys.GAME_PROFILE)
-                        .get(h -> (GameProfile) ((SkullTileEntityAccessor) h).accessor$getPlayerProfile())
-                        .set((h, v) -> h.setPlayerProfile((com.mojang.authlib.GameProfile) GameProfileUtils.resolveProfileIfNecessary(v)))
-                        .delete(h -> h.setPlayerProfile(null));
+                        .get(h -> SpongeGameProfile.of(((SkullTileEntityAccessor) h).accessor$getPlayerProfile()))
+                        .set((h, v) -> ((SkullTileEntityBridge) h).bridge$setUnresolvedPlayerProfile(SpongeGameProfile.toMcProfile(v)))
+                        .delete(h -> ((SkullTileEntityBridge) h).bridge$setUnresolvedPlayerProfile(null));
     }
     // @formatter:on
 }

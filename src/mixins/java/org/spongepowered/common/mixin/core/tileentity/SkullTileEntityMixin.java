@@ -38,12 +38,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.tileentity.SkullTileEntityBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(SkullTileEntity.class)
-public abstract class SkullTileEntityMixin extends TileEntity implements ITickableTileEntity {
+public abstract class SkullTileEntityMixin extends TileEntity implements ITickableTileEntity, SkullTileEntityBridge {
 
     @Shadow private GameProfile playerProfile;
 
@@ -53,16 +54,27 @@ public abstract class SkullTileEntityMixin extends TileEntity implements ITickab
         super(tileEntityTypeIn);
     }
 
+    private void cancelResolveFuture() {
+        if (this.impl$currentProfileFuture != null) {
+            this.impl$currentProfileFuture.cancel(true);
+            this.impl$currentProfileFuture = null;
+        }
+    }
+
+    @Override
+    public void bridge$setUnresolvedPlayerProfile(final @Nullable GameProfile mcProfile) {
+        this.cancelResolveFuture();
+        this.playerProfile = mcProfile;
+        this.markDirty();
+    }
+
     /**
      * @reason Don't block the main thread while attempting to lookup a game profile.
      */
     @Redirect(method = "updatePlayerProfile()V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/tileentity/SkullTileEntity;updateGameProfile(Lcom/mojang/authlib/GameProfile;)Lcom/mojang/authlib/GameProfile;"))
     private GameProfile onUpdateProfile(final GameProfile input) {
-        if (this.impl$currentProfileFuture != null) {
-            this.impl$currentProfileFuture.cancel(true);
-            this.impl$currentProfileFuture = null;
-        }
+        this.cancelResolveFuture();
         if (input == null) {
             return null;
         }
@@ -90,9 +102,6 @@ public abstract class SkullTileEntityMixin extends TileEntity implements ITickab
     @Override
     public void remove() {
         super.remove();
-        if (this.impl$currentProfileFuture != null) {
-            this.impl$currentProfileFuture.cancel(true);
-            this.impl$currentProfileFuture = null;
-        }
+        this.cancelResolveFuture();
     }
 }
