@@ -889,10 +889,6 @@ public final class DataTest  {
         this.checkWithData(acaciaStairs, Keys.IS_WATERLOGGED, true);
 
         this.checkOfferData(wolf, Keys.IS_WET, true);
-        final BlockState spongeState = BlockTypes.SPONGE.get().getDefaultState();
-        final BlockState wetSpongeState = BlockTypes.WET_SPONGE.get().getDefaultState();
-//        this.checkGetData(spongeState, Keys.IS_WET, false);
-//        this.checkGetData(wetSpongeState, Keys.IS_WET, true);
         this.checkGetData(sheep, Keys.IS_WET, false);
 
         this.checkOfferData(jungleAxe, Keys.ITEM_DURABILITY, 5);
