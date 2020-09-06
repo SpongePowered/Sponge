@@ -53,6 +53,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 public final class SpongeTabList implements TabList {
 
@@ -144,7 +145,7 @@ public final class SpongeTabList implements TabList {
         if (!this.entries.containsKey(entry.getProfile().getId())) {
             this.addEntry(new SpongeTabListEntry(
                     this,
-                    (org.spongepowered.api.profile.GameProfile) entry.getProfile(),
+                    SpongeGameProfile.of(entry.getProfile()),
                     entry.getDisplayName() == null ? null : SpongeAdventure.asAdventure(entry.getDisplayName()),
                     entry.getPing(),
                     (GameMode) (Object) entry.getGameMode()
@@ -191,7 +192,7 @@ public final class SpongeTabList implements TabList {
     void sendUpdate(final TabListEntry entry, final SPlayerListItemPacket.Action action) {
         final SPlayerListItemPacket packet = new SPlayerListItemPacket();
         ((SPlayerListItemPacketAccessor) packet).accessor$setAction(action);
-        final SPlayerListItemPacket.AddPlayerData data = packet.new AddPlayerData((GameProfile) entry.getProfile(),
+        final SPlayerListItemPacket.AddPlayerData data = packet.new AddPlayerData(SpongeGameProfile.toMcProfile(entry.getProfile()),
             entry.getLatency(), (GameType) (Object) entry.getGameMode(),
             entry.getDisplayName().isPresent() ? SpongeAdventure.asVanilla(entry.getDisplayName().get()) : null);
         ((SPlayerListItemPacketAccessor) packet).accessor$getPlayers().add(data);

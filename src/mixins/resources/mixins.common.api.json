@@ -322,7 +322,6 @@
         "mcp.world.raid.RaidMixin_API",
         "mcp.world.server.ServerWorldMixin_API",
         "mcp.world.storage.WorldInfoMixin_API",
-        "mojang.authlib.GameProfileMixin_API",
         "mojang.authlib.properties.PropertyMixin_API",
         "service.permission.SubjectMixin_API",
         "world.LocatableBlockMixin"

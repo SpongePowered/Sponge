@@ -166,10 +166,6 @@ public final class SpongeGameProfileManager implements GameProfileManager {
     public void lookupUserAsync(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         this.gameLookupExecutorService.execute(() -> {
-            if (this.usernameCache.getLastKnownUsername(uniqueId) != null) {
-                return;
-            }
-
             try {
                 this.getBasicProfile(uniqueId).get();
             } catch (final InterruptedException | ExecutionException e) {

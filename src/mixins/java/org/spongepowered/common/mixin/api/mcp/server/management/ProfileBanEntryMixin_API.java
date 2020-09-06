@@ -30,6 +30,7 @@ import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 @Mixin(ProfileBanEntry.class)
 public abstract class ProfileBanEntryMixin_API extends BanEntryMixin_API<com.mojang.authlib.GameProfile> implements Ban.Profile {
@@ -41,6 +42,6 @@ public abstract class ProfileBanEntryMixin_API extends BanEntryMixin_API<com.moj
 
     @Override
     public GameProfile getProfile() {
-        return (GameProfile) this.shadow$getValue();
+        return SpongeGameProfile.of(this.shadow$getValue());
     }
 }
