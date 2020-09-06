@@ -60,6 +60,7 @@ import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.api.data.type.PistonTypes;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.type.ProfessionTypes;
+import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.data.type.SlabPortions;
 import org.spongepowered.api.data.type.SpellTypes;
@@ -1054,8 +1055,7 @@ public final class DataTest  {
         this.checkOfferData(villager, Keys.PROFESSION_LEVEL, 4);
 
         final Entity rabbit = world.createEntity(EntityTypes.RABBIT.get(), position);
-// TODO missing RabbitTypes providers
-//        this.checkOfferData(rabbit, Keys.RABBIT_TYPE, RabbitTypes.GOLD.get());
+        this.checkOfferData(rabbit, Keys.RABBIT_TYPE, RabbitTypes.GOLD.get());
 
         this.checkOfferData(areaEffectCloud, Keys.RADIUS, 20.0);
         this.checkOfferData(areaEffectCloud, Keys.RADIUS_ON_USE, -1.0);
