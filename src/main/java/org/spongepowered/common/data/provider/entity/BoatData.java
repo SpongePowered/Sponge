@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.item.BoatEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.BoatType;
 import org.spongepowered.api.data.type.WoodType;
 import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.common.accessor.entity.item.BoatEntityAccessor;
@@ -43,16 +44,12 @@ public final class BoatData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(BoatEntity.class)
-                    .create(Keys.WOOD_TYPE)
-                        .get(h -> getFor(h.getBoatType()))
-                        .set((h, v) -> h.setBoatType(getFor(v)))
+                    .create(Keys.BOAT_TYPE)
+                        .get(h -> ((BoatType) (Object) h.getBoatType()))
+                        .set((h, v) -> h.setBoatType((BoatEntity.Type) (Object) v))
                 .asMutable(BoatEntityAccessor.class)
                     .create(Keys.IS_IN_WATER)
                         .get(h -> h.accessor$getStatus() == BoatEntity.Status.IN_WATER)
-                .asMutable(BoatBridge.class)
-                    .create(Keys.MAX_SPEED)
-                        .get(BoatBridge::bridge$getMaxSpeed)
-                        .set(BoatBridge::bridge$setMaxSpeed)
                 .asMutable(BoatBridge.class)
                     .create(Keys.CAN_MOVE_ON_LAND)
                         .get(BoatBridge::bridge$getMoveOnLand)
@@ -62,47 +59,14 @@ public final class BoatData {
                         .get(BoatBridge::bridge$getOccupiedDecelerationSpeed)
                         .set(BoatBridge::bridge$setOccupiedDecelerationSpeed)
                 .asMutable(BoatBridge.class)
+                    .create(Keys.MAX_SPEED)
+                        .get(BoatBridge::bridge$getMaxSpeed)
+                        .set(BoatBridge::bridge$setMaxSpeed)
+                .asMutable(BoatBridge.class)
                     .create(Keys.UNOCCUPIED_DECELERATION)
                         .get(BoatBridge::bridge$getUnoccupiedDecelerationSpeed)
                         .set(BoatBridge::bridge$setUnoccupiedDecelerationSpeed)
         ;
     }
     // @formatter:on
-
-    private static @Nullable BoatEntity.Type getFor(final WoodType type) {
-        if (type == WoodTypes.OAK.get()) {
-            return BoatEntity.Type.OAK;
-        } else if (type == WoodTypes.SPRUCE.get()) {
-            return BoatEntity.Type.SPRUCE;
-        } else if (type == WoodTypes.JUNGLE.get()) {
-            return BoatEntity.Type.JUNGLE;
-        } else if (type == WoodTypes.DARK_OAK.get()) {
-            return BoatEntity.Type.DARK_OAK;
-        } else if (type == WoodTypes.BIRCH.get()) {
-            return BoatEntity.Type.BIRCH;
-        } else if (type == WoodTypes.ACACIA.get()) {
-            return BoatEntity.Type.ACACIA;
-        }
-        // TODO: Modded types?
-        return null;
-    }
-
-    private static @Nullable WoodType getFor(final BoatEntity.Type type) {
-        switch (type) {
-            case OAK:
-                return WoodTypes.OAK.get();
-            case SPRUCE:
-                return WoodTypes.SPRUCE.get();
-            case BIRCH:
-                return WoodTypes.BIRCH.get();
-            case JUNGLE:
-                return WoodTypes.JUNGLE.get();
-            case ACACIA:
-                return WoodTypes.ACACIA.get();
-            case DARK_OAK:
-                return WoodTypes.DARK_OAK.get();
-        }
-        // TODO: Modded types?
-        return null;
-    }
 }

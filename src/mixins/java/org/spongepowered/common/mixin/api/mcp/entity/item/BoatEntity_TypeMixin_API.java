@@ -24,37 +24,37 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.item;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.item.BoatEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.WoodTypes;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.vehicle.Boat;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.type.BoatType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.api.mcp.entity.EntityMixin_API;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 
-import java.util.Collection;
-import java.util.Set;
+@Mixin(BoatEntity.Type.class)
+public abstract class BoatEntity_TypeMixin_API implements BoatType {
 
-@Mixin(BoatEntity.class)
-@Implements(@Interface(iface = Boat.class, prefix = "apiBoat$"))
-public abstract class BoatEntityMixin_API extends EntityMixin_API implements Boat {
+    @Shadow @Final private Block block;
+    private ResourceKey api$key;
 
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.type().asImmutable());
-        values.add(this.inWater().asImmutable());
-        values.add(this.moveOnLand().asImmutable());
-        values.add(this.maxSpeed().asImmutable());
-        values.add(this.unoccupiedDeceleration().asImmutable());
-        values.add(this.occupiedDeceleration().asImmutable());
-
-        return values;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(final String enumName, final int ordinal, final Block p_i48146_3_, final String p_i48146_4_, final CallbackInfo ci) {
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
     }
 
+    @Override
+    public ResourceKey getKey() {
+        return this.api$key;
+    }
+
+    @Override
+    public BlockType getRepresentedBlock() {
+        return (BlockType) this.block;
+    }
 }

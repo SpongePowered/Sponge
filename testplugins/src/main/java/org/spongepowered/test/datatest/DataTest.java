@@ -45,6 +45,7 @@ import org.spongepowered.api.data.type.ArmorMaterials;
 import org.spongepowered.api.data.type.ArtTypes;
 import org.spongepowered.api.data.type.AttachmentSurfaces;
 import org.spongepowered.api.data.type.BannerPatternShapes;
+import org.spongepowered.api.data.type.BoatTypes;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.data.type.CatTypes;
@@ -1257,8 +1258,9 @@ public final class DataTest  {
         final Entity evoker = world.createEntity(EntityTypes.EVOKER.get(), position);
         this.checkOfferData(evoker, Keys.WOLOLO_TARGET, (Sheep) sheep);
 
-        this.checkOfferData(boat, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
-        // TODO WOOD_TYPE for BlockState
+        this.checkOfferData(boat, Keys.BOAT_TYPE, BoatTypes.ACACIA.get());
+        final BlockState woodState = BlockTypes.ACACIA_WOOD.get().getDefaultState();
+        this.checkGetData(woodState, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
 
         world.setBlock(blockPos, oldState);
     }
