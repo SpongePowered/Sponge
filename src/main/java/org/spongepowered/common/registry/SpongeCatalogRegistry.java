@@ -152,6 +152,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
@@ -197,6 +198,7 @@ import org.spongepowered.common.registry.builtin.sponge.SelectorSortAlgorithmStr
 import org.spongepowered.common.registry.builtin.sponge.SelectorTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SerializationBehaviorStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.WeatherStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
@@ -548,6 +550,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(StructureMode.class, ResourceKey.minecraft("structure_mode"), Arrays.stream(net.minecraft.state.properties.StructureMode.values()), true, false)
             .generateRegistry(ToolType.class, ResourceKey.minecraft("tool_type"), Arrays.stream(ItemTier.values()), true, false)
             .generateRegistry(TropicalFishShape.class, ResourceKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true, false)
+            .generateRegistry(Weather.class, ResourceKey.minecraft("weather"), WeatherStreamGenerator.stream(), true, false)
             .generateRegistry(WireAttachmentType.class, ResourceKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true, false)
             .generateRegistry(WoodType.class, ResourceKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true, false)
             .generateRegistry(Visibility.class, ResourceKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true, false)

@@ -28,7 +28,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeWeather extends SpongeCatalogType implements Weather {
+public final class SpongeWeather extends SpongeCatalogType implements Weather {
 
     public SpongeWeather(final ResourceKey key) {
         super(key);

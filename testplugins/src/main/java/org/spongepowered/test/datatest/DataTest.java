@@ -117,6 +117,7 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
@@ -165,6 +166,8 @@ public final class DataTest  {
         final ServerLocation location = world.getLocation(blockPos);
 
         final BlockState oldState = world.getBlock(blockPos);
+
+        world.setWeather(Weathers.CLEAR.get());
 
         this.checkOfferData(player, Keys.ABSORPTION, 0.0);
         this.checkOfferData(player, Keys.ABSORPTION, 10.0);

@@ -374,7 +374,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         if (this.shadow$isRaining()) {
             return Weathers.RAIN.get();
         } else if (this.shadow$isThundering()) {
-            return Weathers.THUNDER_STORM.get();
+            return Weathers.THUNDER.get();
         }
         return Weathers.CLEAR.get();
     }
@@ -420,7 +420,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
             this.shadow$setClearWeatherTime(0);
-        } else if (weather == Weathers.THUNDER_STORM.get()) {
+        } else if (weather == Weathers.THUNDER.get()) {
             this.shadow$setRaining(true);
             this.shadow$setRainTime((int) (duration.toMillis() / 1000));
             this.shadow$setThundering(true);
