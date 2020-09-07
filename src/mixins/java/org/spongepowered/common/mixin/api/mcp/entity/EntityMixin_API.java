@@ -325,6 +325,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         this.creator().map(Value::asImmutable).ifPresent(values::add);
         this.notifier().map(Value::asImmutable).ifPresent(values::add);
         this.fireTicks().map(Value::asImmutable).ifPresent(values::add);
+        this.fireImmuneTicks().map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

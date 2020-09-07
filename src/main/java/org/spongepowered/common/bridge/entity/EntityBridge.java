@@ -54,7 +54,6 @@ public interface EntityBridge {
 
     void bridge$setFireImmuneTicks(int ticks);
 
-
     default void bridge$clearWrappedCaptureList() {
 
     }

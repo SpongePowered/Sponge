@@ -510,7 +510,8 @@ public final class DataTest  {
         this.checkOfferData(rocket, Keys.FIREWORK_FLIGHT_MODIFIER, 5);
 
         // TODO bridge$setFireImmunityTicks is abstract
-//        this.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, 20000);
+        this.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, 20000);
+        this.checkOfferData(player, Keys.FIRE_DAMAGE_DELAY, 20000);
 
         this.checkOfferData(sheep, Keys.FIRE_TICKS, 10);
 

@@ -139,8 +139,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setWorld(World worldIn);
 
-    // @formatter:on
-
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
     private boolean impl$isVanished = false;
@@ -151,6 +149,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$skipSettingCustomNameTag;
     private boolean impl$invulnerable = false;
     private boolean impl$transient = false;
+    protected boolean impl$hasCustomFireImmuneTicks = false;
+    protected short impl$fireImmuneTicks = 0;
 
     // @formatter:on
 
@@ -921,17 +921,20 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             this.impl$destructCause = PhaseTracker.getCauseStackManager().getCurrentCause();
         }
     }
+*/
 
-    @Inject(method = "getFireImmuneTicks", at = @At(value = "RETURN"), cancellable = true)
+    @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
     private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
-        ci.setReturnValue(this.impl$customFireImmuneTicks);
+        if (this.impl$hasCustomFireImmuneTicks) {
+            ci.setReturnValue((int) this.impl$fireImmuneTicks);
+        }
     }
 
     @Override
     public void bridge$setFireImmuneTicks(final int ticks) {
-        this.impl$customFireImmuneTicks = ticks;
+        this.impl$hasCustomFireImmuneTicks = true;
+        this.impl$fireImmuneTicks = (short) ticks;
     }
-*/
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {

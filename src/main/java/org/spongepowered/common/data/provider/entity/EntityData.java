@@ -76,7 +76,7 @@ public final class EntityData {
                     .create(Keys.FIRE_DAMAGE_DELAY)
                         .get(h -> ((EntityAccessor) h).accessor$getFireImmuneTicks())
                         .setAnd((h, v) -> {
-                            if (v < 1) {
+                            if (v < 1 || v > Short.MAX_VALUE) {
                                 return false;
                             }
                             ((EntityBridge) h).bridge$setFireImmuneTicks(v);
