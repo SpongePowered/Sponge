@@ -26,7 +26,6 @@ package org.spongepowered.common.entity.living.human;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -39,17 +38,31 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.brain.task.WalkRandomlyTask;
+import net.minecraft.entity.ai.goal.BreedGoal;
+import net.minecraft.entity.ai.goal.FollowParentGoal;
+import net.minecraft.entity.ai.goal.LookAtGoal;
+import net.minecraft.entity.ai.goal.RandomWalkingGoal;
+import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.ai.goal.TemptGoal;
+import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
+import net.minecraft.entity.passive.BeeEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.server.SDestroyEntitiesPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
 import net.minecraft.network.play.server.SSpawnPlayerPacket;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
@@ -59,7 +72,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
@@ -68,12 +80,12 @@ import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
 import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SSpawnPlayerPacketAccessor;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,30 +95,20 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-/*
- * Notes
- *
- * The label above the player's head is always visible unless the human is in
- * a team with invisible labels set to true. Could we leverage this at all?
- *
- * Hostile mobs don't attack the human, should this be default behaviour?
- */
-@SuppressWarnings("EntityConstructor") // MCDev needs an update for 1.14
-public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAttackMob {
+public final class HumanEntity extends CreatureEntity implements TeamMember, IRangedAttackMob {
 
     // According to http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
     // you can access this data once per minute, lets cache for 2 minutes
     private static final LoadingCache<UUID, PropertyMap> PROPERTIES_CACHE = Caffeine.newBuilder()
-            .expireAfterWrite(2, TimeUnit.MINUTES)
-            .build((uuid) -> SpongeCommon.getServer().getMinecraftSessionService()
-                    .fillProfileProperties(new GameProfile(uuid, ""), true)
-                    .getProperties());
+        .expireAfterWrite(2, TimeUnit.MINUTES)
+        .build(uuid -> SpongeCommon.getServer().getMinecraftSessionService()
+            .fillProfileProperties(new GameProfile(uuid, ""), true)
+            .getProperties());
 
     // A queue of packets waiting to send to players tracking this human
-    private final Map<UUID, List<Stream<IPacket<?>>>> playerPacketMap = Maps.newHashMap();
+    private final Map<UUID, List<Stream<IPacket<?>>>> playerPacketMap = new HashMap<>();
 
     private GameProfile fakeProfile;
-    @Nullable private UUID skinUuid;
     private boolean aiDisabled = false, leftHanded = false;
 
     public HumanEntity(final EntityType<? extends HumanEntity> type, final World worldIn) {
@@ -121,7 +123,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
 
         // PlayerEntity
         this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
-        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.1F);
+        this.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(0.23F);
         this.getAttributes().registerAttribute(SharedMonsterAttributes.ATTACK_SPEED);
         this.getAttributes().registerAttribute(SharedMonsterAttributes.LUCK);
     }
@@ -129,21 +131,30 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     protected void registerData() {
         // LivingEntity
-        this.dataManager.register(LivingEntityAccessor.accessor$getLivingFlags(), Byte.valueOf((byte)0));
-        this.dataManager.register(LivingEntityAccessor.accessor$getHealth(), Float.valueOf(1.0F));
-        this.dataManager.register(LivingEntityAccessor.accessor$getPotionEffects(), Integer.valueOf(0));
-        this.dataManager.register(LivingEntityAccessor.accessor$getHideParticles(), Boolean.valueOf(false));
-        this.dataManager.register(LivingEntityAccessor.accessor$getArrowCountInEntity(), Integer.valueOf(0));
-        this.dataManager.register(LivingEntityAccessor.accessor$getBeeStringCount(), Integer.valueOf(0));
+        this.dataManager.register(LivingEntityAccessor.accessor$getLivingFlags(), (byte) 0);
+        this.dataManager.register(LivingEntityAccessor.accessor$getHealth(), 1.0F);
+        this.dataManager.register(LivingEntityAccessor.accessor$getPotionEffects(), 0);
+        this.dataManager.register(LivingEntityAccessor.accessor$getHideParticles(), Boolean.FALSE);
+        this.dataManager.register(LivingEntityAccessor.accessor$getArrowCountInEntity(), 0);
+        this.dataManager.register(LivingEntityAccessor.accessor$getBeeStringCount(), 0);
         this.dataManager.register(LivingEntityAccessor.accessor$getBedPosition(), Optional.empty());
 
         // PlayerEntity
-        this.dataManager.register(PlayerEntityAccessor.accessor$getAbsorption(), Float.valueOf(0.0F));
-        this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerScore(), Integer.valueOf(0));
-        this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerModelFlag(), Byte.valueOf((byte)0));
-        this.dataManager.register(PlayerEntityAccessor.accessor$getMainHand(), Byte.valueOf((byte)1));
+        this.dataManager.register(PlayerEntityAccessor.accessor$getAbsorption(), 0.0F);
+        this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerScore(), 0);
+        this.dataManager.register(PlayerEntityAccessor.accessor$getPlayerModelFlag(), (byte) 0);
+        this.dataManager.register(PlayerEntityAccessor.accessor$getMainHand(), (byte) 1);
         this.dataManager.register(PlayerEntityAccessor.accessor$getLeftShoulderEntity(), new CompoundNBT());
         this.dataManager.register(PlayerEntityAccessor.accessor$getRightShoulderEntity(), new CompoundNBT());
+    }
+
+    @Override
+    protected void registerGoals() {
+        // Just some defaults, so they do something by default. Plugins can fully cancel this and make them do whatever
+        this.goalSelector.addGoal(0, new SwimGoal(this));
+        this.goalSelector.addGoal(1, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
+        this.goalSelector.addGoal(2, new LookAtGoal(this, PlayerEntity.class, 3.0F, 1.0F));
+        this.goalSelector.addGoal(3, new LookAtGoal(this, MobEntity.class, 8.0F));
     }
 
     @Override
@@ -169,39 +180,35 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void setCustomName(@Nullable ITextComponent name) {
         // TODO - figure out whether these restrictions still exist
-//        if (name.length() > 16) {
-//            // Vanilla restriction
-//            name = name.substring(0, 16);
-//        }
+        //        if (name.length() > 16) {
+        //            // Vanilla restriction
+        //            name = name.substring(0, 16);
+        //        }
         final ITextComponent customName = this.getCustomName();
         if (customName == null && name == null || customName != null && customName.equals(name)) {
             return;
         }
         super.setCustomName(name);
-        this.renameProfile(name);
+        this.setProfileName(name);
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }
     }
 
     @Override
-    public void readAdditional(final CompoundNBT tagCompund) {
-        super.readAdditional(tagCompund);
-        final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeData().getString(Constants.Entity.Human.SKIN_UUID_KEY);
-        if (!skinUuidString.isEmpty()) {
-            this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
+    public void readAdditional(final CompoundNBT compound) {
+        super.readAdditional(compound);
+        if (compound.contains("profile")) {
+            this.fakeProfile = NBTUtil.readGameProfile(compound.getCompound("profile"));
         }
     }
 
     @Override
     public void writeAdditional(CompoundNBT compound) {
         super.writeAdditional(compound);
-        final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeData();
-        if (this.skinUuid != null) {
-            spongeData.putString(Constants.Entity.Human.SKIN_UUID_KEY, this.skinUuid.toString());
-        } else {
-            spongeData.remove(Constants.Entity.Human.SKIN_UUID_KEY);
-        }
+        final CompoundNBT profileCompound = new CompoundNBT();
+        NBTUtil.writeGameProfile(profileCompound, this.fakeProfile);
+        compound.put("profile", profileCompound);
     }
 
     @Override
@@ -243,15 +250,16 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void onDeath(@Nullable final DamageSource cause) {
         super.onDeath(cause);
-        this.setPosition(this.getPosX(), this.getPosY(), this.getPosZ());
-        double motionX = 0.0D;
-        double motionY = 0.1D;
-        double motionZ = 0.0D;
+        this.recenterBoundingBox();
         if (cause != null) {
-            motionX = -MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
-            motionZ = -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float) Math.PI / 180.0F) * 0.1F;
+            this.setMotion(-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * ((float)Math.PI / 180F)) * 0.1F, 0.1F,
+                -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * ((float)Math.PI / 180F)) * 0.1F);
+        } else {
+            this.setMotion(0.0D, 0.1D, 0.0D);
         }
-        this.setMotion(motionX, motionY, motionZ);
+
+        this.extinguish();
+        this.setFlag(0, false);
     }
 
     @Override
@@ -317,7 +325,7 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         if (flag) {
             if (i > 0) {
                 entityIn.addVelocity(-MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
-                        MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F);
+                    MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F);
                 this.setMotion(this.getMotion().mul(0.6, 1.0, 0.6));
             }
 
@@ -333,20 +341,18 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
         return flag;
     }
 
-    private void renameProfile(final ITextComponent newName) {
+    private void setProfileName(final ITextComponent newName) {
         final PropertyMap props = this.fakeProfile.getProperties();
-        // TODO - is this right? calling getString on the name?
         this.fakeProfile = new GameProfile(this.fakeProfile.getId(), newName.getString());
         this.fakeProfile.getProperties().putAll(props);
     }
 
-    private boolean updateFakeProfileWithSkin(final UUID skin) {
-        final PropertyMap properties = PROPERTIES_CACHE.get(skin);
+    private boolean setProfileSkin(final UUID skin) {
+        final PropertyMap properties = HumanEntity.PROPERTIES_CACHE.get(skin);
         if (properties == null || properties.isEmpty()) {
             return false;
         }
         this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, properties.get(ProfileProperty.TEXTURES));
-        this.skinUuid = skin;
         return true;
     }
 
@@ -357,56 +363,19 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
             removeTask.run();
         } else {
             Sponge.getServer().getScheduler().submit(Task.builder()
-                    .execute(removeTask)
-                    .delayTicks(delay)
-                    .plugin(SpongeCommon.getPlugin())
-                    .build());
+                .execute(removeTask)
+                .delayTicks(delay)
+                .plugin(SpongeCommon.getPlugin())
+                .build());
         }
-    }
-
-    public boolean setSkinUuid(final UUID skin) {
-        if (!SpongeCommon.getServer().isServerInOnlineMode()) {
-            // Skins only work when online-mode = true
-            return false;
-        }
-        if (skin.equals(this.skinUuid)) {
-            return true;
-        }
-        if (!this.updateFakeProfileWithSkin(skin)) {
-            return false;
-        }
-        if (this.isAliveAndInWorld()) {
-            this.respawnOnClient();
-        }
-        return true;
     }
 
     public Property getSkinProperty() {
         return this.fakeProfile.getProperties().get(ProfileProperty.TEXTURES).iterator().next();
     }
 
-    public void setSkinProperty(Property property) {
+    public void setSkinProperty(final Property property) {
         this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(property));
-    }
-
-    @Nullable
-    public UUID getSkinUuid() {
-        return this.skinUuid;
-    }
-
-    public DataTransactionResult removeSkin() {
-        if (this.skinUuid == null) {
-            return DataTransactionResult.successNoData();
-        }
-        this.fakeProfile.getProperties().removeAll(ProfileProperty.TEXTURES);
-        // TODO - figure out this new bit of mess.
-//        final Immutable<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, this.skinUuid);
-//        this.skinUuid = null;
-//        if (this.isAliveAndInWorld()) {
-//            this.respawnOnClient();
-//        }
-//        return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();
-        return DataTransactionResult.failNoData();
     }
 
     private boolean isAliveAndInWorld() {
@@ -518,7 +487,6 @@ public class HumanEntity extends CreatureEntity implements TeamMember, IRangedAt
     @Override
     public void attackEntityWithRangedAttack(final LivingEntity target, final float distanceFactor) {
         // Borrowed from Skeleton
-        // TODO Figure out how to API this out
         final ArrowEntity entitytippedarrow = new ArrowEntity(this.world, this);
         final double d0 = target.getPosX() - this.getPosX();
         final double d1 = target.getBoundingBox().minY + target.getHeight() / 3.0F - entitytippedarrow.getPosY();
