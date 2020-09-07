@@ -29,6 +29,7 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -39,6 +40,8 @@ public abstract class EntityTypeMixin_API<T extends Entity> implements EntityTyp
 
     @Shadow public abstract ITextComponent shadow$getName();
 
+    @Shadow @Final private boolean serializable;
+
     @Override
     public ResourceKey getKey() {
         return ((ResourceKeyBridge) this).bridge$getKey();
@@ -47,5 +50,10 @@ public abstract class EntityTypeMixin_API<T extends Entity> implements EntityTyp
     @Override
     public Component asComponent() {
         return SpongeAdventure.asAdventure(this.shadow$getName());
+    }
+
+    @Override
+    public boolean isTransient() {
+        return !this.serializable;
     }
 }

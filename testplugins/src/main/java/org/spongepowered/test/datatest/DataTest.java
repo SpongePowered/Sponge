@@ -1210,7 +1210,10 @@ public final class DataTest  {
                 .build();
         this.checkOfferListData(villager, Keys.TRADE_OFFERS, Arrays.asList(tradeOffer));
 
-//        this.checkOfferData(villager, Keys.TRANSIENT, true);
+        final Entity hooman = world.createEntity(EntityTypes.HUMAN.get(), position);
+        this.checkGetData(hooman, Keys.TRANSIENT, true);
+        this.checkOfferData(villager, Keys.TRANSIENT, true);
+
 
 //        this.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
 

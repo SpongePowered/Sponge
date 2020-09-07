@@ -60,6 +60,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
@@ -149,6 +150,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private Component impl$displayName;
     private boolean impl$skipSettingCustomNameTag;
     private boolean impl$invulnerable = false;
+    private boolean impl$transient = false;
 
     // @formatter:on
 
@@ -865,7 +867,22 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     */
-/**
+
+    @Override
+    public void bridge$setTransient(final boolean value) {
+        this.impl$transient = value;
+    }
+
+    @Redirect(method = "getEntityString", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityType;isSerializable()Z"))
+    private boolean impl$respectTransientFlag(final EntityType entityType) {
+        if (!entityType.isSerializable()) {
+            return false;
+        }
+
+        return !this.impl$transient;
+    }
+
+    /**
      * Overridden method for Players to determine whether this entity is immune to fire
      * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
      * take fire damage, nor do they light on fire.
