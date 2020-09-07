@@ -22,30 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.TNTEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.common.accessor.entity.item.TNTEntityAccessor;
-import org.spongepowered.common.bridge.entity.item.EntityTNTPrimedBridge;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.common.weather.SpongeWeather;
 
-public final class TNTData {
+import java.util.stream.Stream;
 
-    private TNTData() {
+public final class WeatherStreamGenerator {
+
+    private WeatherStreamGenerator() {
     }
 
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(TNTEntity.class)
-                    .create(Keys.DETONATOR)
-                        .get(h -> (Living) h.getTntPlacedBy())
-                        .set((h, v) -> ((TNTEntityAccessor) h).accessor$setTntPlacedBy((LivingEntity) v))
-                    .create(Keys.IS_PRIMED)
-                        .get(h -> !h.removed && h.getFuse() > 0);
+    public static Stream<Weather> stream() {
+        return Stream.of(
+                new SpongeWeather(ResourceKey.minecraft("clear")),
+                new SpongeWeather(ResourceKey.minecraft("rain")),
+                new SpongeWeather(ResourceKey.minecraft("thunder"))
+        );
     }
-    // @formatter:on
 }

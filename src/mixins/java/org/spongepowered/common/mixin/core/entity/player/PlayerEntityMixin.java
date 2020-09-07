@@ -302,6 +302,13 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         return this.impl$shouldRestoreInventory;
     }
 
+    @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
+        if (this.impl$hasCustomFireImmuneTicks) {
+            ci.setReturnValue((int) this.impl$fireImmuneTicks);
+        }
+    }
+
 /*    @Override
     public boolean impl$isImmuneToFireForIgniteEvent() {
         return this.shadow$isSpectator() || this.shadow$isCreative();

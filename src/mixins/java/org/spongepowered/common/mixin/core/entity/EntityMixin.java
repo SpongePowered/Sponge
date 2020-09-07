@@ -60,6 +60,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
@@ -138,8 +139,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setWorld(World worldIn);
 
-    // @formatter:on
-
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
     private boolean impl$isVanished = false;
@@ -148,6 +147,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$collision = true;
     private Component impl$displayName;
     private boolean impl$skipSettingCustomNameTag;
+    private boolean impl$invulnerable = false;
+    private boolean impl$transient = false;
+    protected boolean impl$hasCustomFireImmuneTicks = false;
+    protected short impl$fireImmuneTicks = 0;
 
     // @formatter:on
 
@@ -475,13 +478,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
+    */
+
     @Override
     public boolean bridge$getIsInvulnerable() {
-        return this.invulnerable;
+        return this.impl$invulnerable;
     }
 
-    */
-/**
+    /**
      * Hooks into vanilla's writeToNBT to call {@link #impl$writeToSpongeCompound}.
      *
      * <p> This makes it easier for other entity mixins to override writeToNBT
@@ -499,7 +503,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     */
-/**
+    /**
      * Hooks into vanilla's readFromNBT to call {@link #impl$readFromSpongeCompound}.
      *
      * <p> This makes it easier for other entity mixins to override readSpongeNBT
@@ -520,7 +524,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     */
-/**
+    /**
      * Read extra data (SpongeData) from the entity's NBT tag. This is
      * meant to be overridden for each impl based mixin that has to store
      * custom fields based on it's implementation. Examples can include:
@@ -829,13 +833,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     public Timing bridge$getTimingsHandler() {
         return ((EntityTypeBridge) this.shadow$getType()).bridge$getTimings();
     }
-/*
+
     @Override
     public void bridge$setInvulnerable(final boolean value) {
-        this.invulnerable = value;
+        this.impl$invulnerable = value;
     }
 
-
+/*
     @Redirect(method = "setFire",
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/entity/Entity;fire:I",
@@ -863,7 +867,22 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     */
-/**
+
+    @Override
+    public void bridge$setTransient(final boolean value) {
+        this.impl$transient = value;
+    }
+
+    @Redirect(method = "getEntityString", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityType;isSerializable()Z"))
+    private boolean impl$respectTransientFlag(final EntityType entityType) {
+        if (!entityType.isSerializable()) {
+            return false;
+        }
+
+        return !this.impl$transient;
+    }
+
+    /**
      * Overridden method for Players to determine whether this entity is immune to fire
      * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
      * take fire damage, nor do they light on fire.
@@ -902,17 +921,20 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             this.impl$destructCause = PhaseTracker.getCauseStackManager().getCurrentCause();
         }
     }
+*/
 
-    @Inject(method = "getFireImmuneTicks", at = @At(value = "RETURN"), cancellable = true)
+    @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
     private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
-        ci.setReturnValue(this.impl$customFireImmuneTicks);
+        if (this.impl$hasCustomFireImmuneTicks) {
+            ci.setReturnValue((int) this.impl$fireImmuneTicks);
+        }
     }
 
     @Override
     public void bridge$setFireImmuneTicks(final int ticks) {
-        this.impl$customFireImmuneTicks = ticks;
+        this.impl$hasCustomFireImmuneTicks = true;
+        this.impl$fireImmuneTicks = (short) ticks;
     }
-*/
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {

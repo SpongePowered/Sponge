@@ -45,6 +45,7 @@ import org.spongepowered.api.data.type.ArmorMaterials;
 import org.spongepowered.api.data.type.ArtTypes;
 import org.spongepowered.api.data.type.AttachmentSurfaces;
 import org.spongepowered.api.data.type.BannerPatternShapes;
+import org.spongepowered.api.data.type.BoatTypes;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.data.type.CatTypes;
@@ -60,6 +61,7 @@ import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.api.data.type.PistonTypes;
 import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.type.ProfessionTypes;
+import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.data.type.SlabPortions;
 import org.spongepowered.api.data.type.SpellTypes;
@@ -115,6 +117,7 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
@@ -163,6 +166,8 @@ public final class DataTest  {
         final ServerLocation location = world.getLocation(blockPos);
 
         final BlockState oldState = world.getBlock(blockPos);
+
+        world.setWeather(Weathers.CLEAR.get());
 
         this.checkOfferData(player, Keys.ABSORPTION, 0.0);
         this.checkOfferData(player, Keys.ABSORPTION, 10.0);
@@ -372,9 +377,13 @@ public final class DataTest  {
         final ItemStack waterBucket = ItemStack.of(ItemTypes.WATER_BUCKET);
         this.checkGetData(waterBucket, Keys.CONTAINER_ITEM, ItemTypes.BUCKET.get());
 
-        // TODO Keys.COOLDOWN missing dataprovider?
-//        world.setBlock(blockPos, BlockTypes.HOPPER.get().getDefaultState());
-//        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
+        // Keys.COOLDOWN
+        world.setBlock(blockPos, BlockTypes.HOPPER.get().getDefaultState());
+        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
+        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 10);
+        world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().getDefaultState());
+        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
+        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 15);
 
         // TODO Keys.CREATOR
 
@@ -458,26 +467,32 @@ public final class DataTest  {
         this.checkOfferData(chicken, Keys.EGG_TIME, 0);
         this.checkOfferData(chicken, Keys.EGG_TIME, 5000);
 
-        // TODO Keys.END_GATEWAY_AGE
+        world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().getDefaultState());
+        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, 0L);
+        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, 100L);
 
         // Keys.EQUIPMENT_TYPE is for inventories
         this.checkOfferData(player, Keys.EXHAUSTION, 1.0);
 
-// TODO bridge$refreshExp is Abstract
-//        this.checkOfferData(player, Keys.EXPERIENCE, 0);
-//        this.checkGetData(player, Keys.EXPERIENCE_FROM_START_OF_LEVEL, 0);
-//        this.checkOfferData(player, Keys.EXPERIENCE_LEVEL, 1);
-//        this.checkOfferData(player, Keys.EXPERIENCE_SINCE_LEVEL, 1);
+        this.checkOfferData(player, Keys.EXPERIENCE, 0);
+        this.checkOfferData(player, Keys.EXPERIENCE, 5);
+        this.checkOfferData(player, Keys.EXPERIENCE, 50);
+        this.checkOfferData(player, Keys.EXPERIENCE, 0);
+        this.checkGetData(player, Keys.EXPERIENCE_LEVEL, 0);
+        this.checkGetData(player, Keys.EXPERIENCE_FROM_START_OF_LEVEL, 7);
+        this.checkOfferData(player, Keys.EXPERIENCE_LEVEL, 1);
+        this.checkGetData(player, Keys.EXPERIENCE, 7);
+        this.checkOfferData(player, Keys.EXPERIENCE_SINCE_LEVEL, 1);
 
-//        this.checkOfferData(tntEntity, Keys.EXPLOSION_RADIUS, 1);
+        this.checkOfferData(tntEntity, Keys.EXPLOSION_RADIUS, 1);
 
         this.checkGetData(player, Keys.EYE_HEIGHT, (double)1.62f);
         this.checkGetData(sheep, Keys.EYE_HEIGHT,  (double)(1.3f * 0.95f));
 
         this.checkGetData(sheep, Keys.EYE_POSITION, position.add(0, (double) (1.3f * 0.95f), 0));
 
-//        this.checkGetData(fallingBlock, Keys.FALL_DISTANCE, 0.0);
-//        this.checkOfferData(fallingBlock, Keys.FALL_DISTANCE, 20.0);
+        this.checkGetData(fallingBlock, Keys.FALL_DISTANCE, 0.0);
+        this.checkOfferData(fallingBlock, Keys.FALL_DISTANCE, 20.0);
 
         this.checkGetData(fallingBlock, Keys.FALL_TIME, 0);
         this.checkOfferData(fallingBlock, Keys.FALL_TIME, 20);
@@ -495,7 +510,8 @@ public final class DataTest  {
         this.checkOfferData(rocket, Keys.FIREWORK_FLIGHT_MODIFIER, 5);
 
         // TODO bridge$setFireImmunityTicks is abstract
-//        this.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, 20000);
+        this.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, 20000);
+        this.checkOfferData(player, Keys.FIRE_DAMAGE_DELAY, 20000);
 
         this.checkOfferData(sheep, Keys.FIRE_TICKS, 10);
 
@@ -524,8 +540,7 @@ public final class DataTest  {
         this.checkOfferData(furnaceMinecart, Keys.FUEL, 10);
         // TODO BrewingStand/FurnaceBlockEntity Keys.FUEL
 
-// TODO missing FusedExplosiveBridge
-//        this.checkOfferData(tntEntity, Keys.FUSE_DURATION, 0);
+        this.checkOfferData(tntEntity, Keys.FUSE_DURATION, 10);
 
         final GameMode gameMode = player.get(Keys.GAME_MODE).orElse(GameModes.CREATIVE.get());
         this.checkOfferData(player, Keys.GAME_MODE, GameModes.SURVIVAL.get());
@@ -638,9 +653,8 @@ public final class DataTest  {
 
         this.checkOfferData(sheep, Keys.INVULNERABILITY_TICKS, 20);
 
-// TODO bridge$getIsInvulnerable is abstract
-//        this.checkOfferData(sheep, Keys.INVULNERABLE, true);
-//        this.checkOfferData(sheep, Keys.INVULNERABLE, false);
+        this.checkOfferData(sheep, Keys.INVULNERABLE, true);
+        this.checkOfferData(sheep, Keys.INVULNERABLE, false);
 
         final BlockState fenceGateState = BlockTypes.ACACIA_FENCE_GATE.get().getDefaultState();
         this.checkGetData(fenceGateState, Keys.IN_WALL, false);
@@ -806,13 +820,12 @@ public final class DataTest  {
 
         this.checkOfferData(fox, Keys.IS_POUNCING, true);
 
-//        this.checkWithData(leverState, Keys.IS_POWERED, true);
-//        this.checkWithData(leverState, Keys.IS_POWERED, false);
+        this.checkWithData(leverState, Keys.IS_POWERED, true);
+        this.checkWithData(leverState, Keys.IS_POWERED, false);
 
-//        this.checkOfferData(tntEntity, Keys.IS_PRIMED, true);
-//        this.checkOfferData(tntEntity, Keys.IS_PRIMED, false);
+        this.checkGetData(tntEntity, Keys.IS_PRIMED, true);
 
-//        this.checkOfferData(cat, Keys.IS_PURRING, true);
+        //        this.checkOfferData(cat, Keys.IS_PURRING, true);
 //        this.checkOfferData(cat, Keys.IS_RELAXED, true);
 
         this.checkGetData(waterBlockState, Keys.IS_REPLACEABLE, true);
@@ -886,10 +899,6 @@ public final class DataTest  {
         this.checkWithData(acaciaStairs, Keys.IS_WATERLOGGED, true);
 
         this.checkOfferData(wolf, Keys.IS_WET, true);
-        final BlockState spongeState = BlockTypes.SPONGE.get().getDefaultState();
-        final BlockState wetSpongeState = BlockTypes.WET_SPONGE.get().getDefaultState();
-//        this.checkGetData(spongeState, Keys.IS_WET, false);
-//        this.checkGetData(wetSpongeState, Keys.IS_WET, true);
         this.checkGetData(sheep, Keys.IS_WET, false);
 
         this.checkOfferData(jungleAxe, Keys.ITEM_DURABILITY, 5);
@@ -1055,8 +1064,7 @@ public final class DataTest  {
         this.checkOfferData(villager, Keys.PROFESSION_LEVEL, 4);
 
         final Entity rabbit = world.createEntity(EntityTypes.RABBIT.get(), position);
-// TODO missing RabbitTypes providers
-//        this.checkOfferData(rabbit, Keys.RABBIT_TYPE, RabbitTypes.GOLD.get());
+        this.checkOfferData(rabbit, Keys.RABBIT_TYPE, RabbitTypes.GOLD.get());
 
         this.checkOfferData(areaEffectCloud, Keys.RADIUS, 20.0);
         this.checkOfferData(areaEffectCloud, Keys.RADIUS_ON_USE, -1.0);
@@ -1124,8 +1132,9 @@ public final class DataTest  {
         // Keys.SKY_LIGHT
 
         final BlockState slabState = BlockTypes.BIRCH_SLAB.get().getDefaultState();
-//        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.BOTTOM.get());
-//        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.FULL.get());
+        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.BOTTOM.get());
+        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.DOUBLE.get());
+        this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.TOP.get());
 
         this.checkOfferData(player, Keys.SLEEP_TIMER, 20);
 
@@ -1209,7 +1218,10 @@ public final class DataTest  {
                 .build();
         this.checkOfferListData(villager, Keys.TRADE_OFFERS, Arrays.asList(tradeOffer));
 
-//        this.checkOfferData(villager, Keys.TRANSIENT, true);
+        final Entity hooman = world.createEntity(EntityTypes.HUMAN.get(), position);
+        this.checkGetData(hooman, Keys.TRANSIENT, true);
+        this.checkOfferData(villager, Keys.TRANSIENT, true);
+
 
 //        this.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
 
@@ -1257,8 +1269,9 @@ public final class DataTest  {
         final Entity evoker = world.createEntity(EntityTypes.EVOKER.get(), position);
         this.checkOfferData(evoker, Keys.WOLOLO_TARGET, (Sheep) sheep);
 
-        this.checkOfferData(boat, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
-        // TODO WOOD_TYPE for BlockState
+        this.checkOfferData(boat, Keys.BOAT_TYPE, BoatTypes.ACACIA.get());
+        final BlockState woodState = BlockTypes.ACACIA_WOOD.get().getDefaultState();
+        this.checkGetData(woodState, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
 
         world.setBlock(blockPos, oldState);
     }

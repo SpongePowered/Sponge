@@ -64,10 +64,19 @@ public final class EntityData {
                         .get(h -> (double) h.getEyeHeight())
                     .create(Keys.EYE_POSITION)
                         .get(h -> VecHelper.toVector3d(h.getEyePosition(1f)))
+                    .create(Keys.FALL_DISTANCE)
+                        .get(h -> (double) h.fallDistance)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.fallDistance = v.floatValue();
+                            return true;
+                        })
                     .create(Keys.FIRE_DAMAGE_DELAY)
                         .get(h -> ((EntityAccessor) h).accessor$getFireImmuneTicks())
                         .setAnd((h, v) -> {
-                            if (v < 1) {
+                            if (v < 1 || v > Short.MAX_VALUE) {
                                 return false;
                             }
                             ((EntityBridge) h).bridge$setFireImmuneTicks(v);
@@ -142,6 +151,9 @@ public final class EntityData {
                             h.getTags().clear();
                             h.getTags().addAll(v);
                         })
+                    .create(Keys.TRANSIENT)
+                        .get(h -> ((EntityAccessor) h).accessor$getEntityString() == null)
+                        .set((h, v) -> ((EntityBridge) h).bridge$setTransient(v))
                     .create(Keys.VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getRidingEntity())
                         .set((h, v) -> h.startRiding((Entity) v, true))

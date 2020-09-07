@@ -22,27 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.state;
+package org.spongepowered.common.mixin.api.mcp.entity.item;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.SpongeBlock;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.minecraft.block.Block;
+import net.minecraft.entity.item.BoatEntity;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.type.BoatType;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 
-public final class SpongeData {
+@Mixin(BoatEntity.Type.class)
+public abstract class BoatEntity_TypeMixin_API implements BoatType {
 
-    private SpongeData() {
+    @Shadow @Final private Block block;
+    private ResourceKey api$key;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setKey(final String enumName, final int ordinal, final Block p_i48146_3_, final String p_i48146_4_, final CallbackInfo ci) {
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), enumName.toLowerCase());
     }
 
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.IS_WET)
-                        .get(h -> h.getBlock() == Blocks.WET_SPONGE)
-                        .set((h, v) -> (v ? Blocks.WET_SPONGE : Blocks.SPONGE).getDefaultState())
-                        .supports(h -> h.getBlock() instanceof SpongeBlock);
+    @Override
+    public ResourceKey getKey() {
+        return this.api$key;
     }
-    // @formatter:on
+
+    @Override
+    public BlockType getRepresentedBlock() {
+        return (BlockType) this.block;
+    }
 }

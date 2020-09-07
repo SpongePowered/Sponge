@@ -44,10 +44,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IWorldReader;
-import net.minecraft.world.LightType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -233,78 +231,6 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Override
     public Vector3i getBlockSize() {
         return Constants.World.BLOCK_SIZE;
-    }
-
-    // WeatherUniverse
-
-    @Override
-    public Weather getWeather() {
-        if (this.shadow$isThundering()) {
-            return Weathers.THUNDER_STORM.get();
-        }
-        if (this.shadow$isRaining()) {
-            return Weathers.RAIN.get();
-        }
-        return Weathers.CLEAR.get();
-    }
-
-    @Override
-    public Duration getRemainingWeatherDuration() {
-        return Duration.of(this.impl$getDurationInTicks(), TemporalUnits.MINECRAFT_TICKS);
-    }
-
-    private long impl$getDurationInTicks() {
-        if (this.shadow$isThundering()) {
-            return this.worldInfo.getThunderTime();
-        }
-        if (this.shadow$isRaining()) {
-            return this.worldInfo.getRainTime();
-        }
-        if (this.worldInfo.getClearWeatherTime() > 0) {
-            return this.worldInfo.getClearWeatherTime();
-        }
-        return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
-    }
-
-    @Override
-    public Duration getRunningWeatherDuration() {
-        return Duration.of(this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime(), TemporalUnits.MINECRAFT_TICKS);
-    }
-
-    @Override
-    public void setWeather(final Weather weather) {
-        Preconditions.checkNotNull(weather);
-        this.impl$setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
-    }
-
-    @Override
-    public void setWeather(final Weather weather, final Duration duration) {
-        Preconditions.checkNotNull(weather);
-        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
-        final int ticks = (int) (duration.toMillis() / TemporalUnits.MINECRAFT_TICKS.getDuration().toMillis());
-        this.impl$setWeather(weather, ticks);
-    }
-
-    public void impl$setWeather(final Weather weather, final int ticks) {
-        if (weather == Weathers.CLEAR.get()) {
-            this.worldInfo.setClearWeatherTime(ticks);
-            this.worldInfo.setRainTime(0);
-            this.worldInfo.setThunderTime(0);
-            this.worldInfo.setRaining(false);
-            this.worldInfo.setThundering(false);
-        } else if (weather == Weathers.RAIN.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(false);
-        } else if (weather == Weathers.THUNDER_STORM.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(true);
-        }
     }
 
     // ContextSource

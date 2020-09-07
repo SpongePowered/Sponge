@@ -28,10 +28,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 
-public class ExperienceHolderUtils {
+public final class ExperienceHolderUtils {
 
-    public static final int XP_AT_LEVEL_30 = xpAtLevel(30);
-    public static final int XP_AT_LEVEL_15 = xpAtLevel(15);
+    public static final int XP_AT_LEVEL_30 = ExperienceHolderUtils.xpAtLevel(30);
+    public static final int XP_AT_LEVEL_15 = ExperienceHolderUtils.xpAtLevel(15);
+
+    private ExperienceHolderUtils() {
+    }
 
     // If these formulas change, make sure to change all these methods and then
     // run ExperienceHolderUtilsTest to check your results.
@@ -106,13 +109,23 @@ public class ExperienceHolderUtils {
             experienceAtNextLevel += getExpBetweenLevels(++level);
         } while (experienceAtNextLevel <= value && experienceAtNextLevel > 0);
 
+        // If experience for current level is still -1 that means that the holder has never gained a level nor has
+        // ever gained any experience. Negative experience makes no sense at all. If this is not set to 0 the below math calculation
+        // will always result in the actual experience on the holder being above 0 when in reality there is no experience gained.
+        if (value == 0) {
+            experienceForCurrentLevel = Math.max(0, experienceForCurrentLevel);
+        }
+
         // Once we're here, we have the correct level. The experience is the decimal fraction that we are through the
         // current level. This is why we require the experienceForCurrentLevel variable, we need the difference between
         // the current value and the beginning of the level.
         holder.experience = (float) (value - experienceForCurrentLevel) / getExpBetweenLevels(level);
         holder.experienceLevel = level;
         holder.experienceTotal = value;
-        ((ServerPlayerEntityBridge) holder).bridge$refreshExp();
+
+        if (holder instanceof ServerPlayerEntityBridge) {
+            ((ServerPlayerEntityBridge) holder).bridge$refreshExp();
+        }
     }
 
     public static void setExperienceSinceLevel(final PlayerEntity holder, Integer value) {
@@ -120,6 +133,9 @@ public class ExperienceHolderUtils {
             value -= holder.xpBarCap();
         }
         ((PlayerEntityBridge) holder).bridge$setExperienceSinceLevel(value);
-        ((ServerPlayerEntityBridge) holder).bridge$refreshExp();
+
+        if (holder instanceof ServerPlayerEntityBridge) {
+            ((ServerPlayerEntityBridge) holder).bridge$refreshExp();
+        }
     }
 }

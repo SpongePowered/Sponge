@@ -103,15 +103,6 @@ public final class LivingData {
                             h.setRotationYawHead(headYaw);
                             h.rotationPitch = pitch;
                         })
-                    .create(Keys.FALL_DISTANCE)
-                        .get(h -> (double) h.fallDistance)
-                        .setAnd((h, v) -> {
-                            if (v < 0) {
-                                return false;
-                            }
-                            h.fallDistance = v.floatValue();
-                            return true;
-                        })
                     .create(Keys.HEAD_ROTATION)
                         .get(h -> new Vector3d(h.rotationPitch, h.getRotationYawHead(), 0))
                         .set((h, v) -> {

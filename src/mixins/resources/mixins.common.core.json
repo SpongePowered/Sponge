@@ -91,7 +91,8 @@
         "world.spawner.AbstractSpawnerMixin",
         "world.storage.SaveHandlerMixin",
         "world.storage.WorldInfoMixin",
-        "entity.ai.goal.RunAroundLikeCrazyGoalMixin"
+        "entity.ai.goal.RunAroundLikeCrazyGoalMixin",
+        "entity.item.TNTEntityMixin"
     ],
     "client": [
         "client.MinecraftMixin",
