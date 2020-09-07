@@ -82,6 +82,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     // @formatter:on
 
+    @Shadow private int lastExperience;
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private @Nullable GameProfile impl$previousGameProfile;
 
@@ -324,5 +325,10 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             EntityUtil.invokePortalTo((ServerPlayerEntity) (Object) this, portalType, destination);
             return (ServerPlayerEntity) (Object) this;
         }
+    }
+
+    @Override
+    public void bridge$refreshExp() {
+        this.lastExperience = -1;
     }
 }

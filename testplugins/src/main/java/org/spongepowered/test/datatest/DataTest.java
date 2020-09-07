@@ -474,11 +474,15 @@ public final class DataTest  {
         // Keys.EQUIPMENT_TYPE is for inventories
         this.checkOfferData(player, Keys.EXHAUSTION, 1.0);
 
-// TODO bridge$refreshExp is Abstract
-//        this.checkOfferData(player, Keys.EXPERIENCE, 0);
-//        this.checkGetData(player, Keys.EXPERIENCE_FROM_START_OF_LEVEL, 0);
-//        this.checkOfferData(player, Keys.EXPERIENCE_LEVEL, 1);
-//        this.checkOfferData(player, Keys.EXPERIENCE_SINCE_LEVEL, 1);
+        this.checkOfferData(player, Keys.EXPERIENCE, 0);
+        this.checkOfferData(player, Keys.EXPERIENCE, 5);
+        this.checkOfferData(player, Keys.EXPERIENCE, 50);
+        this.checkOfferData(player, Keys.EXPERIENCE, 0);
+        this.checkGetData(player, Keys.EXPERIENCE_LEVEL, 0);
+        this.checkGetData(player, Keys.EXPERIENCE_FROM_START_OF_LEVEL, 7);
+        this.checkOfferData(player, Keys.EXPERIENCE_LEVEL, 1);
+        this.checkGetData(player, Keys.EXPERIENCE, 7);
+        this.checkOfferData(player, Keys.EXPERIENCE_SINCE_LEVEL, 1);
 
         this.checkOfferData(tntEntity, Keys.EXPLOSION_RADIUS, 1);
 
