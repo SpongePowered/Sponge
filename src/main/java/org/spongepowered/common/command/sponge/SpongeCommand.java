@@ -180,7 +180,7 @@ public class SpongeCommand {
         final PluginContainer apiPlugin = Launch.getInstance().getApiPlugin();
         final PluginContainer minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
 
-        context.getCause().sendMessage(TextComponent.builder().append(
+        context.sendMessage(TextComponent.builder().append(
                 TextComponent.of("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(TextComponent.space()),
                 TextComponent.of("Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"),
                 TextComponent.newline(),
@@ -189,6 +189,25 @@ public class SpongeCommand {
                 TextComponent.of(platformPlugin.getMetadata().getName().get() + ": " + platformPlugin.getMetadata().getVersion())
             ).build()
         );
+
+        final Optional<Command.Parameterized> parameterized = context.getExecutedCommand();
+        if (parameterized.isPresent()) {
+            final String subcommands = parameterized.get()
+                    .subcommands()
+                    .stream()
+                    .filter(x -> x.getCommand().canExecute(context.getCause()))
+                    .flatMap(x -> x.getAliases().stream())
+                    .collect(Collectors.joining(", "));
+            if (!subcommands.isEmpty()) {
+                context.sendMessage(TextComponent.builder().append(
+                        TextComponent.newline(),
+                        TextComponent.of("Available subcommands:"),
+                        TextComponent.newline(),
+                        TextComponent.of(subcommands)).build()
+                );
+            }
+        }
+
         return CommandResult.success();
     }
 

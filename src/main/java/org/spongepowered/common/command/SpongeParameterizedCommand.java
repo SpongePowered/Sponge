@@ -168,13 +168,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         if (this.executor == null) {
             return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTreeWithSubcommandsOnly(primary, this.subcommands);
         } else {
-            return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTree(
-                    primary,
-                    this.flags,
-                    this.parameters,
-                    this.subcommands,
-                    this
-            );
+            return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTree(primary, this);
         }
     }
 
@@ -187,7 +181,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
             final LiteralArgumentBuilder<CommandSource> secondary = LiteralArgumentBuilder.literal(iterable.next());
             secondary.executes(built.getCommand());
             secondary.requires(built.getRequirement());
-            nodes.add(new SpongeLiteralCommandNode(secondary.redirect(built)));
+            nodes.add(new SpongeLiteralCommandNode(secondary.redirect(built), this));
         }
 
         return nodes;

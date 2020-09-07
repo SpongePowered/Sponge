@@ -40,8 +40,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import jdk.nashorn.internal.runtime.RecompilableScriptFunctionData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
