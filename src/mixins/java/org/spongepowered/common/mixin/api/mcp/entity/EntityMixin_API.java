@@ -314,6 +314,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final Set<Value.Immutable<?>> values = new HashSet<>();
 
         values.add(this.displayName().asImmutable());
+        values.add(this.fallDistance().asImmutable());
         values.add(this.passengers().asImmutable());
         values.add(this.onGround().asImmutable());
         values.add(this.velocity().asImmutable());

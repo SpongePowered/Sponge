@@ -491,8 +491,8 @@ public final class DataTest  {
 
         this.checkGetData(sheep, Keys.EYE_POSITION, position.add(0, (double) (1.3f * 0.95f), 0));
 
-//        this.checkGetData(fallingBlock, Keys.FALL_DISTANCE, 0.0);
-//        this.checkOfferData(fallingBlock, Keys.FALL_DISTANCE, 20.0);
+        this.checkGetData(fallingBlock, Keys.FALL_DISTANCE, 0.0);
+        this.checkOfferData(fallingBlock, Keys.FALL_DISTANCE, 20.0);
 
         this.checkGetData(fallingBlock, Keys.FALL_TIME, 0);
         this.checkOfferData(fallingBlock, Keys.FALL_TIME, 20);

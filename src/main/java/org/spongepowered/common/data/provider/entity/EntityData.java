@@ -64,6 +64,15 @@ public final class EntityData {
                         .get(h -> (double) h.getEyeHeight())
                     .create(Keys.EYE_POSITION)
                         .get(h -> VecHelper.toVector3d(h.getEyePosition(1f)))
+                    .create(Keys.FALL_DISTANCE)
+                        .get(h -> (double) h.fallDistance)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.fallDistance = v.floatValue();
+                            return true;
+                        })
                     .create(Keys.FIRE_DAMAGE_DELAY)
                         .get(h -> ((EntityAccessor) h).accessor$getFireImmuneTicks())
                         .setAnd((h, v) -> {
