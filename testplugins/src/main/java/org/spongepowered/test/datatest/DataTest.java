@@ -410,6 +410,8 @@ public final class DataTest  {
         // TODO also other dataholders
 //        final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
 //        this.checkGetData(itemEntity, Keys.DESPAWN_DELAY, 6000);
+        final Entity eyeOfEnder = world.createEntity(EntityTypes.EYE_OF_ENDER.get(), position);
+        this.checkOfferData(eyeOfEnder, Keys.DESPAWN_DELAY, 500);
 
         final Entity tntEntity = world.createEntity(EntityTypes.TNT.get(), position);
         this.checkGetData(tntEntity, Keys.DETONATOR, null);
@@ -447,7 +449,6 @@ public final class DataTest  {
         final Entity areaEffectCloud = world.createEntity(EntityTypes.AREA_EFFECT_CLOUD.get(), position);
         this.checkOfferData(areaEffectCloud, Keys.DURATION, 50);
         this.checkOfferData(areaEffectCloud, Keys.DURATION_ON_USE, -1); // TODO does it work?
-        world.spawnEntity(areaEffectCloud);
 
 // TODO this is broken
 //        this.checkOfferData(cat, Keys.DYE_COLOR, DyeColors.LIME.get());
@@ -1196,8 +1197,7 @@ public final class DataTest  {
         this.checkOfferData(shulkerBullet, Keys.TARGET_ENTITY, sheep);
         // FishingBobber
 
-        final Entity eyeOfEnder = world.createEntity(EntityTypes.EYE_OF_ENDER.get(), position);
-//        this.checkOfferData(eyeOfEnder, Keys.TARGET_LOCATION, position);
+        this.checkOfferData(eyeOfEnder, Keys.TARGET_LOCATION, position.add(0, 10, 10));
 
         this.checkOfferData(ravager, Keys.TARGET_POSITION, blockPos);
         this.checkOfferData(turtle, Keys.TARGET_POSITION, blockPos);
