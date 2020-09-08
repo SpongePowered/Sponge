@@ -53,7 +53,7 @@ public interface MixinIResourcePack_API extends Pack {
 
     // @formatter:off
     @Shadow InputStream getResourceStream(ResourcePackType type, ResourceLocation location) throws IOException;
-    @Shadow Collection<ResourceLocation> getAllResourceLocations(ResourcePackType type, String pathIn, int maxDepth, Predicate<String> filter);
+    @Shadow Collection<ResourceLocation> getAllResourceLocations(ResourcePackType type, String namespace, String pathIn, int maxDepth, Predicate<String> filter);
     @Shadow @Nullable <T> T getMetadata(IMetadataSectionSerializer<T> deserializer) throws IOException;
     @Shadow boolean resourceExists(ResourcePackType type, ResourceLocation location);
     @Shadow Set<String> getResourceNamespaces(ResourcePackType type);
@@ -67,8 +67,8 @@ public interface MixinIResourcePack_API extends Pack {
 
     @Override
     @SuppressWarnings("ConstantConditions")
-    default Collection<ResourcePath> find(PackType type, String prefix, int depth, Predicate<String> filter) {
-        return this.getAllResourceLocations((ResourcePackType) (Object) type, prefix, depth, filter)
+    default Collection<ResourcePath> find(PackType type, String namespace, String prefix, int depth, Predicate<String> filter) {
+        return this.getAllResourceLocations((ResourcePackType) (Object) type, namespace, prefix, depth, filter)
                 .stream()
                 .map(ResourcePath.class::cast)
                 .collect(Collectors.toList());

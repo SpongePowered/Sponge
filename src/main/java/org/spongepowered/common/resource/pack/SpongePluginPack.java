@@ -30,7 +30,7 @@ public class SpongePluginPack extends SpongeFileSystemPack {
     private final PluginContainer plugin;
 
     protected SpongePluginPack(PluginContainer plugin) {
-        super(plugin.getFile());
+        super(plugin.getPath());
         this.plugin = plugin;
     }
 

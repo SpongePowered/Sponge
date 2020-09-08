@@ -43,7 +43,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class SpongeFileSystemPack extends AbstractSpongePack {
 
@@ -123,22 +122,16 @@ public class SpongeFileSystemPack extends AbstractSpongePack {
     }
 
     @Override
-    public Collection<ResourcePath> find(PackType type, String prefix, int depth, Predicate<String> filter) {
+    public Collection<ResourcePath> find(PackType type, String namespace, String prefix, int depth, Predicate<String> filter) {
         try {
             Path root = getPackRoot(type);
-            return getNamespaces(type).stream()
-                    .flatMap(namespace -> {
-                        try {
-                            return Files.walk(root.resolve(namespace).resolve(prefix), depth)
-                                    .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
-                                    // todo is the path relative to start?
-                                    .map(Object::toString)
-                                    .filter(filter)
-                                    .map(s -> ResourcePath.of(namespace, s));
-                        } catch (IOException e) {
-                            return Stream.empty();
-                        }
-                    }).collect(Collectors.toList());
+            return Files.walk(root.resolve(namespace).resolve(prefix), depth)
+                    .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
+                    // todo is the path relative to start?
+                    .map(Object::toString)
+                    .filter(filter)
+                    .map(s -> ResourcePath.of(namespace, s))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             return Collections.emptyList();
         }

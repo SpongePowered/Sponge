@@ -75,8 +75,8 @@ public class SpongePacks {
         }
 
         @Override
-        public Collection<ResourceLocation> getAllResourceLocations(ResourcePackType type, String pathIn, int maxDepth, Predicate<String> filter) {
-            return pack.find((PackType) (Object) type, pathIn, maxDepth, filter)
+        public Collection<ResourceLocation> getAllResourceLocations(ResourcePackType type, String namespaceIn, String pathIn, int maxDepth, Predicate<String> filter) {
+            return pack.find((PackType) (Object) type, namespaceIn, pathIn, maxDepth, filter)
                     .stream()
                     .map(ResourceLocation.class::cast)
                     .collect(Collectors.toList());
