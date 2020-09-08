@@ -104,7 +104,7 @@ public interface Lens extends LensCollection {
      * @return
      */
     default boolean setStack(Fabric fabric, int ordinal, ItemStack stack) {
-        SlotLens slot = this.getSlotLens(ordinal);
+        SlotLens slot = this.getSlotLens(fabric, ordinal);
         if (slot != null) {
             return slot.setStack(fabric, stack);
         }
@@ -121,15 +121,15 @@ public interface Lens extends LensCollection {
      */
     @Nullable 
     default ItemStack getStack(Fabric fabric, int ordinal) {
-        SlotLens slot = this.getSlotLens(ordinal);
+        SlotLens slot = this.getSlotLens(fabric, ordinal);
         if (slot != null) {
             return slot.getStack(fabric);
         }
         return null;
     }
 
-    List<SlotLens> getSlots();
-    SlotLens getSlotLens(int ordinal);
+    List<SlotLens> getSlots(Fabric fabric);
+    SlotLens getSlotLens(Fabric fabric, int ordinal);
 
     String toString(int deep);
 

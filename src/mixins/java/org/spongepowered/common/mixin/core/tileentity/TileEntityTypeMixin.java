@@ -34,21 +34,17 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
-import org.spongepowered.common.config.ConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.config.tracker.BlockEntityTrackerCategory;
 import org.spongepowered.common.config.tracker.BlockEntityTrackerModCategory;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(TileEntityType.class)
-public abstract class TileEntityTypeMixin implements ResourceKeyBridge, TrackableBridge, TileEntityTypeBridge {
+public abstract class TileEntityTypeMixin implements ResourceKeyBridge, TileEntityTypeBridge {
 
     private ResourceKey impl$key;
-    private boolean impl$allowsBlockBulkCaptures = true;
-    private boolean impl$allowsBlockEventCreation = true;
-    private boolean impl$allowsEntityBulkCaptures = true;
-    private boolean impl$allowsEntityEventCreation = true;
     private boolean impl$canTick;
 
     @Redirect(method = "register",
@@ -67,7 +63,7 @@ public abstract class TileEntityTypeMixin implements ResourceKeyBridge, Trackabl
 
         final TrackableBridge trackableBridge = (TrackableBridge) tileEntityType;
 
-        final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeConfigs.getTracker();
+        final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeGameConfigs.getTracker();
         final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.get().getBlockEntityTracker();
 
         BlockEntityTrackerModCategory modCapturing = blockEntityTracker.getModMappings().get(plugin.getMetadata().getId());
@@ -108,46 +104,6 @@ public abstract class TileEntityTypeMixin implements ResourceKeyBridge, Trackabl
     @Override
     public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
-    }
-
-    @Override
-    public boolean bridge$allowsBlockBulkCaptures() {
-        return this.impl$allowsBlockBulkCaptures;
-    }
-
-    @Override
-    public void bridge$setAllowsBlockBulkCaptures(final boolean allowsBlockBulkCaptures) {
-        this.impl$allowsBlockBulkCaptures = allowsBlockBulkCaptures;
-    }
-
-    @Override
-    public boolean bridge$allowsBlockEventCreation() {
-        return this.impl$allowsBlockEventCreation;
-    }
-
-    @Override
-    public void bridge$setAllowsBlockEventCreation(final boolean allowsBlockEventCreation) {
-        this.impl$allowsBlockEventCreation = allowsBlockEventCreation;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityBulkCaptures() {
-        return this.impl$allowsEntityBulkCaptures;
-    }
-
-    @Override
-    public void bridge$setAllowsEntityBulkCaptures(final boolean allowsEntityBulkCaptures) {
-        this.impl$allowsEntityBulkCaptures = allowsEntityBulkCaptures;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityEventCreation() {
-        return this.impl$allowsEntityEventCreation;
-    }
-
-    @Override
-    public void bridge$setAllowsEntityEventCreation(final boolean allowsEntityEventCreation) {
-        this.impl$allowsEntityEventCreation = allowsEntityEventCreation;
     }
 
     @Override

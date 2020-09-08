@@ -30,19 +30,26 @@ import net.kyori.adventure.text.TextComponent;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SDisconnectPacket;
+import net.minecraft.network.play.server.SJoinGamePacket;
+import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameType;
+import net.minecraft.world.WorldType;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.SaveHandler;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -57,6 +64,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.net.SocketAddress;
@@ -113,13 +122,14 @@ public abstract class PlayerListMixin {
 
         //noinspection ConstantConditions
         if (mcWorld == null) {
-            SpongeCommon.getLogger().warn("The player \"{}\" was located in a world that isn't loaded "
-                            + "or doesn't exist. This is not safe so the player will be moved to the first available world.",
-                    mcPlayer.getGameProfile().getName());
-            mcWorld = server.getWorlds().iterator().next();
+            SpongeCommon.getLogger().warn("The player '{}' was located in a world that isn't loaded or doesn't exist. This is not safe so "
+                            + "the player will be moved to the spawn of the default world.", mcPlayer.getGameProfile().getName());
+            mcPlayer.dimension = DimensionType.OVERWORLD;
+            mcWorld = server.getWorld(mcPlayer.dimension);
             final BlockPos spawnPoint = mcWorld.getSpawnPoint();
-            mcPlayer.setPosition(spawnPoint.getX() + 0.5, spawnPoint.getY(), spawnPoint.getZ() + 0.5);
+            mcPlayer.setPosition(spawnPoint.getX() + 0.5, spawnPoint.getY() + 0.5, spawnPoint.getZ() + 0.5);
         }
+
         mcPlayer.setWorld(mcWorld);
 
         final ServerPlayer player = (ServerPlayer) mcPlayer;
@@ -157,6 +167,26 @@ public abstract class PlayerListMixin {
         }
     }
 
+    @Redirect(method = "initializeConnectionToPlayer",
+        at = @At(value = "INVOKE",
+            target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V",
+            remap = false
+        )
+    )
+    private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(Logger logger, String message, Object p0, Object p1, Object p2, Object p3,
+            Object p4, Object p5, NetworkManager manager, ServerPlayerEntity entity) {
+        logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", p0, p1, ((org.spongepowered.api.world.server.ServerWorld) entity.getServerWorld()).getKey(), p2, p3, p4, p5);
+    }
+
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "NEW", target = "net/minecraft/network/play/server/SJoinGamePacket"))
+    private SJoinGamePacket impl$onInitPlayer_sendFakeDimensionTypeForVanillaClient(final int entityId, final GameType gameType, final long seed,
+            final boolean hardcoreMode, final DimensionType dimensionType, final int maxPlayers, final WorldType worldType, final int viewDistance,
+            final boolean reducedDebugInfo, final boolean enableRespawnScreen, final NetworkManager manager, final ServerPlayerEntity entity) {
+        ((ServerPlayerEntityBridge) entity).bridge$sendDimensionData(manager, dimensionType);
+        return PlatformHooks.getInstance().getPacketHooks().createSJoinGamePacket(entity, gameType, seed, hardcoreMode, dimensionType, maxPlayers,
+                worldType, viewDistance, reducedDebugInfo, enableRespawnScreen);
+    }
+
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;)V"))
     private void impl$onInitPlayer_delaySendMessage(final PlayerList playerList, final ITextComponent message) {
@@ -190,5 +220,24 @@ public abstract class PlayerListMixin {
         }
 
         ((ServerPlayerEntityBridge) mcPlayer).bridge$setPreviousGameProfile(null);
+    }
+
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
+    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(MinecraftServer minecraftServer, NetworkManager netManager, ServerPlayerEntity playerIn) {
+        return ((ServerWorldBridge) playerIn.getServerWorld()).bridge$getBossBarManager();
+    }
+
+    @Redirect(method = "playerLoggedOut", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
+    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(MinecraftServer minecraftServer, ServerPlayerEntity playerIn) {
+        return ((ServerWorldBridge) playerIn.getServerWorld()).bridge$getBossBarManager();
+    }
+
+    @Redirect(method = "func_212504_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSaveHandler()Lnet/minecraft/world/storage/SaveHandler;"))
+    private SaveHandler impl$onlyUseOverworldForPlayerData(ServerWorld serverWorld) {
+        if (serverWorld.dimension.getType() == DimensionType.OVERWORLD) {
+            return serverWorld.getSaveHandler();
+        }
+
+        return SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler();
     }
 }

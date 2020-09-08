@@ -55,7 +55,13 @@ public final class LivingData {
                 .asMutable(LivingEntity.class)
                     .create(Keys.ABSORPTION)
                         .get(h -> (double) h.getAbsorptionAmount())
-                        .set((h, v) -> h.setAbsorptionAmount(v.floatValue()))
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.setAbsorptionAmount(v.floatValue());
+                            return true;
+                        })
                     .create(Keys.ACTIVE_ITEM)
                         .get(h -> ItemStackUtil.snapshotOf(h.getActiveItemStack()))
                         .setAnd((h, v) -> {
@@ -97,9 +103,6 @@ public final class LivingData {
                             h.setRotationYawHead(headYaw);
                             h.rotationPitch = pitch;
                         })
-                    .create(Keys.FALL_DISTANCE)
-                        .get(h -> (double) h.fallDistance)
-                        .set((h, v) -> h.fallDistance = v.floatValue())
                     .create(Keys.HEAD_ROTATION)
                         .get(h -> new Vector3d(h.rotationPitch, h.getRotationYawHead(), 0))
                         .set((h, v) -> {
@@ -181,7 +184,13 @@ public final class LivingData {
                         })
                     .create(Keys.WALKING_SPEED)
                         .get(h -> h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getValue())
-                        .set((h, v) -> h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(v))
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(v);
+                            return true;
+                        })
                 .asMutable(LivingEntityAccessor.class)
                     .create(Keys.LAST_DAMAGE_RECEIVED)
                         .get(h -> (double) h.accessor$getLastDamage())

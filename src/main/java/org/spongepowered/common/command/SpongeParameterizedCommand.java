@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -121,13 +120,18 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     @Override
     public List<Flag> flags() {
-        return ImmutableList.copyOf(this.flags);
+        return new ArrayList<>(this.flags);
     }
 
     @Override
     @NonNull
     public List<Parameter> parameters() {
-        return ImmutableList.copyOf(this.parameters);
+        return new ArrayList<>(this.parameters);
+    }
+
+    @Override
+    public List<Parameter.Subcommand> subcommands() {
+        return new ArrayList<>(this.subcommands);
     }
 
     @Override

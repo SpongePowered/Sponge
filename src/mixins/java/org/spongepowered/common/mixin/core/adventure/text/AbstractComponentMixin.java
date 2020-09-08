@@ -51,7 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(AbstractComponent.class)
-public class AbstractComponentMixin implements ComponentBridge {
+public abstract class AbstractComponentMixin implements ComponentBridge {
     private ITextComponent bridge$vanillaComponent;
 
     @Override
@@ -96,6 +96,9 @@ public class AbstractComponentMixin implements ComponentBridge {
             }
             this.bridge$vanillaComponent.setStyle(((StyleBridge) (Object) ((Component) this).style()).bridge$asVanilla());
         }
-        return this.bridge$vanillaComponent;
+        // To prevent potential issues with using this mutable component as part of another text component,
+        // of if Minecraft or a mod decides to change this text component, we make a deep copy so that this
+        // cache and its siblings are not affected (particularly important for TextComponent#setStyle).
+        return this.bridge$vanillaComponent.deepCopy();
     }
 }

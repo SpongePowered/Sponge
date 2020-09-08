@@ -54,7 +54,8 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
     @Shadow public abstract boolean shadow$getDoesRewardExp();
     @Shadow public abstract int shadow$getGivenExp();
     @Shadow public abstract float shadow$getPriceMultiplier();
-    @Shadow public abstract int shadow$func_225482_k(); // demand
+
+    @Shadow public abstract int shadow$getDemand();
 
     @Override
     public ItemStackSnapshot getFirstBuyingItem() {
@@ -111,7 +112,7 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
 
     @Override
     public int getDemandBonus() {
-        return this.shadow$func_225482_k();
+        return this.shadow$getDemand();
     }
 
     @Override
@@ -131,7 +132,7 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
             .set(Constants.Item.TradeOffer.USES_QUERY, this.getUses())
             .set(Constants.Item.TradeOffer.EXPERIENCE_GRANTED_TO_MERCHANT_QUERY, this.shadow$getGivenExp())
             .set(Constants.Item.TradeOffer.PRICE_GROWTH_MULTIPLIER_QUERY, this.shadow$getPriceMultiplier())
-            .set(Constants.Item.TradeOffer.DEMAND_BONUS_QUERY, this.shadow$func_225482_k());
+            .set(Constants.Item.TradeOffer.DEMAND_BONUS_QUERY, this.shadow$getDemand());
     }
 
 }

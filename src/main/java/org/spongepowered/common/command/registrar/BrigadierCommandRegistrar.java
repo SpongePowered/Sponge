@@ -69,7 +69,7 @@ import java.util.stream.Collectors;
  * {@link #register(PluginContainer, LiteralArgumentBuilder, String...)}
  * method.</p>
  */
-public final class BrigadierCommandRegistrar implements CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
+public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
 
     private static final TypeToken<LiteralArgumentBuilder<CommandSource>> COMMAND_TYPE = new TypeToken<LiteralArgumentBuilder<CommandSource>>() {};
 
@@ -211,8 +211,7 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
             final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
             return CommandResult.builder().setResult(result).build();
         } catch (final CommandSyntaxException e) {
-            // TODO: CommandException when text is working
-            throw new RuntimeException(e.getMessage(), e);
+            throw new CommandException(TextComponent.of(e.getMessage()), e);
         }
     }
 
@@ -224,7 +223,8 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
             @NonNull final String command,
             @NonNull final String arguments) {
         final CompletableFuture<Suggestions> suggestionsCompletableFuture =
-                this.dispatcher.getCompletionSuggestions(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
+                this.dispatcher.getCompletionSuggestions(
+                        this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause, true));
         // TODO: Fix so that we keep suggestions in the Mojang format?
         return suggestionsCompletableFuture.join().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }
@@ -240,7 +240,12 @@ public final class BrigadierCommandRegistrar implements CommandRegistrar<Literal
         return Optional.empty();
     }
 
-    public CommandDispatcher<CommandSource> getDispatcher() {
+    @Override
+    public boolean canExecute(final CommandCause cause, final CommandMapping mapping) {
+        return this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias())).getRequirement().test((CommandSource) cause);
+    }
+
+    public SpongeCommandDispatcher getDispatcher() {
         return this.dispatcher;
     }
 

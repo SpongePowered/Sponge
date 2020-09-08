@@ -24,28 +24,37 @@
  */
 package org.spongepowered.common.mixin.tracker.entity;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.Pose;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.entity.EntityTypeBridge;
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -61,47 +70,125 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
     @Shadow public double posZ;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
+    @Shadow @Final protected Random rand;
 
     @Shadow public abstract void shadow$extinguish();
     @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
+    @Shadow @Nullable public abstract Team getTeam();
+    @Shadow public abstract void shadow$setPosition(double x, double y, double z);
+    @Shadow public abstract void shadow$setMotion(Vec3d motionIn);
+    @Shadow public abstract void shadow$setMotion(double x, double y, double z);
+    @Shadow public abstract float getEyeHeight();
+    @Shadow public abstract UUID getUniqueID();
+    @Shadow protected abstract void shadow$setPose(Pose pose);
+    @Shadow protected abstract void shadow$recenterBoundingBox();
+
+    private boolean tracker$trackedInWorld = false;
+    @Nullable private Cause tracker$destructCause;
     //@formatter:on
 
-    @Shadow @Nullable public abstract Team getTeam();
 
-    @Shadow public abstract void shadow$setPosition(double x, double y, double z);
+//    @Inject(method = "<init>", at = @At("RETURN"))
+//    private void tracker$refreshTrackerStates(final EntityType<?> entityType, final net.minecraft.world.World world, final CallbackInfo ci) {
+//        this.bridge$refreshTrackerStates();
+//
+//        final EntityTypeBridge entityTypeBridge = (EntityTypeBridge) entityType;
+//        if (!entityTypeBridge.bridge$checkedDamageEntity()) {
+//            try {
+//                final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? Constants.Entity.ATTACK_ENTITY_FROM_MAPPING : Constants.Entity.ATTACK_ENTITY_FROM_OBFUSCATED;
+//                final Class<?>[] argTypes = {DamageSource.class, float.class};
+//                final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+//                if (!(clazz.equals(LivingEntity.class) || clazz.equals(PlayerEntity.class) || clazz.equals(ServerPlayerEntity.class))) {
+//                    entityTypeBridge.bridge$setOverridesDamageEntity(true);
+//                }
+//            } catch (final Throwable ex) {
+//                // In some rare cases, we just want to ignore class errors or
+//                // reflection errors and can "Safely" ignore our tracking because the alternative
+//                // is to silently ignore the mod's custom handling if it's there.
+//                entityTypeBridge.bridge$setOverridesDamageEntity(true);
+//            } finally {
+//                entityTypeBridge.bridge$setCheckedDamageEntity(true);
+//            }
+//        }
+//    }
 
-    @Shadow public abstract void shadow$setMotion(Vec3d motionIn);
-
-    @Shadow public abstract void shadow$setMotion(double x, double y, double z);
-
-    @Shadow @Final protected Random rand;
-
-    @Shadow public abstract float getEyeHeight();
-
-    @Shadow public abstract UUID getUniqueID();
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$refreshTrackerStates(final EntityType<?> entityType, final net.minecraft.world.World world, final CallbackInfo ci) {
-        this.bridge$refreshTrackerStates();
-
-        final EntityTypeBridge entityTypeBridge = (EntityTypeBridge) entityType;
-        if (!entityTypeBridge.bridge$checkedDamageEntity()) {
-            try {
-                final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? Constants.Entity.ATTACK_ENTITY_FROM_MAPPING : Constants.Entity.ATTACK_ENTITY_FROM_OBFUSCATED;
-                final Class<?>[] argTypes = {DamageSource.class, float.class};
-                final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-                if (!(clazz.equals(LivingEntity.class) || clazz.equals(PlayerEntity.class) || clazz.equals(ServerPlayerEntity.class))) {
-                    entityTypeBridge.bridge$setOverridesDamageEntity(true);
-                }
-            } catch (final Throwable ex) {
-                // In some rare cases, we just want to ignore class errors or
-                // reflection errors and can "Safely" ignore our tracking because the alternative
-                // is to silently ignore the mod's custom handling if it's there.
-                entityTypeBridge.bridge$setOverridesDamageEntity(true);
-            } finally {
-                entityTypeBridge.bridge$setCheckedDamageEntity(true);
-            }
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Inject(
+        method = "entityDropItem(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/ItemEntity;",
+        at = @At("HEAD")
+    )
+    private void tracker$logEntityDropTransactionIfNecessary(final ItemStack stack, final float offsetY,
+        final CallbackInfoReturnable<ItemEntity> cir) {
+        final PhaseTracker instance = PhaseTracker.SERVER;
+        if (!instance.onSidedThread()) {
+            return;
         }
+        if (((WorldBridge) this.world).bridge$isFake()) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
+        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+            return;
+        }
+        if (this.tracker$dropsTransactor == null) {
+            this.tracker$dropsTransactor = context.getTransactor().ensureEntityDropTransactionEffect((Entity) (Object) this);
+        }
+    }
+
+    protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Inject(method = "remove()V", at = @At("RETURN"))
+    private void tracker$ensureDropEffectCompleted(final CallbackInfo ci) {
+        final PhaseTracker instance = PhaseTracker.SERVER;
+        if (!instance.onSidedThread()) {
+            return;
+        }
+        if (((WorldBridge) this.world).bridge$isFake()) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
+        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+            return;
+        }
+        if (this.tracker$dropsTransactor != null) {
+            this.tracker$dropsTransactor.close();
+        }
+    }
+
+    @Override
+    public boolean bridge$isWorldTracked() {
+        return this.tracker$trackedInWorld;
+    }
+
+    @Override
+    public void bridge$setWorldTracked(final boolean tracked) {
+        this.tracker$trackedInWorld = tracked;
+        // Since this is called during removeEntity from world, we can
+        // post the removal event here, basically.
+        if (!tracked && this.tracker$destructCause != null) {
+            final Audience originalChannel = Audience.empty();
+            SpongeCommon.postEvent(SpongeEventFactory.createDestructEntityEvent(
+                this.tracker$destructCause,
+                originalChannel,
+                Optional.of(originalChannel),
+                TextComponent.empty(),
+                TextComponent.empty(),
+                (org.spongepowered.api.entity.Entity) this,
+                false
+            ));
+
+            this.tracker$destructCause = null;
+        }
+    }
+
+    @Override
+    public boolean bridge$shouldTick() {
+//        final ChunkBridge chunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
+//        // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
+//        // See https://github.com/SpongePowered/SpongeVanilla/issues/344
+//        return chunk == null || chunk.bridge$isActive();
+        return true;
     }
 
     @Override
@@ -110,7 +197,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
     }
 
     @Override
-    public void bridge$setAllowsBlockBulkCaptures(boolean allowsBlockBulkCaptures) {
+    public void bridge$setAllowsBlockBulkCaptures(final boolean allowsBlockBulkCaptures) {
         ((TrackableBridge) this.type).bridge$setAllowsBlockBulkCaptures(allowsBlockBulkCaptures);
     }
 
@@ -120,7 +207,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
     }
 
     @Override
-    public void bridge$setAllowsBlockEventCreation(boolean allowsBlockEventCreation) {
+    public void bridge$setAllowsBlockEventCreation(final boolean allowsBlockEventCreation) {
         ((TrackableBridge) this.type).bridge$setAllowsBlockEventCreation(allowsBlockEventCreation);
     }
 
@@ -130,7 +217,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
     }
 
     @Override
-    public void bridge$setAllowsEntityBulkCaptures(boolean allowsEntityBulkCaptures) {
+    public void bridge$setAllowsEntityBulkCaptures(final boolean allowsEntityBulkCaptures) {
         ((TrackableBridge) this.type).bridge$setAllowsEntityBulkCaptures(allowsEntityBulkCaptures);
     }
 
@@ -140,7 +227,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
     }
 
     @Override
-    public void bridge$setAllowsEntityEventCreation(boolean allowsEntityEventCreation) {
+    public void bridge$setAllowsEntityEventCreation(final boolean allowsEntityEventCreation) {
         ((TrackableBridge) this.type).bridge$setAllowsEntityEventCreation(allowsEntityEventCreation);
     }
 

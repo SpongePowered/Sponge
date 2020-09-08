@@ -72,7 +72,7 @@ public final class SpongeDynamicChoicesBuilder<T> implements VariableValueParame
     public ValueParameter<T> build() {
         Preconditions.checkNotNull(this.choices, "choices must not be null");
         Preconditions.checkNotNull(this.results, "results must not be null");
-        return new SpongeChoicesValueParameter<>(this.choices, this.results, this.showInUsage);
+        return new SpongeChoicesValueParameter<>(this.choices, this.results, this.showInUsage, false);
     }
 
     @Override

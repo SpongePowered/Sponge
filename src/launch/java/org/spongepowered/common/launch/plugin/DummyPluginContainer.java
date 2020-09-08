@@ -37,13 +37,13 @@ import java.util.Optional;
 public final class DummyPluginContainer implements PluginContainer {
 
     private final PluginMetadata metadata;
-    private final Path file;
+    private final Path path;
     private final Logger logger;
     private final Object instance;
 
-    public DummyPluginContainer(final PluginMetadata metadata, final Path file, final Logger logger, final Object instance) {
+    public DummyPluginContainer(final PluginMetadata metadata, final Path path, final Logger logger, final Object instance) {
         this.metadata = metadata;
-        this.file = file;
+        this.path = path;
         this.logger = logger;
         this.instance = instance;
     }
@@ -54,8 +54,8 @@ public final class DummyPluginContainer implements PluginContainer {
     }
 
     @Override
-    public Path getFile() {
-        return this.file;
+    public Path getPath() {
+        return this.path;
     }
 
     @Override
@@ -97,7 +97,7 @@ public final class DummyPluginContainer implements PluginContainer {
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .addValue(this.metadata)
-            .add("file", this.file)
+            .add("path", this.path)
             .toString();
     }
 }

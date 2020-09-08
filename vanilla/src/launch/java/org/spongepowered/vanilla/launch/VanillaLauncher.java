@@ -25,12 +25,15 @@
 package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
+import org.spongepowered.common.applaunch.plugin.PluginEngine;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.PluginKeys;
+import org.spongepowered.plugin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
-import org.spongepowered.vanilla.launch.plugin.PluginLoader;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
@@ -42,8 +45,8 @@ public abstract class VanillaLauncher extends Launcher {
     private final Stage injectionStage;
     private PluginContainer vanillaPlugin;
 
-    protected VanillaLauncher(Stage injectionStage) {
-        super(new VanillaPluginManager());
+    protected VanillaLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
+        super(pluginEngine, new VanillaPluginManager());
         this.injectionStage = injectionStage;
     }
 
@@ -59,12 +62,7 @@ public abstract class VanillaLauncher extends Launcher {
 
     @Override
     public final void loadPlugins() {
-        final PluginLoader pluginLoader = new PluginLoader(this.getPluginEnvironment(), this.getPluginManager());
-        pluginLoader.discoverLanguageServices();
-        pluginLoader.initialize();
-        pluginLoader.discoverPluginResources();
-        pluginLoader.createPluginCandidates();
-        pluginLoader.createPlugins();
+        this.getPluginManager().loadPlugins(this.getPluginEngine());
     }
 
     @Override
@@ -81,14 +79,27 @@ public abstract class VanillaLauncher extends Launcher {
     }
 
     @Override
-    protected final void createPlatformPlugins(final Path gameDirectory) {
+    protected final void createPlatformPlugins(final PluginEngine pluginEngine) {
+        final Path gameDirectory = this.pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
+                .orElseThrow(() -> new RuntimeException("The game directory has not been added to the environment!"));
+
         try {
-            final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(VanillaLauncher.class.getResourceAsStream("/plugins.json"));
+            final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(VanillaLauncher.class.getResourceAsStream(
+                    "/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME));
             for (final PluginMetadata metadata : read) {
-                this.getPluginManager().addPlugin(new DummyPluginContainer(metadata, gameDirectory, this.getLogger(), this));
+                this.getPluginManager().addDummyPlugin(new DummyPluginContainer(metadata, gameDirectory, this.getLogger(), this));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException("Could not load metadata information for the implementation! This should be impossible!");
         }
+    }
+
+    @Override
+    public VanillaPluginEngine getPluginEngine() {
+        return (VanillaPluginEngine) this.pluginEngine;
+    }
+
+    public VanillaPluginManager getPluginManager() {
+        return (VanillaPluginManager) this.pluginManager;
     }
 }

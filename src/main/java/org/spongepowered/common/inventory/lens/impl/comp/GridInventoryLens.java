@@ -48,7 +48,7 @@ public class GridInventoryLens extends Inventory2DLens {
     }
 
     protected void init(SlotLensProvider slots) {
-        for (int y = 0, base = this.base; y < this.height; y++, base += this.stride) {
+        for (int y = 0, base = this.base; y < this.height; y++, base += this.width) {
             InventoryRowLens row = new InventoryRowLens(base, this.width, this.xBase, this.yBase + y, slots);
             this.addRow(row);
         }

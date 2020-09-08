@@ -76,17 +76,17 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -118,6 +118,7 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -131,7 +132,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -359,7 +359,7 @@ public final class SpongeCommonEventFactory {
                 }
             }
 
-            final User creator = phaseContext.getCreator().orElse((User) player);
+            final User creator = phaseContext.getCreator().orElse(((ServerPlayerEntityBridge) player).bridge$getUser());
             if (creator != null) {
                 frame.addContext(EventContextKeys.CREATOR, creator);
             }
@@ -482,8 +482,8 @@ public final class SpongeCommonEventFactory {
             hand, @Nullable final Vector3d hitVec) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             frame.addContext(EventContextKeys.ENTITY_HIT, ((Entity) entity));
             if (!stack.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
@@ -502,8 +502,8 @@ public final class SpongeCommonEventFactory {
             final Hand hand, @Nullable final Vector3d hitVec) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             frame.addContext(EventContextKeys.ENTITY_HIT, (Entity) entity);
             if (!stack.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
@@ -522,8 +522,8 @@ public final class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, (User) player);
-                frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             }
 
             if (hitTarget instanceof Entity) {
@@ -550,8 +550,8 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
         } else {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, (User) player);
-            frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
         }
 
         if (hitTarget instanceof Entity) {
@@ -585,8 +585,8 @@ public final class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, (User) player);
-                frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             }
 
             frame.addContext(EventContextKeys.BLOCK_HIT, blockSnapshot);
@@ -622,8 +622,8 @@ public final class SpongeCommonEventFactory {
                 frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
             } else {
                 frame.pushCause(player);
-                frame.addContext(EventContextKeys.CREATOR, (User) player);
-                frame.addContext(EventContextKeys.NOTIFIER, (User) player);
+                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
+                frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
             }
 
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
@@ -639,73 +639,68 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    @Nullable
-    public static Event callMoveEntityEvent(final net.minecraft.entity.Entity entity,
-        final EntityTickContext context) {
-        // Ignore movement event if entity is dead, a projectile, or item.
-        // Note: Projectiles are handled with CollideBlockEvent.Impact
-        if (entity.removed || (!ShouldFire.MOVE_ENTITY_EVENT && !ShouldFire.MOVE_ENTITY_EVENT_POSITION && !ShouldFire.ROTATE_ENTITY_EVENT)) {
-            return null;
+    /**
+     * Performs the logic necessary to post the {@link MoveEntityEvent position event} for an {@link Entity}.
+     *
+     * @param entity The event
+     */
+    public static void callNaturalMoveEntityEvent(final net.minecraft.entity.Entity entity) {
+        if (entity.removed || (!ShouldFire.MOVE_ENTITY_EVENT)) {
+            return;
         }
 
-        final Entity spongeEntity = (Entity) entity;
-        final double deltaX = context.prevX - entity.posX;
-        final double deltaY = context.prevY - entity.posY;
-        final double deltaZ = context.prevZ - entity.posZ;
+        final double deltaX = entity.prevPosX - entity.getPosX();
+        final double deltaY = entity.prevPosY - entity.getPosY();
+        final double deltaZ = entity.prevPosZ - entity.getPosZ();
         final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
+        if (deltaChange < 1f / 256) {
+            return;
+        }
 
-        if (deltaChange > 1f / 256 // Micro-optimization, avoids almost negligible position movement from floating point differences.
-            || entity.rotationPitch != entity.prevRotationPitch
-            || entity.rotationYaw != entity.prevRotationYaw) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.pushCause(entity);
-                // yes we have a move event.
-                final double currentPosX = entity.posX;
-                final double currentPosY = entity.posY;
-                final double currentPosZ = entity.posZ;
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entity);
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
-                final Vector3d oldPosition = new Vector3d(context.prevX, context.prevY, context.prevZ);
-                final Vector3d currentPosition = new Vector3d(currentPosX, currentPosY, currentPosZ);
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(), (Entity) entity,
+                    new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.getPosX(), entity.getPosY(), entity.getPosZ()),
+                    new Vector3d(entity.getPosX(), entity.getPosY(), entity.getPosZ()));
 
-                final Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
-                final Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
-
-                Event event  = null;
-                if (!oldPosition.equals(currentPosition) && ShouldFire.MOVE_ENTITY_EVENT_POSITION) {
-                    event = SpongeEventFactory.createMoveEntityEventPosition(frame.getCurrentCause(), oldPosition, currentPosition, spongeEntity);
-                    if (SpongeCommon.postEvent(event)) { // Cancelled event, reset position to previous position.
-                        entity.posX = context.prevX;
-                        entity.posY = context.prevY;
-                        entity.posZ = context.prevZ;
-                    } else {
-                        Vector3d newPosition = ((MoveEntityEvent) event).getToPosition();
-                        if (!newPosition.equals(currentPosition)) {
-                            entity.posX = newPosition.getX();
-                            entity.posY = newPosition.getY();
-                            entity.posZ = newPosition.getZ();
-                        }
-                    }
-
-                } else if (ShouldFire.ROTATE_ENTITY_EVENT) {
-                    event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), oldRotationVector, currentRotationVector, spongeEntity);
-                    if (SpongeCommon.postEvent(event)) { // Cancelled event, reset rotation to previous rotation.
-                        entity.rotationPitch = entity.prevRotationPitch;
-                        entity.rotationYaw = entity.prevRotationYaw;
-                    } else {
-                        Vector3d newRotation = ((RotateEntityEvent) event).getToRotation();
-                        if (!newRotation.equals(currentRotationVector)) {
-                            entity.rotationPitch = (float) currentRotationVector.getX();
-                            entity.rotationYaw = (float) currentRotationVector.getY();
-                        }
-                    }
-                }
-
-                return event;
+            if (SpongeCommon.postEvent(event)) {
+                entity.setPosition(entity.prevPosX, entity.prevPosY, entity.prevPosZ);
+            } else {
+                entity.setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
+                        event.getDestinationPosition().getZ());
             }
         }
-
-        return null;
     }
+
+    /**
+     * Performs the logic necessary to post the {@link RotateEntityEvent rotation event} for an {@link Entity}.
+     *
+     * @param entity The event
+     */
+    public static void callNaturalRotateEntityEvent(final net.minecraft.entity.Entity entity) {
+        if (entity.removed || !ShouldFire.ROTATE_ENTITY_EVENT || (entity.rotationPitch == entity.prevRotationPitch && entity.rotationYaw == entity.prevRotationYaw)) {
+            return;
+        }
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(entity);
+
+            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(), (Entity) entity,
+                    new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0), new Vector3d(entity.rotationPitch,
+                    entity.rotationYaw, 0));
+
+            if (SpongeCommon.postEvent(event)) {
+                entity.rotationPitch = entity.prevRotationPitch;
+                entity.rotationYaw = entity.prevRotationYaw;
+            } else {
+                entity.rotationPitch = (float) event.getToRotation().getX();
+                entity.rotationYaw = (float) event.getToRotation().getY();
+            }
+        }
+    }
+
     public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(final LivingEntity entity, @Nullable final DamageSource source, final boolean isMainThread) {
         final Audience originalChannel;
         final Audience channel;
@@ -1054,5 +1049,4 @@ public final class SpongeCommonEventFactory {
         SpongeCommon.postEvent(event);
         return event;
     }
-
 }

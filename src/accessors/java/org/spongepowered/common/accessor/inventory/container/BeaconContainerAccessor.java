@@ -32,5 +32,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(BeaconContainer.class)
 public interface BeaconContainerAccessor {
 
-    @Accessor("field_216971_e") IWorldPosCallable accessor$getBeaconPosition();
+    @Accessor("worldPosCallable") IWorldPosCallable accessor$getWorldPosCallable();
 }

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
+import net.minecraft.world.dimension.EndDimension;
+import net.minecraft.world.dimension.NetherDimension;
+import net.minecraft.world.dimension.OverworldDimension;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
@@ -38,15 +41,9 @@ public final class DimensionTypeStreamGenerator {
 
     public static Stream<DimensionType> stream() {
         return Stream.of(
-            new SpongeDimensionType(ResourceKey.minecraft("overworld"),
-                ((DimensionTypeAccessor) net.minecraft.world.dimension.DimensionType.OVERWORLD)::accessor$getFactory,
-                net.minecraft.world.dimension.DimensionType.OVERWORLD::hasSkyLight),
-            new SpongeDimensionType(ResourceKey.minecraft("the_nether"),
-                ((DimensionTypeAccessor) net.minecraft.world.dimension.DimensionType.THE_NETHER)::accessor$getFactory,
-                net.minecraft.world.dimension.DimensionType.THE_NETHER::hasSkyLight),
-            new SpongeDimensionType(ResourceKey.minecraft("the_end"),
-                ((DimensionTypeAccessor) net.minecraft.world.dimension.DimensionType.THE_END)::accessor$getFactory,
-                net.minecraft.world.dimension.DimensionType.THE_END::hasSkyLight)
+            new SpongeDimensionType(ResourceKey.minecraft("overworld"), () -> OverworldDimension::new, () -> true),
+            new SpongeDimensionType(ResourceKey.minecraft("the_nether"), () -> NetherDimension::new, () -> false),
+            new SpongeDimensionType(ResourceKey.minecraft("the_end"), () -> EndDimension::new, () -> false)
         );
     }
 }

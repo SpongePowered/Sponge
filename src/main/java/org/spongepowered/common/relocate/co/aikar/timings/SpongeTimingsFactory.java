@@ -31,12 +31,11 @@ import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.common.TimingsCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.common.TimingsCategory;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
@@ -85,15 +84,8 @@ public final class SpongeTimingsFactory implements TimingsFactory {
         return time;
     }
 
-    private static PluginContainer checkPlugin(Object plugin) {
-        Optional<PluginContainer> optPlugin = SpongeCommon.getGame().getPluginManager().fromInstance(plugin);
-        checkArgument(optPlugin.isPresent(), "Provided object is not a plugin instance");
-        return optPlugin.get();
-    }
-
     @Override
-    public Timing of(PluginContainer pluginObj, String name, @Nullable Timing groupHandler) {
-        PluginContainer plugin = checkPlugin(pluginObj);
+    public Timing of(PluginContainer plugin, String name, @Nullable Timing groupHandler) {
         return TimingsManager.getHandler(plugin.getMetadata().getId(), name, groupHandler, true);
     }
 

@@ -38,9 +38,9 @@ public final class HopperData {
         registrator
                 .asMutable(HopperTileEntityAccessor.class)
                     .create(Keys.COOLDOWN)
-                        .get(h -> h.accessor$getTransferCooldown() < 1 ? null : h.accessor$getTransferCooldown())
+                        .get(h -> Math.max(h.accessor$getTransferCooldown(), 0))
                         .setAnd((h, v) -> {
-                            if (v < 1) {
+                            if (v < 0) {
                                 return false;
                             }
                             h.accessor$setTransferCooldown(v);

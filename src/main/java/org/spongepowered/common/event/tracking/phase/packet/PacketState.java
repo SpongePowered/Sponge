@@ -34,9 +34,9 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -58,7 +58,7 @@ import java.util.function.BiConsumer;
 
 public abstract class PacketState<P extends PacketContext<P>> extends PooledPhaseState<P> implements IPhaseState<P> {
 
-    private final BiConsumer<CauseStackManager.StackFrame, P> BASIC_PACKET_MODIFIER = IPhaseState.super.getFrameModifier().andThen((frame, ctx) -> {
+    private final BiConsumer<CauseStackManager.StackFrame, P> BASIC_PACKET_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
         if (ctx.packetPlayer != null) {
             frame.pushCause(ctx.packetPlayer);
         }
@@ -119,52 +119,9 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         return false;
     }
 
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return false;
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(final P context) {
-        return false;
-    }
-
-    @Override
-    public boolean doesBulkBlockCapture(final P context) {
-        return true;
-    }
-
-    /**
-     * A defaulted method to handle entities that are spawned due to packet placement during post processing.
-     * Examples can include a player placing a redstone block priming a TNT explosive.
-     * @param context The phase context
-     * @param entities The list of entities to spawn
-     */
-    @Override
-    public void postProcessSpawns(final P context, final ArrayList<Entity> entities) {
-        final Player player = context.getSpongePlayer();
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            frame.pushCause(player);
-            SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final P context, final Entity entity) {
-        return this.shouldCaptureEntity()
-        ? context.getCapturedEntities().add(entity)
-        : this.spawnEntity(context, entity);
-    }
 
     public boolean shouldCaptureEntity() {
         return false;
-    }
-
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return this.shouldCaptureEntity();
     }
 
 

@@ -31,5 +31,5 @@ public interface ActiveChunkReferantBridge {
     @Nullable
     ChunkBridge bridge$getActiveChunk();
 
-    void bridge$setActiveChunk(@Nullable ChunkBridge chunk);
+    void bridge$setActiveChunk(@Nullable TrackedChunkBridge chunk);
 }

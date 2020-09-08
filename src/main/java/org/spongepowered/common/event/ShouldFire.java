@@ -76,7 +76,6 @@ public final class ShouldFire {
     public static boolean GOAL_EVENT_REMOVE = false;
 
     public static boolean MOVE_ENTITY_EVENT = false;
-    public static boolean MOVE_ENTITY_EVENT_POSITION = false;
 
     public static boolean PLAYER_CHANGE_CLIENT_SETTINGS_EVENT = false;
 

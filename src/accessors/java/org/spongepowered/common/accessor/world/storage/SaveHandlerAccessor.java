@@ -34,5 +34,6 @@ import java.io.File;
 public interface SaveHandlerAccessor {
 
     @Accessor("playersDirectory") File accessor$getPlayersDirectory();
-    @Accessor("field_215777_f") String accessor$getName();
+
+    @Accessor("worldId") String accessor$getWorldId();
 }

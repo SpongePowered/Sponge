@@ -51,7 +51,7 @@ public final class SpongeTargetBlockValueParameter extends CatalogedZeroAdvanceV
     @NonNull
     public Optional<? extends ServerLocation> getValue(final CommandContext.@NonNull Builder context, final ArgumentReader.@NonNull Mutable reader)
             throws ArgumentParseException {
-        final Object root = context.getCommandCause().getCause().root();
+        final Object root = context.getCause().getCause().root();
         if (root instanceof Living) {
             // TODO: BlockRay, where art thou?
             throw reader.createException(TextComponent.of("The cause root is not looking at a block!"));

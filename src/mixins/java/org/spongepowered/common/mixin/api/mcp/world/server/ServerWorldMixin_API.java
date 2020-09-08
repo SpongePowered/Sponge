@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.world.server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.Block;
@@ -39,27 +40,33 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.ServerTickList;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.raid.Raid;
 import net.minecraft.world.raid.RaidManager;
 import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerTickList;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataProvider;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
+import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
+import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -67,7 +74,9 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -81,6 +90,7 @@ import org.spongepowered.math.vector.Vector3i;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -93,6 +103,11 @@ import javax.annotation.Nullable;
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowered.api.world.server.ServerWorld> implements org.spongepowered.api.world.server.ServerWorld {
 
+    @Shadow @Final private ServerTickList<Block> pendingBlockTicks;
+    @Shadow @Final private ServerTickList<Fluid> pendingFluidTicks;
+    @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
+    @Shadow private boolean insideTick;
+
     @Shadow public abstract void shadow$save(@Nullable IProgressUpdate p_217445_1_, boolean p_217445_2_, boolean p_217445_3_) throws SessionLockException;
     @Shadow public abstract boolean shadow$addEntity(Entity p_217376_1_);
     @Shadow public abstract void shadow$onChunkUnloading(Chunk p_217466_1_);
@@ -104,11 +119,6 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
     @Shadow public abstract RaidManager shadow$getRaids();
     @Nullable @Shadow public abstract Raid shadow$findRaid(BlockPos p_217475_1_);
-
-    @Shadow @Final private ServerTickList<Block> pendingBlockTicks;
-    @Shadow @Final private ServerTickList<Fluid> pendingFluidTicks;
-
-    @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
 
     // World
     @Override
@@ -160,7 +170,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
         final File worldDirectory = this.shadow$getSaveHandler().getWorldDirectory();
         if (worldDirectory == null) {
             new PrettyPrinter(60).add("A Server World has a null save directory!").centre().hr()
-                    .add("%s : %s", "World Name", ((SaveHandlerAccessor) this.shadow$getSaveHandler()).accessor$getName())
+                    .add("%s : %s", "World Name", ((SaveHandlerAccessor) this.shadow$getSaveHandler()).accessor$getWorldId())
                     .add("%s : %s", "Dimension", this.getProperties().getDimensionType())
                     .add("Please report this to sponge developers so they may potentially fix this")
                     .trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
@@ -286,4 +296,87 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
         return (ScheduledUpdateList<FluidType>) this.pendingFluidTicks;
     }
 
+    @Override
+    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends Value<E>> key, E value) {
+        final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
+        return dataProvider.offer(ServerLocation.of(this, new Vector3d(x, y, z)), value);
+    }
+
+    @Override
+    public <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
+        final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
+        return dataProvider.get(ServerLocation.of(this, new Vector3d(x, y, z)));
+    }
+
+    // WeatherUniverse
+
+    @Override
+    public Weather getWeather() {
+        if (this.shadow$isThundering()) {
+            return Weathers.THUNDER.get();
+        }
+        if (this.shadow$isRaining()) {
+            return Weathers.RAIN.get();
+        }
+        return Weathers.CLEAR.get();
+    }
+
+    @Override
+    public Duration getRemainingWeatherDuration() {
+        return Duration.of(this.api$getDurationInTicks(), TemporalUnits.MINECRAFT_TICKS);
+    }
+
+    private long api$getDurationInTicks() {
+        if (this.shadow$isThundering()) {
+            return this.worldInfo.getThunderTime();
+        }
+        if (this.shadow$isRaining()) {
+            return this.worldInfo.getRainTime();
+        }
+        if (this.worldInfo.getClearWeatherTime() > 0) {
+            return this.worldInfo.getClearWeatherTime();
+        }
+        return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
+    }
+
+    @Override
+    public Duration getRunningWeatherDuration() {
+        return Duration.of(this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime(), TemporalUnits.MINECRAFT_TICKS);
+    }
+
+    @Override
+    public void setWeather(final Weather weather) {
+        Preconditions.checkNotNull(weather);
+        this.api$setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
+    }
+
+    @Override
+    public void setWeather(final Weather weather, final Duration duration) {
+        Preconditions.checkNotNull(weather);
+        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
+        final int ticks = (int) (duration.toMillis() / TemporalUnits.MINECRAFT_TICKS.getDuration().toMillis());
+        this.api$setWeather(weather, ticks);
+    }
+
+    public void api$setWeather(final Weather weather, final int ticks) {
+        if (weather == Weathers.CLEAR.get()) {
+            this.worldInfo.setClearWeatherTime(ticks);
+            this.worldInfo.setRainTime(0);
+            this.worldInfo.setThunderTime(0);
+            this.worldInfo.setRaining(false);
+            this.worldInfo.setThundering(false);
+        } else if (weather == Weathers.RAIN.get()) {
+            this.worldInfo.setClearWeatherTime(0);
+            this.worldInfo.setRainTime(ticks);
+            this.worldInfo.setThunderTime(ticks);
+            this.worldInfo.setRaining(true);
+            this.worldInfo.setThundering(false);
+        } else if (weather == Weathers.THUNDER.get()) {
+            this.worldInfo.setClearWeatherTime(0);
+            this.worldInfo.setRainTime(ticks);
+            this.worldInfo.setThunderTime(ticks);
+            this.worldInfo.setRaining(true);
+            this.worldInfo.setThundering(true);
+        }
+    }
 }

@@ -35,8 +35,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
@@ -100,7 +100,6 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
     @Override
     public boolean bridge$fireAuthEvent() {
         final Component disconnectMessage = TextComponent.of("You are not allowed to log in to this server.");
-        // Cause is created directly as we can't access the cause stack manager from off the main thread
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
                 cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this, false);

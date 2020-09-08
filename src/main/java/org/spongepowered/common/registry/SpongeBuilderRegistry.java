@@ -44,7 +44,9 @@ import org.spongepowered.api.command.parameter.managed.standard.VariableValuePar
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
+import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
@@ -58,7 +60,7 @@ import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLike
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
-import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
@@ -81,6 +83,9 @@ import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import org.spongepowered.api.placeholder.PlaceholderComponent;
+import org.spongepowered.api.placeholder.PlaceholderContext;
+import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.registry.BuilderRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
@@ -88,9 +93,9 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.util.ResettableBuilder;
-import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.WorldBorder;
@@ -115,8 +120,10 @@ import org.spongepowered.common.command.parameter.subcommand.SpongeSubcommandPar
 import org.spongepowered.common.command.result.SpongeCommandResultBuilder;
 import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
+import org.spongepowered.common.data.SpongeKeyValueMatcherBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.key.SpongeKeyBuilder;
+import org.spongepowered.common.data.persistence.SpongeDataStoreBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
@@ -131,11 +138,11 @@ import org.spongepowered.common.entity.ai.goal.builtin.creature.target.SpongeFin
 import org.spongepowered.common.entity.attribute.SpongeAttributeModifierBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
-import org.spongepowered.common.event.damage.SpongeBlockDamageSourceBuilder;
-import org.spongepowered.common.event.damage.SpongeDamageSourceBuilder;
-import org.spongepowered.common.event.damage.SpongeEntityDamageSourceBuilder;
-import org.spongepowered.common.event.damage.SpongeFallingBlockDamgeSourceBuilder;
-import org.spongepowered.common.event.damage.SpongeIndirectEntityDamageSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeEntityDamageSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeFallingBlockDamgeSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.inventory.InventoryTransactionResultImpl;
@@ -154,6 +161,9 @@ import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingReci
 import org.spongepowered.common.item.recipe.crafting.SpongeSpecialCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.crafting.SpongeStoneCutterRecipeBuilder;
 import org.spongepowered.common.item.recipe.smelting.SpongeSmeltingRecipeBuilder;
+import org.spongepowered.common.placeholder.SpongePlaceholderComponentBuilder;
+import org.spongepowered.common.placeholder.SpongePlaceholderContextBuilder;
+import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
@@ -278,6 +288,11 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(Parameter.Key.Builder.class, SpongeParameterKeyBuilder::new)
             .register(Flag.Builder.class, SpongeFlagBuilder::new)
             .register(Selector.Builder.class, SpongeSelectorFactory::createBuilder)
+            .register(DataStore.Builder.class, SpongeDataStoreBuilder::new)
+            .register(KeyValueMatcher.Builder.class, SpongeKeyValueMatcherBuilder::new)
+            .register(PlaceholderParser.Builder.class, SpongePlaceholderParserBuilder::new)
+            .register(PlaceholderContext.Builder.class, SpongePlaceholderContextBuilder::new)
+            .register(PlaceholderComponent.Builder.class, SpongePlaceholderComponentBuilder::new)
             .register(ResourcePath.Builder.class, SpongeResourcePathBuilder::new)
         ;
     }

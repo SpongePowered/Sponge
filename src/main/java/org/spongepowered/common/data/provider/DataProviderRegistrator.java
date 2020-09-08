@@ -165,7 +165,7 @@ public class DataProviderRegistrator {
                         @Override
                         protected boolean supports(final T dataHolder) {
                             if (registration.supports != null) {
-                                registration.supports.apply(dataHolder);
+                                return registration.supports.apply(dataHolder);
                             }
                             return super.supports(dataHolder);
                         }
@@ -230,16 +230,13 @@ public class DataProviderRegistrator {
 
                         @Override
                         protected Optional<T> set(final T dataHolder, final K value) {
-                            if (this.isBooleanKey) {
-                                return (Optional<T>) OptBool.of((Boolean) registration.set.apply(dataHolder, value));
-                            }
                             return Optional.ofNullable(registration.set.apply(dataHolder, value));
                         }
 
                         @Override
                         protected boolean supports(final T dataHolder) {
                             if (registration.supports != null) {
-                                registration.supports.apply(dataHolder);
+                                return registration.supports.apply(dataHolder);
                             }
                             return super.supports(dataHolder);
                         }

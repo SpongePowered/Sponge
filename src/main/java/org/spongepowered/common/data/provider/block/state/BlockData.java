@@ -34,10 +34,14 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.state.properties.ChestType;
 import net.minecraft.state.properties.NoteBlockInstrument;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.MatterStates;
+import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.accessor.block.BlockAccessor;
 import org.spongepowered.common.accessor.block.FireBlockAccessor;
 import org.spongepowered.common.bridge.block.BlockBridge;
@@ -57,7 +61,7 @@ public final class BlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.BLAST_RESISTANCE)
-                        .get(h -> (double) ((BlockAccessor) h).accessor$getBlockResistance())
+                        .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockResistance())
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
                             if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
@@ -66,7 +70,7 @@ public final class BlockData {
                             return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)));
                         })
                     .create(Keys.HARDNESS)
-                        .get(h -> (double) ((BlockAccessor) h).accessor$getBlockHardness())
+                        .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockHardness())
                     .create(Keys.HELD_ITEM)
                         .get(h -> {
                             final Item item = h.getBlock().asItem();
@@ -81,7 +85,7 @@ public final class BlockData {
                     .create(Keys.IS_PASSABLE)
                         .get(h -> !h.getMaterial().blocksMovement())
                     .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> ((BlockAccessor) h).accessor$getBlockHardness() < 0)
+                        .get(h -> ((BlockAccessor) h.getBlock()).accessor$getBlockHardness() < 0)
                     .create(Keys.IS_FLAMMABLE)
                         .get(h -> ((FireBlockAccessor) Blocks.FIRE).accessor$func_220274_q(h) > 0)
                     .create(Keys.IS_SOLID)
@@ -106,10 +110,29 @@ public final class BlockData {
                         .get(h -> (InstrumentType) (Object) NoteBlockInstrument.byState(h))
                     .create(Keys.WOOD_TYPE)
                         .get(h -> {
-                            throw new MissingImplementationException("BlockStateData", "WOOD_TYPE::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("BlockStateData", "WOOD_TYPE::setter");
+                            // Get the resource key of the block and stop if we're not in the minecraft namespace
+                            final ResourceKey key = ((BlockType) h.getBlock()).getKey();
+                            if (!key.getNamespace().equals(PluginManager.MINECRAFT_PLUGIN_ID)) {
+                                return null;
+                            }
+
+                            // Compare ids and determine the wood type to return
+                            final String id = key.getValue();
+                            if (id.contains("acacia_")) {
+                                return WoodTypes.ACACIA.get();
+                            } else if (id.contains("birch_")) {
+                                return WoodTypes.BIRCH.get();
+                            } else if (id.contains("dark_oak_")) {
+                                return WoodTypes.DARK_OAK.get();
+                            } else if (id.contains("jungle_")) {
+                                return WoodTypes.JUNGLE.get();
+                            } else if (id.contains("oak_")) {
+                                return WoodTypes.OAK.get();
+                            } else if (id.contains("spruce_")) {
+                                return WoodTypes.SPRUCE.get();
+                            }
+
+                            return null;
                         });
     }
     // @formatter:on

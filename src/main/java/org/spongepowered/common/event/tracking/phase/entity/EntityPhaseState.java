@@ -26,8 +26,8 @@ package org.spongepowered.common.event.tracking.phase.entity;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -41,12 +41,7 @@ import java.util.stream.Collectors;
 
 public abstract class EntityPhaseState<E extends EntityContext<E>> extends PooledPhaseState<E> implements IPhaseState<E> {
 
-    private final String desc = TrackingUtil.phaseStateToString("Block", this);
-
-    @Override
-    public boolean doesCaptureEntityDrops(final E context) {
-        return true;
-    }
+    private final String desc = TrackingUtil.phaseStateToString("Entity", this);
 
     @Override
     public void unwind(final E context) {
@@ -80,15 +75,9 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
     }
 
     @Override
-    public boolean tracksEntitySpecificDrops() {
+    public boolean doesDenyChunkRequests(E context) {
         return true;
     }
-
-    @Override
-    public boolean doesDenyChunkRequests() {
-        return true;
-    }
-
 }
 
 

@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(PandaEntity.class)
 public interface PandaEntityAccessor {
 
-    @Invoker("func_213559_es") int accessor$func_213559_es();
+    @Invoker("getEatCounter") int accessor$getEatCounter();
 
-    @Invoker("func_213571_t") void accessor$func_213571_t(int eatingTime);
+    @Invoker("setEatCounter") void accessor$setEatCounter(int eatingTime);
 }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.lifecycle;
 
 import org.spongepowered.api.Game;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 
 public abstract class AbstractLifecycleEvent implements LifecycleEvent {

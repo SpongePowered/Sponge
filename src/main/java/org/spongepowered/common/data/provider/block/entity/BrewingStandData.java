@@ -39,7 +39,13 @@ public final class BrewingStandData {
                 .asMutable(BrewingStandTileEntityAccessor.class)
                     .create(Keys.FUEL)
                         .get(BrewingStandTileEntityAccessor::accessor$getFuel)
-                        .set(BrewingStandTileEntityAccessor::accessor$setFuel)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setFuel(v);
+                            return true;
+                        })
                     .create(Keys.REMAINING_BREW_TIME)
                         .get(h -> h.accessor$canBrew() ? h.accessor$getBrewTime() : null)
                         .set((h, v) -> {

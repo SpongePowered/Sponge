@@ -25,8 +25,8 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.api.util.ban.BanType;
+import org.spongepowered.api.service.ban.Ban;
+import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.common.ban.SpongeBanType;
 
 import java.util.stream.Stream;

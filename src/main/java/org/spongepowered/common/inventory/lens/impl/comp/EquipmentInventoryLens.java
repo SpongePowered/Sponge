@@ -48,7 +48,7 @@ public class EquipmentInventoryLens extends RealLens {
 
     private void init(Map<EquipmentType, SlotLens> lenses) {
         for (Map.Entry<EquipmentType, SlotLens> entry : lenses.entrySet()) {
-            this.addSpanningChild(new EquipmentSlotLens(entry.getValue(), entry.getKey()), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), entry.getKey()));
+            this.addSpanningChild(new EquipmentSlotLens(this, entry.getValue(), entry.getKey()), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), entry.getKey()));
         }
     }
 

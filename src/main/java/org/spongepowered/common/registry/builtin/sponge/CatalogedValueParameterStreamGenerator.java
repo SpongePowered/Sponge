@@ -29,10 +29,11 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.arguments.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.world.dimension.Dimension;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigDecimalValueParameter;
@@ -67,11 +68,12 @@ public final class CatalogedValueParameterStreamGenerator {
         return Stream.of(
                 new SpongeBigDecimalValueParameter(),
                 new SpongeBigIntegerValueParameter(),
+                StandardCatalogedArgumentParser.createConverter("block_state", BlockStateArgument.blockState(),
+                        (reader, cause, state) -> (BlockState) state.getState()),
                 StandardCatalogedArgumentParser.createIdentity("boolean", BoolArgumentType.bool()),
                 new SpongeColorValueParameter(), // Includes ColorArgumentParser.color(), but does more. TODO: what does 1.16 do?
                 new SpongeDataContainerValueParameter(),
                 new SpongeDateTimeValueParameter(),
-                StandardCatalogedArgumentParser.createCast("dimension", DimensionArgument.getDimension(), Dimension.class),
                 StandardCatalogedArgumentParser.createIdentity("double", DoubleArgumentType.doubleArg()),
                 new SpongeDurationValueParameter(),
                 // This is for a single entity. We'll have a separate one for multiple.
@@ -81,7 +83,8 @@ public final class CatalogedValueParameterStreamGenerator {
                         (reader, cause, converter) -> converter.getNames(cause.getSource())),
                 StandardCatalogedArgumentParser.createIdentity("integer", IntegerArgumentType.integer()),
                 new SpongeIPAddressValueParameter(),
-                new SpongeServerLocationValueParameter(),
+                new SpongeServerLocationValueParameter(true),
+                new SpongeServerLocationValueParameter(false),
                 StandardCatalogedArgumentParser.createIdentity("long", LongArgumentType.longArg()),
                 StandardCatalogedArgumentParser.createConverter("many_entities", EntityArgument.entities(),
                         (reader, cause, selector) -> selector.select(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())),
@@ -92,6 +95,8 @@ public final class CatalogedValueParameterStreamGenerator {
                         (reader, cause, selector) -> (Player) selector.selectOnePlayer(cause.getSource())),
                 new SpongePluginContainerValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("remaining_joined_strings", StringArgumentType.greedyString()),
+                StandardCatalogedArgumentParser.createConverter("resource_key", ResourceLocationArgument.resourceLocation(),
+                        (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation),
                 StandardCatalogedArgumentParser.createIdentity("string", StringArgumentType.string()),
                 new SpongeTargetBlockValueParameter(),
                 new SpongeTargetEntityValueParameter(false),
@@ -139,7 +144,8 @@ public final class CatalogedValueParameterStreamGenerator {
                         "vector3d",
                         Vec3Argument.vec3(),
                         (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))),
-                new SpongeWorldPropertiesValueParameter()
+                new SpongeWorldPropertiesValueParameter(true),
+                new SpongeWorldPropertiesValueParameter(false)
             );
     }
 

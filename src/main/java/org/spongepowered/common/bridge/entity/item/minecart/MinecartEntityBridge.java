@@ -28,5 +28,12 @@ import org.spongepowered.math.vector.Vector3d;
 
 public interface MinecartEntityBridge {
 
-    Vector3d bridge$getAirboneVelocityModifier();
+    double bridge$getMaxSpeed();
+    void bridge$setMaxSpeed(double impl$maxSpeed);
+    boolean bridge$getSlowWhenEmpty();
+    void bridge$setSlowWhenEmpty(boolean impl$slowWhenEmpty);
+    Vector3d bridge$getAirborneMod();
+    void bridge$setAirborneMod(Vector3d impl$airborneMod);
+    Vector3d bridge$getDerailedMod();
+    void bridge$setDerailedMod(Vector3d impl$derailedMod);
 }

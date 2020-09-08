@@ -29,8 +29,8 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -60,7 +60,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
         return this.openInventory(inventory, null);
     }
 
-    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
+    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes", "deprecation"})
     @Override
     public Optional<Container> openInventory(final Inventory inventory, final Component displayName) {
         ContainerBridge openContainer = (ContainerBridge) this.openContainer;

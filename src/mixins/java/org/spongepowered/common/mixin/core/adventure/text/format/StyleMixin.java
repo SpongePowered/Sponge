@@ -42,7 +42,7 @@ import static org.spongepowered.common.adventure.SpongeAdventure.asVanilla;
 import java.io.IOException;
 
 @Mixin(net.kyori.adventure.text.format.Style.class)
-public class StyleMixin implements StyleBridge {
+public abstract class StyleMixin implements StyleBridge {
     private Style bridge$vanilla;
 
     @Override
@@ -93,6 +93,11 @@ public class StyleMixin implements StyleBridge {
             // insertion
             this.bridge$vanilla.setInsertion($this.insertion());
         }
-        return this.bridge$vanilla;
+        // If this style is used multiple times, its parent might change so the style might be wrong
+        // when the style object is used as part of a previous text component.
+        //
+        // We use a shallow copy because the parent here has not been set - everything else is immutable
+        // (enough) such that changes will not be reflected elsewhere.
+        return this.bridge$vanilla.createShallowCopy();
     }
 }

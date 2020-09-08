@@ -31,6 +31,7 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.common.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -40,9 +41,10 @@ public class EquipmentSlotLens extends FilteringSlotLens {
     
     private final Predicate<EquipmentType> equipmentTypeFilter;
 
-    public EquipmentSlotLens(SlotLens lens, EquipmentType type) {
+    public EquipmentSlotLens(Lens parent, SlotLens lens, EquipmentType type) {
         super(lens, equipmentTypeFilter(type), EquipmentSlotAdapter.class);
         this.equipmentTypeFilter = e -> e == type;
+        this.setParent(parent);
     }
 
     private static FilteringSlotLens.ItemStackFilter equipmentTypeFilter(EquipmentType type) {

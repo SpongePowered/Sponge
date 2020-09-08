@@ -40,13 +40,25 @@ public final class EndGatewayData {
                 .asMutable(EndGatewayTileEntityAccessor.class)
                     .create(Keys.COOLDOWN)
                         .get(EndGatewayTileEntityAccessor::accessor$getTeleportCooldown)
-                        .set(EndGatewayTileEntityAccessor::accessor$setTeleportCooldown)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setTeleportCooldown(v);
+                            return true;
+                        })
                     .create(Keys.DO_EXACT_TELEPORT)
                         .get(EndGatewayTileEntityAccessor::accessor$getExactTeleport)
                         .set(EndGatewayTileEntityAccessor::accessor$setExactTeleport)
                     .create(Keys.END_GATEWAY_AGE)
                         .get(EndGatewayTileEntityAccessor::accessor$getAge)
-                        .set(EndGatewayTileEntityAccessor::accessor$setAge)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setAge(v);
+                            return true;
+                        })
                     .create(Keys.TARGET_POSITION)
                         .get(h -> VecHelper.toVector3i(h.accessor$getExitPortal()))
                         .set((h, v) -> h.accessor$setExitPortal(VecHelper.toBlockPos(v)));

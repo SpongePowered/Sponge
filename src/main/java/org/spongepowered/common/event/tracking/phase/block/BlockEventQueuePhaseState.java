@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;

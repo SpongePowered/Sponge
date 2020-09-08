@@ -114,7 +114,7 @@ public class PlayerInventoryLens extends AbstractLens {
             equipmentLenses.put(EquipmentTypes.OFF_HAND.get(), this.offhand);
         }
 
-        equipmentLenses.put(EquipmentTypes.MAIN_HAND.get(), new HeldHandSlotLens());
+        equipmentLenses.put(EquipmentTypes.MAIN_HAND.get(), new HeldHandSlotLens(this.primary.getHotbar()));
         this.equipment = new EquipmentInventoryLens(equipmentLenses);
 
         this.addSpanningChild(this.primary);

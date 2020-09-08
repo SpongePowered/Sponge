@@ -58,14 +58,6 @@ import java.util.Optional;
 @Mixin(AbstractSpawner.class)
 public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
 
-    @Shadow private int spawnDelay;
-    @Shadow private int minSpawnDelay;
-    @Shadow private int maxSpawnDelay;
-    @Shadow private int spawnCount;
-    @Shadow private int maxNearbyEntities;
-    @Shadow private int activatingRangeFromPlayer;
-    @Shadow private int spawnRange;
-
     /**
      * @author gabizou - January 30th, 2016
      * @author gabizou - Updated April 10th, 2016 - Update for 1.9 since it's passed to the AnvilChunkLoader
@@ -150,48 +142,4 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
         return entity;
     }
 
-    @Override
-    public int bridge$getSpawnDelay() {
-        return this.spawnDelay;
-    }
-
-    @Override
-    public void bridge$setSpawnDelay(final int spawnDelay) {
-        this.spawnDelay = spawnDelay;
-    }
-
-    @Override
-    public int bridge$getMinSpawnDelay() {
-        return this.minSpawnDelay;
-    }
-
-    @Override
-    public int bridge$getMaxSpawnDelay() {
-        return this.maxSpawnDelay;
-    }
-
-    @Override
-    public int bridge$getSpawnCount() {
-        return this.spawnCount;
-    }
-
-    @Override
-    public int bridge$getMaxNearbyEntities() {
-        return this.maxNearbyEntities;
-    }
-
-    @Override
-    public void bridge$setMaxNearbyEntities(final int maxNearbyEntities) {
-        this.maxNearbyEntities = maxNearbyEntities;
-    }
-
-    @Override
-    public int bridge$getActivatingRangeFromPlayer() {
-        return this.activatingRangeFromPlayer;
-    }
-
-    @Override
-    public int bridge$getSpawnRange() {
-        return this.spawnRange;
-    }
 }

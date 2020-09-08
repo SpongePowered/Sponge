@@ -96,7 +96,6 @@ public class BlockStateDataProviders extends DataProviderRegistratorBuilder {
         SlabData.register(this.registrator);
         SnowData.register(this.registrator);
         SnowyDirtData.register(this.registrator);
-        SpongeData.register(this.registrator);
         StairsData.register(this.registrator);
         StandingSignData.register(this.registrator);
         StemData.register(this.registrator);

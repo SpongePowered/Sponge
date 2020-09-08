@@ -27,7 +27,7 @@ package org.spongepowered.common.event.lifecycle;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.common.registry.SpongeFactoryRegistry;

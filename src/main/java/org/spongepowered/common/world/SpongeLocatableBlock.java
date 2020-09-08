@@ -43,12 +43,11 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public final class SpongeLocatableBlock implements LocatableBlock {
 
@@ -62,7 +61,7 @@ public final class SpongeLocatableBlock implements LocatableBlock {
         this.blockState = checkNotNull(builder.blockState.get(), "blockstate");
         this.position = checkNotNull(builder.position.get(), "position");
         this.world = checkNotNull(builder.world.get(), "world");
-        this.worldRef = checkNotNull(builder.worldReference.get(), "reference");
+        this.worldRef = new WeakReference<>(checkNotNull(builder.worldReference.get(), "reference"));
     }
 
     @Override

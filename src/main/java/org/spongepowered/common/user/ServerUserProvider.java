@@ -251,10 +251,14 @@ public final class ServerUserProvider {
             for (final WatchEvent<?> event : this.watchKey.pollEvents()) {
                 @SuppressWarnings("unchecked") final WatchEvent<Path> ev = (WatchEvent<Path>) event;
                 final Path file = ev.context();
-                final String filename = file.getFileName().toString();
 
-                // We don't determine the UUIDs yet, we'll only do that if we need to.
-                this.watcherUpdateMap.computeIfAbsent(filename, f -> new MutableWatchEvent()).set(ev.kind());
+                // It is possible that the context is null, in which case, ignore it.
+                if (file != null) {
+                    final String filename = file.getFileName().toString();
+
+                    // We don't determine the UUIDs yet, we'll only do that if we need to.
+                    this.watcherUpdateMap.computeIfAbsent(filename, f -> new MutableWatchEvent()).set(ev.kind());
+                }
             }
 
             // Now we know what the final result is, we can act upon it.

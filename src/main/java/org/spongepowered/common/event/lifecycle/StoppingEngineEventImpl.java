@@ -27,7 +27,7 @@ package org.spongepowered.common.event.lifecycle;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 
 public final class StoppingEngineEventImpl<E extends Engine> extends AbstractEngineLifecycleEvent<E> implements StoppingEngineEvent<E> {

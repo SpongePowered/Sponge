@@ -24,11 +24,18 @@
  */
 package org.spongepowered.vanilla.launch.plugin;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
+import org.spongepowered.plugin.InvalidPluginException;
+import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.PluginLanguageService;
+import org.spongepowered.plugin.PluginLoader;
+import org.spongepowered.plugin.PluginResource;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.launch.VanillaLauncher;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +43,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Singleton
@@ -46,19 +54,24 @@ public final class VanillaPluginManager implements SpongePluginManager {
     private final List<PluginContainer> sortedPlugins;
 
     public VanillaPluginManager() {
+        final ClassLoader classLoader = this.getClass().getClassLoader();
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();
     }
 
     @Override
-    public Optional<PluginContainer> fromInstance(Object instance) {
-        return Optional.ofNullable(this.instancesToPlugins.get(Preconditions.checkNotNull(instance)));
+    public Optional<PluginContainer> fromInstance(final Object instance) {
+        Objects.requireNonNull(instance);
+
+        return Optional.ofNullable(this.instancesToPlugins.get(instance));
     }
 
     @Override
-    public Optional<PluginContainer> getPlugin(String id) {
-        return Optional.ofNullable(this.plugins.get(Preconditions.checkNotNull(id)));
+    public Optional<PluginContainer> getPlugin(final String id) {
+        Objects.requireNonNull(id);
+
+        return Optional.ofNullable(this.plugins.get(id));
     }
 
     @Override
@@ -67,14 +80,56 @@ public final class VanillaPluginManager implements SpongePluginManager {
     }
 
     @Override
-    public boolean isLoaded(String id) {
-        return this.plugins.containsKey(Preconditions.checkNotNull(id));
+    public boolean isLoaded(final String id) {
+        Objects.requireNonNull(id);
+
+        return this.plugins.containsKey(id);
     }
 
     @Override
-    public void addPlugin(PluginContainer plugin) {
-        this.plugins.put(plugin.getMetadata().getId(), Preconditions.checkNotNull(plugin));
+    public void addPlugin(final PluginContainer plugin) {
+        Objects.requireNonNull(plugin);
+
+        this.plugins.put(plugin.getMetadata().getId(), plugin);
         this.instancesToPlugins.put(plugin.getInstance(), plugin);
         this.sortedPlugins.add(plugin);
+    }
+
+    @Override
+    public void addDummyPlugin(DummyPluginContainer plugin) {
+        Objects.requireNonNull(plugin);
+
+        this.plugins.put(plugin.getMetadata().getId(), plugin);
+        this.sortedPlugins.add(plugin);
+    }
+
+    public void loadPlugins(final VanillaPluginEngine engine) {
+        for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> languageCandidates : engine.getCandidates().entrySet()) {
+            final PluginLanguageService<PluginResource> languageService = languageCandidates.getKey();
+            final Collection<PluginCandidate<PluginResource>> candidates = languageCandidates.getValue();
+            final String loaderClass = languageService.getPluginLoader();
+            final PluginLoader<PluginResource, PluginContainer> pluginLoader;
+            try {
+                pluginLoader =  (PluginLoader<PluginResource, PluginContainer>) Class.forName(loaderClass).newInstance();
+            } catch (final InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            for (final PluginCandidate<PluginResource> candidate : candidates) {
+                final PluginContainer pluginContainer = pluginLoader.createPluginContainer(candidate, engine.getPluginEnvironment()).orElse(null);
+                if (pluginContainer == null) {
+                    engine.getPluginEnvironment().getLogger().debug("Language service '{}' returned a null plugin container for '{}'.",
+                            languageService.getName(), candidate.getMetadata().getId());
+                    continue;
+                }
+
+                try {
+                    pluginLoader.loadPlugin(engine.getPluginEnvironment(), pluginContainer, VanillaLauncher.getInstance().getClass().getClassLoader());
+                    engine.getPluginEnvironment().getLogger().info("Loaded plugin '{}'", pluginContainer.getMetadata().getId());
+                    this.addPlugin(pluginContainer);
+                } catch (final InvalidPluginException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

@@ -25,6 +25,8 @@
 package org.spongepowered.common.bridge.world;
 
 import net.minecraft.world.World;
+import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public interface WorldBridge {
 
@@ -45,5 +47,5 @@ public interface WorldBridge {
 
     void bridge$clearFakeCheck();
 
-    boolean bridge$isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
+    void bridge$adjustDimensionLogic(SpongeDimensionType dimensionType);
 }

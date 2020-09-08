@@ -29,15 +29,23 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 
 @Mixin(net.minecraft.entity.EntityType.class)
+@Implements(@Interface(iface = EntityType.class, prefix = "entitytype$"))
 public abstract class EntityTypeMixin_API<T extends Entity> implements EntityType<T> {
 
     @Shadow public abstract ITextComponent shadow$getName();
+    @Shadow public abstract boolean shadow$func_225437_d();
+    @Shadow public abstract boolean shadow$isSerializable();
+    @Shadow public abstract boolean shadow$isImmuneToFire();
+    @Shadow public abstract boolean shadow$isSummonable();
 
     @Override
     public ResourceKey getKey() {
@@ -47,5 +55,25 @@ public abstract class EntityTypeMixin_API<T extends Entity> implements EntityTyp
     @Override
     public Component asComponent() {
         return SpongeAdventure.asAdventure(this.shadow$getName());
+    }
+
+    @Override
+    public boolean isTransient() {
+        return !this.shadow$isSerializable();
+    }
+
+    @Override
+    public boolean isFlammable() {
+        return !this.shadow$isImmuneToFire();
+    }
+
+    @Override
+    public boolean canSpawnAwayFromPlayer() {
+        return this.shadow$func_225437_d();
+    }
+
+    @Intrinsic
+    public boolean entitytype$isSummonable() {
+        return this.shadow$isSummonable();
     }
 }

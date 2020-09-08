@@ -26,15 +26,18 @@ package org.spongepowered.common.world;
 
 
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContextKey;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.common.config.inheritable.LoggingCategory;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContextKey;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.common.applaunch.config.inheritable.LoggingCategory;
 
+@DefaultQualifier(NonNull.class)
 public enum BlockChange {
 
     BREAK() {

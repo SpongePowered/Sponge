@@ -40,6 +40,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import jdk.nashorn.internal.runtime.RecompilableScriptFunctionData;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,11 +49,13 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -70,18 +74,19 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
 
         return (context, builder) -> {
             final String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
-            completer.complete((org.spongepowered.api.command.parameter.CommandContext) context)
-                    .forEach(suggestion -> {
-                        if (suggestion.toLowerCase(Locale.ROOT).startsWith(remaining)) {
-                            builder.suggest(suggestion);
-                        }
-                    });
+            final List<String> suggestions = completer.complete((org.spongepowered.api.command.parameter.CommandContext) context);
+            for (final String suggestion : suggestions) {
+                if (suggestion.toLowerCase(Locale.ROOT).contains(remaining)) {
+                    builder.suggest(suggestion);
+                }
+            }
             return builder.buildFuture();
         };
     }
 
     private final Parameter.Key<? super T> key;
     private final ArgumentParser<T> parser;
+    private final boolean isComplexSuggestions;
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
@@ -106,7 +111,31 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 forks,
                 SpongeArgumentCommandNode.createSuggestionProvider(valueCompleter));
         this.parser = parser;
+        this.isComplexSuggestions = this.parser instanceof ComplexSuggestionNodeProvider;
         this.key = key;
+    }
+
+    public final boolean isComplex() {
+        return this.isComplexSuggestions;
+    }
+
+    public final CommandNode<ISuggestionProvider> getComplexSuggestions(
+            final CommandNode<ISuggestionProvider> rootSuggestionNode,
+            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode,
+            final Map<CommandNode<CommandSource>, List<CommandNode<ISuggestionProvider>>> commandNodeListMap,
+            final boolean allowCustomSuggestionsOnTheFirstElement) {
+        if (!this.isComplexSuggestions) {
+            throw new IllegalStateException("The parser is not a ComplexSuggestionNodeParser");
+        }
+
+        final ComplexSuggestionNodeProvider provider = (ComplexSuggestionNodeProvider) this.parser;
+        return provider.createSuggestions(
+                rootSuggestionNode,
+                this.key.key(),
+                this.getCommand() != null,
+                nodeList -> commandNodeListMap.put(this, nodeList),
+                firstNode -> commandNodeToSuggestionNode.put(this, firstNode),
+                allowCustomSuggestionsOnTheFirstElement);
     }
 
     @Override
@@ -182,7 +211,6 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             builder.withArgumentInternal(this.getName(), parsed, false);
             builder.withNode(this, parsed.getRange());
         }
-
     }
 
     @Override

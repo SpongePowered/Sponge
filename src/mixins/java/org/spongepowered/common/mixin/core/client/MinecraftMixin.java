@@ -35,8 +35,6 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.listener.ChainedChunkStatusListener;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.chunk.listener.TrackingChunkStatusListener;
-import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,13 +42,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
+import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import java.net.Proxy;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -59,55 +58,93 @@ import javax.annotation.Nullable;
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
-    @Shadow @Final private Thread thread;
+    @Shadow private Thread thread;
     @Shadow @Nullable private IntegratedServer integratedServer;
-    @Shadow @Final private AtomicReference<TrackingChunkStatusListener> field_213277_ad;
-    @Shadow @Final private Queue<Runnable> field_213275_aU;
-
+    @Shadow @Final private AtomicReference<TrackingChunkStatusListener> refChunkStatusListener;
+    @Shadow @Final private Queue<Runnable> queueChunkTracking;
+    
     private IntegratedServer impl$temporaryIntegratedServer;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$setClientOnGame(GameConfiguration gameConfig, CallbackInfo ci) {
+    private void impl$setClientOnGame(final GameConfiguration gameConfig, final CallbackInfo ci) {
         SpongeCommon.getGame().setClient(this);
     }
 
     @Inject(method = "run", at = @At("HEAD"))
-    private void impl$setThreadOnClientPhaseTracker(CallbackInfo ci) {
+    private void impl$setThreadOnClientPhaseTracker(final CallbackInfo ci) {
         try {
             PhaseTracker.CLIENT.setThread(this.thread);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw new RuntimeException("Could not initialize the client PhaseTracker!");
         }
     }
 
-    @Inject(method = "launchIntegratedServer", at = @At(value = "INVOKE", target =
-        "Lnet/minecraft/server/management/PlayerProfileCache;<init>(Lcom/mojang/authlib/GameProfileRepository;Ljava/io/File;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void impl$createServerBeforeCache(String folderName, String worldName, WorldSettings worldSettingsIn, CallbackInfo ci,
-        SaveHandler savehandler, WorldInfo worldinfo, YggdrasilAuthenticationService yggdrasilauthenticationservice, MinecraftSessionService minecraftsessionservice, GameProfileRepository gameprofilerepository) {
+    @Inject(method = "runGameLoop", at = @At("TAIL"))
+    private void impl$tickClientScheduler(boolean renderWorldIn, CallbackInfo ci) {
+        this.getScheduler().tick();
+    }
+
+    // Note: worldSettingsIn is never null here, it is null checked and assigned before this point in the method.
+    @Redirect(method = "launchIntegratedServer",
+        at = @At(value = "NEW",
+            target = "com/mojang/authlib/yggdrasil/YggdrasilAuthenticationService",
+            remap = false
+        )
+    )
+    private YggdrasilAuthenticationService impl$createServerBeforeCache(final Proxy proxy, final String clientToken, final String folderName,
+            final String worldName, final WorldSettings worldSettingsIn) {
+
+        final YggdrasilAuthenticationService service = new YggdrasilAuthenticationService(proxy, clientToken);
         this.integratedServer = new IntegratedServer((Minecraft) (Object) this, folderName, worldName, worldSettingsIn,
-            yggdrasilauthenticationservice, minecraftsessionservice, gameprofilerepository, null, (p_213246_1_) -> {
-            TrackingChunkStatusListener trackingchunkstatuslistener = new TrackingChunkStatusListener(p_213246_1_ + 0);
-            trackingchunkstatuslistener.func_219521_a();
-            this.field_213277_ad.set(trackingchunkstatuslistener);
-            return new ChainedChunkStatusListener(trackingchunkstatuslistener, this.field_213275_aU::add);
+                service, service.createMinecraftSessionService(), service.createProfileRepository(), null, (p_213246_1_) -> {
+            final TrackingChunkStatusListener trackingchunkstatuslistener = new TrackingChunkStatusListener(p_213246_1_ + 0);
+            trackingchunkstatuslistener.startTracking();
+            this.refChunkStatusListener.set(trackingchunkstatuslistener);
+            return new ChainedChunkStatusListener(trackingchunkstatuslistener, this.queueChunkTracking::add);
         });
+        return service;
+    }
+
+    @Redirect(method = "launchIntegratedServer",
+        at = @At(value = "INVOKE",
+            target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;",
+            remap = false
+        )
+    )
+    private MinecraftSessionService impl$useServerMinecraftSessionService(final YggdrasilAuthenticationService yggdrasilAuthenticationService) {
+        return ((MinecraftServerAccessor) this.integratedServer).accessor$getSessionService();
+    }
+
+    @Redirect(method = "launchIntegratedServer",
+        at = @At(value = "INVOKE",
+            target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createProfileRepository()Lcom/mojang/authlib/GameProfileRepository;",
+            remap = false
+        )
+    )
+    private GameProfileRepository impl$useServerGameProfileRepository(final YggdrasilAuthenticationService yggdrasilAuthenticationService) {
+        return ((MinecraftServerAccessor) this.integratedServer).accessor$getProfileRepo();
     }
 
     @Redirect(method = "launchIntegratedServer", at = @At(value = "NEW", target = "net/minecraft/server/integrated/IntegratedServer"))
-    private IntegratedServer impl$setCacheOnServer(Minecraft mcIn, String worldName, String p_i50895_3_,
-        WorldSettings worldSettingsIn, YggdrasilAuthenticationService p_i50895_5_, MinecraftSessionService p_i50895_6_,
-        GameProfileRepository p_i50895_7_, PlayerProfileCache p_i50895_8_, IChunkStatusListenerFactory p_i50895_9_) {
+    private IntegratedServer impl$setCacheOnServer(final Minecraft mcIn, final String worldName, final String p_i50895_3_,
+            final WorldSettings worldSettingsIn, final YggdrasilAuthenticationService p_i50895_5_, final MinecraftSessionService p_i50895_6_,
+            final GameProfileRepository p_i50895_7_, final PlayerProfileCache p_i50895_8_, final IChunkStatusListenerFactory p_i50895_9_) {
         ((MinecraftServerAccessor) this.integratedServer).accessor$setProfileCache(p_i50895_8_);
         return this.integratedServer;
     }
 
     @Override
     public IntegratedServer bridge$getTemporaryIntegratedServer() {
-        return impl$temporaryIntegratedServer;
+        return this.impl$temporaryIntegratedServer;
     }
 
     @Override
-    public void bridge$setTemporaryIntegratedServer(IntegratedServer server) {
+    public void bridge$setTemporaryIntegratedServer(final IntegratedServer server) {
         this.impl$temporaryIntegratedServer = server;
+    }
+
+    @Override
+    public ClientType bridge$getClientType() {
+        return ClientType.SPONGE_VANILLA;
     }
 }

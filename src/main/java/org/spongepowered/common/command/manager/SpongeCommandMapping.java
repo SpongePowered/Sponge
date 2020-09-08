@@ -26,8 +26,10 @@ package org.spongepowered.common.command.manager;
 
 import com.google.common.collect.ImmutableSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Set;

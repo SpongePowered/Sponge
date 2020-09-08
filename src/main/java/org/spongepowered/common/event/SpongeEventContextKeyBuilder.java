@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.api.event.EventContextKey;
 
 import javax.annotation.Nullable;
 

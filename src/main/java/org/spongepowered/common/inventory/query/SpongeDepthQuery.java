@@ -25,17 +25,12 @@
 package org.spongepowered.common.inventory.query;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
-import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
-import org.spongepowered.common.inventory.lens.impl.QueryLens;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,32 +42,14 @@ public abstract class SpongeDepthQuery extends SpongeQuery {
     public abstract boolean matches(Lens lens, Lens parent, Inventory inventory);
 
     public Inventory execute(Inventory inventory, InventoryAdapter adapter) {
-        Fabric fabric = adapter.inventoryAdapter$getFabric();
-        Lens lens = adapter.inventoryAdapter$getRootLens();
+        final Fabric fabric = adapter.inventoryAdapter$getFabric();
+        final Lens lens = adapter.inventoryAdapter$getRootLens();
 
         if (this.matches(lens, null, inventory)) {
             return lens.getAdapter(fabric, inventory);
         }
 
-        return this.toResult(inventory, fabric, this.reduce(lens, this.depthFirstSearch(inventory, lens)));
-    }
-
-    private Inventory toResult(Inventory inventory, Fabric fabric, Map<Lens, Integer> matches) {
-        if (matches.isEmpty()) {
-            return new EmptyInventoryImpl(inventory);
-        }
-        if (matches.size() == 1) {
-            final Map.Entry<Lens, Integer> entry = matches.entrySet().iterator().next();
-            if (entry.getValue() == 0) {
-                return entry.getKey().getAdapter(fabric, inventory);
-            }
-            final LensRegistrar.BasicSlotLensProvider slotProvider = new LensRegistrar.BasicSlotLensProvider(entry.getKey().slotCount());
-            final DelegatingLens delegate = new DelegatingLens(entry.getValue(), entry.getKey(), slotProvider);
-            return delegate.getAdapter(fabric, inventory);
-        }
-
-        QueryLens lens = new QueryLens(matches);
-        return lens.getAdapter(fabric, inventory);
+        return this.toResult(inventory, fabric, this.reduce(fabric, lens, this.depthFirstSearch(inventory, lens)));
     }
 
     private Map<Lens, Integer> depthFirstSearch(Inventory inventory, Lens lens) {
@@ -90,30 +67,9 @@ public abstract class SpongeDepthQuery extends SpongeQuery {
             }
         }
 
-
-        if (lens.base() != 0 && !matches.isEmpty()) {
+        if (lens.base() != 0 && !matches.isEmpty() && lens instanceof DelegatingLens) {
             matches.entrySet().forEach(entry -> entry.setValue(entry.getValue() + lens.base()));
         }
-
-        return matches;
-    }
-
-    private Map<Lens, Integer> reduce(Lens lens, Map<Lens, Integer> matches) {
-        if (matches.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        // Check if all matches are the direct children of this lens
-        List<Lens> lensSlots = lens.getChildren();
-        if (lensSlots.size() == matches.size() && matches.keySet().containsAll(lensSlots) ) {
-            // return parent lens instead of constructing a new for the query result
-            matches.clear();
-            matches.put(lens, 0);
-            return matches;
-        }
-
-        // TODO maybe? Reduce when all matches are slots of this lens
-        // TODO maybe? Reduce when subset of matches are child-lens of this lens
 
         return matches;
     }

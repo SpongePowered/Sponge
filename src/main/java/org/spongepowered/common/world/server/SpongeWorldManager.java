@@ -48,31 +48,21 @@ public interface SpongeWorldManager extends WorldManager {
 
     Path getSavesDirectory();
 
-    boolean isDimensionTypeRegistered(DimensionType dimensionType);
-
     boolean registerPendingWorld(ResourceKey key, WorldArchetype archetype);
-
-    default UUID getDimensionTypeUniqueId(final DimensionType dimensionType) {
-        final WorldInfo info = this.getInfo(dimensionType);
-        if (info == null) {
-            return null;
-        }
-
-        return ((WorldProperties) info).getUniqueId();
-    }
 
     @Nullable
     ServerWorld getWorld(final DimensionType dimensionType);
 
     @Nullable
+    ServerWorld getWorld0(final ResourceKey key);
+
+    @Nullable
     ServerWorld getDefaultWorld();
 
-    WorldInfo getInfo(DimensionType dimensionType);
+    void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean forceDifficulty);
 
-    void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions, boolean isSinglePlayer, @Nullable
-            WorldSettings defaultSettings, Difficulty defaultDifficulty);
-
-    void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean isCustom);
+    void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions, boolean isSinglePlayer,
+            @Nullable WorldSettings defaultSettings, Difficulty defaultDifficulty);
 
     default String getDirectoryName(final ResourceKey key) {
         if (SpongeWorldManager.VANILLA_OVERWORLD.equals(key)) {

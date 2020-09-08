@@ -26,11 +26,11 @@ package org.spongepowered.common.bridge.network.play.server;
 
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
-import org.spongepowered.common.command.registrar.tree.RootCommandTreeBuilder;
+import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNode;
 
 public interface SCommandListPacketBridge {
 
-    void bridge$addRootCommandTreeBuilder(RootCommandTreeBuilder rootCommandTreeBuilder);
+    void bridge$addRootCommandTreeBuilder(RootCommandTreeNode rootCommandTreeBuilder);
 
     RootCommandNode<CommandSource> bridge$getRootCommandNode();
 

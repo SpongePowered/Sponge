@@ -92,15 +92,8 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
     @Override
     public List<String> complete(@NonNull final CommandContext context) {
         if (this.completions == null) {
-            final ImmutableList.Builder<String> entries = ImmutableList.builder();
-            final Collection<T> catalogTypes = SpongeCommon.getRegistry().getCatalogRegistry().getAllOf(this.catalogType);
-            for (final T catalogType : catalogTypes) {
-                this.completions.add(catalogType.getKey().getFormatted());
-                if (this.prefixes.contains(catalogType.getKey().getNamespace())) {
-                    this.completions.add(catalogType.getKey().getValue());
-                }
-            }
-            this.completions = entries.build();
+            this.completions = SpongeCommon.getRegistry().getCatalogRegistry().getAllOf(this.catalogType).stream().map(x -> x.getKey().toString())
+                    .collect(Collectors.toList());
         }
         return this.completions;
     }

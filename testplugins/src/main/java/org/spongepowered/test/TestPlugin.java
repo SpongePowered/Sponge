@@ -24,222 +24,88 @@
  */
 package org.spongepowered.test;
 
-import com.google.common.collect.Sets;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Client;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.parameter.managed.Flag;
-import org.spongepowered.api.command.selector.Selector;
-import org.spongepowered.api.command.selector.SelectorTypes;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
-import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
-import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
-import org.spongepowered.api.event.lifecycle.RegisterBuilderEvent;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogRegistryEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
-import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
-import org.spongepowered.api.event.lifecycle.StartingEngineEvent;
-import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Plugin("test")
 public final class TestPlugin {
 
-    private final Logger logger;
     private final PluginContainer plugin;
+    private final Set<String> enabledPlugins = new HashSet<>();
 
     @Inject
-    public TestPlugin(final Logger logger, final PluginContainer plugin) {
-        this.logger = logger;
+    public TestPlugin(final PluginContainer plugin) {
         this.plugin = plugin;
     }
 
     @Listener
-    public void onConstruct(final ConstructPluginEvent event) {
-        this.logger.info(event);
-    }
-
-    @Listener
-    public void onRegisterFactory(final RegisterFactoryEvent event) {
-        this.logger.info(event);
-    }
-
-    @Listener
-    public void onRegisterBuilder(final RegisterBuilderEvent event) {
-        this.logger.info(event);
-    }
-
-    @Listener
-    public void onProvideService(final ProvideServiceEvent<WhitelistService> event) {
-        this.logger.info(event);
-        event.suggest(TestWhitelistService::new);
-    }
-
-    @Listener
-    public void onRegisterCatalogRegistry(final RegisterCatalogRegistryEvent event) {
-        this.logger.info(event);
-        event.register(TestType.class, ResourceKey.of(this.plugin, "test_type"), () -> Sets.newHashSet(new TestType(ResourceKey.of(this.plugin, "a"))));
-    }
-
-    @Listener
-    public void onRegisterTestType(final RegisterCatalogEvent<TestType> event) {
-        this.logger.info(event);
-        event.register(new TestType(ResourceKey.of(this.plugin, "b")));
-    }
-
-    @Listener
-    public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<ServerPlayer> playerKey = Parameter.playerOrSource().setKey("player").build();
-        event.register(
-                this.plugin,
-                Command.builder()
-                        .parameter(playerKey)
-                        .setExecutor(context -> {
-                            final ServerPlayer player = context.requireOne(playerKey);
-                            this.logger.info(player.getName());
-                            return CommandResult.success();
-                        })
-                        .build(),
-                "getplayer");
-
-        final Parameter.Value<String> playerParameterKey = Parameter.string().setKey("name").optional().build();
-        event.register(
-                this.plugin,
-                Command.builder()
-                        .parameter(playerParameterKey)
-                        .setExecutor(context -> {
-                            final Optional<String> result = context.getOne(playerParameterKey);
-                            final Collection<GameProfile> collection;
-                            if (result.isPresent()) {
-                                // check to see if the string matches
-                                collection = Sponge.getGame().getServer().getUserManager()
-                                                .streamOfMatches(result.get().toLowerCase(Locale.ROOT))
-                                                .collect(Collectors.toList());
-                            } else {
-                                collection = Sponge.getGame().getServer().getUserManager()
-                                        .streamAll()
-                                        .collect(Collectors.toList());
-                            }
-                            collection.forEach(x -> this.logger.info(
-                                    "GameProfile - UUID: {}, Name - {}", x.getUniqueId().toString(), x.getName().orElse("---")));
-                            return CommandResult.success();
-                        })
-                        .build(),
-                "checkuser"
-        );
-
-        final Parameter.Key<String> testKey = Parameter.key("testKey", TypeToken.of(String.class));
-        final Parameter.Key<Component> requiredKey = Parameter.key("requiredKey", TypeToken.of(Component.class));
-        event.register(
-                this.plugin,
-                Command.builder()
-                        .flag(Flag.builder().alias("f").alias("flag").build())
-                        .flag(Flag.builder().alias("t").alias("text").setParameter(Parameter.string().setKey(testKey).build()).build())
-                        .parameter(Parameter.formattingCodeText().setKey(requiredKey).build())
-                        .setExecutor(context -> {
-                            context.sendMessage(TextComponent.of(context.getFlagInvocationCount("flag")));
-                            context.sendMessage(TextComponent.of(context.getFlagInvocationCount("t")));
-                            context.getAll(testKey).forEach(x -> context.sendMessage(TextComponent.of(x)));
-                            context.sendMessage(context.requireOne(requiredKey));
-                            return CommandResult.success();
-                        })
-                        .build(),
-                "flagtest"
-        );
-
-        event.register(
-                this.plugin,
-                Command.builder()
-                        .setExecutor(x -> {
-                            x.sendMessage(TextComponent.builder("Click Me")
-                                    .clickEvent(SpongeComponents.executeCallback(ctx -> ctx.sendMessage(TextComponent.of("Hello"))))
-                                    .build()
-                            );
-                            return CommandResult.success();
-                        }).build(),
-                "testCallback"
-        );
-
-        event.register(
-                this.plugin,
-                Command.builder()
-                    .setExecutor(x -> {
-                        final Collection<Entity> collection = Selector.builder()
-                                .applySelectorType(SelectorTypes.ALL_ENTITIES.get())
-                                .entityType(EntityTypes.PLAYER.get(), false)
-                                .gameMode(GameModes.CREATIVE.get())
-                                .setLimit(1)
-                                .includeSelf()
-                                .build()
-                                .select(x.getCommandCause());
-                        for (final Entity entity : collection) {
-                            x.sendMessage(TextComponent.of(entity.toString()));
+    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+        final Parameter.Value<PluginContainer> pluginKey = Parameter.plugin().setKey("plugin").setSuggestions(
+                context -> Sponge.getPluginManager().getPlugins().stream()
+                        .filter(pc -> pc.getInstance() instanceof LoadableModule)
+                        .map(x -> x.getMetadata().getId()).collect(Collectors.toList())).build();
+        final Command.Parameterized enableCommand = Command.builder().parameter(pluginKey)
+                .setExecutor(context -> {
+                    final PluginContainer pc = context.requireOne(pluginKey);
+                    if (pc.getInstance() instanceof LoadableModule) {
+                        if (this.enabledPlugins.add(pc.getMetadata().getId())) {
+                            ((LoadableModule) pc.getInstance()).enable(context);
+                            context.sendMessage(TextComponent.of("Enabled " + pc.getMetadata().getId()));
+                        } else {
+                            context.sendMessage(TextComponent.of("Already enabled " + pc.getMetadata().getId()));
                         }
-                        return CommandResult.success();
-                    })
-                .build(),
-                "testselector"
-        );
+                    }
+                    return CommandResult.success();
+                }).build();
+        final Command.Parameterized disableCommand = Command.builder().parameter(pluginKey)
+                .setExecutor(context -> {
+                    final PluginContainer pc = context.requireOne(pluginKey);
+                    if (pc.getInstance() instanceof LoadableModule) {
+                        if (this.enabledPlugins.remove(pc.getMetadata().getId())) {
+                            ((LoadableModule) pc.getInstance()).disable(context);
+                            context.sendMessage(TextComponent.of("Disabled " + pc.getMetadata().getId()));
+                        } else {
+                            context.sendMessage(TextComponent.of("Already disabled " + pc.getMetadata().getId()));
+                        }
+                    }
+                    return CommandResult.success();
+                }).build();
+        final Command.Parameterized toggleCommand = Command.builder().parameter(pluginKey)
+                .setExecutor(context -> {
+                    final PluginContainer pc = context.requireOne(pluginKey);
+                    if (pc.getInstance() instanceof LoadableModule) {
+                        if (this.enabledPlugins.contains(pc.getMetadata().getId())) {
+                            this.enabledPlugins.remove(pc.getMetadata().getId());
+                            ((LoadableModule) pc.getInstance()).disable(context);
+                            context.sendMessage(TextComponent.of("Disabled " + pc.getMetadata().getId()));
+                        } else {
+                            this.enabledPlugins.add(pc.getMetadata().getId());
+                            ((LoadableModule) pc.getInstance()).enable(context);
+                            context.sendMessage(TextComponent.of("Enabled " + pc.getMetadata().getId()));
+                        }
+                    }
+                    return CommandResult.success();
+                }).build();
 
-    }
-
-    @Listener
-    public void onStartingServer(final StartingEngineEvent<Server> event) {
-        this.logger.info("Starting engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onStartingClient(final StartingEngineEvent<Client> event) {
-        this.logger.info("Starting engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onStartedServer(final StartedEngineEvent<Server> event) {
-        this.logger.info("Started engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onStartedClient(final StartedEngineEvent<Client> event) {
-        this.logger.info("Started engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onLoadedGame(final LoadedGameEvent event) {
-        this.logger.info(event);
-    }
-
-    @Listener
-    public void onStoppingServer(final StoppingEngineEvent<Server> event) {
-        this.logger.info("Stopping engine '{}'", event.getEngine());
-    }
-
-    @Listener
-    public void onStoppingClient(final StoppingEngineEvent<Client> event) {
-        this.logger.info("Stopping engine '{}'", event.getEngine());
+        final Command.Parameterized testPluginCommand = Command.builder()
+                .child(enableCommand, "enable")
+                .child(disableCommand, "disable")
+                .child(toggleCommand, "toggle")
+                .parameter(pluginKey)
+                .setExecutor(toggleCommand)
+                .build();
+        event.register(this.plugin, testPluginCommand, "testplugins");
     }
 }

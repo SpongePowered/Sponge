@@ -33,8 +33,10 @@ import org.spongepowered.common.SpongeServer;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -52,10 +54,10 @@ public abstract class Query<V> implements Callable<V> {
         this.useCache = useCache;
     }
 
-    protected List<GameProfile> fromUniqueIds(Collection<UUID> uniqueIds) throws ProfileNotFoundException {
+    protected Map<UUID, Optional<GameProfile>> fromUniqueIds(Collection<UUID> uniqueIds) throws ProfileNotFoundException {
         if (this.useCache) {
             List<UUID> pool = Lists.newArrayList(uniqueIds);
-            List<GameProfile> result = Lists.newArrayListWithCapacity(uniqueIds.size());
+            Map<UUID, Optional<GameProfile>> result = new HashMap<>(uniqueIds.size());
 
             // check username cache first
             Iterator<UUID> it = pool.iterator();
@@ -63,19 +65,19 @@ public abstract class Query<V> implements Callable<V> {
                 UUID uniqueId = it.next();
                 @Nullable String username = ((SpongeServer) Sponge.getServer()).getUsernameCache().getLastKnownUsername(uniqueId);
                 if (username != null) {
-                    result.add(GameProfile.of(uniqueId, username));
+                    result.put(uniqueId, Optional.of(GameProfile.of(uniqueId, username)));
                     it.remove();
                 }
             }
 
             if (!pool.isEmpty()) {
-                result.addAll(this.cache.getOrLookupByIds(pool).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+                result.putAll(this.cache.getOrLookupByIds(pool));
             }
 
             return result;
         }
 
-        return this.cache.lookupByIds(uniqueIds).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+        return this.cache.lookupByIds(uniqueIds);
     }
 
     protected GameProfile fillProfile(GameProfile profile, boolean signed) throws ProfileNotFoundException {
@@ -97,11 +99,11 @@ public abstract class Query<V> implements Callable<V> {
         throw new ProfileNotFoundException("Profile: " + profile);
     }
 
-    protected List<GameProfile> fromNames(Collection<String> names) throws ProfileNotFoundException {
+    protected Map<String, Optional<GameProfile>> fromNames(Collection<String> names) throws ProfileNotFoundException {
         if (this.useCache) {
-            return this.cache.getOrLookupByNames(names).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+            return this.cache.getOrLookupByNames(names);
         }
-        return this.cache.lookupByNames(names).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+        return this.cache.lookupByNames(names);
     }
 
 }

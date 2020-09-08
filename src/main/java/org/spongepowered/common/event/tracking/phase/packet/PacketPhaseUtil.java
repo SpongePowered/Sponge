@@ -197,7 +197,7 @@ public final class PacketPhaseUtil {
                     final CPlayerPacket movingPacket = ((CPlayerPacket) packetIn);
                     if (movingPacket instanceof CPlayerPacket.RotationPacket) {
                         ignoreMovementCapture = true;
-                    } else if (packetPlayer.posX == ((CPlayerPacketAccessor) movingPacket).accessor$getX() && packetPlayer.posY == ((CPlayerPacketAccessor) movingPacket).accessor$getY() && packetPlayer.posZ == ((CPlayerPacketAccessor) movingPacket).accessor$getZ()) {
+                    } else if (packetPlayer.getPosX() == ((CPlayerPacketAccessor) movingPacket).accessor$getX() && packetPlayer.getPosY() == ((CPlayerPacketAccessor) movingPacket).accessor$getY() && packetPlayer.getPosZ() == ((CPlayerPacketAccessor) movingPacket).accessor$getZ()) {
                         ignoreMovementCapture = true;
                     } else {
                         ignoreMovementCapture = false;

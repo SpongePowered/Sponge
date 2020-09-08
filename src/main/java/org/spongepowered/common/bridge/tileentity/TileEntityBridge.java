@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.bridge.tileentity;
 
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 
 public interface TileEntityBridge {
 
@@ -33,13 +33,13 @@ public interface TileEntityBridge {
         return SpawnTypes.BLOCK_SPAWNING.get();
     }
 
-    boolean bridge$shouldTick();
-
-    boolean bridge$isCaptured();
-
-    void bridge$setCaptured(boolean captured);
-
     default String bridge$getPrettyPrinterString() {
         return this.toString();
     }
+
+    /**
+     * A forge compatibility method assigned for {@link net.minecraft.tileentity.TileEntity}
+     * when said tile entity gets added to a {@link net.minecraft.world.World}.
+     */
+    default void bridge$onLoad() { }
 }

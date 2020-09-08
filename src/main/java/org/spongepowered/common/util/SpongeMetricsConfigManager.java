@@ -28,8 +28,8 @@ import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
-import org.spongepowered.common.config.ConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.config.metrics.MetricsConfiguration;
 import org.spongepowered.plugin.PluginContainer;
 

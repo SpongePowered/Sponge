@@ -49,7 +49,7 @@ public abstract class AdapterLogic {
     }
 
     public static InventoryTransactionResult.Poll pollSequential(Fabric fabric, @Nullable Lens lens, @Nullable Integer limit) {
-        if (lens == null || lens.getSlots().size() <= 0) {
+        if (lens == null || lens.getSlots(fabric).size() <= 0) {
             return InventoryTransactionResult.builder().type(Type.NO_SLOT).poll(ItemStackSnapshot.empty()).build();
         }
 
@@ -58,7 +58,7 @@ public abstract class AdapterLogic {
         ItemStack removedType = null; // used when polling from multiple slots
         int totalPolled = 0;
 
-        for (SlotLens slot : lens.getSlots()) {
+        for (SlotLens slot : lens.getSlots(fabric)) {
             net.minecraft.item.ItemStack stack = slot.getStack(fabric);
 
             // Only remove one type of item
@@ -117,11 +117,11 @@ public abstract class AdapterLogic {
     }
 
     private static Optional<ItemStack> findStack(Fabric fabric, @Nullable Lens lens) {
-        if (lens == null || lens.getSlots().size() <= 0) {
+        if (lens == null || lens.getSlots(fabric).size() <= 0) {
             return Optional.empty();
         }
 
-        for (SlotLens slot : lens.getSlots()) {
+        for (SlotLens slot : lens.getSlots(fabric)) {
             net.minecraft.item.ItemStack stack = slot.getStack(fabric);
             if (!stack.isEmpty()) {
                 return ItemStackUtil.cloneDefensiveOptional(stack);
@@ -170,7 +170,7 @@ public abstract class AdapterLogic {
             final net.minecraft.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
             if (lens.setStack(fabric, ord, newStack)) {
                 remaining -= push;
-                final Slot slot = lens.getSlotLens(ord).getAdapter(fabric, null);
+                final Slot slot = lens.getSlotLens(fabric, ord).getAdapter(fabric, null);
                 final SlotTransaction trans = new SlotTransaction(slot, oldSnap, ItemStackUtil.snapshotOf(lens.getStack(fabric, ord)));
                 result.transaction(trans);
             }
@@ -200,7 +200,7 @@ public abstract class AdapterLogic {
             int push = Math.min(remaining, maxStackSize);
             if (old.isEmpty() && lens.setStack(fabric, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                 remaining -= push;
-                Slot slot = ((SlotAdapter) lens.getSlotLens(ord).getAdapter(fabric, null));
+                Slot slot = ((SlotAdapter) lens.getSlotLens(fabric, ord).getAdapter(fabric, null));
                 result.transaction(new SlotTransaction(slot, ItemStackUtil.snapshotOf(old), ItemStackUtil.snapshotOf(lens.getStack(fabric, ord))));
             } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
                 ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
@@ -208,7 +208,7 @@ public abstract class AdapterLogic {
                 old.setCount(old.getCount() + push);
                 lens.setStack(fabric, ord, old);
                 remaining -= push;
-                Slot slot = ((SlotAdapter) lens.getSlotLens(ord).getAdapter(fabric, null));
+                Slot slot = ((SlotAdapter) lens.getSlotLens(fabric, ord).getAdapter(fabric, null));
                 result.transaction(new SlotTransaction(slot, oldSnap, ItemStackUtil.snapshotOf(lens.getStack(fabric, ord))));
             }
 
@@ -226,7 +226,7 @@ public abstract class AdapterLogic {
     }
 
     public static int countFreeCapacity(Fabric fabric, Lens lens) {
-        return lens.getSlots().stream().mapToInt(slot -> slot.getStack(fabric).isEmpty() ? 1 : 0).sum();
+        return lens.getSlots(fabric).stream().mapToInt(slot -> slot.getStack(fabric).isEmpty() ? 1 : 0).sum();
     }
 
     public static int countQuantity(Fabric fabric, Lens lens) {

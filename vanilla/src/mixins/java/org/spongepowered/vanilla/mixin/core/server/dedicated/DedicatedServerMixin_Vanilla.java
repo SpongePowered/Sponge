@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
-import org.spongepowered.common.config.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.vanilla.VanillaServer;
 
 import java.io.File;
@@ -69,6 +69,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer {
 
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishRegistries();
+        lifecycle.establishDataProviders();
 
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();

@@ -36,9 +36,12 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.data.SpongeDataManager;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -47,6 +50,7 @@ import java.util.function.Function;
 public class SpongeDataStoreBuilder implements DataStore.Builder {
 
     private Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> serializers = new IdentityHashMap<>();
+    private List<TypeToken<? extends DataHolder>> dataHolderTypes = new ArrayList<>();
 
     @Override
     @SuppressWarnings("unchecked")
@@ -85,11 +89,18 @@ public class SpongeDataStoreBuilder implements DataStore.Builder {
     @Override
     public DataStore.Builder reset() {
         this.serializers.clear();
+        this.dataHolderTypes.clear();
         return this;
     }
 
     @Override
-    public DataStore build(TypeToken<? extends DataHolder> typeToken) {
-        return new SpongeDataStore(Collections.unmodifiableMap(this.serializers), typeToken);
+    public DataStore.Builder holder(TypeToken<? extends DataHolder>... typeTokens) {
+        this.dataHolderTypes.addAll(Arrays.asList(typeTokens));
+        return this;
+    }
+
+    @Override
+    public DataStore build() {
+        return new SpongeDataStore(Collections.unmodifiableMap(this.serializers), this.dataHolderTypes);
     }
 }

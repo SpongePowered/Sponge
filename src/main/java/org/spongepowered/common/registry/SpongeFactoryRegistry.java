@@ -32,11 +32,13 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.adventure.SpongeComponents;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
-import org.spongepowered.api.command.registrar.tree.CommandTreeBuilder;
 import org.spongepowered.api.command.selector.Selector;
-import org.spongepowered.common.command.selector.SpongeSelectorFactory;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -47,12 +49,19 @@ import org.spongepowered.api.resource.pack.Pack;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.adventure.AudienceFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
 import org.spongepowered.common.command.parameter.SpongeParameterValueFactory;
 import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParameterBuilderFactory;
-import org.spongepowered.common.command.registrar.tree.SpongeRootCommandTreeBuilderFactory;
+import org.spongepowered.common.command.registrar.tree.builder.SpongeCommandTreeBuilderFactory;
+import org.spongepowered.common.command.selector.SpongeSelectorFactory;
+import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory;
+import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
+import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlers;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
@@ -60,8 +69,6 @@ import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resource.SpongeResourceReloadListenerFactory;
 import org.spongepowered.common.resource.pack.SpongePackFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
-import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
 import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTransformFactory;
 import org.spongepowered.common.world.SpongeServerLocationFactory;
@@ -109,7 +116,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(ResourceReloadListener.Factory.class, SpongeResourceReloadListenerFactory.INSTANCE)
             .registerFactory(Pack.Factory.class, SpongePackFactory.INSTANCE)
             .registerFactory(CommandCause.Factory.class, SpongeCommandCauseFactory.INSTANCE)
-            .registerFactory(CommandTreeBuilder.RootNodeFactory.class, SpongeRootCommandTreeBuilderFactory.INSTANCE)
+            .registerFactory(CommandTreeNode.NodeFactory.class, SpongeCommandTreeBuilderFactory.INSTANCE)
             .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
             .registerFactory(Parameter.Value.Factory.class, SpongeParameterValueFactory.INSTANCE)
             .registerFactory(ResourcePack.Factory.class, SpongeResourcePackFactory.INSTANCE)
@@ -121,6 +128,10 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(ChannelExceptionHandler.Factory.class, SpongeChannelExceptionHandlers.INSTANCE)
             .registerFactory(Selector.Factory.class, SpongeSelectorFactory.INSTANCE)
             .registerFactory(Range.Factory.class, SpongeRange.FACTORY_INSTANCE)
+            .registerFactory(Value.Factory.class, SpongeValueFactory.INSTANCE)
+            .registerFactory(DataManipulator.Mutable.Factory.class, MutableDataManipulatorFactory.INSTANCE)
+            .registerFactory(DataManipulator.Immutable.Factory.class, ImmutableDataManipulatorFactory.INSTANCE)
+            .registerFactory(BlockChangeFlag.Factory.class, BlockChangeFlagManager.getInstance().getFactory())
         ;
     }
 

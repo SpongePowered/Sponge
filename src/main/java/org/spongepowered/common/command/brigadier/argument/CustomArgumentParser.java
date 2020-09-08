@@ -47,9 +47,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * For use with other argument types
@@ -76,8 +78,13 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
             final ValueParser<? extends T> parser = this.parsers.iterator().next();
             if (parser instanceof StandardArgumentParser) {
                 this.types = ImmutableList.copyOf(((StandardArgumentParser<?, ?>) parser).getClientCompletionArgumentType());
-            } else {
+            } else if (this.doesNotRead) {
                 this.types = ImmutableList.of(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE);
+            } else {
+                this.types = parser.getClientCompletionType().stream()
+                        .map(x -> ((SpongeClientCompletionType) x).getType())
+                        .filter(Objects::nonNull)
+                        .collect(ImmutableList.toImmutableList());
             }
         } else {
             this.types = ImmutableList.of(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE);
@@ -93,7 +100,7 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
         for (final ValueParser<? extends T> parser : this.parsers) {
             final org.spongepowered.api.command.parameter.CommandContext.Builder.Transaction transaction = contextBuilder.startTransaction();
             try {
-                value = parser.getValue(key, (ArgumentReader.Mutable) reader, contextBuilder);
+                value = parser.getValue(key, reader, contextBuilder);
                 contextBuilder.commit(transaction);
                 return value.orElse(null);
             } catch (final Exception e) {

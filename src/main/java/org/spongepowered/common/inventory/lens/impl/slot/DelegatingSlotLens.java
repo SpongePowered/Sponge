@@ -30,6 +30,10 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
 public abstract class DelegatingSlotLens extends AbstractLens implements SlotLens {
 
     private final SlotLens delegate;
@@ -60,4 +64,14 @@ public abstract class DelegatingSlotLens extends AbstractLens implements SlotLen
         return "[Delegate-" + this.delegate + "]";
     }
 
+    @Override
+    public List<SlotLens> getSlots(Fabric fabric) {
+        return this.delegate.getSlots(fabric);
+    }
+
+    @Nullable
+    @Override
+    public SlotLens getSlotLens(Fabric fabric, int ordinal) {
+        return this.delegate.getSlotLens(fabric, ordinal);
+    }
 }

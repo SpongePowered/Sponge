@@ -32,9 +32,9 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.inheritable.GlobalConfig;
+import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.inheritable.GlobalConfig;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
@@ -45,6 +45,7 @@ import org.spongepowered.plugin.PluginKeys;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Singleton
@@ -101,11 +102,12 @@ public final class SpongeCommon {
     }
 
     public static Path getGameDirectory() {
-        return Launcher.getInstance().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
+        return Launcher.getInstance().getPluginEngine().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
+                .orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
     }
 
     public static Path getPluginConfigDirectory() {
-        return SpongeCommon.getGameDirectory().resolve(SpongeConfigs.getCommon().get().getGeneral().configDir());
+        return Paths.get(SpongeConfigs.getCommon().get().getGeneral().configDir());
     }
 
     public static Path getSpongeConfigDirectory() {

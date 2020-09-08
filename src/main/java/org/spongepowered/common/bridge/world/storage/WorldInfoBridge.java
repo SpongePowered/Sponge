@@ -27,26 +27,30 @@ package org.spongepowered.common.bridge.world.storage;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.dimension.DimensionType;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.teleport.PortalAgentType;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 public interface WorldInfoBridge {
 
     @Nullable
-    DimensionType bridge$getDimensionType();
+    ServerWorld bridge$getWorld();
 
-    void bridge$setDimensionType(DimensionType type);
+    @Nullable
+    Integer bridge$getDimensionId();
+
+    void bridge$setDimensionId(DimensionType type);
 
     SpongeDimensionType bridge$getLogicType();
 
-    void bridge$setLogicType(org.spongepowered.api.world.dimension.DimensionType type);
+    void bridge$setLogicType(SpongeDimensionType type, boolean updatePlayers);
 
     UUID bridge$getUniqueId();
 
@@ -80,8 +84,6 @@ public interface WorldInfoBridge {
 
     void bridge$setSerializationBehavior(SerializationBehavior behavior);
 
-    PortalAgentType bridge$getPortalAgent();
-
     boolean bridge$isModCreated();
 
     void bridge$setModCreated(boolean state);
@@ -94,8 +96,6 @@ public interface WorldInfoBridge {
      * Sets the difficulty without marking it as custom
      */
     void bridge$forceSetDifficulty(Difficulty difficulty);
-
-    void bridge$updatePlayersForDifficulty();
 
     void bridge$writeSpongeLevelData(CompoundNBT compound);
 

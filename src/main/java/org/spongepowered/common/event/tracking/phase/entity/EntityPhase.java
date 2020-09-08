@@ -29,13 +29,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 public final class EntityPhase {
 
     public static final class State {
-        public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
-        public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
-        public static final IPhaseState<DimensionChangeContext> CHANGING_DIMENSION = new ChangingToDimensionState();
-        public static final IPhaseState<InvokingTeleporterContext> INVOKING_TELEPORTER = new InvokingTeleporterState();
-        public static final IPhaseState<BasicEntityContext> LEAVING_DIMENSION = new LeavingDimensionState();
         public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
-        public static final IPhaseState<BasicEntityContext> ENTITY_DROP_ITEMS = new EntityDropPhaseState();
 
         private State() {
         }

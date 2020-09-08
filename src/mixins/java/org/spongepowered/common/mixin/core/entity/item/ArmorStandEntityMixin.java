@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity.item;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.util.DamageSource;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -41,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.LivingEntityMixin;
 

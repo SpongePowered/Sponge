@@ -68,8 +68,9 @@ public final class SpongeDataRegistration implements DataRegistration {
         }
         for (Map.Entry<TypeToken, DataStore> entry : this.dataStoreMap.entrySet()) {
             if (entry.getKey().isSupertypeOf(token)) {
-                this.dataStoreMap.put(token, entry.getValue());
-                return Optional.of(entry.getValue());
+                dataStore = entry.getValue();
+                this.dataStoreMap.put(token, dataStore);
+                return Optional.of(dataStore);
             }
         }
         return Optional.empty();

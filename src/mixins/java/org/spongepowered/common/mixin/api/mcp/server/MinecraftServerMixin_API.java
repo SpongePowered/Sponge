@@ -64,7 +64,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.user.UserManager;
-import org.spongepowered.api.world.TeleportHelper;
+import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -117,7 +117,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void reload();
 
     private Iterable<? extends Audience> audiences;
-    private SpongeScheduler api$scheduler;
+    private ServerScheduler api$scheduler;
     private SpongeTeleportHelper api$teleportHelper;
     private SpongePlayerDataManager api$playerDataHandler;
     private UsernameCache api$usernameCache;
@@ -311,7 +311,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public Scheduler getScheduler() {
+    public ServerScheduler getScheduler() {
         return this.api$scheduler;
     }
 
@@ -341,7 +341,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public void sendMessage(final Component message, final MessageType type) {
-        this.shadow$sendMessage(SpongeAdventure.asVanilla(message));
+        this.shadow$getPlayerList().sendMessage(SpongeAdventure.asVanilla(message));
     }
 
     @Override

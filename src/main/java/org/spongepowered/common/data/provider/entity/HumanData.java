@@ -41,7 +41,8 @@ public final class HumanData {
                 .asMutable(HumanEntity.class)
                     .create(Keys.SKIN_PROFILE_PROPERTY)
                         .get(h -> (ProfileProperty) h.getSkinProperty())
-                        .set((h, v) -> h.setSkinProperty((Property) v));
+                        .set((h, v) -> h.setSkinProperty((Property) v))
+                        .delete(h -> h.setSkinProperty(null));
     }
     // @formatter:on
 }

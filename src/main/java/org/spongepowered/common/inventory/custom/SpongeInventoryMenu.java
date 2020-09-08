@@ -27,11 +27,12 @@ package org.spongepowered.common.inventory.custom;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ClickType;
+import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
@@ -43,6 +44,7 @@ import org.spongepowered.api.item.inventory.menu.handler.KeySwapHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import org.spongepowered.common.accessor.inventory.container.ContainerAccessor;
 import org.spongepowered.common.bridge.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -68,6 +70,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     @Nullable private CloseHandler closeHandler;
 
     private boolean readonly;
+    private ItemStack oldCursorStack;
 
     public SpongeInventoryMenu(ViewableInventory inventory) {
         this.inventory = inventory;
@@ -81,6 +84,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     @Override
     public void setCurrentInventory(ViewableInventory inventory) {
         if (inventory.getClass().equals(this.inventory.getClass()) && inventory instanceof ViewableCustomInventory && inventory.capacity() == this.inventory.capacity()) {
+            this.inventory = inventory;
             for (Map.Entry<Container, ServerPlayer> entry : this.tracked.entrySet()) {
                 final net.minecraft.inventory.container.Container container = (net.minecraft.inventory.container.Container) entry.getKey();
                 final ServerPlayer player = entry.getValue();
@@ -88,7 +92,14 @@ public class SpongeInventoryMenu implements InventoryMenu {
                 final net.minecraft.inventory.container.Container newContainer = ((ViewableCustomInventory) inventory).createMenu(-1, ((PlayerEntity)player).inventory, (PlayerEntity) player);
                 for (int i = 0; i < inventory.capacity(); i++) {
                     // And put its slots into the old container
-                    container.inventorySlots.set(i, newContainer.inventorySlots.get(i));
+                    final Slot slot = newContainer.inventorySlots.get(i);
+                    container.inventorySlots.set(i, slot);
+                    // Update Container items
+                    ((ContainerAccessor)container).accessor$getInventoryItemStacks().set(i, slot.getStack());
+                }
+                // send update to Client
+                for (IContainerListener listener : ((ContainerAccessor) container).accessor$getListeners()) {
+                    listener.sendAllContents(container, ((ContainerAccessor) container).accessor$getInventoryItemStacks());
                 }
             }
         } else {
@@ -256,7 +267,8 @@ public class SpongeInventoryMenu implements InventoryMenu {
                         //        CLICK_THROW_ALL = DummyObjectProvider.createFor(org.spongepowered.api.item.inventory.menu.ClickType.class, "click_throw_all");
                     }        // else unknown slotId/drag-type
                     break;
-            }     return true;
+            }
+            return true;
         }
     }
 
@@ -335,5 +347,13 @@ public class SpongeInventoryMenu implements InventoryMenu {
                     ItemStackUtil.snapshotOf(oldStack), ItemStackUtil.snapshotOf(newStack));
         }
         return true;
+    }
+
+    public void setOldCursor(ItemStack itemStack) {
+        this.oldCursorStack = itemStack;
+    }
+
+    public ItemStack getOldCursor() {
+        return this.oldCursorStack;
     }
 }

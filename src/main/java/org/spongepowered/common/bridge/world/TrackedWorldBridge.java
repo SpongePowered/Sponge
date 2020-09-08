@@ -36,12 +36,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.tracking.ScheduledBlockChange;
-import org.spongepowered.common.event.tracking.context.MultiBlockCaptureSupplier;
-import org.spongepowered.common.event.tracking.context.SpongeProxyBlockAccess;
-
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 
 /**
  * A specialized {@link WorldBridge} or {@link ServerWorldBridge}
@@ -51,10 +46,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public interface TrackedWorldBridge {
 
     boolean bridge$forceSpawnEntity(Entity entity);
-
-    SpongeProxyBlockAccess bridge$getProxyAccess();
-
-    BlockingQueue<ScheduledBlockChange> bridge$getScheduledBlockChangeList();
 
     /**
      * Delegates to the {@link ServerWorld} to perform the lookup for a {@link Chunk}
@@ -71,7 +62,9 @@ public interface TrackedWorldBridge {
      * @param flag The block change flag to associate with the snapshot.
      * @return The snapshot, or none if not loaded
      */
-    SpongeBlockSnapshot bridge$createSnapshot(BlockPos pos, BlockChangeFlag flag);
+    default SpongeBlockSnapshot bridge$createSnapshot(final BlockPos pos, final BlockChangeFlag flag) {
+        return this.bridge$createSnapshot(((ServerWorld) (Object) this).getBlockState(pos), pos, flag);
+    }
 
     /**
      * Creates a {@link BlockSnapshot} but performs an additional {@link Chunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
@@ -79,8 +72,7 @@ public interface TrackedWorldBridge {
      * {@code true} for being an {@link ITileEntityProvider} or
      * {@link SpongeImplHooks#hasBlockTileEntity(BlockState)}, and associates
      * the resulting snapshot of said Tile with the snapshot. This is useful for in-progress
-     * snapshot creation during transaction building for {@link MultiBlockCaptureSupplier}
-     * or where sensitivity to the {@link SpongeProxyBlockAccess} is needed.
+     * snapshot creation during transaction building for {@link TransactionalCaptureSupplier}.
      *
      * <p>If the {@link TileEntity} is already known, and no lookups are needed, use
      * {@link #bridge$createSnapshotWithEntity(BlockState, BlockPos, BlockChangeFlag, TileEntity)} as it avoids

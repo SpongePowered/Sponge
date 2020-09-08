@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,10 +52,10 @@ public abstract class SmallFireballEntityMixin extends DamagingProjectileEntityM
         method = "onImpact",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;isAirBlock(Lnet/minecraft/util/math/BlockPos;)Z"
+            target = "Lnet/minecraft/world/IWorldReader;isAirBlock(Lnet/minecraft/util/math/BlockPos;)Z"
         )
     )
-    private boolean onCanGrief(World world, BlockPos pos) {
+    private boolean onCanGrief(final IWorldReader world, final BlockPos pos) {
         return ((GrieferBridge) this).bridge$canGrief() && world.isAirBlock(pos);
     }
 }

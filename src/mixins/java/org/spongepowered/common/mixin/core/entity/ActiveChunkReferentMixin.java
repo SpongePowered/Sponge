@@ -29,6 +29,7 @@ import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 
 import java.lang.ref.WeakReference;
 
@@ -45,9 +46,10 @@ public abstract class ActiveChunkReferentMixin implements ActiveChunkReferantBri
         return this.activeChunk$chunkReference.get();
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void bridge$setActiveChunk(@Nullable final ChunkBridge chunkBridge) {
-        this.activeChunk$chunkReference = new WeakReference<>(chunkBridge);
+    public void bridge$setActiveChunk(@Nullable final TrackedChunkBridge chunkBridge) {
+        this.activeChunk$chunkReference = new WeakReference(chunkBridge);
     }
 
 }

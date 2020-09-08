@@ -24,45 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import org.spongepowered.api.entity.Entity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-
 public final class UnknownPacketState extends BasicPacketState {
-
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
-    }
-
-    @Override
-    public boolean tracksBlockSpecificDrops(BasicPacketContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return true;
-    }
 
     @Override
     public void unwind(BasicPacketContext context) {
@@ -70,79 +39,7 @@ public final class UnknownPacketState extends BasicPacketState {
 
         try (CauseStackManager.StackFrame frame1 = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame1.pushCause(player);
-            frame1.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
             TrackingUtil.processBlockCaptures(context);
-            context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
-                SpongeCommonEventFactory.callSpawnEntity(entities, context);
-            });
-            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(entities -> {
-                final List<Entity> items = entities.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-                SpongeCommonEventFactory.callSpawnEntity(items, context);
-            });
         }
-        context.getPerEntityItemDropSupplier().acceptAndClearIfNotEmpty(map -> {
-            final PrettyPrinter printer = new PrettyPrinter(80);
-            printer.add("Processing An Unknown Packet for Entity Drops").centre().hr();
-            printer.add("The item stacks captured are: ");
-
-            for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
-                printer.add("  - Entity with UUID: %s", entry.getKey());
-                for (ItemDropData stack : entry.getValue()) {
-                    printer.add("    - %s", stack);
-                }
-            }
-            printer.trace(System.err);
-        });
-        context.getPerEntityItemEntityDropSupplier().acceptAndClearIfNotEmpty(map -> {
-            for (Map.Entry<UUID, Collection<ItemEntity>> entry : map.asMap().entrySet()) {
-                final UUID entityUuid = entry.getKey();
-                final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityByUuid(entityUuid);
-                final Entity affectedEntity = (Entity) entityFromUuid;
-                if (entityFromUuid != null) {
-                    final List<Entity> entities = entry.getValue()
-                        .stream()
-                        .map(entity -> (Entity) entity)
-                        .collect(Collectors.toList());
-                    if (!entities.isEmpty()) {
-                        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                            frame.pushCause(player);
-                            frame.pushCause(affectedEntity);
-                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(),
-                                entities);
-                            SpongeCommon.postEvent(event);
-                            if (!event.isCancelled()) {
-                                processSpawnedEntities(player, event);
-
-                            }
-                        }
-                    }
-                }
-            }
-        });
-        context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
-            final List<ItemEntity> items =
-                drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
-            final List<Entity> entities = items
-                .stream()
-                .map(entity -> (Entity) entity)
-                .collect(Collectors.toList());
-            if (!entities.isEmpty()) {
-                try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    frame.pushCause(player);
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-                    DropItemEvent.Custom event =
-                        SpongeEventFactory.createDropItemEventCustom(frame.getCurrentCause(), entities);
-                    SpongeCommon.postEvent(event);
-                    if (!event.isCancelled()) {
-                        processSpawnedEntities(player, event);
-
-                    }
-                }
-            }
-
-        });
     }
 }

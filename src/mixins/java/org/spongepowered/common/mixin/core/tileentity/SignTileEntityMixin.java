@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.tileentity;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.SignTileEntity;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,9 +37,8 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
 import javax.annotation.Nullable;
 
-// TODO: Uncomment extends when everything is okay again.
 @Mixin(SignTileEntity.class)
-public abstract class SignTileEntityMixin /* extends TileEntityMixin */ implements SubjectBridge, CommandSourceProviderBridge {
+public abstract class SignTileEntityMixin extends TileEntityMixin implements SubjectBridge, CommandSourceProviderBridge {
 
     @Shadow public abstract CommandSource shadow$getCommandSource(@Nullable ServerPlayerEntity p_195539_1_);
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.registry.builtin.sponge;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.common.event.damage.SpongeDamageType;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
 import org.spongepowered.common.accessor.util.DamageSourceAccessor;
 
 import java.util.stream.Stream;

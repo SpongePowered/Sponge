@@ -27,8 +27,6 @@ package org.spongepowered.common.mixin.core.world.storage;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -54,12 +52,12 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -105,7 +103,6 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
                         .add("The following information may be useful in debugging:")
                         .add()
                         .add("World: %s", ((ResourceKeyBridge) info).bridge$getKey())
-                        .add("Is Mod Created: ", ((WorldInfoBridge) info).bridge$isModCreated())
                         .add("Valid flag: ", ((WorldInfoBridge) info).bridge$isValid())
                         .add()
                         .add("Stack trace:")
@@ -114,15 +111,16 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
                 return;
             }
 
-            final File newDataFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT_NEW);
-            final File oldDataFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
-            final File dataFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT);
-            try (final FileOutputStream stream = new FileOutputStream(newDataFile)) {
+            final Path spongeLevelFile = this.shadow$getWorldDirectory().toPath().resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT);
+            final Path newSpongeLevelFile = spongeLevelFile.resolveSibling(Constants.Sponge.World.LEVEL_SPONGE_DAT_NEW);
+            final Path oldSpongeLevelFile = spongeLevelFile.resolveSibling(Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
+
+            try (final OutputStream stream = Files.newOutputStream(newSpongeLevelFile)) {
                 CompressedStreamTools.writeCompressed(spongeLevelCompound, stream);
             }
 
             // Before we continue, is the file zero length?
-            if (newDataFile.length() == 0) {
+            if (newSpongeLevelFile.toFile().length() == 0) {
                 // Then we just delete the file and tell the user that we didn't save properly.
                 new PrettyPrinter().add("Zero length level_sponge.dat file was created for %s!", info.getWorldName()).centre().hr()
                         .add("When saving the data file for the world %s, a zero length file was written. Sponge has discarded this file.",
@@ -137,26 +135,17 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
                         .add("Stack trace:")
                         .add(new Exception())
                         .print(System.err);
-                newDataFile.delete();
+                Files.deleteIfExists(newSpongeLevelFile);
                 return;
             }
 
-            if (dataFile.exists()) {
-                if (oldDataFile.exists()) {
-                    oldDataFile.delete();
-                }
-
-                dataFile.renameTo(oldDataFile);
-                dataFile.delete();
+            if (Files.exists(spongeLevelFile)) {
+                Files.copy(spongeLevelFile, oldSpongeLevelFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            newDataFile.renameTo(dataFile);
-
-            if (newDataFile.exists()) {
-                newDataFile.delete();
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
+            Files.move(newSpongeLevelFile, spongeLevelFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 
@@ -168,26 +157,33 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
 
         final WorldInfo info = cir.getReturnValue();
 
-        final File spongeFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT);
-        final File spongeOldFile = new File(this.shadow$getWorldDirectory(), Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
+        final Path spongeLevelFile = this.shadow$getWorldDirectory().toPath().resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT);
+        final Path oldSpongeLevelFile = spongeLevelFile.resolveSibling(Constants.Sponge.World.LEVEL_SPONGE_DAT_OLD);
 
         boolean exceptionRaised = false;
-        if (spongeFile.exists()) {
-            if (this.impl$loadSpongeLevelData(info, spongeFile, true)) {
+        if (Files.exists(spongeLevelFile)) {
+            if (this.impl$loadSpongeLevelData(info, spongeLevelFile, true)) {
                 return;
             }
 
             exceptionRaised = true;
         }
 
-        if (spongeOldFile.exists()) {
-            if (this.impl$loadSpongeLevelData(info, spongeOldFile, false)) {
+        if (Files.exists(oldSpongeLevelFile)) {
+            if (this.impl$loadSpongeLevelData(info, oldSpongeLevelFile, false)) {
                 if (exceptionRaised) {
                     // Tell the user we successfully loaded a backup
-                    SpongeCommon.getLogger().warn("Successfully loaded backup data file {} for world '{}'.", spongeFile.getName(), info.getWorldName());
+                    SpongeCommon.getLogger().warn("Successfully loaded backup data file {} for world '{}'.", oldSpongeLevelFile.getFileName().toString(),
+                            info.getWorldName());
 
                     // Delete the "current" file so we don't accidentally make it the backup file.
-                    spongeFile.delete();
+                    try {
+                        Files.deleteIfExists(oldSpongeLevelFile);
+                    } catch (final IOException e) {
+                        // This server has some disk issues, bring it down to prevent more damage..
+                        throw new RuntimeException(String.format("Failed to delete the old Sponge level file in world '%s'!", info.getWorldName()),
+                                e);
+                    }
                 }
                 return;
             }
@@ -196,7 +192,7 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
         }
 
         if (exceptionRaised) {
-            throw new RuntimeException("Unable to load sponge data for world [" + info.getWorldName() + "]");
+            throw new RuntimeException("Unable to load sponge level data for world '" + info.getWorldName() + "'!");
         }
     }
 
@@ -300,23 +296,23 @@ public abstract class SaveHandlerMixin implements SaveHandlerBridge, IPlayerFile
         return this.shadow$getWorldDirectory();
     }
 
-    private boolean impl$loadSpongeLevelData(WorldInfo info, File file, boolean isCurrent) {
+    private boolean impl$loadSpongeLevelData(final WorldInfo info, final Path levelFile, final boolean isCurrent) {
         final CompoundNBT compound;
-        try (final FileInputStream stream = new FileInputStream(file)) {
+        try (final InputStream stream = Files.newInputStream(levelFile)) {
             compound = CompressedStreamTools.readCompressed(stream);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             final PrettyPrinter errorPrinter = new PrettyPrinter()
-                    .add("Unable to load level data from world '%s' for file [%s]!", ((ResourceKeyBridge) info).bridge$getKey(), file.getName())
+                    .add("Unable to load level data from world '%s' for file '%s'!", info.getWorldName(), levelFile.getFileName().toString())
                     .centre()
                     .hr();
             // We can't read it - but let's copy the file so we can ask for it to inspect what it looks like later.
-            Path corrupted = file.toPath().getParent().resolve(file.getName() + ".corrupted-" +
+            final Path corrupted = levelFile.getParent().resolve(levelFile.getFileName().toString() + ".corrupted-" +
                     DateTimeFormatter.ISO_INSTANT.format(Instant.now()).replaceAll(":", "") + ".dat");
             try {
-                Files.copy(file.toPath(), corrupted);
+                Files.copy(levelFile, corrupted);
                 errorPrinter.add("We have backed up the corrupted file to %s. Please keep hold of this, it may be useful to Sponge developers.",
                         corrupted.getFileName());
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 errorPrinter.add("We were unable to copy the corrupted file.");
             }
 

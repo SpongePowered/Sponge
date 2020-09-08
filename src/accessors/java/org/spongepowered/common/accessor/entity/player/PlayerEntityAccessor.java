@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.entity.player;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -47,4 +48,14 @@ public interface PlayerEntityAccessor {
     @Accessor("MAIN_HAND") static DataParameter<Byte> accessor$getMainHand() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
+
+    @Accessor("LEFT_SHOULDER_ENTITY") static DataParameter<CompoundNBT> accessor$getLeftShoulderEntity() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("RIGHT_SHOULDER_ENTITY") static DataParameter<CompoundNBT> accessor$getRightShoulderEntity() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("sleepTimer") void accessor$setSleepTimer(int sleepTimer);
 }

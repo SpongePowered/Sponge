@@ -39,6 +39,7 @@ public final class SerializationBehaviorStreamGenerator {
         return Stream.of(
                 new SpongeSerializationBehavior(ResourceKey.sponge("automatic")),
                 new SpongeSerializationBehavior(ResourceKey.sponge("manual")),
+                new SpongeSerializationBehavior(ResourceKey.sponge("metadata_only")),
                 new SpongeSerializationBehavior(ResourceKey.sponge("none"))
         );
     }

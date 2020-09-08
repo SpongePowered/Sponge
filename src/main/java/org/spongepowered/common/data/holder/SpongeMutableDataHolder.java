@@ -47,6 +47,11 @@ import java.util.Optional;
 public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mutable {
 
     @Override
+    default DataHolder.Mutable delegateDataHolder() {
+        return this;
+    }
+
+    @Override
     default <E> DataTransactionResult tryOffer(Key<? extends Value<E>> key, E value) {
         final DataTransactionResult result = this.offer(key, value);
         if (!result.isSuccessful()) {
@@ -57,12 +62,12 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default <E> DataTransactionResult offer(Key<? extends Value<E>> key, E value) {
-        return this.getProviderFor(key).offer(this, value);
+        return this.getProviderFor(key).offer(this.delegateDataHolder(), value);
     }
 
     @Override
     default DataTransactionResult offer(Value<?> value) {
-        return ((DataProvider) this.getProviderFor(value.getKey())).offerValue(this, value);
+        return ((DataProvider) this.getProviderFor(value.getKey())).offerValue(this.delegateDataHolder(), value);
     }
 
     @Override
@@ -70,16 +75,16 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         final SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>> key0 =
                 (SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>>) key;
         final DataProvider<?, Collection<E>> provider = this.getProviderFor(key0);
-        if (!provider.isSupported(this)) {
+        if (!provider.isSupported(this.delegateDataHolder())) {
             return DataTransactionResult.failNoData();
         }
-        final Collection<E> collection = provider.get(this)
+        final Collection<E> collection = provider.get(this.delegateDataHolder())
                 .map(EnsureMutable::ensureMutable)
                 .orElseGet(key0.getDefaultValueSupplier());
         if (!collection.add(element)) {
             return DataTransactionResult.failNoData();
         }
-        return provider.offer(this, collection);
+        return provider.offer(this.delegateDataHolder(), collection);
     }
 
     @Override
@@ -87,16 +92,16 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         final SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>> key0 =
                 (SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>>) key;
         final DataProvider<?, Collection<E>> provider = this.getProviderFor(key0);
-        if (!provider.isSupported(this)) {
+        if (!provider.isSupported(this.delegateDataHolder())) {
             return DataTransactionResult.failNoData();
         }
-        final Collection<E> collection = provider.get(this)
+        final Collection<E> collection = provider.get(this.delegateDataHolder())
                 .map(EnsureMutable::ensureMutable)
                 .orElseGet(key0.getDefaultValueSupplier());
         if (!collection.addAll(elements)) {
             return DataTransactionResult.failNoData();
         }
-        return provider.offer(this, collection);
+        return provider.offer(this.delegateDataHolder(), collection);
     }
 
     @Override
@@ -107,14 +112,14 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
     @Override
     default <K, V> DataTransactionResult offerSingle(Key<? extends MapValue<K, V>> key, K valueKey, V value) {
         final DataProvider<?, Map<K, V>> provider = this.getProviderFor(key);
-        if (!provider.isSupported(this)) {
+        if (!provider.isSupported(this.delegateDataHolder())) {
             return DataTransactionResult.failNoData();
         }
-        final Map<K, V> copy = provider.get(this)
+        final Map<K, V> copy = provider.get(this.delegateDataHolder())
                 .map(EnsureMutable::ensureMutable)
                 .orElseGet(((SpongeKey) key).getDefaultValueSupplier());
         copy.put(valueKey, value);
-        return provider.offer(this, copy);
+        return provider.offer(this.delegateDataHolder(), copy);
     }
 
     @Override
@@ -123,14 +128,14 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             return DataTransactionResult.failNoData();
         }
         final DataProvider<?, Map<K, V>> provider = this.getProviderFor(key);
-        if (!provider.isSupported(this)) {
+        if (!provider.isSupported(this.delegateDataHolder())) {
             return DataTransactionResult.failNoData();
         }
-        final Map<K, V> map = provider.get(this)
+        final Map<K, V> map = provider.get(this.delegateDataHolder())
                 .map(EnsureMutable::ensureMutable)
                 .orElseGet(((SpongeKey) key).getDefaultValueSupplier());
         map.putAll(values);
-        return provider.offer(this, map);
+        return provider.offer(this.delegateDataHolder(), map);
     }
 
     @Override
@@ -143,10 +148,10 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         final SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>> key0 =
                 (SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>>) key;
         final DataProvider<?, Collection<E>> provider = this.getProviderFor(key0);
-        if (!provider.isSupported(this)) {
+        if (!provider.isSupported(this.delegateDataHolder())) {
             return DataTransactionResult.failNoData();
         }
-        final Optional<Collection<E>> optCollection = provider.get(this)
+        final Optional<Collection<E>> optCollection = provider.get(this.delegateDataHolder())
                 .map(EnsureMutable::ensureMutable);
         if (!optCollection.isPresent()) {
             return DataTransactionResult.failNoData();
@@ -155,7 +160,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         if (!collection.remove(element)) {
             return DataTransactionResult.failNoData();
         }
-        return provider.offer(this, collection);
+        return provider.offer(this.delegateDataHolder(), collection);
     }
 
     @Override
@@ -166,10 +171,10 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         final SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>> key0 =
                 (SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>>) key;
         final DataProvider<?, Collection<E>> provider = this.getProviderFor(key0);
-        if (!provider.isSupported(this)) {
+        if (!provider.isSupported(this.delegateDataHolder())) {
             return DataTransactionResult.failNoData();
         }
-        final Optional<Collection<E>> optCollection = provider.get(this)
+        final Optional<Collection<E>> optCollection = provider.get(this.delegateDataHolder())
                 .map(EnsureMutable::ensureMutable);
         if (!optCollection.isPresent()) {
             return DataTransactionResult.failNoData();
@@ -191,16 +196,16 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         final SpongeKey<? extends MapValue<K, Object>, Map<K, Object>> key0 =
                 (SpongeKey<? extends MapValue<K, Object>, Map<K, Object>>) key;
         final DataProvider<? extends MapValue<K, Object>, Map<K, Object>> provider = this.getProviderFor(key0);
-        if (!provider.isSupported(this)) {
+        if (!provider.isSupported(this.delegateDataHolder())) {
             return DataTransactionResult.failNoData();
         }
-        final Optional<Map<K, Object>> optionalMap = provider.get(this);
+        final Optional<Map<K, Object>> optionalMap = provider.get(this.delegateDataHolder());
         if (!optionalMap.isPresent() || !optionalMap.get().containsKey(mapKey)) {
             return DataTransactionResult.failNoData();
         }
         final Map<K, Object> map = EnsureMutable.ensureMutable(optionalMap.get());
         map.remove(mapKey);
-        return provider.offer(this, map);
+        return provider.offer(this.delegateDataHolder(), map);
     }
 
     @Override
@@ -209,10 +214,10 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             return DataTransactionResult.failNoData();
         }
         final DataProvider<? extends MapValue<K, V>, Map<K, V>> provider = this.getProviderFor(key);
-        if (!provider.isSupported(this)) {
+        if (!provider.isSupported(this.delegateDataHolder())) {
             return DataTransactionResult.failNoData();
         }
-        final Optional<Map<K, V>> optionalMap = provider.get(this)
+        final Optional<Map<K, V>> optionalMap = provider.get(this.delegateDataHolder())
                 .map(EnsureMutable::ensureMutable);
         if (!optionalMap.isPresent()) {
             return DataTransactionResult.failNoData();
@@ -221,7 +226,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         for (final Map.Entry<? extends K, ? extends V> entry : values.entrySet()) {
             map.remove(entry.getKey(), entry.getValue());
         }
-        return provider.offer(this, map);
+        return provider.offer(this.delegateDataHolder(), map);
     }
 
     @Override
@@ -231,18 +236,18 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default DataTransactionResult remove(Key<?> key) {
-        return this.getProviderFor((Key) key).remove(this);
+        return this.getProviderFor((Key) key).remove(this.delegateDataHolder());
     }
 
     @Override
     default DataTransactionResult remove(Value<?> value) {
         final Key<Value<Object>> key = (Key<Value<Object>>) value.getKey();
         final DataProvider<?, Object> provider = this.getProviderFor(key);
-        final Optional<Object> optionalElement = provider.get(this);
+        final Optional<Object> optionalElement = provider.get(this.delegateDataHolder());
         if (!optionalElement.isPresent() || !optionalElement.get().equals(value.get())) {
             return DataTransactionResult.failNoData();
         }
-        return provider.remove(this);
+        return provider.remove(this.delegateDataHolder());
     }
 
     @Override

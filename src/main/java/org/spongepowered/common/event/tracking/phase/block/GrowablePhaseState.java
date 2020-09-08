@@ -26,25 +26,21 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
 @SuppressWarnings({"unchecked", "rawTypes"})
 public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> implements IPhaseState<GrowablePhaseContext> {
 
-    private final BiConsumer<CauseStackManager.StackFrame, GrowablePhaseContext> FRAME_MODIFIER = IPhaseState.super.getFrameModifier()
+    private final BiConsumer<CauseStackManager.StackFrame, GrowablePhaseContext> FRAME_MODIFIER = super.getFrameModifier()
         .andThen((stackFrame, growablePhaseContext) -> {
             if (!growablePhaseContext.usedItem.isEmpty()) {
                 stackFrame.addContext(EventContextKeys.USED_ITEM, growablePhaseContext.usedItem);
@@ -65,18 +61,10 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
     }
 
     @Override
-    public boolean spawnEntityOrCapture(final GrowablePhaseContext context, final Entity entity) {
-        final ArrayList<Entity> entities = new ArrayList<>(1);
-        entities.add(entity);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.STRUCTURE);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
-    }
-
-    @Override
     public BlockChange associateBlockChangeWithSnapshot(final GrowablePhaseContext phaseContext,
-                                                        final BlockState newState, final Block newBlock, final BlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
+        final BlockState newState, final Block newBlock, final BlockState currentState, final SpongeBlockSnapshot snapshot,
+        final Block originalBlock
+    ) {
         return BlockChange.GROW;
     }
 
@@ -86,12 +74,7 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
     }
 
     @Override
-    public boolean doesBulkBlockCapture(final GrowablePhaseContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean doesDenyChunkRequests() {
+    public boolean doesDenyChunkRequests(final GrowablePhaseContext context) {
         return true;
     }
 

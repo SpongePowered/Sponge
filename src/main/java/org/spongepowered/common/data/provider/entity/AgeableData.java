@@ -40,10 +40,22 @@ public final class AgeableData {
                 .asMutable(AgeableEntity.class)
                     .create(Keys.BABY_TICKS)
                         .get(h -> h.getGrowingAge() < 0 ? -h.getGrowingAge() : null)
-                        .set((h, v) -> h.setGrowingAge(-v))
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.setGrowingAge(-v);
+                            return true;
+                        })
                     .create(Keys.BREEDING_COOLDOWN)
-                        .get(h -> h.getGrowingAge() > 0 ? h.getGrowingAge() : null)
-                        .set(AgeableEntity::setGrowingAge)
+                        .get(h -> h.getGrowingAge() >= 0 ? h.getGrowingAge() : null)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.setGrowingAge(v);
+                            return true;
+                        })
                     .create(Keys.CAN_BREED)
                         .get(h -> h.getGrowingAge() == 0)
                         .setAnd((h, v) -> {

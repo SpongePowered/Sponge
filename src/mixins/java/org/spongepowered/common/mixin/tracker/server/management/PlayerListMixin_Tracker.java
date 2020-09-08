@@ -41,7 +41,7 @@ public class PlayerListMixin_Tracker {
     @Redirect(method = "playerLoggedOut",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/server/ServerWorld;removePlayer(Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
-    private void impl$trackPlayerLogoutThroughPhaseTracker(ServerWorld world, ServerPlayerEntity player) {
+    private void tracker$trackPlayerLogoutThroughPhaseTracker(ServerWorld world, ServerPlayerEntity player) {
         try (final GeneralizedContext context = PlayerPhase.State.PLAYER_LOGOUT
                 .createPhaseContext(PhaseTracker.SERVER)
                 .source(player)) {

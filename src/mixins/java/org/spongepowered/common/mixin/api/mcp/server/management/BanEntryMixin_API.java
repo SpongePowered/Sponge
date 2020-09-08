@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.server.management;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.management.BanEntry;
-import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

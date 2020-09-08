@@ -94,7 +94,7 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
         if (this.shadow$getBlock().hasTileEntity() && location.getBlock().getType().equals(this.shadow$getBlock())) {
             final BlockEntity tileEntity = location.getBlockEntity()
                     .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
-            ((CustomDataHolderBridge) tileEntity).bridge$getCustomManipulators().forEach(builder::add);
+            builder.add(((CustomDataHolderBridge) tileEntity).bridge$getManipulator());
             final CompoundNBT compound = new CompoundNBT();
             ((net.minecraft.tileentity.TileEntity) tileEntity).write(compound);
             builder.unsafeNbt(compound);

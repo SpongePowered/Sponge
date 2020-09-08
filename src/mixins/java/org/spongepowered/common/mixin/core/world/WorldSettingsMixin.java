@@ -32,7 +32,6 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,8 +42,6 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
-
-import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -58,42 +55,18 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Nullable private SpongeDimensionType impl$logicType;
     @Nullable private Difficulty impl$difficulty;
     @Nullable private SerializationBehavior impl$serializationBehavior;
+    @Nullable private DataContainer impl$generatorSettings;
+
     private boolean impl$isEnabled = true;
     private boolean impl$loadOnStartup = true;
-    @Nullable private Boolean impl$keepSpawnLoaded = null;
+    private boolean impl$keepSpawnLoaded = false;
     private boolean impl$generateSpawnOnLoad = false;
     private boolean impl$pvpEnabled = true;
-    @Nullable private PortalAgentType portalAgentType;
     private boolean seedRandomized = false;
-    @Nullable private DataContainer impl$generatorSettings;
 
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
     private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
-        final WorldProperties properties = (WorldProperties) info;
-        if (!((WorldInfoBridge) info).bridge$isValid()) {
-            return;
-        }
-
-        this.impl$logicType = (SpongeDimensionType) properties.getDimensionType();
-        this.impl$difficulty = properties.getDifficulty();
-        this.impl$serializationBehavior = properties.getSerializationBehavior();
-        this.impl$isEnabled = properties.isEnabled();
-        this.impl$loadOnStartup = properties.doesLoadOnStartup();
-        this.impl$keepSpawnLoaded = properties.doesKeepSpawnLoaded();
-        this.impl$generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
-        this.impl$pvpEnabled = properties.isPVPEnabled();
-        this.bonusChestEnabled = properties.doesGenerateBonusChest();
-        this.impl$generatorSettings = properties.getGeneratorSettings();
-    }
-
-    @Override
-    public boolean bridge$isSeedRandomized() {
-        return this.seedRandomized;
-    }
-
-    @Override
-    public void bridge$setRandomSeed(boolean state) {
-        this.seedRandomized = state;
+        this.impl$$populateArchetype(info);
     }
 
     @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
@@ -107,6 +80,21 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     }
 
     @Override
+    public void bridge$setKey(ResourceKey key) {
+        this.key = key;
+    }
+
+    @Override
+    public boolean bridge$isSeedRandomized() {
+        return this.seedRandomized;
+    }
+
+    @Override
+    public void bridge$setRandomSeed(boolean state) {
+        this.seedRandomized = state;
+    }
+
+    @Override
     public SpongeDimensionType bridge$getLogicType() {
         return this.impl$logicType;
     }
@@ -114,16 +102,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Override
     public Difficulty bridge$getDifficulty() {
         return this.impl$difficulty;
-    }
-
-    @Override
-    public PortalAgentType bridge$getPortalAgentType() {
-        return this.portalAgentType;
-    }
-
-    @Override
-    public void bridge$setPortalAgentType(PortalAgentType type) {
-        this.portalAgentType = type;
     }
 
     @Override
@@ -162,11 +140,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     }
 
     @Override
-    public void bridge$setKey(ResourceKey key) {
-        this.key = key;
-    }
-
-    @Override
     public void bridge$setLogicType(SpongeDimensionType dimensionType) {
         this.impl$logicType = dimensionType;
     }
@@ -182,62 +155,76 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     }
 
     @Override
-    public void bridge$setGeneratorSettings(DataContainer generatorSettings) {
+    public void bridge$setGeneratorSettings(final DataContainer generatorSettings) {
         // TODO DataContainer -> JsonElement
     }
 
     @Override
-    public void bridge$setEnabled(boolean state) {
+    public void bridge$setEnabled(final boolean state) {
         this.impl$isEnabled = state;
     }
 
     @Override
-    public void bridge$setLoadOnStartup(boolean state) {
+    public void bridge$setLoadOnStartup(final boolean state) {
         this.impl$loadOnStartup = state;
     }
 
     @Override
-    public void bridge$setKeepSpawnLoaded(@Nullable Boolean state) {
+    public void bridge$setKeepSpawnLoaded(@Nullable final Boolean state) {
         this.impl$keepSpawnLoaded = state;
     }
 
     @Override
-    public void bridge$setGenerateSpawnOnLoad(boolean state) {
+    public void bridge$setGenerateSpawnOnLoad(final boolean state) {
         this.impl$generateSpawnOnLoad = state;
     }
 
     @Override
-    public void bridge$setPVPEnabled(boolean state) {
+    public void bridge$setPVPEnabled(final boolean state) {
         this.impl$pvpEnabled = state;
     }
 
     @Override
-    public void bridge$setCommandsEnabled(boolean state) {
+    public void bridge$setCommandsEnabled(final boolean state) {
         this.commandsAllowed = state;
     }
 
     @Override
-    public void bridge$setGenerateBonusChest(boolean state) {
+    public void bridge$setGenerateBonusChest(final boolean state) {
         this.bonusChestEnabled = state;
     }
 
-    @Override
-    public Boolean bridge$internalKeepSpawnLoaded() {
-        return this.impl$keepSpawnLoaded;
+    public void impl$$populateArchetype(final WorldInfo info) {
+        if (!((WorldInfoBridge) info).bridge$isValid()) {
+            return;
+        }
+
+        final WorldProperties properties = (WorldProperties) info;
+
+        this.impl$isEnabled = properties.isEnabled();
+        this.impl$logicType = (SpongeDimensionType) properties.getDimensionType();
+        this.impl$loadOnStartup = properties.doesLoadOnStartup();
+        this.impl$generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
+        this.impl$keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+        this.bonusChestEnabled = properties.doesGenerateBonusChest();
+        this.impl$serializationBehavior = properties.getSerializationBehavior();
+        this.impl$difficulty = properties.getDifficulty();
+        this.impl$pvpEnabled = properties.isPVPEnabled();
+        this.impl$generatorSettings = properties.getGeneratorSettings();
     }
 
     @Override
-    public void bridge$populateInfo(WorldInfo info) {
+    public void bridge$populateInfo(final WorldInfo info) {
         final WorldInfoBridge infoBridge = (WorldInfoBridge) info;
 
-        // TODO 1.14 - Add all the property setters
         infoBridge.bridge$setEnabled(this.impl$isEnabled);
-        infoBridge.bridge$setLogicType(this.impl$logicType);
+        infoBridge.bridge$setLogicType(this.impl$logicType, false);
         infoBridge.bridge$setLoadOnStartup(this.impl$loadOnStartup);
         infoBridge.bridge$setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
         infoBridge.bridge$setKeepSpawnLoaded(this.impl$keepSpawnLoaded);
         infoBridge.bridge$setGenerateBonusChest(this.bonusChestEnabled);
         infoBridge.bridge$setSerializationBehavior(this.impl$serializationBehavior);
         infoBridge.bridge$forceSetDifficulty((net.minecraft.world.Difficulty) (Object) this.impl$difficulty);
+        infoBridge.bridge$setPVPEnabled(this.impl$pvpEnabled);
     }
 }

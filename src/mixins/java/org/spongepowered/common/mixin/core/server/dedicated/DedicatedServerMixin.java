@@ -40,11 +40,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
+import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 
 import java.io.File;
 
 @Mixin(DedicatedServer.class)
-public abstract class DedicatedServerMixin implements SpongeServer {
+public abstract class DedicatedServerMixin extends MinecraftServerMixin {
+
+    public DedicatedServerMixin(String name) {
+        super(name);
+    }
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$setServerOnGame(final File p_i50720_1_, final ServerPropertiesProvider p_i50720_2_, final DataFixer dataFixerIn,

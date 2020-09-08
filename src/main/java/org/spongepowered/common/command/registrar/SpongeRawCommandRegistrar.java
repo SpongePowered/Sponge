@@ -25,137 +25,103 @@
 package org.spongepowered.common.command.registrar;
 
 import com.google.common.reflect.TypeToken;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.command.CommandSource;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.exception.CommandPermissionException;
+import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandMapping;
-import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
-import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
-import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
+import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.plugin.PluginContainer;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.Optional;
 
 /**
  * For use with {@link org.spongepowered.api.command.Command.Raw}
  */
-public final class SpongeRawCommandRegistrar extends SpongeCommandRegistrar<Command.Raw> {
+public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command.Raw> {
 
     private static final TypeToken<Command.Raw> COMMAND_TYPE = TypeToken.of(Command.Raw.class);
-    private static final String PARAMETER_NAME = "parameters";
-    public static final ResourceKey CATALOG_KEY = ResourceKey.sponge("raw");
-    public static final SpongeRawCommandRegistrar INSTANCE = new SpongeRawCommandRegistrar(CATALOG_KEY);
+    private static final ResourceKey CATALOG_KEY = ResourceKey.sponge("raw");
+    public static final SpongeRawCommandRegistrar INSTANCE = new SpongeRawCommandRegistrar();
 
-    private SpongeRawCommandRegistrar(final ResourceKey catalogKey) {
-        super(catalogKey);
-    }
-
+    private final HashMap<CommandMapping, Command.Raw> commands = new HashMap<>();
 
     @Override
-    public TypeToken<Command.Raw> handledType() {
+    @NonNull
+    public TypeToken<Command.@NonNull Raw> handledType() {
         return SpongeRawCommandRegistrar.COMMAND_TYPE;
     }
 
-    // TODO: Support the tree builder.
     @Override
-    Collection<LiteralCommandNode<CommandSource>> createNode(final CommandMapping mapping, final Command.Raw command) {
-        final Executor executor = new Executor(command);
-        final List<LiteralCommandNode<CommandSource>> result = new ArrayList<>();
-        final LiteralCommandNode<CommandSource> primary =
-                new SpongeLiteralCommandNode(LiteralArgumentBuilder.<CommandSource>literal(mapping.getPrimaryAlias())
-                .requires(x -> command.canExecute((CommandCause) x))
-                .executes(executor)
-                .then(
-                        RequiredArgumentBuilder
-                                .<CommandSource, String>argument(PARAMETER_NAME, new RawString(command))
-                                .executes(executor)
-                                .build()
-                ));
-        result.add(primary);
-        for (final String alias : mapping.getAllAliases()) {
-            if (!alias.equalsIgnoreCase(mapping.getPrimaryAlias())) {
-                result.add(new SpongeLiteralCommandNode(LiteralArgumentBuilder.<CommandSource>literal(mapping.getPrimaryAlias())
-                        .requires(x -> command.canExecute((CommandCause) x))
-                        .executes(executor)
-                        .redirect(primary)));
-            }
-        }
-        return result;
+    public CommandMapping register(
+            @NonNull final PluginContainer container,
+            final Command.@NonNull Raw command,
+            @NonNull final String primaryAlias,
+            @NonNull final String @NonNull... secondaryAliases)
+            throws CommandFailedRegistrationException {
+        final CommandMapping mapping = Sponge.getCommandManager().registerAlias(
+                this,
+                container,
+                command.commandTree(),
+                primaryAlias,
+                secondaryAliases
+        );
+        this.commands.put(mapping, command);
+        return mapping;
     }
 
-    private static class Executor implements com.mojang.brigadier.Command<CommandSource> {
-
-        private final Command.Raw command;
-
-        private Executor(final Command.Raw command) {
-            this.command = command;
+    @Override
+    public CommandResult process(final CommandCause cause, final CommandMapping mapping, final String command, final String arguments) throws CommandException {
+        final Command.Raw commandToExecute = this.commands.get(mapping);
+        if (commandToExecute.canExecute(cause)) {
+            return commandToExecute.process(cause, arguments);
         }
+        throw new CommandPermissionException(TextComponent.of("You do not have permission to run /" + command));
+    }
 
-        @Override
-        public int run(final CommandContext<CommandSource> context) throws CommandSyntaxException {
-            String argument;
-            try {
-                argument = context.getArgument(PARAMETER_NAME, String.class);
-            } catch (final IllegalArgumentException e) {
-                // doesn't exist, no input
-                argument = "";
-            }
+    @Override
+    public List<String> suggestions(final CommandCause cause, final CommandMapping mapping, final String command, final String arguments) throws CommandException {
+        final Command.Raw commandToExecute = this.commands.get(mapping);
+        if (commandToExecute.canExecute(cause)) {
+            return commandToExecute.getSuggestions(cause, arguments);
+        }
+        return Collections.emptyList();
+    }
 
-            try {
-                return this.command.process((CommandCause) context.getSource(), argument).getResult();
-            } catch (final CommandException e) {
-                throw new SpongeCommandSyntaxException(e, (SpongeCommandContext) context);
-            }
+    @Override
+    public Optional<Component> help(final CommandCause cause, final CommandMapping mapping) {
+        final Command.Raw commandToExecute = this.commands.get(mapping);
+        if (commandToExecute.canExecute(cause)) {
+            return commandToExecute.getHelp(cause);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean canExecute(final CommandCause cause, final CommandMapping mapping) {
+        return this.commands.get(mapping).canExecute(cause);
+    }
+
+    @Override
+    public void reset() {
+        if (Sponge.getCommandManager().isResetting()) {
+            this.commands.clear();
         }
     }
 
-    private static class RawString implements ArgumentType<String> {
-
-        private final Command.Raw command;
-
-        private RawString(final Command.Raw command) {
-            this.command = command;
-        }
-
-        @Override
-        public String parse(final StringReader reader) {
-            return reader.getRemaining();
-        }
-
-        @Override
-        public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
-            final String[] input = context.getInput().split(" ", 2);
-            final String arg;
-            SuggestionsBuilder offsetBuilder = builder;
-            if (input.length == 2) {
-                arg = input[1];
-                offsetBuilder =  builder.createOffset(context.getInput().lastIndexOf(" "));
-            } else {
-                arg = "";
-            }
-            try {
-                for (final String completion : this.command.getSuggestions(((CommandCause) context.getSource()), arg)) {
-                    offsetBuilder.suggest(completion);
-                }
-
-                return offsetBuilder.buildFuture();
-            } catch (final CommandException e) {
-                return Suggestions.empty();
-            }
-        }
+    @Override
+    public ResourceKey getKey() {
+        return SpongeRawCommandRegistrar.CATALOG_KEY;
     }
 
 }

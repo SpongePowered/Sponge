@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.core.adventure.bossbar;
 
 import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.world.server.ServerBossInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
 
 @Mixin(targets = "net.kyori.adventure.bossbar.BossBarImpl")
-public class BossBarImplMixin implements BossBarBridge {
+public abstract class BossBarImplMixin implements BossBarBridge {
     private ServerBossInfo bridge$vanillaServerBar;
 
     @Override

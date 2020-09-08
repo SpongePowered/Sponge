@@ -28,6 +28,8 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.entity.monster.ZombiePigmanEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
+import java.util.SplittableRandom;
+
 public final class ZombiePigmanData {
 
     private ZombiePigmanData() {
@@ -39,7 +41,8 @@ public final class ZombiePigmanData {
                 .asMutable(ZombiePigmanEntityAccessor.class)
                     .create(Keys.ANGER_LEVEL)
                         .get(ZombiePigmanEntityAccessor::accessor$getAngerLevel)
-                        .set(ZombiePigmanEntityAccessor::accessor$setAngerLevel);
+                        .set(ZombiePigmanEntityAccessor::accessor$setAngerLevel)
+                        .resetOnDelete(400 + new SplittableRandom().nextInt(400));
     }
     // @formatter:on
 }

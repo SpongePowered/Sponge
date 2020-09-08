@@ -25,12 +25,16 @@
 package org.spongepowered.common.data.provider.block.location;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.util.INameable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import org.spongepowered.api.block.entity.NameableBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
 
@@ -60,7 +64,7 @@ public final class ServerLocationData {
                             final World world = (World) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             final Biome biome = world.getBiome(pos);
-                            return (double) biome.func_225486_c(pos);
+                            return (double) biome.getTemperature(pos);
                         })
                     .create(Keys.SKY_LIGHT)
                         .get(h -> {
@@ -80,7 +84,13 @@ public final class ServerLocationData {
                             final World world = (World) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             return world.getRedstonePowerFromNeighbors(pos) > 0;
-                        });
+                        })
+                    .create(Keys.DISPLAY_NAME)
+                        .get(h -> SpongeAdventure.asAdventure(((INameable)h.getBlockEntity().get()).getDisplayName()))
+                        .set((h, v) -> (((CustomNameableBridge)h.getBlockEntity().get())).bridge$setCustomDisplayName(SpongeAdventure.asVanilla(v)))
+                        .delete(h -> (((CustomNameableBridge)h.getBlockEntity().get())).bridge$setCustomDisplayName(null))
+                        .supports(h -> h.getBlockEntity().isPresent() && h.getBlockEntity().get() instanceof NameableBlockEntity);
+                    ;
     }
     // @formatter:on
 }

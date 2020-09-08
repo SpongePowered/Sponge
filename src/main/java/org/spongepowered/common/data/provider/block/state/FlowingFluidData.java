@@ -30,6 +30,7 @@ import net.minecraft.fluid.FlowingFluid;
 import net.minecraft.fluid.IFluidState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.data.provider.util.BoundedUtils;
 
 public final class FlowingFluidData {
 
@@ -42,10 +43,7 @@ public final class FlowingFluidData {
                 .asImmutable(BlockState.class)
                     .create(Keys.FLUID_LEVEL)
                         .get(h -> ((FlowingFluidBlock) h.getBlock()).getFluidState(h).getLevel())
-                        .set((h, v) -> {
-                            final IFluidState newState = ((FlowingFluidBlock) h.getBlock()).getFluidState(h).with(FlowingFluid.LEVEL_1_8, v);
-                            return newState.getBlockState();
-                        })
+                        .set((h, v) -> BoundedUtils.setInteger(((FlowingFluidBlock) h.getBlock()).getFluidState(h), v, FlowingFluid.LEVEL_1_8).getBlockState())
                         .supports(h -> h.getBlock() instanceof FlowingFluidBlock);
     }
     // @formatter:on

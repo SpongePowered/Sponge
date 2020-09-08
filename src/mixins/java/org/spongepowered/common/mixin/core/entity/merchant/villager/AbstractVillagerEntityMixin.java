@@ -35,6 +35,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.core.entity.AgeableEntityMixin;
 
+import java.util.Set;
+
 @Mixin(AbstractVillagerEntity.class)
 public abstract class AbstractVillagerEntityMixin extends AgeableEntityMixin {
     /**
@@ -50,10 +52,10 @@ public abstract class AbstractVillagerEntityMixin extends AgeableEntityMixin {
         method = "addTrades(Lnet/minecraft/item/MerchantOffers;[Lnet/minecraft/entity/merchant/villager/VillagerTrades$ITrade;I)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/item/MerchantOffers;add(Lnet/minecraft/item/MerchantOffer;)Z"
+            target = "Ljava/util/Set;add(Ljava/lang/Object;)Z"
         )
     )
-    protected boolean impl$addNewOfferToTempMap(final MerchantOffers merchantOffers, final MerchantOffer offer) {
+    protected boolean impl$addNewOfferToTempMap(final Set<MerchantOffer> merchantOffers, final MerchantOffer offer) {
         return merchantOffers.add(offer);
     }
 

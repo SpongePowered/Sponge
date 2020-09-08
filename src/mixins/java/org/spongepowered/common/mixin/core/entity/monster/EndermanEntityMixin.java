@@ -24,15 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import javax.annotation.Nullable;
@@ -45,18 +38,6 @@ public abstract class EndermanEntityMixin extends MonsterEntityMixin {
     @Shadow @Nullable public abstract BlockState getHeldBlockState();
 
     @Shadow public abstract void setHeldBlockState(@Nullable BlockState state);
-
-    @Redirect(method = "teleportTo", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/monster/EndermanEntity;attemptTeleport(DDDZ)Z"))
-    private boolean impl$CheckContextWithTeleport(EndermanEntity entityEnderman, double x, double y, double z, boolean particles) {
-        if (entityEnderman.world.isRemote) {
-            return entityEnderman.attemptTeleport(x, y, z, particles);
-        }
-        
-        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.TELEPORT_TYPE, TeleportTypes.ENTITY_TELEPORT);
-            return this.attemptTeleport(x, y, z, particles);
-        }
-    }
 
     /**
      * @author gabizou - July 26th, 2018

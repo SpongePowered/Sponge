@@ -39,7 +39,13 @@ public final class TraderLlamaData {
                 .asMutable(TraderLlamaEntityAccessor.class)
                     .create(Keys.DESPAWN_DELAY)
                         .get(TraderLlamaEntityAccessor::accessor$getDespawnDelay)
-                        .set(TraderLlamaEntityAccessor::accessor$setDespawnDelay);
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setDespawnDelay(v);
+                            return true;
+                        });
     }
     // @formatter:on
 }

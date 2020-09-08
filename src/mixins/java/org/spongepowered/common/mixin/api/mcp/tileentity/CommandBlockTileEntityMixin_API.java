@@ -53,9 +53,8 @@ public abstract class CommandBlockTileEntityMixin_API extends TileEntityMixin_AP
     }
 
     @Override
-    @SuppressWarnings("deprecated")
     public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
+        final DataContainer container = super.toContainer();
         container.set(Constants.TileEntity.CommandBlock.STORED_COMMAND, this.getCommandBlockLogic().getCommand());
         container.set(Constants.TileEntity.CommandBlock.SUCCESS_COUNT, this.getCommandBlockLogic().getSuccessCount());
         container.set(Constants.TileEntity.CUSTOM_NAME, this.getCommandBlockLogic().getName());
@@ -79,4 +78,8 @@ public abstract class CommandBlockTileEntityMixin_API extends TileEntityMixin_AP
         return values;
     }
 
+    @Override
+    public String getIdentifier() {
+        return this.getCommandBlockLogic().getName().getString();
+    }
 }

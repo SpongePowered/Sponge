@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeMinecraftVersion;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.util.Constants;
 
@@ -62,6 +63,8 @@ public abstract class NetworkManagerMixin extends SimpleChannelInboundHandler<IP
     @Nullable private InetSocketAddress impl$virtualHost;
     @Nullable private MinecraftVersion impl$version;
 
+    private ClientType impl$clientType = ClientType.VANILLA;
+
     @Override
     public TransactionStore bridge$getTransactionStore() {
         return this.impl$transactionStore;
@@ -70,6 +73,16 @@ public abstract class NetworkManagerMixin extends SimpleChannelInboundHandler<IP
     @Override
     public Set<ResourceKey> bridge$getRegisteredChannels() {
         return this.impl$registeredChannels;
+    }
+
+    @Override
+    public ClientType bridge$getClientType() {
+        return this.impl$clientType;
+    }
+
+    @Override
+    public void bridge$setClientType(final ClientType clientType) {
+        this.impl$clientType = clientType;
     }
 
     @Override

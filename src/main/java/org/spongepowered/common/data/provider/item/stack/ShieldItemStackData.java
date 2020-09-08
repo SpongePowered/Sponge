@@ -24,14 +24,16 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.item.BannerItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.ShieldItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.BannerPattern;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
+import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -73,11 +75,11 @@ public final class ShieldItemStackData {
                             final CompoundNBT tag = h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
                             tag.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) v).getId());
                         })
-                        .supports(h -> h.getItem() == Items.SHIELD)
+                        .supports(h -> h.getItem() instanceof ShieldItem || h.getItem() instanceof BannerItem)
                     .create(Keys.BANNER_PATTERN_LAYERS)
                         .get(h -> {
-                            final CompoundNBT tag = h.getTag();
-                            if (tag == null || tag.contains(Constants.TileEntity.Banner.BANNER_PATTERNS, Constants.NBT.TAG_LIST)) {
+                            final CompoundNBT tag = h.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+                            if (tag == null || !tag.contains(Constants.TileEntity.Banner.BANNER_PATTERNS, Constants.NBT.TAG_LIST)) {
                                 return new ArrayList<>();
                             }
                             final ListNBT layersList = tag.getList(Constants.TileEntity.Banner.BANNER_PATTERNS, Constants.NBT.TAG_COMPOUND);
@@ -87,13 +89,19 @@ public final class ShieldItemStackData {
                         })
                         .set((h, v) -> {
                             final ListNBT layersTag = v.stream()
+                                    .filter(layer -> layer.getShape() != BannerPatternShapes.BASE.get())
                                     .map(ShieldItemStackData::layerToNbt)
                                     .collect(NbtCollectors.toTagList());
-
                             final CompoundNBT blockEntity = h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
                             blockEntity.put(Constants.TileEntity.Banner.BANNER_PATTERNS, layersTag);
+                            if (h.getItem() instanceof ShieldItem) {
+                                // TODO reject BannerPatternShapes.BASE for BannerItem?
+                                v.stream().filter(layer -> layer.getShape() == BannerPatternShapes.BASE.get()).forEach(layer -> {
+                                    blockEntity.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) layer.getColor()).getId());
+                                });
+                            }
                         })
-                        .supports(h -> h.getItem() == Items.SHIELD);
+                        .supports(h -> h.getItem() instanceof ShieldItem || h.getItem() instanceof BannerItem);
     }
     // @formatter:on
 

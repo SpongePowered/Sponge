@@ -39,7 +39,13 @@ public final class LightningBoltData {
                 .asMutable(LightningBoltEntityAccessor.class)
                     .create(Keys.DESPAWN_DELAY)
                         .get(LightningBoltEntityAccessor::accessor$getBoltLivingTime)
-                        .set(LightningBoltEntityAccessor::accessor$setBoltLivingTime)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setBoltLivingTime(v);
+                            return true;
+                        })
                     .create(Keys.IS_EFFECT_ONLY)
                         .get(LightningBoltEntityAccessor::accessor$getEffectOnly);
     }

@@ -95,6 +95,7 @@ public final class SpongeKey<V extends Value<E>, E> extends SpongeCatalogType im
     @Override
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
+                .add("resourceKey", this.getKey())
                 .add("valueToken", this.valueToken);
     }
 

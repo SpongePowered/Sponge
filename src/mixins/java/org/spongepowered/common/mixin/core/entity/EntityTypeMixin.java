@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import co.aikar.timings.Timing;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
@@ -34,22 +35,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Objects;
-
 @Mixin(EntityType.class)
-public abstract class EntityTypeMixin implements ResourceKeyBridge, TrackableBridge, EntityTypeBridge {
+public abstract class EntityTypeMixin implements ResourceKeyBridge, EntityTypeBridge {
 
     private ResourceKey impl$key;
-    private boolean impl$allowsBlockBulkCaptures = true;
-    private boolean impl$allowsBlockEventCreation = true;
-    private boolean impl$allowsEntityBulkCaptures = true;
-    private boolean impl$allowsEntityEventCreation = true;
     private boolean impl$isActivationRangeInitialized = false;
     private boolean impl$hasCheckedDamageEntity = false;
     private boolean impl$overridesDamageEntity = false;
@@ -70,6 +65,16 @@ public abstract class EntityTypeMixin implements ResourceKeyBridge, TrackableBri
         }
     }
 
+    @Redirect(method = "register",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"
+        )
+    )
+    private static Object impl$setKey(final Registry<Object> registry, final String key, final Object catalog) {
+        ((EntityTypeMixin) catalog).impl$key = ResourceKey.of(SpongeCommon.getActivePlugin(), key.toLowerCase());
+        return Registry.register(registry, key, catalog);
+    }
+
     @Override
     public ResourceKey bridge$getKey() {
         return this.impl$key;
@@ -78,46 +83,6 @@ public abstract class EntityTypeMixin implements ResourceKeyBridge, TrackableBri
     @Override
     public void bridge$setKey(final ResourceKey key) {
         this.impl$key = key;
-    }
-
-    @Override
-    public boolean bridge$allowsBlockBulkCaptures() {
-        return this.impl$allowsBlockBulkCaptures;
-    }
-
-    @Override
-    public void bridge$setAllowsBlockBulkCaptures(final boolean allowsBlockBulkCaptures) {
-        this.impl$allowsBlockBulkCaptures = allowsBlockBulkCaptures;
-    }
-
-    @Override
-    public boolean bridge$allowsBlockEventCreation() {
-        return this.impl$allowsBlockEventCreation;
-    }
-
-    @Override
-    public void bridge$setAllowsBlockEventCreation(final boolean allowsBlockEventCreation) {
-        this.impl$allowsBlockEventCreation = allowsBlockEventCreation;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityBulkCaptures() {
-        return this.impl$allowsEntityBulkCaptures;
-    }
-
-    @Override
-    public void bridge$setAllowsEntityBulkCaptures(final boolean allowsEntityBulkCaptures) {
-        this.impl$allowsEntityBulkCaptures = allowsEntityBulkCaptures;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityEventCreation() {
-        return this.impl$allowsEntityEventCreation;
-    }
-
-    @Override
-    public void bridge$setAllowsEntityEventCreation(final boolean allowsEntityEventCreation) {
-        this.impl$allowsEntityEventCreation = allowsEntityEventCreation;
     }
 
     @Override
@@ -158,12 +123,5 @@ public abstract class EntityTypeMixin implements ResourceKeyBridge, TrackableBri
         return this.impl$timings;
     }
 
-    @Redirect(method = "register",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"))
-    private static Object impl$setKey(final Registry<Object> registry, final String resourcePath, final Object entityType) {
-        ((ResourceKeyBridge) entityType).bridge$setKey(ResourceKey.resolve(resourcePath));
-        return Registry.register(registry, resourcePath, entityType);
-    }
 
 }

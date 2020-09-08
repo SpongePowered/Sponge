@@ -39,7 +39,7 @@ public final class CreeperData {
         registrator
                 .asMutable(CreeperEntity.class)
                     .create(Keys.IS_CHARGED)
-                        .get(CreeperEntity::getPowered)
+                        .get(CreeperEntity::isCharged)
                         .set((h, v) -> h.getDataManager().set(CreeperEntityAccessor.accessor$getPowered(), v));
     }
     // @formatter:on

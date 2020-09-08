@@ -28,20 +28,18 @@ import com.google.inject.Stage;
 import net.minecraft.client.main.Main;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launcher;
-
-import java.nio.file.Path;
-import java.util.List;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 
 public final class ClientLauncher extends VanillaLauncher {
 
-    protected ClientLauncher(final Stage injectionStage) {
-        super(injectionStage);
+    protected ClientLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
+        super(pluginEngine, injectionStage);
     }
 
-    public static void launch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
+    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isDeveloperEnvironment, final String[] args) {
+        final ClientLauncher launcher = new ClientLauncher(pluginEngine, isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
         Launcher.setInstance(launcher);
-        launcher.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
+        launcher.launchPlatform(args);
     }
 
     @Override
@@ -49,10 +47,9 @@ public final class ClientLauncher extends VanillaLauncher {
         return false;
     }
 
-    @Override
-    public void onLaunch(final String pluginSpiVersion, final Path baseDirectory, final List<Path> pluginDirectories, final String[] args) {
-        super.onLaunch(pluginSpiVersion, baseDirectory, pluginDirectories, args);
-        this.getLogger().info("Loading Minecraft Client, please wait...");
+    public void launchPlatform(final String[] args) {
+        super.onLaunch();
+        this.getLogger().info("Loading Sponge, please wait...");
 
         SpongeBootstrap.perform("Client", () -> Main.main(args));
     }

@@ -32,8 +32,8 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
@@ -54,12 +54,11 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 public class BasicInventoryPacketState extends PacketState<InventoryPacketContext> {
 
@@ -99,11 +98,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     public BasicInventoryPacketState(final int stateId, final int stateMask) {
         this.stateId = stateId & stateMask;
         this.stateMask = stateMask;
-    }
-
-    @Override
-    public boolean doesBulkBlockCapture(final InventoryPacketContext context) {
-        return false;
     }
 
     @Nullable
@@ -171,9 +165,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
         final int usedButton = packetIn.getUsedButton();
         final List<Entity> capturedItems = new ArrayList<>();
-        context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> items.stream().map(entity -> (Entity) entity).forEach(capturedItems::add));
-        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(capturedItems::addAll);
-
         // MAKE SURE THAT THIS IS KEPT IN SYNC WITH THE REST OF THE METHOD
         // If you add any logic that does something even if no event listenres
         // are registered, add it here.

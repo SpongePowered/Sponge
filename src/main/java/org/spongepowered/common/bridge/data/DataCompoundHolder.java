@@ -29,19 +29,53 @@ import org.spongepowered.common.util.Constants;
 
 public interface DataCompoundHolder {
 
-    boolean data$hasSpongeCompound();
+    CompoundNBT data$getCompound();
+    void data$setCompound(CompoundNBT nbt);
 
-    CompoundNBT data$getSpongeCompound();
-
-    default boolean data$hasSpongeDataCompound() {
-        return this.data$hasSpongeCompound() && this.data$getSpongeCompound().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
+    default boolean data$hasForgeData() {
+        if (this.data$getCompound() == null) {
+            return false;
+        }
+        return this.data$getCompound().contains(Constants.Forge.FORGE_DATA);
     }
 
-    default CompoundNBT data$getSpongeDataCompound() {
-        final CompoundNBT data = this.data$getSpongeCompound();
-        if (!data.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-            data.put(Constants.Sponge.SPONGE_DATA, new CompoundNBT());
+    default CompoundNBT data$getForgeData() {
+        if (this.data$getCompound() == null) {
+            this.data$setCompound(new CompoundNBT());
         }
-        return data.getCompound(Constants.Sponge.SPONGE_DATA);
+        CompoundNBT forgeCompound = this.data$getCompound().getCompound(Constants.Forge.FORGE_DATA);
+        if (forgeCompound.isEmpty()) {
+            this.data$getCompound().put(Constants.Forge.FORGE_DATA, forgeCompound);
+        }
+        return forgeCompound;
+    }
+
+
+    default boolean data$hasSpongeData() {
+        return this.data$hasForgeData() && this.data$getForgeData().contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND);
+    }
+
+    default CompoundNBT data$getSpongeData() {
+        final CompoundNBT spongeCompound = this.data$getForgeData();
+        final CompoundNBT dataCompound = spongeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
+        if (dataCompound.isEmpty()) {
+            spongeCompound.put(Constants.Sponge.SPONGE_DATA, dataCompound);
+        }
+        return dataCompound;
+    }
+
+    default void data$cleanEmptySpongeData() {
+        final CompoundNBT spongeData = this.data$getSpongeData();
+        if (spongeData.isEmpty()) {
+            final CompoundNBT spongeCompound = this.data$getForgeData();
+            spongeCompound.remove(Constants.Sponge.SPONGE_DATA);
+            if (spongeCompound.isEmpty()) {
+                final CompoundNBT nbt = this.data$getCompound();
+                nbt.remove(Constants.Forge.FORGE_DATA);
+                if (nbt.isEmpty()) {
+                    this.data$setCompound(null);
+                }
+            }
+        }
     }
 }

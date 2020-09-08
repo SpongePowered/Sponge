@@ -60,7 +60,7 @@ public abstract class SlotMixin_Lens_Inventory implements InventoryAdapter, Lens
 
         try {
             final Lens rootLens = ((InventoryAdapter) this.inventory).inventoryAdapter$getRootLens();
-            SlotLens lens = rootLens.getSlotLens(this.slotIndex);
+            SlotLens lens = rootLens.getSlotLens(this.inventoryAdapter$getFabric(), this.slotIndex);
             if (lens != null) {
                 return lens;
             }

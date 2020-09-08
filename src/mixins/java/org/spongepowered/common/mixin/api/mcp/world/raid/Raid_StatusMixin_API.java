@@ -33,19 +33,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(Raid.Status.class)
 public abstract class Raid_StatusMixin_API implements RaidStatus {
 
-    @Shadow public abstract String shadow$func_221277_a();
+    @Shadow public abstract String shadow$getName();
 
     private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void api$setKey(CallbackInfo ci) {
-        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), this.shadow$func_221277_a().toLowerCase());
+        this.api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), this.shadow$getName().toLowerCase());
     }
 
     @Override

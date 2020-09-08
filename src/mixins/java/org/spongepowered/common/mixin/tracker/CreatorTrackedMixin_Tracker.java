@@ -46,7 +46,7 @@ import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
 
-@Mixin(value = {Entity.class, TileEntity.class}, priority = 1100)
+@Mixin({Entity.class, TileEntity.class})
 public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridge {
 
     @Nullable private UUID tracker$creator;
@@ -140,25 +140,26 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
         } else if (PlayerTracker.Type.NOTIFIER == type) {
             this.tracker$notifier = uuid;
         }
-        if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
-            if (uuid == null) {
-                if (spongeData.contains(type.compoundKey)) {
-                    spongeData.remove(type.compoundKey);
-                }
-                return;
-            }
-            if (!spongeData.contains(type.compoundKey)) {
-                final CompoundNBT sourceNbt = new CompoundNBT();
-                sourceNbt.putUniqueId(Constants.UUID, uuid);
-                spongeData.put(type.compoundKey, sourceNbt);
-            } else {
-                final CompoundNBT compoundTag = spongeData.getCompound(type.compoundKey);
-                compoundTag.putUniqueId(Constants.UUID, uuid);
-            }
-        }
+//        if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
+//            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
+//            if (uuid == null) {
+//                if (spongeData.contains(type.compoundKey)) {
+//                    spongeData.remove(type.compoundKey);
+//                }
+//                return;
+//            }
+//            if (!spongeData.contains(type.compoundKey)) {
+//                final CompoundNBT sourceNbt = new CompoundNBT();
+//                sourceNbt.putUniqueId(Constants.UUID, uuid);
+//                spongeData.put(type.compoundKey, sourceNbt);
+//            } else {
+//                final CompoundNBT compoundTag = spongeData.getCompound(type.compoundKey);
+//                compoundTag.putUniqueId(Constants.UUID, uuid);
+//            }
+//        }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Nullable
     private UUID getTrackedUniqueId(final PlayerTracker.Type type) {
         if (this.tracker$creator != null && PlayerTracker.Type.CREATOR == type) {
@@ -174,7 +175,7 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
         } else if (this.tracker$notifier != null && PlayerTracker.Type.NOTIFIER == type) {
             return this.tracker$notifier;
         }
-        final CompoundNBT compound = ((DataCompoundHolder) this).data$getSpongeDataCompound();
+        final CompoundNBT compound = ((DataCompoundHolder) this).data$getSpongeData();
         if (!compound.contains(type.compoundKey)) {
             return null;
         }

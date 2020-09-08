@@ -34,6 +34,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public abstract class NameQuery<T> extends Query<T> {
 
@@ -52,15 +54,15 @@ public abstract class NameQuery<T> extends Query<T> {
 
         @Override
         public GameProfile call() throws Exception {
-            List<GameProfile> profiles = this.fromNames(Collections.singleton(this.name));
+            Map<String, Optional<GameProfile>> profiles = this.fromNames(Collections.singleton(this.name));
             if (profiles.isEmpty()) {
                 throw new ProfileNotFoundException("Failed to find profile for name " + this.name);
             }
-            return profiles.get(0);
+            return profiles.values().iterator().next().orElseThrow(() -> new ProfileNotFoundException("Failed to find profile for name " + this.name));
         }
     }
 
-    public static final class MultiGet extends NameQuery<Collection<GameProfile>> {
+    public static final class MultiGet extends NameQuery<Map<String, Optional<GameProfile>>> {
 
         private final Iterator<String> iterator;
 
@@ -70,9 +72,9 @@ public abstract class NameQuery<T> extends Query<T> {
         }
 
         @Override
-        public Collection<GameProfile> call() throws Exception {
+        public Map<String, Optional<GameProfile>> call() throws Exception {
             if (!this.iterator.hasNext()) {
-                return ImmutableSet.of();
+                return Collections.emptyMap();
             }
 
             return this.fromNames(Sets.newHashSet(this.iterator));

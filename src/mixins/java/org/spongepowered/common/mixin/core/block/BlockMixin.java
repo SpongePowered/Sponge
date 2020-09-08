@@ -25,48 +25,14 @@
 package org.spongepowered.common.mixin.core.block;
 
 import co.aikar.timings.Timing;
-import net.minecraft.block.BeaconBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.EndGatewayBlock;
-import net.minecraft.block.EnderChestBlock;
-import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.block.SpawnerBlock;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.ConstructEntityEvent;
-import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
-import org.spongepowered.common.config.ConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.tracker.BlockTrackerCategory;
-import org.spongepowered.common.config.tracker.BlockTrackerModCategory;
-import org.spongepowered.common.config.tracker.TrackerConfig;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
-import org.spongepowered.math.vector.Vector3d;
-
-import java.util.Locale;
 
 import javax.annotation.Nullable;
 
@@ -84,7 +50,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     private boolean impl$allowsEntityBulkCapture = true;
     private boolean impl$allowsBlockEventCreation = true;
     private boolean impl$allowsEntityEventCreation = true;
-    private boolean impl$hasNeighborOverride = false;
 
     @Shadow public abstract String getTranslationKey();
     @Shadow public abstract Material getMaterial(net.minecraft.block.BlockState state);
@@ -94,6 +59,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
      * We captured the dye color when creating the Block.Properties.
      * As the Properties objects are discarded we transfer it over to the Block itself now.
      */
+/*
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setUpSpongeFields(Block.Properties properties, CallbackInfo ci) {
         ((DyeColorBlockBridge)this).bridge$setDyeColor(((DyeColorBlockBridge)properties).bridge$getDyeColor().orElse(null));
@@ -125,7 +91,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
             }
         }
     }
-
+*/
 
     @Override
     public boolean bridge$isVanilla() {
@@ -140,11 +106,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Override
     public boolean bridge$hasCollideWithStateLogic() {
         return this.impl$hasCollideWithStateLogic;
-    }
-
-    @Override
-    public boolean bridge$hasNeighborChangedLogic() {
-        return this.impl$hasNeighborOverride;
     }
 
     @Override
@@ -189,6 +150,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         return this.impl$shouldFireBlockEvents;
     }
 
+    /*
     @SuppressWarnings("ConstantConditions")
     @Override
     public void bridge$initializeTrackerState() {
@@ -251,20 +213,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         } catch (final Throwable ex) {
             // ignore
         }
-        // neighborChanged
-        try {
-            final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? "neighborChanged" : "func_189540_a";
-            final Class<?>[] argTypes = {net.minecraft.block.BlockState.class, net.minecraft.world.World.class, BlockPos.class, Block.class, BlockPos.class};
-            final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            this.impl$hasNeighborOverride = !clazz.equals(Block.class);
-        } catch (final Throwable e) {
-            if (e instanceof NoClassDefFoundError) {
-                // fall back to checking if class equals Block.
-                // Fixes https://github.com/SpongePowered/SpongeForge/issues/2770
-                //noinspection EqualsBetweenInconvertibleTypes
-                this.impl$hasNeighborOverride = !this.getClass().equals(Block.class);
-            }
-        }
+
 
         if (!blockTrackerModCat.isEnabled()) {
             this.impl$allowsBlockBulkCapture = false;
@@ -286,4 +235,5 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
             trackerConfigAdapter.save();
         }
     }
+     */
 }

@@ -44,10 +44,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IWorldReader;
-import net.minecraft.world.LightType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -58,6 +56,7 @@ import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.Player;
@@ -90,6 +89,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -102,16 +102,14 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
 
     @Shadow public @Final Random rand;
     @Shadow protected @Final WorldInfo worldInfo;
+    @Shadow @Final public List<TileEntity> loadedTileEntityList;
 
-    @Shadow public abstract Biome shadow$getBiome(BlockPos p_180494_1_);
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract net.minecraft.world.chunk.Chunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
     @Shadow public abstract boolean shadow$setBlockState(BlockPos p_180501_1_, BlockState p_180501_2_, int p_180501_3_);
     @Shadow public abstract boolean shadow$removeBlock(BlockPos p_217377_1_, boolean p_217377_2_);
-    @Shadow public abstract boolean shadow$destroyBlock(BlockPos p_175655_1_, boolean p_175655_2_);
     @Shadow public abstract int shadow$getHeight(Heightmap.Type p_201676_1_, int p_201676_2_, int p_201676_3_);
-    @Shadow public abstract int shadow$getLightFor(LightType p_175642_1_, BlockPos p_175642_2_);
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos p_175625_1_);
@@ -129,7 +127,6 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Shadow public abstract Dimension shadow$getDimension();
     @Shadow public abstract Random shadow$getRandom();
     @Shadow public abstract boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<BlockState> p_217375_2_);
-    @Shadow public abstract BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
 
     private Context impl$context;
 
@@ -206,7 +203,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
         if (chunkProvider instanceof ServerChunkProvider) {
             final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerChunkProvider) chunkProvider).chunkManager;
             final List<Chunk> chunks = new ArrayList<>();
-            chunkManager.accessor$getLoadedChunksIterable().forEach(holder -> chunks.add((Chunk) holder.func_219298_c()));
+            chunkManager.accessor$getLoadedChunksIterable().forEach(holder -> chunks.add((Chunk) holder.getChunkIfComplete()));
             return chunks;
         }
         return Collections.emptyList();
@@ -234,78 +231,6 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Override
     public Vector3i getBlockSize() {
         return Constants.World.BLOCK_SIZE;
-    }
-
-    // WeatherUniverse
-
-    @Override
-    public Weather getWeather() {
-        if (this.shadow$isThundering()) {
-            return Weathers.THUNDER_STORM.get();
-        }
-        if (this.shadow$isRaining()) {
-            return Weathers.RAIN.get();
-        }
-        return Weathers.CLEAR.get();
-    }
-
-    @Override
-    public Duration getRemainingWeatherDuration() {
-        return Duration.of(this.impl$getDurationInTicks(), TemporalUnits.MINECRAFT_TICKS);
-    }
-
-    private long impl$getDurationInTicks() {
-        if (this.shadow$isThundering()) {
-            return this.worldInfo.getThunderTime();
-        }
-        if (this.shadow$isRaining()) {
-            return this.worldInfo.getRainTime();
-        }
-        if (this.worldInfo.getClearWeatherTime() > 0) {
-            return this.worldInfo.getClearWeatherTime();
-        }
-        return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
-    }
-
-    @Override
-    public Duration getRunningWeatherDuration() {
-        return Duration.of(this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime(), TemporalUnits.MINECRAFT_TICKS);
-    }
-
-    @Override
-    public void setWeather(final Weather weather) {
-        Preconditions.checkNotNull(weather);
-        this.impl$setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
-    }
-
-    @Override
-    public void setWeather(final Weather weather, final Duration duration) {
-        Preconditions.checkNotNull(weather);
-        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
-        final int ticks = (int) (duration.toMillis() / TemporalUnits.MINECRAFT_TICKS.getDuration().toMillis());
-        this.impl$setWeather(weather, ticks);
-    }
-
-    public void impl$setWeather(final Weather weather, final int ticks) {
-        if (weather == Weathers.CLEAR.get()) {
-            this.worldInfo.setClearWeatherTime(ticks);
-            this.worldInfo.setRainTime(0);
-            this.worldInfo.setThunderTime(0);
-            this.worldInfo.setRaining(false);
-            this.worldInfo.setThundering(false);
-        } else if (weather == Weathers.RAIN.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(false);
-        } else if (weather == Weathers.THUNDER_STORM.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(true);
-        }
     }
 
     // ContextSource
@@ -399,5 +324,34 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
             this.shadow$getServer().getPlayerList().sendToAllNearExcept(null, x, y, z, radius,
               this.shadow$getDimension().getType(), packet);
         }
+    }
+
+    @Override
+    public Collection<? extends BlockEntity> getBlockEntities() {
+        return (Collection) this.loadedTileEntityList;
+    }
+
+    public boolean allowsPlayerRespawns() {
+        return this.shadow$getDimension().canRespawnHere();
+    }
+
+    @Override
+    public boolean doesWaterEvaporate() {
+        return this.shadow$getDimension().doesWaterVaporize();
+    }
+
+    @Override
+    public boolean hasSkylight() {
+        return this.shadow$getDimension().hasSkyLight();
+    }
+
+    @Override
+    public boolean isCaveWorld() {
+        return this.shadow$getDimension().isNether();
+    }
+
+    @Override
+    public boolean isSurfaceWorld() {
+        return this.shadow$getDimension().isSurfaceWorld();
     }
 }

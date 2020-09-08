@@ -29,13 +29,20 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.Hand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -44,6 +51,34 @@ import javax.annotation.Nullable;
         ArmorStandEntity.class,
         MobEntity.class})
 public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEquipable {
+
+    // TODO can we implement canEquip?
+    // We might want to allow plugins to set any item
+    // but we should least expose checks if an item can be equipped normally
+
+    @Override
+    public boolean canEquip(final EquipmentType type) {
+        return true;
+    }
+
+    @Override
+    public boolean canEquip(final EquipmentType type, @Nullable final ItemStack equipment) {
+        return true;
+    }
+
+    @Override
+    public Optional<ItemStack> getEquipped(final EquipmentType type) {
+        final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
+        final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
+        return Optional.of(ItemStackUtil.fromNative(lens.getStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getSlotIndex())));
+    }
+
+    @Override
+    public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
+        final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
+        final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
+        return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getSlotIndex(), ItemStackUtil.toNative(equipment));
+    }
 
     @Override
     public ItemStack getItemInHand(HandType handType) {

@@ -39,6 +39,8 @@ import java.util.Map;
 
 public class ImmutableDataManipulatorFactory implements DataManipulator.Immutable.Factory {
 
+    public static final DataManipulator.Immutable.Factory INSTANCE = new ImmutableDataManipulatorFactory();
+
     @Override
     public DataManipulator.Immutable of() {
         return new ImmutableDataManipulator(ImmutableMap.of());

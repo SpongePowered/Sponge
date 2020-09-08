@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DoubleSidedInventory.class)
 public interface DoubleSidedInventoryAccessor {
 
-    @Accessor("field_70477_b") IInventory accessor$getField_70477_b();
+    @Accessor("upperChest") IInventory accessor$getUpperChest();
 
-    @Accessor("field_70478_c") IInventory accessor$getField_70478_c();
+    @Accessor("lowerChest") IInventory accessor$getLowerChest();
 }

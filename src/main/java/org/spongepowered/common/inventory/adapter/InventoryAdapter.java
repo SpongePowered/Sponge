@@ -62,7 +62,7 @@ public interface InventoryAdapter {
 
     // TODO override this to provide caching when possible
     default Optional<Slot> inventoryAdapter$getSlot(final int ordinal) {
-        final SlotLens slotLens = this.inventoryAdapter$getRootLens().getSlotLens(ordinal);
+        final SlotLens slotLens = this.inventoryAdapter$getRootLens().getSlotLens(this.inventoryAdapter$getFabric(), ordinal);
         return BasicInventoryAdapter.forSlot(this.inventoryAdapter$getFabric(), slotLens, (Inventory) this);
     }
 

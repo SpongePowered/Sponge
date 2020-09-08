@@ -33,19 +33,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.entity.item.BoatBridge;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(BoatEntity.class)
-public abstract class BoatEntityMixin extends EntityMixin {
+public abstract class BoatEntityMixin extends EntityMixin implements BoatBridge {
 
     private float impl$maxSpeed = Constants.Entity.Boat.DEFAULT_MAX_SPEED;
     private boolean impl$moveOnLand = Constants.Entity.Boat.MOVE_ON_LAND;
     private double impl$occupiedDecelerationSpeed = Constants.Entity.Boat.OCCUPIED_DECELERATION_SPEED;
     private double impl$unoccupiedDecelerationSpeed = Constants.Entity.Boat.UNOCCUPIED_DECELERATION_SPEED;
 
-    @ModifyConstant(method = "updateMotion", constant = @Constant(floatValue = 0.9f))
-    private float impl$getMaximumWaterMotion() {
+    @ModifyConstant(method = "updateMotion", constant = @Constant(floatValue = Constants.Entity.Boat.DEFAULT_MAX_SPEED))
+    private float impl$getMaximumWaterMotion(final float originalSpeed) {
         return this.impl$maxSpeed;
     }
 
@@ -78,5 +79,45 @@ public abstract class BoatEntityMixin extends EntityMixin {
         compound.putBoolean(Constants.Entity.Boat.BOAT_MOVE_ON_LAND, this.impl$moveOnLand);
         compound.putDouble(Constants.Entity.Boat.BOAT_OCCUPIED_DECELERATION_SPEED, this.impl$occupiedDecelerationSpeed);
         compound.putDouble(Constants.Entity.Boat.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.impl$unoccupiedDecelerationSpeed);
+    }
+
+    @Override
+    public double bridge$getMaxSpeed() {
+        return impl$maxSpeed;
+    }
+
+    @Override
+    public void bridge$setMaxSpeed(double impl$maxSpeed) {
+        this.impl$maxSpeed = (float) impl$maxSpeed;
+    }
+
+    @Override
+    public boolean bridge$getMoveOnLand() {
+        return impl$moveOnLand;
+    }
+
+    @Override
+    public void bridge$setMoveOnLand(boolean impl$moveOnLand) {
+        this.impl$moveOnLand = impl$moveOnLand;
+    }
+
+    @Override
+    public double bridge$getOccupiedDecelerationSpeed() {
+        return impl$occupiedDecelerationSpeed;
+    }
+
+    @Override
+    public void bridge$setOccupiedDecelerationSpeed(double impl$occupiedDecelerationSpeed) {
+        this.impl$occupiedDecelerationSpeed = impl$occupiedDecelerationSpeed;
+    }
+
+    @Override
+    public double bridge$getUnoccupiedDecelerationSpeed() {
+        return impl$unoccupiedDecelerationSpeed;
+    }
+
+    @Override
+    public void bridge$setUnoccupiedDecelerationSpeed(double impl$unoccupiedDecelerationSpeed) {
+        this.impl$unoccupiedDecelerationSpeed = impl$unoccupiedDecelerationSpeed;
     }
 }

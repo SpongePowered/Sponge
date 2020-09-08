@@ -67,6 +67,7 @@ public final class TileEntityTypeSupplier {
             .registerSupplier(BlockEntityType.class, "bell", () -> (BlockEntityType) TileEntityType.BELL)
             .registerSupplier(BlockEntityType.class, "jigsaw", () -> (BlockEntityType) TileEntityType.JIGSAW)
             .registerSupplier(BlockEntityType.class, "campfire", () -> (BlockEntityType) TileEntityType.CAMPFIRE)
+            .registerSupplier(BlockEntityType.class, "beehive", () -> (BlockEntityType) TileEntityType.BEEHIVE)
         ;
     }
 }

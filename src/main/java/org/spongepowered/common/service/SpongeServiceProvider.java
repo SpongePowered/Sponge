@@ -34,8 +34,8 @@ import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.ServiceRegistration;
@@ -45,12 +45,13 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.common.ServicesCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.common.ServicesCategory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
 import org.spongepowered.common.launch.Launcher;
 import org.spongepowered.common.service.ban.SpongeBanService;
+import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -77,11 +78,10 @@ public final class SpongeServiceProvider implements ServiceProvider {
                             EconomyService.class,
                             ServicesCategory.ServicePluginSubCategory::getEconomyService,
                             null))
-                    // TODO: currently in invalid, will need doing when text comes back up
                     .add(new Service<>(
                             PaginationService.class,
                             ServicesCategory.ServicePluginSubCategory::getPaginationService,
-                            null))
+                            SpongePaginationService.class))
                     .add(new Service<>(
                             PermissionService.class,
                             ServicesCategory.ServicePluginSubCategory::getPermissionService,

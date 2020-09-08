@@ -27,7 +27,7 @@ package org.spongepowered.common.service.ban;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.BanService;
-import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.service.ban.Ban;
 
 import java.io.File;
 import java.util.ArrayList;

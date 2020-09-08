@@ -24,20 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-public class EntityTickContext extends TickContext<EntityTickContext> {
-
-    double posX;
-    double posY;
-    double posZ;
-    public double prevX;
-    public double prevY;
-    public double prevZ;
-
+public final class EntityTickContext extends TickContext<EntityTickContext> {
 
     EntityTickContext(final IPhaseState<? extends EntityTickContext> phaseState, PhaseTracker tracker) {
         super(phaseState, tracker);
@@ -53,28 +44,6 @@ public class EntityTickContext extends TickContext<EntityTickContext> {
             this.setBulkEntityCaptures(mixinEntity.bridge$allowsEntityBulkCaptures());
             this.setEntitySpawnEvents(mixinEntity.bridge$allowsEntityEventCreation());
         }
-        this.populateEntityPosition((Entity) owner);
         return super.source(owner);
-    }
-
-    @Override
-    protected void reset() {
-        super.reset();
-        this.posX = 0;
-        this.posY = 0;
-        this.posZ = 0;
-        this.prevX = 0;
-        this.prevY = 0;
-        this.prevZ = 0;
-    }
-
-    public void populateEntityPosition(final Entity entity) {
-        this.posX = entity.posX;
-        this.posY = entity.posY;
-        this.posZ = entity.posZ;
-        this.prevX = entity.lastTickPosX;
-        this.prevY = entity.lastTickPosY;
-        this.prevZ = entity.lastTickPosZ;
-
     }
 }

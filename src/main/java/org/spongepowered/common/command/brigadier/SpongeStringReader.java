@@ -71,6 +71,16 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     }
 
     @Override
+    public char peekCharacter() {
+        if (this.canRead()) {
+            final char read = this.read();
+            this.setCursor(this.getCursor() - 1);
+            return read;
+        }
+        throw new IllegalStateException("Cannot get character when at the end of the string.");
+    }
+
+    @Override
     public char parseChar() {
         return this.read();
     }
@@ -193,7 +203,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     }
 
     @NonNull
-    public ArgumentParseException createException(@NonNull final Component errorMessage, @NonNull Throwable inner) {
+    public ArgumentParseException createException(@NonNull final Component errorMessage, @NonNull final Throwable inner) {
         return new ArgumentParseException(errorMessage, inner, this.getInput(), this.getCursor());
     }
 

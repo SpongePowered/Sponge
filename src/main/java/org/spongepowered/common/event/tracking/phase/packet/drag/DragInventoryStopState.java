@@ -25,12 +25,12 @@
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.network.IPacket;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
@@ -63,17 +63,22 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
         final ServerPlayerEntity player = context.getPacketPlayer();
         ((TrackedContainerBridge) player.openContainer).bridge$setFirePreview(true);
 
-        Inventory craftInv = ((Inventory) player.openContainer).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
-        if (craftInv instanceof CraftingInventory) {
+        final CraftingInventory craftInv = ((Inventory) player.openContainer).query(CraftingInventory.class).orElse(null);
+        if (craftInv != null) {
             List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) player.openContainer).bridge$getPreviewTransactions();
             if (!previewTransactions.isEmpty()) {
-                Optional<ICraftingRecipe> recipe = player.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING,
-                        (net.minecraft.inventory.CraftingInventory) ((CraftingInventory) craftInv).getCraftingGrid(),
-                        player.world
-                );
-                InventoryEventFactory.callCraftEventPre(player, ((CraftingInventory) craftInv), previewTransactions.get(0),
-                        ((CraftingRecipe) recipe.orElse(null)), player.openContainer, previewTransactions);
-                previewTransactions.clear();
+                net.minecraft.inventory.CraftingInventory mcCraftInv = null;
+                for (Slot slot : player.openContainer.inventorySlots) {
+                    if (slot.inventory instanceof net.minecraft.inventory.CraftingInventory) {
+                        mcCraftInv = ((net.minecraft.inventory.CraftingInventory) slot.inventory);
+                    }
+                }
+                if (mcCraftInv != null) {
+                    Optional<ICraftingRecipe> recipe = player.getServer().getRecipeManager().getRecipe(IRecipeType.CRAFTING, mcCraftInv, player.world);
+                    InventoryEventFactory.callCraftEventPre(player, craftInv, previewTransactions.get(0),
+                            ((CraftingRecipe) recipe.orElse(null)), player.openContainer, previewTransactions);
+                    previewTransactions.clear();
+                }
             }
         }
     }

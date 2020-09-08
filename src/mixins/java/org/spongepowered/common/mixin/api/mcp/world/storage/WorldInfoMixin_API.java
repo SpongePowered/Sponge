@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.storage;
 
-import com.google.common.base.Preconditions;
 import com.google.gson.JsonParseException;
-import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.key.KeyedValue;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Difficulty;
@@ -42,12 +39,11 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.gamerule.GameRule;
-import org.spongepowered.api.world.gen.GeneratorType;
+import org.spongepowered.api.world.gen.GeneratorModifierType;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.world.teleport.PortalAgentType;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Implements;
@@ -58,17 +54,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.GameRules_RuleValueAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -77,9 +74,12 @@ import java.util.UUID;
 @Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
 public abstract class WorldInfoMixin_API implements WorldProperties {
 
+    // @formatter:off
+
     @Shadow private long randomSeed;
     @Shadow @Nullable private String legacyCustomOptions;
     @Shadow private UUID wanderingTraderId;
+
     @Shadow public abstract int shadow$getSpawnX();
     @Shadow public abstract int shadow$getSpawnY();
     @Shadow public abstract int shadow$getSpawnZ();
@@ -120,9 +120,16 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     @Shadow public abstract void shadow$setClearWeatherTime(int time);
     @Shadow public abstract int shadow$getClearWeatherTime();
 
+    // @formatter:on
+
     @Override
     public ResourceKey getKey() {
         return ((ResourceKeyBridge) this).bridge$getKey();
+    }
+
+    @Override
+    public Optional<ServerWorld> getWorld() {
+        return Optional.ofNullable((ServerWorld) ((WorldInfoBridge) this).bridge$getWorld());
     }
 
     @Override
@@ -131,20 +138,20 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setSpawnPosition(Vector3i position) {
-        Preconditions.checkNotNull(position);
+    public void setSpawnPosition(final Vector3i position) {
+        Objects.requireNonNull(position);
         this.shadow$setSpawn(VecHelper.toBlockPos(position));
     }
 
     @Override
-    public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.shadow$getGenerator();
+    public GeneratorModifierType getGeneratorModifierType() {
+        return (GeneratorModifierType) this.shadow$getGenerator();
     }
 
     @Override
-    public void setGeneratorType(final GeneratorType type) {
-        Preconditions.checkNotNull(type);
-        this.shadow$setGenerator((WorldType) type);
+    public void setGeneratorModifierType(final GeneratorModifierType modifier) {
+        Objects.requireNonNull(modifier);
+        this.shadow$setGenerator((WorldType) modifier);
     }
 
     @Intrinsic
@@ -168,18 +175,18 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setDayTime(Duration time) {
+    public void setDayTime(final Duration time) {
         this.shadow$setDayTime(time.toMillis());
     }
 
     @Override
     public DimensionType getDimensionType() {
-        return ((DimensionTypeBridge) ((WorldInfoBridge) this).bridge$getDimensionType()).bridge$getSpongeDimensionType();
+        return ((WorldInfoBridge) this).bridge$getLogicType();
     }
 
     @Override
-    public PortalAgentType getPortalAgentType() {
-        return ((WorldInfoBridge) this).bridge$getPortalAgent();
+    public void setDimensionType(final DimensionType dimensionType) {
+        ((WorldInfoBridge) this).bridge$setLogicType((SpongeDimensionType) dimensionType, true);
     }
 
     @Override
@@ -188,7 +195,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setGameMode(GameMode gamemode) {
+    public void setGameMode(final GameMode gamemode) {
         this.shadow$setGameType((GameType) (Object) gamemode);
     }
 
@@ -208,7 +215,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Intrinsic
-    public void worldproperties$setHardcore(boolean state) {
+    public void worldproperties$setHardcore(final boolean state) {
         this.shadow$setHardcore(state);
     }
 
@@ -218,7 +225,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setCommandsEnabled(boolean state) {
+    public void setCommandsEnabled(final boolean state) {
         this.shadow$setAllowCommands(state);
     }
 
@@ -233,7 +240,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setDifficulty(org.spongepowered.api.world.difficulty.Difficulty difficulty) {
+    public void setDifficulty(final org.spongepowered.api.world.difficulty.Difficulty difficulty) {
         this.shadow$setDifficulty((Difficulty) (Object) difficulty);
     }
 
@@ -243,7 +250,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setPVPEnabled(boolean state) {
+    public void setPVPEnabled(final boolean state) {
         ((WorldInfoBridge) this).bridge$setPVPEnabled(state);
     }
 
@@ -253,7 +260,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setGenerateBonusChest(boolean state) {
+    public void setGenerateBonusChest(final boolean state) {
         ((WorldInfoBridge) this).bridge$setGenerateBonusChest(state);
     }
 
@@ -268,7 +275,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setEnabled(boolean state) {
+    public void setEnabled(final boolean state) {
         ((WorldInfoBridge) this).bridge$setEnabled(state);
     }
 
@@ -278,7 +285,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setLoadOnStartup(boolean state) {
+    public void setLoadOnStartup(final boolean state) {
         ((WorldInfoBridge) this).bridge$setLoadOnStartup(state);
     }
 
@@ -288,7 +295,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setKeepSpawnLoaded(boolean state) {
+    public void setKeepSpawnLoaded(final boolean state) {
         ((WorldInfoBridge) this).bridge$setKeepSpawnLoaded(state);
     }
 
@@ -298,7 +305,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setGenerateSpawnOnLoad(boolean state) {
+    public void setGenerateSpawnOnLoad(final boolean state) {
         ((WorldInfoBridge) this).bridge$setGenerateSpawnOnLoad(state);
     }
 
@@ -318,7 +325,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setGeneratorSettings(DataContainer generatorSettings) {
+    public void setGeneratorSettings(final DataContainer generatorSettings) {
         this.shadow$setGeneratorOptions(NbtTranslator.getInstance().translate(generatorSettings));
     }
 
@@ -328,8 +335,8 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setSerializationBehavior(SerializationBehavior behavior) {
-        ((WorldInfoBridge) this).bridge$setSerializationBehavior(Preconditions.checkNotNull(behavior));
+    public void setSerializationBehavior(final SerializationBehavior behavior) {
+        ((WorldInfoBridge) this).bridge$setSerializationBehavior(Objects.requireNonNull(behavior));
     }
 
     @Intrinsic
@@ -358,7 +365,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setWanderingTrader(@Nullable WanderingTrader trader) {
+    public void setWanderingTrader(@Nullable final WanderingTrader trader) {
         this.shadow$setWanderingTraderId(trader == null ? null : trader.getUniqueId());
     }
 
@@ -367,7 +374,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         if (this.shadow$isRaining()) {
             return Weathers.RAIN.get();
         } else if (this.shadow$isThundering()) {
-            return Weathers.THUNDER_STORM.get();
+            return Weathers.THUNDER.get();
         }
         return Weathers.CLEAR.get();
     }
@@ -395,12 +402,12 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setWeather(Weather weather) {
+    public void setWeather(final Weather weather) {
         this.setWeather(weather, Duration.ofSeconds(6000));
     }
 
     @Override
-    public void setWeather(Weather weather, Duration duration) {
+    public void setWeather(final Weather weather, final Duration duration) {
         if (weather == Weathers.CLEAR.get()) {
             this.shadow$setClearWeatherTime((int) (duration.toMillis() / 1000));
             this.shadow$setRaining(false);
@@ -413,7 +420,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
             this.shadow$setClearWeatherTime(0);
-        } else if (weather == Weathers.THUNDER_STORM.get()) {
+        } else if (weather == Weathers.THUNDER.get()) {
             this.shadow$setRaining(true);
             this.shadow$setRainTime((int) (duration.toMillis() / 1000));
             this.shadow$setThundering(true);
@@ -423,7 +430,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public <V> V getGameRule(GameRule<V> gameRule) {
+    public <V> V getGameRule(final GameRule<V> gameRule) {
         // TODO Minecraft 1.14 - Boy, this is baaaad....
         final GameRules.RuleValue<?> value = this.shadow$getGameRulesInstance().get((GameRules.RuleKey<?>) (Object) gameRule);
         if (value instanceof GameRules.BooleanValue) {
@@ -435,10 +442,10 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public <V> void setGameRule(GameRule<V> gameRule, V value) {
+    public <V> void setGameRule(final GameRule<V> gameRule, V value) {
         // TODO Minecraft 1.14 - Boy, this is baaaad....
         final GameRules.RuleValue<?> mValue = this.shadow$getGameRulesInstance().get((GameRules.RuleKey<?>) (Object) gameRule);
-        ((GameRules_RuleValueAccessor) mValue).accessor$func_223553_a(value.toString());
+        ((GameRules_RuleValueAccessor) mValue).accessor$setStringValue(value.toString());
     }
 
     @Override

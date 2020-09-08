@@ -30,6 +30,8 @@ import org.spongepowered.common.data.key.SpongeKey;
 
 public class SpongeValueFactory implements Value.Factory {
 
+    public static final SpongeValueFactory INSTANCE = new SpongeValueFactory();
+
     @Override
     @SuppressWarnings("unchecked")
     public <V extends Value<E>, E> V mutableOf(Key<V> key, E element) {

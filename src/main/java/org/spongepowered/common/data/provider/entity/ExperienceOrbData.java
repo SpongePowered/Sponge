@@ -39,7 +39,13 @@ public final class ExperienceOrbData {
                 .asMutable(ExperienceOrbEntityAccessor.class)
                     .create(Keys.EXPERIENCE)
                         .get(ExperienceOrbEntityAccessor::accessor$getXpValue)
-                        .set(ExperienceOrbEntityAccessor::accessor$setXpValue);
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setXpValue(v);
+                            return true;
+                        });
     }
     // @formatter:on
 }

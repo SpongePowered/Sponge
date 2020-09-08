@@ -28,8 +28,9 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.event.cause.entity.DismountType;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -38,21 +39,6 @@ public interface EntityBridge {
     boolean bridge$isConstructing();
 
     void bridge$fireConstructors();
-
-    /**
-     * Gets whether this entity has been added to a World's tracked entity lists
-     * @return True if this entity is being tracked in a world's chunk lists.
-     */
-    boolean bridge$isWorldTracked();
-
-    /**
-     * Sets an entity to be tracked or untracked. Specifically used in
-     * {@link net.minecraft.world.World#addEntity(Entity)} (Entity)} and
-     * {@link net.minecraft.world.server.ServerWorld#removeEntity(Entity)}.
-     *
-     * @param tracked Tracked
-     */
-    void bridge$setWorldTracked(boolean tracked);
 
     boolean bridge$removePassengers(DismountType type);
 
@@ -68,11 +54,11 @@ public interface EntityBridge {
 
     void bridge$setFireImmuneTicks(int ticks);
 
-    boolean bridge$shouldTick();
-
     default void bridge$clearWrappedCaptureList() {
 
     }
+
+    boolean bridge$setLocation(ServerLocation location);
 
     /**
      * @author gabizou - July 26th, 2018
@@ -86,4 +72,6 @@ public interface EntityBridge {
     default void bridge$onCancelledBlockChange(EntityTickContext phaseContext) {
 
     }
+
+    void bridge$setTransient(boolean value);
 }

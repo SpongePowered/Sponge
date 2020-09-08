@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.accessor.network.play.server;
 
-import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SSpawnPlayerPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -47,6 +46,4 @@ public interface SSpawnPlayerPacketAccessor {
     @Accessor("yaw") void accessor$setYaw(byte value);
 
     @Accessor("pitch") void accessor$setPitch(byte value);
-
-    @Accessor("watcher") void accessor$setWatcher(EntityDataManager value);
 }

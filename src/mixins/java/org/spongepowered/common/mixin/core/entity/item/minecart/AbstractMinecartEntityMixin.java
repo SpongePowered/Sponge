@@ -30,6 +30,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
+import org.spongepowered.api.entity.vehicle.minecart.MinecartEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
@@ -120,7 +121,7 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             frame.pushCause(source);
-            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), (Minecart) this, new ArrayList<>(), 0, amount);
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(), (MinecartEntity) this, new ArrayList<>(), 0, amount);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
@@ -155,7 +156,36 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
     }
 
     @Override
-    public Vector3d bridge$getAirboneVelocityModifier() {
-        return this.impl$airborneMod;
+    public double bridge$getMaxSpeed() {
+        return this.impl$maxSpeed;
+    }
+
+    @Override
+    public void bridge$setMaxSpeed(double impl$maxSpeed) {
+        this.impl$maxSpeed = impl$maxSpeed;
+    }
+    @Override
+    public boolean bridge$getSlowWhenEmpty() {
+        return impl$slowWhenEmpty;
+    }
+    @Override
+    public void bridge$setSlowWhenEmpty(boolean impl$slowWhenEmpty) {
+        this.impl$slowWhenEmpty = impl$slowWhenEmpty;
+    }
+    @Override
+    public Vector3d bridge$getAirborneMod() {
+        return impl$airborneMod;
+    }
+    @Override
+    public void bridge$setAirborneMod(Vector3d impl$airborneMod) {
+        this.impl$airborneMod = impl$airborneMod;
+    }
+    @Override
+    public Vector3d bridge$getDerailedMod() {
+        return impl$derailedMod;
+    }
+    @Override
+    public void bridge$setDerailedMod(Vector3d impl$derailedMod) {
+        this.impl$derailedMod = impl$derailedMod;
     }
 }

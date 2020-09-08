@@ -34,23 +34,19 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -62,9 +58,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
-import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public final class PlaceBlockPacketState extends BasicPacketState {
@@ -122,13 +116,13 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final ServerPlayerEntity player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = context.getItemUsedSnapshot();
-        context.getCapturedEntitySupplier()
-            .acceptAndClearIfNotEmpty(entities -> {
-                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
-                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
-                }
-            });
+//        context.getCapturedEntitySupplier()
+//            .acceptAndClearIfNotEmpty(entities -> {
+//                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+//                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
+//                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
+//                }
+//            });
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
         // Swap the items used, the item used is what we want to "restore" it to the player
         final Hand hand = (Hand) (Object) context.getHandUsed();
@@ -139,18 +133,6 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         } else {
             player.setHeldItem(hand, replaced);
         }
-        context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(drops -> {
-            final List<Entity> entities =
-                drops.stream().map(drop -> drop.create(player.getServerWorld())).map(entity -> (Entity) entity)
-                    .collect(Collectors.toList());
-            if (!entities.isEmpty()) {
-                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
-                }
-            }
-
-        });
 
         final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
         trackedInventory.bridge$setCaptureInventory(false);
@@ -167,8 +149,4 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         return SpawnTypes.PLACEMENT.get();
     }
 
-    @Override
-    public boolean hasSpecificBlockProcess(final BasicPacketContext context) {
-        return false;
-    }
 }

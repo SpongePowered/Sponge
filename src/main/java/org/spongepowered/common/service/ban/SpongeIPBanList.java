@@ -28,7 +28,7 @@ import static org.spongepowered.common.util.NetworkUtil.LOCAL_ADDRESS;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.BanService;
-import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.common.util.NetworkUtil;
 
 import java.io.File;

@@ -45,7 +45,6 @@ import net.minecraft.world.GameRules;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.type.ArtType;
@@ -81,8 +80,8 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.accessor.entity.item.ArmorStandEntityAccessor;
+import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -92,7 +91,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
@@ -528,7 +526,7 @@ public final class Constants {
         // These are the various tag compound id's for getting to various places
         public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
         public static final String BLOCK_ENTITY_ID = "id";
-        public static final String ITEM_ENCHANTMENT_LIST = "ench";
+        public static final String ITEM_ENCHANTMENT_LIST = "Enchantments";
         public static final String ITEM_STORED_ENCHANTMENTS_LIST = "StoredEnchantments";
         public static final String ITEM_DISPLAY = "display";
         public static final String ITEM_DISPLAY_NAME = "Name";
@@ -1023,11 +1021,16 @@ public final class Constants {
         public static final int DENY_NEIGHBOR_SHAPE_UPDATE =   1 << 4; // 16
         public static final int NEIGHBOR_DROPS =  1 << 5; // 32
         public static final int BLOCK_MOVING =    1 << 6; // 64
-        public static final int PHYSICS_MASK =    0b10000000; // Sponge Added mask, because vanilla doesn't support it yet
+        public static final int PHYSICS_MASK =    1 << 7; // Sponge Added mask, because vanilla doesn't support it yet
         // All of these flags are what we "expose" to the API
         // The flags that are naturally inverted are already inverted here by being masked in
         // with the opposite OR.
         // Example: If we DO want physics, we don't include the physics flag, if we DON'T want physics, we | it in.
+        public static final int FORCED_RESTORE = Constants.BlockChangeFlags.NOTIFY_CLIENTS
+            | Constants.BlockChangeFlags.PHYSICS_MASK
+            | Constants.BlockChangeFlags.FORCE_RE_RENDER
+            | Constants.BlockChangeFlags.NEIGHBOR_DROPS
+            ;
         public static final int ALL = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.NEIGHBOR_MASK;
         public static final int DEFAULT = Constants.BlockChangeFlags.NEIGHBOR_MASK
@@ -1056,8 +1059,6 @@ public final class Constants {
             | Constants.BlockChangeFlags.NEIGHBOR_MASK
             | Constants.BlockChangeFlags.PHYSICS_MASK;
 
-        public static final int NEIGHBOR_PHYSICS_OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.NEIGHBOR_MASK;
         public static final int PHYSICS_OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS;
 
     }
@@ -1126,7 +1127,7 @@ public final class Constants {
             final ListNBT nbttaglist = new ListNBT();
 
             for (final double d1 : numbers) {
-                nbttaglist.add(new DoubleNBT(d1));
+                nbttaglist.add(DoubleNBT.valueOf(d1));
             }
 
             return nbttaglist;
@@ -1136,7 +1137,7 @@ public final class Constants {
             final ListNBT nbttaglist = new ListNBT();
 
             for (final float f : numbers) {
-                nbttaglist.add(new FloatNBT(f));
+                nbttaglist.add(FloatNBT.valueOf(f));
             }
 
             return nbttaglist;
@@ -1479,6 +1480,11 @@ public final class Constants {
         public static final ResourceKey SPONGE_CHANNEL_REGISTRY = ResourceKey.sponge("channel_registry");
 
         /**
+         * A sponge channel used to determine the type of client connecting
+         */
+        public static final ResourceKey SPONGE_CLIENT_TYPE = ResourceKey.sponge("client_type");
+
+        /**
          * A minecraft channel used to register channels keys.
          */
         public static final ResourceKey REGISTER_KEY = ResourceKey.minecraft("register");
@@ -1487,5 +1493,12 @@ public final class Constants {
          * A minecraft channel used to unregister channels keys.
          */
         public static final ResourceKey UNREGISTER_KEY = ResourceKey.minecraft("unregister");
+    }
+
+    public static final class KeyValueMatcher {
+
+        public static final DataQuery VALUE = DataQuery.of("Value");
+        public static final DataQuery OPERATOR = DataQuery.of("Operator");
+        public static final DataQuery KEY = DataQuery.of("Key");
     }
 }

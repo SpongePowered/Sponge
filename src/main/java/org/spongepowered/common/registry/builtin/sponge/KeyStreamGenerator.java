@@ -72,6 +72,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("block_light"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("block_state"), TypeTokens.BLOCK_STATE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("block_temperature"), TypeTokens.DOUBLE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("boat_type"), TypeTokens.BOAT_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("body_rotations"), TypeTokens.MAP_BODY_VECTOR3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("boss_bar"), TypeTokens.BOSS_BAR_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("breakable_block_types"), TypeTokens.SET_BLOCK_TYPE_VALUE_TOKEN));
@@ -364,6 +365,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("skin_moisture"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("sky_light"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("slab_portion"), TypeTokens.SLAB_PORTION_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("sleep_timer"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("slot_index"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("slot_position"), TypeTokens.VECTOR_2I_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("slot_side"), TypeTokens.DIRECTION_VALUE_TOKEN));

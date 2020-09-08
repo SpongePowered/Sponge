@@ -26,12 +26,12 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.scoreboard.Scoreboard;
@@ -41,20 +41,18 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -67,7 +65,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.provider.util.ExperienceHolderUtils;
@@ -82,8 +79,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerEntityBridge, LocationTargetingBridge {
@@ -93,7 +88,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Shadow public float experience;
     @Shadow public PlayerAbilities abilities;
     @Shadow public net.minecraft.entity.player.PlayerInventory inventory;
-    @Shadow public BlockPos spawnPos;
     @Shadow public Container openContainer;
 
     @Shadow public abstract boolean shadow$isSpectator();
@@ -108,6 +102,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     }
     @Shadow public abstract String shadow$getScoreboardName();
 
+    @Shadow @Final public PlayerContainer container;
     private boolean impl$affectsSpawning = true;
     private Vector3d impl$targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
     private boolean impl$dontRecalculateExperience;
@@ -167,7 +162,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
             if (!((WorldBridge) this.world).bridge$isFake()) {
                 final CauseStackManager csm = PhaseTracker.getCauseStackManager();
                 csm.pushCause(this);
-                final BlockPos bedLocation = this.spawnPos;
+                final BlockPos bedLocation = this.shadow$getBedPosition().get();
                 final BlockSnapshot snapshot = ((ServerWorld) this.world).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
                 SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (Humanoid) this));
                 csm.popCause();
@@ -305,6 +300,13 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Override
     public boolean bridge$shouldRestoreInventory() {
         return this.impl$shouldRestoreInventory;
+    }
+
+    @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
+        if (this.impl$hasCustomFireImmuneTicks) {
+            ci.setReturnValue((int) this.impl$fireImmuneTicks);
+        }
     }
 
 /*    @Override

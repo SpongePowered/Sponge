@@ -81,7 +81,8 @@ public class ServerPlayNetHandlerMixin_Inventory {
         }
     }
 
-    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/ints/Int2ShortMap;put(IS)S"))
+    @Inject(method = "processClickWindow", 
+        at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/ints/Int2ShortMap;put(IS)S", remap = false))
     private void impl$updateOpenContainer(final CClickWindowPacket packet, final CallbackInfo ci) {
         // We want to treat an 'invalid' click just like a regular click - we still fire events, do restores, etc.
 

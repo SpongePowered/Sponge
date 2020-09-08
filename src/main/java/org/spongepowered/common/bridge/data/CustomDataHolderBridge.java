@@ -29,38 +29,47 @@ import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.data.SpongeDataManager;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 public interface CustomDataHolderBridge {
 
-    DataTransactionResult bridge$offerCustom(DataManipulator.Mutable manipulator, MergeFunction function);
+    void bridge$clearCustomData();
 
-    <T extends DataManipulator.Mutable> Optional<T> bridge$getCustom(Class<T> customClass);
+    default <E> Optional<E> bridge$getCustom(Key<? extends Value<E>> key) {
+        return this.bridge$getManipulator().get(key);
+    }
 
-    DataTransactionResult bridge$removeCustom(Class<? extends DataManipulator.Mutable> customClass);
+    default <E> DataTransactionResult bridge$offerCustom(Key<? extends Value<E>> key, E value) {
+        final DataManipulator.Mutable manipulator = this.bridge$getManipulator();
+        final Value.Immutable<E> immutableValue = manipulator.getValue(key).map(Value::asImmutable).orElse(null);
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        if (immutableValue != null) {
+            builder.replace(immutableValue);
+        }
+        manipulator.set(key, value);
+        builder.success(manipulator.getValue(key).get().asImmutable());
 
-    boolean bridge$hasManipulators();
+        SpongeDataManager.getInstance().syncCustomToTag(this);
 
-    boolean bridge$supportsCustom(Key<?> key);
+        return builder.result(DataTransactionResult.Type.SUCCESS).build();
+    }
 
-    <E> Optional<E> bridge$getCustom(Key<? extends Value<E>> key);
+    default <E> DataTransactionResult bridge$removeCustom(Key<? extends Value<E>> key) {
+        final Optional<? extends Value<E>> value = this.bridge$getManipulator().getValue(key);
+        return value.map(Value::asImmutable).map(DataTransactionResult::successRemove)
+                .orElseGet(DataTransactionResult::successNoData);
+    }
 
-    <E, V extends Value<E>> Optional<V> bridge$getCustomValue(Key<V> key);
+    DataManipulator.Mutable bridge$getManipulator();
 
-    Collection<DataManipulator.Mutable> bridge$getCustomManipulators();
-
-    <E> DataTransactionResult bridge$offerCustom(Key<? extends Value<E>> key, E value);
-
-    DataTransactionResult bridge$removeCustom(Key<?> key);
-
-    void bridge$removeCustomFromNBT(DataManipulator.Mutable manipulator);
-
-    void bridge$addFailedData(ImmutableList<DataView> failedData);
+    default void bridge$addFailedData(ImmutableList<DataView> failedData) {
+        this.bridge$getFailedData().addAll(failedData);
+        SpongeDataManager.getInstance().syncCustomToTag(this);
+    }
 
     List<DataView> bridge$getFailedData();
 }

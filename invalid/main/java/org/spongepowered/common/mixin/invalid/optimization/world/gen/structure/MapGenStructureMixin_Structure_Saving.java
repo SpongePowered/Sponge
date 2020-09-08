@@ -42,8 +42,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.config.inheritable.category.StructureModCategory;
-import org.spongepowered.common.config.inheritable.category.StructureSaveCategory;
+import org.spongepowered.applaunch.config.inheritable.category.StructureModCategory;
+import org.spongepowered.applaunch.config.inheritable.category.StructureSaveCategory;
 
 import javax.annotation.Nullable;
 import java.util.Locale;

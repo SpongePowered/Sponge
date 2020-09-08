@@ -25,8 +25,8 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.cause.entity.dismount.DismountType;
-import org.spongepowered.common.data.type.SpongeDismountType;
+import org.spongepowered.api.event.cause.entity.DismountType;
+import org.spongepowered.common.event.cause.entity.SpongeDismountType;
 
 import java.util.stream.Stream;
 

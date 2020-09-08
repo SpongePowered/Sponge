@@ -32,73 +32,38 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
+import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.tileentity.TileEntity.class)
-public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge, TrackableBridge {
+public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundHolder, TimingBridge {
 
     //@formatter:off
     @Shadow @Final private TileEntityType<?> type;
     @Shadow @Nullable private BlockState cachedBlockState;
     @Shadow protected net.minecraft.world.World world;
     @Shadow protected BlockPos pos;
+    @Nullable private Timing impl$timing;
 
     @Shadow public abstract BlockPos shadow$getPos();
     @Shadow public abstract BlockState shadow$getBlockState();
     @Shadow public abstract void shadow$markDirty();
-
     //@formatter:on
-
-
-    @Nullable private Timing impl$timing;
-    private boolean impl$isTicking = false;
-    // Used by tracker config
-    private boolean impl$allowsBlockBulkCapture = true;
-    private boolean impl$allowsEntityBulkCapture = true;
-    private boolean impl$allowsBlockEventCreation = true;
-    private boolean impl$allowsEntityEventCreation = true;
-    private boolean impl$isCaptured = false;
-
-    @Inject(method = "<init>*", at = @At("RETURN"))
-    private void impl$RefreshTrackerStates(final CallbackInfo ci) {
-        this.bridge$refreshTrackerStates();
-    }
-
-
-
-    /**
-     * Read extra data (SpongeData) from the tile entity's NBT tag.
-     *
-     * @param compound The SpongeData compound to read from
-     */
-    protected void bridge$readFromSpongeCompound(final CompoundNBT compound) {
-        throw new UnsupportedOperationException("Implement me");
-    }
-
-    /**
-     * Write extra data (SpongeData) to the tile entity's NBT tag.
-     *
-     * @param compound The SpongeData compound to write to
-     */
-    protected void bridge$writeToSpongeCompound(final CompoundNBT compound) {
-        SpongeDataManager.getInstance().serializeCustomData(compound, this);
-    }
-
 
     @Override
     public Timing bridge$getTimingsHandler() {
@@ -108,64 +73,59 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
         return this.impl$timing;
     }
 
+    // When changing custom data it is serialized on to this.
+    // On writeInternal the SpongeData tag is added to the new CompoundNBT accordingly
+    // In a Forge environment the ForgeData tag is managed by forge
+    // Structure: tileNbt - ForgeData - SpongeData - customdata
+    private CompoundNBT impl$nbt;
+
+    // TODO overrides for ForgeData
+    // @Shadow private CompoundNBT customTileData;
+    // @Override CompoundNBT data$getForgeData()
+    // @Override CompoundNBT data$getForgeData()
+    // @Override CompoundNBT data$hasForgeData()
+    // @Override CompoundNBT cleanEmptySpongeData()
 
     @Override
-    public boolean bridge$shouldTick() {
-        final ChunkBridge chunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
-        // Don't tick if chunk is queued for unload or is in progress of being scheduled for unload
-        // See https://github.com/SpongePowered/SpongeVanilla/issues/344
-        if (chunk == null) {
-            return false;
-        }
-        if (!chunk.bridge$isActive()) {
-            return false;
-        }
-
-        return true;
+    public CompoundNBT data$getCompound() {
+        return this.impl$nbt;
     }
 
     @Override
-    public boolean bridge$allowsBlockBulkCaptures() {
-        return this.impl$allowsBlockBulkCapture;
+    public void data$setCompound(CompoundNBT nbt) {
+        this.impl$nbt = nbt;
     }
 
-    @Override
-    public boolean bridge$allowsBlockEventCreation() {
-        return this.impl$allowsBlockEventCreation;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityBulkCaptures() {
-        return this.impl$allowsEntityBulkCapture;
-    }
-
-
-    @Override
-    public boolean bridge$allowsEntityEventCreation() {
-        return this.impl$allowsEntityEventCreation;
-    }
-
-    @Override
-    public boolean bridge$isCaptured() {
-        return this.impl$isCaptured;
-    }
-
-    @Override
-    public void bridge$setCaptured(final boolean captured) {
-        this.impl$isCaptured = captured;
-    }
-
-    @Override
-    public void bridge$refreshTrackerStates() {
-        if (((BlockEntity) this).getType() != null) {
-            this.impl$allowsBlockBulkCapture = ((TrackableBridge) this.type).bridge$allowsBlockBulkCaptures();
-            this.impl$allowsEntityBulkCapture = ((TrackableBridge) this.type).bridge$allowsEntityBulkCaptures();
-            this.impl$allowsBlockEventCreation = ((TrackableBridge) this.type).bridge$allowsBlockEventCreation();
-            this.impl$allowsEntityEventCreation = ((TrackableBridge) this.type).bridge$allowsEntityEventCreation();
+    @Inject(method = "writeInternal", at = @At("RETURN"))
+    private void impl$WriteSpongeDataToCompound(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
+        if (this.data$hasSpongeData()) {
+            final CompoundNBT forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
+            // If we are in Forge data is already present
+            if (forgeCompound != this.data$getForgeData()) {
+                if (forgeCompound.isEmpty()) { // In vanilla this should be an new detached empty compound
+                    compound.put(Constants.Forge.FORGE_DATA, forgeCompound);
+                }
+                // Get our nbt data and write it to the compound
+                forgeCompound.put(Constants.Sponge.SPONGE_DATA, this.data$getSpongeData());
+            }
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @Inject(method = "read", at = @At("RETURN"))
+    private void impl$ReadSpongeDataFromCompound(final CompoundNBT compound, final CallbackInfo ci) {
+        // If we are in Forge data is already present
+        this.data$setCompound(compound); // For vanilla we set the incoming nbt
+        if (this.data$hasSpongeData()) {
+            // Deserialize our data...
+            SpongeDataManager.getInstance().deserializeCustomData(this.data$getSpongeData(), this);
+            this.data$setCompound(null);; // For vanilla this will be recreated empty in the next call - for Forge it reuses the existing compound instead
+            // ReSync our data (includes failed data)
+            SpongeDataManager.getInstance().syncCustomToTag(this);
+        } else {
+            this.data$setCompound(null); // No data? No need to keep the nbt
+        }
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
@@ -181,7 +141,7 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
     protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
         return MoreObjects.toStringHelper(this)
             .add("type", ((BlockEntityType) this.type).getKey())
-            .add("world", this.world.getWorldInfo().getWorldName())
+            .add("world", ((ServerWorld) this.world).getKey())
             .add("pos", this.pos);
     }
 
