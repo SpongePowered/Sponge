@@ -988,7 +988,6 @@ public final class DataTest  {
 //        this.checkOfferListData(writtenBookStack, Keys.PAGES, Arrays.asList(TextComponent.of("Page 1"), TextComponent.of("Page 2")));
 
         final Entity parrot = world.createEntity(EntityTypes.PARROT.get(), position);
-// TODO missing supplier
         this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_AND_BLUE.get());
 
 // TODO missing ParticleEffect.Builder registration
@@ -1182,7 +1181,7 @@ public final class DataTest  {
         this.checkOfferData(parrot, Keys.TAMER, player.getUniqueId());
         this.checkOfferData(parrot, Keys.TAMER, null);
 
-// TODO missing dataprovider       this.checkOfferData(zombiePigman, Keys.TARGET_ENTITY, player);
+        this.checkOfferData(zombiePigman, Keys.TARGET_ENTITY, player);
         this.checkOfferData(shulkerBullet, Keys.TARGET_ENTITY, sheep);
         // FishingBobber
 
