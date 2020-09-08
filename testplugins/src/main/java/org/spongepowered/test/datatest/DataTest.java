@@ -1004,7 +1004,7 @@ public final class DataTest  {
 //        this.checkOfferData(phantom, Keys.PHANTOM_PHASE, PhantomPhases.CIRCLING.get());
 //        this.checkOfferData(phantom, Keys.PHANTOM_PHASE, PhantomPhases.SWOOPING.get());
 
-//        this.checkOfferData(itemEntity, Keys.PICKUP_DELAY, 5);
+        this.checkOfferData(itemEntity, Keys.PICKUP_DELAY, 5);
 
         // TODO Keys.PICKUP_RULE
 
