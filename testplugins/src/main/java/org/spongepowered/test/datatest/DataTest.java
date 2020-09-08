@@ -173,7 +173,6 @@ public final class DataTest  {
         Entity sheep = world.createEntity(EntityTypes.SHEEP.get(), position);
         this.checkGetData(sheep, Keys.AGE, 0);
         this.checkOfferData(player, Keys.AGE, 10);
-        // TODO check fail on negative values
 
         final Entity minecartEntity = world.createEntity(EntityTypes.MINECART.get(), position);
         this.checkOfferData(minecartEntity, Keys.AIRBORNE_VELOCITY_MODIFIER, new Vector3d(2, 0.5, 2)); // falls at ~50% flies at -200%
@@ -366,7 +365,6 @@ public final class DataTest  {
         final ItemStack waterBucket = ItemStack.of(ItemTypes.WATER_BUCKET);
         this.checkGetData(waterBucket, Keys.CONTAINER_ITEM, ItemTypes.BUCKET.get());
 
-        // Keys.COOLDOWN
         world.setBlock(blockPos, BlockTypes.HOPPER.get().getDefaultState());
         this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
         this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 10);
