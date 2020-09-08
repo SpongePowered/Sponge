@@ -998,7 +998,7 @@ public final class DataTest  {
 
         this.checkGetListData(donkey, Keys.PASSENGERS, Arrays.asList(wolf));
 
-//        this.checkOfferData(tropicalFish, Keys.PATTERN_COLOR, DyeColors.CYAN.get());
+        this.checkOfferData(tropicalFish, Keys.PATTERN_COLOR, DyeColors.CYAN.get());
 
         final Entity phantom = world.createEntity(EntityTypes.PHANTOM.get(), position);
 //        this.checkOfferData(phantom, Keys.PHANTOM_PHASE, PhantomPhases.CIRCLING.get());
