@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.entity.living.human;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -40,21 +38,14 @@ import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.brain.task.WalkRandomlyTask;
-import net.minecraft.entity.ai.goal.BreedGoal;
-import net.minecraft.entity.ai.goal.FollowParentGoal;
 import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.ai.goal.RandomWalkingGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.ai.goal.TemptGoal;
 import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
-import net.minecraft.entity.passive.BeeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.IPacket;
@@ -62,7 +53,6 @@ import net.minecraft.network.play.server.SDestroyEntitiesPacket;
 import net.minecraft.network.play.server.SPlayerListItemPacket;
 import net.minecraft.network.play.server.SSpawnPlayerPacket;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
@@ -88,22 +78,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
 public final class HumanEntity extends CreatureEntity implements TeamMember, IRangedAttackMob {
-
-    // According to http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
-    // you can access this data once per minute, lets cache for 2 minutes
-    private static final LoadingCache<UUID, PropertyMap> PROPERTIES_CACHE = Caffeine.newBuilder()
-        .expireAfterWrite(2, TimeUnit.MINUTES)
-        .build(uuid -> SpongeCommon.getServer().getMinecraftSessionService()
-            .fillProfileProperties(new GameProfile(uuid, ""), true)
-            .getProperties());
 
     // A queue of packets waiting to send to players tracking this human
     private final Map<UUID, List<Stream<IPacket<?>>>> playerPacketMap = new HashMap<>();
@@ -178,12 +160,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     }
 
     @Override
-    public void setCustomName(@Nullable ITextComponent name) {
-        // TODO - figure out whether these restrictions still exist
-        //        if (name.length() > 16) {
-        //            // Vanilla restriction
-        //            name = name.substring(0, 16);
-        //        }
+    public void setCustomName(@Nullable final ITextComponent name) {
         final ITextComponent customName = this.getCustomName();
         if (customName == null && name == null || customName != null && customName.equals(name)) {
             return;
@@ -253,7 +230,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
         this.recenterBoundingBox();
         if (cause != null) {
             this.setMotion(-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * ((float)Math.PI / 180F)) * 0.1F, 0.1F,
-                -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * ((float)Math.PI / 180F)) * 0.1F);
+                    -MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * ((float)Math.PI / 180F)) * 0.1F);
         } else {
             this.setMotion(0.0D, 0.1D, 0.0D);
         }
@@ -311,21 +288,19 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     @Override
     public boolean attackEntityAsMob(final Entity entityIn) {
         super.attackEntityAsMob(entityIn);
-        this.swingArm(Hand.MAIN_HAND);
+        this.swingArm(this.getActiveHand());
         float f = (float) this.getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
         int i = 0;
 
-        if (entityIn instanceof LivingEntity) {
-            f += EnchantmentHelper.getModifierForCreature(this.getHeldItem(Hand.MAIN_HAND), ((LivingEntity) entityIn).getCreatureAttribute());
-            i += EnchantmentHelper.getKnockbackModifier(this);
-        }
+        f += EnchantmentHelper.getModifierForCreature(this.getHeldItem(Hand.MAIN_HAND), this.getCreatureAttribute());
+        i += EnchantmentHelper.getKnockbackModifier(this);
 
         final boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), f);
 
         if (flag) {
             if (i > 0) {
                 entityIn.addVelocity(-MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
-                    MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F);
+                        MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * i * 0.5F);
                 this.setMotion(this.getMotion().mul(0.6, 1.0, 0.6));
             }
 
@@ -341,18 +316,52 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
         return flag;
     }
 
-    private void setProfileName(final ITextComponent newName) {
+    private void setProfileName(@Nullable final ITextComponent newName) {
         final PropertyMap props = this.fakeProfile.getProperties();
-        this.fakeProfile = new GameProfile(this.fakeProfile.getId(), newName.getString());
+        this.fakeProfile = new GameProfile(this.fakeProfile.getId(), newName == null ? "" : newName.getString());
         this.fakeProfile.getProperties().putAll(props);
     }
 
-    private boolean setProfileSkin(final UUID skin) {
-        final PropertyMap properties = HumanEntity.PROPERTIES_CACHE.get(skin);
-        if (properties == null || properties.isEmpty()) {
+    public boolean getOrLoadSkin(final UUID minecraftAccount) {
+        GameProfile gameProfile = SpongeCommon.getServer().getPlayerProfileCache().getProfileByUUID(minecraftAccount);
+        if (gameProfile == null) {
+            gameProfile =
+                    SpongeCommon.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(minecraftAccount, ""), true);
+            if (gameProfile == null) {
+                return false;
+            }
+
+            // TODO Should we put profile cache entries with UUIDs that don't have their names?
+
+            SpongeCommon.getServer().getPlayerProfileCache().addEntry(gameProfile);
+        }
+
+        this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, gameProfile.getProperties().get(ProfileProperty.TEXTURES));
+        if (this.isAliveAndInWorld()) {
+            this.respawnOnClient();
+        }
+
+        return true;
+    }
+
+    public boolean getOrLoadSkin(final String minecraftAccount) {
+        Objects.requireNonNull(minecraftAccount);
+        GameProfile gameProfile = SpongeCommon.getServer().getPlayerProfileCache().getGameProfileForUsername(minecraftAccount);
+        if (gameProfile == null) {
             return false;
         }
-        this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, properties.get(ProfileProperty.TEXTURES));
+
+        if (gameProfile.getProperties().isEmpty()) {
+            gameProfile = SpongeCommon.getServer().getMinecraftSessionService().fillProfileProperties(gameProfile, true);
+            SpongeCommon.getServer().getPlayerProfileCache().addEntry(gameProfile);
+        }
+
+        this.fakeProfile.getProperties().clear();
+        this.fakeProfile.getProperties().putAll(gameProfile.getProperties());
+        if (this.isAliveAndInWorld()) {
+            this.respawnOnClient();
+        }
+
         return true;
     }
 
@@ -363,10 +372,10 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
             removeTask.run();
         } else {
             Sponge.getServer().getScheduler().submit(Task.builder()
-                .execute(removeTask)
-                .delayTicks(delay)
-                .plugin(SpongeCommon.getPlugin())
-                .build());
+                    .execute(removeTask)
+                    .delayTicks(delay)
+                    .plugin(SpongeCommon.getPlugin())
+                    .build());
         }
     }
 
@@ -376,6 +385,10 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
 
     public void setSkinProperty(final Property property) {
         this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(property));
+
+        if (this.isAliveAndInWorld()) {
+            this.respawnOnClient();
+        }
     }
 
     private boolean isAliveAndInWorld() {
@@ -443,7 +456,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     public SPlayerListItemPacket createPlayerListPacket(final SPlayerListItemPacket.Action action) {
         final SPlayerListItemPacket packet = new SPlayerListItemPacket(action);
         ((SPlayerListItemPacketAccessor) packet).accessor$getPlayers()
-            .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
+                .add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }
 
