@@ -38,6 +38,7 @@ import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.passive.PandaEntity;
 import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.ItemTier;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.state.properties.ChestType;
@@ -129,6 +130,7 @@ import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
@@ -177,6 +179,7 @@ import org.spongepowered.common.registry.builtin.sponge.DisplaySlotStreamGenerat
 import org.spongepowered.common.registry.builtin.sponge.EquipmentGroupStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.EquipmentTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.EventContextKeyStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.FireworkShapeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.GeneratorModifierTypeRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.GoalExecutorTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.GoalTypeStreamGenerator;
@@ -559,6 +562,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         this
             .generateMappedRegistry(CatType.class, ResourceKey.minecraft("cat_type"), CatTypeStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(FireworkShape.class, ResourceKey.minecraft("firework_shape"), FireworkShapeStreamGenerator.stream(), true, false)
             .generateMappedRegistry(GoalType.class, ResourceKey.minecraft("goal_type"), GoalTypeStreamGenerator.stream(), true, false)
             .generateMappedRegistry(HorseColor.class, ResourceKey.minecraft("horse_color"), HorseColorStreamGenerator.stream(), true, false)
             .generateMappedRegistry(HorseStyle.class, ResourceKey.minecraft("horse_style"), HorseStyleStreamGenerator.stream(), true, false)

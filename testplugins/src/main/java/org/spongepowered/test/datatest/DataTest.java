@@ -89,6 +89,9 @@ import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.item.FireworkEffect;
+import org.spongepowered.api.item.FireworkShapes;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
@@ -483,19 +486,17 @@ public final class DataTest  {
         this.checkGetData(fallingBlock, Keys.FALL_TIME, 0);
         this.checkOfferData(fallingBlock, Keys.FALL_TIME, 20);
 
-// TODO missing FireworkShapes supplier
         final ItemStack fireworkStar = ItemStack.of(ItemTypes.FIREWORK_STAR);
         final ItemStack fireworkRocket = ItemStack.of(ItemTypes.FIREWORK_ROCKET);
         final Entity rocket = world.createEntity(EntityTypes.FIREWORK_ROCKET.get(), position);
-//        final List<FireworkEffect> fireworkEffects = Arrays.asList(FireworkEffect.builder().color(Color.RED).build());
-//        this.checkOfferListData(fireworkStar, Keys.FIREWORK_EFFECTS, fireworkEffects);
-//        this.checkOfferListData(fireworkRocket, Keys.FIREWORK_EFFECTS, fireworkEffects);
-//        this.checkOfferListData(rocket, Keys.FIREWORK_EFFECTS, fireworkEffects);
+        final List<FireworkEffect> fireworkEffects = Collections.singletonList(FireworkEffect.builder().shape(FireworkShapes.CREEPER).color(Color.RED).build());
+        this.checkOfferListData(fireworkStar, Keys.FIREWORK_EFFECTS, fireworkEffects);
+        this.checkOfferListData(fireworkRocket, Keys.FIREWORK_EFFECTS, fireworkEffects);
+        this.checkOfferListData(rocket, Keys.FIREWORK_EFFECTS, fireworkEffects);
         world.spawnEntity(rocket);
 
         this.checkOfferData(rocket, Keys.FIREWORK_FLIGHT_MODIFIER, 5);
 
-        // TODO bridge$setFireImmunityTicks is abstract
         this.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, 20000);
         this.checkOfferData(player, Keys.FIRE_DAMAGE_DELAY, 20000);
 
