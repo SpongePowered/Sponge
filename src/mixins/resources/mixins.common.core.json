@@ -36,6 +36,7 @@
         "entity.ai.goal.GoalSelectorMixin",
         "entity.item.BoatEntityMixin",
         "entity.item.EnderPearlEntityMixin",
+        "entity.item.EyeOfEnderEntityMixin",
         "entity.item.minecart.AbstractMinecartEntityMixin",
         "entity.item.minecart.MinecartCommandBlockEntity_MinecartCommandLogicMixin",
         "entity.item.minecart.MinecartCommandBlockEntityMixin",

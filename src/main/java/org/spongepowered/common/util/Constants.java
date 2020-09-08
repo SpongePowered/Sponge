@@ -250,6 +250,11 @@ public final class Constants {
                 public static final String PROJECTILE_SOURCE = "projectileSource";
             }
 
+            public static final class EyeOfEnder {
+
+                public static final int DESPAWN_TIMER_MAX = 80;
+            }
+
             public static final class Player {
 
                 public static final String HEALTH_SCALE = "HealthScale";
