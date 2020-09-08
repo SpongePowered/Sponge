@@ -94,7 +94,8 @@
         "world.storage.SaveHandlerMixin",
         "world.storage.WorldInfoMixin",
         "entity.ai.goal.RunAroundLikeCrazyGoalMixin",
-        "entity.item.TNTEntityMixin"
+        "entity.item.TNTEntityMixin",
+        "entity.item.ItemEntityMixin"
     ],
     "client": [
         "client.MinecraftMixin",

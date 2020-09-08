@@ -616,7 +616,6 @@ public final class DataTest  {
         this.checkOfferData(turtle, Keys.HOME_POSITION, blockPos.add(0, 0, 10));
 
         final Entity horse = world.createEntity(EntityTypes.HORSE.get(), position);
-// TODO HorseColor unregistered
         this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.BLACK.get());
         this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.WHITE.get());
         this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.DARK_BROWN.get());
@@ -625,11 +624,10 @@ public final class DataTest  {
         this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.BLACK_DOTS.get());
 
         final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
-// TODO missing ItemEntityBridge?
-//        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, true);
-//        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, false);
-//        this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);
-//        world.spawnEntity(itemEntity);
+        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, true);
+        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, false);
+        this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);
+        world.spawnEntity(itemEntity);
 
 // TODO InstrumentTypes unregistered
         //        this.checkGetData(dirtState, Keys.INSTRUMENT_TYPE, InstrumentTypes.XYLOPHONE.get());
