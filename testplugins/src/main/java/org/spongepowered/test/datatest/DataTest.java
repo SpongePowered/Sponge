@@ -67,6 +67,7 @@ import org.spongepowered.api.data.type.SlabPortions;
 import org.spongepowered.api.data.type.SpellTypes;
 import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.api.data.type.ToolTypes;
+import org.spongepowered.api.data.type.TropicalFishShapes;
 import org.spongepowered.api.data.type.VillagerTypes;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WireAttachmentTypes;
@@ -1211,7 +1212,7 @@ public final class DataTest  {
         this.checkOfferData(villager, Keys.TRANSIENT, true);
 
 
-//        this.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
+        this.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
 
         this.checkOfferData(panda, Keys.UNHAPPY_TIME, 20);
 
