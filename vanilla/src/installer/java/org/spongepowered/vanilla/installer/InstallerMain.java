@@ -58,7 +58,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.StringJoiner;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public final class InstallerMain {
@@ -85,7 +91,7 @@ public final class InstallerMain {
 
         this.logger.info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...",
             VanillaCommandLine.librariesDirectory.toAbsolutePath());
-        final List<Path> dependencies = this.downloadDependencies(VanillaCommandLine.librariesDirectory);
+        final Set<Path> dependencies = this.downloadDependencies(VanillaCommandLine.librariesDirectory);
         final Path gameJar = this.downloadMinecraft(VanillaCommandLine.librariesDirectory);
         final Path srgZip = this.downloadSRG(VanillaCommandLine.librariesDirectory);
         this.remapMinecraft(VanillaCommandLine.librariesDirectory, srgZip);
@@ -115,7 +121,7 @@ public final class InstallerMain {
         process.waitFor();
     }
 
-    private List<Path> downloadDependencies(final Path librariesDirectory) throws IOException, NoSuchAlgorithmException {
+    private Set<Path> downloadDependencies(final Path librariesDirectory) throws IOException, NoSuchAlgorithmException {
         this.logger.info("Checking dependencies, please wait...");
         final Gson gson = new Gson();
 
@@ -124,58 +130,76 @@ public final class InstallerMain {
             dependencies = gson.fromJson(reader, Libraries.class);
         }
 
-        final List<Path> downloadedDeps = new ArrayList<>();
+        final Set<Path> downloadedDeps = ConcurrentHashMap.newKeySet();
+        final List<CompletableFuture<?>> operations = new ArrayList<>(dependencies.dependencies.size());
+        final Set<String> failures = ConcurrentHashMap.newKeySet();
+        final ExecutorService workerPool = Executors.newFixedThreadPool(4);
 
         for (final Libraries.Dependency dependency : dependencies.dependencies) {
-            final String groupPath = dependency.group.replace(".", "/");
-            final Path depDirectory =
-                    librariesDirectory.resolve(groupPath).resolve(dependency.module).resolve(dependency.version);
-            Files.createDirectories(depDirectory);
-            final Path depFile = depDirectory.resolve(dependency.module + "-" + dependency.version + ".jar");
-            if (Files.exists(depFile)) {
-                this.logger.info("Detected existing '{}', verifying hashes...", depFile);
-
+            operations.add(asyncFailableFuture(() -> {
+                final String groupPath = dependency.group.replace(".", "/");
+                final Path depDirectory =
+                        librariesDirectory.resolve(groupPath).resolve(dependency.module).resolve(dependency.version);
+                Files.createDirectories(depDirectory);
+                final Path depFile = depDirectory.resolve(dependency.module + "-" + dependency.version + ".jar");
                 final MessageDigest md5 = MessageDigest.getInstance("MD5");
+                if (Files.exists(depFile)) {
+                    this.logger.info("Detected existing '{}', verifying hashes...", depFile);
 
-                // Pipe the download stream into the file and compute the SHA-1
-                final byte[] bytes = Files.readAllBytes(depFile);
-                final String fileMd5 = this.toHexString(md5.digest(bytes));
 
-                if (dependency.md5.equals(fileMd5)) {
-                    this.logger.info("'{}' verified!", depFile);
+                    // Pipe the download stream into the file and compute the SHA-1
+                    final byte[] bytes = Files.readAllBytes(depFile);
+                    final String fileMd5 = this.toHexString(md5.digest(bytes));
+
+                    if (dependency.md5.equals(fileMd5)) {
+                        this.logger.info("'{}' verified!", depFile);
+                    } else {
+                        this.logger.error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
+                                dependency.md5, fileMd5, depFile);
+                        Files.delete(depFile);
+
+                        final SonatypeResponse response = this.getResponseFor(gson, dependency);
+
+                        if (response.items.isEmpty()) {
+                            failures.add("No data received from '" + new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL,
+                                    dependency.md5, dependency.group,
+                                    dependency.module, dependency.version)) + "'!");
+                            return null;
+                        }
+                        final SonatypeResponse.Item item = response.items.get(0);
+                        final URL url = item.downloadUrl;
+
+                        this.downloadCheckHash(url, depFile, md5, item.checksum.md5, true);
+                    }
                 } else {
-                    this.logger.error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
-                            dependency.md5, fileMd5, depFile);
-                    Files.delete(depFile);
-
                     final SonatypeResponse response = this.getResponseFor(gson, dependency);
 
                     if (response.items.isEmpty()) {
-                        this.logger.error("No data received from '{}'!", new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL, dependency.md5, dependency.group,
-                                dependency.module, dependency.version)));
-                        continue;
+                        failures.add("No data received from '" + new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL,
+                                dependency.md5, dependency.group,
+                                dependency.module, dependency.version)) + "'!");
+                        return null;
                     }
+
                     final SonatypeResponse.Item item = response.items.get(0);
                     final URL url = item.downloadUrl;
 
-                    this.downloadCheckHash(url, depFile, MessageDigest.getInstance("MD5"), item.checksum.md5, true);
-                }
-            } else {
-                final SonatypeResponse response = this.getResponseFor(gson, dependency);
-
-                if (response.items.isEmpty()) {
-                    this.logger.error("No data received from '{}'!", new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL, dependency.md5, dependency.group,
-                            dependency.module, dependency.version)));
-                    continue;
+                    this.downloadCheckHash(url, depFile, md5, item.checksum.md5, true);
                 }
 
-                final SonatypeResponse.Item item = response.items.get(0);
-                final URL url = item.downloadUrl;
+                downloadedDeps.add(depFile);
+                return null;
+            }, workerPool));
+        }
 
-                this.downloadCheckHash(url, depFile, MessageDigest.getInstance("MD5"), item.checksum.md5, true);
+        CompletableFuture.allOf(operations.toArray(new CompletableFuture<?>[0])).join();
+        workerPool.shutdown();
+        if (!failures.isEmpty()) {
+            logger.error("Failed to download some dependencies:");
+            for (String message : failures) {
+                logger.error(message);
             }
-
-            downloadedDeps.add(depFile);
+            System.exit(-1);
         }
 
         return downloadedDeps;
@@ -408,5 +432,17 @@ public final class InstallerMain {
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    private static <T> CompletableFuture<T> asyncFailableFuture(final Callable<T> action, final Executor executor) {
+        final CompletableFuture<T> future = new CompletableFuture<>();
+        executor.execute(() -> {
+            try {
+                future.complete(action.call());
+            } catch (Exception ex) {
+                future.completeExceptionally(ex);
+            }
+        });
+        return future;
     }
 }
