@@ -6,6 +6,7 @@ plugins {
 repositories {
     gradlePluginPortal()
     maven("https://repo-new.spongepowered.org/repository/maven-public/")
+    mavenCentral()
     mavenLocal()
 }
 
@@ -13,4 +14,5 @@ repositories {
 dependencies {
     implementation("net.minecraftforge.gradle:ForgeGradle:3.0.184")
     implementation("org.spongepowered:mixingradle:0.7-SNAPSHOT")
+    implementation("com.google.code.gson:gson:2.8.6")
 }

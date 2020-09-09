@@ -1,9 +1,6 @@
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.commons.io.FileUtils
 import java.io.FileInputStream
 import java.util.StringJoiner
-import java.security.MessageDigest
-import kotlin.experimental.and
 
 plugins {
     id("net.minecraftforge.gradle")
@@ -261,7 +258,7 @@ val extraSrgs = file("extra.srgs")
 mixin {
     add("mixins", "spongecommon.mixins.refmap.json")
     add("accessors", "spongecommon.accessors.refmap.json")
-    extraMappings(extraSrgs)
+    //extraMappings(extraSrgs)
 }
 fun debug(logger: Logger, messsage: String) {
     println(message = messsage)
@@ -700,12 +697,23 @@ project("SpongeVanilla") {
             from(vanillaAccessors.output)
         }
 
+        val installerResources = vanillaProject.layout.buildDirectory.dir("generated/resources/installer")
+        vanillaInstaller.resources.srcDir(installerResources)
         val emitDependencies by registering(OutputDependenciesToJson::class) {
             group = "sponge"
-            val confName = vanillaAppLaunchConfig.name
-            configuration = confName
-            outputFile.set(File(vanillaProject.buildDir, "libraries.json"))
+            // everything in applaunch
+            configuration.set(vanillaAppLaunchConfig)
+            // except what we're providing through the installer
+            excludeConfiguration.set(vanillaInstallerConfig)
+            // for accesstransformers
+            allowedClassifiers.add("shadowed")
+
+            outputFile.set(installerResources.map { it.file("libraries.json") })
         }
+        named(vanillaInstaller.processResourcesTaskName).configure {
+            dependsOn(emitDependencies)
+        }
+
         shadowJar {
             mergeServiceFiles()
             val generateImplementationVersionString = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
@@ -763,44 +771,89 @@ project("SpongeVanilla") {
         newLine = false
     }
 }
-open class OutputDependenciesToJson(): DefaultTask() {
+
+abstract class OutputDependenciesToJson: DefaultTask() {
+
+    companion object {
+        val GSON: com.google.gson.Gson = com.google.gson.GsonBuilder().also {
+            it.setPrettyPrinting()
+        }.create()
+    }
+
+    /**
+     * A single dependency
+     */
+    data class DependencyDescriptor(val group: String, val module: String, val version: String, val md5: String)
+
+    /**
+     * A manifest containing a list of dependencies.
+     *
+     * Non-transitive dependencies will not be resolved.
+     */
+    data class DependencyManifest(val dependencies: List<DependencyDescriptor>)
 
     @get:org.gradle.api.tasks.Input
-    var configuration: String = "main"
+    abstract val configuration: Property<Configuration>
+
+    @get:org.gradle.api.tasks.Input
+    abstract val excludeConfiguration: Property<Configuration>
+
+    /**
+     * Classifiers to include in the dependency manifest. The empty string identifies no classifier
+     */
+    @get:org.gradle.api.tasks.Input
+    abstract val allowedClassifiers: SetProperty<String>
 
     @get:org.gradle.api.tasks.OutputFile
-    val outputFile: RegularFileProperty = project.objects.fileProperty()
+    abstract val outputFile: RegularFileProperty
+
+    init {
+        allowedClassifiers.add("")
+    }
 
     @org.gradle.api.tasks.TaskAction
     fun generateDependenciesJson() {
-        val stringBuilder = StringBuilder("{\n \"dependencies\":\n")
-        val depJoiner = StringJoiner(",\n", "  [\n", "\n  ]\n")
-
-        val foundConfig = project.configurations.findByName(configuration)
-        if (foundConfig == null) {
-            return
+        val foundConfig = if (this.excludeConfiguration.isPresent) {
+            val config = project.configurations.detachedConfiguration(*this.configuration.get().allDependencies.toTypedArray())
+            val excludes = this.excludeConfiguration.get()
+            excludes.allDependencies.forEach {
+                config.exclude(group = it.group, module = it.name)
+            }
+            config
+        } else {
+            this.configuration.get()
         }
-        foundConfig.resolvedConfiguration.getFirstLevelModuleDependencies()
-                .filter { dependency -> dependency.getModuleName() != "SpongeAPI" }
-                .forEach { dependency ->
-                    //Get file input stream for reading the file content
-                    val depFile = dependency.getModuleArtifacts().filter { it.file.path.endsWith(".jar") }.first().file
-                    //Get file input stream for reading the file content
-                    val fis = FileInputStream(depFile)
-                    val md5Hash = DigestUtils.md5Hex(fis)
-                    fis.close()
 
-                    val depBuilder = StringJoiner(",\n", "    {\n", "\n    }")
-                    depBuilder.add("      \"group\": \"${dependency.getModuleGroup()}\"")
-                    depBuilder.add("      \"module\": \"${dependency.getModuleName()}\"")
-                    depBuilder.add("      \"version\": \"${dependency.getModuleVersion()}\"")
-                    depBuilder.add("      \"md5\": \"$md5Hash\"")
-                    depJoiner.add(depBuilder.toString())
+        val manifest = foundConfig.resolvedConfiguration.firstLevelModuleDependencies.asSequence()
+                .flatMap { it.allModuleArtifacts.asSequence() }
+                // only jars with the allowed classifiers
+                .filter { it.extension == "jar" && allowedClassifiers.get().contains(it.classifier ?: "") }
+                .filter { it.moduleVersion.id.name != "SpongeAPI" }
+                .distinct()
+                .map { dependency ->
+
+                    val ident = dependency.moduleVersion.id
+                    val version = (dependency.id.componentIdentifier as? ModuleComponentIdentifier)?.version ?: ident.version
+                    // Get file input stream for reading the file content
+                    val md5hash = dependency.file.inputStream().use {
+                        DigestUtils.md5Hex(it)
+                    }
+
+                    // create descriptor
+                    DependencyDescriptor(
+                            group = ident.group,
+                            module = ident.name,
+                            version = version, // TODO: can we get timestamped snapshot versions?
+                            md5 = md5hash
+                    )
+                }.toList().run {
+                    DependencyManifest(this)
                 }
-        stringBuilder.append(depJoiner.toString())
-        stringBuilder.append("}\n")
-        val output = outputFile.asFile.get()
-        FileUtils.write(output, stringBuilder.toString())
+
+        println("Writing to ${outputFile.get().asFile}")
+        this.outputFile.get().asFile.bufferedWriter(Charsets.UTF_8).use {
+            GSON.toJson(manifest, it)
+        }
     }
 
 }

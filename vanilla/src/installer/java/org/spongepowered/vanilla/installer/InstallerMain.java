@@ -94,7 +94,7 @@ public final class InstallerMain {
 
         final String javaHome = System.getProperty("java.home");
         final String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        final String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
+        final List<String> jvmArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();
         final String depsClasspath = dependencies.stream().map(Path::toAbsolutePath).map(Path::toString).collect(Collectors.joining(File.pathSeparator));
         final String classpath = System.getProperty("java.class.path") + File.pathSeparator + depsClasspath + File.pathSeparator +
             gameJar.toAbsolutePath().toString();
@@ -104,7 +104,7 @@ public final class InstallerMain {
         final String className = "org.spongepowered.vanilla.applaunch.Main";
         final List<String> command = new ArrayList<>();
         command.add(javaBin);
-        command.add(jvmArgs);
+        command.addAll(jvmArgs);
         command.add("-cp");
         command.add(classpath);
         command.add(className);
