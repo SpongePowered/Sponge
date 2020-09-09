@@ -374,8 +374,7 @@ public final class DataTest  {
 
         // TODO Keys.CREATOR
 
-// TODO missing spelltype NONE or return null
-//        this.checkGetData(illusioner, Keys.CURRENT_SPELL, SpellTypes.NONE.get());
+        this.checkGetData(illusioner, Keys.CURRENT_SPELL, SpellTypes.NONE.get());
         this.checkOfferData(illusioner, Keys.CURRENT_SPELL, SpellTypes.BLINDNESS.get());
 
         // TODO Keys.CUSTOM_ATTACK_DAMAGE
