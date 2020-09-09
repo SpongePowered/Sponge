@@ -258,7 +258,7 @@ val extraSrgs = file("extra.srgs")
 mixin {
     add("mixins", "spongecommon.mixins.refmap.json")
     add("accessors", "spongecommon.accessors.refmap.json")
-    //extraMappings(extraSrgs)
+    extraMappings(extraSrgs)
 }
 fun debug(logger: Logger, messsage: String) {
     println(message = messsage)
@@ -586,7 +586,7 @@ project("SpongeVanilla") {
         vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.1.+") {
             exclude(group = "org.apache.logging.log4j")
         }
-        vanillaAppLaunchConfig("net.minecraftforge:accesstransformers:1.0.+:shadowed") {
+        vanillaAppLaunchConfig("net.minecraftforge:accesstransformers:1.0.+:service") {
             exclude(group = "org.apache.logging.log4j")
         }
         vanillaAppLaunchImplementation(vanillaAppLaunchConfig)
@@ -706,7 +706,7 @@ project("SpongeVanilla") {
             // except what we're providing through the installer
             excludeConfiguration.set(vanillaInstallerConfig)
             // for accesstransformers
-            allowedClassifiers.add("shadowed")
+            allowedClassifiers.add("service")
 
             outputFile.set(installerResources.map { it.file("libraries.json") })
         }
@@ -788,18 +788,25 @@ abstract class OutputDependenciesToJson: DefaultTask() {
     /**
      * A manifest containing a list of dependencies.
      *
-     * Non-transitive dependencies will not be resolved.
+     * At runtime, transitive dependencies won't be traversed, so this needs to
+     * include direct + transitive depends.
      */
     data class DependencyManifest(val dependencies: List<DependencyDescriptor>)
 
+    /**
+     * Configuration to gather depenency artifacts from
+     */
     @get:org.gradle.api.tasks.Input
     abstract val configuration: Property<Configuration>
 
+    /**
+     * Excludes configuration, to remove certain entries from dependencies and transitive dependencies of [configuration]
+     */
     @get:org.gradle.api.tasks.Input
     abstract val excludeConfiguration: Property<Configuration>
 
     /**
-     * Classifiers to include in the dependency manifest. The empty string identifies no classifier
+     * Classifiers to include in the dependency manifest. The empty string identifies no classifier.
      */
     @get:org.gradle.api.tasks.Input
     abstract val allowedClassifiers: SetProperty<String>
@@ -843,7 +850,7 @@ abstract class OutputDependenciesToJson: DefaultTask() {
                     DependencyDescriptor(
                             group = ident.group,
                             module = ident.name,
-                            version = version, // TODO: can we get timestamped snapshot versions?
+                            version = version,
                             md5 = md5hash
                     )
                 }.toList().run {
