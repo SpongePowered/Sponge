@@ -33,6 +33,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SRespawnPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
@@ -126,9 +127,9 @@ public interface ServerPlayerEntityBridge {
     @Nullable
     Vector3d bridge$getVelocityOverride();
 
-    @Nullable GameProfile bridge$getPreviousGameProfile();
+    @Nullable ITextComponent bridge$getConnectionMessageToSend();
 
-    void bridge$setPreviousGameProfile(@Nullable GameProfile gameProfile);
+    void bridge$setConnectionMessageToSend(ITextComponent message);
 
     default void bridge$sendDimensionData(final NetworkManager manager, final DimensionType dimensionType) {
     }

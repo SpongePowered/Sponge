@@ -103,6 +103,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Shadow public abstract String shadow$getScoreboardName();
 
     @Shadow @Final public PlayerContainer container;
+
     private boolean impl$affectsSpawning = true;
     private Vector3d impl$targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
     private boolean impl$dontRecalculateExperience;

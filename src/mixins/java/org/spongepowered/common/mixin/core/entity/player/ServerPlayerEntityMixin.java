@@ -32,6 +32,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
@@ -84,17 +86,19 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Shadow private int lastExperience;
     private final User impl$user = this.impl$getUserObjectOnConstruction();
-    private @Nullable GameProfile impl$previousGameProfile;
+    private @Nullable ITextComponent impl$connectionMessage;
 
     @Override
-    @Nullable
-    public GameProfile bridge$getPreviousGameProfile() {
-        return this.impl$previousGameProfile;
+    public @Nullable ITextComponent bridge$getConnectionMessageToSend() {
+        if (this.impl$connectionMessage == null) {
+            return new StringTextComponent("");
+        }
+        return this.impl$connectionMessage;
     }
 
     @Override
-    public void bridge$setPreviousGameProfile(final @Nullable GameProfile gameProfile) {
-        this.impl$previousGameProfile = gameProfile;
+    public void bridge$setConnectionMessageToSend(final ITextComponent message) {
+        this.impl$connectionMessage = message;
     }
 
     @Override
