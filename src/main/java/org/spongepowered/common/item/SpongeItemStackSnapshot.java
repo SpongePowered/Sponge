@@ -338,6 +338,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public HoverEvent<HoverEvent.ShowItem> asHoverEvent(final UnaryOperator<HoverEvent.ShowItem> op) {
         final CompoundNBT tag = this.getCompound().orElse(null);
-        return HoverEvent.showItem(op.apply(new HoverEvent.ShowItem(this.getType().getKey(), this.getQuantity(), SpongeAdventure.asBinaryTagHolder(tag))));
+        return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.of(this.getType().getKey(), this.getQuantity(), SpongeAdventure.asBinaryTagHolder(tag))));
     }
 }
