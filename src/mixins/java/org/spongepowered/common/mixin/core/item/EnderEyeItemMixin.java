@@ -143,10 +143,17 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
      * @param enderEye The ender eye being spawned
      */
     @Inject(method = "onItemRightClick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"
-        ),
+        at = {
+            @At(
+                value = "INVOKE", // Development
+                target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
+                remap = false
+            ),
+            @At(value = "INVOKE", // Production
+                target = "Lnet/minecraft/world/World;func_217376_c(Lnet/minecraft/entity/Entity;)Z",
+                remap = false
+            )
+        },
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
@@ -160,7 +167,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         ),
         locals = LocalCapture.CAPTURE_FAILSOFT
     )
-    private void impl$setShooter(final IWorldWriter worldIn, final PlayerEntity playerIn, final Hand handIn,
+    private void impl$setShooter(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack, final RayTraceResult result,
         final BlockPos targetPos, final EyeOfEnderEntity enderEye) {
         if (((WorldBridge) worldIn).bridge$isFake()) {
@@ -176,7 +183,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
      * or some other injection. Either way, this one works in production.
      */
     @Surrogate
-    private void implSetShooter(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
+    private void impl$setShooter(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
         final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack playerStack,
         final BlockPos targetPos, final EyeOfEnderEntity enderEye, final CallbackInfoReturnable<ActionResult<ItemStack>> preEventCir) {
         if (((WorldBridge) worldIn).bridge$isFake()) {

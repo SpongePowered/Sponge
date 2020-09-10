@@ -261,7 +261,6 @@ val extraSrgs = file("extra.srgs")
 mixin {
     add("mixins", "spongecommon.mixins.refmap.json")
     add("accessors", "spongecommon.accessors.refmap.json")
-    extraMappings(extraSrgs)
 }
 fun debug(logger: Logger, messsage: String) {
     println(message = messsage)

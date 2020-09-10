@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
+import com.google.inject.internal.cglib.reflect.$FastMember;
 import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FireworkRocketItem;
@@ -86,8 +87,8 @@ public abstract class ItemFireworkMixin {
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
-    private void spongeImpl$ThrowPreBeforeSpawning(World worldIn, PlayerEntity playerIn, Hand handIn,
-        CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack stack) {
+    private void spongeImpl$ThrowPreBeforeSpawning(final World worldIn, final PlayerEntity playerIn, final Hand handIn,
+        final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack stack) {
         if (this.spongeImpl$ThrowConstructPreEvent(worldIn, playerIn, stack)) {
             cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, stack));
         }
@@ -109,7 +110,7 @@ public abstract class ItemFireworkMixin {
     @Inject(method = "onItemUse",
         at = @At(value = "NEW", target = "net/minecraft/entity/item/FireworkRocketEntity"),
         cancellable = true)
-    private void spongeImpl$ThrowPrimeEventsIfCancelled(ItemUseContext context, CallbackInfoReturnable<ActionResultType> cir) {
+    private void spongeImpl$ThrowPrimeEventsIfCancelled(final ItemUseContext context, final CallbackInfoReturnable<ActionResultType> cir) {
         if (this.spongeImpl$ThrowConstructPreEvent(context.getWorld(), context.getPlayer(), context.getItem())) {
             cir.setReturnValue(ActionResultType.SUCCESS);
         }
@@ -126,9 +127,9 @@ public abstract class ItemFireworkMixin {
      * @param usedItem The used item
      * @return True if the event is cancelled and the callback needs to be cancelled
      */
-    private boolean spongeImpl$ThrowConstructPreEvent(World world, PlayerEntity player, ItemStack usedItem) {
+    private boolean spongeImpl$ThrowConstructPreEvent(final World world, final PlayerEntity player, final ItemStack usedItem) {
         if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).bridge$isFake()) {
-            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);
@@ -142,22 +143,43 @@ public abstract class ItemFireworkMixin {
     }
 
     @Inject(method = "onItemUse",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = {
+            @At(value = "INVOKE",
+                target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
+                remap = false
+            ),
+            @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/world/World;func_217376_c(Lnet/minecraft/entity/Entity;)Z",
+                remap = false
+            )
+        },
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
-    private void spongeImpl$InjectPrimeEventAndCancel(ItemUseContext context, CallbackInfoReturnable<ActionResultType> cir, ItemStack usedItem, Vec3d vec3d, FireworkRocketEntity rocket) {
+    private void spongeImpl$InjectPrimeEventAndCancel(final ItemUseContext context, final CallbackInfoReturnable<ActionResultType> cir, final ItemStack usedItem, final Vec3d vec3d, final FireworkRocketEntity rocket) {
         if (this.spongeImpl$ThrowPrimeEventAndGetCancel(context.getWorld(), context.getPlayer(), rocket, usedItem)) {
             cir.setReturnValue(ActionResultType.SUCCESS);
         }
     }
     @Inject(method = "onItemRightClick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldWriter;addEntity(Lnet/minecraft/entity/Entity;)Z"),
+        at = {
+            @At(
+                value = "INVOKE", // Development
+                target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
+                remap = false
+            ),
+            @At(
+                value = "INVOKE", // Production
+                target = "Lnet/minecraft/world/World;func_217376_c(Lnet/minecraft/entity/Entity;)Z",
+                remap = false
+            )
+        },
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
-    private void spongeImpl$InjectPrimeEventAndCancel(World worldIn, PlayerEntity player, Hand handIn,
-        CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack usedItem, FireworkRocketEntity rocket) {
+    private void spongeImpl$InjectPrimeEventAndCancel(final World worldIn, final PlayerEntity player, final Hand handIn,
+        final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack usedItem, final FireworkRocketEntity rocket) {
         if (this.spongeImpl$ThrowPrimeEventAndGetCancel(worldIn, player, rocket, usedItem)) {
             // We have to still return success because the server/client can get out of sync otherwise.
             cir.setReturnValue(new ActionResult<>(ActionResultType.SUCCESS, usedItem));
@@ -177,13 +199,13 @@ public abstract class ItemFireworkMixin {
      * @param usedItem The used item
      * @return True if the event is cancelled and the rocket should not be spawned
      */
-    private boolean spongeImpl$ThrowPrimeEventAndGetCancel(World world, PlayerEntity player, FireworkRocketEntity rocket, ItemStack usedItem) {
+    private boolean spongeImpl$ThrowPrimeEventAndGetCancel(final World world, final PlayerEntity player, final FireworkRocketEntity rocket, final ItemStack usedItem) {
         if (((WorldBridge) world).bridge$isFake() ) {
             return false;
         }
         ((FireworkRocket) rocket).offer(Keys.SHOOTER, (Player) player);
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
-            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
                 frame.pushCause(player);

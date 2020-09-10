@@ -26,12 +26,12 @@ package org.spongepowered.common.mixin.core.world.spawner;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.EntityPredicates;
-import net.minecraft.world.IEntityReader;
 import net.minecraft.world.World;
 import net.minecraft.world.spawner.AbstractSpawner;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
@@ -92,10 +92,16 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
         return this.spawnRange;
     }
 
+    @Group(name = "sponge$playerAffectingSpawningCheck", max = 1)
     @Redirect(method = "isActivated()Z",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;isPlayerWithin(DDDD)Z"))
-    public boolean onIsPlayerWithin(final World world, final double x, final double y, final double z, final double distance) {
+            target = "Lnet/minecraft/world/World;isPlayerWithin(DDDD)Z",
+            remap = false // This is to workaround Mixin#438
+        ),
+        expect = 0,
+        require = 0
+    )
+    public boolean impl$isPlayerWithin(final World world, final double x, final double y, final double z, final double distance) {
         // Like vanilla but filter out players with !bridge$affectsSpawning
         for (final PlayerEntity playerentity : world.getPlayers()) {
             if (EntityPredicates.NOT_SPECTATING.test(playerentity)
@@ -110,4 +116,19 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
 
         return false;
     }
+
+    @Group(name = "sponge$playerAffectingSpawningCheck", max = 1)
+    @Redirect(method = "isActivated()Z",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;func_217358_a(DDDD)Z",
+            remap = false // This is to workaround Mixin#438
+        ),
+        expect = 0,
+        require = 0
+    )
+    public boolean impl$production_playerAffectsSpawningCheck(final World world, final double x, final double y, final double z, final double distance) {
+        // Like vanilla but filter out players with !bridge$affectsSpawning
+        return this.impl$isPlayerWithin(world, x, y, z, distance);
+    }
+
 }

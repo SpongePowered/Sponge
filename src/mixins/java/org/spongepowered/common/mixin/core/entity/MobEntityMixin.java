@@ -54,6 +54,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -201,7 +202,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      * @return True if the attack was successful
      */
     @Overwrite
-    public boolean attackEntityAsMob(net.minecraft.entity.Entity targetEntity) {
+    public boolean attackEntityAsMob(final net.minecraft.entity.Entity targetEntity) {
         // Sponge Start - Prepare our event values
         // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
         final double originalBaseDamage = this.shadow$getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
@@ -229,7 +230,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         }
         knockbackModifier = event.getKnockbackModifier();
         // boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causeMobDamage(this), baseDamage);
-        boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
+        final boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
         // Sponge End
         if (attackSucceeded) {
             if (knockbackModifier > 0 && targetEntity instanceof LivingEntity) {
@@ -238,18 +239,18 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
                 this.shadow$setMotion(this.shadow$getMotion().mul(0.6D, 1.0D, 0.6D));
             }
 
-            int j = EnchantmentHelper.getFireAspectModifier((MobEntity) (Object) this);
+            final int j = EnchantmentHelper.getFireAspectModifier((MobEntity) (Object) this);
 
             if (j > 0) {
                 targetEntity.setFire(j * 4);
             }
 
             if (targetEntity instanceof PlayerEntity) {
-                PlayerEntity playerentity = (PlayerEntity) targetEntity;
-                ItemStack itemstack = this.shadow$getHeldItemMainhand();
-                ItemStack itemstack1 = playerentity.isHandActive() ? playerentity.getActiveItemStack() : ItemStack.EMPTY;
+                final PlayerEntity playerentity = (PlayerEntity) targetEntity;
+                final ItemStack itemstack = this.shadow$getHeldItemMainhand();
+                final ItemStack itemstack1 = playerentity.isHandActive() ? playerentity.getActiveItemStack() : ItemStack.EMPTY;
                 if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof AxeItem && itemstack1.getItem() == Items.SHIELD) {
-                    float f2 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier((MobEntity) (Object) this) * 0.05F;
+                    final float f2 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier((MobEntity) (Object) this) * 0.05F;
                     if (this.rand.nextFloat() < f2) {
                         playerentity.getCooldownTracker().setCooldown(Items.SHIELD, 100);
                         this.world.setEntityState(playerentity, (byte)30);
@@ -288,13 +289,19 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         return value;
     }
 
+    @Group(name = "sponge$getClosestPlayerInMobEntity", max = 1)
     @Nullable
     @Redirect(
-            method = "checkDespawn()V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/IEntityReader;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
-    private PlayerEntity impl$getClosestPlayerForSpawning(IEntityReader world, net.minecraft.entity.Entity entityIn, double distance) {
+        method = "checkDespawn()V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;",
+            remap = false
+        ),
+        expect = 0,
+        require = 0
+    )
+    private PlayerEntity impl$getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entityIn, final double distance) {
         double bestDistance = -1.0D;
         PlayerEntity result = null;
 
@@ -312,6 +319,23 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         }
 
         return result;
+    }
+
+    @Group(name = "sponge$getClosestPlayerInMobEntity", max = 1)
+    @Nullable
+    @Redirect(
+        method = "checkDespawn()V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;func_217366_a(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;",
+            remap = false
+        ),
+        expect = 0,
+        require = 0
+    )
+    private PlayerEntity impl$production_getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entityIn,
+        final double distance) {
+        return this.impl$getClosestPlayerForSpawning(world, entityIn, distance);
     }
 
 }
