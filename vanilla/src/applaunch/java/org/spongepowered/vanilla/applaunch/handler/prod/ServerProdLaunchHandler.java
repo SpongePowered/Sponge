@@ -26,11 +26,11 @@ package org.spongepowered.vanilla.applaunch.handler.prod;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
-import org.spongepowered.vanilla.applaunch.Constants;
 import org.spongepowered.vanilla.applaunch.Main;
-import org.spongepowered.vanilla.applaunch.VanillaCommandLine;
-import org.spongepowered.vanilla.applaunch.VanillaLaunchTargets;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.installer.Constants;
+import org.spongepowered.vanilla.installer.VanillaCommandLine;
+import org.spongepowered.vanilla.installer.VanillaLaunchTargets;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;

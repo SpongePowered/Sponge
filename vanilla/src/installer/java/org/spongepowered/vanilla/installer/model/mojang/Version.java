@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.launcher.model;
+package org.spongepowered.vanilla.installer.model.mojang;
 
 import java.net.URL;
 import java.util.Date;

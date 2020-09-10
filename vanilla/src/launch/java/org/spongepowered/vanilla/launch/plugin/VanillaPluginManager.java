@@ -54,7 +54,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
     private final List<PluginContainer> sortedPlugins;
 
     public VanillaPluginManager() {
-        final ClassLoader classLoader = this.getClass().getClassLoader();
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();
@@ -115,17 +114,26 @@ public final class VanillaPluginManager implements SpongePluginManager {
                 throw new RuntimeException(e);
             }
             for (final PluginCandidate<PluginResource> candidate : candidates) {
-                final PluginContainer pluginContainer = pluginLoader.createPluginContainer(candidate, engine.getPluginEnvironment()).orElse(null);
-                if (pluginContainer == null) {
+                PluginContainer plugin = this.plugins.get(candidate.getMetadata().getId());
+                if (plugin != null) {
+                    if (plugin instanceof DummyPluginContainer) {
+                        continue;
+                    }
+                    // TODO Print nasty message or do something about the dupe otherwise?
+                    continue;
+                }
+
+                plugin = pluginLoader.createPluginContainer(candidate, engine.getPluginEnvironment()).orElse(null);
+                if (plugin == null) {
                     engine.getPluginEnvironment().getLogger().debug("Language service '{}' returned a null plugin container for '{}'.",
                             languageService.getName(), candidate.getMetadata().getId());
                     continue;
                 }
 
                 try {
-                    pluginLoader.loadPlugin(engine.getPluginEnvironment(), pluginContainer, VanillaLauncher.getInstance().getClass().getClassLoader());
-                    engine.getPluginEnvironment().getLogger().info("Loaded plugin '{}'", pluginContainer.getMetadata().getId());
-                    this.addPlugin(pluginContainer);
+                    pluginLoader.loadPlugin(engine.getPluginEnvironment(), plugin, VanillaLauncher.getInstance().getClass().getClassLoader());
+                    engine.getPluginEnvironment().getLogger().info("Loaded plugin '{}'", plugin.getMetadata().getId());
+                    this.addPlugin(plugin);
                 } catch (final InvalidPluginException e) {
                     e.printStackTrace();
                 }

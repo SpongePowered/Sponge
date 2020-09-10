@@ -22,24 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.dev;
+package org.spongepowered.vanilla.installer;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
-import org.spongepowered.vanilla.applaunch.Main;
-import org.spongepowered.vanilla.installer.VanillaLaunchTargets;
+public enum VanillaLaunchTargets {
+    CLIENT_DEVELOPMENT("sponge_client_dev"),
+    CLIENT_PRODUCTION("sponge_client_prod"),
+    SERVER_DEVELOPMENT("sponge_server_dev"),
+    SERVER_PRODUCTION("sponge_server_prod");
 
-public final class ServerDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
+    private final String launchTarget;
 
-    @Override
-    public String name() {
-        return VanillaLaunchTargets.SERVER_DEVELOPMENT.getLaunchTarget();
+    VanillaLaunchTargets(final String launchTarget) {
+        this.launchTarget = launchTarget;
     }
 
-    @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
-                .invoke(null, Main.getInstance().getPluginEngine(), Boolean.TRUE, arguments);
+    public String getLaunchTarget() {
+        return this.launchTarget;
+    }
+
+    public static VanillaLaunchTargets from(final String launchTarget) {
+
+        switch (launchTarget) {
+            case "sponge_client_dev":
+                return CLIENT_DEVELOPMENT;
+            case "sponge_client_prod":
+                return CLIENT_PRODUCTION;
+            case "sponge_server_dev":
+                return SERVER_DEVELOPMENT;
+            case "sponge_server_prod":
+                return SERVER_PRODUCTION;
+        }
+
+        return null;
     }
 }

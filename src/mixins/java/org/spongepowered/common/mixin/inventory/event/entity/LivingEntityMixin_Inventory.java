@@ -64,10 +64,14 @@ public abstract class LivingEntityMixin_Inventory {
 
     private final EnumMap<EquipmentSlotType, SlotLens> slotLens = new EnumMap<>(EquipmentSlotType.class);
 
-    @SuppressWarnings("ConstantConditions")
     @Inject(method = "tick", locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getItemStackFromSlot(Lnet/minecraft/inventory/EquipmentSlotType;)Lnet/minecraft/item/ItemStack;"))
-    private void onGetItemStackFromSlot(CallbackInfo ci, int i, int j, EquipmentSlotType var3[], int var4, int var5, EquipmentSlotType equipmentslottype, ItemStack itemstack) {
+    private void inventory$throwInventoryEvent(final CallbackInfo ci, final int i, final int j, final EquipmentSlotType[] var3, final int var4, final int var5, final EquipmentSlotType equipmentslottype, final ItemStack itemstack) {
+        this.inventory$throwInventoryEvent(ci, var3, var4, var5, equipmentslottype, itemstack);
+    }
+
+    @Surrogate
+    private void inventory$throwInventoryEvent(final CallbackInfo ci, final EquipmentSlotType[] var3, final int var4, final int var5, final EquipmentSlotType equipmentslottype, final ItemStack itemstack) {
         if (((Entity)(Object)this).ticksExisted == 1 && (LivingEntity) (Object) this instanceof PlayerEntity) {
             return; // Ignore Equipment on player spawn/respawn
         }

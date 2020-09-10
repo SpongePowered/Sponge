@@ -22,23 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch;
+package org.spongepowered.vanilla.installer.model.sponge;
 
-public final class Constants {
+import java.util.List;
+import java.util.Objects;
 
-    public static final class Libraries {
-        public static final String MINECRAFT_VERSION_TARGET = "1.15.2";
-        public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-        public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
-        public static final String MINECRAFT_SERVER_PATH_PREFIX = Libraries.MINECRAFT_PATH_PREFIX + "/server";
-        public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
-        public static final String MCP_CONFIG_NAME = "mcp_config";
-        public static final String MCP_CONFIG_PREFIX_URL = "https://files.minecraftforge.net/maven/de/oceanlabs/mcp/" + Libraries.MCP_CONFIG_NAME;
-        public static final String MCP_CONFIG_PATH_PREFIX = "de/oceanlabs/mcp/" + Libraries.MCP_CONFIG_NAME;
-        public static final String MCP_JOINED_PATH = "config/joined.tsrg";
-    }
+public final class Libraries {
 
-    public static final class ManifestAttributes {
-        public static final String LAUNCH_TARGET = "Launch-Target";
+    public List<Dependency> dependencies;
+
+    public static final class Dependency {
+        public String group, module, version, md5;
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.group, this.module);
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            final Dependency that = (Dependency) o;
+            return this.group.equals(that.group) &&
+                    this.module.equals(that.module);
+        }
     }
 }

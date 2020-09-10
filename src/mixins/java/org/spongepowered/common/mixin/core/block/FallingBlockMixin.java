@@ -24,43 +24,62 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import org.objectweb.asm.Opcodes;
+import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.Random;
+
 @Mixin(FallingBlock.class)
 public abstract class FallingBlockMixin {
 
-    @Inject(method = "checkFallable", at = @At(value = "JUMP", opcode = Opcodes.IFNE), cancellable = true)
-    public void impl$checkFallable(World worldIn, BlockPos pos, CallbackInfo ci) {
+    @Redirect(
+        method = "tick(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockPos;getY()I")
+    )
+    public int impl$checkFallable(final BlockPos pos, final BlockState state,
+        final ServerWorld world, final BlockPos samePos,
+        final Random random,
+        final CallbackInfo ci
+    ) {
+        if (pos.getY() < 0) {
+            return pos.getY();
+        }
         final EntityType<org.spongepowered.api.entity.FallingBlock> fallingBlock = EntityTypes.FALLING_BLOCK.get();
-        final org.spongepowered.api.world.World<?> spongeWorld = (org.spongepowered.api.world.World<?>) worldIn;
+        final World<@NonNull ?> spongeWorld = (World<@NonNull ?>) world;
         final BlockSnapshot snapshot = spongeWorld.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(snapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
-            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(), ServerLocation.of((ServerWorld) worldIn, pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D), new Vector3d(0, 0, 0), fallingBlock);
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
+                ServerLocation.of(
+                    (org.spongepowered.api.world.server.ServerWorld) world, pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D),
+                new Vector3d(0, 0, 0),
+                fallingBlock
+            );
             if (SpongeCommon.postEvent(event)) {
-                ci.cancel();
+                return -1;
             }
+            return pos.getY();
         }
     }
 

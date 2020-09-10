@@ -32,6 +32,7 @@ import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.applaunch.util.ArgumentList;
+import org.spongepowered.vanilla.installer.VanillaCommandLine;
 
 import java.io.IOException;
 import java.nio.file.Files;

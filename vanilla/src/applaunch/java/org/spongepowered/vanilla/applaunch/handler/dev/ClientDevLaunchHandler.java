@@ -25,9 +25,9 @@
 package org.spongepowered.vanilla.applaunch.handler.dev;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.vanilla.applaunch.VanillaLaunchTargets;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.applaunch.Main;
+import org.spongepowered.vanilla.installer.VanillaLaunchTargets;
 
 public final class ClientDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
 

@@ -29,29 +29,32 @@ import com.google.common.collect.Maps;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
+import net.minecraftforge.accesstransformer.AccessTransformerEngine;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
+import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 import org.spongepowered.vanilla.applaunch.Main;
+import org.spongepowered.vanilla.installer.Constants;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.jar.Attributes;
 
 import javax.annotation.Nonnull;
 
-public final class PluginService implements ITransformationService {
+public final class VanillaPlatformService implements ITransformationService {
 
-    private static final String NAME = "plugin";
+    private static final String NAME = "vanilla_platform";
 
     private static final VanillaPluginEngine pluginEngine = Main.getInstance().getPluginEngine();
 
     @Nonnull
     @Override
     public String name() {
-        return PluginService.NAME;
+        return VanillaPlatformService.NAME;
     }
 
     @Override
@@ -66,19 +69,33 @@ public final class PluginService implements ITransformationService {
 
     @Override
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
-        PluginService.pluginEngine.locatePluginResources();
-        PluginService.pluginEngine.createPluginCandidates();
+        VanillaPlatformService.pluginEngine.locatePluginResources();
+        VanillaPlatformService.pluginEngine.createPluginCandidates();
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
         for (final Map.Entry<String, List<PluginResource>> resourcesEntry : pluginEngine.getResources().entrySet()) {
             final List<PluginResource> resources = resourcesEntry.getValue();
-            launchResources.addAll(
-                    resources
-                            .stream()
-                            .map(resource -> Maps.immutableEntry(resource.getPath().getFileName().toString(), resource.getPath()))
-                            .collect(Collectors.toList())
-            );
+            for (final PluginResource resource : resources) {
+
+                // Handle Access Transformers
+                if (resource instanceof JVMPluginResource) {
+                    ((JVMPluginResource) resource).getManifest().ifPresent(manifest -> {
+                        final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.AT);
+                        if (atFiles != null) {
+                            for (final String atFile : atFiles.split(",")) {
+                                if (!atFile.endsWith(".cfg")) {
+                                    continue;
+                                }
+                                AccessTransformerEngine.INSTANCE.addResource(resource.getFileSystem().getPath("META-INF").resolve(atFile), atFile);
+                            }
+                        }
+                    });
+                }
+
+                final Map.Entry<String, Path> entry = Maps.immutableEntry(resource.getPath().getFileName().toString(), resource.getPath());
+                launchResources.add(entry);
+            }
         }
 
         return launchResources;
@@ -86,21 +103,17 @@ public final class PluginService implements ITransformationService {
 
     @Override
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
-        PluginService.pluginEngine.getPluginEnvironment().getLogger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
-            PluginService.pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.VERSION).get(), this.getCodeSource());
-        PluginService.pluginEngine.discoverLocatorServices();
-        PluginService.pluginEngine.getLocatorServices().forEach((k, v) -> PluginService.pluginEngine.getPluginEnvironment()
-                .getLogger().info("Plugin resource locator '{}' found.", k));
-        PluginService.pluginEngine.discoverLanguageServices();
-        PluginService.pluginEngine.getLanguageServices().forEach((k, v) -> PluginService.pluginEngine.getPluginEnvironment()
-                .getLogger().info("Plugin language loader '{}' found.", k));
+        final VanillaPluginEngine pluginEngine = VanillaPlatformService.pluginEngine;
 
-//        try {
-//            final Path path = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
-//            AccessTransformerEngine.INSTANCE.addResource(FileSystems.newFileSystem(path, null).getPath("META-INF/common_at.cfg"), "common_at.cfg");
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
+        pluginEngine.getPluginEnvironment().getLogger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
+            pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.VERSION).get(), this.getCodeSource());
+
+        pluginEngine.discoverLocatorServices();
+        pluginEngine.getLocatorServices().forEach((k, v) -> pluginEngine.getPluginEnvironment()
+                .getLogger().info("Plugin resource locator '{}' found.", k));
+        pluginEngine.discoverLanguageServices();
+        pluginEngine.getLanguageServices().forEach((k, v) -> pluginEngine.getPluginEnvironment()
+                .getLogger().info("Plugin language loader '{}' found.", k));
     }
 
     @Nonnull
