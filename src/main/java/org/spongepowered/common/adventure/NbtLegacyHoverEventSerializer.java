@@ -62,7 +62,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
         try {
             final CompoundNBT contents = SNBT_CODEC.decode(rawContent);
             final CompoundNBT tag = contents.getCompound(ITEM_TAG);
-            return new HoverEvent.ShowItem(
+            return HoverEvent.ShowItem.of(
                 Key.of(contents.getString(ITEM_TYPE)),
                 contents.contains(ITEM_COUNT) ? contents.getByte(ITEM_COUNT) : 1,
                 tag.isEmpty() ? null : BinaryTagHolder.encode(tag, SNBT_CODEC)
@@ -77,7 +77,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
         final String raw = PlainComponentSerializer.plain().serialize(input);
         try {
             final CompoundNBT contents = SNBT_CODEC.decode(raw);
-            return new HoverEvent.ShowEntity(
+            return HoverEvent.ShowEntity.of(
                 Key.of(contents.getString(ENTITY_TYPE)),
                 UUID.fromString(contents.getString(ENTITY_ID)),
                 componentCodec.decode(contents.getString(ENTITY_NAME))
