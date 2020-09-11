@@ -250,6 +250,8 @@ dependencies {
     // Annotation Processor
     "accessorsAnnotationProcessor"("org.spongepowered:mixin:$mixinVersion:processor")
     "mixinsAnnotationProcessor"("org.spongepowered:mixin:$mixinVersion:processor")
+    "accessorsAnnotationProcessor"("org.apache.logging.log4j:log4j-core:2.11.2")
+    "mixinsAnnotationProcessor"("org.apache.logging.log4j:log4j-core:2.11.2")
     mixinsConfig(sourceSets["main"].output)
     add(accessors.get().implementationConfigurationName, accessorsConfig)
     add(mixins.get().implementationConfigurationName, mixinsConfig)
@@ -602,6 +604,8 @@ project("SpongeVanilla") {
         // Annotation Processor
         vanillaAccessorsAnnotationProcessor(vanillaAppLaunchImplementation)
         vanillaMixinsAnnotationProcessor(vanillaAppLaunchImplementation)
+        vanillaAccessorsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
+        vanillaMixinsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
         vanillaAccessorsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion")
         vanillaMixinsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion")
 
@@ -996,6 +1000,8 @@ if (spongeForge != null) {
             // Annotation Processor
             forgeAccessorsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
             forgeMixinsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
+            forgeAccessorsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
+            forgeMixinsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
 
             testplugins?.apply {
                 add(forgeLaunch.runtimeConfigurationName, project(testplugins.path)) {
