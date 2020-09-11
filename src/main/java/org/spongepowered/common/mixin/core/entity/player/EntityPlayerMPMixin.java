@@ -172,6 +172,8 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
 
     @Shadow public abstract WorldServer getServerWorld();
 
+    @Shadow public abstract void closeContainer();
+
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.EMPTY;
     private final User impl$user = impl$getUserObjectOnConstruction();
@@ -898,6 +900,11 @@ public abstract class EntityPlayerMPMixin extends EntityPlayerMixin implements S
     @Override
     public void bridge$setContainerDisplay(final Text displayName) {
         this.impl$displayName = displayName;
+    }
+
+    @Redirect(method = {"displayGUIChest", "openGuiHorseInventory"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;closeScreen()V"))
+    private void impl$closePreviousContainer(EntityPlayerMP self) {
+        closeContainer();
     }
 
     @Redirect(method = "displayGUIChest", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/IInventory;getDisplayName()Lnet/minecraft/util/text/ITextComponent;"))
