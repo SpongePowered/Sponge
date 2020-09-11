@@ -1,6 +1,7 @@
 import org.apache.commons.codec.digest.DigestUtils
 import java.io.FileInputStream
 import java.util.StringJoiner
+import java.util.Locale
 
 plugins {
     id("net.minecraftforge.gradle")
@@ -296,6 +297,10 @@ allprojects {
 
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
+
+    base {
+        archivesBaseName = name.toLowerCase(Locale.ENGLISH)
+    }
 
     tasks {
         withType(JavaCompile::class) {
