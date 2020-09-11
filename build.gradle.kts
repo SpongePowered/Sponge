@@ -732,6 +732,7 @@ project("SpongeVanilla") {
                         "AT" to "common_at.cfg",
                         "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
                         "Launch-Target" to "sponge_server_prod",
+                        "Multi-Release" to true,
                         "Specification-Title" to "SpongeCommon",
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
@@ -1025,7 +1026,6 @@ if (spongeForge != null) {
                             "Implementation-Title" to project.name,
                             "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion, forgeVersion),
                             "Implementation-Vendor" to "SpongePowered"
-//                            "Implementation-Timestamp" to Instant.now().format("yyyy-MM-dd'T'HH:mm:ssZ")
                     ))
                 }
             }
@@ -1034,7 +1034,6 @@ if (spongeForge != null) {
             }
 
         }
-
 
         license {
             (this as ExtensionAware).extra.apply {

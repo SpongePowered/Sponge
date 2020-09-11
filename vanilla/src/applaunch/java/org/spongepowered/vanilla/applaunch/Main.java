@@ -32,7 +32,6 @@ import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.applaunch.util.ArgumentList;
-import org.spongepowered.vanilla.installer.VanillaCommandLine;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,7 +52,7 @@ public final class Main {
     }
 
     public static void main(final String[] args) throws Exception {
-        VanillaCommandLine.configure(args);
+        AppCommandLine.configure(args);
         new Main().run();
     }
 
@@ -66,19 +65,19 @@ public final class Main {
 
         this.pluginEngine.getPluginEnvironment().getBlackboard()
                 .getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
-        this.pluginEngine.getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> VanillaCommandLine.gameDirectory);
+        this.pluginEngine.getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> AppCommandLine.gameDirectory);
 
         SpongeConfigs.initialize(this.pluginEngine.getPluginEnvironment());
-        final Path modsDirectory = VanillaCommandLine.gameDirectory.resolve("mods");
+        final Path modsDirectory = AppCommandLine.gameDirectory.resolve("mods");
         if (Files.notExists(modsDirectory)) {
             Files.createDirectories(modsDirectory);
         }
         this.pluginEngine.getPluginEnvironment().getBlackboard()
-                .getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, VanillaCommandLine
+                .getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, AppCommandLine
                         .gameDirectory.resolve("plugins")));
 
         this.logger.info("Transitioning to ModLauncher, please wait...");
-        final ArgumentList lst = ArgumentList.from(VanillaCommandLine.RAW_ARGS);
+        final ArgumentList lst = ArgumentList.from(AppCommandLine.RAW_ARGS);
         Launcher.main(lst.getArguments());
     }
 

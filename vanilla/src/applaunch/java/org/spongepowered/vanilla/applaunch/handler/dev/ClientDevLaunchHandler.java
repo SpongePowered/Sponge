@@ -27,18 +27,18 @@ package org.spongepowered.vanilla.applaunch.handler.dev;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.applaunch.Main;
-import org.spongepowered.vanilla.installer.VanillaLaunchTargets;
+import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
 
 public final class ClientDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
 
     @Override
     public String name() {
-        return VanillaLaunchTargets.CLIENT_DEVELOPMENT.getLaunchTarget();
+        return AppLaunchTargets.CLIENT_DEVELOPMENT.getLaunchTarget();
     }
 
     @Override
     protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.ClientLauncher", true, launchClassLoader.getInstance())
+        Class.forName("org.spongepowered.vanilla.launch.ClientLaunch", true, launchClassLoader.getInstance())
                 .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
                 .invoke(null, Main.getInstance().getPluginEngine(), Boolean.TRUE, arguments);
     }

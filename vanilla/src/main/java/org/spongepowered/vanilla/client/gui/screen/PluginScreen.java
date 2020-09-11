@@ -32,7 +32,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.StringTextComponent;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.widget.MetadataPanel;
@@ -55,7 +55,7 @@ public final class PluginScreen extends Screen {
         super(new StringTextComponent("Plugins"));
         this.previousScreen = previousScreen;
         this.metadata = new ObjectArrayList<>();
-        final Collection<PluginContainer> plugins = Launcher.getInstance().getPluginManager().getPlugins();
+        final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().getPlugins();
         this.metadata.addAll(plugins.stream().map(PluginContainer::getMetadata).collect(Collectors.toList()));
     }
 
@@ -71,7 +71,7 @@ public final class PluginScreen extends Screen {
         // Add plugin list
         this.selectionList.setSelectConsumer(e -> this.contentPanel.setMetadata(e == null ? null : e.metadata));
         this.generateEntries(
-            Launcher.getInstance().getPluginManager().getPlugins().stream().map(PluginContainer::getMetadata).collect(Collectors.toList()));
+            Launch.getInstance().getPluginManager().getPlugins().stream().map(PluginContainer::getMetadata).collect(Collectors.toList()));
 
         // Add search text field
         this.searchField = new TextFieldWidget(this.font, this.width / 2 - 100, 22, 200, 20, I18n.format("itemGroup.search"));

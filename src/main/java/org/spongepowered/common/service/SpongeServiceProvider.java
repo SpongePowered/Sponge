@@ -49,7 +49,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.ServicesCategory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.permission.SpongePermissionService;
@@ -189,7 +189,7 @@ public final class SpongeServiceProvider implements ServiceProvider {
             Registration<?> registration = null;
             if (isSpecific) {
                 final Optional<PluginContainer> specificPluginContainer =
-                        Launcher.getInstance().getPluginManager().getPlugin(pluginId);
+                        Launch.getInstance().getPluginManager().getPlugin(pluginId);
                 if (specificPluginContainer.isPresent()) {
                     registration = this.getSpecificRegistration(specificPluginContainer.get(), candidate);
                     if (registration == null) {
@@ -236,7 +236,7 @@ public final class SpongeServiceProvider implements ServiceProvider {
                     prettyPrinter.log(SpongeCommon.getLogger(), Level.ERROR);
                 }
             } else {
-                final Collection<PluginContainer> toQuery = Launcher.getInstance().getPluginManager().getPlugins();
+                final Collection<PluginContainer> toQuery = Launch.getInstance().getPluginManager().getPlugins();
                 registration = this.attemptRegistration(toQuery, candidate);
             }
 
@@ -244,7 +244,7 @@ public final class SpongeServiceProvider implements ServiceProvider {
                 // If we don't have a registration, we try a Sponge one (which is lowest priority)
                 registration = this.createRegistration(
                         candidate,
-                        Launcher.getInstance().getCommonPlugin());
+                        Launch.getInstance().getCommonPlugin());
             }
 
             // If after all that we have a registration, we... register it.
@@ -264,7 +264,7 @@ public final class SpongeServiceProvider implements ServiceProvider {
         final Iterator<PluginContainer> pluginContainerIterator = pluginContainers.iterator();
         while (registration == null && pluginContainerIterator.hasNext()) {
             final PluginContainer pluginContainer = pluginContainerIterator.next();
-            if (!Launcher.getInstance().getLauncherPlugins().contains(pluginContainer)) {
+            if (!Launch.getInstance().getLauncherPlugins().contains(pluginContainer)) {
                 // If this succeeds, the while loop will end.
                 registration = this.getSpecificRegistration(pluginContainer, service);
             }

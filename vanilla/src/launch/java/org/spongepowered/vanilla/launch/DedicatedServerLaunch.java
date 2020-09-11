@@ -22,37 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer;
+package org.spongepowered.vanilla.launch;
 
-public enum VanillaLaunchTargets {
-    CLIENT_DEVELOPMENT("sponge_client_dev"),
-    CLIENT_PRODUCTION("sponge_client_prod"),
-    SERVER_DEVELOPMENT("sponge_server_dev"),
-    SERVER_PRODUCTION("sponge_server_prod");
+import com.google.inject.Stage;
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.common.SpongeBootstrap;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 
-    private final String launchTarget;
+public final class DedicatedServerLaunch extends VanillaLaunch {
 
-    VanillaLaunchTargets(final String launchTarget) {
-        this.launchTarget = launchTarget;
+    protected DedicatedServerLaunch(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
+        super(pluginEngine, injectionStage);
     }
 
-    public String getLaunchTarget() {
-        return this.launchTarget;
+    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isDeveloperEnvironment, final String[] args) {
+        final DedicatedServerLaunch launcher = new DedicatedServerLaunch(pluginEngine, isDeveloperEnvironment ? Stage.DEVELOPMENT :
+                Stage.PRODUCTION);
+        Launch.setInstance(launcher);
+        launcher.launchPlatform(args);
     }
 
-    public static VanillaLaunchTargets from(final String launchTarget) {
+    @Override
+    public boolean isDedicatedServer() {
+        return true;
+    }
 
-        switch (launchTarget) {
-            case "sponge_client_dev":
-                return CLIENT_DEVELOPMENT;
-            case "sponge_client_prod":
-                return CLIENT_PRODUCTION;
-            case "sponge_server_dev":
-                return SERVER_DEVELOPMENT;
-            case "sponge_server_prod":
-                return SERVER_PRODUCTION;
-        }
+    public void launchPlatform(final String[] args) {
+        super.onLaunch();
+        this.getLogger().info("Loading Sponge, please wait...");
 
-        return null;
+        SpongeBootstrap.perform("Server", () -> MinecraftServer.main(args));
     }
 }

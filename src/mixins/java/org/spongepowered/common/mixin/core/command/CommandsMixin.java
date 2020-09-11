@@ -37,7 +37,6 @@ import net.minecraft.command.impl.AdvancementCommand;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,7 +52,7 @@ import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode
 import org.spongepowered.common.command.brigadier.tree.SpongeNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -92,7 +91,7 @@ public abstract class CommandsMixin {
     private void impl$setupStackFrameOnInit(final CommandDispatcher<CommandSource> dispatcher) {
         ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).reset();
         this.impl$initFrame = PhaseTracker.getCauseStackManager().pushCauseFrame();
-        this.impl$initFrame.pushCause(Launcher.getInstance().getMinecraftPlugin());
+        this.impl$initFrame.pushCause(Launch.getInstance().getMinecraftPlugin());
         AdvancementCommand.register(dispatcher);
     }
 

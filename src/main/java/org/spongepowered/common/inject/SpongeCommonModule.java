@@ -50,7 +50,7 @@ import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.ChannelBufferAllocator;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
@@ -72,7 +72,7 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(AssetManager.class).to(SpongeAssetManager.class);
         this.bindAndExpose(ChannelRegistry.class).toInstance(new SpongeChannelRegistry(ChannelBufferAllocator.POOLED));
         this.bindAndExpose(EventManager.class).to(SpongeEventManager.class);
-        this.bindAndExpose(PluginManager.class).toInstance(Launcher.getInstance().getPluginManager());
+        this.bindAndExpose(PluginManager.class).toInstance(Launch.getInstance().getPluginManager());
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(PluginConfigManager.class);

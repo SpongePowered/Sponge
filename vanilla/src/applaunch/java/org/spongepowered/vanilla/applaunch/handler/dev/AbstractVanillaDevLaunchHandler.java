@@ -48,7 +48,7 @@ public abstract class AbstractVanillaDevLaunchHandler extends AbstractVanillaLau
             try {
                 builder.addTransformationPath(Paths.get(url.toURI()));
             } catch (final URISyntaxException ex) {
-                log.error("Failed to add Mixin transformation path", ex);
+                this.logger.error("Failed to add Mixin transformation path", ex);
             }
         }
 

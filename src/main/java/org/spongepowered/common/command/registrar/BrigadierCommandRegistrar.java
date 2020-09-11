@@ -25,7 +25,6 @@
 package org.spongepowered.common.command.registrar;
 
 import com.google.common.reflect.TypeToken;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
@@ -51,7 +50,7 @@ import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongePermissionWrappedLiteralCommandNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayList;
@@ -90,7 +89,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         final PluginContainer container = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
                 .orElseThrow(() -> new IllegalStateException("Cannot register command without knowing its origin."));
 
-        if (!this.hasVanillaRegistered && Launcher.getInstance().getMinecraftPlugin() == container) {
+        if (!this.hasVanillaRegistered && Launch.getInstance().getMinecraftPlugin() == container) {
             final LiteralCommandNode<CommandSource> vanillaCommand = this.applyNamespace(container, command, false);
             this.vanilla.add(vanillaCommand);
             return vanillaCommand;
@@ -108,7 +107,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         // then they can register anyway.
         this.hasVanillaRegistered = true;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final PluginContainer container = Launcher.getInstance().getMinecraftPlugin();
+            final PluginContainer container = Launch.getInstance().getMinecraftPlugin();
             frame.pushCause(container);
             for (final LiteralCommandNode<CommandSource> node : this.vanilla) {
                 this.registerInternal(this, container, node, new String[0], true);

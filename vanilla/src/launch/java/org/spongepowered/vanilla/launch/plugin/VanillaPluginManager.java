@@ -35,7 +35,7 @@ import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginLoader;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
-import org.spongepowered.vanilla.launch.VanillaLauncher;
+import org.spongepowered.vanilla.launch.VanillaLaunch;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -131,7 +131,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
                 }
 
                 try {
-                    pluginLoader.loadPlugin(engine.getPluginEnvironment(), plugin, VanillaLauncher.getInstance().getClass().getClassLoader());
+                    pluginLoader.loadPlugin(engine.getPluginEnvironment(), plugin, VanillaLaunch.getInstance().getClass().getClassLoader());
                     engine.getPluginEnvironment().getLogger().info("Loaded plugin '{}'", plugin.getMetadata().getId());
                     this.addPlugin(plugin);
                 } catch (final InvalidPluginException e) {

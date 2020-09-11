@@ -49,7 +49,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.plugin.PluginContainer;
@@ -176,9 +176,9 @@ public class SpongeCommand {
 
     @NonNull
     private CommandResult rootCommand(final CommandContext context) {
-        final PluginContainer platformPlugin = Launcher.getInstance().getPlatformPlugin();
-        final PluginContainer apiPlugin = Launcher.getInstance().getApiPlugin();
-        final PluginContainer minecraftPlugin = Launcher.getInstance().getMinecraftPlugin();
+        final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
+        final PluginContainer apiPlugin = Launch.getInstance().getApiPlugin();
+        final PluginContainer minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
 
         context.getCause().sendMessage(TextComponent.builder().append(
                 TextComponent.of("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(TextComponent.space()),
@@ -195,7 +195,7 @@ public class SpongeCommand {
     @NonNull
     private CommandResult auditSubcommandExecutor(final CommandContext context) {
         SpongeCommon.getLogger().info("Starting Mixin Audit");
-        Launcher.getInstance().auditMixins();
+        Launch.getInstance().auditMixins();
         return CommandResult.success();
     }
 
@@ -258,7 +258,7 @@ public class SpongeCommand {
 
     @NonNull
     private CommandResult pluginsListSubcommand(final CommandContext context) {
-        final Collection<PluginContainer> plugins = Launcher.getInstance().getPluginManager().getPlugins();
+        final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().getPlugins();
         context.sendMessage(this.title("Plugins (" + plugins.size() + ")"));
         for (final PluginContainer specificContainer : plugins) {
             final PluginMetadata metadata = specificContainer.getMetadata();
@@ -409,7 +409,7 @@ public class SpongeCommand {
     @NonNull
     private CommandResult versionExecutor(final CommandContext context) {
         if (this.versionText == null) {
-            final PluginContainer platformPlugin = Launcher.getInstance().getPlatformPlugin();
+            final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
 
             final TextComponent.Builder builder = TextComponent.builder()
                     .append(
@@ -417,7 +417,7 @@ public class SpongeCommand {
                     );
 
             final TextComponent colon = TextComponent.of(": ", NamedTextColor.GRAY);
-            for (final PluginContainer container : Launcher.getInstance().getLauncherPlugins()) {
+            for (final PluginContainer container : Launch.getInstance().getLauncherPlugins()) {
                 final PluginMetadata metadata = container.getMetadata();
                 builder.append(
                         TextComponent.newline(),

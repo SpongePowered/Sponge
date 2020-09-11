@@ -22,35 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.vanilla.applaunch;
 
-import com.google.inject.Stage;
-import net.minecraft.client.main.Main;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+public enum AppLaunchTargets {
+    CLIENT_DEVELOPMENT("sponge_client_dev"),
+    CLIENT_PRODUCTION("sponge_client_prod"),
+    SERVER_DEVELOPMENT("sponge_server_dev"),
+    SERVER_PRODUCTION("sponge_server_prod");
 
-public final class ClientLauncher extends VanillaLauncher {
+    private final String launchTarget;
 
-    protected ClientLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
-        super(pluginEngine, injectionStage);
+    AppLaunchTargets(final String launchTarget) {
+        this.launchTarget = launchTarget;
     }
 
-    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLauncher launcher = new ClientLauncher(pluginEngine, isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.launchPlatform(args);
+    public String getLaunchTarget() {
+        return this.launchTarget;
     }
 
-    @Override
-    public boolean isDedicatedServer() {
-        return false;
-    }
+    public static AppLaunchTargets from(final String launchTarget) {
 
-    public void launchPlatform(final String[] args) {
-        super.onLaunch();
-        this.getLogger().info("Loading Sponge, please wait...");
+        switch (launchTarget) {
+            case "sponge_client_dev":
+                return CLIENT_DEVELOPMENT;
+            case "sponge_client_prod":
+                return CLIENT_PRODUCTION;
+            case "sponge_server_dev":
+                return SERVER_DEVELOPMENT;
+            case "sponge_server_prod":
+                return SERVER_PRODUCTION;
+        }
 
-        SpongeBootstrap.perform("Client", () -> Main.main(args));
+        return null;
     }
 }

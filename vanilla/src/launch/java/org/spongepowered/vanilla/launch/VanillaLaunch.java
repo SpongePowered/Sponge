@@ -26,7 +26,7 @@ package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
 import org.spongepowered.common.applaunch.plugin.PluginEngine;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
@@ -40,12 +40,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 
-public abstract class VanillaLauncher extends Launcher {
+public abstract class VanillaLaunch extends Launch {
 
     private final Stage injectionStage;
     private PluginContainer vanillaPlugin;
 
-    protected VanillaLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
+    protected VanillaLaunch(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
         super(pluginEngine, new VanillaPluginManager());
         this.injectionStage = injectionStage;
     }
@@ -84,7 +84,7 @@ public abstract class VanillaLauncher extends Launcher {
                 .orElseThrow(() -> new RuntimeException("The game directory has not been added to the environment!"));
 
         try {
-            final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(VanillaLauncher.class.getResourceAsStream(
+            final Collection<PluginMetadata> read = PluginMetadataHelper.builder().build().read(VanillaLaunch.class.getResourceAsStream(
                     "/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME));
             for (final PluginMetadata metadata : read) {
                 this.getPluginManager().addDummyPlugin(new DummyPluginContainer(metadata, gameDirectory, this.getLogger(), this));

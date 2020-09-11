@@ -29,23 +29,15 @@ import com.google.inject.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.applaunch.plugin.PluginEngine;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.PluginKeys;
-import org.spongepowered.plugin.metadata.PluginMetadata;
-import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
-
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-public abstract class Launcher {
+public abstract class Launch {
 
-    private static Launcher INSTANCE;
+    private static Launch INSTANCE;
 
     protected final PluginEngine pluginEngine;
     protected final SpongePluginManager pluginManager;
@@ -53,7 +45,7 @@ public abstract class Launcher {
     private final List<PluginContainer> launcherPlugins;
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
 
-    protected Launcher(final PluginEngine pluginEngine, final SpongePluginManager pluginManager) {
+    protected Launch(final PluginEngine pluginEngine, final SpongePluginManager pluginManager) {
         this.logger = LogManager.getLogger("Sponge");
         this.pluginEngine = pluginEngine;
         this.pluginManager = pluginManager;
@@ -61,16 +53,16 @@ public abstract class Launcher {
     }
 
     @SuppressWarnings("unchecked")
-    public static <L extends Launcher> L getInstance() {
-        return (L) Launcher.INSTANCE;
+    public static <L extends Launch> L getInstance() {
+        return (L) Launch.INSTANCE;
     }
 
-    public static void setInstance(Launcher instance) {
-        if (Launcher.INSTANCE != null) {
+    public static void setInstance(Launch instance) {
+        if (Launch.INSTANCE != null) {
             throw new RuntimeException("Attempt made to re-set launcher instance!");
         }
 
-        Launcher.INSTANCE = Preconditions.checkNotNull(instance);
+        Launch.INSTANCE = Preconditions.checkNotNull(instance);
     }
 
     public abstract boolean isVanilla();

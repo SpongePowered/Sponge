@@ -22,36 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch;
+package org.spongepowered.vanilla.installer;
 
-import com.google.inject.Stage;
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import com.google.gson.annotations.SerializedName;
 
-public final class DedicatedServerLauncher extends VanillaLauncher {
+public final class LauncherConfig {
 
-    protected DedicatedServerLauncher(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
-        super(pluginEngine, injectionStage);
-    }
-
-    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isDeveloperEnvironment, final String[] args) {
-        final DedicatedServerLauncher launcher = new DedicatedServerLauncher(pluginEngine, isDeveloperEnvironment ? Stage.DEVELOPMENT :
-                Stage.PRODUCTION);
-        Launcher.setInstance(launcher);
-        launcher.launchPlatform(args);
-    }
-
-    @Override
-    public boolean isDedicatedServer() {
-        return true;
-    }
-
-    public void launchPlatform(final String[] args) {
-        super.onLaunch();
-        this.getLogger().info("Loading Sponge, please wait...");
-
-        SpongeBootstrap.perform("Server", () -> MinecraftServer.main(args));
-    }
+    @SerializedName("jvm-directory")
+    public String jvmDirectory = "${JAVA_HOME}";
+    @SerializedName("jvm-args")
+    public String jvmArgs = "";
+    @SerializedName("args")
+    public String args = "nogui";
+    @SerializedName("libraries-directory")
+    public String librariesDirectory = "${BASE_DIRECTORY}/libraries";
+    @SerializedName("auto-download-libraries")
+    public boolean autoDownloadLibraries = true;
+    @SerializedName("check-library-hashes")
+    public boolean checkLibraryHashes = true;
 }
