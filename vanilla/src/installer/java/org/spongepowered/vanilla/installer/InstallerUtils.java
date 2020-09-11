@@ -128,15 +128,11 @@ public final class InstallerUtils {
 
         final String fileSha1 = InstallerUtils.toHexString(digest.digest());
 
-        if (LauncherCommandLine.checkMinecraftJarHash) {
-            if (expected.equalsIgnoreCase(fileSha1)) {
-                logger.info("Successfully downloaded {} and verified checksum!", name);
-            } else {
-                Files.delete(path);
-                throw new IOException(String.format("Checksum verification failed: Expected '%s', got '%s'.", expected, fileSha1));
-            }
+        if (expected.equalsIgnoreCase(fileSha1)) {
+            logger.info("Successfully downloaded {} and verified checksum!", name);
         } else {
-            logger.info("Skipping hash check as that is turned off...");
+            Files.delete(path);
+            throw new IOException(String.format("Checksum verification failed: Expected '%s', got '%s'.", expected, fileSha1));
         }
     }
 

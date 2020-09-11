@@ -40,16 +40,9 @@ public final class LauncherCommandLine {
             .withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Paths.get("."));
     private static final ArgumentAcceptingOptionSpec<Path> LIBRARIES_DIRECTORY_ARG = PARSER.accepts("librariesDir", "Alternative libraries directory")
             .withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Paths.get("libraries"));
-    private static final ArgumentAcceptingOptionSpec<Boolean> DOWNLOAD_MINECRAFT_JAR = PARSER.accepts("downloadMinecraftJar", "If true, we'll "
-            + "download the Minecraft jar.").withOptionalArg().ofType(Boolean.class).defaultsTo(Boolean.TRUE);
-    private static final ArgumentAcceptingOptionSpec<Boolean> CHECK_MINECRAFT_JAR_HASH = PARSER.accepts("checkMinecraftJarHash", "If true, we'll "
-            + "verify the Minecraft jar hash (to protect against corruption/etc).").withOptionalArg().ofType(Boolean.class).defaultsTo(Boolean.TRUE);
-    private static final ArgumentAcceptingOptionSpec<Boolean> DOWNLOAD_SRG_MAPPINGS = PARSER.accepts("downloadSrgMappings", "If true, we'll "
-            + "download the SRG mappings").withOptionalArg().ofType(Boolean.class).defaultsTo(Boolean.TRUE);
 
     public static String[] RAW_ARGS;
     public static Path installerDirectory, librariesDirectory;
-    public static boolean downloadMinecraftJar, checkMinecraftJarHash, downloadSrgMappings;
 
     public static void configure(final String[] args) {
         LauncherCommandLine.PARSER.allowsUnrecognizedOptions();
@@ -57,9 +50,6 @@ public final class LauncherCommandLine {
         final OptionSet options = LauncherCommandLine.PARSER.parse(args);
         LauncherCommandLine.installerDirectory = options.valueOf(LauncherCommandLine.INSTALLER_DIRECTORY_ARG);
         LauncherCommandLine.librariesDirectory = options.valueOf(LauncherCommandLine.LIBRARIES_DIRECTORY_ARG);
-        LauncherCommandLine.downloadMinecraftJar = options.valueOf(LauncherCommandLine.DOWNLOAD_MINECRAFT_JAR);
-        LauncherCommandLine.checkMinecraftJarHash = options.valueOf(LauncherCommandLine.CHECK_MINECRAFT_JAR_HASH);
-        LauncherCommandLine.downloadSrgMappings = options.valueOf(LauncherCommandLine.DOWNLOAD_SRG_MAPPINGS);
 
         LauncherCommandLine.RAW_ARGS = args;
     }
