@@ -80,7 +80,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.service.pagination.SpongePaginationService;
+import org.spongepowered.common.service.game.pagination.SpongePaginationService;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 

@@ -55,6 +55,7 @@ import org.spongepowered.common.network.channel.ChannelBufferAllocator;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.SpongeServiceProvider;
+import org.spongepowered.common.service.game.SpongeGameScopedServiceProvider;
 import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.SpongeMetricsConfigManager;
 
@@ -78,7 +79,7 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(ConfigManager.class).to(PluginConfigManager.class);
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
         this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
-        this.bindAndExpose(ServiceProvider.class).to(SpongeServiceProvider.class);
+        this.bindAndExpose(ServiceProvider.GameScoped.class).to(SpongeGameScopedServiceProvider.class);
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
 
         this.requestStaticInjection(SpongeCommon.class);

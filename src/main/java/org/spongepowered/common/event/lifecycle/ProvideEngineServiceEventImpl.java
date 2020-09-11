@@ -27,44 +27,29 @@ package org.spongepowered.common.event.lifecycle;
 import com.google.common.reflect.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 
 import java.util.function.Supplier;
 
-public class ProvideServiceEventImpl<T> extends AbstractLifecycleEvent implements ProvideServiceEvent<T> {
+public final class ProvideEngineServiceEventImpl<T> extends ProvideServiceEventImpl<T> implements ProvideServiceEvent.EngineScoped<T> {
 
-    protected final TypeToken<T> token;
-    @Nullable private Supplier<T> serviceFactory;
+    private final Engine engine;
 
-    public ProvideServiceEventImpl(final Cause cause, final Game game, final TypeToken<T> token) {
-        super(cause, game);
-        this.token = token;
-    }
-
-    @Override
-    public TypeToken<T> getGenericType() {
-        return this.token;
-    }
-
-    @Override
-    public void suggest(@NonNull final Supplier<T> serviceFactory) {
-        this.serviceFactory = serviceFactory;
-    }
-
-    @Nullable
-    public Supplier<T> getSuggestion() {
-        return this.serviceFactory;
-    }
-
-    // For resetting the event between plugins.
-    public void clear() {
-        this.serviceFactory = null;
+    public ProvideEngineServiceEventImpl(final Cause cause, final Game game, final TypeToken<T> token, final Engine engine) {
+        super(cause, game, token);
+        this.engine = engine;
     }
 
     @Override
     public String toString() {
-        return "ProvideServiceEvent{cause=" + this.cause + ", type=" + this.token + "}";
+        return "ProvideServiceEvent.EngineScoped{cause=" + this.cause + ", type=" + this.token + ", engine=" + this.engine.toString() + "}";
+    }
+
+    @Override
+    public Engine getEngine() {
+        return this.engine;
     }
 }

@@ -22,29 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server;
+package org.spongepowered.common.service.server.permission;
 
-import com.google.inject.Injector;
-import net.minecraft.world.dimension.DimensionType;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
+import org.spongepowered.api.service.permission.MemorySubjectData;
 
-public interface MinecraftServerBridge {
+public abstract class SpongeSubject extends SpongeBaseSubject {
 
-    void bridge$initServices(Game game, Injector injector);
+    @Override
+    public MemorySubjectData getTransientSubjectData() {
+        return this.getSubjectData();
+    }
 
-    SpongeServerScopedServiceProvider bridge$getServiceProvider();
+    @Override
+    public abstract MemorySubjectData getSubjectData();
 
-    long[] bridge$getWorldTickTimes(DimensionType dimensionType);
-
-    void bridge$putWorldTickTimes(DimensionType dimensionType, long[] tickTimes);
-
-    void bridge$removeWorldTickTimes(DimensionType dimensionType);
-
-    void bridge$setSaveEnabled(boolean enabled);
-
-    @Nullable
-    ResourcePack bridge$getResourcePack();
 }

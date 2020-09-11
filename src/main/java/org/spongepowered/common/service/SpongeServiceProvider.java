@@ -25,11 +25,9 @@
 package org.spongepowered.common.service;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Singleton;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,59 +37,25 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.ServiceRegistration;
-import org.spongepowered.api.service.ban.BanService;
-import org.spongepowered.api.service.economy.EconomyService;
-import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.ServicesCategory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.service.ban.SpongeBanService;
-import org.spongepowered.common.service.pagination.SpongePaginationService;
-import org.spongepowered.common.service.permission.SpongePermissionService;
-import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-@Singleton
-public final class SpongeServiceProvider implements ServiceProvider {
-
-    // Contains all the services and defaults.
-    private static final ImmutableList<Service<?>> AVAILABLE_SERVICES =
-            ImmutableList.<Service<?>>builder()
-                    .add(new Service<>(
-                            BanService.class,
-                            ServicesCategory.ServicePluginSubCategory::getBanService,
-                            SpongeBanService.class))
-                    .add(new Service<>(
-                            EconomyService.class,
-                            ServicesCategory.ServicePluginSubCategory::getEconomyService,
-                            null))
-                    .add(new Service<>(
-                            PaginationService.class,
-                            ServicesCategory.ServicePluginSubCategory::getPaginationService,
-                            SpongePaginationService.class))
-                    .add(new Service<>(
-                            PermissionService.class,
-                            ServicesCategory.ServicePluginSubCategory::getPermissionService,
-                            SpongePermissionService.class))
-                    .add(new Service<>(
-                            WhitelistService.class,
-                            ServicesCategory.ServicePluginSubCategory::getWhitelistService,
-                            SpongeWhitelistService.class))
-                    .build();
-    // --
+public abstract class SpongeServiceProvider implements ServiceProvider {
 
     private final Game game;
     private final Injector injector;
@@ -102,6 +66,12 @@ public final class SpongeServiceProvider implements ServiceProvider {
         this.game = game;
         this.injector = injector;
     }
+
+    protected final Game getGame() {
+        return this.game;
+    }
+
+    protected abstract List<Service<?>> servicesToSelect();
 
     @Override
     @NonNull
@@ -123,42 +93,12 @@ public final class SpongeServiceProvider implements ServiceProvider {
 
     @NonNull
     @SuppressWarnings("unchecked")
-    private <T> T provideUnchecked(final Class<T> serviceClass) {
+    protected final <T> T provideUnchecked(final Class<T> serviceClass) {
         final Registration<T> registration = (Registration<T>) this.services.get(serviceClass);
         if (registration != null) {
             return registration.service();
         }
         throw new IllegalStateException("Service registration does not exist.");
-    }
-
-    @Override
-    @NonNull
-    public final BanService banService() {
-        return this.provideUnchecked(BanService.class);
-    }
-
-    @Override
-    @NonNull
-    public final Optional<EconomyService> economyService() {
-        return this.provide(EconomyService.class);
-    }
-
-    @Override
-    @NonNull
-    public final PaginationService paginationService() {
-        return this.provideUnchecked(PaginationService.class);
-    }
-
-    @Override
-    @NonNull
-    public final PermissionService permissionService() {
-        return this.provideUnchecked(PermissionService.class);
-    }
-
-    @Override
-    @NonNull
-    public final WhitelistService whitelistService() {
-        return this.provideUnchecked(WhitelistService.class);
     }
 
     // Service Discovery
@@ -178,7 +118,7 @@ public final class SpongeServiceProvider implements ServiceProvider {
 
         // We loop over all available services and try to discover each one.
         // This does NOT support third party service interfaces, only impls.
-        for (final Service<?> candidate : AVAILABLE_SERVICES) {
+        for (final Service<?> candidate : this.servicesToSelect()) {
 
             // If the configuration file has a specific plugin ID, we look for it.
             final String pluginId = candidate.providePluginId(servicePluginSubCategory);
@@ -272,13 +212,14 @@ public final class SpongeServiceProvider implements ServiceProvider {
         return registration;
     }
 
+    protected abstract <T> ProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service);
+
     @Nullable
     private <T> Registration<T> getSpecificRegistration(final PluginContainer container, final Service<T> service) {
-        final ProvideServiceEventImpl<T> event = new ProvideServiceEventImpl<>(Cause.of(EventContext.empty(), this.game), this.game, TypeToken.of(service.getServiceClass()));
-
         // This is the actual query - a generic event.
+        final ProvideServiceEventImpl<T> event = this.createEvent(container, service);
         try {
-            ((SpongeEventManager) this.game.getEventManager()).post(event, container);
+            ((SpongeEventManager) this.getGame().getEventManager()).post(event, container);
         } catch (final Exception ex) {
             ex.printStackTrace();
         }
@@ -335,13 +276,13 @@ public final class SpongeServiceProvider implements ServiceProvider {
         }
     }
 
-    static final class Service<T> {
+    protected static final class Service<T> {
 
         @NonNull private final Class<T> service;
         @Nullable private final Class<? extends T> defaultServiceClass;
         @NonNull private final Function<ServicesCategory.ServicePluginSubCategory, String> configEntryProvider;
 
-        Service(@NonNull final Class<T> service,
+        public Service(@NonNull final Class<T> service,
                 @NonNull final Function<ServicesCategory.ServicePluginSubCategory, String> configEntryProvider,
                 @Nullable final Class<? extends T> defaultServiceClass) {
             this.service = service;
@@ -349,20 +290,20 @@ public final class SpongeServiceProvider implements ServiceProvider {
             this.configEntryProvider = configEntryProvider;
         }
 
-        Class<T> getServiceClass() {
+        public Class<T> getServiceClass() {
             return this.service;
         }
 
-        String providePluginId(final ServicesCategory.ServicePluginSubCategory servicePluginSubCategory) {
+        public String providePluginId(final ServicesCategory.ServicePluginSubCategory servicePluginSubCategory) {
             return this.configEntryProvider.apply(servicePluginSubCategory);
         }
 
-        boolean suppliesDefault() {
+        public boolean suppliesDefault() {
             return this.defaultServiceClass != null;
         }
 
         @Nullable
-        T provideDefaultService(final Injector injector) {
+        public T provideDefaultService(final Injector injector) {
             if (this.defaultServiceClass != null) {
                 return injector.getInstance(this.defaultServiceClass);
             } else {

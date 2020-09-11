@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.service.permission.SpongePermissions;
+import org.spongepowered.common.service.server.permission.SpongePermissions;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 

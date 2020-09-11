@@ -33,7 +33,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
 import org.spongepowered.common.command.brigadier.tree.SpongePermissionWrappedLiteralCommandNode;
-import org.spongepowered.common.service.permission.SpongePermissions;
+import org.spongepowered.common.service.server.permission.SpongePermissions;
 
 import java.util.Collection;
 import java.util.Locale;
