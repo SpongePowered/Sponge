@@ -1096,6 +1096,8 @@ public final class Constants {
         // RepresentedPlayerData
         public static final DataQuery GAME_PROFILE_ID = of("Id");
         public static final DataQuery GAME_PROFILE_NAME = of("Name");
+
+        public static final String DUMMY_NAME = "[sponge]";
     }
 
     public static final class Block {

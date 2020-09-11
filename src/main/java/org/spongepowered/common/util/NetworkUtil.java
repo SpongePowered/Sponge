@@ -362,7 +362,7 @@ public final class NetworkUtil {
 
         final TextComponentTranslation chatcomponenttranslation;
 
-        if (!playerIn.getName().equalsIgnoreCase(s))
+        if (!s.equals(Constants.GameProfile.DUMMY_NAME) && !playerIn.getName().equalsIgnoreCase(s))
         {
             chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
         }
