@@ -32,6 +32,7 @@ public final class Libraries {
     public List<Dependency> dependencies;
 
     public static final class Dependency {
+
         public String group, module, version, md5;
 
         @Override
@@ -49,7 +50,7 @@ public final class Libraries {
             }
             final Dependency that = (Dependency) o;
             return this.group.equals(that.group) &&
-                    this.module.equals(that.module);
+                this.module.equals(that.module);
         }
     }
 }

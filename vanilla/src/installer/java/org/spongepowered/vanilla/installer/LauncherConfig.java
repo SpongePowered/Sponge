@@ -33,7 +33,7 @@ public final class LauncherConfig {
     @SerializedName("jvm-args")
     public String jvmArgs = "";
     @SerializedName("args")
-    public String args = "nogui";
+    public String args = "--nogui";
     @SerializedName("libraries-directory")
     public String librariesDirectory = "${BASE_DIRECTORY}/libraries";
     @SerializedName("auto-download-libraries")

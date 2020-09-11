@@ -39,21 +39,13 @@ import java.nio.file.Paths;
 
 public final class Installer {
 
-    private static Installer INSTANCE;
-
     private final Logger logger;
     private final Path directory;
     private final LibraryManager libraryManager;
     private final Gson gson;
     private final LauncherConfig config;
 
-    public static Installer getInstance() {
-        return Installer.INSTANCE;
-    }
-
     public Installer(final Logger logger, final Path directory) throws IOException {
-        Installer.INSTANCE = this;
-
         this.logger = logger;
         this.directory = directory;
         final Path launcherConfigFile = this.directory.resolve("launcher.conf");

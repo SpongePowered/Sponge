@@ -36,24 +36,21 @@ import java.nio.file.Paths;
 public final class LauncherCommandLine {
 
     private static final OptionParser PARSER = new OptionParser();
-    private static final ArgumentAcceptingOptionSpec<Path> INSTALLER_DIRECTORY_ARG = PARSER.accepts("installerDir", "Alternative installer directory")
-            .withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Paths.get("."));
-    private static final ArgumentAcceptingOptionSpec<Path> LIBRARIES_DIRECTORY_ARG = PARSER.accepts("librariesDir", "Alternative libraries directory")
-            .withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Paths.get("libraries"));
+    private static final ArgumentAcceptingOptionSpec<Path> INSTALLER_DIRECTORY_ARG = LauncherCommandLine.PARSER.accepts("installerDir",
+        "Alternative installer directory").withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING))
+        .defaultsTo(Paths.get("."));
+    private static final ArgumentAcceptingOptionSpec<Path> LIBRARIES_DIRECTORY_ARG = LauncherCommandLine.PARSER.accepts("librariesDir",
+        "Alternative libraries directory").withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING))
+        .defaultsTo(Paths.get("libraries"));
 
-    public static String[] RAW_ARGS;
     public static Path installerDirectory, librariesDirectory;
 
-    public static void configure(final String[] args) {
-        LauncherCommandLine.PARSER.allowsUnrecognizedOptions();
+    private LauncherCommandLine() {
+    }
 
+    public static void configure(final String[] args) {
         final OptionSet options = LauncherCommandLine.PARSER.parse(args);
         LauncherCommandLine.installerDirectory = options.valueOf(LauncherCommandLine.INSTALLER_DIRECTORY_ARG);
         LauncherCommandLine.librariesDirectory = options.valueOf(LauncherCommandLine.LIBRARIES_DIRECTORY_ARG);
-
-        LauncherCommandLine.RAW_ARGS = args;
-    }
-
-    private LauncherCommandLine() {
     }
 }

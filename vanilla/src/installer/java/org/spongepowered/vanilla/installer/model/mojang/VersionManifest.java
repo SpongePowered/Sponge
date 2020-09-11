@@ -25,21 +25,25 @@
 package org.spongepowered.vanilla.installer.model.mojang;
 
 import com.google.gson.annotations.SerializedName;
+
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-public class VersionManifest {
+public final class VersionManifest {
+
     public Latest latest;
     public List<Version> versions;
 
     public static class Latest {
+
         public String snapshot;
         public String release;
     }
 
     public static class Version {
+
         public String id;
         public Type type;
         public URL url;
@@ -50,8 +54,12 @@ public class VersionManifest {
 
         @Override
         public boolean equals(final Object other) {
-            if(this == other)  return true;
-            if(other == null || this.getClass() != other.getClass()) return false;
+            if (this == other) {
+                return true;
+            }
+            if (other == null || this.getClass() != other.getClass()) {
+                return false;
+            }
             final Version that = (Version) other;
             return Objects.equals(this.id, that.id) && Objects.equals(this.type, that.type);
         }
@@ -74,7 +82,7 @@ public class VersionManifest {
             @SerializedName("release")
             RELEASE,
             @SerializedName("snapshot")
-            SNAPSHOT;
+            SNAPSHOT
         }
     }
 }

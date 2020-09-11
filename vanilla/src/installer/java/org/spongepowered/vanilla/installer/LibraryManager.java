@@ -200,6 +200,7 @@ public final class LibraryManager {
     }
 
     public static class Library {
+
         private final String name;
         private final Path file;
 

@@ -43,6 +43,9 @@ public final class InstallerUtils {
     // From http://stackoverflow.com/questions/9655181/convert-from-byte-array-to-hex-string-in-java
     private static final char[] hexArray = "0123456789abcdef".toCharArray();
 
+    private InstallerUtils() {
+    }
+
     public static String toHexString(final byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
@@ -134,8 +137,5 @@ public final class InstallerUtils {
             Files.delete(path);
             throw new IOException(String.format("Checksum verification failed: Expected '%s', got '%s'.", expected, fileSha1));
         }
-    }
-
-    private InstallerUtils() {
     }
 }

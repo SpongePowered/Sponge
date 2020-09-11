@@ -33,12 +33,14 @@ public final class SonatypeResponse {
     public String continuationToken;
 
     public static final class Item {
+
         public URL downloadUrl;
         public String path, id, repository, format;
         public Checksum checksum;
     }
 
     public static final class Checksum {
+
         public String sha1, md5;
     }
 }

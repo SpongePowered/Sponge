@@ -71,7 +71,7 @@ public final class SpongeBootstrap {
 
         SpongePacketHandler.init((SpongeChannelRegistry) Sponge.getChannelRegistry());
 
-        Launch.getInstance().getLogger().info("Loading Minecraft '{}', please wait...", engineName);
+        Launch.getInstance().getLogger().info("Loading Minecraft {}, please wait...", engineName);
         engineStart.run();
     }
 

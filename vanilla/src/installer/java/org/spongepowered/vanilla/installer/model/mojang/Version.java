@@ -29,7 +29,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class Version {
+public final class Version {
+
     public AssetIndex assetIndex;
     public String assets;
     public Downloads downloads;
@@ -43,6 +44,7 @@ public class Version {
     public VersionManifest.Version.Type type;
 
     public static class AssetIndex {
+
         public String id;
         public String sha1;
         public int size;
@@ -51,12 +53,14 @@ public class Version {
     }
 
     public static class Downloads {
+
         public Download client;
         public Download client_mappings;
         public Download server;
         public Download server_mappings;
 
         public static class Download {
+
             public String sha1;
             public int size;
             public URL url;
@@ -64,14 +68,17 @@ public class Version {
     }
 
     public static class Library {
+
         public Downloads downloads;
         public String name;
 
         public static class Downloads {
+
             public Artifact artifact;
             public Map<String, Artifact> classifiers;
 
             public static class Artifact {
+
                 public String path;
                 public String sha1;
                 public int size;

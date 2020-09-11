@@ -2,17 +2,17 @@
 <Configuration status="warn">
   <Appenders>
     <Console name="SysOut" target="SYSTEM_OUT">
-      <PatternLayout pattern="%highlight{[%d{HH:mm:ss.SSS}] [%t/%level] [%c{-3}/%markerSimpleName]: %msg%n}"/>
+      <PatternLayout pattern="%highlight{[%d{HH:mm:ss}] [%t/%level]:%msg%n}"/>
     </Console>
     <RollingRandomAccessFile name="File" fileName="logs/latest_launcher.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
-      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss.SSS}] [%t/%level] [%logger/%markerSimpleName]: %msg%n"/>
+      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level]:%msg%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
         <OnStartupTriggeringPolicy/>
       </Policies>
     </RollingRandomAccessFile>
     <RollingRandomAccessFile name="DebugFile" fileName="logs/debug_launcher.log" filePattern="logs/debug_launcher-%i.log.gz">
-      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss.SSS}] [%t/%level] [%logger/%markerSimpleName]: %msg%n"/>
+      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level]:%msg%n"/>
       <Policies>
         <OnStartupTriggeringPolicy/>
         <SizeBasedTriggeringPolicy size="200MB"/>

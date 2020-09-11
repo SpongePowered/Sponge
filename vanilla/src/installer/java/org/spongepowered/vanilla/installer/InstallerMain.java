@@ -44,7 +44,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,19 +52,18 @@ import java.util.stream.Collectors;
 public final class InstallerMain {
 
     static {
-        System.setProperty("log4j.configurationFile", "log4j2_installer.xml");
+        System.setProperty("log4j.configurationFile", "log4j2_launcher.xml");
     }
 
     private final Installer installer;
 
-    public static void main(final String[] args) throws Exception {
-        new InstallerMain(args);
-    }
-
     public InstallerMain(final String[] args) throws Exception {
         LauncherCommandLine.configure(args);
         this.installer = new Installer(LogManager.getLogger("Installer"), LauncherCommandLine.installerDirectory);
-        this.run();
+    }
+
+    public static void main(final String[] args) throws Exception {
+        new InstallerMain(args).run();
     }
 
     public void run() throws Exception {
@@ -78,7 +76,7 @@ public final class InstallerMain {
         this.installer.getLibraryManager().addLibrary(new LibraryManager.Library("minecraft", minecraftJar));
 
         this.installer.getLogger().info("Environment has been verified.");
-        
+
         final String javaBin = this.installer.getLauncherConfig().jvmDirectory.replace("${JAVA_HOME}", System.getProperty("java.home")) +
             File.separator + "bin" + File.separator + "java";
         final List<String> jvmArgs = Arrays.asList(this.installer.getLauncherConfig().jvmArgs.split(" "));
@@ -104,14 +102,14 @@ public final class InstallerMain {
         process.waitFor();
     }
 
-    private void downloadMinecraft(final Path librariesDirectory) throws IOException, NoSuchAlgorithmException {
+    private void downloadMinecraft(final Path librariesDirectory) throws Exception {
         this.installer.getLogger().info("Downloading the Minecraft versions manifest...");
 
         VersionManifest.Version foundVersionManifest = null;
 
         final Gson gson = new Gson();
         try (final JsonReader reader = new JsonReader(new InputStreamReader(new URL(Constants.Libraries.MINECRAFT_MANIFEST_URL)
-                .openStream()))) {
+            .openStream()))) {
             final VersionManifest manifest = gson.fromJson(reader, VersionManifest.class);
             for (final VersionManifest.Version version : manifest.versions) {
                 if (Constants.Libraries.MINECRAFT_VERSION_TARGET.equals(version.id)) {
@@ -133,19 +131,20 @@ public final class InstallerMain {
 
         if (version == null) {
             throw new IOException(String.format("Failed to download version information for '%s'!",
-                    Constants.Libraries.MINECRAFT_VERSION_TARGET));
+                Constants.Libraries.MINECRAFT_VERSION_TARGET));
         }
 
         final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX).resolve(
-                Constants.Libraries.MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
+            Constants.Libraries.MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
 
         if (Files.notExists(downloadTarget)) {
             if (!this.installer.getLauncherConfig().autoDownloadLibraries) {
                 throw new IOException(
-                        String.format("The Minecraft jar is not located at '%s' and downloading it has been turned off.", downloadTarget));
+                    String.format("The Minecraft jar is not located at '%s' and downloading it has been turned off.", downloadTarget));
             }
-            InstallerUtils.downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget, MessageDigest.getInstance("SHA-1"),
-                version.downloads.server.sha1, false);
+            InstallerUtils
+                .downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget, MessageDigest.getInstance("SHA-1"),
+                    version.downloads.server.sha1, false);
         } else {
             if (this.installer.getLauncherConfig().checkLibraryHashes) {
                 this.installer.getLogger().info("Detected existing Minecraft Server jar, verifying hashes...");
@@ -159,10 +158,10 @@ public final class InstallerMain {
                     this.installer.getLogger().info("Minecraft Server jar verified!");
                 } else {
                     this.installer.getLogger().error("Checksum verification failed: Expected {}, {}. Deleting cached Minecraft Server jar...",
-                            version.downloads.server.sha1, fileSha1);
+                        version.downloads.server.sha1, fileSha1);
                     Files.delete(downloadTarget);
-                    InstallerUtils.downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget, MessageDigest.getInstance("SHA-1"),
-                            version.downloads.server.sha1, false);
+                    InstallerUtils.downloadCheckHash(this.installer.getLogger(), version.downloads.server.url, downloadTarget,
+                        MessageDigest.getInstance("SHA-1"), version.downloads.server.sha1, false);
                 }
             } else {
                 this.installer.getLogger().info("Detected existing Minecraft jar. Skipping hash check as that is turned off...");
@@ -173,12 +172,11 @@ public final class InstallerMain {
     private Path downloadSRG(final Path librariesDirectory) throws IOException {
         this.installer.getLogger().info("Setting up MCP config for Minecraft {}", Constants.Libraries.MINECRAFT_VERSION_TARGET);
         final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MCP_CONFIG_PATH_PREFIX).resolve(Constants.Libraries
-                .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MCP_CONFIG_NAME + "-" + Constants.Libraries
-                .MINECRAFT_VERSION_TARGET + ".zip");
+            .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MCP_CONFIG_NAME + "-" + Constants.Libraries
+            .MINECRAFT_VERSION_TARGET + ".zip");
         if (Files.notExists(downloadTarget)) {
-            final URL mcpConfigUrl = new URL(Constants.Libraries.MCP_CONFIG_PREFIX_URL + "/" + Constants.Libraries
-                    .MINECRAFT_VERSION_TARGET + "/" + Constants.Libraries.MCP_CONFIG_NAME + "-" + Constants.Libraries
-                    .MINECRAFT_VERSION_TARGET + ".zip");
+            final URL mcpConfigUrl = new URL(Constants.Libraries.MCP_CONFIG_PREFIX_URL + "/" + Constants.Libraries.MINECRAFT_VERSION_TARGET
+                + "/" + Constants.Libraries.MCP_CONFIG_NAME + "-" + Constants.Libraries.MINECRAFT_VERSION_TARGET + ".zip");
             // TODO Figure out how to sha1 check the zip file
             if (this.installer.getLauncherConfig().autoDownloadLibraries) {
                 InstallerUtils.download(this.installer.getLogger(), mcpConfigUrl, downloadTarget, false);
@@ -197,9 +195,9 @@ public final class InstallerMain {
     private Path remapMinecraft(final Path librariesDirectory, final Path srgZip) throws IOException {
         this.installer.getLogger().info("Checking if we need to remap Minecraft...");
         final Path inputJar = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX).resolve(Constants.Libraries
-                .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
+            .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
         final Path outputJar = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX).resolve(Constants.Libraries
-                .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_" + "remapped.jar");
+            .MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_" + "remapped.jar");
 
         if (Files.exists(outputJar)) {
             this.installer.getLogger().info("Remapped Minecraft detected, skipping...");
@@ -213,7 +211,7 @@ public final class InstallerMain {
             MappingFormats.TSRG.read(mappings, srgFile);
             final Atlas atlas = new Atlas();
             atlas.install(ctx -> new JarEntryRemappingTransformer(
-                    new LorenzRemapper(mappings, ctx.inheritanceProvider())
+                new LorenzRemapper(mappings, ctx.inheritanceProvider())
             ));
             atlas.run(inputJar, outputJar);
         }
