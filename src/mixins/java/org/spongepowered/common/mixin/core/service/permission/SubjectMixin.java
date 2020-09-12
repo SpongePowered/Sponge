@@ -52,13 +52,6 @@ public abstract class SubjectMixin implements SubjectBridge {
     @Nullable
     private SubjectReference impl$subjectReference;
 
-    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
-    private void subjectConstructor(final CallbackInfo ci) {
-        if (SpongeCommon.isInitialized()) {
-            SubjectHelper.applySubject(this);
-        }
-    }
-
     @Override
     public void bridge$setSubject(final SubjectReference subj) {
         this.impl$subjectReference = subj;
