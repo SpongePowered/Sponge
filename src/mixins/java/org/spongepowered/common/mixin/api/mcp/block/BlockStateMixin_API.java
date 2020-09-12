@@ -40,6 +40,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.mirror.Mirror;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -60,6 +61,7 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
     @Shadow public abstract Block shadow$getBlock();
     @Shadow public abstract IFluidState shadow$getFluidState();
     @Shadow public abstract net.minecraft.block.BlockState shadow$rotate(net.minecraft.util.Rotation rotation);
+    @Shadow public abstract net.minecraft.block.BlockState shadow$mirror(net.minecraft.util.Mirror rotation);
     //@formatting:on
 
     private String impl$serializedState;
@@ -133,5 +135,10 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
     @Override
     public BlockState rotate(final Rotation rotation) {
         return (BlockState) this.shadow$rotate((net.minecraft.util.Rotation) (Object) Objects.requireNonNull(rotation, "Rotation cannot be null!"));
+    }
+
+    @Override
+    public BlockState mirror(final Mirror mirror) {
+        return (BlockState) this.shadow$mirror((net.minecraft.util.Mirror) (Object) Objects.requireNonNull(mirror, "Mirror cannot be null!"));
     }
 }
