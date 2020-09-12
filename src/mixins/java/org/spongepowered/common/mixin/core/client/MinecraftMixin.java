@@ -24,17 +24,24 @@
  */
 package org.spongepowered.common.mixin.core.client;
 
+import com.google.common.reflect.TypeToken;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import net.minecraft.client.GameConfiguration;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.ClientResourcePackInfo;
+import net.minecraft.resources.IFutureReloadListener;
+import net.minecraft.resources.IPackFinder;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.ResourcePackList;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.listener.ChainedChunkStatusListener;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.chunk.listener.TrackingChunkStatusListener;
+import org.spongepowered.api.Client;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,6 +54,7 @@ import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.event.resource.ResourceEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.net.Proxy;
@@ -62,12 +70,24 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     @Shadow @Nullable private IntegratedServer integratedServer;
     @Shadow @Final private AtomicReference<TrackingChunkStatusListener> refChunkStatusListener;
     @Shadow @Final private Queue<Runnable> queueChunkTracking;
-    
+
     private IntegratedServer impl$temporaryIntegratedServer;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$setClientOnGame(final GameConfiguration gameConfig, final CallbackInfo ci) {
         SpongeCommon.getGame().setClient(this);
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourcePackList;addPackFinder(Lnet/minecraft/resources/IPackFinder;)V", ordinal = 1))
+    private void impl$registerPackDiscoverers(ResourcePackList<ClientResourcePackInfo> resourcePackList, IPackFinder packFinder) {
+        resourcePackList.addPackFinder(packFinder);
+        ResourceEventFactory.registerPackDiscoverers(TypeToken.of(Client.class), this, resourcePackList);
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target="Lnet/minecraft/resources/IReloadableResourceManager;addReloadListener(Lnet/minecraft/resources/IFutureReloadListener;)V", ordinal = 15))
+    private void impl$registerResourceReloadListeners(IReloadableResourceManager resourceManager, IFutureReloadListener listener) {
+        resourceManager.addReloadListener(listener);
+        ResourceEventFactory.registerResourceReloadListeners(TypeToken.of(Client.class), this, resourceManager);
     }
 
     @Inject(method = "run", at = @At("HEAD"))

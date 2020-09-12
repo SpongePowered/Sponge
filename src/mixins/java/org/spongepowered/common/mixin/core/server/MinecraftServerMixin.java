@@ -24,17 +24,29 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Injector;
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.datafixers.DataFixer;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.resources.IReloadableResourceManager;
+import net.minecraft.resources.ResourcePackInfo;
+import net.minecraft.resources.ResourcePackList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -59,11 +71,14 @@ import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
+import org.spongepowered.common.event.resource.ResourceEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
+import java.io.File;
+import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.function.BooleanSupplier;
 
@@ -77,6 +92,8 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow @Final private PlayerProfileCache profileCache;
     @Shadow @Final private static Logger LOGGER;
     @Shadow private int tickCounter;
+    @Shadow @Final private ResourcePackList<ResourcePackInfo> resourcePacks;
+    @Shadow @Final private IReloadableResourceManager resourceManager;
 
     @Shadow public abstract CommandSource shadow$getCommandSource();
     @Shadow public abstract Iterable<ServerWorld> shadow$getWorlds();
@@ -112,6 +129,16 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                 e.printStackTrace();
             }
         }
+    }
+
+    @Inject(method = "loadDataPacks(Ljava/io/File;Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourcePackList;reloadPacksFromFinders()V"))
+    private void impl$registerPackDiscoverers(File p_195560_1_, WorldInfo p_195560_2_, CallbackInfo ci) {
+        ResourceEventFactory.registerPackDiscoverers(TypeToken.of(Server.class), this, this.resourcePacks);
+    }
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void impl$registerResourceReloadListeners(File anvilFileIn, Proxy serverProxyIn, DataFixer dataFixerIn, Commands commandManagerIn, YggdrasilAuthenticationService authServiceIn, MinecraftSessionService sessionServiceIn, GameProfileRepository profileRepoIn, PlayerProfileCache profileCacheIn, IChunkStatusListenerFactory chunkStatusListenerFactoryIn, String folderNameIn, CallbackInfo ci) {
+        ResourceEventFactory.registerResourceReloadListeners(TypeToken.of(Server.class), this, this.resourceManager);
     }
 
     @Override
