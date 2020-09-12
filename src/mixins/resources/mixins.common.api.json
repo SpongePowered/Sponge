@@ -307,6 +307,7 @@
         "mcp.util.HandMixin_API",
         "mcp.util.HandSideMixin_API",
         "mcp.util.IndirectEntityDamageSourceMixin_API",
+        "mcp.util.MirrorMixin_API",
         "mcp.util.ResourceLocationMixin_API",
         "mcp.util.RotationMixin_API",
         "mcp.util.SoundEventMixin_API",
