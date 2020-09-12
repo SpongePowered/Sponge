@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.item.ItemFrameEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -42,8 +42,8 @@ public final class ItemFrameData {
                     .create(Keys.ITEM_STACK_SNAPSHOT)
                         .get(h -> ItemStackUtil.snapshotOf(h.getDisplayedItem()))
                         .set((h, v) -> h.setDisplayedItem(ItemStackUtil.fromSnapshotToNative(v)))
-                    .create(Keys.ROTATION)
-                        .get(h -> Rotation.fromDegrees(h.getRotation() * 45).orElse(null))
+                    .create(Keys.ORIENTATION)
+                        .get(h -> Orientation.fromDegrees(h.getRotation() * 45).orElse(null))
                         .set((h, v) -> h.setItemRotation(v.getAngle() / 45));
     }
     // @formatter:on
