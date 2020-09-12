@@ -22,18 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.rotation;
+package org.spongepowered.common.orientation;
 
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeRotation extends SpongeCatalogType implements Rotation {
+public class SpongeOrientation extends SpongeCatalogType implements Orientation {
 
     private final int angle;
 
 
-    public SpongeRotation(final ResourceKey key, final int angle) {
+    public SpongeOrientation(final ResourceKey key, final int angle) {
         super(key);
         this.angle = angle;
     }
