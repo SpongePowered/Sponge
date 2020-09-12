@@ -40,6 +40,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,13 +50,17 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.mixin.api.mcp.state.StateHolderMixin_API;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Mixin(net.minecraft.block.BlockState.class)
 public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockState, net.minecraft.block.BlockState> implements BlockState {
 
+    //@formatting:off
     @Shadow public abstract Block shadow$getBlock();
     @Shadow public abstract IFluidState shadow$getFluidState();
+    @Shadow public abstract net.minecraft.block.BlockState shadow$rotate(net.minecraft.util.Rotation rotation);
+    //@formatting:on
 
     private String impl$serializedState;
 
@@ -125,4 +130,8 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
         return this.impl$serializedState;
     }
 
+    @Override
+    public BlockState rotate(final Rotation rotation) {
+        return (BlockState) this.shadow$rotate((net.minecraft.util.Rotation) (Object) Objects.requireNonNull(rotation, "Rotation cannot be null!"));
+    }
 }
