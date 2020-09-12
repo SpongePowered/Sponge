@@ -25,46 +25,20 @@
 package org.spongepowered.vanilla.applaunch.handler.prod;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
-import org.spongepowered.vanilla.applaunch.Constants;
 import org.spongepowered.vanilla.applaunch.Main;
-import org.spongepowered.vanilla.applaunch.VanillaCommandLine;
-import org.spongepowered.vanilla.applaunch.VanillaLaunchTargets;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
-
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
 
 public final class ServerProdLaunchHandler extends AbstractVanillaProdLaunchHandler {
 
-    private final Path remappedJar = VanillaCommandLine.librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX)
-            .resolve(Constants.Libraries.MINECRAFT_VERSION_TARGET).resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME +
-                    "_remapped.jar");
-
     @Override
     public String name() {
-        return VanillaLaunchTargets.SERVER_PRODUCTION.getLaunchTarget();
-    }
-
-    @Override
-    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        final Path path;
-        try {
-            path = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
-        } catch (final URISyntaxException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        builder.addTransformationPath(path);
-        builder.addTransformationPath(this.remappedJar);
-
-        super.configureTransformationClassLoader(builder);
+        return AppLaunchTargets.SERVER_PRODUCTION.getLaunchTarget();
     }
 
     @Override
     protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLauncher", true, launchClassLoader.getInstance())
+        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLaunch", true, launchClassLoader.getInstance())
                 .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
                 .invoke(null, Main.getInstance().getPluginEngine(), Boolean.TRUE, arguments);
     }

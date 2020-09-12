@@ -31,6 +31,7 @@ import net.minecraft.world.spawner.AbstractSpawner;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.spawner.AbstractSpawnerBridge;
@@ -91,14 +92,22 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
         return this.spawnRange;
     }
 
-    @Redirect(method = "isActivated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isPlayerWithin(DDDD)Z"))
-    public boolean onIsPlayerWithin(World world, double x, double y, double z, double distance) {
+    @Group(name = "sponge$playerAffectingSpawningCheck", max = 1)
+    @Redirect(method = "isActivated()Z",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;isPlayerWithin(DDDD)Z",
+            remap = false // This is to workaround Mixin#438
+        ),
+        expect = 0,
+        require = 0
+    )
+    public boolean impl$isPlayerWithin(final World world, final double x, final double y, final double z, final double distance) {
         // Like vanilla but filter out players with !bridge$affectsSpawning
-        for(PlayerEntity playerentity : world.getPlayers()) {
+        for (final PlayerEntity playerentity : world.getPlayers()) {
             if (EntityPredicates.NOT_SPECTATING.test(playerentity)
                   && EntityPredicates.IS_LIVING_ALIVE.test(playerentity)
                   && ((PlayerEntityBridge) playerentity).bridge$affectsSpawning()) {
-                double d0 = playerentity.getDistanceSq(x, y, z);
+                final double d0 = playerentity.getDistanceSq(x, y, z);
                 if (distance < 0.0D || d0 < distance * distance) {
                     return true;
                 }
@@ -107,4 +116,19 @@ public abstract class AbstractSpawnerMixin implements AbstractSpawnerBridge {
 
         return false;
     }
+
+    @Group(name = "sponge$playerAffectingSpawningCheck", max = 1)
+    @Redirect(method = "isActivated()Z",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;func_217358_a(DDDD)Z",
+            remap = false // This is to workaround Mixin#438
+        ),
+        expect = 0,
+        require = 0
+    )
+    public boolean impl$production_playerAffectsSpawningCheck(final World world, final double x, final double y, final double z, final double distance) {
+        // Like vanilla but filter out players with !bridge$affectsSpawning
+        return this.impl$isPlayerWithin(world, x, y, z, distance);
+    }
+
 }

@@ -55,7 +55,7 @@ import java.util.function.Predicate;
  */
 public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerService {
 
-    protected static final Logger log = LogManager.getLogger("Launch");
+    protected final Logger logger = LogManager.getLogger("Launch");
 
     /**
      * A list of packages to exclude from the {@link TransformingClassLoader transforming class loader},
@@ -87,7 +87,7 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
     @Override
     public Callable<Void> launchService(final String[] arguments, final ITransformingClassLoader launchClassLoader) {
-        log.info("Transitioning to Sponge launcher, please wait...");
+        this.logger.info("Transitioning to Sponge launcher, please wait...");
 
         launchClassLoader.addTargetPackageFilter(klass -> {
             for (final String pkg : EXCLUDED_PACKAGES) {

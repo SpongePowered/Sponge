@@ -37,6 +37,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
@@ -48,13 +49,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 public final class SpongeCommandContext extends CommandContext<CommandSource> implements org.spongepowered.api.command.parameter.CommandContext {
 
     private final Map<Parameter.Key<?>, Collection<?>> argumentMap;
     private final Object2IntOpenHashMap<String> flagMap;
     private final Map<String, ParsedArgument<CommandSource, ?>> brigArguments;
+    private final org.spongepowered.api.command.Command.@Nullable Parameterized targetCommand;
 
     public SpongeCommandContext(
             final CommandSource source,
@@ -68,7 +68,8 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
             final StringRange range,
             @Nullable final CommandContext<CommandSource> child,
             @Nullable final RedirectModifier<CommandSource> modifier,
-            final boolean forks) {
+            final boolean forks,
+            final org.spongepowered.api.command.Command.@Nullable Parameterized currentTargetCommand) {
         super(source,
                 input,
                 brigArguments,
@@ -82,6 +83,13 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
         this.brigArguments = brigArguments;
         this.argumentMap = arguments;
         this.flagMap = flags.clone();
+        this.targetCommand = currentTargetCommand;
+    }
+
+    @Override
+    @NonNull
+    public Optional<org.spongepowered.api.command.Command.Parameterized> getExecutedCommand() {
+        return Optional.ofNullable(this.targetCommand);
     }
 
     @Override
@@ -169,7 +177,8 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
                 this.getRange(),
                 this.getChild(),
                 this.getRedirectModifier(),
-                this.isForked());
+                this.isForked(),
+                this.targetCommand);
     }
 
     @Nullable

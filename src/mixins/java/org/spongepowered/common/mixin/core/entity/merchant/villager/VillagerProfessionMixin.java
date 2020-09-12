@@ -39,7 +39,7 @@ public abstract class VillagerProfessionMixin implements ResourceKeyBridge {
     private ResourceKey impl$key;
 
     @Redirect(
-        method = "register(Ljava/lang/String;Lnet/minecraft/village/PointOfInterestType;Lcom/google/common/collect/ImmutableSet;Lcom/google/common/collect/ImmutableSet;)Lnet/minecraft/entity/merchant/villager/VillagerProfession;",
+        method = "register(Ljava/lang/String;Lnet/minecraft/village/PointOfInterestType;Lcom/google/common/collect/ImmutableSet;Lcom/google/common/collect/ImmutableSet;Lnet/minecraft/util/SoundEvent;)Lnet/minecraft/entity/merchant/villager/VillagerProfession;",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/util/registry/Registry;register(Lnet/minecraft/util/registry/Registry;Lnet/minecraft/util/ResourceLocation;Ljava/lang/Object;)Ljava/lang/Object;"

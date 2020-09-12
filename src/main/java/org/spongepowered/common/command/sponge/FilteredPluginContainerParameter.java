@@ -31,7 +31,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -45,7 +45,7 @@ public final class FilteredPluginContainerParameter implements ValueParameter<Pl
     private final Map<String, PluginContainer> validPluginContainers = FilteredPluginContainerParameter.getValidContainers();
 
     private static Map<String, PluginContainer> getValidContainers() {
-        return Launcher.getInstance().getPluginManager().getPlugins()
+        return Launch.getInstance().getPluginManager().getPlugins()
                 .stream()
                 .filter(x -> !(x instanceof DummyPluginContainer))
                 .collect(Collectors.toMap(x -> x.getMetadata().getId(), x -> x));

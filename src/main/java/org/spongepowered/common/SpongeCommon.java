@@ -35,7 +35,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.inheritable.GlobalConfig;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
@@ -74,7 +74,7 @@ public final class SpongeCommon {
     }
 
     public static Logger getLogger() {
-        return Launcher.getInstance().getLogger();
+        return Launch.getInstance().getLogger();
     }
 
     public static boolean isInitialized() {
@@ -102,7 +102,7 @@ public final class SpongeCommon {
     }
 
     public static Path getGameDirectory() {
-        return Launcher.getInstance().getPluginEngine().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
+        return Launch.getInstance().getPluginEngine().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
                 .orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
     }
 
@@ -116,22 +116,22 @@ public final class SpongeCommon {
 
     @Deprecated
     public static PluginContainer getMinecraftPlugin() {
-        return Launcher.getInstance().getMinecraftPlugin();
+        return Launch.getInstance().getMinecraftPlugin();
     }
 
     @Deprecated
     public static PluginContainer getPlugin() {
-        return Launcher.getInstance().getCommonPlugin();
+        return Launch.getInstance().getCommonPlugin();
     }
 
     @Deprecated
     public static List<PluginContainer> getInternalPlugins() {
-        return Launcher.getInstance().getLauncherPlugins();
+        return Launch.getInstance().getLauncherPlugins();
     }
 
     public static PluginContainer getActivePlugin() {
         if (SpongeCommon.activePlugin == null) {
-            return Launcher.getInstance().getMinecraftPlugin();
+            return Launch.getInstance().getMinecraftPlugin();
         }
 
         return SpongeCommon.activePlugin;

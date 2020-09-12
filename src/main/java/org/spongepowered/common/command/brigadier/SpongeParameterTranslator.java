@@ -32,7 +32,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
@@ -72,13 +71,10 @@ public final class SpongeParameterTranslator {
     @SuppressWarnings({"unchecked"})
     public static CommandNode<CommandSource> createCommandTree(
             @NonNull final ArgumentBuilder<CommandSource, ?> rootNode,
-            @NonNull final List<Flag> flags,
-            @NonNull final List<Parameter> parameters,
-            @NonNull final List<Parameter.Subcommand> subcommands,
-            @NonNull final CommandExecutor executor) {
+            @NonNull final SpongeParameterizedCommand command) {
 
-        final SpongeCommandExecutorWrapper executorWrapper = new SpongeCommandExecutorWrapper(executor);
-        final ListIterator<Parameter> parameterListIterator = parameters.listIterator();
+        final SpongeCommandExecutorWrapper executorWrapper = new SpongeCommandExecutorWrapper(command);
+        final ListIterator<Parameter> parameterListIterator = command.parameters().listIterator();
 
         // If we have no parameters, or they are all optional, all literals will get an executor.
         final boolean isTerminal = SpongeParameterTranslator.createNode(
@@ -86,14 +82,14 @@ public final class SpongeParameterTranslator {
         if (isTerminal) {
             rootNode.executes(executorWrapper);
         }
-        SpongeParameterTranslator.createSubcommands(rootNode, subcommands);
+        SpongeParameterTranslator.createSubcommands(rootNode, command.subcommands());
         final CommandNode<CommandSource> builtNode;
         if (rootNode instanceof LiteralArgumentBuilder) {
-            builtNode = new SpongeLiteralCommandNode((LiteralArgumentBuilder<CommandSource>) rootNode);
+            builtNode = new SpongeLiteralCommandNode((LiteralArgumentBuilder<CommandSource>) rootNode, command);
         } else {
             builtNode = rootNode.build();
         }
-        SpongeParameterTranslator.createFlags(flags, builtNode, isTerminal ? executorWrapper : null);
+        SpongeParameterTranslator.createFlags(command.flags(), builtNode, isTerminal ? executorWrapper : null);
         return builtNode;
     }
 

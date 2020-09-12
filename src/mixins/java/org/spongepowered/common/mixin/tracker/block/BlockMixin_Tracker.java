@@ -43,7 +43,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(Block.class)
@@ -61,7 +61,7 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
     private void tracker$initializeTrackerOptimizations(final Block.Properties properties, final CallbackInfo ci) {
         // neighborChanged
         try {
-            final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? "neighborChanged" : "func_220069_a";
+            final String mapping = Launch.getInstance().isDeveloperEnvironment() ? "neighborChanged" : "func_220069_a";
             final Class<?>[] argTypes = {net.minecraft.block.BlockState.class, net.minecraft.world.World.class, BlockPos.class, Block.class, BlockPos.class, boolean.class};
             final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             this.tracker$hasNeighborLogicOverridden = !clazz.equals(Block.class);

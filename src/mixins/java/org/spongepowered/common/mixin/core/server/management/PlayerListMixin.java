@@ -44,6 +44,7 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SaveHandler;
 import org.apache.logging.log4j.Logger;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -60,12 +61,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.net.SocketAddress;
@@ -94,15 +97,9 @@ public abstract class PlayerListMixin {
                     netManager.getRemoteAddress() + ": " + reason.getUnformattedComponentText()));
             netManager.sendPacket(new SDisconnectPacket(reason));
             netManager.closeChannel(reason);
-        } catch (Exception exception) {
+        } catch (final Exception exception) {
             LOGGER.error("Error whilst disconnecting player", exception);
         }
-    }
-
-    @Inject(method = "initializeConnectionToPlayer", at = @At(value = "HEAD"))
-    private void impl$onInitPlayer_head(final NetworkManager networkManager, final ServerPlayerEntity mcPlayer, final CallbackInfo ci) {
-        final GameProfile previousGameProfile = (GameProfile) this.server.getPlayerProfileCache().getProfileByUUID(mcPlayer.getGameProfile().getId());
-        ((ServerPlayerEntityBridge) mcPlayer).bridge$setPreviousGameProfile(previousGameProfile);
     }
 
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target =
@@ -110,8 +107,8 @@ public abstract class PlayerListMixin {
     private net.minecraft.world.server.ServerWorld impl$onInitPlayer_getWorld(
             final MinecraftServer server, final net.minecraft.world.dimension.DimensionType type,
             final NetworkManager networkManager, final ServerPlayerEntity mcPlayer) {
-        @Nullable ITextComponent kickReason = this.canPlayerLogin(networkManager.getRemoteAddress(), mcPlayer.getGameProfile());
-        Component disconnectMessage;
+        @Nullable final ITextComponent kickReason = this.canPlayerLogin(networkManager.getRemoteAddress(), mcPlayer.getGameProfile());
+        final Component disconnectMessage;
         if (kickReason != null) {
             disconnectMessage = SpongeAdventure.asAdventure(kickReason);
         } else {
@@ -173,8 +170,9 @@ public abstract class PlayerListMixin {
             remap = false
         )
     )
-    private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(Logger logger, String message, Object p0, Object p1, Object p2, Object p3,
-            Object p4, Object p5, NetworkManager manager, ServerPlayerEntity entity) {
+    private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(
+            final Logger logger, final String message, final Object p0, final Object p1, final Object p2, final Object p3,
+            final Object p4, final Object p5, final NetworkManager manager, final ServerPlayerEntity entity) {
         logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", p0, p1, ((org.spongepowered.api.world.server.ServerWorld) entity.getServerWorld()).getKey(), p2, p3, p4, p5);
     }
 
@@ -187,30 +185,33 @@ public abstract class PlayerListMixin {
                 worldType, viewDistance, reducedDebugInfo, enableRespawnScreen);
     }
 
-    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;)V"))
-    private void impl$onInitPlayer_delaySendMessage(final PlayerList playerList, final ITextComponent message) {
-        // Don't send here, will be done later
+    @Redirect(method = "initializeConnectionToPlayer",
+            slice = @Slice(
+                    from = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;refreshStatusNextTick()V"),
+                    to = @At(value = "FIELD", opcode = Opcodes.GETSTATIC, target = "Lnet/minecraft/util/text/TextFormatting;YELLOW:Lnet/minecraft/util/text/TextFormatting;")),
+            at = @At(value = "INVOKE", target = "Ljava/lang/String;equalsIgnoreCase(Ljava/lang/String;)Z"))
+    private boolean impl$onInitPlayer_dontClassSpongeNameAsModified(final String currentName, final String originalName) {
+        if (originalName.equals(Constants.GameProfile.DUMMY_NAME)) {
+            return true;
+        }
+        return currentName.equalsIgnoreCase(originalName);
+    }
+
+    @Redirect(method = "initializeConnectionToPlayer",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;)V"))
+    private void impl$onInitPlayer_delaySendMessage(final PlayerList playerList, final ITextComponent message,
+            final NetworkManager netManager, final ServerPlayerEntity playerIn) {
+        // Don't send here, will be done later. We cache the expected message.
+        ((ServerPlayerEntityBridge) playerIn).bridge$setConnectionMessageToSend(message);
     }
 
     @Inject(method = "initializeConnectionToPlayer", at = @At(value = "RETURN"))
     private void impl$onInitPlayer_join(final NetworkManager networkManager, final ServerPlayerEntity mcPlayer, final CallbackInfo ci) {
-        final GameProfile previousGameProfile = ((ServerPlayerEntityBridge) mcPlayer).bridge$getPreviousGameProfile();
-        final String previousName = previousGameProfile == null ? "" : previousGameProfile.getName().orElse(null);
-
-        final ITextComponent joinMessage;
-        if (mcPlayer.getGameProfile().getName().equalsIgnoreCase(previousName)) {
-            joinMessage = new TranslationTextComponent("multiplayer.player.joined", mcPlayer.getDisplayName());
-        } else {
-            joinMessage = new TranslationTextComponent("multiplayer.player.joined.renamed", mcPlayer.getDisplayName(), previousName);
-        }
-        joinMessage.getStyle().setColor(TextFormatting.YELLOW);
-
         final ServerPlayer player = (ServerPlayer) mcPlayer;
         final ServerSideConnection connection = player.getConnection();
         final Cause cause = Cause.of(EventContext.empty(), connection, player);
         final Audience audience = Audiences.onlinePlayers();
-        final Component joinComponent = SpongeAdventure.asAdventure(joinMessage);
+        final Component joinComponent = SpongeAdventure.asAdventure(((ServerPlayerEntityBridge) mcPlayer).bridge$getConnectionMessageToSend());
 
         final ServerSideConnectionEvent.Join event = SpongeEventFactory.createServerSideConnectionEventJoin(cause, audience,
                 Optional.of(audience), joinComponent, joinComponent, connection, player, false);
@@ -219,21 +220,22 @@ public abstract class PlayerListMixin {
             event.getAudience().ifPresent(audience1 -> audience1.sendMessage(event.getMessage()));
         }
 
-        ((ServerPlayerEntityBridge) mcPlayer).bridge$setPreviousGameProfile(null);
+        ((ServerPlayerEntityBridge) mcPlayer).bridge$setConnectionMessageToSend(null);
     }
 
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
-    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(MinecraftServer minecraftServer, NetworkManager netManager, ServerPlayerEntity playerIn) {
+    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(
+            final MinecraftServer minecraftServer, final NetworkManager netManager, final ServerPlayerEntity playerIn) {
         return ((ServerWorldBridge) playerIn.getServerWorld()).bridge$getBossBarManager();
     }
 
     @Redirect(method = "playerLoggedOut", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
-    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(MinecraftServer minecraftServer, ServerPlayerEntity playerIn) {
+    private CustomServerBossInfoManager impl$getPerWorldBossBarManager(final MinecraftServer minecraftServer, final ServerPlayerEntity playerIn) {
         return ((ServerWorldBridge) playerIn.getServerWorld()).bridge$getBossBarManager();
     }
 
     @Redirect(method = "func_212504_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSaveHandler()Lnet/minecraft/world/storage/SaveHandler;"))
-    private SaveHandler impl$onlyUseOverworldForPlayerData(ServerWorld serverWorld) {
+    private SaveHandler impl$onlyUseOverworldForPlayerData(final ServerWorld serverWorld) {
         if (serverWorld.dimension.getType() == DimensionType.OVERWORLD) {
             return serverWorld.getSaveHandler();
         }

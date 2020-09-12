@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.service.pagination;
+package org.spongepowered.common.service.game.pagination;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;

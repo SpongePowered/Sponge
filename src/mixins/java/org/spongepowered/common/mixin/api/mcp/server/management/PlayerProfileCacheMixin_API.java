@@ -44,6 +44,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.PlayerProfileCache_ProfileEntryAccessor;
 import org.spongepowered.common.profile.callback.MapProfileLookupCallback;
 import org.spongepowered.common.profile.callback.SingleProfileLookupCallback;
+import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -171,7 +172,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
             } else {
                 // create a dummy profile to avoid future lookups
                 // if actual user logs in, the profile will be updated during PlayerList#initializeConnectionToPlayer
-                this.shadow$addEntry(new com.mojang.authlib.GameProfile(uniqueId, "[sponge]"), null);
+                this.shadow$addEntry(new com.mojang.authlib.GameProfile(uniqueId, Constants.GameProfile.DUMMY_NAME), null);
                 result.put(uniqueId, Optional.empty());
             }
         }

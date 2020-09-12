@@ -54,11 +54,11 @@ import java.net.Proxy;
 @Implements(@Interface(iface = VanillaServer.class, prefix = "server$"))
 public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer {
 
-    public DedicatedServerMixin_Vanilla(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn,
-        Commands p_i50590_4_, YggdrasilAuthenticationService p_i50590_5_,
-        MinecraftSessionService p_i50590_6_, GameProfileRepository p_i50590_7_,
-        PlayerProfileCache p_i50590_8_, IChunkStatusListenerFactory p_i50590_9_,
-        String p_i50590_10_) {
+    public DedicatedServerMixin_Vanilla(final File p_i50590_1_, final Proxy p_i50590_2_, final DataFixer dataFixerIn,
+        final Commands p_i50590_4_, final YggdrasilAuthenticationService p_i50590_5_,
+        final MinecraftSessionService p_i50590_6_, final GameProfileRepository p_i50590_7_,
+        final PlayerProfileCache p_i50590_8_, final IChunkStatusListenerFactory p_i50590_9_,
+        final String p_i50590_10_) {
         super(p_i50590_1_, p_i50590_2_, dataFixerIn, p_i50590_4_, p_i50590_5_, p_i50590_6_, p_i50590_7_, p_i50590_8_, p_i50590_9_, p_i50590_10_);
     }
 
@@ -68,6 +68,8 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer {
         ConfigHandle.setSaveSuppressed(false);
 
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        lifecycle.establishServerServices();
+
         lifecycle.establishRegistries();
         lifecycle.establishDataProviders();
 
@@ -90,7 +92,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer {
     }
 
     @Override
-    protected void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, JsonElement generatorOptions) {
+    protected void loadAllWorlds(final String saveName, final String worldNameIn, final long seed, final WorldType type, final JsonElement generatorOptions) {
         cast().getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions, false, null, Difficulty.NORMAL);
     }
 

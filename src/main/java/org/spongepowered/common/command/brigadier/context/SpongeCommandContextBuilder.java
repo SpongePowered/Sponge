@@ -70,6 +70,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     private RedirectModifier<CommandSource> modifier;
     private boolean forks;
     private Deque<SpongeCommandContextBuilderTransaction> transaction = null;
+    private org.spongepowered.api.command.Command.Parameterized currentTargetCommand = null;
 
     public SpongeCommandContextBuilder(
             final CommandDispatcher<CommandSource> dispatcher,
@@ -89,6 +90,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
 
         this.modifier = original.modifier;
         this.forks = original.forks;
+        this.currentTargetCommand = original.currentTargetCommand;
         this.withChild(original.getChild());
         this.withCommand(original.getCommand());
         original.getArguments().forEach(this::withArgument);
@@ -107,6 +109,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         }
         this.flagMap.object2IntEntrySet().fastForEach(x -> builder.flagMap.put(x.getKey(), x.getIntValue()));
         this.arguments.forEach((key, values) -> builder.arguments.computeIfAbsent(key, k -> new ArrayList<>()).addAll((Collection) values));
+        this.currentTargetCommand = builder.currentTargetCommand;
     }
 
     @Override
@@ -264,11 +267,21 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         return super.withCommand(command);
     }
 
+    @Override
     public SpongeCommandContextBuilder copy() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().copy();
         }
         return new SpongeCommandContextBuilder(this);
+    }
+
+    @Override
+    @NonNull
+    public Optional<org.spongepowered.api.command.Command.Parameterized> getExecutedCommand() {
+        if (this.transaction != null && !this.transaction.isEmpty()) {
+            return this.transaction.peek().getCopyBuilder().getExecutedCommand();
+        }
+        return Optional.ofNullable(this.currentTargetCommand);
     }
 
     @Override
@@ -344,7 +357,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public void sendMessage(final Component message) {
+    public void sendMessage(@NonNull final Component message) {
         this.getCause().sendMessage(message);
     }
 
@@ -379,6 +392,14 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
             this.transaction.peek().putEntry(key, object);
         } else {
             this.addToArgumentMap(SpongeParameterKey.getSpongeKey(key), object);
+        }
+    }
+
+    public void setCurrentTargetCommand(final org.spongepowered.api.command.Command.Parameterized command) {
+        if (this.transaction != null && !this.transaction.isEmpty()) {
+            this.transaction.peek().setCurrentTargetCommand(command);
+        } else {
+            this.currentTargetCommand = command;
         }
     }
 
@@ -417,7 +438,8 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
                 this.getRange(),
                 child == null ? null : child.build(input),
                 this.modifier,
-                this.forks);
+                this.forks,
+                this.currentTargetCommand);
     }
 
     @Override

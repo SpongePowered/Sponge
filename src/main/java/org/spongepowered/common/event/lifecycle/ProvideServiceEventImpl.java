@@ -33,9 +33,9 @@ import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 
 import java.util.function.Supplier;
 
-public final class ProvideServiceEventImpl<T> extends AbstractLifecycleEvent implements ProvideServiceEvent<T> {
+public class ProvideServiceEventImpl<T> extends AbstractLifecycleEvent implements ProvideServiceEvent<T> {
 
-    private final TypeToken<T> token;
+    protected final TypeToken<T> token;
     @Nullable private Supplier<T> serviceFactory;
 
     public ProvideServiceEventImpl(final Cause cause, final Game game, final TypeToken<T> token) {

@@ -24,8 +24,30 @@
  */
 package org.spongepowered.vanilla.applaunch.handler.prod;
 
+import cpw.mods.gross.Java9ClassLoaderUtil;
+import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
+
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 
 public abstract class AbstractVanillaProdLaunchHandler extends AbstractVanillaLaunchHandler {
 
+    @Override
+    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
+            if (url.toString().contains("mixin") && url.toString().endsWith(".jar")) {
+                continue;
+            }
+
+            try {
+                builder.addTransformationPath(Paths.get(url.toURI()));
+            } catch (final URISyntaxException ex) {
+                this.logger.error("Failed to add Mixin transformation path", ex);
+            }
+        }
+
+        super.configureTransformationClassLoader(builder);
+    }
 }

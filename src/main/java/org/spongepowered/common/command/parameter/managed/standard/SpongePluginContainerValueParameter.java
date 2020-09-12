@@ -32,7 +32,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.List;
@@ -52,7 +52,7 @@ public final class SpongePluginContainerValueParameter extends CatalogedArgument
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context) {
-        return Launcher.getInstance().getPluginManager().getPlugins().stream().map(x -> x.getMetadata().getId()).collect(Collectors.toList());
+        return Launch.getInstance().getPluginManager().getPlugins().stream().map(x -> x.getMetadata().getId()).collect(Collectors.toList());
     }
 
     @Override
@@ -63,7 +63,7 @@ public final class SpongePluginContainerValueParameter extends CatalogedArgument
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
         final String id = reader.parseString();
-        final Optional<PluginContainer> container = Launcher.getInstance().getPluginManager().getPlugin(id);
+        final Optional<PluginContainer> container = Launch.getInstance().getPluginManager().getPlugin(id);
         if (container.isPresent()) {
             return container;
         }

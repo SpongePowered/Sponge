@@ -48,11 +48,12 @@ import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.ChannelBufferAllocator;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.SpongeServiceProvider;
+import org.spongepowered.common.service.game.SpongeGameScopedServiceProvider;
 import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.SpongeMetricsConfigManager;
 
@@ -69,13 +70,13 @@ public final class SpongeCommonModule extends PrivateModule {
         this.bindAndExpose(MinecraftVersion.class).toInstance(SpongeCommon.MINECRAFT_VERSION);
         this.bindAndExpose(ChannelRegistry.class).toInstance(new SpongeChannelRegistry(ChannelBufferAllocator.POOLED));
         this.bindAndExpose(EventManager.class).to(SpongeEventManager.class);
-        this.bindAndExpose(PluginManager.class).toInstance(Launcher.getInstance().getPluginManager());
+        this.bindAndExpose(PluginManager.class).toInstance(Launch.getInstance().getPluginManager());
         this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(PluginConfigManager.class);
         this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
         this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
-        this.bindAndExpose(ServiceProvider.class).to(SpongeServiceProvider.class);
+        this.bindAndExpose(ServiceProvider.GameScoped.class).to(SpongeGameScopedServiceProvider.class);
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
 
         this.requestStaticInjection(SpongeCommon.class);

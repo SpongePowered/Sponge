@@ -54,7 +54,7 @@ import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -258,7 +258,7 @@ public final class PhaseTracker implements CauseStackManager {
                 }
 
             })
-            .plugin(Launcher.getInstance().getCommonPlugin())
+            .plugin(Launch.getInstance().getCommonPlugin())
             .build();
     }
 

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.google.inject.Injector;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -33,6 +34,7 @@ import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -60,6 +62,7 @@ import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
+import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 import java.net.URISyntaxException;
 import java.util.function.BooleanSupplier;
@@ -81,6 +84,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract boolean shadow$isServerRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
 
+    @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;
     private boolean impl$enableSaving = true;
 
@@ -131,7 +135,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
-    private void impl$tickServerScheduler(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
+    private void impl$tickServerScheduler(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
         this.getScheduler().tick();
     }
 
@@ -194,7 +198,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 //    }
 
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000, ordinal = 0))
-    private int getSaveTickInterval(int tickInterval) {
+    private int getSaveTickInterval(final int tickInterval) {
         if (!this.shadow$isDedicatedServer()) {
             return tickInterval;
         } else if (!this.shadow$isServerRunning()) {
@@ -218,7 +222,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
      */
     @Overwrite
-    public boolean save(boolean suppressLog, boolean flush, boolean forced) {
+    public boolean save(final boolean suppressLog, final boolean flush, final boolean forced) {
         if (!this.impl$enableSaving) {
             return false;
         }
@@ -266,9 +270,22 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      * @reason Set the difficulty without marking as custom
      */
     @Overwrite
-    public void setDifficultyForAllWorlds(Difficulty difficulty, boolean forceDifficulty) {
-        for (ServerWorld world : this.shadow$getWorlds()) {
+    public void setDifficultyForAllWorlds(final Difficulty difficulty, final boolean forceDifficulty) {
+        for (final ServerWorld world : this.shadow$getWorlds()) {
             ((SpongeServer) SpongeCommon.getServer()).getWorldManager().adjustWorldForDifficulty(world, difficulty, forceDifficulty);
         }
+    }
+
+    @Override
+    public void bridge$initServices(final Game game, final Injector injector) {
+        if (this.impl$serviceProvider == null) {
+            this.impl$serviceProvider = new SpongeServerScopedServiceProvider(this, game, injector);
+            this.impl$serviceProvider.init();
+        }
+    }
+
+    @Override
+    public SpongeServerScopedServiceProvider bridge$getServiceProvider() {
+        return this.impl$serviceProvider;
     }
 }

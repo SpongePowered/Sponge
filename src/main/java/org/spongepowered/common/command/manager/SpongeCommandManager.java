@@ -44,7 +44,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.ITextComponent;
@@ -80,8 +79,8 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.launch.Launcher;
-import org.spongepowered.common.service.pagination.SpongePaginationService;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.service.game.pagination.SpongePaginationService;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -505,7 +504,7 @@ public final class SpongeCommandManager implements CommandManager {
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         try {
             SpongeParameterizedCommandRegistrar.INSTANCE.register(
-                    Launcher.getInstance().getCommonPlugin(),
+                    Launch.getInstance().getCommonPlugin(),
                     this.spongeCommand.get().createSpongeCommand(),
                     "sponge"
             );
@@ -516,7 +515,7 @@ public final class SpongeCommandManager implements CommandManager {
             final PaginationService paginationService = Sponge.getServiceProvider().paginationService();
             if (paginationService instanceof SpongePaginationService) {
                 SpongeParameterizedCommandRegistrar.INSTANCE.register(
-                        Launcher.getInstance().getCommonPlugin(),
+                        Launch.getInstance().getCommonPlugin(),
                         ((SpongePaginationService) paginationService).createPaginationCommand(),
                         "pagination", "page"
                 );
@@ -540,7 +539,7 @@ public final class SpongeCommandManager implements CommandManager {
             }
         }
         SpongeParameterizedCommandRegistrar.INSTANCE.register(
-                Launcher.getInstance().getCommonPlugin(),
+                Launch.getInstance().getCommonPlugin(),
                 SpongeAdventure.CALLBACK_COMMAND.createCommand(),
                 "callback");
         BrigadierCommandRegistrar.INSTANCE.completeVanillaRegistration();

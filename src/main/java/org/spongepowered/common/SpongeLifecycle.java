@@ -26,12 +26,14 @@ package org.spongepowered.common;
 
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -49,6 +51,7 @@ import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.registry.SpongeFactoryRegistry;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
+import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
@@ -58,10 +61,12 @@ import java.util.stream.Collectors;
 public final class SpongeLifecycle {
 
     private final Game game;
+    private final Injector injector;
 
     @Inject
-    public SpongeLifecycle(final Game game) {
+    public SpongeLifecycle(final Game game, final Injector injector) {
         this.game = game;
+        this.injector = injector;
     }
 
     public void establishFactories() {
@@ -97,8 +102,12 @@ public final class SpongeLifecycle {
         SpongeTimingsFactory.INSTANCE.init();
     }
 
-    public void establishServices() {
+    public void establishGlobalServices() {
         ((SpongeServiceProvider) this.game.getServiceProvider()).init();
+    }
+
+    public void establishServerServices() {
+        ((MinecraftServerBridge) this.game.getServer()).bridge$initServices(this.game, this.injector);
     }
 
     public void establishServerFeatures() {
