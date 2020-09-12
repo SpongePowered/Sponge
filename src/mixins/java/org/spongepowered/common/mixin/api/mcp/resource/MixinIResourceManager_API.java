@@ -32,6 +32,9 @@ import org.spongepowered.api.resource.Resource;
 import org.spongepowered.api.resource.ResourceManager;
 import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.util.CloseableList;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.CloseableListImpl;
@@ -40,9 +43,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Mixin(IResourceManager.class)
+@Implements(@Interface(iface = ResourceManager.class, prefix = "resource$"))
 public interface MixinIResourceManager_API extends ResourceManager {
 
     // @formatter:off
@@ -58,17 +61,11 @@ public interface MixinIResourceManager_API extends ResourceManager {
 
     @Override
     default CloseableList<@NonNull Resource> loadAll(ResourcePath path) throws IOException {
-        return CloseableListImpl.create(this.getAllResources((ResourceLocation) (Object) path)
-                .stream()
-                .map(Resource.class::cast)
-                .collect(Collectors.toList()));
+        return CloseableListImpl.create((List) this.getAllResources((ResourceLocation) (Object) path));
     }
 
-    @Override
-    default Collection<ResourcePath> find(String pathPrefix, Predicate<String> pathFilter) {
-        return this.getAllResourceLocations(pathPrefix, pathFilter)
-                .stream()
-                .map(ResourcePath.class::cast)
-                .collect(Collectors.toList());
+    @Intrinsic
+    default Collection<ResourcePath> resource$find(String pathPrefix, Predicate<String> pathFilter) {
+        return (Collection) this.getAllResourceLocations(pathPrefix, pathFilter);
     }
 }

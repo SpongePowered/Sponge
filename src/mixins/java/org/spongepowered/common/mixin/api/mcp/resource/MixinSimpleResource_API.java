@@ -33,9 +33,11 @@ import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.resource.meta.MetaParseException;
 import org.spongepowered.api.resource.meta.MetaSection;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.resource.ISpongeResource;
 
 import java.io.BufferedReader;
@@ -46,41 +48,44 @@ import java.io.Reader;
 import java.util.Optional;
 
 @Mixin(SimpleResource.class)
+@Implements(@Interface(iface = ISpongeResource.class, prefix="resource$"))
 public abstract class MixinSimpleResource_API implements ISpongeResource {
     // @formatter:off
+    // fields with client-only getters
     @Shadow @Final private ResourceLocation location;
     @Shadow @Final @Nullable private InputStream metadataInputStream;
-    // @formatter:on
 
-    private final ResourcePath resourcePath = ResourcePath.of(location.getNamespace(), location.getPath());
+    @Shadow public abstract InputStream shadow$getInputStream();
+    @Shadow public abstract String shadow$getPackName();
+    // @formatter:on
 
     private boolean metadataRead;
     private DataView metadataView;
 
-    @Override
-    public ResourcePath getPath() {
-        return this.resourcePath;
+    @Intrinsic
+    public ResourcePath resource$getPath() {
+        return (ResourcePath) (Object) location;
     }
 
-    @Override
-    @Invoker("getInputStream")
-    public abstract InputStream getInputStream();
+    @Intrinsic
+    public InputStream resource$getInputStream() {
+        return shadow$getInputStream();
+    }
 
-    @Override
-    @Invoker("getPackName")
-    public abstract String getPack();
+    @Intrinsic
+    public String resource$getPack() {
+        return shadow$getPackName();
+    }
 
-    @Override
-    public final boolean hasMetadata() {
-        // this method is client only, add it back.
-        // TODO: special casing for client?
+    @Intrinsic
+    public final boolean resource$hasMetadata() {
+        // this method is client only. re-implement it
         return this.metadataInputStream != null;
     }
 
     @Override
     public <T> Optional<T> getMetadata(MetaSection<T> section) throws MetaParseException {
-        // this method is client only, add it back.
-        // TODO: special casing for client?
+        // this method is client only, re-implement it
         if (!hasMetadata()) {
             return Optional.empty();
         }

@@ -34,9 +34,11 @@ import org.spongepowered.api.resource.meta.MetaParseException;
 import org.spongepowered.api.resource.meta.MetaSection;
 import org.spongepowered.api.resource.pack.Pack;
 import org.spongepowered.api.resource.pack.PackType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.resource.meta.SpongeMetadataSectionSerializer;
 
 import javax.annotation.Nullable;
@@ -49,6 +51,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Mixin(IResourcePack.class)
+@Implements(@Interface(iface = Pack.class, prefix = "pack$"))
 public interface MixinIResourcePack_API extends Pack {
 
     // @formatter:off
@@ -57,6 +60,7 @@ public interface MixinIResourcePack_API extends Pack {
     @Shadow @Nullable <T> T getMetadata(IMetadataSectionSerializer<T> deserializer) throws IOException;
     @Shadow boolean resourceExists(ResourcePackType type, ResourceLocation location);
     @Shadow Set<String> getResourceNamespaces(ResourcePackType type);
+    @Shadow String shadow$getName();
     // @formatter:on
 
     @Override
@@ -95,7 +99,8 @@ public interface MixinIResourcePack_API extends Pack {
         }
     }
 
-    @Invoker("getName")
-    @Override
-    String getName();
+    @Intrinsic
+    default String pack$getName() {
+        return shadow$getName();
+    }
 }

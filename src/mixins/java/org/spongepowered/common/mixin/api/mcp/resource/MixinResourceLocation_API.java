@@ -25,11 +25,15 @@
 package org.spongepowered.common.mixin.api.mcp.resource;
 
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.resource.ISpongeResourcePath;
 
 @Mixin(ResourceLocation.class)
+@Implements(@Interface(iface = ISpongeResourcePath.class, prefix = "resource$"))
 public abstract class MixinResourceLocation_API implements ISpongeResourcePath {
 
     // @formatter:off
@@ -37,13 +41,13 @@ public abstract class MixinResourceLocation_API implements ISpongeResourcePath {
     @Shadow public abstract String shadow$getPath();
     // @formatter:on
 
-    @Override
-    public String getNamespace() {
+    @Intrinsic
+    public String resource$getNamespace() {
         return shadow$getNamespace();
     }
 
-    @Override
-    public String getPath() {
+    @Intrinsic
+    public String resource$getPath() {
         return shadow$getPath();
     }
 

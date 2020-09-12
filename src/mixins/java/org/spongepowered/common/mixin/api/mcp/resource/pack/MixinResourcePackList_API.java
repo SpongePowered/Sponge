@@ -28,6 +28,9 @@ import net.minecraft.resources.ResourcePackInfo;
 import net.minecraft.resources.ResourcePackList;
 import org.spongepowered.api.resource.pack.PackInfo;
 import org.spongepowered.api.resource.pack.PackList;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -36,6 +39,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Mixin(ResourcePackList.class)
+@Implements(@Interface(iface=PackList.class,prefix="pack$"))
 public abstract class MixinResourcePackList_API implements PackList {
 
     // @formatter:off
@@ -45,23 +49,23 @@ public abstract class MixinResourcePackList_API implements PackList {
     @Shadow @Nullable public abstract ResourcePackInfo getPackInfo(String name);
     // @formatter:on
 
-    @Override
-    public Collection<PackInfo> all() {
+    @Intrinsic
+    public Collection<PackInfo> pack$all() {
         return (Collection) this.getAllPacks();
     }
 
-    @Override
-    public Collection<PackInfo> disabled() {
+    @Intrinsic
+    public Collection<PackInfo> pack$disabled() {
         return (Collection) this.getAvailablePacks();
     }
 
-    @Override
-    public Collection<PackInfo> enabled() {
+    @Intrinsic
+    public Collection<PackInfo> pack$enabled() {
         return (Collection) this.getEnabledPacks();
     }
 
-    @Override
-    public Optional<PackInfo> get(String name) {
+    @Intrinsic
+    public Optional<PackInfo> pack$get(String name) {
         return Optional.ofNullable((PackInfo) this.getPackInfo(name));
     }
 }

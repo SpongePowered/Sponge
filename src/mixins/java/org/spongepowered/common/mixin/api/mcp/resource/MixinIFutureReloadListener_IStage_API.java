@@ -26,16 +26,24 @@ package org.spongepowered.common.mixin.api.mcp.resource;
 
 import net.minecraft.resources.IFutureReloadListener;
 import org.spongepowered.api.resource.ResourceReloadListener;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(IFutureReloadListener.IStage.class)
+@Implements(@Interface(iface = ResourceReloadListener.AsyncStage.class, prefix="resource$"))
 public interface MixinIFutureReloadListener_IStage_API extends ResourceReloadListener.AsyncStage {
 
-    @Invoker("markCompleteAwaitingOthers")
-    @Override
-    <T> CompletableFuture<T> markComplete(T result);
+    //@formatter:off
+    @Shadow CompletableFuture shadow$markCompleteAwaitingOthers(Object result);
+    //@formatter:on
 
+    @Intrinsic
+    default <T> CompletableFuture<T> resource$markComplete(T result) {
+        return shadow$markCompleteAwaitingOthers(result);
+    }
 }

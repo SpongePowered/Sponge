@@ -31,12 +31,15 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.resource.pack.Pack;
 import org.spongepowered.api.resource.pack.PackInfo;
 import org.spongepowered.api.resource.pack.PackVersion;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(ResourcePackInfo.class)
+@Implements(@Interface(iface = PackInfo.class, prefix = "pack$"))
 public abstract class MixinResourcePackInfo_API implements PackInfo {
 
     // @formatter:off
@@ -45,6 +48,9 @@ public abstract class MixinResourcePackInfo_API implements PackInfo {
     @Shadow public abstract IResourcePack shadow$getResourcePack();
     @Shadow public abstract net.minecraft.resources.PackCompatibility shadow$getCompatibility();
     @Shadow public abstract ResourcePackInfo.Priority shadow$getPriority();
+    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract boolean shadow$isAlwaysEnabled();
+    @Shadow public abstract boolean shadow$isOrderLocked();
     // @formatter:on
 
     @Override
@@ -72,15 +78,18 @@ public abstract class MixinResourcePackInfo_API implements PackInfo {
         return (Priority) (Object) shadow$getPriority();
     }
 
-    @Override
-    @Invoker("getName")
-    public abstract String getName();
+    @Intrinsic
+    public String pack$getName() {
+        return shadow$getName();
+    }
 
-    @Override
-    @Invoker("isAlwaysEnabled")
-    public abstract boolean isForced();
+    @Intrinsic
+    public boolean pack$isForced() {
+        return shadow$isAlwaysEnabled();
+    }
 
-    @Override
-    @Invoker("isOrderLocked")
-    public abstract boolean isLocked();
+    @Intrinsic
+    public boolean pack$isLocked() {
+        return shadow$isOrderLocked();
+    }
 }

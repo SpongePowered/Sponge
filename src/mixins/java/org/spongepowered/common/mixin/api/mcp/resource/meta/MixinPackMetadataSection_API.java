@@ -28,15 +28,19 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.resources.data.PackMetadataSection;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.resource.meta.PackMeta;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(PackMetadataSection.class)
+@Implements(@Interface(iface = PackMeta.class, prefix = "pack$"))
 public abstract class MixinPackMetadataSection_API implements PackMeta {
     // @formatter:off
     @Shadow public abstract ITextComponent shadow$getDescription();
+    @Shadow public abstract int shadow$getPackFormat();
     // @formatter:on
 
     @Override
@@ -44,7 +48,8 @@ public abstract class MixinPackMetadataSection_API implements PackMeta {
         return SpongeAdventure.asAdventure(shadow$getDescription());
     }
 
-    @Override
-    @Invoker("getPackFormat")
-    public abstract int getPackFormat();
+    @Intrinsic
+    public int pack$getPackFormat() {
+        return shadow$getPackFormat();
+    }
 }

@@ -27,17 +27,21 @@ package org.spongepowered.common.mixin.api.mcp.resource.pack;
 import net.minecraft.resources.PackCompatibility;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.resource.pack.PackVersion;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 
 @Mixin(PackCompatibility.class)
+@Implements(@Interface(iface = PackVersion.class, prefix = "pack$"))
 public abstract class MixinPackCompatibility_API implements PackVersion {
 
     private ResourceKey api$key;
+    public abstract boolean shadow$isCompatible();
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setKey(String enumName, int ordinal, String directoryNameIn, CallbackInfo ci) {
@@ -49,7 +53,8 @@ public abstract class MixinPackCompatibility_API implements PackVersion {
         return this.api$key;
     }
 
-    @Invoker("isCompatible")
-    @Override
-    public abstract boolean isCompatible();
+    @Intrinsic
+    public boolean pack$isCompatible() {
+        return shadow$isCompatible();
+    }
 }
