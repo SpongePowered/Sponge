@@ -84,13 +84,9 @@ public abstract class PlayerListMixin {
 
     @Shadow public abstract ITextComponent canPlayerLogin(SocketAddress socketAddress, com.mojang.authlib.GameProfile gameProfile);
 
-    private void disconnectClient(final NetworkManager netManager, final @Nullable Component disconnectMessage, final @Nullable GameProfile profile) {
-        final ITextComponent reason;
-        if (disconnectMessage != null) {
-            reason = SpongeAdventure.asVanilla(disconnectMessage);
-        } else {
-            reason = new TranslationTextComponent("disconnect.disconnected");
-        }
+    private void disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
+        final ITextComponent reason = SpongeAdventure.asVanilla(disconnectMessage);
+
 
         try {
             LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" :
@@ -138,13 +134,13 @@ public abstract class PlayerListMixin {
 
         final Cause cause = Cause.of(EventContext.empty(), connection, user);
         final ServerSideConnectionEvent.Login event = SpongeEventFactory.createServerSideConnectionEventLogin(cause, disconnectMessage,
-                disconnectMessage, location, location, rotation, rotation, connection, user, false);
+                disconnectMessage, location, location, rotation, rotation, connection, user);
         if (kickReason != null) {
             event.setCancelled(true);
         }
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
-            final Component message = event.isMessageCancelled() ? null : event.getMessage();
+            final Component message = event.getMessage();
             this.disconnectClient(networkManager, message, player.getProfile());
             return null;
         }
