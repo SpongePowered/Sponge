@@ -43,8 +43,10 @@ import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.ImmutableDataProviderBuilder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.KeyValueMatcher;
+import org.spongepowered.api.data.MutableDataProviderBuilder;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -123,6 +125,7 @@ import org.spongepowered.common.data.SpongeKeyValueMatcherBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.key.SpongeKeyBuilder;
 import org.spongepowered.common.data.persistence.SpongeDataStoreBuilder;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
@@ -291,7 +294,8 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(PlaceholderParser.Builder.class, SpongePlaceholderParserBuilder::new)
             .register(PlaceholderContext.Builder.class, SpongePlaceholderContextBuilder::new)
             .register(PlaceholderComponent.Builder.class, SpongePlaceholderComponentBuilder::new)
-
+            .register(MutableDataProviderBuilder.class, DataProviderRegistrator.SpongeMutableDataProviderBuilder::new)
+            .register(ImmutableDataProviderBuilder.class, DataProviderRegistrator.SpongeImmutableDataProviderBuilder::new)
         ;
     }
 }

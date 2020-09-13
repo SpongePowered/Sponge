@@ -24,17 +24,23 @@
  */
 package org.spongepowered.test.customdatatest;
 
+import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.MutableDataProviderBuilder;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
@@ -52,10 +58,15 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -75,7 +86,8 @@ public final class CustomDataTest {
         ENTITY,
         BLOCKENTITY,
         PLAYER,
-        USER
+        USER,
+        BLOCK
     }
 
     @Listener
@@ -125,6 +137,11 @@ public final class CustomDataTest {
                             scheduler.submit(Task.builder().delayTicks(1).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
                             scheduler.submit(Task.builder().delayTicks(2).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
                             break;
+                        case BLOCK:
+                            // try out custom data-stores
+                            final Integer oldNumber = player.getWorld().get(player.getBlockPosition(), this.myKey).orElse(0);
+                            player.sendActionBar(TextComponent.of(oldNumber));
+                            player.getWorld().offer(player.getBlockPosition(), this.myKey, oldNumber + number);
                     }
                     return CommandResult.success();
                 })
@@ -135,14 +152,45 @@ public final class CustomDataTest {
     @Listener
     public void onRegisterData(final RegisterCatalogEvent<DataRegistration> event) {
         this.myKey = Key.builder().key(ResourceKey.of(this.plugin, "mydata")).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
+
+
+        final DataProvider<Value<Integer>, Integer> blockDataProvider = DataProvider.mutableBuilder()
+                .key(this.myKey).dataHolder(TypeTokens.SERVER_LOCATION_TOKEN)
+                .get(this::getData).set(this::setData).delete(this::removeData)
+                .build();
+        final DataStore dataStore = DataStore.builder().key(this.myKey, "mykey")
+                .holder(TypeTokens.ITEM_TYPE_TOKEN, TypeTokens.USER_TOKEN, TypeTokens.PLAYER_TOKEN)
+                .build();
+
         final DataRegistration myRegistration = DataRegistration.builder()
                 .key(this.myKey)
-                .store(DataStore.builder().key(this.myKey, "mykey")
-                        .holder(TypeTokens.ITEM_TYPE_TOKEN, TypeTokens.USER_TOKEN, TypeTokens.PLAYER_TOKEN)
-                        .build())
+                .store(dataStore)
+                .provider(blockDataProvider)
                 .key(ResourceKey.of(this.plugin, "mydataregistration"))
                 .build();
+
         event.register(myRegistration);
+    }
+
+    // replace with mongoDB - for web-scale
+    private Map<ResourceKey, Map<Vector3i, Integer>> myCustomData = new HashMap<>();
+
+    private DataTransactionResult removeData(ServerLocation serverLocation) {
+        final Integer removed = this.myCustomData.getOrDefault(serverLocation.getWorldKey(), Collections.emptyMap()).remove(serverLocation.getBlockPosition());
+        if (removed == null) {
+            return DataTransactionResult.failNoData();
+        }
+        return DataTransactionResult.successRemove(Value.immutableOf(this.myKey, removed));
+    }
+
+    private DataTransactionResult setData(ServerLocation serverLocation, Integer value) {
+        final Map<Vector3i, Integer> worldData = this.myCustomData.computeIfAbsent(serverLocation.getWorldKey(), k -> new HashMap<>());
+        worldData.put(serverLocation.getBlockPosition(), value);
+        return DataTransactionResult.successResult(Value.immutableOf(this.myKey, value));
+    }
+
+    private Integer getData(ServerLocation serverLocation) {
+        return this.myCustomData.getOrDefault(serverLocation.getWorldKey(), Collections.emptyMap()).get(serverLocation.getBlockPosition());
     }
 
     @Listener

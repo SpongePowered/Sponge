@@ -28,6 +28,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minecraft.tileentity.SignTileEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -45,22 +46,43 @@ public final class SignData {
         registrator
                 .asMutable(SignTileEntity.class)
                     .create(Keys.SIGN_LINES)
-                        .get(h -> {
-                           final List<Component> lines = new ArrayList<>(h.signText.length);
-                           for (int i = 0; i < h.signText.length; i++ ) {
-                               lines.add(SpongeAdventure.asAdventure(h.signText[i]));
-                           }
-                           return lines;
-                        })
+                        .get(SignData::getSignLines)
                         .set(SignData::setSignLines)
-                        .delete(h -> setSignLines(h, Collections.emptyList()));
+                        .delete(h -> SignData.setSignLines(h, Collections.emptyList()))
+                .asMutable(ServerLocation.class)
+                    .create(Keys.SIGN_LINES)
+                        .get(SignData::getSignLines)
+                        .set(SignData::setSignLines)
+                        .delete(h -> SignData.setSignLines(h, Collections.emptyList()))
+                        .supports(loc -> loc.getBlockEntity().map(b -> b instanceof SignTileEntity).orElse(false))
+        ;
     }
     // @formatter:on
+
+    private static SignTileEntity toSignTileEntity(final ServerLocation holder) {
+        return (SignTileEntity) holder.getBlockEntity().get();
+    }
+
+    private static void setSignLines(final ServerLocation holder, final List<Component> value) {
+        SignData.setSignLines(SignData.toSignTileEntity(holder), value);
+    }
 
     private static void setSignLines(final SignTileEntity holder, final List<Component> value) {
         for (int i = 0; i < holder.signText.length; i++) {
             holder.signText[i] = SpongeAdventure.asVanilla(i > value.size() ? TextComponent.empty() : value.get(i));
         }
         holder.markDirty();
+    }
+
+    private static List<Component> getSignLines(ServerLocation h) {
+        return SignData.getSignLines(SignData.toSignTileEntity(h));
+    }
+
+    private static List<Component> getSignLines(SignTileEntity h) {
+        final List<Component> lines = new ArrayList<>(h.signText.length);
+        for (int i = 0; i < h.signText.length; i++) {
+            lines.add(SpongeAdventure.asAdventure(h.signText[i]));
+        }
+        return lines;
     }
 }
