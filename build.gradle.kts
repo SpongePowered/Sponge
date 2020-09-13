@@ -552,8 +552,8 @@ project("SpongeVanilla") {
         vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.3")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-core:2.11.2")
-        vanillaInstallerConfig("org.cadixdev:lorenz:0.6.0-SNAPSHOT")
-        vanillaInstallerConfig("org.cadixdev:atlas:0.3.0-SNAPSHOT")
+        vanillaInstallerConfig("org.cadixdev:atlas:0.2.0")
+        vanillaInstallerConfig("org.cadixdev:lorenz-asm:0.5.4")
         vanillaInstallerImplementation(vanillaInstallerConfig)
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))

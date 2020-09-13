@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import org.apache.logging.log4j.LogManager;
 import org.cadixdev.atlas.Atlas;
-import org.cadixdev.bombe.jar.asm.JarEntryRemappingTransformer;
+import org.cadixdev.bombe.asm.jar.JarEntryRemappingTransformer;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.lorenz.asm.LorenzRemapper;
 import org.cadixdev.lorenz.io.MappingFormats;
@@ -207,7 +207,7 @@ public final class InstallerMain {
         this.installer.getLogger().info("Remapping Minecraft to SRG. This may take a while...");
         try (final FileSystem fileSystem = FileSystems.newFileSystem(srgZip, null)) {
             final Path srgFile = fileSystem.getPath(Constants.Libraries.MCP_JOINED_PATH);
-            final MappingSet mappings = new MappingSet();
+            final MappingSet mappings = MappingSet.create();
             MappingFormats.TSRG.read(mappings, srgFile);
             final Atlas atlas = new Atlas();
             atlas.install(ctx -> new JarEntryRemappingTransformer(
