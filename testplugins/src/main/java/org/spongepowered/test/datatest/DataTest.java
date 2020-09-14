@@ -1106,8 +1106,8 @@ public final class DataTest  {
 
         final BlockState signState = BlockTypes.SPRUCE_SIGN.get().getDefaultState();
         world.setBlock(blockPos, signState);
-// TODO @kashike        final TextComponent emptyText = TextComponent.empty().style(Style.empty());
-//        this.checkGetListData(location, Keys.SIGN_LINES, Arrays.asList(emptyText, emptyText, emptyText, emptyText));
+        final TextComponent emptyText = TextComponent.empty().style(Style.empty());
+        this.checkGetListData(location, Keys.SIGN_LINES, Arrays.asList(emptyText, emptyText, emptyText, emptyText));
         final TextComponent text = TextComponent.of("Test").style(Style.of(NamedTextColor.RED));
         this.checkOfferListData(location, Keys.SIGN_LINES, Arrays.asList(text, text, text, text));
 
