@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.accessor.util.text.StyleAccessor;
 import org.spongepowered.common.adventure.NbtLegacyHoverEventSerializer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.util.text.StyleBridge;
@@ -41,7 +42,6 @@ import java.io.IOException;
 
 @Mixin(Style.class)
 public class StyleMixin implements StyleBridge {
-
     private net.kyori.adventure.text.format.Style bridge$adventure;
 
     @Override
@@ -50,16 +50,17 @@ public class StyleMixin implements StyleBridge {
         if (this.bridge$adventure == null) {
             final net.kyori.adventure.text.format.Style.Builder builder = net.kyori.adventure.text.format.Style.builder();
             final Style $this = (Style) (Object) this;
+            final StyleAccessor $access = (StyleAccessor) this;
             // font
             // TODO(adventure): 1.16
             // color
             builder.color(SpongeAdventure.asAdventureNamed($this.getColor()));
             // decorations
-            builder.decoration(TextDecoration.OBFUSCATED, $this.getObfuscated());
-            builder.decoration(TextDecoration.BOLD, $this.getBold());
-            builder.decoration(TextDecoration.STRIKETHROUGH, $this.getStrikethrough());
-            builder.decoration(TextDecoration.UNDERLINED, $this.getUnderlined());
-            builder.decoration(TextDecoration.ITALIC, $this.getItalic());
+            builder.decoration(TextDecoration.OBFUSCATED, TextDecoration.State.byBoolean($access.accessor$getObfuscated()));
+            builder.decoration(TextDecoration.BOLD, TextDecoration.State.byBoolean($access.accessor$getBold()));
+            builder.decoration(TextDecoration.STRIKETHROUGH, TextDecoration.State.byBoolean($access.accessor$getStrikethrough()));
+            builder.decoration(TextDecoration.UNDERLINED, TextDecoration.State.byBoolean($access.accessor$getUnderlined()));
+            builder.decoration(TextDecoration.ITALIC, TextDecoration.State.byBoolean($access.accessor$getItalic()));
             // events
             final HoverEvent hoverEvent = $this.getHoverEvent();
             if (hoverEvent != null) {
@@ -73,7 +74,7 @@ public class StyleMixin implements StyleBridge {
                     } else if (action == net.kyori.adventure.text.event.HoverEvent.Action.SHOW_ENTITY) {
                         builder.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showEntity(NbtLegacyHoverEventSerializer.INSTANCE.deserializeShowEntity(value, SpongeAdventure.GSON::deserialize)));
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     // can't deal
                 }
             }
