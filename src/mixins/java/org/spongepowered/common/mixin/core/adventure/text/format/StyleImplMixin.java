@@ -41,8 +41,8 @@ import static org.spongepowered.common.adventure.SpongeAdventure.asVanilla;
 
 import java.io.IOException;
 
-@Mixin(net.kyori.adventure.text.format.Style.class)
-public abstract class StyleMixin implements StyleBridge {
+@Mixin(targets = "net.kyori.adventure.text.format.StyleImpl")
+public abstract class StyleImplMixin implements StyleBridge {
     private Style bridge$vanilla;
 
     @Override
@@ -76,7 +76,7 @@ public abstract class StyleMixin implements StyleBridge {
                 } else if (oldValue instanceof net.kyori.adventure.text.event.HoverEvent.ShowItem) {
                     try {
                         value = SpongeAdventure.asVanilla(NbtLegacyHoverEventSerializer.INSTANCE.serializeShowItem((net.kyori.adventure.text.event.HoverEvent.ShowItem) oldValue));
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         throw new IllegalArgumentException();
                     }
                 } else if (oldValue instanceof net.kyori.adventure.text.event.HoverEvent.ShowEntity) {

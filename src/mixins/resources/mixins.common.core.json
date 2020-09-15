@@ -10,7 +10,7 @@
         "advancements.FunctionManagerMixin",
         "adventure.bossbar.BossBarImplMixin",
         "adventure.text.AbstractComponentMixin",
-        "adventure.text.format.StyleMixin",
+        "adventure.text.format.StyleImplMixin",
         "block.BlockMixin",
         "block.BlockPropertiesMixin",
         "block.BlockStateMixin",
