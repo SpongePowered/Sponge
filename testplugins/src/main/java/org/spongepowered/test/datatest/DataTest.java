@@ -54,6 +54,7 @@ import org.spongepowered.api.data.type.FoxTypes;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyles;
+import org.spongepowered.api.data.type.InstrumentTypes;
 import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
@@ -624,8 +625,9 @@ public final class DataTest  {
         this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);
         world.spawnEntity(itemEntity);
 
-// TODO InstrumentTypes unregistered
-        //        this.checkGetData(dirtState, Keys.INSTRUMENT_TYPE, InstrumentTypes.XYLOPHONE.get());
+        final BlockState noteBlockState = BlockTypes.NOTE_BLOCK.get().getDefaultState();
+        this.checkGetData(noteBlockState, Keys.INSTRUMENT_TYPE, InstrumentTypes.HARP.get());
+        this.checkWithData(noteBlockState, Keys.INSTRUMENT_TYPE, InstrumentTypes.COW_BELL.get());
 
         final BlockState daylightDetectorState = BlockTypes.DAYLIGHT_DETECTOR.get().getDefaultState();
         this.checkGetData(daylightDetectorState, Keys.INVERTED, false);
@@ -969,7 +971,6 @@ public final class DataTest  {
 
         // TODO Keys.NEXT_ENTITY_TO_SPAWN
 
-        final BlockState noteBlockState = BlockTypes.NOTE_BLOCK.get().getDefaultState();
 // TODO missing supplier
 //        this.checkWithData(noteBlockState, Keys.NOTE_PITCH, NotePitches.E1.get());
 
