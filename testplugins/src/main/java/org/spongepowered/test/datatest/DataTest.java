@@ -392,10 +392,8 @@ public final class DataTest  {
         this.checkOfferData(minecartEntity, Keys.DERAILED_VELOCITY_MODIFIER, Vector3d.RIGHT);
 
 
-        // TODO missing ItemEntityBridge
-        // TODO also other dataholders
-//        final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
-//        this.checkGetData(itemEntity, Keys.DESPAWN_DELAY, 6000);
+        final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
+        this.checkGetData(itemEntity, Keys.DESPAWN_DELAY, 6000);
         final Entity eyeOfEnder = world.createEntity(EntityTypes.EYE_OF_ENDER.get(), position);
         this.checkOfferData(eyeOfEnder, Keys.DESPAWN_DELAY, 500);
 
@@ -621,7 +619,6 @@ public final class DataTest  {
         this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.WHITE.get());
         this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.BLACK_DOTS.get());
 
-        final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
         this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, true);
         this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, false);
         this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);
