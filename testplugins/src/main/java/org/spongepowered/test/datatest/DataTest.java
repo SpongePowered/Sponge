@@ -231,8 +231,8 @@ public final class DataTest  {
         this.checkOfferListData(bannerStack, Keys.BANNER_PATTERN_LAYERS, pattern);
 
         world.setBlock(blockPos, BlockTypes.RED_BANNER.get().getDefaultState());
-        final BlockEntity blockEntity = world.getBlockEntity(blockPos).get();
-        this.checkOfferListData(blockEntity, Keys.BANNER_PATTERN_LAYERS, pattern);
+        final BlockEntity bannerEntity = world.getBlockEntity(blockPos).get();
+        this.checkOfferListData(bannerEntity, Keys.BANNER_PATTERN_LAYERS, pattern);
 
         // Keys.BASE_COLOR
 
@@ -435,12 +435,20 @@ public final class DataTest  {
         this.checkOfferData(areaEffectCloud, Keys.DURATION, 50);
         this.checkOfferData(areaEffectCloud, Keys.DURATION_ON_USE, -1); // TODO does it work?
 
-// TODO this is broken
-//        this.checkOfferData(cat, Keys.DYE_COLOR, DyeColors.LIME.get());
-//        this.checkGetData(ItemStack.of(ItemTypes.RED_WOOL), Keys.DYE_COLOR, DyeColors.RED.get());
-//        this.checkGetData(bannerStack, Keys.DYE_COLOR, DyeColors.RED.get());
-//        this.checkGetData(BlockTypes.BLUE_CONCRETE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
-//        // TODO banner blockentity
+        this.checkOfferData(cat, Keys.DYE_COLOR, DyeColors.LIME.get());
+        this.checkGetData(ItemStack.of(ItemTypes.RED_WOOL), Keys.DYE_COLOR, DyeColors.RED.get());
+        this.checkGetData(bannerStack, Keys.DYE_COLOR, DyeColors.RED.get());
+        this.checkGetData(BlockTypes.RED_BED.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.RED.get());
+        this.checkGetData(BlockTypes.BLUE_CONCRETE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_CONCRETE_POWDER.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_TERRACOTTA.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_GLAZED_TERRACOTTA.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_STAINED_GLASS.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_STAINED_GLASS_PANE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_BANNER.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_WALL_BANNER.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkOfferData(bannerEntity, Keys.DYE_COLOR, DyeColors.PINK.get());
+
         final Entity tropicalFish = world.createEntity(EntityTypes.TROPICAL_FISH.get(), position);
         this.checkOfferData(tropicalFish, Keys.DYE_COLOR, DyeColors.CYAN.get());
 
@@ -1289,7 +1297,7 @@ public final class DataTest  {
 
     private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Supplier<Key<V>> key, final Object value, final DataTransactionResult result) {
         if (!result.isSuccessful()) {
-            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", holder.getClass().getSimpleName(), key.get().getKey()
+            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.get().getKey()
                     .asString(), value);
             return true;
         }
@@ -1301,11 +1309,11 @@ public final class DataTest  {
         if (gotValue.isPresent()) {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
-                this.plugin.getLogger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", holder.getClass().getSimpleName(),
+                this.plugin.getLogger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
                         key.get().getKey().asString(), expected, actual);
             }
         } else {
-            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", holder.getClass().getSimpleName(),
+            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder),
                     key.get().getKey().asString(), expected);
         }
     }
@@ -1329,11 +1337,21 @@ public final class DataTest  {
     private <T> void checkData(final DataHolder holder, final String key, final T expectedValue, @Nullable final T actualValue) {
         if (actualValue != null) {
             if (!Objects.equals(actualValue, expectedValue)) {
-                this.plugin.getLogger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", holder.getClass().getSimpleName(), key,
+                this.plugin.getLogger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder), key,
                         expectedValue, actualValue);
             }
         } else if (expectedValue != null) {
-            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", holder.getClass().getSimpleName(), key, expectedValue);
+            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder), key, expectedValue);
         }
+    }
+
+    private static String getHolderName(final DataHolder holder) {
+        String value = "";
+        if (holder instanceof BlockState) {
+            value = ((BlockState) holder).getType().getKey().getValue();
+        } else if (holder instanceof ItemStack) {
+            value = ((ItemStack) holder).getType().getKey().getValue();
+        }
+        return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
     }
 }

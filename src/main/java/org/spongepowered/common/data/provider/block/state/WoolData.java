@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AbstractBannerBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.WallBannerBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.common.accessor.entity.passive.SheepEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.data.provider.util.DyeColorUtil;
 
-public final class AbstractBannerData {
+public final class WoolData {
 
-    private AbstractBannerData() {
+    private WoolData() {
     }
 
     // @formatter:off
@@ -41,12 +41,8 @@ public final class AbstractBannerData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((AbstractBannerBlock) h.getBlock()).getColor())
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock)
-                    .create(Keys.IS_ATTACHED)
-                        .get(h -> h.getBlock() instanceof WallBannerBlock)
-                        .set((h, v) -> null)
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock);
+                        .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(h.getBlock()))
+                        .supports(h -> SheepEntityAccessor.accessor$getWoolByColor().containsValue(h.getBlock()));
     }
     // @formatter:on
 }

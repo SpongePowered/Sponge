@@ -75,7 +75,7 @@ public final class ShieldItemStackData {
                             final CompoundNBT tag = h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
                             tag.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.item.DyeColor) (Object) v).getId());
                         })
-                        .supports(h -> h.getItem() instanceof ShieldItem || h.getItem() instanceof BannerItem)
+                        .supports(h -> h.getItem() instanceof ShieldItem)
                     .create(Keys.BANNER_PATTERN_LAYERS)
                         .get(h -> {
                             final CompoundNBT tag = h.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);

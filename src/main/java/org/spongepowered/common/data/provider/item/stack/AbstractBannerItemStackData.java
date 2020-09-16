@@ -22,25 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block;
+package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.DyeColor;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
+import net.minecraft.item.BannerItem;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-@Mixin(Block.Properties.class)
-public abstract class BlockPropertiesMixin {
+public final class AbstractBannerItemStackData {
 
-    @Inject(method = "create(Lnet/minecraft/block/material/Material;Lnet/minecraft/item/DyeColor;)Lnet/minecraft/block/Block$Properties;",
-            at = @At("RETURN"))
-    private static void impl$onCreate(Material material, DyeColor color, CallbackInfoReturnable<Block.Properties> cir) {
-        final Block.Properties returnValue = cir.getReturnValue();
-        ((DyeColorBlockBridge) returnValue).bridge$setDyeColor((org.spongepowered.api.data.type.DyeColor) (Object) color);
+    private AbstractBannerItemStackData() {
     }
 
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asMutable(ItemStack.class)
+                    .create(Keys.DYE_COLOR)
+                        .get(h -> (DyeColor) (Object) ((BannerItem) h.getItem()).getColor())
+                        .supports(h -> h.getItem() instanceof BannerItem);
+    }
+    // @formatter:on
 }

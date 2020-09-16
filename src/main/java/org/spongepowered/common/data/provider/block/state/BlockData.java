@@ -45,9 +45,9 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.accessor.block.BlockAccessor;
 import org.spongepowered.common.accessor.block.FireBlockAccessor;
 import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Collections;
 
@@ -69,6 +69,9 @@ public final class BlockData {
                             }
                             return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)));
                         })
+                    .create(Keys.DYE_COLOR)
+                        .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
+                        .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
                     .create(Keys.HARDNESS)
                         .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockHardness())
                     .create(Keys.HELD_ITEM)

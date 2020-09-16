@@ -12,7 +12,7 @@
         "adventure.text.AbstractComponentMixin",
         "adventure.text.format.StyleImplMixin",
         "block.BlockMixin",
-        "block.BlockPropertiesMixin",
+        "block.Block_PropertiesMixin",
         "block.BlockStateMixin",
         "block.DyeColorBlockPropertiesMixin",
         "command.CommandsMixin",
@@ -95,7 +95,8 @@
         "world.storage.WorldInfoMixin",
         "entity.ai.goal.RunAroundLikeCrazyGoalMixin",
         "entity.item.TNTEntityMixin",
-        "entity.item.ItemEntityMixin"
+        "entity.item.ItemEntityMixin",
+        "block.NoteBlockMixin"
     ],
     "client": [
         "client.MinecraftMixin",

@@ -24,16 +24,18 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AbstractBannerBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.WallBannerBlock;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.data.provider.util.DyeColorUtil;
 
-public final class AbstractBannerData {
+public final class TerracottaData {
 
-    private AbstractBannerData() {
+    private TerracottaData() {
     }
 
     // @formatter:off
@@ -41,12 +43,15 @@ public final class AbstractBannerData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((AbstractBannerBlock) h.getBlock()).getColor())
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock)
-                    .create(Keys.IS_ATTACHED)
-                        .get(h -> h.getBlock() instanceof WallBannerBlock)
-                        .set((h, v) -> null)
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock);
+                        .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_TERRACOTTA.get(h.getBlock()))
+                        .supports(h -> {
+                            final ResourceKey key = ((BlockType) h.getBlock()).getKey();
+                            if (!key.getNamespace().equals(PluginManager.MINECRAFT_PLUGIN_ID)) {
+                                return false;
+                            }
+
+                            return key.getValue().endsWith("_terracotta");
+                        });
     }
     // @formatter:on
 }
