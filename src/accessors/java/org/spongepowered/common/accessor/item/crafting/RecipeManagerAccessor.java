@@ -22,46 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.recipe.crafting;
+package org.spongepowered.common.accessor.item.crafting;
 
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.recipe.crafting.Ingredient;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public class SpongeIngredientBuilder implements Ingredient.Builder {
+@Mixin(Ingredient.class)
+public interface RecipeManagerAccessor {
 
-    private ItemType[] types;
-    private ResourceKey itemTag;
-
-    @Override
-    public Ingredient.Builder reset() {
-        this.types = null;
-        this.itemTag = null;
-        return this;
-    }
-
-    @Override
-    public Ingredient.Builder with(ItemType... types) {
-        this.types = types;
-        this.itemTag = null;
-        return this;
-    }
-
-    @Override
-    public Ingredient.Builder with(ResourceKey itemTag) {
-        this.itemTag = itemTag;
-        this.types = null;
-        return this;
-    }
-
-    @Override
-    public Ingredient build() {
-        if (this.itemTag != null) {
-            return IngredientUtil.of(this.itemTag);
-        }
-        if (this.types != null && this.types.length > 0) {
-            return IngredientUtil.of(this.types);
-        }
-        throw new IllegalStateException("An ingredient must have at least one ItemType or an item tag");
-    }
+    @Accessor("matchingStacks") ItemStack[] accessor$getMatchingStacks();
 }

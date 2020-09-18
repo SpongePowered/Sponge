@@ -30,9 +30,10 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
@@ -44,6 +45,7 @@ import org.spongepowered.common.event.lifecycle.StartedEngineEventImpl;
 import org.spongepowered.common.event.lifecycle.StartingEngineEventImpl;
 import org.spongepowered.common.event.lifecycle.StoppingEngineEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.item.recipe.SpongeRecipeProvider;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeBuilderRegistry;
@@ -51,7 +53,6 @@ import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.registry.SpongeFactoryRegistry;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
-import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
@@ -86,12 +87,22 @@ public final class SpongeLifecycle {
     }
 
     public void establishRegistries() {
-        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultRegistries();
-        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultSuppliers();
+        final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
+
+        spongeCatalogRegistry.registerDefaultRegistries();
+        spongeCatalogRegistry.registerDefaultSuppliers();
 
         this.game.getEventManager().post(new RegisterCatalogRegistryEventImpl(Cause.of(EventContext.empty(), this.game), this.game));
 
-        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+        spongeCatalogRegistry.callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+    }
+
+    public void establishDataPackRegistries() {
+        final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
+        spongeCatalogRegistry.callDataPackRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+
+        // After all plugins registered their recipes we serialize them
+        SpongeRecipeProvider.registerRecipes(spongeCatalogRegistry.getRegistry(RecipeRegistration.class));
     }
 
     public void callRegisterChannelEvent() {

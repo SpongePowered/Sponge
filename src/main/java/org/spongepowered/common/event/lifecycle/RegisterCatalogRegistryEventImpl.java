@@ -55,7 +55,7 @@ public final class RegisterCatalogRegistryEventImpl extends AbstractLifecycleEve
     public <T extends CatalogType> void register(Class<T> catalogClass, ResourceKey key, @Nullable Supplier<Set<T>> defaultsSupplier) throws DuplicateRegistrationException {
         Preconditions.checkNotNull(key);
 
-        ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerRegistry(catalogClass, key, defaultsSupplier, false, true);
+        ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerRegistry(catalogClass, key, defaultsSupplier, false, true, true);
     }
 
     @Override

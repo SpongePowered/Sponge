@@ -69,6 +69,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
 
         lifecycle.establishRegistries();
         lifecycle.establishDataProviders();
+        lifecycle.establishDataPackRegistries();
 
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();

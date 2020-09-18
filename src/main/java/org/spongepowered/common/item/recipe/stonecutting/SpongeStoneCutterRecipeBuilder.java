@@ -22,31 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.recipe.crafting;
+package org.spongepowered.common.item.recipe.stonecutting;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
+import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.StonecuttingRecipe;
 import net.minecraft.util.ResourceLocation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
-import org.spongepowered.common.item.recipe.crafting.custom.SpongeStonecuttingRecipe;
+import org.spongepowered.common.inventory.util.InventoryUtil;
+import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
-import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.function.Function;
 
-public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<StoneCutterRecipe, StoneCutterRecipe.Builder> implements
+public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<RecipeRegistration, StoneCutterRecipe.Builder> implements
         StoneCutterRecipe.Builder, StoneCutterRecipe.Builder.ResultStep, StoneCutterRecipe.Builder.EndStep {
 
-    private net.minecraft.item.ItemStack result = net.minecraft.item.ItemStack.EMPTY;
+    private ItemStack result;
     private Ingredient ingredient;
-    private Predicate<ItemStackSnapshot> ingredientPredicate;
+    private Function<IInventory, net.minecraft.item.ItemStack> resultFunction;
+    @Nullable private String group;
 
     @Override
     public ResultStep ingredient(ItemType ingredient) {
@@ -55,33 +65,49 @@ public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<S
     }
 
     @Override
-    public ResultStep ingredient(Predicate<ItemStackSnapshot> predicate, ItemType exemplaryIngredient) {
-        this.ingredient = Ingredient.fromItems(() -> ((Item) exemplaryIngredient));
-        this.ingredientPredicate = predicate;
+    public ResultStep ingredient(org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
+        this.ingredient = IngredientUtil.toNative(ingredient);
         return this;
     }
 
     @Override
     public EndStep result(ItemStackSnapshot result) {
-        this.result = ItemStackUtil.fromSnapshotToNative(result);
+        this.result = result.createStack();
+        this.resultFunction = null;
         return this;
     }
 
     @Override
     public EndStep result(final ItemStack result) {
         checkNotNull(result, "result");
-        this.result = ItemStackUtil.toNative(result).copy();
+        this.result = result;
+        this.resultFunction = null;
         return this;
     }
 
     @Override
-    protected StoneCutterRecipe build(ResourceKey key) {
-        String group = ""; // unused
-        if (this.ingredientPredicate == null) {
-            return (StoneCutterRecipe) new StonecuttingRecipe((ResourceLocation) (Object) key, group, this.ingredient, this.result);
-        }
-        // TODO generate JSON
-        return (StoneCutterRecipe) new SpongeStonecuttingRecipe((ResourceLocation) (Object) key, group, this.ingredientPredicate, this.ingredient, this.result);
+    public EndStep result(Function<Inventory, ItemStack> resultFunction, ItemStack exemplaryResult) {
+        checkNotNull(exemplaryResult, "exemplaryResult");
+        checkState(!exemplaryResult.isEmpty(), "exemplaryResult must not be empty");
+
+        this.result = exemplaryResult;
+        this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toInventory(inv)));
+        return this;
+    }
+
+    @Override
+    public EndStep group(@Nullable String name) {
+        this.group = name;
+        return this;
+    }
+
+    @Override
+    protected RecipeRegistration build(ResourceKey key) {
+        final net.minecraft.item.ItemStack result = ItemStackUtil.toNative(this.result);
+        final IRecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Collections.singleton(this.ingredient),
+                IRecipeSerializer.STONECUTTING, SpongeStonecuttingRecipeSerializer.SPONGE_STONECUTTING);
+
+        return new SpongeStonecuttingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredient, result, this.resultFunction);
     }
 
     @Override
@@ -92,9 +118,10 @@ public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<S
 
     @Override
     public StoneCutterRecipe.Builder reset() {
-        this.result = net.minecraft.item.ItemStack.EMPTY;
+        this.result = null;
+        this.resultFunction = null;
         this.ingredient = null;
-        this.ingredientPredicate = null;
+        this.group = null;
         return super.reset();
     }
 }

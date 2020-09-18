@@ -35,7 +35,9 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
@@ -60,6 +62,10 @@ import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.item.recipe.SpongeRecipeProvider;
+import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
+import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
@@ -287,5 +293,15 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Override
     public SpongeServerScopedServiceProvider bridge$getServiceProvider() {
         return this.impl$serviceProvider;
+    }
+
+    @Inject(method = "reload", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourcePackList;reloadPacksFromFinders()V"))
+    public void impl$reloadPluginRecipes(CallbackInfo ci) {
+        final SpongeCatalogRegistry catalogRegistry = SpongeCommon.getRegistry().getCatalogRegistry();
+        catalogRegistry.registerDatapackCatalogues();
+        SpongeIngredient.clearCache();
+        ResultUtil.clearCache();
+        catalogRegistry.callDataPackRegisterCatalogEvents(Sponge.getServer().getCauseStackManager().getCurrentCause(), Sponge.getGame());
+        SpongeRecipeProvider.registerRecipes(catalogRegistry.getRegistry(RecipeRegistration.class));
     }
 }

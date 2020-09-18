@@ -22,21 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.item.crafting;
+package org.spongepowered.common.registry.builtin.vanilla;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import net.minecraft.item.crafting.IRecipeType;
+import org.spongepowered.api.item.recipe.RecipeType;
+import org.spongepowered.common.registry.SpongeCatalogRegistry;
 
-import java.util.stream.Stream;
+public final class RecipeTypeSupplier {
 
-@Mixin(Ingredient.class)
-public interface IngredientAccessor {
+    private RecipeTypeSupplier() {
+    }
 
-    @Accessor("matchingStacks") ItemStack[] accessor$getMatchingStacks();
-    @Invoker("fromItemListStream") static Ingredient accessor$fromItemListStream(Stream<? extends Ingredient.IItemList> stream) {
-        throw new IllegalStateException("Untransformed Accessor");
+    public static void registerSuppliers(final SpongeCatalogRegistry registry) {
+        registry.registerSupplier(RecipeType.class, "crafting", () -> (RecipeType) IRecipeType.CRAFTING)
+                .registerSupplier(RecipeType.class, "smelting", () -> (RecipeType) IRecipeType.SMELTING)
+                .registerSupplier(RecipeType.class, "blasting", () -> (RecipeType) IRecipeType.BLASTING)
+                .registerSupplier(RecipeType.class, "smoking", () -> (RecipeType) IRecipeType.SMOKING)
+                .registerSupplier(RecipeType.class, "campfire_cooking", () -> (RecipeType) IRecipeType.CAMPFIRE_COOKING)
+                .registerSupplier(RecipeType.class, "stonecutting", () -> (RecipeType) IRecipeType.STONECUTTING);
     }
 }

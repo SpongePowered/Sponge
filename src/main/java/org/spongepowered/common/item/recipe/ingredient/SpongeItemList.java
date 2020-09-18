@@ -22,21 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.item.crafting;
+package org.spongepowered.common.item.recipe.ingredient;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.Collection;
 
-@Mixin(Ingredient.class)
-public interface IngredientAccessor {
+public abstract class SpongeItemList implements Ingredient.IItemList {
 
-    @Accessor("matchingStacks") ItemStack[] accessor$getMatchingStacks();
-    @Invoker("fromItemListStream") static Ingredient accessor$fromItemListStream(Stream<? extends Ingredient.IItemList> stream) {
-        throw new IllegalStateException("Untransformed Accessor");
+    public static final String INGREDIENT_TYPE = "sponge:type";
+    public static final String INGREDIENT_ITEM = "sponge:item";
+
+    protected final ItemStack[] stacks;
+
+    public SpongeItemList(ItemStack... stacks) {
+        this.stacks = stacks;
     }
+
+    @Override
+    public Collection<ItemStack> getStacks() {
+        return Arrays.asList(stacks);
+    }
+
+    @Override
+    public JsonObject serialize() {
+        final JsonObject jsonobject = new JsonObject();
+        final JsonArray stackArray = new JsonArray();
+        for (ItemStack stack : this.stacks) {
+            stackArray.add(ResultUtil.serializeItemStack(stack));
+        }
+        jsonobject.add(SpongeItemList.INGREDIENT_ITEM, stackArray);
+        return jsonobject;
+    }
+
+    public abstract boolean test(ItemStack stack);
+
 }

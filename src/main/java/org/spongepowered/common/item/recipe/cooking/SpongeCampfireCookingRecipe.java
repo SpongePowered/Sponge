@@ -22,44 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.recipe.crafting;
+package org.spongepowered.common.item.recipe.cooking;
 
-import net.minecraft.item.Item;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.CampfireCookingRecipe;
 import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.ItemType;
 
-import java.util.Arrays;
+import java.util.function.Function;
 
-import javax.annotation.Nullable;
+public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe {
 
-public class IngredientUtil {
+    private final Function<IInventory, ItemStack> resultFunction;
 
-    public static org.spongepowered.api.item.recipe.crafting.Ingredient fromNative(Ingredient ingredient) {
-        return (org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) ingredient;
+    public SpongeCampfireCookingRecipe(ResourceLocation p_i50030_1_, String p_i50030_2_, Ingredient p_i50030_3_, ItemStack p_i50030_4_, float p_i50030_5_, int p_i50030_6_, Function<IInventory, ItemStack> resultFunction) {
+        super(p_i50030_1_, p_i50030_2_, p_i50030_3_, p_i50030_4_, p_i50030_5_, p_i50030_6_);
+        this.resultFunction = resultFunction;
     }
 
-    public static Ingredient toNative(org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
-        return (Ingredient) (Object) ingredient;
-
-    }
-
-    public static org.spongepowered.api.item.recipe.crafting.Ingredient of(ItemType... items) {
-        IItemProvider[] providers = Arrays.stream(items).map(item -> (IItemProvider) () -> ((Item) item)).toArray(IItemProvider[]::new);
-        return fromNative(Ingredient.fromItems(providers));
-    }
-
-    @Nullable
-    public static org.spongepowered.api.item.recipe.crafting.Ingredient of(ResourceKey tagKey) {
-        Tag<Item> itemTag = ItemTags.getCollection().get(((ResourceLocation) (Object) tagKey));
-        if (itemTag == null) {
-            return null;
+    @Override
+    public ItemStack getCraftingResult(IInventory p_77572_1_) {
+        if (this.resultFunction != null) {
+            final ItemStack result = this.resultFunction.apply(p_77572_1_);
+            result.setCount(1);
+            return result;
         }
-        return fromNative(Ingredient.fromTag(itemTag));
+        return super.getCraftingResult(p_77572_1_);
     }
 
+    @Override
+    public ItemStack getRecipeOutput() {
+        if (this.resultFunction != null) {
+            return ItemStack.EMPTY;
+        }
+        return super.getRecipeOutput();
+    }
 }

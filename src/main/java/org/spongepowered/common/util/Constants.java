@@ -616,6 +616,27 @@ public final class Constants {
         }
     }
 
+    public static final class Recipe {
+        public static final String GROUP = "group";
+
+        public static final String RESULT = "result";
+        public static final String ITEM = "item";
+        public static final String COUNT = "count";
+
+        public static final String SPONGE_RESULT = "sponge:result";
+        public static final String SPONGE_RESULTFUNCTION = "sponge:result_function";
+        public static final String SPONGE_REMAINING_ITEMS = "sponge:remaining_items";
+
+        public static final String COOKING_EXP = "experience";
+        public static final String COOKING_TIME = "cookingtime";
+
+        public static final String COOKING_INGREDIENT = "ingredient";
+        public static final String STONECUTTING_INGREDIENT = "ingredient";
+        public static final String SHAPED_PATTERN = "pattern";
+        public static final String SHAPED_INGREDIENTS = "key";
+        public static final String SHAPELESS_INGREDIENTS = "ingredients";
+    }
+
     public static final class TileEntity {
 
         public static final String SIGN = "Sign";

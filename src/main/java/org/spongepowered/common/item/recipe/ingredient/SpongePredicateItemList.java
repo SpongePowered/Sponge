@@ -22,21 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.item.crafting;
+package org.spongepowered.common.item.recipe.ingredient;
 
+import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.stream.Stream;
+import java.util.function.Predicate;
 
-@Mixin(Ingredient.class)
-public interface IngredientAccessor {
+public class SpongePredicateItemList extends SpongeItemList {
 
-    @Accessor("matchingStacks") ItemStack[] accessor$getMatchingStacks();
-    @Invoker("fromItemListStream") static Ingredient accessor$fromItemListStream(Stream<? extends Ingredient.IItemList> stream) {
-        throw new IllegalStateException("Untransformed Accessor");
+    public static final String TYPE_PREDICATE = "sponge:predicate";
+    public static final String INGREDIENT_PREDICATE = "sponge:predicate";
+
+    private final String id;
+    private final Predicate<ItemStack> predicate;
+
+    public SpongePredicateItemList(String id, Predicate<ItemStack> predicate, ItemStack... stacks) {
+        super(stacks);
+        this.id = id;
+        this.predicate = predicate;
+    }
+
+    @Override
+    public JsonObject serialize() {
+        final JsonObject jsonobject = super.serialize();
+        jsonobject.addProperty(SpongeItemList.INGREDIENT_TYPE, SpongePredicateItemList.TYPE_PREDICATE);
+        jsonobject.addProperty(SpongePredicateItemList.INGREDIENT_PREDICATE, this.id);
+        return jsonobject;
+    }
+
+    @Override
+    public boolean test(ItemStack stack) {
+        return this.predicate.test(stack);
     }
 }

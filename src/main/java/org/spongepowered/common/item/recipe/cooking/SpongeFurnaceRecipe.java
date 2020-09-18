@@ -22,21 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.item.crafting;
+package org.spongepowered.common.item.recipe.cooking;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.FurnaceRecipe;
 import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import net.minecraft.item.crafting.SmokingRecipe;
+import net.minecraft.util.ResourceLocation;
 
-import java.util.stream.Stream;
+import java.util.function.Function;
 
-@Mixin(Ingredient.class)
-public interface IngredientAccessor {
+public class SpongeFurnaceRecipe extends FurnaceRecipe {
 
-    @Accessor("matchingStacks") ItemStack[] accessor$getMatchingStacks();
-    @Invoker("fromItemListStream") static Ingredient accessor$fromItemListStream(Stream<? extends Ingredient.IItemList> stream) {
-        throw new IllegalStateException("Untransformed Accessor");
+    private final Function<IInventory, ItemStack> resultFunction;
+
+    public SpongeFurnaceRecipe(ResourceLocation p_i50030_1_, String p_i50030_2_, Ingredient p_i50030_3_, ItemStack p_i50030_4_, float p_i50030_5_, int p_i50030_6_, Function<IInventory, ItemStack> resultFunction) {
+        super(p_i50030_1_, p_i50030_2_, p_i50030_3_, p_i50030_4_, p_i50030_5_, p_i50030_6_);
+        this.resultFunction = resultFunction;
     }
+
+    @Override
+    public ItemStack getCraftingResult(IInventory p_77572_1_) {
+        if (this.resultFunction != null) {
+            final ItemStack result = this.resultFunction.apply(p_77572_1_);
+            result.setCount(1);
+            return result;
+        }
+        return super.getCraftingResult(p_77572_1_);
+    }
+
+    @Override
+    public ItemStack getRecipeOutput() {
+        if (this.resultFunction != null) {
+            return ItemStack.EMPTY;
+        }
+        return super.getRecipeOutput();
+    }
+
 }

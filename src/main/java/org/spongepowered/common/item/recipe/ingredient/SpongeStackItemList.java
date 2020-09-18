@@ -22,21 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.item.crafting;
+package org.spongepowered.common.item.recipe.ingredient;
 
+import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.stream.Stream;
+public class SpongeStackItemList extends SpongeItemList {
 
-@Mixin(Ingredient.class)
-public interface IngredientAccessor {
+    public static final String TYPE_STACK = "sponge:stack";
 
-    @Accessor("matchingStacks") ItemStack[] accessor$getMatchingStacks();
-    @Invoker("fromItemListStream") static Ingredient accessor$fromItemListStream(Stream<? extends Ingredient.IItemList> stream) {
-        throw new IllegalStateException("Untransformed Accessor");
+    public SpongeStackItemList(ItemStack... stacks) {
+        super(stacks);
+    }
+
+    @Override
+    public JsonObject serialize() {
+        final JsonObject jsonobject = super.serialize();
+        jsonobject.addProperty(SpongeItemList.INGREDIENT_TYPE, SpongeStackItemList.TYPE_STACK);
+        return jsonobject;
+    }
+
+    @Override
+    public boolean test(ItemStack testStack) {
+        if (this.stacks.length == 0) {
+            return testStack.isEmpty();
+        }
+
+        for (ItemStack itemstack : this.stacks) {
+            if (itemstack.getItem() == testStack.getItem()) {
+                if (ItemStack.areItemStackTagsEqual(itemstack, testStack)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

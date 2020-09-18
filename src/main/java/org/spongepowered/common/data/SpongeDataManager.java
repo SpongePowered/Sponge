@@ -284,11 +284,11 @@ public final class SpongeDataManager implements DataManager {
         Preconditions.checkState(allowRegistrations);
 
         // TODO do we want this?
-        Preconditions.checkState(registration.key.getNamespace().equals(registration.plugin.getMetadata().getId()), "Registration namespace not matchin plugin id");
+        Preconditions.checkState(registration.key.getNamespace().equals(registration.plugin.getMetadata().getId()), "Registration namespace not matching plugin id {}", registration.key);
 
         // Make sure the Keys are not already registered
-        Preconditions.checkState(Collections.disjoint(this.registrationByKey.keySet(), registration.keys), "Duplicate key registration");
-        Preconditions.checkState(Collections.disjoint(this.registrationByKey.keySet(), registration.dataProviderMap.keySet()), "Duplicate key registration");
+        Preconditions.checkState(Collections.disjoint(this.registrationByKey.keySet(), registration.keys), "Duplicate key registration {}", registration.key);
+        Preconditions.checkState(Collections.disjoint(this.registrationByKey.keySet(), registration.dataProviderMap.keySet()), "Duplicate key registration {}", registration.key);
     }
 
     public static boolean areRegistrationsComplete() {

@@ -22,21 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.item.crafting;
+package org.spongepowered.common.item.recipe.stonecutting;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import net.minecraft.item.crafting.SmokingRecipe;
+import net.minecraft.item.crafting.StonecuttingRecipe;
+import net.minecraft.util.ResourceLocation;
 
-import java.util.stream.Stream;
+import java.util.function.Function;
 
-@Mixin(Ingredient.class)
-public interface IngredientAccessor {
+public class SpongeStonecuttingRecipe extends StonecuttingRecipe {
 
-    @Accessor("matchingStacks") ItemStack[] accessor$getMatchingStacks();
-    @Invoker("fromItemListStream") static Ingredient accessor$fromItemListStream(Stream<? extends Ingredient.IItemList> stream) {
-        throw new IllegalStateException("Untransformed Accessor");
+    private final Function<IInventory, ItemStack> resultFunction;
+
+    public SpongeStonecuttingRecipe(ResourceLocation idIn, String groupIn, Ingredient ingredientIn, ItemStack resultIn, Function<IInventory, ItemStack> resultFunction) {
+        super(idIn, groupIn, ingredientIn, resultIn);
+        this.resultFunction = resultFunction;
     }
+
+    @Override
+    public ItemStack getCraftingResult(IInventory p_77572_1_) {
+        if (this.resultFunction != null) {
+            return this.resultFunction.apply(p_77572_1_);
+        }
+        return super.getCraftingResult(p_77572_1_);
+    }
+
+    @Override
+    public ItemStack getRecipeOutput() {
+        if (this.resultFunction != null) {
+            return ItemStack.EMPTY;
+        }
+        return super.getRecipeOutput();
+    }
+
 }

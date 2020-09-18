@@ -165,7 +165,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.ItemStack.TYPE, this.itemStack$getType().getKey())
+                .set(Constants.ItemStack.TYPE, this.itemStack$getType().getKey().toString())
                 .set(Constants.ItemStack.COUNT, this.itemStack$getQuantity())
                 .set(Constants.ItemStack.DAMAGE_VALUE, this.shadow$getDamage());
         if (this.shadow$hasTag()) { // no tag? no data, simple as that.
