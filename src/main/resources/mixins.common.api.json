@@ -227,8 +227,6 @@
         "mcp.item.Item_ToolMaterialMixin_API",
         "mcp.item.ItemArmorMaterialMixin_API",
         "mcp.item.ItemBlockMixin_API",
-        "mcp.item.ItemEmptyMapMixin_API",
-        "mcp.item.ItemMapMixin_API",
         "mcp.item.ItemFishFood_FishTypeMixin_API",
         "mcp.item.ItemMixin_API",
         "mcp.item.ItemStackMixin_API",

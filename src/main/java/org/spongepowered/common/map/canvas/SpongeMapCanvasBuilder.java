@@ -43,6 +43,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> implements MapCanvas.Builder {
@@ -84,6 +85,7 @@ public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> imple
 
     @Override
     public MapCanvas.Builder fromImage(Image image) {
+        Objects.requireNonNull(image, "image cannot be null");
         if (image.getWidth(null) != 128 || image.getHeight(null) != 128) {
             throw new IllegalStateException("image size was invalid!");
         }

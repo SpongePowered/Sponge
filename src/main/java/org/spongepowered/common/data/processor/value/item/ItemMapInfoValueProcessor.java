@@ -48,34 +48,34 @@ public class ItemMapInfoValueProcessor extends AbstractSpongeValueProcessor<Item
     }
 
     @Override
-    protected Value<MapInfo> constructValue(MapInfo actualValue) {
+    protected Value<MapInfo> constructValue(final MapInfo actualValue) {
         return new SpongeValue<>(Keys.MAP_INFO, SpongeMapInfoItemData.getDefaultMapInfo(), actualValue);
     }
 
     @Override
-    protected boolean set(ItemStack container, MapInfo value) {
+    protected boolean set(final ItemStack container, final MapInfo value) {
         if (container.getType() != ItemTypes.FILLED_MAP) {
             return false;
         }
-        ((net.minecraft.item.ItemStack)container).setItemDamage(((MapDataBridge)value).bridge$getMapId());
+        ((net.minecraft.item.ItemStack) container).setItemDamage(((MapDataBridge) value).bridge$getMapId());
         return true;
     }
 
     @Override
-    protected Optional<MapInfo> getVal(ItemStack container) {
+    protected Optional<MapInfo> getVal(final ItemStack container) {
         return Sponge.getServer().getMapStorage()
-                .map(mapStorage -> (MapStorageBridge)mapStorage)
-                .flatMap(bridge -> bridge.bridge$getMinecraftMapData((int)container.toContainer().get(Constants.ItemStack.DAMAGE_VALUE).get()))
-                .map(mapData -> (MapInfo)mapData);
+                .map(mapStorage -> (MapStorageBridge) mapStorage)
+                .flatMap(bridge -> bridge.bridge$getMinecraftMapData((int) container.toContainer().get(Constants.ItemStack.DAMAGE_VALUE).get()))
+                .map(mapData -> (MapInfo) mapData);
     }
 
     @Override
-    protected ImmutableValue<MapInfo> constructImmutableValue(MapInfo value) {
-        return constructValue(value).asImmutable();
+    protected ImmutableValue<MapInfo> constructImmutableValue(final MapInfo value) {
+        return this.constructValue(value).asImmutable();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 }

@@ -45,27 +45,26 @@ import org.spongepowered.common.world.WorldManager;
 import java.io.IOException;
 import java.util.Optional;
 
-public class MapUtil {
+public final class MapUtil {
     /**
      * Returns MapInfo of newly created map, if the event was not cancelled.
      * @param mapInfoData MapInfoData for the data in the MapData
      * @param cause Cause of the event
      * @return MapInfo if event was not cancelled
      */
-    public static Optional<MapInfo> fireCreateMapEvent(MapInfoData mapInfoData, Cause cause) {
-        int id = Sponge.getServer().getMapStorage()
+    public static Optional<MapInfo> fireCreateMapEvent(final MapInfoData mapInfoData, final Cause cause) {
+        final int id = Sponge.getServer().getMapStorage()
                 .map(mapStorage -> (MapStorageBridge)mapStorage)
                 .flatMap(MapStorageBridge::bridge$getHighestMapId)
                 .map(i -> i + 1)
                 .orElse(0);
 
-        net.minecraft.world.World defaultWorld = WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get();
+        final net.minecraft.world.World defaultWorld = WorldManager.getWorld(Sponge.getServer().getDefaultWorldName()).get();
 
-        String s = Constants.Map.MAP_PREFIX + id;
-        MapData mapData = new MapData(s);
+        final String s = Constants.Map.MAP_PREFIX + id;
+        final MapData mapData = new MapData(s);
 
-        MapInfo mapInfo = (MapInfo)mapData;
-        //((SpongeMapInfo)mapInfo).setMapId(id);
+        final MapInfo mapInfo = (MapInfo) mapData;
         mapInfo.offer(mapInfoData);
 
         final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
@@ -75,13 +74,13 @@ public class MapUtil {
         }
 
         // Call getUniqueDataId to advance the map ids.
-        int mcId = defaultWorld.getUniqueDataId("map");
+        final int mcId = defaultWorld.getUniqueDataId("map");
         if (id != mcId) {
             // Short has overflown.
             SpongeImpl.getLogger().warn("Map size corruption, vanilla only allows " + Short.MAX_VALUE + "! Expected next number was not equal to the true next number.");
             SpongeImpl.getLogger().warn("Expected: " + id + ". Got: " + mcId);
             SpongeImpl.getLogger().warn("Automatically cancelling map creation");
-            ((MapStorageBridge)Sponge.getServer().getMapStorage().get()).bridge$setHighestMapId((short)(id - 1));
+            ((MapStorageBridge)Sponge.getServer().getMapStorage().get()).bridge$setHighestMapId((short) (id - 1));
             return Optional.empty();
         }
         defaultWorld.setData(s, mapData);
@@ -93,16 +92,16 @@ public class MapUtil {
      * @param i number to check
      * @return true if it is in bounds
      */
-    public static boolean isInCanvasBounds(int i) {
+    public static boolean isInCanvasBounds(final int i) {
         return i >= 0 && i < Constants.Map.MAP_PIXELS;
     }
 
-    public static boolean isInMapDecorationBounds(int i) {
+    public static boolean isInMapDecorationBounds(final int i) {
         return i >= Byte.MIN_VALUE && i <= Byte.MAX_VALUE;
     }
 
-    public static net.minecraft.world.storage.MapDecoration mapDecorationFromNBT(NBTTagCompound nbt) {
-        net.minecraft.world.storage.MapDecoration mapDecoration = new net.minecraft.world.storage.MapDecoration(
+    public static net.minecraft.world.storage.MapDecoration mapDecorationFromNBT(final NBTTagCompound nbt) {
+        final net.minecraft.world.storage.MapDecoration mapDecoration = new net.minecraft.world.storage.MapDecoration(
                 net.minecraft.world.storage.MapDecoration.Type.byIcon(nbt.getByte(Constants.Map.DECORATION_TYPE.asString(""))),
                 (byte)nbt.getDouble(Constants.Map.DECORATION_X.asString("")),
                 (byte)nbt.getDouble(Constants.Map.DECORATION_Y.asString("")),
@@ -112,7 +111,7 @@ public class MapUtil {
         return mapDecoration;
     }
 
-    public static Optional<MapDecoration> mapDecorationFromContainer(DataView container) {
+    public static Optional<MapDecoration> mapDecorationFromContainer(final DataView container) {
         if (!container.contains(
                 Constants.Map.DECORATION_TYPE,
                 Constants.Map.DECORATION_ID,
@@ -122,7 +121,7 @@ public class MapUtil {
         )) {
             return Optional.empty();
         }
-        MapDecoration mapDecoration = (MapDecoration) new net.minecraft.world.storage.MapDecoration(
+        final MapDecoration mapDecoration = (MapDecoration) new net.minecraft.world.storage.MapDecoration(
                 net.minecraft.world.storage.MapDecoration.Type.byIcon(container.getByte(Constants.Map.DECORATION_TYPE).get()),
                 container.getByte(Constants.Map.DECORATION_X).get(),
                 container.getByte(Constants.Map.DECORATION_Y).get(),
@@ -132,10 +131,10 @@ public class MapUtil {
         return Optional.of(mapDecoration);
     }
 
-    public static NBTTagCompound mapDecorationToNBT(MapDecoration decoration) {
+    public static NBTTagCompound mapDecorationToNBT(final MapDecoration decoration) {
         try {
             return net.minecraft.nbt.JsonToNBT.getTagFromJson(DataFormats.JSON.write(decoration.toContainer()));
-        } catch (NBTException | IOException e) {
+        } catch (final NBTException | IOException e) {
             // I don't see this ever happening but lets put logging in anyway
             throw new IllegalStateException("Error converting DataView to MC NBT", e);
         }

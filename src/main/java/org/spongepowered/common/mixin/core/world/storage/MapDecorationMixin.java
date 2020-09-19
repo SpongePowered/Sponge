@@ -38,12 +38,12 @@ import java.util.UUID;
 public class MapDecorationMixin implements MapDecorationBridge {
 
 	// If should save to disk
-	private boolean bridge$isPersistant;
-	//
-	private String bridge$key = Constants.Map.DECORATION_KEY_PREFIX + UUID.randomUUID().toString();
+	private boolean impl$isPersistent;
+	private String impl$key = Constants.Map.DECORATION_KEY_PREFIX + UUID.randomUUID().toString();
 
 	@Inject(method = "<init>", at = @At("RETURN"))
-	public void api$initialiser(MapDecoration.Type typeIn, byte xIn, byte yIn, byte rotationIn, CallbackInfo ci) {
+	public void impl$setPersistenceOnInit(final MapDecoration.Type typeIn, final byte xIn, final byte yIn, final byte rotationIn,
+			final CallbackInfo ci) {
 		// All of the below types have no reason to be saved to disk
 		// This is because they can/should be calculated when needed
 		// Furthermore if a sponge plugin adds a MapDecoration, isPersistent
@@ -53,11 +53,11 @@ public class MapDecorationMixin implements MapDecorationBridge {
 			case PLAYER_OFF_MAP:
 			case PLAYER_OFF_LIMITS:
 			case FRAME: {
-				this.bridge$isPersistant = false;
+				this.impl$isPersistent = false;
 				break;
 			}
 			default: {
-				this.bridge$isPersistant = true;
+				this.impl$isPersistent = true;
 				break;
 			}
 
@@ -65,22 +65,22 @@ public class MapDecorationMixin implements MapDecorationBridge {
 	}
 
 	@Override
-	public void bridge$setPersistent(boolean persistent) {
-		this.bridge$isPersistant = persistent;
+	public void bridge$setPersistent(final boolean persistent) {
+		this.impl$isPersistent = persistent;
 	}
 
 	@Override
 	public boolean bridge$isPersistent() {
-		return this.bridge$isPersistant;
+		return this.impl$isPersistent;
 	}
 
 	@Override
-	public void bridge$setKey(String key) {
-		this.bridge$key = key;
+	public void bridge$setKey(final String key) {
+		this.impl$key = key;
 	}
 
 	@Override
 	public String bridge$getKey() {
-		return this.bridge$key;
+		return this.impl$key;
 	}
 }

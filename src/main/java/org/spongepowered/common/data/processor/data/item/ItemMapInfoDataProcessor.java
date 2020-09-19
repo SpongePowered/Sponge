@@ -45,47 +45,47 @@ import java.util.Optional;
 
 public class ItemMapInfoDataProcessor extends AbstractItemSingleDataProcessor<MapInfo, Value<MapInfo>, MapInfoItemData, ImmutableMapInfoItemData> {
     protected ItemMapInfoDataProcessor() {
-        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack)itemStack).getType() == ItemTypes.FILLED_MAP
+        super(itemStack -> ((org.spongepowered.api.item.inventory.ItemStack) itemStack).getType() == ItemTypes.FILLED_MAP
                 && Sponge.getServer().getMapStorage()
-                    .map(mapStorage -> (MapStorageBridge)mapStorage)
+                    .map(mapStorage -> (MapStorageBridge) mapStorage)
                     .flatMap(bridge -> bridge.bridge$getMinecraftMapData(itemStack.getMetadata()))
                 .isPresent(),
                 Keys.MAP_INFO);
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, MapInfo value) {
-        if (((org.spongepowered.api.item.inventory.ItemStack)dataHolder).getType() != ItemTypes.FILLED_MAP) {
+    protected boolean set(final ItemStack dataHolder, final MapInfo value) {
+        if (((org.spongepowered.api.item.inventory.ItemStack) dataHolder).getType() != ItemTypes.FILLED_MAP) {
             return false;
         }
-        dataHolder.setItemDamage(((MapDataBridge)value).bridge$getMapId());
+        dataHolder.setItemDamage(((MapDataBridge) value).bridge$getMapId());
         return true;
     }
 
     @Override
-    protected Optional<MapInfo> getVal(ItemStack dataHolder) {
-        if (((org.spongepowered.api.item.inventory.ItemStack)dataHolder).getType() != ItemTypes.FILLED_MAP) {
+    protected Optional<MapInfo> getVal(final ItemStack dataHolder) {
+        if (((org.spongepowered.api.item.inventory.ItemStack) dataHolder).getType() != ItemTypes.FILLED_MAP) {
             return Optional.empty();
         }
         return Sponge.getServer().getMapStorage()
-                .map(mapStorage -> (MapStorageBridge)mapStorage)
+                .map(mapStorage -> (MapStorageBridge) mapStorage)
                 .flatMap(mapStorageBridge -> mapStorageBridge.bridge$getMinecraftMapData(dataHolder.getMetadata()))
-                .map(mapData -> (MapInfo)mapData);
+                .map(mapData -> (MapInfo) mapData);
 
     }
 
     @Override
-    protected ImmutableValue<MapInfo> constructImmutableValue(MapInfo value) {
-        return constructValue(value).asImmutable();
+    protected ImmutableValue<MapInfo> constructImmutableValue(final MapInfo value) {
+        return this.constructValue(value).asImmutable();
     }
 
     @Override
-    protected Value<MapInfo> constructValue(MapInfo actualValue) {
+    protected Value<MapInfo> constructValue(final MapInfo actualValue) {
         return new SpongeValue<>(Keys.MAP_INFO, SpongeMapInfoItemData.getDefaultMapInfo(), actualValue);
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

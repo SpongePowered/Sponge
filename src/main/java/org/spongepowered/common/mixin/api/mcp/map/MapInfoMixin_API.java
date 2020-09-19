@@ -50,28 +50,28 @@ public abstract class MapInfoMixin_API implements MapInfo {
     }
 
     @Override
-    public boolean isLinked(MapInfo other) {
-        return ((MapDataBridge) this).bridge$getMapId() == ((MapDataBridge)other).bridge$getMapId();
+    public boolean isLinked(final MapInfo other) {
+        return ((MapDataBridge) this).bridge$getMapId() == ((MapDataBridge) other).bridge$getMapId();
     }
 
     @Override
-    public boolean isLinked(ItemStack itemStack) {
+    public boolean isLinked(final ItemStack itemStack) {
         return itemStack.getType() == ItemTypes.FILLED_MAP
                 && ((MapDataBridge) this).bridge$getMapId() == ((net.minecraft.item.ItemStack) itemStack).getMetadata();
     }
 
     @Override
-    public boolean validateRawData(DataView container) {
+    public boolean validateRawData(final DataView container) {
         if (!container.getInt(Constants.Map.MAP_ID).isPresent()) {
             return false;
         }
-        Optional<DataView> manipulator = container.getView(Constants.Map.MAP_DATA);
+        final Optional<DataView> manipulator = container.getView(Constants.Map.MAP_DATA);
         return manipulator.filter(dataView -> new SpongeMapInfoData().from((DataContainer) dataView).isPresent()).isPresent();
     }
 
     @Override
-    public void setRawData(DataView container) throws InvalidDataException {
-        Optional<DataView> manipulator = container.getView(Constants.Map.MAP_DATA);
+    public void setRawData(final DataView container) throws InvalidDataException {
+        final Optional<DataView> manipulator = container.getView(Constants.Map.MAP_DATA);
         manipulator.flatMap(dataView -> new SpongeMapInfoData().from(dataView.copy()))
             .map(this::offer)
             .orElseThrow(() -> new InvalidDataException("Manipulator data given to MapInfo was invalid!"));

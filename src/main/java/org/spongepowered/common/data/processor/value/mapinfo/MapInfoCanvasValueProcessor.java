@@ -49,7 +49,7 @@ public class MapInfoCanvasValueProcessor extends AbstractSingleDataSingleTargetP
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult removeFrom(final ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
@@ -59,8 +59,8 @@ public class MapInfoCanvasValueProcessor extends AbstractSingleDataSingleTargetP
     }
 
     @Override
-    protected boolean set(MapInfo mapInfo, MapCanvas value) {
-        MapData mapData = (MapData) mapInfo;
+    protected boolean set(final MapInfo mapInfo, final MapCanvas value) {
+        final MapData mapData = (MapData) mapInfo;
 
         ((SpongeMapCanvas) value).applyToMapData(mapData);
         ((MapDataBridge) mapData).bridge$updateWholeMap();
@@ -68,18 +68,18 @@ public class MapInfoCanvasValueProcessor extends AbstractSingleDataSingleTargetP
     }
 
     @Override
-    protected Optional<MapCanvas> getVal(MapInfo mapInfo) {
-        MapData mapData = (MapData) mapInfo;
+    protected Optional<MapCanvas> getVal(final MapInfo mapInfo) {
+        final MapData mapData = (MapData) mapInfo;
         return Optional.of(new SpongeMapByteCanvas(mapData.colors));
     }
 
     @Override
-    protected ImmutableValue<MapCanvas> constructImmutableValue(MapCanvas value) {
-        return constructValue(value).asImmutable();
+    protected ImmutableValue<MapCanvas> constructImmutableValue(final MapCanvas value) {
+        return this.constructValue(value).asImmutable();
     }
 
     @Override
-    protected Value<MapCanvas> constructValue(MapCanvas actualValue) {
+    protected Value<MapCanvas> constructValue(final MapCanvas actualValue) {
         return new SpongeValue<>(Keys.MAP_CANVAS, MapCanvas.blank(), actualValue);
     }
 }

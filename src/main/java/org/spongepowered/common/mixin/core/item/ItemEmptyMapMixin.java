@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.item;
+package org.spongepowered.common.mixin.core.item;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.collect.Sets;
@@ -57,29 +57,29 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 
 @Mixin(net.minecraft.item.ItemEmptyMap.class)
-public abstract class ItemEmptyMapMixin_API {
+public abstract class ItemEmptyMapMixin {
 
     // World2 is the same as worldIn
     @Redirect(method = "onItemRightClick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/item/ItemMap;setupNewMap(Lnet/minecraft/world/World;DDBZZ)Lnet/minecraft/item/ItemStack;",
                     ordinal = 0))
-    protected ItemStack setupNewMapRedirect(World worldIn, double x, double z, byte scale, boolean trackPosition,
-                                            boolean unlimitedTracking, World world2, EntityPlayer playerIn, EnumHand handIn) {
-        Player player = (Player)playerIn;
+    private ItemStack impl$createMapWithSpongeData(final World worldIn, final double x, final double z, final byte scale, final boolean trackPosition,
+                                            final boolean unlimitedTracking, final World world2, final EntityPlayer playerIn, final EnumHand handIn) {
+        final Player player = (Player) playerIn;
 
         try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.PLAYER, player);
-            HandType handType = (HandType)(Object)handIn;
+            final HandType handType = (HandType) (Object) handIn;
             frame.addContext(EventContextKeys.USED_HAND, handType);
             frame.addContext(EventContextKeys.USED_ITEM,
                     player.getItemInHand(handType)
                             .map(org.spongepowered.api.item.inventory.ItemStack::createSnapshot)
                             .orElse(ItemStackSnapshot.NONE));
 
-            Vector2i center = calculateMapCenter(x, z, scale);
-            MapInfoData mapInfoData = new SpongeMapInfoData(center,
+            final Vector2i center = this.impl$calculateMapCenter(x, z, scale);
+            final MapInfoData mapInfoData = new SpongeMapInfoData(center,
                     (org.spongepowered.api.world.World) worldIn,
                     trackPosition,
                     unlimitedTracking,
@@ -88,32 +88,35 @@ public abstract class ItemEmptyMapMixin_API {
                     Constants.Map.DEFAULT_MAP_LOCKED,
                     Sets.newHashSet());
 
-            Optional<MapInfo> optMapInfo = MapUtil.fireCreateMapEvent(mapInfoData, frame.getCurrentCause());
-            // Event Cancelled
+            final Optional<MapInfo> optMapInfo = MapUtil.fireCreateMapEvent(mapInfoData, frame.getCurrentCause());
             if (!optMapInfo.isPresent()) {
                 return ItemStack.EMPTY;
             }
 
-            org.spongepowered.api.item.inventory.ItemStack newMap = (org.spongepowered.api.item.inventory.ItemStack)new ItemStack(Items.FILLED_MAP, 1, ((MapDataBridge)optMapInfo.get()).bridge$getMapId());
+            final org.spongepowered.api.item.inventory.ItemStack newMap =
+                    (org.spongepowered.api.item.inventory.ItemStack) new ItemStack(Items.FILLED_MAP, 1,
+                            ((MapDataBridge) optMapInfo.get()).bridge$getMapId());
             return (ItemStack) newMap;
         }
     }
 
-    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", ordinal = 2),
+    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE",
+            target = "net/minecraft/entity/player/EntityPlayer.getHeldItem(Lnet/minecraft/util/EnumHand;)Lnet/minecraft/item/ItemStack;"),
             locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    protected void checkIfShouldReturn(World worldIn, EntityPlayer player, EnumHand handIn, CallbackInfoReturnable<ActionResult<ItemStack>> cir, ItemStack itemStack, ItemStack itemStack1) {
+    private void impl$returnFailResultIfMapWasNotCreated(final World worldIn, final EntityPlayer player, final EnumHand handIn,
+            final CallbackInfoReturnable<ActionResult<ItemStack>> cir, final ItemStack itemStack) {
         if (itemStack.isEmpty()) {
             cir.cancel();
-            cir.setReturnValue(new ActionResult<>(EnumActionResult.FAIL, itemStack1));
+            cir.setReturnValue(new ActionResult<>(EnumActionResult.FAIL, player.getHeldItem(handIn)));
         }
     }
 
-    private static Vector2i calculateMapCenter(double x, double z, int mapScale) {
-        int i = 128 * (1 << mapScale);
-        int j = MathHelper.floor((x + 64.0D) / (double)i);
-        int k = MathHelper.floor((z + 64.0D) / (double)i);
-        int xCenter = j * i + i / 2 - 64;
-        int zCenter = k * i + i / 2 - 64; // Copied pretty much directly from MapData but static.
+    private Vector2i impl$calculateMapCenter(final double x, final double z, final int mapScale) {
+        final int i = 128 * (1 << mapScale);
+        final int j = MathHelper.floor((x + 64.0D) / (double)i);
+        final int k = MathHelper.floor((z + 64.0D) / (double)i);
+        final int xCenter = j * i + i / 2 - 64;
+        final int zCenter = k * i + i / 2 - 64; // Copied pretty much directly from MapData but static.
         return new Vector2i(xCenter, zCenter);
     }
 }

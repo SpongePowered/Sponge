@@ -47,14 +47,12 @@ import java.util.stream.Stream;
 @Mixin(MapStorage.class)
 public abstract class MapStorageMixin_API implements org.spongepowered.api.world.map.MapStorage {
 
-    @Final
-    @Shadow
-    private Map<String, Short> idCounts;
+    @Final @Shadow private Map<String, Short> idCounts;
 
     @Shadow
-    public abstract WorldSavedData getOrLoadData(Class<? extends WorldSavedData> clazz, String dataIdentifier);
+    public abstract WorldSavedData shadow$getOrLoadData(Class<? extends WorldSavedData> clazz, String dataIdentifier);
 
-    private Map<UUID, MapInfo> uuidCache = new HashMap<>();
+    private final Map<UUID, MapInfo> api$uuidCache = new HashMap<>();
 
     /**
      * Fully load the cache.
@@ -62,31 +60,31 @@ public abstract class MapStorageMixin_API implements org.spongepowered.api.world
      * (getOrLoad only loads the file when needed)
      */
     private void api$fullyLoadCache() {
-        Number highestId = idCounts.get(Constants.Map.ID_COUNTS_KEY); // Prefer intValue() as it means max map ids can be changed to int/long without breaking this
+        final Number highestId = this.idCounts.get(Constants.Map.ID_COUNTS_KEY); // Prefer intValue() as it means max map ids can be changed to int/long without breaking this
         if (highestId == null) {
             return;
         }
         Stream.iterate(0, i -> i + 1)
                 .limit(highestId.intValue() + 1) // limit is < but we want <=
                 .map(id -> Constants.Map.MAP_PREFIX + id)
-                .map(s -> getOrLoadData(MapData.class, s))
+                .map(s -> this.shadow$getOrLoadData(MapData.class, s))
                 .filter(Objects::nonNull) // if we have missing map between 0 and highest map .getOrLoadData() returns null so filter out
                 .map(worldSavedData -> (MapInfo)worldSavedData)
-                .forEach(info -> uuidCache.put(info.getUniqueId(), info)); // Does not allow for map deletion!
+                .forEach(info -> this.api$uuidCache.put(info.getUniqueId(), info)); // Does not allow for map deletion!
     }
 
     @Override
     public Collection<MapInfo> getAllMapInfos() {
         this.api$fullyLoadCache();
-        return this.uuidCache.values();
+        return this.api$uuidCache.values();
     }
 
     @Override
-    public Optional<MapInfo> getMapInfo(UUID uuid) {
-        Optional<MapInfo> mapInfo = Optional.ofNullable(this.uuidCache.get(uuid));
+    public Optional<MapInfo> getMapInfo(final UUID uuid) {
+        Optional<MapInfo> mapInfo = Optional.ofNullable(this.api$uuidCache.get(uuid));
         if (!mapInfo.isPresent()) {
             this.api$fullyLoadCache();
-            mapInfo = Optional.ofNullable(this.uuidCache.get(uuid));
+            mapInfo = Optional.ofNullable(this.api$uuidCache.get(uuid));
         }
         return mapInfo;
     }

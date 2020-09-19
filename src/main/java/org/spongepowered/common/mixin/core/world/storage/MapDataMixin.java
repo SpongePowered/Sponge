@@ -63,28 +63,28 @@ public abstract class MapDataMixin implements MapDataBridge {
      */
     @Shadow public Map<String, MapDecoration> mapDecorations;
 
-    @Shadow public abstract void updateMapData(int x, int y);
+    @Shadow public abstract void shadow$updateMapData(int x, int y);
 
-    private int bridge$mapId = 0;
-    private UUID uuid = UUID.randomUUID();
+    private int impl$mapId = 0;
+    private UUID impl$uuid = UUID.randomUUID();
     // Turns out Minecraft 1.14 actually has exactly what we want
     // Locked = stops terrain updates
     // So we're just adding it early, and it should be directly compatible
     // https://minecraft.gamepedia.com/Map#Locking
-    private boolean locked = Constants.Map.DEFAULT_MAP_LOCKED;
+    private boolean impl$locked = Constants.Map.DEFAULT_MAP_LOCKED;
 
     @Override
     public void bridge$updateWholeMap() {
-        updateMapData(0,0);
-        updateMapData(Constants.Map.MAP_MAX_INDEX, Constants.Map.MAP_MAX_INDEX);
+        this.shadow$updateMapData(0,0);
+        this.shadow$updateMapData(Constants.Map.MAP_MAX_INDEX, Constants.Map.MAP_MAX_INDEX);
     }
 
     @Override
-    public void bridge$setDecorations(Set<org.spongepowered.api.map.decoration.MapDecoration> newDecorations) {
+    public void bridge$setDecorations(final Set<org.spongepowered.api.map.decoration.MapDecoration> newDecorations) {
         this.mapDecorations.clear();
         newDecorations.stream()
                 .map(decoration -> (MapDecoration)decoration)
-                .forEach(this::addDecoration);
+                .forEach(this::impl$addDecorationToDecorationsMap);
     }
 
     @Override
@@ -96,36 +96,36 @@ public abstract class MapDataMixin implements MapDataBridge {
 
     @Override
     public int bridge$getMapId() {
-        return this.bridge$mapId;
+        return this.impl$mapId;
     }
 
     @Override
-    public void bridge$setMapId(int mapId) {
-        this.bridge$mapId = mapId;
+    public void bridge$setMapId(final int mapId) {
+        this.impl$mapId = mapId;
     }
 
     @Override
     public boolean bridge$isLocked() {
-        return locked;
+        return this.impl$locked;
     }
 
     @Override
-    public void bridge$setLocked(boolean locked) {
-        this.locked = locked;
+    public void bridge$setLocked(final boolean locked) {
+        this.impl$locked = locked;
     }
 
     @Nonnull
     @Override
     public UUID bridge$getUniqueId() {
-        return this.uuid;
+        return this.impl$uuid;
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void setMapId(String mapname, CallbackInfo ci) {
-        String id = mapname.substring(Constants.Map.MAP_PREFIX.length());
+    public void impl$setMapId(final String mapname, final CallbackInfo ci) {
+        final String id = mapname.substring(Constants.Map.MAP_PREFIX.length());
         try {
-            this.bridge$mapId = Integer.parseInt(id);
-        } catch (NumberFormatException e) {
+            this.impl$mapId = Integer.parseInt(id);
+        } catch (final NumberFormatException e) {
             SpongeImpl.getLogger().error("Map id could not be got from map name, (" + mapname + ")", e);
         }
     }
@@ -133,18 +133,18 @@ public abstract class MapDataMixin implements MapDataBridge {
     // Save to disk if we don't want to auto explore the map
     // No point saving additional data if its default.
     @Inject(method = "writeToNBT", at = @At("RETURN"))
-    public void writeNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> cir) {
-        if (this.locked != Constants.Map.DEFAULT_MAP_LOCKED) {
-            compound.setBoolean(Constants.Map.LOCKED_KEY, this.locked);
+    public void impl$writeAdditionalNBT(final NBTTagCompound compound, final CallbackInfoReturnable<NBTTagCompound> cir) {
+        if (this.impl$locked != Constants.Map.DEFAULT_MAP_LOCKED) {
+            compound.setBoolean(Constants.Map.LOCKED_KEY, this.impl$locked);
         }
-        compound.setUniqueId(Constants.Map.SPONGE_UUID_KEY, this.uuid);
-        NBTTagList nbtList = new NBTTagList();
-        for (Map.Entry<String, MapDecoration> entry : mapDecorations.entrySet()) {
-            org.spongepowered.api.map.decoration.MapDecoration mapDecoration = (org.spongepowered.api.map.decoration.MapDecoration)entry.getValue();
-            if (!((MapDecorationBridge)mapDecoration).bridge$isPersistent()) {
+        compound.setUniqueId(Constants.Map.SPONGE_UUID_KEY, this.impl$uuid);
+        final NBTTagList nbtList = new NBTTagList();
+        for (final Map.Entry<String, MapDecoration> entry : this.mapDecorations.entrySet()) {
+            final org.spongepowered.api.map.decoration.MapDecoration mapDecoration = (org.spongepowered.api.map.decoration.MapDecoration)entry.getValue();
+            if (!((MapDecorationBridge) mapDecoration).bridge$isPersistent()) {
                 continue;
             }
-            NBTTagCompound nbt = MapUtil.mapDecorationToNBT(mapDecoration);
+            final NBTTagCompound nbt = MapUtil.mapDecorationToNBT(mapDecoration);
             nbt.setString("id", entry.getKey());
             nbtList.appendTag(nbt);
         }
@@ -152,33 +152,31 @@ public abstract class MapDataMixin implements MapDataBridge {
     }
 
     @Inject(method = "readFromNBT", at = @At("RETURN"))
-    public void readNBT(NBTTagCompound nbt, CallbackInfo ci) {
+    public void impl$readAdditionalNBT(final NBTTagCompound nbt, final CallbackInfo ci) {
         if (nbt.hasKey(Constants.Map.LOCKED_KEY)) {
-            this.locked = nbt.getBoolean(Constants.Map.LOCKED_KEY);
+            this.impl$locked = nbt.getBoolean(Constants.Map.LOCKED_KEY);
         }
         if (nbt.hasKey(Constants.Map.SPONGE_UUID_KEY)) {
-            this.uuid = nbt.getUniqueId(Constants.Map.SPONGE_UUID_KEY);
+            this.impl$uuid = nbt.getUniqueId(Constants.Map.SPONGE_UUID_KEY);
         }
-        NBTTagList decorationsList = ((NBTTagList)nbt.getTag(Constants.Map.DECORATIONS_KEY));
+        final NBTTagList decorationsList = ((NBTTagList)nbt.getTag(Constants.Map.DECORATIONS_KEY));
         if (decorationsList != null) {
             for (int i = 0; i < decorationsList.tagCount(); i++) {
-                NBTTagCompound decorationNbt = (NBTTagCompound) decorationsList.get(i);
-                addDecoration(MapUtil.mapDecorationFromNBT(decorationNbt));
+                final NBTTagCompound decorationNbt = (NBTTagCompound) decorationsList.get(i);
+                this.impl$addDecorationToDecorationsMap(MapUtil.mapDecorationFromNBT(decorationNbt));
             }
         }
     }
 
-    public void addDecoration(MapDecoration mapDecoration) {
+    public void impl$addDecorationToDecorationsMap(final MapDecoration mapDecoration) {
         this.mapDecorations.put(((MapDecorationBridge)mapDecoration).bridge$getKey(), mapDecoration);
     }
 
-    // We could technically Inject after, but that would mean
-    // searching the map for the value we just had, seems like a waste.
     @Nullable
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "updateDecorations", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))
-    public Object redirectPut(Map map, Object key, Object value) {
-        ((MapDecorationBridge)value).bridge$setKey((String) key);
+    public Object impl$setKeyOnValue(final Map map, final Object key, final Object value) {
+        ((MapDecorationBridge) value).bridge$setKey((String) key);
         return map.put(key, value);
     }
 }

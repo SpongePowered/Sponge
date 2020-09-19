@@ -75,7 +75,8 @@ public class SpongeMapInfoData extends AbstractData<MapInfoData, ImmutableMapInf
                 MapCanvas.blank(), Constants.Map.DEFAULT_MAP_LOCKED, Sets.newHashSet());
     }
 
-    public SpongeMapInfoData(Vector2i center, World world, boolean trackingPosition, boolean unlimitedTracking, int scale, MapCanvas canvas, boolean locked, Set<MapDecoration> mapDecorations) {
+    public SpongeMapInfoData(final Vector2i center, final World world, final boolean trackingPosition, final boolean unlimitedTracking,
+            final int scale, final MapCanvas canvas, final boolean locked, final Set<MapDecoration> mapDecorations) {
         super(MapInfoData.class);
         this.center = center;
         this.world = world;
@@ -86,10 +87,10 @@ public class SpongeMapInfoData extends AbstractData<MapInfoData, ImmutableMapInf
         this.locked = locked;
         this.decorations = mapDecorations;
 
-        registerGettersAndSetters();
+        this.registerGettersAndSetters();
     }
 
-    public SpongeMapInfoData(MapData mapData) {
+    public SpongeMapInfoData(final MapData mapData) {
         this(
                 new Vector2i(mapData.xCenter, mapData.zCenter),
                 (org.spongepowered.api.world.World)WorldManager
@@ -168,32 +169,32 @@ public class SpongeMapInfoData extends AbstractData<MapInfoData, ImmutableMapInf
 
     @Override
     protected void registerGettersAndSetters() {
-        registerKeyValue(Keys.MAP_LOCATION, SpongeMapInfoData.this::location);
-        registerKeyValue(Keys.MAP_WORLD, SpongeMapInfoData.this::world);
-        registerKeyValue(Keys.MAP_TRACKS_PLAYERS, SpongeMapInfoData.this::trackPosition);
-        registerKeyValue(Keys.MAP_UNLIMITED_TRACKING, SpongeMapInfoData.this::unlimitedTracking);
-        registerKeyValue(Keys.MAP_SCALE, SpongeMapInfoData.this::scale);
-        registerKeyValue(Keys.MAP_CANVAS, SpongeMapInfoData.this::canvas);
-        registerKeyValue(Keys.MAP_LOCKED, SpongeMapInfoData.this::locked);
-        registerKeyValue(Keys.MAP_DECORATIONS, SpongeMapInfoData.this::decorations);
+        this.registerKeyValue(Keys.MAP_LOCATION, SpongeMapInfoData.this::location);
+        this.registerKeyValue(Keys.MAP_WORLD, SpongeMapInfoData.this::world);
+        this.registerKeyValue(Keys.MAP_TRACKS_PLAYERS, SpongeMapInfoData.this::trackPosition);
+        this.registerKeyValue(Keys.MAP_UNLIMITED_TRACKING, SpongeMapInfoData.this::unlimitedTracking);
+        this.registerKeyValue(Keys.MAP_SCALE, SpongeMapInfoData.this::scale);
+        this.registerKeyValue(Keys.MAP_CANVAS, SpongeMapInfoData.this::canvas);
+        this.registerKeyValue(Keys.MAP_LOCKED, SpongeMapInfoData.this::locked);
+        this.registerKeyValue(Keys.MAP_DECORATIONS, SpongeMapInfoData.this::decorations);
 
-        registerFieldGetter(Keys.MAP_LOCATION, () -> this.center);
-        registerFieldGetter(Keys.MAP_WORLD, () -> this.world);
-        registerFieldGetter(Keys.MAP_TRACKS_PLAYERS, () -> this.trackingPosition);
-        registerFieldGetter(Keys.MAP_UNLIMITED_TRACKING, () -> this.unlimitedTracking);
-        registerFieldGetter(Keys.MAP_SCALE, () -> this.scale);
-        registerFieldGetter(Keys.MAP_CANVAS, () -> this.canvas);
-        registerFieldGetter(Keys.MAP_LOCKED, () -> this.locked);
-        registerFieldGetter(Keys.MAP_DECORATIONS, () -> this.decorations);
+        this.registerFieldGetter(Keys.MAP_LOCATION, () -> this.center);
+        this.registerFieldGetter(Keys.MAP_WORLD, () -> this.world);
+        this.registerFieldGetter(Keys.MAP_TRACKS_PLAYERS, () -> this.trackingPosition);
+        this.registerFieldGetter(Keys.MAP_UNLIMITED_TRACKING, () -> this.unlimitedTracking);
+        this.registerFieldGetter(Keys.MAP_SCALE, () -> this.scale);
+        this.registerFieldGetter(Keys.MAP_CANVAS, () -> this.canvas);
+        this.registerFieldGetter(Keys.MAP_LOCKED, () -> this.locked);
+        this.registerFieldGetter(Keys.MAP_DECORATIONS, () -> this.decorations);
 
-        registerFieldSetter(Keys.MAP_LOCATION, location -> this.center = checkNotNull(location));
-        registerFieldSetter(Keys.MAP_WORLD, world -> this.world = checkNotNull(world));
-        registerFieldSetter(Keys.MAP_TRACKS_PLAYERS, tracksPlayers -> this.trackingPosition = checkNotNull(tracksPlayers));
-        registerFieldSetter(Keys.MAP_UNLIMITED_TRACKING, unlimitedTracking -> this.unlimitedTracking = checkNotNull(unlimitedTracking));
-        registerFieldSetter(Keys.MAP_SCALE, scale -> this.scale = checkNotNull(scale));
-        registerFieldSetter(Keys.MAP_CANVAS, canvas -> this.canvas = checkNotNull(canvas));
-        registerFieldSetter(Keys.MAP_LOCKED, locked -> this.locked = checkNotNull(locked));
-        registerFieldSetter(Keys.MAP_DECORATIONS, decorations -> this.decorations = checkNotNull(decorations));
+        this.registerFieldSetter(Keys.MAP_LOCATION, location -> this.center = checkNotNull(location));
+        this.registerFieldSetter(Keys.MAP_WORLD, world -> this.world = checkNotNull(world));
+        this.registerFieldSetter(Keys.MAP_TRACKS_PLAYERS, tracksPlayers -> this.trackingPosition = checkNotNull(tracksPlayers));
+        this.registerFieldSetter(Keys.MAP_UNLIMITED_TRACKING, unlimitedTracking -> this.unlimitedTracking = checkNotNull(unlimitedTracking));
+        this.registerFieldSetter(Keys.MAP_SCALE, scale -> this.scale = checkNotNull(scale));
+        this.registerFieldSetter(Keys.MAP_CANVAS, canvas -> this.canvas = checkNotNull(canvas));
+        this.registerFieldSetter(Keys.MAP_LOCKED, locked -> this.locked = checkNotNull(locked));
+        this.registerFieldSetter(Keys.MAP_DECORATIONS, decorations -> this.decorations = checkNotNull(decorations));
     }
 
     @Override
