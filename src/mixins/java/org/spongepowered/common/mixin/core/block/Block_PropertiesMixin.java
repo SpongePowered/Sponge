@@ -27,12 +27,10 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.DyeColor;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
 @Mixin(Block.Properties.class)
@@ -42,8 +40,6 @@ public abstract class Block_PropertiesMixin {
             at = @At("RETURN"))
     private static void impl$onCreate(final Material material, final DyeColor color, final CallbackInfoReturnable<Block.Properties> cir) {
         final Block.Properties returnValue = cir.getReturnValue();
-//        SpongeCommon.getLogger().info("[material:" + material.toString() + ", dyecolor:" + color.getName().toLowerCase() + "]");
         ((DyeColorBlockBridge) returnValue).bridge$setDyeColor((org.spongepowered.api.data.type.DyeColor) (Object) color);
     }
-
 }

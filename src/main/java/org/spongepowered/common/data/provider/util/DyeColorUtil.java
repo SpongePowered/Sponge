@@ -43,21 +43,21 @@ public class DyeColorUtil {
     public static Map<Block, DyeColor> COLOR_BY_TERRACOTTA = new HashMap<>();
 
     static {
-            COLOR_BY_TERRACOTTA.put(Blocks.BLACK_TERRACOTTA, DyeColor.BLACK);
-            COLOR_BY_TERRACOTTA.put(Blocks.BLUE_TERRACOTTA, DyeColor.BLUE);
-            COLOR_BY_TERRACOTTA.put(Blocks.BROWN_TERRACOTTA, DyeColor.BROWN);
-            COLOR_BY_TERRACOTTA.put(Blocks.CYAN_TERRACOTTA, DyeColor.CYAN);
-            COLOR_BY_TERRACOTTA.put(Blocks.GRAY_TERRACOTTA, DyeColor.GRAY);
-            COLOR_BY_TERRACOTTA.put(Blocks.GREEN_TERRACOTTA, DyeColor.GREEN);
-            COLOR_BY_TERRACOTTA.put(Blocks.LIGHT_BLUE_TERRACOTTA, DyeColor.LIGHT_BLUE);
-            COLOR_BY_TERRACOTTA.put(Blocks.LIGHT_GRAY_TERRACOTTA, DyeColor.LIGHT_GRAY);
-            COLOR_BY_TERRACOTTA.put(Blocks.LIME_TERRACOTTA, DyeColor.LIME);
-            COLOR_BY_TERRACOTTA.put(Blocks.MAGENTA_TERRACOTTA, DyeColor.MAGENTA);
-            COLOR_BY_TERRACOTTA.put(Blocks.ORANGE_TERRACOTTA, DyeColor.ORANGE);
-            COLOR_BY_TERRACOTTA.put(Blocks.PINK_TERRACOTTA, DyeColor.PINK);
-            COLOR_BY_TERRACOTTA.put(Blocks.PURPLE_TERRACOTTA, DyeColor.PURPLE);
-            COLOR_BY_TERRACOTTA.put(Blocks.RED_TERRACOTTA, DyeColor.RED);
-            COLOR_BY_TERRACOTTA.put(Blocks.WHITE_TERRACOTTA, DyeColor.WHITE);
-            COLOR_BY_TERRACOTTA.put(Blocks.YELLOW_TERRACOTTA, DyeColor.YELLOW);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.BLACK_TERRACOTTA, DyeColor.BLACK);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.BLUE_TERRACOTTA, DyeColor.BLUE);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.BROWN_TERRACOTTA, DyeColor.BROWN);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.CYAN_TERRACOTTA, DyeColor.CYAN);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.GRAY_TERRACOTTA, DyeColor.GRAY);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.GREEN_TERRACOTTA, DyeColor.GREEN);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.LIGHT_BLUE_TERRACOTTA, DyeColor.LIGHT_BLUE);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.LIGHT_GRAY_TERRACOTTA, DyeColor.LIGHT_GRAY);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.LIME_TERRACOTTA, DyeColor.LIME);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.MAGENTA_TERRACOTTA, DyeColor.MAGENTA);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.ORANGE_TERRACOTTA, DyeColor.ORANGE);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.PINK_TERRACOTTA, DyeColor.PINK);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.PURPLE_TERRACOTTA, DyeColor.PURPLE);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.RED_TERRACOTTA, DyeColor.RED);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.WHITE_TERRACOTTA, DyeColor.WHITE);
+        DyeColorUtil.COLOR_BY_TERRACOTTA.put(Blocks.YELLOW_TERRACOTTA, DyeColor.YELLOW);
     }
 }
