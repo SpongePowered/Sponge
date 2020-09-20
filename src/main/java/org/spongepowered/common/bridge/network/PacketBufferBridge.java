@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.util.text;
+package org.spongepowered.common.bridge.network;
 
-import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import java.util.Locale;
 
-public interface TextComponentBridge {
-    Component bridge$asAdventureComponent();
+public interface PacketBufferBridge {
 
-    @Nullable Component bridge$adventureComponentIfPresent();
+    void bridge$setLocale(final Locale locale);
+
 }

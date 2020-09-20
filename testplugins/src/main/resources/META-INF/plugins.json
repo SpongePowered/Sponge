@@ -377,6 +377,27 @@
                 "id": "spongeapi",
                 "version": "8.0.0"
             }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "chattest",
+            "name": "Chat Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.chat.ChatTest",
+            "description": "Testing Chat and Adventure functionality",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
         }
     ]
 }

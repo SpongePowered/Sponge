@@ -80,6 +80,8 @@
         "item.ItemMixin",
         "item.ItemStackMixin",
         "network.NetworkManagerMixin",
+        "network.NettyPacketEncoderMixin",
+        "network.PacketBufferMixin",
         "network.handshake.ServerHandshakeNetHandlerMixin",
         "network.login.ServerLoginNetHandler_1Mixin",
         "network.login.ServerLoginNetHandlerMixin",
@@ -156,7 +158,8 @@
         "client.network.play.ClientPlayNetHandlerMixin",
         "client.renderer.LightTextureMixin",
         "client.renderer.WorldRendererMixin",
-        "client.world.ClientWorldMixin"
+        "client.world.ClientWorldMixin",
+        "client.util.text.TranslationTextComponentMixin"
     ],
     "server": [
         "server.dedicated.DedicatedServerMixin"
