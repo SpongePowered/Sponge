@@ -71,7 +71,9 @@ public final class CommandTestPlugin {
 
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<ServerPlayer> playerKey = Parameter.playerOrSource().setKey("player").build();
+        final Parameter.Value<ServerPlayer> playerKey = Parameter.playerOrSource().setKey("player")
+                .setUsage(key -> "[any player]")
+                .build();
         event.register(
                 this.plugin,
                 Command.builder()

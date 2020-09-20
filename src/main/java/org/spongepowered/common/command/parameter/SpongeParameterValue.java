@@ -44,6 +44,7 @@ import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -168,14 +169,14 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     @Override
     @NonNull
-    public Component getUsage(@NonNull final CommandCause cause) {
+    public String getUsage(@NonNull final CommandCause cause) {
         if (this.usage != null) {
             return this.usage.getUsage(this.key.key());
         }
 
-        final Component usage = TextComponent.of(this.key.key());
+        final String usage = this.key.key();
         if (this.isOptional) {
-            return TextComponent.builder().append("[").append(usage).append("]").build();
+            return "[" + usage + "]";
         }
 
         return usage;
@@ -191,6 +192,11 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     @NonNull
     public ValueCompleter getCompleter() {
         return this.completer;
+    }
+
+    @Override
+    public Optional<ValueUsage> getValueUsage() {
+        return Optional.ofNullable(this.usage);
     }
 
     @Override

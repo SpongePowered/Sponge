@@ -67,8 +67,8 @@ public final class SpongeNoneValueParameter extends CatalogedArgumentParser<Void
 
     @Override
     @NonNull
-    public Component getUsage(@NonNull final String key) {
-        return TextComponent.empty();
+    public String getUsage(@NonNull final String key) {
+        return "";
     }
 
     @Override

@@ -302,7 +302,8 @@ public final class SpongeParameterTranslator {
         final SpongeArgumentCommandNodeBuilder<T> argumentBuilder = new SpongeArgumentCommandNodeBuilder<>(
                         SpongeParameterKey.getSpongeKey(parameter.getKey()),
                         type,
-                        parameter.getCompleter());
+                        parameter.getCompleter(),
+                        parameter.getValueUsage().orElse(null));
         // CommandCause is mixed into CommandSource, so this is okay.
         argumentBuilder.requires((Predicate) parameter.getRequirement());
 
@@ -316,6 +317,7 @@ public final class SpongeParameterTranslator {
                                         SpongeParameterTranslator.EMPTY_COMPLETER,
                                         true),
                                 SpongeParameterTranslator.EMPTY_COMPLETER,
+                                parameter.getValueUsage().orElse(null),
                                 "default");
                 return ImmutableList.of(argumentBuilder, defaultBuilder);
             }

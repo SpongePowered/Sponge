@@ -85,8 +85,8 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
 
     @Override
     @NonNull
-    public Component getUsage(@NonNull final String key) {
-        return TextComponent.of(String.join(" ", this.literalSupplier.get()));
+    public String getUsage(@NonNull final String key) {
+        return String.join(" ", this.literalSupplier.get());
     }
 
     @Override
