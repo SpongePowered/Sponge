@@ -35,17 +35,18 @@ import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCo
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public abstract class CatalogedZeroAdvanceValueParameter<T> extends CatalogedArgumentParser<T> {
 
-    private static final List<ClientCompletionType> NONE_KEY = ImmutableList.of(ClientCompletionTypes.NONE.get());
+    private static final List<ClientCompletionType> NONE_KEY = Collections.singletonList(ClientCompletionTypes.NONE.get());
 
     @Override
     @NonNull
-    public final List<String> complete(@NonNull final CommandContext context, String currentInput) {
-        return ImmutableList.of();
+    public final List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+        return Collections.emptyList();
     }
 
     @Override
@@ -73,4 +74,10 @@ public abstract class CatalogedZeroAdvanceValueParameter<T> extends CatalogedArg
         // need this as a dummy
         return ImmutableList.of(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE);
     }
+
+    @Override
+    public boolean doesNotRead() {
+        return true;
+    }
+
 }

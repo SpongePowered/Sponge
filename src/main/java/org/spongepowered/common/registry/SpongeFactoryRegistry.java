@@ -53,6 +53,7 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
@@ -79,6 +80,7 @@ import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransformFactory;
+import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
 import org.spongepowered.common.world.SpongeServerLocationFactory;
 
 import java.util.Map;
@@ -144,6 +146,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(MinecraftDayTime.Factory.class, SpongeMinecraftDayTime.FACTORY_INSTANCE)
             .registerFactory(GameProfile.Factory.class, new SpongeGameProfileFactory())
             .registerFactory(ProfileProperty.Factory.class, new SpongeProfilePropertyFactory())
+            .registerFactory(RayTrace.Factory.class, new SpongeRayTraceFactory())
         ;
     }
 
