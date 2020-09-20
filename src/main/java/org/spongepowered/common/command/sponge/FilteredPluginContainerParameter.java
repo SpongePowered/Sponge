@@ -52,7 +52,7 @@ public final class FilteredPluginContainerParameter implements ValueParameter<Pl
     }
 
     @Override
-    public List<String> complete(final CommandContext context) {
+    public List<String> complete(final CommandContext context, String currentInput) {
         return ImmutableList.copyOf(this.validPluginContainers.keySet());
     }
 

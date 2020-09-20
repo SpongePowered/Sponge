@@ -33,12 +33,14 @@ import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.arguments.EntityArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
@@ -48,6 +50,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public final class SpongeUserValueParameter extends CatalogedArgumentParser<User> {
 
@@ -69,8 +72,9 @@ public final class SpongeUserValueParameter extends CatalogedArgumentParser<User
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return ImmutableList.of();
+    public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+        return Sponge.getServer().getUserManager().streamOfMatches(currentInput).filter(GameProfile::isFilled)
+                .map(x -> x.getName().orElse("")).collect(Collectors.toList());
     }
 
     @Override

@@ -44,7 +44,7 @@ import java.util.function.Supplier;
 
 public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Builder<T> {
 
-    private static final ValueCompleter EMPTY_COMPLETER = context -> ImmutableList.of();
+    private static final ValueCompleter EMPTY_COMPLETER = (context, currentInput) -> ImmutableList.of();
 
     private final TypeToken<T> typeToken;
     private final List<ValueParser<? extends T>> parsers = new ArrayList<>();
@@ -159,10 +159,10 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
             } else if (completers.size() == 1) {
                 completer = completers.get(0);
             } else {
-                completer = (context) -> {
+                completer = (context, currentInput) -> {
                     final ImmutableList.Builder<String> builder = ImmutableList.builder();
                     for (final ValueCompleter valueCompleter : completers) {
-                        builder.addAll(valueCompleter.complete(context));
+                        builder.addAll(valueCompleter.complete(context, currentInput));
                     }
 
                     return builder.build();

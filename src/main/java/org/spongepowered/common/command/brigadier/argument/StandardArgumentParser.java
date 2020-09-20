@@ -106,8 +106,8 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        final SuggestionsBuilder suggestionsBuilder = new SuggestionsBuilder("", 0);
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+        final SuggestionsBuilder suggestionsBuilder = new SuggestionsBuilder(currentInput, 0);
         this.listSuggestions((com.mojang.brigadier.context.CommandContext<?>) context, suggestionsBuilder);
         return suggestionsBuilder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }

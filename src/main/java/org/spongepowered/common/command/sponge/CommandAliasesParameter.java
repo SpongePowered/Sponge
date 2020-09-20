@@ -26,25 +26,23 @@ package org.spongepowered.common.command.sponge;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.TextComponent;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-public final class CommandAliasesParameter implements ValueParameter<CommandMapping> {
+public final class CommandAliasesParameter implements ValueParameter<CommandMapping>, ValueCompleter.All {
 
     @Override
     public List<String> complete(final CommandContext context) {

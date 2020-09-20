@@ -39,6 +39,7 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
@@ -170,7 +171,7 @@ public final class SpongePaginationService implements PaginationService {
                 .build();
     }
 
-    private final class ActivePaginationParameter implements ValueParameter<ActivePagination> {
+    private final class ActivePaginationParameter implements ValueParameter<ActivePagination>, ValueCompleter.All {
 
         @Override
         public Optional<? extends ActivePagination> getValue(final Parameter.Key<? super ActivePagination> parameterKey,

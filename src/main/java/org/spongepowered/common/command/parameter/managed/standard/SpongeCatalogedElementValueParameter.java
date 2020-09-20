@@ -39,7 +39,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -90,9 +89,12 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
 
     @NonNull
     @Override
-    public List<String> complete(@NonNull final CommandContext context) {
+    public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
         if (this.completions == null) {
-            this.completions = SpongeCommon.getRegistry().getCatalogRegistry().getAllOf(this.catalogType).stream().map(x -> x.getKey().toString())
+            this.completions = SpongeCommon.getRegistry().getCatalogRegistry().getAllOf(this.catalogType)
+                    .stream()
+                    .map(x -> x.getKey().toString())
+                    .filter(x -> x.contains(currentInput.toLowerCase()))
                     .collect(Collectors.toList());
         }
         return this.completions;

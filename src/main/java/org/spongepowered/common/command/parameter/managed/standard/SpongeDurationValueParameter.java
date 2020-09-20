@@ -51,7 +51,7 @@ public final class SpongeDurationValueParameter extends CatalogedArgumentParser<
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
         return ImmutableList.of();
     }
 

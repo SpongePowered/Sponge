@@ -164,7 +164,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     @Override
     @NonNull
     public List<String> complete(final ArgumentReader.@NonNull Immutable reader, @NonNull final CommandContext context) {
-        return this.completer.complete(context);
+        return this.completer.complete(context, reader.getRemaining());
     }
 
     @Override

@@ -67,11 +67,12 @@ public final class WorldTest {
         final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElement(DimensionType.class).setKey("dimension_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
         final Parameter.Value<ResourceKey> unloadedWorldKeyParameter = Parameter.resourceKey()
-                .setSuggestions(context -> Sponge.getServer().getWorldManager()
+                .setSuggestions((context, currentInput) -> Sponge.getServer().getWorldManager()
                         .getAllProperties()
                         .stream()
                         .filter(x -> !x.getWorld().isPresent())
                         .map(x -> x.getKey().asString())
+                        .filter(x -> x.startsWith(currentInput))
                         .collect(Collectors.toList()))
                 .setKey("world").build();
 

@@ -78,8 +78,9 @@ public final class SpongeCallback {
 
         @Override
         @NonNull
-        public List<String> complete(@NonNull final CommandContext context) {
-            return SpongeCallback.this.executors.asMap().keySet().stream().map(UUID::toString).collect(Collectors.toList());
+        public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+            return SpongeCallback.this.executors.asMap().keySet().stream().map(UUID::toString).filter(x -> x.startsWith(currentInput))
+                    .collect(Collectors.toList());
         }
 
         @Override

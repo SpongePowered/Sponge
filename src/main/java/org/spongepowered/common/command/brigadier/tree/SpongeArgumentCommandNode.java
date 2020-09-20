@@ -40,8 +40,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -74,12 +72,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         }
 
         return (context, builder) -> {
-            final String remaining = builder.getRemaining().toLowerCase(Locale.ROOT);
-            final List<String> suggestions = completer.complete((org.spongepowered.api.command.parameter.CommandContext) context);
+            final List<String> suggestions = completer.complete((org.spongepowered.api.command.parameter.CommandContext) context, builder.getRemaining());
             for (final String suggestion : suggestions) {
-                if (suggestion.toLowerCase(Locale.ROOT).contains(remaining)) {
-                    builder.suggest(suggestion);
-                }
+                builder.suggest(suggestion);
             }
             return builder.buildFuture();
         };

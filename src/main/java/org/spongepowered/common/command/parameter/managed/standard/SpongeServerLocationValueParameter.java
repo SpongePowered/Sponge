@@ -69,7 +69,6 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
         this.resourceKey = selectAllWorlds ?  ResourceKey.sponge("location_all") : ResourceKey.sponge("location_online_only");
     }
 
-
     @Override
     @NonNull
     public ResourceKey getKey() {
@@ -78,16 +77,17 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return this.complete();
+    public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+        return this.complete(currentInput);
     }
 
-    private List<String> complete() {
+    private List<String> complete(final String currentInput) {
         return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
                 .stream()
                 .filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
                 .map(WorldProperties::getKey)
                 .map(ResourceKey::getFormatted)
+                .filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
     }
 
@@ -148,7 +148,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
                 RequiredArgumentBuilder.argument(key, Constants.Command.RESOURCE_LOCATION_TYPE);
         if (allowCustomSuggestionsOnTheFirstElement) {
             firstNode.suggests((context, builder) -> {
-                this.complete().forEach(builder::suggest);
+                this.complete("").forEach(builder::suggest);
                 return builder.buildFuture();
             });
         }
