@@ -64,7 +64,7 @@ public final class SpongeBigIntegerValueParameter extends CatalogedArgumentParse
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
         return ImmutableList.of();
     }
 

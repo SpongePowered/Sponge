@@ -74,8 +74,8 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return ImmutableList.copyOf(this.choices.get());
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+        return this.choices.get().stream().filter(x -> x.startsWith(currentInput)).collect(Collectors.toList());
     }
 
     @Override

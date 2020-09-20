@@ -53,8 +53,9 @@ public final class TestPlugin {
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<PluginContainer> pluginKey = Parameter.plugin().setKey("plugin").setSuggestions(
-                context -> Sponge.getPluginManager().getPlugins().stream()
+                (context, currentInput) -> Sponge.getPluginManager().getPlugins().stream()
                         .filter(pc -> pc.getInstance() instanceof LoadableModule)
+                        .filter(x -> x.getMetadata().getId().startsWith(currentInput))
                         .map(x -> x.getMetadata().getId()).collect(Collectors.toList())).build();
         final Command.Parameterized enableCommand = Command.builder().parameter(pluginKey)
                 .setExecutor(context -> {

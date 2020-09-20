@@ -51,8 +51,9 @@ public final class SpongePluginContainerValueParameter extends CatalogedArgument
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return Launch.getInstance().getPluginManager().getPlugins().stream().map(x -> x.getMetadata().getId()).collect(Collectors.toList());
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+        return Launch.getInstance().getPluginManager().getPlugins().stream().map(x -> x.getMetadata().getId()).filter(x -> x.startsWith(currentInput))
+                .collect(Collectors.toList());
     }
 
     @Override

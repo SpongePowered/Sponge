@@ -58,7 +58,7 @@ import java.util.function.Predicate;
 
 public final class SpongeParameterTranslator {
 
-    private static final ValueCompleter EMPTY_COMPLETER = context -> ImmutableList.of();
+    private static final ValueCompleter EMPTY_COMPLETER = (context, currentInput) -> ImmutableList.of();
 
     public static CommandNode<CommandSource> createCommandTreeWithSubcommandsOnly(
             @NonNull final ArgumentBuilder<CommandSource, ?> rootNode,

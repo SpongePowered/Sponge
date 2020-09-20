@@ -204,7 +204,7 @@ public final class CommandTestPlugin {
                 this.plugin,
                 Command.builder()
                         .parameter(Parameter.enumValue(TestEnum.class).orDefault(TestEnum.ONE).setKey(enumParameterKey).build())
-                        .parameter(Parameter.string().setKey(stringKey).setSuggestions(context -> ImmutableList.of("bacon", "eggs", "spam")).build())
+                        .parameter(Parameter.string().setKey(stringKey).setSuggestions((context, currentInput) -> ImmutableList.of("bacon", "eggs", "spam")).build())
                         .setExecutor(x -> {
                             x.sendMessage(TextComponent.of(x.requireOne(enumParameterKey).name()));
                             return CommandResult.success();

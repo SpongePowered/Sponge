@@ -70,8 +70,8 @@ public final class SpongeColorValueParameter extends CatalogedArgumentParser<Col
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        final SuggestionsBuilder builder = new SuggestionsBuilder("", 0);
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+        final SuggestionsBuilder builder = new SuggestionsBuilder(currentInput, 0);
         this.listSuggestions((com.mojang.brigadier.context.CommandContext<?>) context, builder);
         return builder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }

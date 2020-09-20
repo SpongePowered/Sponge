@@ -74,7 +74,7 @@ public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, Su
     public CompletableFuture<Suggestions> listSuggestions(
             final CommandContext<?> context,
             final SuggestionsBuilder builder) {
-        for (final String s : this.complete((SpongeCommandContext) context)) {
+        for (final String s : this.complete((SpongeCommandContext) context, builder.getRemaining())) {
             if (INTEGER_PATTERN.matcher(s).matches()) {
                 try {
                     builder.suggest(Integer.parseInt(s));

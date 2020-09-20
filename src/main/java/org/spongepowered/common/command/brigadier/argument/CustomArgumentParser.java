@@ -51,7 +51,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * For use with other argument types
@@ -131,14 +130,14 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
     public CompletableFuture<Suggestions> listSuggestions(
             final com.mojang.brigadier.context.CommandContext<?> context,
             final SuggestionsBuilder builder) {
-        for (final String s : this.completer.complete((SpongeCommandContext) context)) {
+        for (final String s : this.completer.complete((SpongeCommandContext) context, builder.getRemaining())) {
             if (CustomArgumentParser.INTEGER_PATTERN.matcher(s).matches()) {
                 try {
                     builder.suggest(Integer.parseInt(s));
                 } catch (final NumberFormatException ex) {
                     builder.suggest(s);
                 }
-            } else if (s.toLowerCase(Locale.ROOT).startsWith(builder.getRemaining())) {
+            } else {
                 builder.suggest(s);
             }
         }
