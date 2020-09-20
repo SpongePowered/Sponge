@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.context.Contextual;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -32,11 +32,10 @@ import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Common Subject Implementation via SubjectBridge
@@ -54,13 +53,6 @@ public interface BridgeSubject extends Subject {
         return ((SubjectBridge) this).bridge$resolveOptional()
                 .map(Subject::isSubjectDataPersisted)
                 .orElse(false);
-    }
-
-    @Override
-    default Set<Context> activeContexts() {
-        return ((SubjectBridge) this).bridge$resolveOptional()
-                .map(Subject::activeContexts)
-                .orElseGet(Collections::emptySet);
     }
 
     @Override
@@ -85,17 +77,17 @@ public interface BridgeSubject extends Subject {
     }
 
     @Override
-    default Tristate permissionValue(final Set<Context> contexts, final String permission) {
+    default Tristate permissionValue(final String permission, final Cause cause) {
         return ((SubjectBridge) this).bridge$resolveOptional()
-                .map(subject -> subject.permissionValue(contexts, permission))
+                .map(subject -> subject.permissionValue(permission, cause))
                 .orElseGet(() -> ((SubjectBridge) this).bridge$permDefault(permission));
     }
 
     @Override
-    default boolean hasPermission(final Set<Context> contexts, final String permission) {
+    default boolean hasPermission(final String permission, final Cause cause) {
         return ((SubjectBridge) this).bridge$resolveOptional()
                 .map(subject -> {
-                    final Tristate ret = subject.permissionValue(contexts, permission);
+                    final Tristate ret = subject.permissionValue(permission, cause);
                     if (ret == Tristate.UNDEFINED) {
                         return ((SubjectBridge) this).bridge$permDefault(permission).asBoolean();
                     }
@@ -108,12 +100,12 @@ public interface BridgeSubject extends Subject {
     default boolean hasPermission(final String permission) {
         // forwarded to the implementation in this class, and not the default
         // in the Subject interface so permission defaults can be applied
-        return this.hasPermission(this.activeContexts(), permission);
+        return this.hasPermission(permission, PhaseTracker.getInstance().currentCause());
     }
 
     @Override
-    default boolean isChildOf(final Set<Context> contexts, final SubjectReference parent) {
-        return ((SubjectBridge) this).bridge$resolve().isChildOf(contexts, parent);
+    default boolean isChildOf(final SubjectReference parent, final Cause cause) {
+        return ((SubjectBridge) this).bridge$resolve().isChildOf(parent, cause);
     }
 
     @Override
@@ -122,8 +114,8 @@ public interface BridgeSubject extends Subject {
     }
 
     @Override
-    default List<? extends SubjectReference> parents(final Set<Context> contexts) {
-        return ((SubjectBridge) this).bridge$resolve().parents(contexts);
+    default List<? extends SubjectReference> parents(final Cause cause) {
+        return ((SubjectBridge) this).bridge$resolve().parents(cause);
     }
 
     @Override
@@ -132,8 +124,8 @@ public interface BridgeSubject extends Subject {
     }
 
     @Override
-    default Optional<String> option(final Set<Context> contexts, final String key) {
-        return ((SubjectBridge) this).bridge$resolve().option(contexts, key);
+    default Optional<String> option(final String key, final Cause cause) {
+        return ((SubjectBridge) this).bridge$resolve().option(key, cause);
     }
 
     @Override

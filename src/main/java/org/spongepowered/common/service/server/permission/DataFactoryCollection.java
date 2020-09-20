@@ -26,7 +26,7 @@ package org.spongepowered.common.service.server.permission;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -35,7 +35,6 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -107,8 +106,8 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public Tristate permissionValue(Set<Context> contexts, String permission) {
-            Tristate ret = super.permissionValue(contexts, permission);
+        public Tristate permissionValue(String permission, Cause cause) {
+            Tristate ret = super.permissionValue(permission, cause);
 
             if (ret == Tristate.UNDEFINED) {
                 ret = this.getDataPermissionValue(DataFactoryCollection.this.defaults().transientSubjectData(), permission);
@@ -121,8 +120,8 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public Optional<String> option(Set<Context> contexts, String option) {
-            Optional<String> ret = super.option(contexts, option);
+        public Optional<String> option(String option, Cause cause) {
+            Optional<String> ret = super.option(option, cause);
             if (!ret.isPresent()) {
                 ret = this.getDataOptionValue(DataFactoryCollection.this.defaults().subjectData(), option);
             }

@@ -32,6 +32,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionDescription.Builder;
@@ -44,6 +46,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 import net.minecraft.server.players.ServerOpList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -83,8 +86,7 @@ public final class SpongePermissionService implements PermissionService {
         this.subjects.put(PermissionService.SUBJECTS_SYSTEM, new DataFactoryCollection(
             PermissionService.SUBJECTS_SYSTEM, this,
                 s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(4).asSubjectReference())
-//                ,
-//                s -> {
+//                , s -> {
 //                    if (s.equals("Server")) {
 //                        return SpongeImpl.game().getServer().getConsole();
 //                    } /*else if (s.equals("RCON")) {
@@ -176,8 +178,16 @@ public final class SpongePermissionService implements PermissionService {
         return CompletableFuture.completedFuture(this.loadedCollections().keySet());
     }
 
+    @Override public Set<Context> getContexts() {
+        return Collections.emptySet();
+    }
+
+    @Override public Set<Context> getContextsFor(Cause cause) {
+        return Collections.emptySet();
+    }
+
     @Override
-    public void registerContextCalculator(final ContextCalculator<Subject> calculator) {
+    public void registerContextCalculator(final ContextCalculator calculator) {
 
     }
 

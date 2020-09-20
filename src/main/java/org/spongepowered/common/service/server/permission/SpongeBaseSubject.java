@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -34,7 +34,6 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public abstract class SpongeBaseSubject implements Subject {
 
@@ -54,12 +53,12 @@ public abstract class SpongeBaseSubject implements Subject {
     }
 
     @Override
-    public boolean hasPermission(Set<Context> contexts, String permission) {
-        return this.permissionValue(contexts, permission) == Tristate.TRUE;
+    public boolean hasPermission(final String permission, final Cause cause) {
+        return this.permissionValue(permission, cause) == Tristate.TRUE;
     }
 
     @Override
-    public Tristate permissionValue(Set<Context> contexts, String permission) {
+    public Tristate permissionValue(final String permission, final Cause cause) {
         return this.getDataPermissionValue(this.transientSubjectData(), permission);
     }
 
@@ -67,8 +66,8 @@ public abstract class SpongeBaseSubject implements Subject {
         Tristate res = subject.nodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
 
         if (res == Tristate.UNDEFINED) {
-            for (SubjectReference parent : subject.parents(SubjectData.GLOBAL_CONTEXT)) {
-                res = parent.resolve().join().permissionValue(SubjectData.GLOBAL_CONTEXT, permission);
+            for (final SubjectReference parent : subject.parents(SubjectData.GLOBAL_CONTEXT)) {
+                res = parent.resolve().join().permissionValue(permission, null);
                 if (res != Tristate.UNDEFINED) {
                     return res;
                 }
@@ -79,13 +78,13 @@ public abstract class SpongeBaseSubject implements Subject {
     }
 
     @Override
-    public boolean isChildOf(Set<Context> contexts, SubjectReference parent) {
-        return this.subjectData().parents(contexts).contains(parent);
+    public boolean isChildOf(final SubjectReference parent, final Cause cause) {
+        return this.subjectData().parents(SubjectData.GLOBAL_CONTEXT).contains(parent);
     }
 
     @Override
-    public List<? extends SubjectReference> parents(Set<Context> contexts) {
-        return this.subjectData().parents(contexts);
+    public List<? extends SubjectReference> parents(final Cause cause) {
+        return this.subjectData().parents(SubjectData.GLOBAL_CONTEXT);
     }
 
     protected Optional<String> getDataOptionValue(MemorySubjectData subject, String option) {
@@ -93,7 +92,7 @@ public abstract class SpongeBaseSubject implements Subject {
 
         if (!res.isPresent()) {
             for (SubjectReference parent : subject.parents(SubjectData.GLOBAL_CONTEXT)) {
-                res = parent.resolve().join().option(SubjectData.GLOBAL_CONTEXT, option);
+                res = parent.resolve().join().option(option, null);
                 if (res.isPresent()) {
                     return res;
                 }
@@ -104,12 +103,8 @@ public abstract class SpongeBaseSubject implements Subject {
     }
 
     @Override
-    public Optional<String> option(Set<Context> contexts, String key) {
+    public Optional<String> option(String key, Cause cause) {
         return this.getDataOptionValue(this.transientSubjectData(), key);
     }
 
-    @Override
-    public Set<Context> activeContexts() {
-        return SubjectData.GLOBAL_CONTEXT;
-    }
 }

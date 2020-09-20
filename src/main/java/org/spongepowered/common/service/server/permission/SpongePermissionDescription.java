@@ -62,7 +62,7 @@ class SpongePermissionDescription implements PermissionDescription {
     private final PluginContainer owner;
 
     SpongePermissionDescription(final SpongePermissionService permissionService, final String id, final String strippedId, final @Nullable Component description, final PluginContainer owner) {
-        this.permissionService =permissionService;
+        this.permissionService = permissionService;
         this.id = id;
         this.strippedId = strippedId;
         this.description = description;
@@ -128,7 +128,7 @@ class SpongePermissionDescription implements PermissionDescription {
 
     @Override
     public Tristate getDefaultValue() {
-        return this.permissionService.getDefaults().getPermissionValue(ImmutableSet.of(), this.strippedId);
+        return this.permissionService.getDefaults().getPermissionValue(this.strippedId);
     }
 
     @Override
@@ -177,7 +177,7 @@ class SpongePermissionDescription implements PermissionDescription {
         @Override
         public SpongePermissionDescription.Builder id(final String id) {
             if (!SpongePermissionDescription.PERMISSION_FORMAT.matcher(Objects.requireNonNull(id, "permissionId")).matches()) {
-                throw new IllegalArgumentException("Input permission '" + this.id + "' is not in the allowed format '" + PERMISSION_FORMAT.pattern());
+                throw new IllegalArgumentException("Input permission '" + this.id + "' is not in the allowed format '" + PERMISSION_FORMAT.pattern() + "'");
             }
             this.id = id;
             return this;

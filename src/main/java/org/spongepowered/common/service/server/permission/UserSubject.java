@@ -27,6 +27,7 @@ package org.spongepowered.common.service.server.permission;
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -116,8 +117,8 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public Tristate permissionValue(final Set<Context> contexts, final String permission) {
-        Tristate ret = super.permissionValue(contexts, permission);
+    public Tristate permissionValue(final String permission, final Cause cause) {
+        Tristate ret = super.permissionValue(permission, cause);
         if (ret == Tristate.UNDEFINED) {
             ret = this.getDataPermissionValue(this.collection.defaults().subjectData(), permission);
         }
@@ -131,8 +132,8 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public Optional<String> option(final Set<Context> contexts, final String option) {
-        Optional<String> ret = super.option(contexts, option);
+    public Optional<String> option(final String option, final Cause cause) {
+        Optional<String> ret = super.option(option, cause);
         if (!ret.isPresent()) {
             ret = this.getDataOptionValue(this.collection.defaults().subjectData(), option);
         }
