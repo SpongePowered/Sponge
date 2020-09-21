@@ -176,6 +176,10 @@ public final class SpongeImplHooks {
         return 5.0d;
     }
 
+    public static double getEntityReachDistanceSq(final EntityPlayerMP player) {
+        return 36.0d; // 6 blocks
+    }
+
     // Entity registry
 
     @Nullable
