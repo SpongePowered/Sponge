@@ -382,7 +382,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         if (this.transaction != null && !this.transaction.isEmpty()) {
             this.transaction.peek().addFlagInvocation(flag);
         } else {
-            flag.getAliases().forEach(x -> this.flagMap.addTo(x, 1));
+            flag.getUnprefixedAliases().forEach(x -> this.flagMap.addTo(x, 1));
         }
     }
 

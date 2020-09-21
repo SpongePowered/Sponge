@@ -152,7 +152,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
     }
 
     public void addFlagInvocation(final Flag flag) {
-        flag.getAliases().forEach(x -> this.flagCapture.addTo(x, 1));
+        flag.getUnprefixedAliases().forEach(x -> this.flagCapture.addTo(x, 1));
         this.copyBuilder.addFlagInvocation(flag);
     }
 
