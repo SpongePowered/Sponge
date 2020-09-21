@@ -83,6 +83,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
     private boolean impl$forceChunkRequests = false;
     private long impl$chunkUnloadDelay = Constants.World.DEFAULT_CHUNK_UNLOAD_DELAY;
     private int impl$maxChunkUnloads = Constants.World.MAX_CHUNK_UNLOADS;
+    private int impl$maxChunkLifetime = Constants.World.MAX_CHUNK_LIFETIME;
 
     @Shadow @Final private WorldServer world;
     @Shadow @Final private IChunkLoader chunkLoader;
@@ -108,6 +109,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
         this.impl$denyChunkRequests = worldCategory.getDenyChunkRequests();
         this.impl$chunkUnloadDelay = worldCategory.getChunkUnloadDelay() * 1000;
         this.impl$maxChunkUnloads = worldCategory.getMaxChunkUnloads();
+        this.impl$maxChunkLifetime = worldCategory.getMaxChunkLifetime();
     }
 
     @Override
@@ -268,10 +270,14 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
             final Iterator<Chunk> iterator = this.loadedChunks.values().iterator();
             int chunksUnloaded = 0;
             final long now = System.currentTimeMillis();
+            final long world_time = this.world.getTotalWorldTime();
             while (chunksUnloaded < this.impl$maxChunkUnloads && iterator.hasNext()) {
                 final Chunk chunk = iterator.next();
                 final ChunkBridge spongeChunk = (ChunkBridge) chunk;
-                if (chunk != null && chunk.unloadQueued && !spongeChunk.bridge$isPersistedChunk()) {
+                if (chunk == null || spongeChunk.bridge$isPersistedChunk()) {
+                    continue;
+                }
+                if (chunk.unloadQueued) {
                     if (this.bridge$getChunkUnloadDelay() > 0) {
                         if ((now - spongeChunk.bridge$getScheduledForUnload()) < this.impl$chunkUnloadDelay) {
                             continue;
@@ -279,11 +285,19 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
                         spongeChunk.bridge$setScheduledForUnload(-1);
                     }
                     chunk.onUnload();
-                    this.saveChunkData(chunk);
-                    this.saveChunkExtraData(chunk);
-                    iterator.remove();
-                    chunksUnloaded++;
                 }
+                // max lifetime only applies to chunks that should stay loaded but still need saving once in a while
+                else if (this.impl$maxChunkLifetime <= 0 // if setting is disabled
+                        || !spongeChunk.bridge$isChunkDirty() // no need to save non-dirty chunks
+                        || world_time - spongeChunk.bridge$getLastSaveTime() < this.impl$maxChunkLifetime) {
+                    continue;  // don't save chunk data
+                }
+                this.saveChunkData(chunk);
+                this.saveChunkExtraData(chunk);
+                if (chunk.unloadQueued) {  // chunks not queued to unload stay loaded
+                    iterator.remove();
+                }
+                chunksUnloaded++;
             }
             ((WorldServerBridge) this.world).bridge$getTimingsHandler().doChunkUnload.stopTiming();
         }
