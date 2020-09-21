@@ -32,8 +32,13 @@ import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
+<<<<<<< HEAD
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+=======
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.Advancement;
+>>>>>>> f5f14fdec8... permissions: Re-implement SpongeContextCalculator
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -56,6 +61,7 @@ import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import co.aikar.timings.sponge.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
+import org.spongepowered.common.service.server.permission.SpongeContextCalculator;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
@@ -145,6 +151,9 @@ public final class SpongeLifecycle {
     }
 
     public void establishServerFeatures() {
+        final SpongeContextCalculator calculator = new SpongeContextCalculator();
+        Sponge.getServer().getServiceProvider().permissionService().registerContextCalculator(calculator);
+        Sponge.getServer().getServiceProvider().economyService().ifPresent(econ -> econ.registerContextCalculator(calculator));
         // Yes this looks odd but prevents having to do sided lifecycle solely to always point at the Server
         ((SpongeServer) this.game.server()).getUsernameCache().load();
     }
