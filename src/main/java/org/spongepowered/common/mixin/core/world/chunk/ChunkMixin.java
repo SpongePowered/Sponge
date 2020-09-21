@@ -157,8 +157,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     @Override
-    public boolean bridge$getChunkDirty()
-    {
+    public boolean bridge$isChunkDirty() {
         return this.dirty;
     }
 
@@ -168,8 +167,7 @@ public abstract class ChunkMixin implements ChunkBridge, CacheKeyBridge {
     }
 
     @Override
-    public long bridge$getLastSaveTime()
-    {
+    public long bridge$getLastSaveTime() {
         return this.lastSaveTime;
     }
 

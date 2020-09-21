@@ -108,7 +108,7 @@ public interface ChunkBridge {
 
     long bridge$getLastSaveTime();
 
-    boolean bridge$getChunkDirty();
+    boolean bridge$isChunkDirty();
 
     void bridge$markChunkDirty();
 

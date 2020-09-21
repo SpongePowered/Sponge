@@ -288,7 +288,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
                 // max lifetime only applies to chunks that should stay loaded but still need saving once in a while
                 else if (this.impl$maxChunkLifetime > 0 // if setting is enabled at all
                         && (world_time - spongeChunk.bridge$getLastSaveTime() < this.impl$maxChunkLifetime
-                            || !spongeChunk.bridge$getChunkDirty())) {  // no need to save non-dirty chunks
+                            || !spongeChunk.bridge$isChunkDirty())) {  // no need to save non-dirty chunks
                     continue;
                 }
                 this.saveChunkData(chunk);
