@@ -811,15 +811,14 @@ public abstract class NetHandlerPlayServerMixin implements NetHandlerPlayServerB
         this.player.markPlayerActive();
 
         if (entity != null) {
-            // Sponge start - flag is not necessary, see below
+            // Sponge start - replace this with an ImplHook, so Forge reach distance attribute can override it
             // final boolean flag = this.player.canEntityBeSeen(entity);
-            // compatibility with Forge reachDistance attribute
-            double d0 = SpongeImplHooks.getEntityReachDistanceSq(this.player);
+            // double d0 = 36.0D; // 6 blocks
 
-            // this check introduces MC-107103
             // if (!flag) {
             //     d0 = 9.0D; // 3 blocks
             // }
+            double d0 = SpongeImplHooks.getEntityReachDistanceSq(this.player, entity);
             // Sponge end
 
             if (this.player.getDistanceSq(entity) < d0) {

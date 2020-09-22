@@ -176,8 +176,12 @@ public final class SpongeImplHooks {
         return 5.0d;
     }
 
-    public static double getEntityReachDistanceSq(final EntityPlayerMP player) {
-        return 36.0d; // 6 blocks
+    public static double getEntityReachDistanceSq(final EntityPlayerMP player, Entity entity) {
+        double d0 = 36.0d; // 6 blocks
+        if (!player.canEntityBeSeen(entity)) {  // TODO: this check introduces MC-107103
+            d0 = 9.0D; // 3 blocks
+        }
+        return d0;
     }
 
     // Entity registry
