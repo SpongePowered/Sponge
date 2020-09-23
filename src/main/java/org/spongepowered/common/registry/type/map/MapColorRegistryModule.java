@@ -95,7 +95,7 @@ public class MapColorRegistryModule implements CatalogRegistryModule<MapColorTyp
         this.register(new SpongeMapColorType("black", "Black", 29));
         this.register(new SpongeMapColorType("gold", "Gold", 30));
         this.register(new SpongeMapColorType("diamond", "Diamond", 31));
-        this.register(new SpongeMapColorType("lapis", "Lapis", 32));
+        this.register(new SpongeMapColorType("lapis_lazuli", "Lapis Lazuli", 32));
         this.register(new SpongeMapColorType("emerald", "Emerald", 33));
         this.register(new SpongeMapColorType("obsidian", "Obsidian", 34));
         this.register(new SpongeMapColorType("netherrack", "Netherrack", 35));

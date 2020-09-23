@@ -30,7 +30,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.spec.CommandExecutor;
@@ -43,8 +42,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.map.MapCanvas;
@@ -186,9 +183,9 @@ public class MapTest implements LoadableModule {
                 for (final MapColorType mapColorType : Sponge.getRegistry().getAllOf(MapColorType.class)) {
                     final MapColor[] colors = new MapColor[] {
                             MapColor.of(mapColorType),
-                            MapColor.builder().baseColor(mapColorType).dark().build(),
-                            MapColor.builder().baseColor(mapColorType).darker().build(),
-                            MapColor.builder().baseColor(mapColorType).darkest().build()
+                            MapColor.builder().baseColor(mapColorType).light().build(),
+                            MapColor.builder().baseColor(mapColorType).base().build(),
+                            MapColor.builder().baseColor(mapColorType).dark().build()
                     };
                     mapColors.add(colors);
                 }
@@ -388,7 +385,7 @@ public class MapTest implements LoadableModule {
         if (!this.isEnabled) {
             this.isEnabled = true;
             Sponge.getEventManager().registerListeners(this, this.listeners);
-            src.sendMessage(Text.of(TextColors.GREEN, "Map listeners are enabled. Created maps will now be blue."));
+            src.sendMessage(Text.of(TextColors.GREEN, "Map listeners are enabled. Created maps will now start blue."));
         } else {
             src.sendMessage(Text.of(TextColors.YELLOW, "Map listeners are already enabled."));
         }
@@ -398,7 +395,7 @@ public class MapTest implements LoadableModule {
     public void disable(final CommandSource src) {
         LoadableModule.super.disable(src);
         this.isEnabled = false;
-        src.sendMessage(Text.of(TextColors.RED, "Map listeners are disabled. Created maps will no longer be blue."));
+        src.sendMessage(Text.of(TextColors.RED, "Map listeners are disabled. Created maps will no start blue."));
     }
 
     private Player requirePlayer(final CommandSource source) throws CommandException {

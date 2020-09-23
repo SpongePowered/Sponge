@@ -26,7 +26,6 @@ package org.spongepowered.common.registry.type.map;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.storage.MapDecoration;
-import org.spongepowered.api.map.color.MapColorTypes;
 import org.spongepowered.api.map.decoration.MapDecorationType;
 import org.spongepowered.api.map.decoration.MapDecorationTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;

@@ -28,6 +28,7 @@ import com.google.common.primitives.Bytes;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
@@ -49,34 +50,8 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
     // Main Canvas storage
     public byte[] canvas;
 
-    SpongeMapByteCanvas() {
-        this.canvas = new byte[Constants.Map.MAP_SIZE];
-    }
-
     public SpongeMapByteCanvas(byte[] canvas) {
         this.canvas = canvas;
-    }
-
-    public void setPixel(int index, byte value) {
-        canvas[index] = value;
-    }
-
-    void paintAll(MapColor mapColor) {
-        Arrays.fill(canvas, ((SpongeMapColor)mapColor).getMCColor());
-    }
-
-    public void paint(int startX, int endX, int startY, int endY, MapColor mapColor) {
-        checkState(MapUtil.isInCanvasBounds(startX), "startX out of bounds");
-        checkState(MapUtil.isInCanvasBounds(endX), "endX out of bounds");
-        checkState(MapUtil.isInCanvasBounds(startY), "startY out of bounds");
-        checkState(MapUtil.isInCanvasBounds(endY), "endY out of bounds");
-
-        byte color = ((SpongeMapColor)mapColor).getMCColor();
-        for (int x = startX; x <= endX; x++) {
-            for (int y = startY; y <= endY; y++) {
-                canvas[x + (y * Constants.Map.MAP_PIXELS)] = color;
-            }
-        }
     }
 
     public void applyToMapData(MapData mapData) {
@@ -90,7 +65,7 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
 
     @Override
     public DataContainer toContainer() {
-        return DataContainer.createNew().set(DataQuery.of("MapColors"), Bytes.asList(canvas));
+        return DataContainer.createNew().set(Keys.MAP_CANVAS.getQuery(), Bytes.asList(canvas));
     }
 
     @Override

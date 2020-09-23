@@ -75,22 +75,22 @@ public class SpongeMapDecorationBuilder extends AbstractDataBuilder<MapDecoratio
     }
 
     @Override
-    public MapDecoration.Builder x(int x) throws IllegalStateException {
-        Preconditions.checkState(MapUtil.isInMapDecorationBounds(x), "x not in bounds");
+    public MapDecoration.Builder x(int x) throws IllegalArgumentException {
+        Preconditions.checkArgument(MapUtil.isInMapDecorationBounds(x), "x not in bounds");
         this.x = x;
         return this;
     }
 
     @Override
-    public MapDecoration.Builder y(int y) throws IllegalStateException {
-        Preconditions.checkState(MapUtil.isInMapDecorationBounds(y), "y not in bounds");
+    public MapDecoration.Builder y(int y) throws IllegalArgumentException {
+        Preconditions.checkArgument(MapUtil.isInMapDecorationBounds(y), "y not in bounds");
         this.y = y;
         return this;
     }
 
     @Override
-    public MapDecoration.Builder rotation(Direction direction) {
-        Preconditions.checkState(direction.isCardinal()
+    public MapDecoration.Builder rotation(Direction direction) throws IllegalArgumentException {
+        Preconditions.checkArgument(direction.isCardinal()
                 || direction.isOrdinal()
                 || direction.isSecondaryOrdinal(),
                 "Direction given in MapDecorationBuilder.rotation was not a cardinal, ordinal or secondary ordinal");
@@ -99,9 +99,9 @@ public class SpongeMapDecorationBuilder extends AbstractDataBuilder<MapDecoratio
     }
 
     @Override
-    public MapDecoration.Builder position(Vector2i position) throws IllegalStateException {
-        Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.getX()), "x not in bounds");
-        Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.getY()), "y not in bounds");
+    public MapDecoration.Builder position(Vector2i position) throws IllegalArgumentException {
+        Preconditions.checkArgument(MapUtil.isInMapDecorationBounds(position.getX()), "x not in bounds");
+        Preconditions.checkArgument(MapUtil.isInMapDecorationBounds(position.getY()), "y not in bounds");
         this.x = position.getX();
         this.y = position.getY();
         return this;

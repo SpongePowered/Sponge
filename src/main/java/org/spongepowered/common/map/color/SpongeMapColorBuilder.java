@@ -40,32 +40,32 @@ import java.util.Optional;
 public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> implements MapColor.Builder {
     @Nullable
     private MapColorType color = null;
-    private int shade = 0;
+    private int shade = 2; // Default to 2, i.e same as base().
 
     public SpongeMapColorBuilder() {
         super(MapColor.class, 1);
     }
 
     @Override
-    public MapColor.Builder base() {
+    public MapColor.Builder lightest() {
         this.shade = 0;
         return this;
     }
 
     @Override
-    public MapColor.Builder dark() {
+    public MapColor.Builder light() {
         this.shade = 1;
         return this;
     }
 
     @Override
-    public MapColor.Builder darker() {
+    public MapColor.Builder base() {
         this.shade = 2;
         return this;
     }
 
     @Override
-    public MapColor.Builder darkest() {
+    public MapColor.Builder dark() {
         this.shade = 3;
         return this;
     }

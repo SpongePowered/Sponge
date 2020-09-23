@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.map.canvas;
 
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.Bytes;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.common.map.MapUtil;
 import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.util.Constants;
 
@@ -41,6 +43,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -50,27 +53,39 @@ public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> imple
     // If its being used to build from a DataView, or is blank
     // We don't want to create a big array.
     @Nullable
-    private SpongeMapByteCanvas canvas = null;
+    private byte[] canvas = null;
 
     public SpongeMapCanvasBuilder() {
         super(MapCanvas.class, 1);
     }
 
+    private byte[] getCanvas() {
+        if (this.canvas == null) {
+            this.canvas = new byte[Constants.Map.MAP_SIZE];
+        }
+        return this.canvas;
+    }
+
     @Override
     public MapCanvas.Builder paintAll(MapColor color) {
-        if (this.canvas == null) {
-            this.canvas = new SpongeMapByteCanvas();
-        }
-        this.canvas.paintAll(color);
+        Arrays.fill(getCanvas(), ((SpongeMapColor)color).getMCColor());
         return this;
     }
 
     @Override
     public MapCanvas.Builder paint(int startX, int startY, int endX, int endY, MapColor mapColor) {
-        if (this.canvas == null) {
-            this.canvas = new SpongeMapByteCanvas();
+        Preconditions.checkArgument(MapUtil.isInCanvasBounds(startX), "startX out of bounds");
+        Preconditions.checkArgument(MapUtil.isInCanvasBounds(endX), "endX out of bounds");
+        Preconditions.checkArgument(MapUtil.isInCanvasBounds(startY), "startY out of bounds");
+        Preconditions.checkArgument(MapUtil.isInCanvasBounds(endY), "endY out of bounds");
+
+        byte[] canvas = getCanvas();
+        byte color = ((SpongeMapColor)mapColor).getMCColor();
+        for (int x = startX; x <= endX; x++) {
+            for (int y = startY; y <= endY; y++) {
+                canvas[x + (y * Constants.Map.MAP_PIXELS)] = color;
+            }
         }
-        this.canvas.paint(startX, endX, startY, endY, mapColor);
         return this;
     }
 
@@ -79,15 +94,15 @@ public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> imple
         if (canvas instanceof SpongeEmptyCanvas) {
             return MapCanvas.builder();
         }
-        this.canvas = (SpongeMapByteCanvas)canvas;
+        this.canvas = ((SpongeMapByteCanvas)canvas).canvas.clone();
         return this;
     }
 
     @Override
     public MapCanvas.Builder fromImage(Image image) {
         Objects.requireNonNull(image, "image cannot be null");
-        if (image.getWidth(null) != 128 || image.getHeight(null) != 128) {
-            throw new IllegalStateException("image size was invalid!");
+        if (image.getWidth(null) != Constants.Map.MAP_PIXELS || image.getHeight(null) != Constants.Map.MAP_PIXELS) {
+            throw new IllegalArgumentException("image size was invalid!");
         }
         BufferedImage bufferedImage = null;
         boolean shouldConvert = true;
@@ -112,26 +127,24 @@ public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> imple
                 palette.put(spongeMapColor.getColor().getRgb(), spongeMapColor);
             }
         }
-        if (this.canvas == null) {
-            this.canvas = new SpongeMapByteCanvas();
-        }
+        byte[] canvas = getCanvas();
         for (int i = 0; i < pixels.length; i++) {
             SpongeMapColor color = palette.get(pixels[i]);
             if (color == null) {
-                throw new IllegalStateException("Can not find a matching color for rgb value: " + pixels[i] + ". The MapCanvas will have painted all pixels up to this point.");
+                throw new IllegalArgumentException("Can not find a matching color for rgb value: " + pixels[i] + ". The MapCanvas will have painted all pixels up to this point.");
             }
-            this.canvas.setPixel(i, color.getMCColor());
+            canvas[i] = color.getMCColor();
         }
         return this;
     }
 
     @Override
     protected Optional<MapCanvas> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQuery.of("MapColors"))) {
+        if (!container.contains(Keys.MAP_CANVAS.getQuery())) {
             return Optional.empty();
         }
         SpongeMapCanvas mapCanvas = new SpongeMapByteCanvas(
-                Bytes.toArray(container.getByteList(DataQuery.of("MapColors")).get())
+                Bytes.toArray(container.getByteList(Keys.MAP_CANVAS.getQuery()).get())
         );
         return Optional.of(mapCanvas);
     }
@@ -141,6 +154,6 @@ public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> imple
         if (this.canvas == null) {
             return SpongeEmptyCanvas.INSTANCE;
         }
-        return this.canvas;
+        return new SpongeMapByteCanvas(canvas.clone());
     }
 }

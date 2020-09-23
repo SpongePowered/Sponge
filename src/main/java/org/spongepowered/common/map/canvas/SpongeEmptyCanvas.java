@@ -27,6 +27,7 @@ package org.spongepowered.common.map.canvas;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorTypes;
@@ -37,6 +38,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.Collections;
 
 // This class basically means that we don't have to create tons of huge byte arrays
 // While doing stuff like create SpongeValues for keys.
@@ -76,9 +78,8 @@ public class SpongeEmptyCanvas implements SpongeMapCanvas {
 
     @Override
     public DataContainer toContainer() {
-        byte[] canvas = new byte[Constants.Map.MAP_SIZE];
-        //Arrays.fill(canvas, Byte.MIN_VALUE);
-        return DataContainer.createNew().set(DataQuery.of("MapColors"), Arrays.asList(canvas));
+        return DataContainer.createNew().set(Keys.MAP_CANVAS.getQuery(),
+                Collections.singletonList(new byte[Constants.Map.MAP_SIZE]));
     }
 
     @Override
