@@ -132,6 +132,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fall_time"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("firework_effects"), TypeTokens.LIST_FIREWORK_EFFECT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("firework_flight_modifier"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("firework_shape"), TypeTokens.FIREWORK_SHAPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fire_damage_delay"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("fire_ticks"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("first_date_joined"), TypeTokens.INSTANT_VALUE_TOKEN));

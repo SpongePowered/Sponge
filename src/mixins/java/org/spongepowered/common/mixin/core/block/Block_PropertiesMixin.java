@@ -22,31 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.state;
+package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.AbstractBannerBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallBannerBlock;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.item.DyeColor;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
-public final class AbstractBannerData {
+@Mixin(Block.Properties.class)
+public abstract class Block_PropertiesMixin {
 
-    private AbstractBannerData() {
+    @Inject(method = "create(Lnet/minecraft/block/material/Material;Lnet/minecraft/item/DyeColor;)Lnet/minecraft/block/Block$Properties;",
+            at = @At("RETURN"))
+    private static void impl$onCreate(final Material material, final DyeColor color, final CallbackInfoReturnable<Block.Properties> cir) {
+        final Block.Properties returnValue = cir.getReturnValue();
+        ((DyeColorBlockBridge) returnValue).bridge$setDyeColor((org.spongepowered.api.data.type.DyeColor) (Object) color);
     }
-
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((AbstractBannerBlock) h.getBlock()).getColor())
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock)
-                    .create(Keys.IS_ATTACHED)
-                        .get(h -> h.getBlock() instanceof WallBannerBlock)
-                        .set((h, v) -> null)
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock);
-    }
-    // @formatter:on
 }

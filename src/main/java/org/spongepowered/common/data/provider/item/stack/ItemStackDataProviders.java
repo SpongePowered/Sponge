@@ -35,6 +35,7 @@ public final class ItemStackDataProviders extends DataProviderRegistratorBuilder
 
     @Override
     public void register() {
+        AbstractBannerItemStackData.register(this.registrator);
         ArmorItemStackData.register(this.registrator);
         BlockItemStackData.register(this.registrator);
         BlockTypeItemStackData.register(this.registrator);
@@ -51,5 +52,6 @@ public final class ItemStackDataProviders extends DataProviderRegistratorBuilder
         SkullItemStackData.register(this.registrator);
         TieredItemStackData.register(this.registrator);
         ToolItemStackData.register(this.registrator);
+        WoolItemStackData.register(this.registrator);
     }
 }

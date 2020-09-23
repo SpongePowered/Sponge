@@ -96,10 +96,13 @@ public class BlockStateDataProviders extends DataProviderRegistratorBuilder {
         SlabData.register(this.registrator);
         SnowData.register(this.registrator);
         SnowyDirtData.register(this.registrator);
+        StainedGlassBlockData.register(this.registrator);
+        StainedGlassPaneBlockData.register(this.registrator);
         StairsData.register(this.registrator);
         StandingSignData.register(this.registrator);
         StemData.register(this.registrator);
         SugarCaneData.register(this.registrator);
+        TerracottaData.register(this.registrator);
         TNTData.register(this.registrator);
         TorchData.register(this.registrator);
         TrapDoorData.register(this.registrator);
@@ -112,5 +115,6 @@ public class BlockStateDataProviders extends DataProviderRegistratorBuilder {
         WallSkullBlockData.register(this.registrator);
         WallTorchData.register(this.registrator);
         WeightedPressurePlateData.register(this.registrator);
+        WoolData.register(this.registrator);
     }
 }

@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.api.data.type.HandPreferences;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.accessor.entity.MobEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -47,6 +49,16 @@ public final class MobData {
                     .create(Keys.LEASH_HOLDER)
                         .get(h -> ((Entity) h.getLeashHolder()))
                         .set((h, v) -> h.setLeashHolder(h, true))
+                    .create(Keys.TARGET_ENTITY)
+                        .get(h -> (Living) h.getAttackTarget())
+                        .setAnd((h, v) -> {
+                            if (!(v instanceof Living)) {
+                                return false;
+                            }
+                            h.setAttackTarget((LivingEntity) v);
+                            return true;
+                        })
+                        .delete(h -> h.setAttackTarget(null))
                 .asMutable(MobEntityAccessor.class)
                     .create(Keys.IS_AI_ENABLED)
                         .get(h -> !h.accessor$isAIDisabled())

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.item.BannerItem;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -48,13 +49,10 @@ public final class BlockItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> {
-                            if (h.getItem() instanceof BlockItem) {
-                                final Block block = ((BlockItem) h.getItem()).getBlock();
-                                return ((DyeColorBlockBridge) block).bridge$getDyeColor().orElse(null);
-                            }
-                            return null;
+                            final Block block = ((BlockItem) h.getItem()).getBlock();
+                            return ((DyeColorBlockBridge) block).bridge$getDyeColor().orElse(null);
                         })
-                        .supports(h -> h.getItem() instanceof BlockItem)
+                        .supports(h -> h.getItem() instanceof BlockItem && !(h.getItem() instanceof BannerItem))
                     .create(Keys.LOCK_TOKEN)
                         .get(h -> {
                             final CompoundNBT tag = h.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);

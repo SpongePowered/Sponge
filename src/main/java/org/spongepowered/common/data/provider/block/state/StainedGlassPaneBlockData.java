@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AbstractBannerBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.WallBannerBlock;
+import net.minecraft.block.StainedGlassPaneBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public final class AbstractBannerData {
+public final class StainedGlassPaneBlockData {
 
-    private AbstractBannerData() {
+    private StainedGlassPaneBlockData() {
     }
 
     // @formatter:off
@@ -41,12 +40,8 @@ public final class AbstractBannerData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((AbstractBannerBlock) h.getBlock()).getColor())
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock)
-                    .create(Keys.IS_ATTACHED)
-                        .get(h -> h.getBlock() instanceof WallBannerBlock)
-                        .set((h, v) -> null)
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock);
+                        .get(h -> (DyeColor) (Object) ((StainedGlassPaneBlock) h.getBlock()).getColor())
+                        .supports(h -> h.getBlock() instanceof StainedGlassPaneBlock);
     }
     // @formatter:on
 }

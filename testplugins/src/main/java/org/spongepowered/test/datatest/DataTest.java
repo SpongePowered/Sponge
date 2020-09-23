@@ -54,6 +54,7 @@ import org.spongepowered.api.data.type.FoxTypes;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyles;
+import org.spongepowered.api.data.type.InstrumentTypes;
 import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
@@ -67,6 +68,7 @@ import org.spongepowered.api.data.type.SlabPortions;
 import org.spongepowered.api.data.type.SpellTypes;
 import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.api.data.type.ToolTypes;
+import org.spongepowered.api.data.type.TropicalFishShapes;
 import org.spongepowered.api.data.type.VillagerTypes;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WireAttachmentTypes;
@@ -89,6 +91,9 @@ import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.item.FireworkEffect;
+import org.spongepowered.api.item.FireworkShapes;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
@@ -169,7 +174,6 @@ public final class DataTest  {
         Entity sheep = world.createEntity(EntityTypes.SHEEP.get(), position);
         this.checkGetData(sheep, Keys.AGE, 0);
         this.checkOfferData(player, Keys.AGE, 10);
-        // TODO check fail on negative values
 
         final Entity minecartEntity = world.createEntity(EntityTypes.MINECART.get(), position);
         this.checkOfferData(minecartEntity, Keys.AIRBORNE_VELOCITY_MODIFIER, new Vector3d(2, 0.5, 2)); // falls at ~50% flies at -200%
@@ -227,8 +231,8 @@ public final class DataTest  {
         this.checkOfferListData(bannerStack, Keys.BANNER_PATTERN_LAYERS, pattern);
 
         world.setBlock(blockPos, BlockTypes.RED_BANNER.get().getDefaultState());
-        final BlockEntity blockEntity = world.getBlockEntity(blockPos).get();
-        this.checkOfferListData(blockEntity, Keys.BANNER_PATTERN_LAYERS, pattern);
+        final BlockEntity bannerEntity = world.getBlockEntity(blockPos).get();
+        this.checkOfferListData(bannerEntity, Keys.BANNER_PATTERN_LAYERS, pattern);
 
         // Keys.BASE_COLOR
 
@@ -362,7 +366,6 @@ public final class DataTest  {
         final ItemStack waterBucket = ItemStack.of(ItemTypes.WATER_BUCKET);
         this.checkGetData(waterBucket, Keys.CONTAINER_ITEM, ItemTypes.BUCKET.get());
 
-        // Keys.COOLDOWN
         world.setBlock(blockPos, BlockTypes.HOPPER.get().getDefaultState());
         this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
         this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 10);
@@ -372,8 +375,7 @@ public final class DataTest  {
 
         // TODO Keys.CREATOR
 
-// TODO missing spelltype NONE or return null
-//        this.checkGetData(illusioner, Keys.CURRENT_SPELL, SpellTypes.NONE.get());
+        this.checkGetData(illusioner, Keys.CURRENT_SPELL, SpellTypes.NONE.get());
         this.checkOfferData(illusioner, Keys.CURRENT_SPELL, SpellTypes.BLINDNESS.get());
 
         // TODO Keys.CUSTOM_ATTACK_DAMAGE
@@ -391,10 +393,8 @@ public final class DataTest  {
         this.checkOfferData(minecartEntity, Keys.DERAILED_VELOCITY_MODIFIER, Vector3d.RIGHT);
 
 
-        // TODO missing ItemEntityBridge
-        // TODO also other dataholders
-//        final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
-//        this.checkGetData(itemEntity, Keys.DESPAWN_DELAY, 6000);
+        final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
+        this.checkGetData(itemEntity, Keys.DESPAWN_DELAY, 6000);
         final Entity eyeOfEnder = world.createEntity(EntityTypes.EYE_OF_ENDER.get(), position);
         this.checkOfferData(eyeOfEnder, Keys.DESPAWN_DELAY, 500);
 
@@ -435,12 +435,20 @@ public final class DataTest  {
         this.checkOfferData(areaEffectCloud, Keys.DURATION, 50);
         this.checkOfferData(areaEffectCloud, Keys.DURATION_ON_USE, -1); // TODO does it work?
 
-// TODO this is broken
-//        this.checkOfferData(cat, Keys.DYE_COLOR, DyeColors.LIME.get());
-//        this.checkGetData(ItemStack.of(ItemTypes.RED_WOOL), Keys.DYE_COLOR, DyeColors.RED.get());
-//        this.checkGetData(bannerStack, Keys.DYE_COLOR, DyeColors.RED.get());
-//        this.checkGetData(BlockTypes.BLUE_CONCRETE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
-//        // TODO banner blockentity
+        this.checkOfferData(cat, Keys.DYE_COLOR, DyeColors.LIME.get());
+        this.checkGetData(ItemStack.of(ItemTypes.RED_WOOL), Keys.DYE_COLOR, DyeColors.RED.get());
+        this.checkGetData(bannerStack, Keys.DYE_COLOR, DyeColors.RED.get());
+        this.checkGetData(BlockTypes.RED_BED.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.RED.get());
+        this.checkGetData(BlockTypes.BLUE_CONCRETE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_CONCRETE_POWDER.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_TERRACOTTA.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_GLAZED_TERRACOTTA.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_STAINED_GLASS.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_STAINED_GLASS_PANE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_BANNER.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_WALL_BANNER.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkOfferData(bannerEntity, Keys.DYE_COLOR, DyeColors.PINK.get());
+
         final Entity tropicalFish = world.createEntity(EntityTypes.TROPICAL_FISH.get(), position);
         this.checkOfferData(tropicalFish, Keys.DYE_COLOR, DyeColors.CYAN.get());
 
@@ -483,19 +491,17 @@ public final class DataTest  {
         this.checkGetData(fallingBlock, Keys.FALL_TIME, 0);
         this.checkOfferData(fallingBlock, Keys.FALL_TIME, 20);
 
-// TODO missing FireworkShapes supplier
         final ItemStack fireworkStar = ItemStack.of(ItemTypes.FIREWORK_STAR);
         final ItemStack fireworkRocket = ItemStack.of(ItemTypes.FIREWORK_ROCKET);
         final Entity rocket = world.createEntity(EntityTypes.FIREWORK_ROCKET.get(), position);
-//        final List<FireworkEffect> fireworkEffects = Arrays.asList(FireworkEffect.builder().color(Color.RED).build());
-//        this.checkOfferListData(fireworkStar, Keys.FIREWORK_EFFECTS, fireworkEffects);
-//        this.checkOfferListData(fireworkRocket, Keys.FIREWORK_EFFECTS, fireworkEffects);
-//        this.checkOfferListData(rocket, Keys.FIREWORK_EFFECTS, fireworkEffects);
+        final List<FireworkEffect> fireworkEffects = Collections.singletonList(FireworkEffect.builder().shape(FireworkShapes.CREEPER).color(Color.RED).build());
+        this.checkOfferListData(fireworkStar, Keys.FIREWORK_EFFECTS, fireworkEffects);
+        this.checkOfferListData(fireworkRocket, Keys.FIREWORK_EFFECTS, fireworkEffects);
+        this.checkOfferListData(rocket, Keys.FIREWORK_EFFECTS, fireworkEffects);
         world.spawnEntity(rocket);
 
         this.checkOfferData(rocket, Keys.FIREWORK_FLIGHT_MODIFIER, 5);
 
-        // TODO bridge$setFireImmunityTicks is abstract
         this.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, 20000);
         this.checkOfferData(player, Keys.FIRE_DAMAGE_DELAY, 20000);
 
@@ -615,7 +621,6 @@ public final class DataTest  {
         this.checkOfferData(turtle, Keys.HOME_POSITION, blockPos.add(0, 0, 10));
 
         final Entity horse = world.createEntity(EntityTypes.HORSE.get(), position);
-// TODO HorseColor unregistered
         this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.BLACK.get());
         this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.WHITE.get());
         this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.DARK_BROWN.get());
@@ -623,15 +628,14 @@ public final class DataTest  {
         this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.WHITE.get());
         this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.BLACK_DOTS.get());
 
-        final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
-// TODO missing ItemEntityBridge?
-//        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, true);
-//        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, false);
-//        this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);
-//        world.spawnEntity(itemEntity);
+        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, true);
+        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, false);
+        this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);
+        world.spawnEntity(itemEntity);
 
-// TODO InstrumentTypes unregistered
-        //        this.checkGetData(dirtState, Keys.INSTRUMENT_TYPE, InstrumentTypes.XYLOPHONE.get());
+        final BlockState noteBlockState = BlockTypes.NOTE_BLOCK.get().getDefaultState();
+        this.checkGetData(noteBlockState, Keys.INSTRUMENT_TYPE, InstrumentTypes.HARP.get());
+        this.checkWithData(noteBlockState, Keys.INSTRUMENT_TYPE, InstrumentTypes.COW_BELL.get());
 
         final BlockState daylightDetectorState = BlockTypes.DAYLIGHT_DETECTOR.get().getDefaultState();
         this.checkGetData(daylightDetectorState, Keys.INVERTED, false);
@@ -975,7 +979,6 @@ public final class DataTest  {
 
         // TODO Keys.NEXT_ENTITY_TO_SPAWN
 
-        final BlockState noteBlockState = BlockTypes.NOTE_BLOCK.get().getDefaultState();
 // TODO missing supplier
 //        this.checkWithData(noteBlockState, Keys.NOTE_PITCH, NotePitches.E1.get());
 
@@ -989,7 +992,6 @@ public final class DataTest  {
 //        this.checkOfferListData(writtenBookStack, Keys.PAGES, Arrays.asList(TextComponent.of("Page 1"), TextComponent.of("Page 2")));
 
         final Entity parrot = world.createEntity(EntityTypes.PARROT.get(), position);
-// TODO missing supplier
         this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_AND_BLUE.get());
 
 // TODO missing ParticleEffect.Builder registration
@@ -999,13 +1001,13 @@ public final class DataTest  {
 
         this.checkGetListData(donkey, Keys.PASSENGERS, Arrays.asList(wolf));
 
-//        this.checkOfferData(tropicalFish, Keys.PATTERN_COLOR, DyeColors.CYAN.get());
+        this.checkOfferData(tropicalFish, Keys.PATTERN_COLOR, DyeColors.CYAN.get());
 
         final Entity phantom = world.createEntity(EntityTypes.PHANTOM.get(), position);
 //        this.checkOfferData(phantom, Keys.PHANTOM_PHASE, PhantomPhases.CIRCLING.get());
 //        this.checkOfferData(phantom, Keys.PHANTOM_PHASE, PhantomPhases.SWOOPING.get());
 
-//        this.checkOfferData(itemEntity, Keys.PICKUP_DELAY, 5);
+        this.checkOfferData(itemEntity, Keys.PICKUP_DELAY, 5);
 
         // TODO Keys.PICKUP_RULE
 
@@ -1183,7 +1185,7 @@ public final class DataTest  {
         this.checkOfferData(parrot, Keys.TAMER, player.getUniqueId());
         this.checkOfferData(parrot, Keys.TAMER, null);
 
-// TODO missing dataprovider       this.checkOfferData(zombiePigman, Keys.TARGET_ENTITY, player);
+        this.checkOfferData(zombiePigman, Keys.TARGET_ENTITY, player);
         this.checkOfferData(shulkerBullet, Keys.TARGET_ENTITY, sheep);
         // FishingBobber
 
@@ -1213,7 +1215,7 @@ public final class DataTest  {
         this.checkOfferData(villager, Keys.TRANSIENT, true);
 
 
-//        this.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
+        this.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
 
         this.checkOfferData(panda, Keys.UNHAPPY_TIME, 20);
 
@@ -1295,7 +1297,7 @@ public final class DataTest  {
 
     private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Supplier<Key<V>> key, final Object value, final DataTransactionResult result) {
         if (!result.isSuccessful()) {
-            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", holder.getClass().getSimpleName(), key.get().getKey()
+            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.get().getKey()
                     .asString(), value);
             return true;
         }
@@ -1307,11 +1309,11 @@ public final class DataTest  {
         if (gotValue.isPresent()) {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
-                this.plugin.getLogger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", holder.getClass().getSimpleName(),
+                this.plugin.getLogger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
                         key.get().getKey().asString(), expected, actual);
             }
         } else {
-            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", holder.getClass().getSimpleName(),
+            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder),
                     key.get().getKey().asString(), expected);
         }
     }
@@ -1335,11 +1337,21 @@ public final class DataTest  {
     private <T> void checkData(final DataHolder holder, final String key, final T expectedValue, @Nullable final T actualValue) {
         if (actualValue != null) {
             if (!Objects.equals(actualValue, expectedValue)) {
-                this.plugin.getLogger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", holder.getClass().getSimpleName(), key,
+                this.plugin.getLogger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder), key,
                         expectedValue, actualValue);
             }
         } else if (expectedValue != null) {
-            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", holder.getClass().getSimpleName(), key, expectedValue);
+            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder), key, expectedValue);
         }
+    }
+
+    private static String getHolderName(final DataHolder holder) {
+        String value = "";
+        if (holder instanceof BlockState) {
+            value = ((BlockState) holder).getType().getKey().getValue();
+        } else if (holder instanceof ItemStack) {
+            value = ((ItemStack) holder).getType().getKey().getValue();
+        }
+        return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
     }
 }

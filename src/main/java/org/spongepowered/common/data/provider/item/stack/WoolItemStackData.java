@@ -22,31 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.state;
+package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.block.AbstractBannerBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallBannerBlock;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.common.accessor.entity.passive.SheepEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.data.provider.util.DyeColorUtil;
 
-public final class AbstractBannerData {
+public final class WoolItemStackData {
 
-    private AbstractBannerData() {
+    private WoolItemStackData() {
     }
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
+                .asImmutable(ItemStack.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((AbstractBannerBlock) h.getBlock()).getColor())
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock)
-                    .create(Keys.IS_ATTACHED)
-                        .get(h -> h.getBlock() instanceof WallBannerBlock)
-                        .set((h, v) -> null)
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock);
+                        .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(((BlockItem) h.getItem()).getBlock()))
+                        .supports(h -> h.getItem() instanceof BlockItem && SheepEntityAccessor.accessor$getWoolByColor().containsValue(((BlockItem) h.getItem()).getBlock()));
     }
     // @formatter:on
 }

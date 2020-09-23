@@ -27,9 +27,12 @@ package org.spongepowered.common.accessor.entity.passive;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.item.DyeColor;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.util.IItemProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.util.Map;
 
 @Mixin(SheepEntity.class)
 public interface SheepEntityAccessor {
@@ -41,6 +44,11 @@ public interface SheepEntityAccessor {
 
     @Invoker("createSheepColor")
     static float[] accessor$createSheepColor(DyeColor p_192020_0_) {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("WOOL_BY_COLOR")
+    static Map<DyeColor, IItemProvider> accessor$getWoolByColor() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 }

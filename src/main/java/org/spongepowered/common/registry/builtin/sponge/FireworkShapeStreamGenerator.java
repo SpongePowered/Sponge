@@ -22,31 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.state;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import net.minecraft.block.AbstractBannerBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallBannerBlock;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.minecraft.item.FireworkRocketItem;
+import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.util.Tuple;
 
-public final class AbstractBannerData {
+import java.util.stream.Stream;
 
-    private AbstractBannerData() {
+public final class FireworkShapeStreamGenerator {
+
+    private FireworkShapeStreamGenerator() {
     }
 
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((AbstractBannerBlock) h.getBlock()).getColor())
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock)
-                    .create(Keys.IS_ATTACHED)
-                        .get(h -> h.getBlock() instanceof WallBannerBlock)
-                        .set((h, v) -> null)
-                        .supports(h -> h.getBlock() instanceof AbstractBannerBlock);
+    public static Stream<Tuple<FireworkShape, Byte>> stream() {
+        return Stream.of(
+                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.SMALL_BALL, (byte) 0),
+                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.LARGE_BALL, (byte) 1),
+                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.STAR, (byte) 2),
+                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.CREEPER, (byte) 3),
+                Tuple.of((FireworkShape) (Object) FireworkRocketItem.Shape.BURST, (byte) 4)
+        );
     }
-    // @formatter:on
 }

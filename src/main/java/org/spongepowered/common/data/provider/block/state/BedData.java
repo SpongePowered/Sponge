@@ -42,7 +42,7 @@ public final class BedData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((BedBlockAccessor) h).accessor$getColor())
+                        .get(h -> (DyeColor) (Object) ((BedBlockAccessor) h.getBlock()).accessor$getColor())
                         .supports(h -> h.getBlock() instanceof BedBlock)
                     .create(Keys.IS_OCCUPIED)
                         .get(h -> h.get(BedBlock.OCCUPIED))
