@@ -176,6 +176,21 @@ public final class SpongeImplHooks {
         return 5.0d;
     }
 
+    /**
+     * @author Polyacov_Yury
+     * @reason Forge reachDistance attribute compatibility
+     * @param player the player whose reach is being checked
+     * @param entity the entity that is being reached
+     * @return square of maximum player reach distance
+     */
+    public static double getEntityReachDistanceSq(final EntityPlayerMP player, Entity entity) {
+        double d0 = 36.0d; // 6 blocks
+        if (!player.canEntityBeSeen(entity)) {  // TODO: this check introduces MC-107103
+            d0 = 9.0D; // 3 blocks
+        }
+        return d0;
+    }
+
     // Entity registry
 
     @Nullable
