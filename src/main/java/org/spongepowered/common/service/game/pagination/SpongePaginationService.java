@@ -32,6 +32,7 @@ import com.google.common.collect.MapMaker;
 import com.google.inject.Singleton;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.TextComponent;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
@@ -54,6 +55,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -171,7 +173,7 @@ public final class SpongePaginationService implements PaginationService {
                 .build();
     }
 
-    private final class ActivePaginationParameter implements ValueParameter<ActivePagination>, ValueCompleter.All {
+    private final class ActivePaginationParameter implements ValueParameter<ActivePagination>, ValueCompleter {
 
         @Override
         public Optional<? extends ActivePagination> getValue(final Parameter.Key<? super ActivePagination> parameterKey,
@@ -204,11 +206,11 @@ public final class SpongePaginationService implements PaginationService {
         }
 
         @Override
-        public List<String> complete(final CommandContext context) {
+        public List<String> complete(final CommandContext context, final String input) {
             final Audience audience = context.getCause().getAudience();
             final SourcePaginations paginations = SpongePaginationService.this.getPaginationState(audience, false);
             if (paginations != null) {
-                return ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString));
+                return paginations.keys().stream().map(Object::toString).filter(x -> x.startsWith(input)).collect(Collectors.toList());
             }
             return ImmutableList.of();
         }

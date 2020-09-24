@@ -37,12 +37,13 @@ import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParse
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser<T> implements ValueCompleter.All {
+public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser<T> implements ValueCompleter {
 
     private final Supplier<? extends Collection<String>> literalSupplier;
     private final Supplier<T> returnValue;
@@ -79,8 +80,12 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return ImmutableList.of(String.join(" ", this.literalSupplier.get()));
+    public List<String> complete(@NonNull final CommandContext context, @NonNull final String input) {
+        final String literal = String.join(" ", this.literalSupplier.get());
+        if (literal.startsWith(input)) {
+            return Collections.singletonList(literal);
+        }
+        return Collections.emptyList();
     }
 
     @Override

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.sponge;
 
-import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -41,12 +40,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public final class CommandAliasesParameter implements ValueParameter<CommandMapping>, ValueCompleter.All {
+public final class CommandAliasesParameter implements ValueParameter<CommandMapping>, ValueCompleter {
 
     @Override
-    public List<String> complete(final CommandContext context) {
-        return ImmutableList.copyOf(Sponge.getGame().getCommandManager().getKnownAliases());
+    public List<String> complete(final CommandContext context, final String input) {
+        return Sponge.getGame().getCommandManager().getKnownAliases().stream().filter(x -> x.startsWith(input)).collect(Collectors.toList());
     }
 
     @Override
