@@ -65,6 +65,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     private final Function<CommandCause, Optional<Component>> extendedDescription;
     private final Predicate<CommandCause> executionRequirements;
     private final CommandExecutor executor;
+    private final boolean isTerminal;
     @Nullable private SpongeCommandDispatcher cachedDispatcher;
 
     SpongeParameterizedCommand(
@@ -74,7 +75,8 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
             final Function<CommandCause, Optional<Component>> extendedDescription,
             final Predicate<CommandCause> executionRequirements,
             final CommandExecutor executor,
-            final List<Flag> flags) {
+            final List<Flag> flags,
+            final boolean isTerminal) {
         this.subcommands = subcommands;
         this.parameters = parameters;
         this.shortDescription = shortDescription;
@@ -82,6 +84,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         this.executionRequirements = executionRequirements;
         this.executor = executor;
         this.flags = flags;
+        this.isTerminal = isTerminal;
     }
 
     @Override
@@ -132,6 +135,11 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     @Override
     public List<Parameter.Subcommand> subcommands() {
         return new ArrayList<>(this.subcommands);
+    }
+
+    @Override
+    public boolean isTerminal() {
+        return this.isTerminal;
     }
 
     @Override

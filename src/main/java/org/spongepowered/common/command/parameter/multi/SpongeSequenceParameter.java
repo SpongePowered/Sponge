@@ -27,6 +27,7 @@ package org.spongepowered.common.command.parameter.multi;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
 import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
@@ -36,8 +37,8 @@ import java.util.function.Consumer;
 
 public final class SpongeSequenceParameter extends SpongeMultiParameter {
 
-    protected SpongeSequenceParameter(final List<Parameter> parameterCandidates, final boolean isOptional) {
-        super(parameterCandidates, isOptional);
+    protected SpongeSequenceParameter(final List<Parameter> parameterCandidates, final boolean isOptional, final boolean isTerminal) {
+        super(parameterCandidates, isOptional, isTerminal);
     }
 
     public boolean endsWithSubcommand() {
@@ -48,18 +49,20 @@ public final class SpongeSequenceParameter extends SpongeMultiParameter {
     @Override
     public boolean createNode(
             final SpongeCommandExecutorWrapper executorWrapper,
-            final Consumer<CommandNode<CommandSource>> buildNodeConsumer,
+            final Consumer<CommandNode<CommandSource>> parentNode,
             final Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            final boolean isTermination) {
+            final boolean isTermination,
+            @Nullable final String suffix) {
 
         return SpongeParameterTranslator.createNode(
                 this.getParameterCandidates().listIterator(),
                 executorWrapper,
-                buildNodeConsumer,
+                parentNode,
                 nodeCallback,
                 potentialOptionalRedirects,
-                isTermination);
+                isTermination || this.isTerminal(),
+                suffix);
     }
 
 

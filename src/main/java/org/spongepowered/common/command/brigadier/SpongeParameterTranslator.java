@@ -155,6 +155,18 @@ public final class SpongeParameterTranslator {
             @Nullable final Consumer<ArgumentBuilder<CommandSource, ?>> lastNodeCallback,
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
             final boolean canBeTerminal) {
+        return SpongeParameterTranslator.createNode(parameters, executorWrapper, builtNodeConsumer, lastNodeCallback, potentialOptionalRedirects,
+                canBeTerminal, null);
+    }
+
+    public static boolean createNode(
+            @NonNull final ListIterator<Parameter> parameters,
+            @Nullable final SpongeCommandExecutorWrapper executorWrapper, // if null, terminal hints will be instead call lastNodeCallback
+            @NonNull final Consumer<CommandNode<CommandSource>> builtNodeConsumer,
+            @Nullable final Consumer<ArgumentBuilder<CommandSource, ?>> lastNodeCallback,
+            final List<CommandNode<CommandSource>> potentialOptionalRedirects,
+            final boolean canBeTerminal,
+            @Nullable final String suffix) {
 
         if (!parameters.hasNext()) {
             return canBeTerminal;
@@ -185,7 +197,8 @@ public final class SpongeParameterTranslator {
                     builtNodeConsumer,
                     nodeCallback,
                     potentialOptionalRedirects,
-                    isInferredTermination
+                    isInferredTermination,
+                    suffix
             ) || isInferredTermination;
         } else if (currentParameter instanceof Parameter.Value<?>) {
 
@@ -200,7 +213,7 @@ public final class SpongeParameterTranslator {
             }
 
             // Process the next element if it exists
-            final List<? extends SpongeArgumentCommandNodeBuilder<?>> currentNodes = SpongeParameterTranslator.createNode(valueParameter);
+            final List<? extends SpongeArgumentCommandNodeBuilder<?>> currentNodes = SpongeParameterTranslator.createNode(valueParameter, suffix);
             final SpongeArgumentCommandNodeBuilder<?> currentNode = currentNodes.get(0);
             if (parameters.hasNext()) {
                 // We still need to execute createNode, so this order matters.
@@ -288,7 +301,8 @@ public final class SpongeParameterTranslator {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @NonNull
-    private static <T> List<SpongeArgumentCommandNodeBuilder<? extends T>> createNode(final Parameter.@NonNull Value<T> parameter) {
+    private static <T> List<SpongeArgumentCommandNodeBuilder<? extends T>> createNode(final Parameter.@NonNull Value<T> parameter,
+            @Nullable final String suffix) {
 
         ArgumentParser<? extends T> type = null;
         if (parameter instanceof SpongeParameterValue<?>) {
@@ -303,7 +317,8 @@ public final class SpongeParameterTranslator {
                         SpongeParameterKey.getSpongeKey(parameter.getKey()),
                         type,
                         parameter.getCompleter(),
-                        parameter.getValueUsage().orElse(null));
+                        parameter.getValueUsage().orElse(null),
+                        suffix);
         // CommandCause is mixed into CommandSource, so this is okay.
         argumentBuilder.requires((Predicate) parameter.getRequirement());
 
@@ -318,7 +333,7 @@ public final class SpongeParameterTranslator {
                                         true),
                                 SpongeParameterTranslator.EMPTY_COMPLETER,
                                 parameter.getValueUsage().orElse(null),
-                                "default");
+                                suffix + "_default");
                 return ImmutableList.of(argumentBuilder, defaultBuilder);
             }
         }

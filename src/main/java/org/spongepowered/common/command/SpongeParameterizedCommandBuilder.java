@@ -58,6 +58,7 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     @Nullable private Function<CommandCause, Optional<Component>> extendedDescription;
     @Nullable private Function<CommandCause, Optional<Component>> shortDescription;
     @Nullable private Predicate<CommandCause> executionRequirements;
+    private boolean isTerminal = false;
 
     @Override
     public Command.@NonNull Builder child(final Command.@NonNull Parameterized child, @NonNull final Iterable<String> aliases) {
@@ -126,6 +127,12 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
+    public Command.@NonNull Builder setTerminal(final boolean terminal) {
+        this.isTerminal = terminal;
+        return this;
+    }
+
+    @Override
     public Command.@NonNull Parameterized build() {
         if (this.subcommands.isEmpty()) {
             Preconditions.checkState(this.commandExecutor != null, "Either a subcommand or an executor must exist!");
@@ -148,7 +155,8 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
                 this.extendedDescription,
                 requirements,
                 this.commandExecutor,
-                this.flags);
+                this.flags,
+                this.isTerminal);
     }
 
     @Override
@@ -162,6 +170,7 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
         this.executionRequirements = null;
         this.extendedDescription = null;
         this.shortDescription = null;
+        this.isTerminal = false;
         return this;
     }
 

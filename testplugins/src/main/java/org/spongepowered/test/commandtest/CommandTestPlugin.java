@@ -239,6 +239,30 @@ public final class CommandTestPlugin {
                     .build(),
                 "getuser"
                 );
+
+        final Parameter.Key<String> stringLiteralKey = Parameter.key("literal", TypeToken.of(String.class));
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .setExecutor(context -> {
+                            context.sendMessage(TextComponent.of("Collected literals: " + String.join(", ", context.getAll(stringLiteralKey))));
+                            return CommandResult.success();
+                        })
+                        .setTerminal(true)
+                        .parameter(
+                                Parameter.firstOfBuilder(Parameter.literal(String.class, "1", "1").setKey(stringLiteralKey).build())
+                                    .or(Parameter.literal(String.class, "2", "2").setKey(stringLiteralKey).build())
+                                    .terminal()
+                                    .build()
+                        )
+                        .parameter(Parameter.seqBuilder(Parameter.literal(String.class, "3", "3").setKey(stringLiteralKey).build())
+                                .then(Parameter.literal(String.class, "4", "4").setKey(stringLiteralKey).build())
+                                .terminal()
+                                .build())
+                        .parameter(Parameter.literal(String.class, "5", "5").optional().setKey(stringLiteralKey).build())
+                        .parameter(Parameter.literal(String.class, "6", "6").setKey(stringLiteralKey).build())
+                        .build(),
+                "testnesting");
     }
 
     @Listener

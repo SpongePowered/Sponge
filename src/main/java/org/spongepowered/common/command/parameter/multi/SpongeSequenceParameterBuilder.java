@@ -59,7 +59,7 @@ public final class SpongeSequenceParameterBuilder implements Parameter.SequenceB
     @NonNull
     public Parameter build() {
         Preconditions.checkState(!this.parameterList.isEmpty(), "There must be at least one parameter!");
-        return new SpongeFirstOfParameter(this.parameterList, this.optional);
+        return new SpongeSequenceParameter(this.parameterList, this.optional, this.terminal);
     }
 
     @Override
