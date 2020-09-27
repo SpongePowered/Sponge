@@ -44,11 +44,14 @@ import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
+import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.map.color.MapColorTypes;
+import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.map.decoration.MapDecorationTypes;
 import org.spongepowered.api.plugin.Plugin;
@@ -183,9 +186,9 @@ public class MapTest implements LoadableModule {
                 for (final MapColorType mapColorType : Sponge.getRegistry().getAllOf(MapColorType.class)) {
                     final MapColor[] colors = new MapColor[] {
                             MapColor.of(mapColorType),
-                            MapColor.builder().baseColor(mapColorType).light().build(),
+                            MapColor.builder().baseColor(mapColorType).darkest().build(),
                             MapColor.builder().baseColor(mapColorType).base().build(),
-                            MapColor.builder().baseColor(mapColorType).dark().build()
+                            MapColor.builder().baseColor(mapColorType).darkest().build()
                     };
                     mapColors.add(colors);
                 }
@@ -378,6 +381,36 @@ public class MapTest implements LoadableModule {
                     return CommandResult.success();
                 })
                 .build(), "getmapfromuuid");
+
+        this.createDefaultCommand("testmapshades", (src, args) -> {
+                    final Player player = this.requirePlayer(src);
+                    for (MapShade shade : Sponge.getRegistry().getAllOf(MapShade.class)) {
+                        final MapColor mapColor = MapColor.of(MapColorTypes.GREEN, shade);
+                        final MapCanvas mapCanvas = MapCanvas.builder().paintAll(mapColor).build();
+                        final MapInfo mapInfo = Sponge.getServer().getMapStorage()
+                                .flatMap(MapStorage::createNewMapInfo)
+                                .orElseThrow(() -> new CommandException(Text.of("Unable to create new map!")));
+                        mapInfo.offer(Keys.MAP_LOCKED, true);
+                        mapInfo.offer(Keys.MAP_CANVAS, mapCanvas);
+                        ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP);
+                        itemStack.offer(Keys.MAP_INFO, mapInfo);
+                        itemStack.offer(Keys.DISPLAY_NAME, Text.of(shade.getName()));
+                        player.getInventory().query(QueryOperationTypes.INVENTORY_TYPE.of(MainPlayerInventory.class))
+                                .offer(itemStack);
+                    }
+                    return CommandResult.success();
+                }
+        );
+
+        this.createDefaultCommand("enableunlimitedtracking", (src, args) -> {
+                final Player player = this.requirePlayer(src);
+                final Optional<ItemStack> heldMap = player.getItemInHand(HandTypes.MAIN_HAND).filter(itemStack -> itemStack.getType() == ItemTypes.FILLED_MAP);
+                if (!heldMap.isPresent()) {
+                    throw new CommandException(Text.of("You must hold a map in your hand"));
+                }
+                heldMap.get().require(Keys.MAP_INFO).offer(Keys.MAP_UNLIMITED_TRACKING, true);
+                return CommandResult.success();
+            });
     }
 
     @Override

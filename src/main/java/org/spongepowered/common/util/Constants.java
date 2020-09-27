@@ -1146,6 +1146,8 @@ public final class Constants {
     public static final class Map {
         public static final DataQuery MAP_ID = of("UnsafeMapId");
         public static final DataQuery MAP_DATA = of("MapData");
+        public static final DataQuery SHADE_NUM = of("shade");
+        public static final DataQuery COLOR_INDEX = of("colorIndex");
 
         // This need to be what they are to be easily convertable to MC NBT
         public static final DataQuery DECORATION_TYPE = of("type");
@@ -1180,8 +1182,7 @@ public final class Constants {
         public static final int MAP_PIXELS = 128;
         public static final int MAP_SHADES = 4;
 
-        // Colors are multiplied by this then divided by 255 to make the true RGB displayed
-        public static final int[] SHADE_MULTIPLIER = new int[] {180, 220, 255, 135};
+        // Colors are multiplied by something then divided by 255 to make the true RGB displayed
         public static final int SHADE_DIVIDER = 255;
 
         // Converts directions into a byte from 0-15 relating to the

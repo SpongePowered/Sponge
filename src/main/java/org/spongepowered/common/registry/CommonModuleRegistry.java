@@ -96,6 +96,7 @@ import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.map.decoration.MapDecorationType;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -186,6 +187,7 @@ import org.spongepowered.common.registry.type.advancement.*;
 import org.spongepowered.common.registry.type.block.*;
 import org.spongepowered.common.registry.type.boss.*;
 import org.spongepowered.common.registry.type.data.*;
+import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
 import org.spongepowered.common.registry.type.service.economy.AccountDeletionResultTypeRegistryModule;
 import org.spongepowered.common.registry.type.service.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.*;
@@ -490,6 +492,7 @@ public final class CommonModuleRegistry {
                 .registerModule(HandPreference.class, HandPreferenceRegistryModule.getInstance())
                 .registerModule(PlaceholderParser.class, new PlaceholderParserRegistryModule())
                 .registerModule(MapColorType.class, MapColorRegistryModule.getInstance())
+                .registerModule(MapShade.class, MapShadeRegistryModule.getInstance())
                 .registerModule(MapDecorationType.class, MapDecorationRegistryModule.getInstance())
                 // Miscellaneous Registries
                 .registerModule(DungeonMobRegistryModule.getInstance())

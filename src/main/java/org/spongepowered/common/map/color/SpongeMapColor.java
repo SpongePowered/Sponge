@@ -28,27 +28,28 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.color.MapShade;
+import org.spongepowered.api.map.color.MapShades;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.util.Constants;
 
 public class SpongeMapColor implements MapColor {
-    private MapColorType type;
-    private int shade;
+    private final MapColorType type;
+    private final MapShade shade;
+    private final byte mcColor;
 
-    public SpongeMapColor(MapColorType type) {
-        this(type, 0);
-    }
-
-    public SpongeMapColor(MapColorType type, int shade) {
+    public SpongeMapColor(MapColorType type, MapShade shade) {
         this.type = type;
         this.shade = shade;
+        this.mcColor = (byte) ((((SpongeMapColorType) this.type).getBaseColor() * Constants.Map.MAP_SHADES) + ((SpongeMapShade)shade).getShadeNum());
     }
 
     public byte getMCColor() {
-        return (byte) ((((SpongeMapColorType) this.type).getBaseColor() * Constants.Map.MAP_SHADES) + this.shade);
+        return this.mcColor;
     }
 
-    public int getShade() {
+    @Override
+    public MapShade getShade() {
         return this.shade;
     }
 
@@ -65,7 +66,7 @@ public class SpongeMapColor implements MapColor {
     }
 
     private int addShade(int color) {
-        return Math.floorDiv(color * Constants.Map.SHADE_MULTIPLIER[this.shade], Constants.Map.SHADE_DIVIDER);
+        return Math.floorDiv(color * ((SpongeMapShade)this.shade).getMultiplier(), Constants.Map.SHADE_DIVIDER);
     }
 
     @Override
@@ -76,7 +77,7 @@ public class SpongeMapColor implements MapColor {
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(DataQuery.of("colorIndex"), ((SpongeMapColorType) this.type).getBaseColor())
-                .set(DataQuery.of("shade"), this.shade);
+                .set(Constants.Map.COLOR_INDEX, ((SpongeMapColorType) this.type).getBaseColor())
+                .set(Constants.Map.SHADE_NUM, ((SpongeMapShade)this.shade).getShadeNum());
     }
 }

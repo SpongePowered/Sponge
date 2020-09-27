@@ -24,37 +24,45 @@
  */
 package org.spongepowered.common.map.color;
 
-import net.minecraft.block.material.MapColor;
-import org.spongepowered.api.map.color.MapColorType;
-import org.spongepowered.api.util.Color;
+import org.spongepowered.api.map.color.MapShade;
+import org.spongepowered.common.util.Constants;
 
-public class SpongeMapColorType implements MapColorType {
-    private final String id;
-    private final String name;
-    private final int colorIndex;
+public class SpongeMapShade implements MapShade {
 
-    public SpongeMapColorType(String id, String name, int colorIndex) {
-        this.id = id;
-        this.name = name;
-        this.colorIndex = colorIndex;
-    }
+	private final String id;
+	private final String name;
+	private final int shadeNum;
+	private final int multiplier;
 
-    public int getBaseColor() {
-        return colorIndex;
-    }
+	/**
+	 * Create a SpongeMapShade with given parameters
+	 * @param id Id of the shade
+	 * @param name Name of the shade
+	 * @param shadeNum Number to add to color byte after multiplying by 4
+	 * @param multiplier Number to multiply R,G and B before dividing by {@value Constants.Map#SHADE_DIVIDER}
+	 */
+	public SpongeMapShade(String id, String name, int shadeNum, int multiplier) {
+		this.id = id;
+		this.name = name;
+		this.shadeNum = shadeNum;
+		this.multiplier = multiplier;
+	}
 
-    @Override
-    public String getId() {
-        return id;
-    }
+	@Override
+	public String getId() {
+		return this.id;
+	}
 
-    @Override
-    public String getName() {
-        return name;
-    }
+	@Override
+	public String getName() {
+		return this.name;
+	}
 
-    @Override
-    public Color getColor() {
-        return Color.of(new java.awt.Color(MapColor.COLORS[colorIndex].colorValue));
-    }
+	public int getShadeNum() {
+		return this.shadeNum;
+	}
+
+	public int getMultiplier() {
+		return multiplier;
+	}
 }

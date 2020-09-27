@@ -34,8 +34,10 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.common.map.MapUtil;
 import org.spongepowered.common.map.color.SpongeMapColor;
+import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -122,8 +124,9 @@ public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> imple
         Map<Integer, SpongeMapColor> palette = new HashMap<>();
         for (MapColorType type : Sponge.getRegistry().getAllOf(MapColorType.class)) {
             // Put each shade in also.
-            for (int i = 0; i < Constants.Map.MAP_SHADES; i++) {
-                SpongeMapColor spongeMapColor = new SpongeMapColor(type, i);
+
+            for (MapShade shade : MapShadeRegistryModule.getInstance().getAll()) {
+                SpongeMapColor spongeMapColor = new SpongeMapColor(type, shade);
                 palette.put(spongeMapColor.getColor().getRgb(), spongeMapColor);
             }
         }

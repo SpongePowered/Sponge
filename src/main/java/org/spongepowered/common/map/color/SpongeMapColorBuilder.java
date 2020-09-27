@@ -25,14 +25,17 @@
 package org.spongepowered.common.map.color;
 
 import com.google.common.base.Preconditions;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.color.MapShade;
+import org.spongepowered.api.map.color.MapShades;
 import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
+import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
+import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -40,39 +43,41 @@ import java.util.Optional;
 public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> implements MapColor.Builder {
     @Nullable
     private MapColorType color = null;
-    private int shade = 2; // Default to 2, i.e same as base().
+    private MapShade shade = MapShades.BASE;
 
     public SpongeMapColorBuilder() {
         super(MapColor.class, 1);
     }
 
     @Override
-    public MapColor.Builder lightest() {
-        this.shade = 0;
+    public MapColor.Builder shade(MapShade shade) {
+        this.shade = shade;
         return this;
     }
 
     @Override
-    public MapColor.Builder light() {
-        this.shade = 1;
-        return this;
+    public MapColor.Builder darker() {
+        return this.shade(MapShades.DARKER);
+    }
+
+    @Override
+    public MapColor.Builder darkest() {
+        return this.shade(MapShades.DARKEST);
     }
 
     @Override
     public MapColor.Builder base() {
-        this.shade = 2;
-        return this;
+        return this.shade(MapShades.BASE);
     }
 
     @Override
     public MapColor.Builder dark() {
-        this.shade = 3;
-        return this;
+        return this.shade(MapShades.DARK);
     }
 
     @Override
     public MapColor.Builder baseColor(MapColorType mapColorType) {
-        color = mapColorType;
+        this.color = mapColorType;
         return this;
     }
 
@@ -84,15 +89,19 @@ public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> impleme
 
     @Override
     protected Optional<MapColor> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQuery.of("mapIndex"))
-                || !container.contains(DataQuery.of("shade"))) {
+        if (!container.contains(Constants.Map.COLOR_INDEX)
+                || !container.contains(Constants.Map.SHADE_NUM)) {
             return Optional.empty();
         }
-        int colorInt = container.getInt(DataQuery.of("mapIndex")).get();
-        Optional<MapColorType> color = MapColorRegistryModule.getByColorValue(colorInt);
-        return color.map(mapColorType -> new SpongeMapColor(
-                mapColorType,
-                container.getInt(DataQuery.of("shade")).get()));
+        int colorInt = container.getInt(Constants.Map.COLOR_INDEX).get();
+        int mapShadeInt = container.getInt(Constants.Map.SHADE_NUM).get();
+
+        MapColorType color = MapColorRegistryModule.getByColorValue(colorInt)
+                .orElseThrow(() -> new InvalidDataException("Invalid map color " + colorInt));
+        MapShade mapShade = MapShadeRegistryModule.getInstance().getByShadeNum(mapShadeInt)
+                .orElseThrow(() -> new InvalidDataException("Invalid map shade " + mapShadeInt));
+
+        return Optional.of(new SpongeMapColor(color, mapShade));
     }
 
     @Override

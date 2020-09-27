@@ -33,9 +33,11 @@ import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.map.color.MapColorTypes;
+import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.common.map.MapUtil;
 import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
+import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import java.awt.Color;
@@ -84,8 +86,11 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
         }
         int shade = intColor % Constants.Map.MAP_SHADES;
         int colorIndex = (intColor - shade)/Constants.Map.MAP_SHADES;
-        MapColorType mapColorType = MapColorRegistryModule.getByColorValue(colorIndex).orElseThrow(() -> new IllegalStateException("Tried to get a color from a map that didn't exist!"));
-        return new SpongeMapColor(mapColorType, shade);
+        MapColorType mapColorType = MapColorRegistryModule.getByColorValue(colorIndex)
+                .orElseThrow(() -> new IllegalStateException("Tried to get a color that didn't exist from a map!"));
+        MapShade mapShade = MapShadeRegistryModule.getInstance().getByShadeNum(shade)
+                .orElseThrow(() -> new IllegalStateException("Tried to get a shade that didn't exist from a map!"));
+        return new SpongeMapColor(mapColorType, mapShade);
     }
 
     @Override

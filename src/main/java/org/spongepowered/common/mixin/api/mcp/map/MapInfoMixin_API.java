@@ -50,11 +50,6 @@ public abstract class MapInfoMixin_API implements MapInfo {
     }
 
     @Override
-    public boolean isLinked(final MapInfo other) {
-        return ((MapDataBridge) this).bridge$getMapId() == ((MapDataBridge) other).bridge$getMapId();
-    }
-
-    @Override
     public boolean isLinked(final ItemStack itemStack) {
         return itemStack.getType() == ItemTypes.FILLED_MAP
                 && ((MapDataBridge) this).bridge$getMapId() == ((net.minecraft.item.ItemStack) itemStack).getMetadata();
