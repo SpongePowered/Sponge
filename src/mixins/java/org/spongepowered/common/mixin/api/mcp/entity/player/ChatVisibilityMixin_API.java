@@ -56,7 +56,7 @@ public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.e
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.resourceKey);
+        return Component.translatable(this.resourceKey);
     }
 
     @Override

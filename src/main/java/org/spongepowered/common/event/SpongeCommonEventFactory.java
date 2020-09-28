@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.block.Block;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -744,7 +743,7 @@ public final class SpongeCommonEventFactory {
             SpongeCommon.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
             final Component message = event.getMessage();
             // Check the event isn't cancelled either. If it is, then don't spawn the message.
-            if (!event.isCancelled() && !event.isMessageCancelled() && message != TextComponent.empty()) {
+            if (!event.isCancelled() && !event.isMessageCancelled() && message != Component.empty()) {
                 event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(message));
             }
             return Optional.of(event);

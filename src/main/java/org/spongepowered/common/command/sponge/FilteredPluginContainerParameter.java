@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.sponge;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -66,6 +66,6 @@ public final class FilteredPluginContainerParameter implements ValueParameter<Pl
         if (pluginContainer != null) {
             return Optional.of(pluginContainer);
         }
-        throw reader.createException(TextComponent.of("Could not find valid plugin to refresh with ID \"" + id + "\""));
+        throw reader.createException(Component.text("Could not find valid plugin to refresh with ID \"" + id + "\""));
     }
 }

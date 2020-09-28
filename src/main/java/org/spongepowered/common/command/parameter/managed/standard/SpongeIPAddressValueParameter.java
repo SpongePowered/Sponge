@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -66,7 +66,7 @@ public final class SpongeIPAddressValueParameter extends CatalogedArgumentParser
         try {
             return Optional.of(InetAddress.getByName(stringToParse));
         } catch (final UnknownHostException e) {
-            throw reader.createException(TextComponent.of(e.getMessage()));
+            throw reader.createException(Component.text(e.getMessage()));
         }
     }
 

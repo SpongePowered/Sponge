@@ -216,17 +216,17 @@ final class PaginationCalculator {
         if (inputLength >= PaginationCalculator.LINE_WIDTH) {
             return text;
         }
-        final Component textWithSpaces = this.addSpaces(TextComponent.space(), text);
+        final Component textWithSpaces = this.addSpaces(Component.space(), text);
 
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH
         final boolean addSpaces = this.getWidth(textWithSpaces) <= PaginationCalculator.LINE_WIDTH;
 
         int paddingLength = this.getWidth(padding);
-        final TextComponent.Builder output = TextComponent.builder();
+        final TextComponent.Builder output = Component.text();
 
         //Using 0 width unicode symbols as padding throws us into an unending loop, replace them with the default padding
         if (paddingLength < 1) {
-            padding = TextComponent.of("=");
+            padding = Component.text("=");
             paddingLength = this.getWidth(padding);
         }
 
@@ -277,7 +277,7 @@ final class PaginationCalculator {
      * @return The text with the added spaces
      */
     private Component addSpaces(final Component spaces, final Component text) {
-        return TextComponent.builder()
+        return Component.text()
                 .append(spaces)
                 .append(text)
                 .append(spaces)

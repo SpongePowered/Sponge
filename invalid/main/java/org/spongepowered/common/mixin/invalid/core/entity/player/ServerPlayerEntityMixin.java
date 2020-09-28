@@ -463,7 +463,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     @Nullable
     public Component bridge$getDisplayNameText() {
-        return TextComponent.of(this.shadow$getScoreboardName());
+        return Component.text(this.shadow$getScoreboardName());
     }
 
     @Override

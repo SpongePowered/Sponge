@@ -26,7 +26,6 @@ package org.spongepowered.test.inventorytest;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -100,7 +99,7 @@ public final class InventoryTest implements LoadableModule {
             this.plugin.getLogger().info("{} slots: {}", "SlotPos 0 6", slotPos0_6.capacity());
 
             // TODO equality check fails with the default TextComponent
-            final Inventory foobarInv = container.query(KeyValueMatcher.of(Keys.DISPLAY_NAME, TextComponent.of("Foobar")));
+            final Inventory foobarInv = container.query(KeyValueMatcher.of(Keys.DISPLAY_NAME, Component.text("Foobar")));
             this.plugin.getLogger().info("{} slots: {}", "Foobar Title", foobarInv.capacity());
             final Inventory max1Quantity = container.query(KeyValueMatcher.of(Keys.MAX_STACK_SIZE, 1));
             this.plugin.getLogger().info("{} slots: {}", "Max quantity 1", max1Quantity.capacity());

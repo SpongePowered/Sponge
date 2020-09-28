@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -69,7 +69,7 @@ public final class SpongePluginContainerValueParameter extends CatalogedArgument
             return container;
         }
 
-        throw reader.createException(TextComponent.of("Could not find plugin with ID \"" + id + "\""));
+        throw reader.createException(Component.text("Could not find plugin with ID \"" + id + "\""));
     }
 
 }

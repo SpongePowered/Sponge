@@ -250,7 +250,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public boolean kick() {
-        return this.kick(TranslatableComponent.of("disconnect.disconnected"));
+        return this.kick(Component.translatable("disconnect.disconnected"));
     }
 
     @Override
@@ -341,7 +341,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     public PlayerChatRouter getChatRouter() {
         if (this.api$chatRouter == null) {
             this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(
-                    TranslatableComponent.of("chat.type.text", ((EntityBridge) player).bridge$getDisplayNameText(), message));
+                    Component.translatable("chat.type.text", ((EntityBridge) player).bridge$getDisplayNameText(), message));
         }
         return this.api$chatRouter;
     }

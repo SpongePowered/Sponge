@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -121,9 +120,9 @@ public final class CommandTestPlugin {
                         .flag(Flag.builder().alias("t").alias("text").setParameter(Parameter.string().setKey(testKey).build()).build())
                         .parameter(Parameter.formattingCodeText().setKey(requiredKey).build())
                         .setExecutor(context -> {
-                            context.sendMessage(TextComponent.of(context.getFlagInvocationCount("flag")));
-                            context.sendMessage(TextComponent.of(context.getFlagInvocationCount("t")));
-                            context.getAll(testKey).forEach(x -> context.sendMessage(TextComponent.of(x)));
+                            context.sendMessage(Component.text(context.getFlagInvocationCount("flag")));
+                            context.sendMessage(Component.text(context.getFlagInvocationCount("t")));
+                            context.getAll(testKey).forEach(x -> context.sendMessage(Component.text(x)));
                             context.sendMessage(context.requireOne(requiredKey));
                             return CommandResult.success();
                         })
@@ -135,8 +134,8 @@ public final class CommandTestPlugin {
                 this.plugin,
                 Command.builder()
                         .setExecutor(x -> {
-                            x.sendMessage(TextComponent.builder("Click Me")
-                                    .clickEvent(SpongeComponents.executeCallback(ctx -> ctx.sendMessage(TextComponent.of("Hello"))))
+                            x.sendMessage(Component.text().content("Click Me")
+                                    .clickEvent(SpongeComponents.executeCallback(ctx -> ctx.sendMessage(Component.text("Hello"))))
                                     .build()
                             );
                             return CommandResult.success();
@@ -157,7 +156,7 @@ public final class CommandTestPlugin {
                                     .build()
                                     .select(x.getCause());
                             for (final Entity entity : collection) {
-                                x.sendMessage(TextComponent.of(entity.toString()));
+                                x.sendMessage(Component.text(entity.toString()));
                             }
                             return CommandResult.success();
                         })
@@ -172,7 +171,7 @@ public final class CommandTestPlugin {
                 Command.builder()
                         .parameter(serverLocationParmeter)
                         .setExecutor(x -> {
-                            x.sendMessage(TextComponent.of(x.requireOne(serverLocationKey).toString()));
+                            x.sendMessage(Component.text(x.requireOne(serverLocationKey).toString()));
                             return CommandResult.success();
                         })
                         .build(),
@@ -190,8 +189,8 @@ public final class CommandTestPlugin {
                                         .setKey(commandParameterKey)
                                         .build())
                         .setExecutor(x -> {
-                            x.sendMessage(TextComponent.of(x.requireOne(serverLocationKey).toString()));
-                            x.sendMessage(TextComponent.of(x.requireOne(commandParameterKey).getKey().toString()));
+                            x.sendMessage(Component.text(x.requireOne(serverLocationKey).toString()));
+                            x.sendMessage(Component.text(x.requireOne(commandParameterKey).getKey().toString()));
                             return CommandResult.success();
                         })
                         .build(),
@@ -206,7 +205,7 @@ public final class CommandTestPlugin {
                         .parameter(Parameter.enumValue(TestEnum.class).orDefault(TestEnum.ONE).setKey(enumParameterKey).build())
                         .parameter(Parameter.string().setKey(stringKey).setSuggestions((context, currentInput) -> ImmutableList.of("bacon", "eggs", "spam")).build())
                         .setExecutor(x -> {
-                            x.sendMessage(TextComponent.of(x.requireOne(enumParameterKey).name()));
+                            x.sendMessage(Component.text(x.requireOne(enumParameterKey).name()));
                             return CommandResult.success();
                         })
                         .build(),
@@ -220,7 +219,7 @@ public final class CommandTestPlugin {
                 Command.builder()
                         .parameter(Parameter.resourceKey().setKey(resourceKeyKey).build())
                         .setExecutor(x -> {
-                            x.sendMessage(TextComponent.of(x.requireOne(resourceKeyKey).getFormatted()));
+                            x.sendMessage(Component.text(x.requireOne(resourceKeyKey).getFormatted()));
                             return CommandResult.success();
                         })
                         .build(),
@@ -233,7 +232,7 @@ public final class CommandTestPlugin {
                 Command.builder()
                     .parameter(Parameter.user().setKey(userKey).build())
                     .setExecutor(context -> {
-                        context.sendMessage(TextComponent.of(context.requireOne(userKey).getName()));
+                        context.sendMessage(Component.text(context.requireOne(userKey).getName()));
                         return CommandResult.success();
                     })
                     .build(),
@@ -245,7 +244,7 @@ public final class CommandTestPlugin {
                 this.plugin,
                 Command.builder()
                         .setExecutor(context -> {
-                            context.sendMessage(TextComponent.of("Collected literals: " + String.join(", ", context.getAll(stringLiteralKey))));
+                            context.sendMessage(Component.text("Collected literals: " + String.join(", ", context.getAll(stringLiteralKey))));
                             return CommandResult.success();
                         })
                         .setTerminal(true)

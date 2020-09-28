@@ -187,7 +187,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
     @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     @Override
     public Audience bridge$getTeamChannel(final ServerPlayerEntity player) {
-        return Audience.of(this.getMembershipCollection().stream()
+        return Audience.audience(this.getMembershipCollection().stream()
                 .map(name -> Sponge.getGame().getServer().getPlayer(name))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -197,7 +197,7 @@ public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
 
     @Override
     public Audience bridge$getNonTeamChannel() {
-        return Audience.of(Sponge.getGame().getServer().getOnlinePlayers().stream()
+        return Audience.audience(Sponge.getGame().getServer().getOnlinePlayers().stream()
                 .filter(player -> ((ServerPlayerEntity) player).getTeam() != (Object) this)
                 .collect(Collectors.toSet()));
     }

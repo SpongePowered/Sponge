@@ -25,7 +25,7 @@
 package org.spongepowered.test.changeblock;
 
 import com.google.inject.Inject;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
@@ -81,8 +81,8 @@ public class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .setExecutor(context -> {
                 this.cancelAll = !this.cancelAll;
-                final TextComponent newState = TextComponent.of(this.cancelAll ? "OFF" : "ON", this.cancelAll ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(TextComponent.of("Turning Block Changes: ").append(newState));
+                final Component newState = Component.text(this.cancelAll ? "OFF" : "ON", this.cancelAll ? NamedTextColor.GREEN : NamedTextColor.RED);
+                context.sendMessage(Component.text("Turning Block Changes: ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleBlockChanges"
@@ -90,8 +90,8 @@ public class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .setExecutor(context -> {
                 this.waterProofRedstone = !this.waterProofRedstone;
-                final TextComponent newState = TextComponent.of(this.waterProofRedstone ? "ON" : "OFF", this.waterProofRedstone ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(TextComponent.of("Waterproof Redstone : ").append(newState));
+                final Component newState = Component.text(this.waterProofRedstone ? "ON" : "OFF", this.waterProofRedstone ? NamedTextColor.GREEN : NamedTextColor.RED);
+                context.sendMessage(Component.text("Waterproof Redstone : ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleRedstoneWaterProofing"
@@ -99,8 +99,8 @@ public class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .setExecutor(context -> {
                 this.printEntityHarvests = !this.printEntityHarvests;
-                final TextComponent newState = TextComponent.of(this.printEntityHarvests ? "ON" : "OFF", this.printEntityHarvests ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(TextComponent.of("Logging Entity Harvests : ").append(newState));
+                final Component newState = Component.text(this.printEntityHarvests ? "ON" : "OFF", this.printEntityHarvests ? NamedTextColor.GREEN : NamedTextColor.RED);
+                context.sendMessage(Component.text("Logging Entity Harvests : ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleEntityHarvestPrinting"
@@ -108,8 +108,8 @@ public class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .setExecutor(context -> {
                 this.printEntityDeaths = !this.printEntityDeaths;
-                final TextComponent newState = TextComponent.of(this.printEntityDeaths ? "ON" : "OFF", this.printEntityDeaths ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(TextComponent.of("Logging Entity Harvests : ").append(newState));
+                final Component newState = Component.text(this.printEntityDeaths ? "ON" : "OFF", this.printEntityDeaths ? NamedTextColor.GREEN : NamedTextColor.RED);
+                context.sendMessage(Component.text("Logging Entity Harvests : ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleEntityDeathPrinting"
@@ -117,8 +117,8 @@ public class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .setExecutor(context -> {
                 this.printEntitySpawns = !this.printEntitySpawns;
-                final TextComponent newState = TextComponent.of(this.printEntitySpawns ? "ON" : "OFF", this.printEntitySpawns ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(TextComponent.of("Logging Entity Spawns : ").append(newState));
+                final Component newState = Component.text(this.printEntitySpawns ? "ON" : "OFF", this.printEntitySpawns ? NamedTextColor.GREEN : NamedTextColor.RED);
+                context.sendMessage(Component.text("Logging Entity Spawns : ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleEntitySpawnPrinting"
@@ -196,7 +196,7 @@ public class ChangeBlockTest implements LoadableModule {
                 post.setCancelled(true);
             }
             if (ChangeBlockTest.this.waterProofRedstone) {
-                for (Transaction<@NonNull BlockSnapshot> transaction : post.getTransactions()) {
+                for (final Transaction<@NonNull BlockSnapshot> transaction : post.getTransactions()) {
                     final boolean wasRedstone = transaction.getOriginal().getState().getType() == BlockTypes.REDSTONE_WIRE.get();
                     final boolean becomesLiquid = transaction.getFinal().getState().get(Keys.MATTER_STATE).get() == MatterStates.LIQUID.get();
                     if (wasRedstone && becomesLiquid) {

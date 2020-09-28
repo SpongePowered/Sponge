@@ -262,7 +262,7 @@ public final class SpongeCommandManager implements CommandManager {
             frame.addContext(EventContextKeys.COMMAND.get(), arguments);
             return this.process(CommandCause.create(), arguments);
         } catch (final CommandSyntaxException commandSyntaxException) {
-            throw new CommandException(TextComponent.of(commandSyntaxException.getMessage()), commandSyntaxException);
+            throw new CommandException(Component.text(commandSyntaxException.getMessage()), commandSyntaxException);
         }
     }
 
@@ -297,7 +297,7 @@ public final class SpongeCommandManager implements CommandManager {
         if (mapping == null) {
             // no command.
             // TextColors.RED,
-            throw new CommandException(TextComponent.of("Unknown command. Type /help for a list of commands."));
+            throw new CommandException(Component.text("Unknown command. Type /help for a list of commands."));
         }
         // For when the phase tracker comes back online
         // final Object source = cause.getCause().root();
@@ -353,19 +353,19 @@ public final class SpongeCommandManager implements CommandManager {
             Component excBuilder;
             if (thr instanceof TextMessageException) {
                 final Component text = ((TextMessageException) thr).getText();
-                excBuilder = text == null ? TextComponent.of("null") : text;
+                excBuilder = text == null ? Component.text("null") : text;
             } else {
-                excBuilder = TextComponent.of(String.valueOf(thr.getMessage()));
+                excBuilder = Component.text(String.valueOf(thr.getMessage()));
             }
             if (cause.hasPermission("sponge.debug.hover-stacktrace")) {
                 final StringWriter writer = new StringWriter();
                 thr.printStackTrace(new PrintWriter(writer));
-                excBuilder = excBuilder.hoverEvent(HoverEvent.showText(TextComponent.of(writer.toString()
+                excBuilder = excBuilder.hoverEvent(HoverEvent.showText(Component.text(writer.toString()
                         .replace("\t", "    ")
                         .replace("\r\n", "\n")
                         .replace("\r", "\n")))); // I mean I guess somebody could be running this on like OS 9?
             }
-            final Component error = TextComponent.builder("Unexpected error occurred while executing command: ").append(excBuilder).build();
+            final Component error = Component.text().content("Unexpected error occurred while executing command: ").append(excBuilder).build();
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, CommandResult.error(error));
             throw new CommandException(error, thr);
         }
@@ -617,9 +617,9 @@ public final class SpongeCommandManager implements CommandManager {
 
     private Component asTextComponent(final Message message) {
         if (message instanceof ITextComponent) {
-            return TextComponent.builder().append(SpongeAdventure.asAdventure((ITextComponent) message)).build();
+            return TextComponent.ofChildren(SpongeAdventure.asAdventure((ITextComponent) message));
         }
-        return TextComponent.of(message.getString());
+        return Component.text(message.getString());
     }
 
 }

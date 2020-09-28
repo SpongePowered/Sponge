@@ -26,7 +26,7 @@ package org.spongepowered.test.datatest;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -211,7 +211,7 @@ public final class DataTest  {
         this.checkOfferData(ravager, Keys.ATTACK_TIME, 200);
 
         final ItemStack writtenBookStack = ItemStack.of(ItemTypes.WRITTEN_BOOK);
-        this.checkOfferData(writtenBookStack, Keys.AUTHOR, TextComponent.of("You"));
+        this.checkOfferData(writtenBookStack, Keys.AUTHOR, Component.text("You"));
 
         BlockState logState = BlockTypes.OAK_LOG.get().getDefaultState();
         this.checkWithData(logState, Keys.AXIS, Axis.Y);
@@ -419,11 +419,11 @@ public final class DataTest  {
         this.checkGetData(acaciaStairs, Keys.DIRECTION, Direction.NORTH);
         this.checkWithData(acaciaStairs, Keys.DIRECTION, Direction.WEST);
 
-        this.checkOfferData(jungleAxe, Keys.DISPLAY_NAME, TextComponent.of("Jungle Axe"));
-        this.checkOfferData(shulkerBullet, Keys.DISPLAY_NAME, TextComponent.of("Angry Shulker Bullet"));
-        this.checkOfferData(sheep, Keys.DISPLAY_NAME, TextComponent.of("Special Sheep"));
+        this.checkOfferData(jungleAxe, Keys.DISPLAY_NAME, Component.text("Jungle Axe"));
+        this.checkOfferData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet"));
+        this.checkOfferData(sheep, Keys.DISPLAY_NAME, Component.text("Special Sheep"));
         world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
-        this.checkOfferData(location, Keys.DISPLAY_NAME, TextComponent.of("Just a Chest"));
+        this.checkOfferData(location, Keys.DISPLAY_NAME, Component.text("Just a Chest"));
 
         player.get(Keys.DOMINANT_HAND).get();
 
@@ -938,7 +938,7 @@ public final class DataTest  {
 
         // TODO Keys.LOCK_TOKEN on BlockEntity
 //        this.checkOfferData(jungleAxe, Keys.LOCK_TOKEN, "Key");
-        this.checkOfferListData(jungleAxe, Keys.LORE, Arrays.asList(TextComponent.of("Loreline1"), TextComponent.of("Loreline2")));
+        this.checkOfferListData(jungleAxe, Keys.LORE, Arrays.asList(Component.text("Loreline1"), Component.text("Loreline2")));
 
 // TODO NPE?
 //        this.checkGetData(dirtState, Keys.MATTER_STATE, MatterStates.SOLID.get());
@@ -989,7 +989,7 @@ public final class DataTest  {
         this.checkGetData(sheep, Keys.ON_GROUND, false);
 
 // TODO failed offer?
-//        this.checkOfferListData(writtenBookStack, Keys.PAGES, Arrays.asList(TextComponent.of("Page 1"), TextComponent.of("Page 2")));
+//        this.checkOfferListData(writtenBookStack, Keys.PAGES, Arrays.asList(Component.text("Page 1"), Component.text("Page 2")));
 
         final Entity parrot = world.createEntity(EntityTypes.PARROT.get(), position);
         this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_AND_BLUE.get());
@@ -1108,9 +1108,9 @@ public final class DataTest  {
 
         final BlockState signState = BlockTypes.SPRUCE_SIGN.get().getDefaultState();
         world.setBlock(blockPos, signState);
-        final TextComponent emptyText = TextComponent.empty().style(Style.empty());
+        final Component emptyText = Component.empty().style(Style.empty());
         this.checkGetListData(location, Keys.SIGN_LINES, Arrays.asList(emptyText, emptyText, emptyText, emptyText));
-        final TextComponent text = TextComponent.of("Test").style(Style.of(NamedTextColor.RED));
+        final Component text = Component.text("Test").style(Style.style(NamedTextColor.RED));
         this.checkOfferListData(location, Keys.SIGN_LINES, Arrays.asList(text, text, text, text));
 
         final Entity slime = world.createEntity(EntityTypes.SLIME.get(), position);

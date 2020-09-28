@@ -25,7 +25,7 @@
 package org.spongepowered.test.worldtest;
 
 import com.google.inject.Inject;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -102,7 +102,7 @@ public final class WorldTest {
                         final ServerLocation location = context.requireOne(locationParameter);
                         final PortalType portalType = context.requireOne(portalTypeParameter);
                         return portalType.teleport(player, location, true) ? CommandResult.success() : CommandResult
-                                .error(TextComponent.of("Could not teleport!"));
+                                .error(Component.text("Could not teleport!"));
                     })
                     .build()
                 , "up", "useportal"
@@ -150,7 +150,7 @@ public final class WorldTest {
                             final Vector3d position =
                                     context.getOne(optVector3Parameter).orElse(properties.getSpawnPosition().toDouble());
                             return player.setLocation(ServerLocation.of(properties.getKey(), position)) ? CommandResult.success() :
-                                    CommandResult.error(TextComponent.of("Could not teleport!"));
+                                    CommandResult.error(Component.text("Could not teleport!"));
                         })
                         .build()
                 , "cl", "changelocation"
@@ -164,7 +164,7 @@ public final class WorldTest {
                             final ResourceKey key = context.requireOne(unloadedWorldKeyParameter);
                             Sponge.getServer().getWorldManager().loadWorld(key).whenComplete(((serverWorld, throwable) -> {
                                 if (throwable != null) {
-                                    context.getCause().getAudience().sendMessage(TextComponent.of(throwable.getMessage()));
+                                    context.getCause().getAudience().sendMessage(Component.text(throwable.getMessage()));
                                 }
                             }));
                             return CommandResult.success();
@@ -188,13 +188,13 @@ public final class WorldTest {
                                     .build();
                             Sponge.getServer().getWorldManager().createProperties(key, archetype).whenComplete(((worldProperties, throwable) -> {
                                 if (throwable != null) {
-                                    context.getCause().getAudience().sendMessage(TextComponent.of(throwable.getMessage()));
+                                    context.getCause().getAudience().sendMessage(Component.text(throwable.getMessage()));
                                     return;
                                 }
 
                                 Sponge.getServer().getWorldManager().loadWorld(worldProperties).whenComplete(((serverWorld, throwable1) -> {
                                     if (throwable1 != null) {
-                                        context.getCause().getAudience().sendMessage(TextComponent.of(throwable1.getMessage()));
+                                        context.getCause().getAudience().sendMessage(Component.text(throwable1.getMessage()));
                                     }
                                 }));
                             }));
@@ -212,7 +212,7 @@ public final class WorldTest {
                             final WorldProperties properties = context.requireOne(worldParameter);
                             Sponge.getServer().getWorldManager().unloadWorld(properties.getKey()).whenComplete((aBoolean, throwable) -> {
                                 if (throwable != null) {
-                                    context.getCause().getAudience().sendMessage(TextComponent.of(throwable.getMessage()));
+                                    context.getCause().getAudience().sendMessage(Component.text(throwable.getMessage()));
                                 }
                             });
 
@@ -227,8 +227,8 @@ public final class WorldTest {
                         .parameter(playerParameter)
                         .setExecutor(context -> {
                             final ServerPlayer player = context.requireOne(playerParameter);
-                            player.sendMessage(TextComponent.of("You are in World ").append(TextComponent.of(player.getWorld().getKey().toString(),
-                             NamedTextColor.AQUA)).append(TextComponent.of(" at (" + player.getPosition().getFloorX() + ", " + player.getPosition().getFloorY() +
+                            player.sendMessage(Component.text("You are in World ").append(Component.text(player.getWorld().getKey().toString(),
+                             NamedTextColor.AQUA)).append(Component.text(" at (" + player.getPosition().getFloorX() + ", " + player.getPosition().getFloorY() +
                                     ", " + player.getPosition().getFloorZ() + ")")));
                             return CommandResult.success();
                         })

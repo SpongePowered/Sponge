@@ -25,7 +25,7 @@
 package org.spongepowered.test.humantest;
 
 import com.google.inject.Inject;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -65,10 +65,10 @@ public final class HumanTest {
                         final String name = context.requireOne(nameParameter);
                         final String mimicUsername = context.getOne(mimicParameter).orElse(name);
                         final Human human = player.getWorld().createEntity(EntityTypes.HUMAN.get(), player.getPosition());
-                        human.offer(Keys.DISPLAY_NAME, TextComponent.of(name));
+                        human.offer(Keys.DISPLAY_NAME, Component.text(name));
                         human.useSkinFor(mimicUsername);
                         final boolean result = player.getWorld().spawnEntity(human);
-                        return result ? CommandResult.success() : CommandResult.error(TextComponent.of("Failed to spawn the human!"));
+                        return result ? CommandResult.success() : CommandResult.error(Component.text("Failed to spawn the human!"));
                     })
                     .build()
             , "ch", "createhuman"

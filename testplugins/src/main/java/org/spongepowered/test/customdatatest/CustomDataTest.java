@@ -26,7 +26,7 @@ package org.spongepowered.test.customdatatest;
 
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
@@ -107,14 +107,14 @@ public final class CustomDataTest {
                             player.getInventory().offer(stack);
                             final List<Slot> slots = player.getInventory().query(QueryTypes.ITEM_STACK_CUSTOM.get().of(s -> s.get(this.myKey).isPresent())).slots();
                             final int itemSum = slots.stream().map(Slot::peek).mapToInt(item -> item.get(this.myKey).get()).sum();
-                            player.sendActionBar(TextComponent.of(itemSum));
+                            player.sendActionBar(Component.text(itemSum));
                             break;
                         case ENTITY:
                             final Entity entity = player.getWorld().createEntity(EntityTypes.MINECART.get(), player.getPosition().add(0, 3, 0));
                             entity.offer(this.myKey, number);
                             player.getWorld().spawnEntity(entity);
                             final int entitySum = player.getNearbyEntities(5).stream().filter(e -> e.get(this.myKey).isPresent()).mapToInt(e -> e.get(this.myKey).get()).sum();
-                            player.sendActionBar(TextComponent.of(entitySum));
+                            player.sendActionBar(Component.text(entitySum));
                             break;
                         case BLOCKENTITY:
                             player.getWorld().setBlock(player.getBlockPosition(), BlockTypes.DISPENSER.get().getDefaultState());
@@ -122,17 +122,17 @@ public final class CustomDataTest {
                             blockEntity.offer(this.myKey, number);
                             final int blockEntitySum = player.getWorld().getBlockEntities().stream().filter(e -> e.get(this.myKey).isPresent())
                                     .mapToInt(e -> e.get(this.myKey).get()).sum();
-                            player.sendActionBar(TextComponent.of(blockEntitySum));
+                            player.sendActionBar(Component.text(blockEntitySum));
                             break;
                         case PLAYER:
                             final Integer integer = player.get(this.myKey).orElse(0);
-                            player.sendActionBar(TextComponent.of(integer));
+                            player.sendActionBar(Component.text(integer));
                             player.offer(this.myKey, number);
                             break;
                         case USER:
                             // delegate to player
                             this.customUserData(player.getUniqueId(), number);
-                            player.kick(TextComponent.of("Setting User data..."));
+                            player.kick(Component.text("Setting User data..."));
                             final Scheduler scheduler = Sponge.getServer().getScheduler();
                             scheduler.submit(Task.builder().delayTicks(1).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
                             scheduler.submit(Task.builder().delayTicks(2).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
@@ -140,7 +140,7 @@ public final class CustomDataTest {
                         case BLOCK:
                             // try out custom data-stores
                             final Integer oldNumber = player.getWorld().get(player.getBlockPosition(), this.myKey).orElse(0);
-                            player.sendActionBar(TextComponent.of(oldNumber));
+                            player.sendActionBar(Component.text(oldNumber));
                             player.getWorld().offer(player.getBlockPosition(), this.myKey, oldNumber + number);
                     }
                     return CommandResult.success();

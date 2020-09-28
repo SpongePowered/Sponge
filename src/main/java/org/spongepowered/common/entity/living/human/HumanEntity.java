@@ -28,7 +28,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.CreatureEntity;
@@ -151,7 +150,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
 
     @Override
     public Component getTeamRepresentation() {
-        return TextComponent.of(this.fakeProfile.getName());
+        return Component.text(this.fakeProfile.getName());
     }
 
     @Override

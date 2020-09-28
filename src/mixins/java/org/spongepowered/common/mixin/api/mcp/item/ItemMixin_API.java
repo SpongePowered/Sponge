@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.item;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.item.Item;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
@@ -57,7 +56,7 @@ public abstract class ItemMixin_API implements ItemType {
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.shadow$getTranslationKey());
+        return Component.translatable(this.shadow$getTranslationKey());
     }
 
     @Override

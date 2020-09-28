@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.network.login;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.login.ServerLoginNetHandler;
 import net.minecraft.network.play.server.SDisconnectPacket;
@@ -94,7 +93,7 @@ public abstract class ServerLoginNetHandlerMixin implements ServerLoginNetHandle
 
     @Override
     public boolean bridge$fireAuthEvent() {
-        final Component disconnectMessage = TextComponent.of("You are not allowed to log in to this server.");
+        final Component disconnectMessage = Component.text("You are not allowed to log in to this server.");
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
                 cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this);

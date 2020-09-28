@@ -71,21 +71,21 @@ public class SpongeCommand {
 
     protected static final String INDENT = "    ";
     protected static final String LONG_INDENT = SpongeCommand.INDENT + SpongeCommand.INDENT;
-    protected static final TextComponent INDENT_COMPONENT = TextComponent.of(SpongeCommand.INDENT);
-    protected static final TextComponent LONG_INDENT_COMPONENT = TextComponent.of(SpongeCommand.LONG_INDENT);
+    protected static final Component INDENT_COMPONENT = Component.text(SpongeCommand.INDENT);
+    protected static final Component LONG_INDENT_COMPONENT = Component.text(SpongeCommand.LONG_INDENT);
     protected static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
 
     private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", TypeTokens.PLUGIN_CONTAINER_TOKEN);
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", TypeTokens.COMMAND_MAPPING);
     private final Parameter.Key<WorldProperties> worldPropertiesKey = Parameter.key("world", TypeTokens.WORLD_PROPERTIES_TOKEN);
 
-    @Nullable private TextComponent versionText = null;
+    @Nullable private Component versionText = null;
 
     public Command.Parameterized createSpongeCommand() {
         // /sponge audit
         final Command.Parameterized auditCommand = Command.builder()
                 .setPermission("sponge.command.audit")
-                .setShortDescription(TextComponent.of("Audit mixin classes for implementation"))
+                .setShortDescription(Component.text("Audit mixin classes for implementation"))
                 .setExecutor(this::auditSubcommandExecutor)
                 .build();
 
@@ -95,14 +95,14 @@ public class SpongeCommand {
         // /sponge heap
         final Command.Parameterized heapCommand = Command.builder()
                 .setPermission("sponge.command.heap")
-                .setShortDescription(TextComponent.of("Dump live JVM heap"))
+                .setShortDescription(Component.text("Dump live JVM heap"))
                 .setExecutor(this::heapSubcommandExecutor)
                 .build();
 
         // /sponge plugins
         final Command.Parameterized pluginsReloadCommand = Command.builder()
                 .setPermission("sponge.command.plugins.refresh")
-                .setShortDescription(TextComponent.of("Refreshes supported plugins, typically causing plugin configuration reloads."))
+                .setShortDescription(Component.text("Refreshes supported plugins, typically causing plugin configuration reloads."))
                 .parameter(Parameter.builder(PluginContainer.class)
                         .optional()
                         .parser(new FilteredPluginContainerParameter())
@@ -112,12 +112,12 @@ public class SpongeCommand {
                 .build();
         final Command.Parameterized pluginsListCommand = Command.builder()
                 .setPermission("sponge.command.plugins.list")
-                .setShortDescription(TextComponent.of("Lists all currently installed plugins."))
+                .setShortDescription(Component.text("Lists all currently installed plugins."))
                 .setExecutor(this::pluginsListSubcommand)
                 .build();
         final Command.Parameterized pluginsInfoCommand = Command.builder()
                 .setPermission("sponge.command.plugins.info")
-                .setShortDescription(TextComponent.of("Displays information about a specific plugin."))
+                .setShortDescription(Component.text("Displays information about a specific plugin."))
                 .parameter(Parameter.plugin().setKey(this.pluginContainerKey).build())
                 .setExecutor(this::pluginsInfoSubcommand)
                 .build();
@@ -134,14 +134,14 @@ public class SpongeCommand {
         // /sponge tps
         final Command.Parameterized tpsCommand = Command.builder()
                 .setPermission("sponge.command.tps")
-                .setShortDescription(TextComponent.of("Provides TPS (ticks per second) data for loaded worlds."))
+                .setShortDescription(Component.text("Provides TPS (ticks per second) data for loaded worlds."))
                 .setExecutor(this::tpsExecutor)
                 .build();
 
         // /sponge version
         final Command.Parameterized versionCommand = Command.builder()
                 .setPermission("sponge.command.version")
-                .setShortDescription(TextComponent.of("Display Sponge's current version"))
+                .setShortDescription(Component.text("Display Sponge's current version"))
                 .setExecutor(this::versionExecutor)
                 .build();
 
@@ -149,7 +149,7 @@ public class SpongeCommand {
         final Command.Parameterized whichCommand = Command.builder()
                 .setPermission("sponge.command.which")
                 .parameter(Parameter.builder(CommandMapping.class).setKey(this.commandMappingKey).parser(new CommandAliasesParameter()).build())
-                .setShortDescription(TextComponent.of("Find the plugin that owns a specific command"))
+                .setShortDescription(Component.text("Find the plugin that owns a specific command"))
                 .setExecutor(this::whichExecutor)
                 .build();
 
@@ -180,13 +180,13 @@ public class SpongeCommand {
         final PluginContainer apiPlugin = Launch.getInstance().getApiPlugin();
         final PluginContainer minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
 
-        context.sendMessage(TextComponent.builder().append(
-                TextComponent.of("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(TextComponent.space()),
-                TextComponent.of("Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"),
-                TextComponent.newline(),
-                TextComponent.of(apiPlugin.getMetadata().getName().get() + ": " + apiPlugin.getMetadata().getVersion()),
-                TextComponent.newline(),
-                TextComponent.of(platformPlugin.getMetadata().getName().get() + ": " + platformPlugin.getMetadata().getVersion())
+        context.sendMessage(Component.text().append(
+                Component.text("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(Component.space()),
+                Component.text("Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"),
+                Component.newline(),
+                Component.text(apiPlugin.getMetadata().getName().get() + ": " + apiPlugin.getMetadata().getVersion()),
+                Component.newline(),
+                Component.text(platformPlugin.getMetadata().getName().get() + ": " + platformPlugin.getMetadata().getVersion())
             ).build()
         );
 
@@ -199,11 +199,11 @@ public class SpongeCommand {
                     .flatMap(x -> x.getAliases().stream())
                     .collect(Collectors.joining(", "));
             if (!subcommands.isEmpty()) {
-                context.sendMessage(TextComponent.builder().append(
-                        TextComponent.newline(),
-                        TextComponent.of("Available subcommands:"),
-                        TextComponent.newline(),
-                        TextComponent.of(subcommands)).build()
+                context.sendMessage(Component.text().append(
+                        Component.newline(),
+                        Component.text("Available subcommands:"),
+                        Component.newline(),
+                        Component.text(subcommands)).build()
                 );
             }
         }
@@ -222,8 +222,8 @@ public class SpongeCommand {
         final Command.Parameterized globalCommand = Command.builder()
                 .setExecutor(context -> {
                     for (final ServerWorld world : SpongeCommon.getGame().getServer().getWorldManager().getWorlds()) {
-                        context.sendMessage(TextComponent.builder("World ")
-                                        .append(TextComponent.of(world.getKey().toString(), Style.of(TextDecoration.BOLD)))
+                        context.sendMessage(Component.text().content("World ")
+                                        .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
                                         .append(this.getChunksInfo(world))
                                         .build());
                     }
@@ -235,9 +235,9 @@ public class SpongeCommand {
                 .setExecutor(context -> {
                     final WorldProperties properties = context.requireOne(this.worldPropertiesKey);
                     final ServerWorld world = properties.getWorld()
-                            .orElseThrow(() -> new CommandException(TextComponent.of("The world " + properties.getKey().toString() + " is not loaded!")));
-                    context.sendMessage(TextComponent.builder("World ")
-                            .append(TextComponent.of(world.getKey().toString(), Style.of(TextDecoration.BOLD)))
+                            .orElseThrow(() -> new CommandException(Component.text("The world " + properties.getKey().toString() + " is not loaded!")));
+                    context.sendMessage(Component.text().content("World ")
+                            .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
                             .append(this.getChunksInfo(world))
                             .build());
                     return CommandResult.success();
@@ -249,9 +249,9 @@ public class SpongeCommand {
                 .setExecutor(context -> {
                     final File file = new File(new File(new File("."), "chunk-dumps"),
                             "chunk-info-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.txt");
-                    context.sendMessage(TextComponent.of("Writing chunk info to: " + file.getAbsolutePath()));
+                    context.sendMessage(Component.text("Writing chunk info to: " + file.getAbsolutePath()));
                     // ChunkSaveHelper.writeChunks(file, context.hasAny(dumpAllKey));
-                    context.sendMessage(TextComponent.of("Chunk info complete"));
+                    context.sendMessage(Component.text("Chunk info complete"));
                     return CommandResult.success();
                 })
                 .build();
@@ -281,7 +281,7 @@ public class SpongeCommand {
         context.sendMessage(this.title("Plugins (" + plugins.size() + ")"));
         for (final PluginContainer specificContainer : plugins) {
             final PluginMetadata metadata = specificContainer.getMetadata();
-            final TextComponent.Builder builder = TextComponent.builder();
+            final TextComponent.Builder builder = Component.text();
             this.createShortContainerMeta(builder.append(INDENT_COMPONENT), metadata);
             // builder.clickEvent(SpongeComponents.executeCallback(cause ->
             //         cause.sendMessage(this.createContainerMeta(metadata))));
@@ -307,36 +307,36 @@ public class SpongeCommand {
         );
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
-            context.sendMessage(TextComponent.of("Sending refresh event to" + pluginContainer.get().getMetadata().getId() + ", please wait..."));
+            context.sendMessage(Component.text("Sending refresh event to" + pluginContainer.get().getMetadata().getId() + ", please wait..."));
             ((SpongeEventManager) SpongeCommon.getGame().getEventManager()).post(event, pluginContainer.get());
         } else {
-            context.sendMessage(TextComponent.of("Sending refresh event to all plugins, please wait..."));
+            context.sendMessage(Component.text("Sending refresh event to all plugins, please wait..."));
             SpongeCommon.getGame().getEventManager().post(event);
         }
 
-        context.sendMessage(TextComponent.of("Completed plugin refresh."));
+        context.sendMessage(Component.text("Completed plugin refresh."));
         return CommandResult.success();
     }
 
     private Command.@NonNull Parameterized timingsSubcommand() {
         return Command.builder()
                 .setPermission("sponge.command.timings")
-                .setShortDescription(TextComponent.of("Manages Sponge Timings data to see performance of the server."))
+                .setShortDescription(Component.text("Manages Sponge Timings data to see performance of the server."))
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.reset();
-                            context.sendMessage(TextComponent.of("Timings reset"));
+                            context.sendMessage(Component.text("Timings reset"));
                             return CommandResult.success();
                         })
                         .build(), "reset")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.generateReport(context.getCause().getAudience());
@@ -346,46 +346,46 @@ public class SpongeCommand {
                 .child(Command.builder()
                         .setExecutor(context -> {
                             Timings.setTimingsEnabled(true);
-                            context.sendMessage(TextComponent.of("Enabled Timings & Reset"));
+                            context.sendMessage(Component.text("Enabled Timings & Reset"));
                             return CommandResult.success();
                         })
                         .build(), "on")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             Timings.setTimingsEnabled(false);
-                            context.sendMessage(TextComponent.of("Disabled Timings"));
+                            context.sendMessage(Component.text("Disabled Timings"));
                             return CommandResult.success();
                         })
                         .build(), "off")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.setVerboseTimingsEnabled(true);
-                            context.sendMessage(TextComponent.of("Enabled Verbose Timings"));
+                            context.sendMessage(Component.text("Enabled Verbose Timings"));
                             return CommandResult.success();
                         })
                         .build(), "verbon")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.setVerboseTimingsEnabled(false);
-                            context.sendMessage(TextComponent.of("Disabled Verbose Timings"));
+                            context.sendMessage(Component.text("Disabled Verbose Timings"));
                             return CommandResult.success();
                         })
                         .build(), "verboff")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(TextComponent.of("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            context.sendMessage(TextComponent.of("Timings cost: " + SpongeTimingsFactory.getCost()));
+                            context.sendMessage(Component.text("Timings cost: " + SpongeTimingsFactory.getCost()));
                             return CommandResult.success();
                         })
                         .build(), "cost")
@@ -399,19 +399,19 @@ public class SpongeCommand {
 //            // Add code to get the average here.
 //            final TextComponent.Builder builder =
 //                    TextComponent.builder("World [")
-//                            .append(TextComponent.of(world.getKey().asString(), NamedTextColor.DARK_GREEN))
-//                            .append(TextComponent.of("]"));
+//                            .append(Component.text(world.getKey().asString(), NamedTextColor.DARK_GREEN))
+//                            .append(Component.text("]"));
 //            tps.add(this.appendTickTime(((MinecraftServerBridge) SpongeCommon.getServer()).bridge$getWorldTickTimes()));
 //        }
 
-        tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimeArray, TextComponent.builder("Overall TPS: ")).build());
+        tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimeArray, Component.text().content("Overall TPS: ")).build());
 
         SpongeCommon.getGame().getServiceProvider()
                 .paginationService()
                 .builder()
                 .contents(tps)
-                .title(TextComponent.of("Server TPS", NamedTextColor.WHITE))
-                .padding(TextComponent.of("-", NamedTextColor.WHITE))
+                .title(Component.text("Server TPS", NamedTextColor.WHITE))
+                .padding(Component.text("-", NamedTextColor.WHITE))
                 .sendTo(context.getCause().getAudience());
 
         return CommandResult.success();
@@ -419,9 +419,9 @@ public class SpongeCommand {
 
     private TextComponent.Builder appendTickTime(final long[] tickTimes, final TextComponent.Builder builder) {
         final double averageTickTime = MathHelper.average(tickTimes) * 1.0E-6D;
-        builder.append(TextComponent.of(THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
-                .append(", Mean: ")
-                .append(THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED);
+        builder.append(Component.text(THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
+                .append(Component.text(", Mean: "))
+                .append(Component.text(THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED));
         return builder;
     }
 
@@ -430,20 +430,20 @@ public class SpongeCommand {
         if (this.versionText == null) {
             final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
 
-            final TextComponent.Builder builder = TextComponent.builder()
+            final TextComponent.Builder builder = Component.text()
                     .append(
-                            TextComponent.of(platformPlugin.getMetadata().getName().get(), Style.of(NamedTextColor.YELLOW, TextDecoration.BOLD))
+                            Component.text(platformPlugin.getMetadata().getName().get(), Style.style(NamedTextColor.YELLOW, TextDecoration.BOLD))
                     );
 
-            final TextComponent colon = TextComponent.of(": ", NamedTextColor.GRAY);
+            final Component colon = Component.text(": ", NamedTextColor.GRAY);
             for (final PluginContainer container : Launch.getInstance().getLauncherPlugins()) {
                 final PluginMetadata metadata = container.getMetadata();
                 builder.append(
-                        TextComponent.newline(),
+                        Component.newline(),
                         SpongeCommand.INDENT_COMPONENT,
-                        TextComponent.of(metadata.getName().orElseGet(metadata::getId), NamedTextColor.GRAY),
+                        Component.text(metadata.getName().orElseGet(metadata::getId), NamedTextColor.GRAY),
                         colon,
-                        TextComponent.of(container.getMetadata().getVersion())
+                        Component.text(container.getMetadata().getVersion())
                 );
             }
 
@@ -457,16 +457,16 @@ public class SpongeCommand {
             final String osArch = System.getProperty("os.arch");
 
             builder.append(
-                    TextComponent.newline(),
+                    Component.newline(),
                     SpongeCommand.INDENT_COMPONENT,
-                    TextComponent.of("JVM", NamedTextColor.GRAY),
+                    Component.text("JVM", NamedTextColor.GRAY),
                     colon,
-                    TextComponent.of(javaVersion + "/" + javaArch + " (" + javaVendor + ")"),
-                    TextComponent.newline(),
+                    Component.text(javaVersion + "/" + javaArch + " (" + javaVendor + ")"),
+                    Component.newline(),
                     SpongeCommand.INDENT_COMPONENT,
-                    TextComponent.of("OS", NamedTextColor.GRAY),
+                    Component.text("OS", NamedTextColor.GRAY),
                     colon,
-                    TextComponent.of(osName + "/" + osVersion + " (" + osArch + ")")
+                    Component.text(osName + "/" + osVersion + " (" + osArch + ")")
             );
             this.versionText = builder.build();
         }
@@ -478,11 +478,11 @@ public class SpongeCommand {
     @NonNull
     private CommandResult whichExecutor(final CommandContext context) {
         final CommandMapping mapping = context.requireOne(this.commandMappingKey);
-        context.sendMessage(TextComponent.builder().append(
+        context.sendMessage(Component.text().append(
                 this.title("Aliases: "),
-                TextComponent.join(TextComponent.of(", "),
-                    mapping.getAllAliases().stream().map(x -> TextComponent.of(x, NamedTextColor.YELLOW)).collect(Collectors.toList())),
-                TextComponent.newline(),
+                TextComponent.join(Component.text(", "),
+                    mapping.getAllAliases().stream().map(x -> Component.text(x, NamedTextColor.YELLOW)).collect(Collectors.toList())),
+                Component.newline(),
                 this.title("Owned by: "),
                 this.hl(mapping.getPlugin().getMetadata().getName().orElseGet(() -> mapping.getPlugin().getMetadata().getId())))
                 .build());
@@ -491,11 +491,11 @@ public class SpongeCommand {
 
     // --
 
-    protected TextComponent getChunksInfo(final ServerWorld worldserver) {
+    protected Component getChunksInfo(final ServerWorld worldserver) {
         if (((WorldBridge) worldserver).bridge$isFake() || worldserver.getWorldStorage().getWorldProperties() == null) {
-            return TextComponent.builder().append(TextComponent.newline(), TextComponent.of("Fake world")).build();
+            return Component.text().append(Component.newline(), Component.text("Fake world")).build();
         }
-        return TextComponent.builder().append(TextComponent.newline(), TextComponent.of("chunk stuff here")).build();
+        return Component.text().append(Component.newline(), Component.text("chunk stuff here")).build();
         /*
                 key("DimensionId: "), value(((WorldServerBridge) worldserver).bridge$getDimensionId()), TextComponent.newline(),
                 key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), TextComponent.newline(),
@@ -506,45 +506,45 @@ public class SpongeCommand {
                 key("Removed Tile Entities: "), value(((WorldAccessor) worldserver).accessor$getTileEntitiesToBeRemoved()), TextComponent.newline()*/
     }
 
-    protected TextComponent key(final String text) {
-        return TextComponent.of(text, NamedTextColor.GOLD);
+    protected Component key(final String text) {
+        return Component.text(text, NamedTextColor.GOLD);
     }
 
-    protected TextComponent value(final String text) {
-        return TextComponent.of(text, NamedTextColor.GRAY);
+    protected Component value(final String text) {
+        return Component.text(text, NamedTextColor.GRAY);
     }
 
-    private TextComponent title(final String title) {
-        return TextComponent.of(title, NamedTextColor.GREEN);
+    private Component title(final String title) {
+        return Component.text(title, NamedTextColor.GREEN);
     }
 
-    private TextComponent hl(final String toHighlight) {
-        return TextComponent.of(toHighlight, NamedTextColor.DARK_GREEN);
+    private Component hl(final String toHighlight) {
+        return Component.text(toHighlight, NamedTextColor.DARK_GREEN);
     }
 
     private void appendPluginMeta(final TextComponent.Builder builder, final String key, final String value) {
-        this.appendPluginMeta(builder, key, TextComponent.of(value));
+        this.appendPluginMeta(builder, key, Component.text(value));
     }
 
     private void appendPluginMeta(final TextComponent.Builder builder, final String key, final URL value) {
         final String url = value.toString();
-        this.appendPluginMeta(builder, key, TextComponent.builder(url).clickEvent(ClickEvent.openUrl(url))
+        this.appendPluginMeta(builder, key, Component.text().content(url).clickEvent(ClickEvent.openUrl(url))
                 .decoration(TextDecoration.UNDERLINED, true).build());
     }
 
-    private void appendPluginMeta(final TextComponent.Builder builder, final String key, final TextComponent value) {
-        builder.append(TextComponent.newline())
+    private void appendPluginMeta(final TextComponent.Builder builder, final String key, final Component value) {
+        builder.append(Component.newline())
                 .append()
                 .append(SpongeCommand.INDENT_COMPONENT, this.title(key + ": "), value);
     }
 
     private void createShortContainerMeta(final TextComponent.Builder builder, final PluginMetadata pluginMetadata) {
         builder.append(this.title(pluginMetadata.getName().orElse(pluginMetadata.getId())));
-        builder.append(" v" + pluginMetadata.getVersion());
+        builder.append(Component.text(" v" + pluginMetadata.getVersion()));
     }
 
-    private TextComponent createContainerMeta(final PluginMetadata pluginMetadata) {
-        final TextComponent.Builder builder = TextComponent.builder();
+    private Component createContainerMeta(final PluginMetadata pluginMetadata) {
+        final TextComponent.Builder builder = Component.text();
         this.createShortContainerMeta(builder, pluginMetadata);
 
         this.appendPluginMeta(builder, "ID", pluginMetadata.getId());
@@ -554,10 +554,10 @@ public class SpongeCommand {
         pluginMetadata.getLinks().getSource().ifPresent(x -> this.appendPluginMeta(builder, "Source", x));
         final Collection<PluginContributor> contributors = pluginMetadata.getContributors();
         if (!contributors.isEmpty()) {
-            builder.append(TextComponent.newline()).append(SpongeCommand.INDENT_COMPONENT).append(this.title("Contributors:"));
+            builder.append(Component.newline()).append(SpongeCommand.INDENT_COMPONENT).append(this.title("Contributors:"));
             for (final PluginContributor contributor : contributors) {
-                builder.append(TextComponent.newline()).append(SpongeCommand.LONG_INDENT_COMPONENT).append(contributor.getName());
-                contributor.getDescription().ifPresent(x -> builder.append(" (" + x + ")"));
+                builder.append(Component.newline()).append(SpongeCommand.LONG_INDENT_COMPONENT).append(Component.text(contributor.getName()));
+                contributor.getDescription().ifPresent(x -> builder.append(Component.text(" (" + x + ")")));
             }
         }
 

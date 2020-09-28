@@ -26,7 +26,7 @@ package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -67,12 +67,12 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
         int x = 0;
         while (iterator.hasNext() && x < toCompare.length) {
             if (!iterator.next().equals(toCompare[x++])) {
-                throw reader.createException(TextComponent.of("The provided literal was not " + String.join(" ", collection)));
+                throw reader.createException(Component.text("The provided literal was not " + String.join(" ", collection)));
             }
         }
 
         if (iterator.hasNext()) {
-            throw reader.createException(TextComponent.of("The provided literal was not " + String.join(" ", collection)));
+            throw reader.createException(Component.text("The provided literal was not " + String.join(" ", collection)));
         }
 
         return Optional.of(this.returnValue.get());

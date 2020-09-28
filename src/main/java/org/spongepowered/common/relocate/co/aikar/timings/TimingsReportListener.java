@@ -53,7 +53,7 @@ public final class TimingsReportListener {
         this.channels = Lists.newArrayList(channels);
         this.addConsoleIfNeeded(this.channels);
         this.onDone = onDone;
-        this.audience = (ForwardingAudience) Audience.of(this.channels);
+        this.audience = Audience.audience(this.channels);
     }
 
     public String getTimingsURL() {

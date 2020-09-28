@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.tracker.entity;
 
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Pose;
@@ -172,8 +172,8 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
                 this.tracker$destructCause,
                 originalChannel,
                 Optional.of(originalChannel),
-                TextComponent.empty(),
-                TextComponent.empty(),
+                Component.empty(),
+                Component.empty(),
                 (org.spongepowered.api.entity.Entity) this,
                 false
             ));

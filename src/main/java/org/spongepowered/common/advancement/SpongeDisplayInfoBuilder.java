@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.AdvancementType;
@@ -125,7 +124,7 @@ public class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     @Override
     public DisplayInfo.Builder reset() {
         this.icon = null;
-        this.description = TextComponent.empty();
+        this.description = Component.empty();
         this.advancementType = AdvancementTypes.TASK.get();
         this.announceToChat = true;
         this.hidden = false;

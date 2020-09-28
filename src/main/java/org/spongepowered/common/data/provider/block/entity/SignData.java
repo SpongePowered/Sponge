@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.tileentity.SignTileEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.ServerLocation;
@@ -69,7 +68,7 @@ public final class SignData {
 
     private static void setSignLines(final SignTileEntity holder, final List<Component> value) {
         for (int i = 0; i < holder.signText.length; i++) {
-            holder.signText[i] = SpongeAdventure.asVanilla(i > value.size() ? TextComponent.empty() : value.get(i));
+            holder.signText[i] = SpongeAdventure.asVanilla(i > value.size() ? Component.empty() : value.get(i));
         }
         holder.markDirty();
     }

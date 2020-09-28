@@ -96,7 +96,7 @@ public abstract class BlockMixin_API implements BlockType {
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.shadow$getTranslationKey());
+        return Component.translatable(this.shadow$getTranslationKey());
     }
 
     @SuppressWarnings("unchecked")

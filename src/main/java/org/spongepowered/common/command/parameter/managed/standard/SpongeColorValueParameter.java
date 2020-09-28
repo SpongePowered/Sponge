@@ -29,7 +29,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.arguments.ColorArgument;
 import net.minecraft.util.text.TextFormatting;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -111,11 +111,11 @@ public final class SpongeColorValueParameter extends CatalogedArgumentParser<Col
             }
         }
 
-        throw reader.createException(TextComponent.builder(
-                "The color is not in one of the expected formats:").append(TextComponent.newline())
-                .append("* Named color (such as \"black\")").append(TextComponent.newline())
-                .append("* Hex encoded color, starting with # (such as \"#000000\")").append(TextComponent.newline())
-                .append("* Comma separated RGB color, with values from 0 to 255 (such as \"0,128,255\")")
+        throw reader.createException(Component.text().content(
+                "The color is not in one of the expected formats:").append(Component.newline())
+                .append(Component.text("* Named color (such as \"black\")")).append(Component.newline())
+                .append(Component.text("* Hex encoded color, starting with # (such as \"#000000\")")).append(Component.newline())
+                .append(Component.text("* Comma separated RGB color, with values from 0 to 255 (such as \"0,128,255\")"))
                 .build());
     }
 

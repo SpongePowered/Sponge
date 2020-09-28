@@ -58,7 +58,7 @@ public class BossInfoMixin implements BossInfoBridge {
     @Override
     public BossBar bridge$asAdventure() {
         if (this.impl$adventure == null) {
-            this.bridge$setAdventure(BossBar.of(
+            this.bridge$setAdventure(BossBar.bossBar(
                 SpongeAdventure.asAdventure(this.name),
                 this.percent,
                 SpongeAdventure.asAdventure(this.color),

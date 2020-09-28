@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.command.sponge;
 
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.manager.CommandMapping;
@@ -63,7 +63,7 @@ public final class CommandAliasesParameter implements ValueParameter<CommandMapp
         if (mapping.isPresent()) {
             return mapping;
         }
-        throw reader.createException(TextComponent.of("A command with alias " + alias + " does not exist."));
+        throw reader.createException(Component.text("A command with alias " + alias + " does not exist."));
     }
 
     @Override

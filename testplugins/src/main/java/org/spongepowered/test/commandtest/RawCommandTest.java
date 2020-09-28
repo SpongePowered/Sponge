@@ -26,7 +26,6 @@ package org.spongepowered.test.commandtest;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
@@ -47,9 +46,9 @@ public class RawCommandTest implements Command.Raw {
     @NonNull
     public CommandResult process(@NonNull final CommandCause cause, @NonNull final String arguments) throws CommandException {
         if (arguments.isEmpty()) {
-            cause.sendMessage(TextComponent.of("No arguments"));
+            cause.sendMessage(Component.text("No arguments"));
         }
-        cause.sendMessage(TextComponent.of(arguments));
+        cause.sendMessage(Component.text(arguments));
         return CommandResult.success();
     }
 
@@ -84,7 +83,7 @@ public class RawCommandTest implements Command.Raw {
     @Override
     @NonNull
     public Component getUsage(@NonNull final CommandCause cause) {
-        return TextComponent.of("[string] [string]");
+        return Component.text("[string] [string]");
     }
 
     @Override

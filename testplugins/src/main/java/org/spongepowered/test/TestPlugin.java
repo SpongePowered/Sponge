@@ -25,7 +25,7 @@
 package org.spongepowered.test;
 
 import com.google.inject.Inject;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -63,9 +63,9 @@ public final class TestPlugin {
                     if (pc.getInstance() instanceof LoadableModule) {
                         if (this.enabledPlugins.add(pc.getMetadata().getId())) {
                             ((LoadableModule) pc.getInstance()).enable(context);
-                            context.sendMessage(TextComponent.of("Enabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Component.text("Enabled " + pc.getMetadata().getId()));
                         } else {
-                            context.sendMessage(TextComponent.of("Already enabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Component.text("Already enabled " + pc.getMetadata().getId()));
                         }
                     }
                     return CommandResult.success();
@@ -76,9 +76,9 @@ public final class TestPlugin {
                     if (pc.getInstance() instanceof LoadableModule) {
                         if (this.enabledPlugins.remove(pc.getMetadata().getId())) {
                             ((LoadableModule) pc.getInstance()).disable(context);
-                            context.sendMessage(TextComponent.of("Disabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Component.text("Disabled " + pc.getMetadata().getId()));
                         } else {
-                            context.sendMessage(TextComponent.of("Already disabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Component.text("Already disabled " + pc.getMetadata().getId()));
                         }
                     }
                     return CommandResult.success();
@@ -90,11 +90,11 @@ public final class TestPlugin {
                         if (this.enabledPlugins.contains(pc.getMetadata().getId())) {
                             this.enabledPlugins.remove(pc.getMetadata().getId());
                             ((LoadableModule) pc.getInstance()).disable(context);
-                            context.sendMessage(TextComponent.of("Disabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Component.text("Disabled " + pc.getMetadata().getId()));
                         } else {
                             this.enabledPlugins.add(pc.getMetadata().getId());
                             ((LoadableModule) pc.getInstance()).enable(context);
-                            context.sendMessage(TextComponent.of("Enabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Component.text("Enabled " + pc.getMetadata().getId()));
                         }
                     }
                     return CommandResult.success();

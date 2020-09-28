@@ -29,7 +29,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.command.exception.CommandException;
 
 import java.util.ArrayList;
@@ -58,15 +57,15 @@ final class IterablePagination extends ActivePagination {
     @Override
     protected Iterable<Component> getLines(final int page) throws CommandException {
         if (!this.countIterator.hasNext()) {
-            throw new CommandException(TextComponent.of("You're already at the end of the pagination list iterator."));
+            throw new CommandException(Component.text("You're already at the end of the pagination list iterator."));
         }
 
         if (page < 1) {
-            throw new CommandException(TextComponent.of("Page " + page + " does not exist!"));
+            throw new CommandException(Component.text("Page " + page + " does not exist!"));
         }
 
         if (page <= this.lastPage) {
-            throw new CommandException(TextComponent.of("You cannot go to previous pages in an iterable pagination."));
+            throw new CommandException(Component.text("You cannot go to previous pages in an iterable pagination."));
         } else if (page > this.lastPage + 1) {
             this.getLines(page - 1);
         }
@@ -115,6 +114,6 @@ final class IterablePagination extends ActivePagination {
 
     @Override
     public void previousPage() throws CommandException {
-        throw new CommandException(TextComponent.of("You cannot go to previous pages in an iterable pagination."));
+        throw new CommandException(Component.text("You cannot go to previous pages in an iterable pagination."));
     }
 }

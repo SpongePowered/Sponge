@@ -31,7 +31,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -120,7 +120,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
         try {
             return Optional.of(this.parse(parameterKey, (SpongeCommandContextBuilder) context, (SpongeStringReader) reader));
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(TextComponent.of(e.getMessage()), e, e.getInput(), e.getCursor());
+            throw new ArgumentParseException(Component.text(e.getMessage()), e, e.getInput(), e.getCursor());
         }
     }
 

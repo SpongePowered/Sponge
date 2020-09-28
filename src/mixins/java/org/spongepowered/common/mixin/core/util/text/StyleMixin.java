@@ -80,7 +80,7 @@ public class StyleMixin implements StyleBridge {
             }
             final ClickEvent clickEvent = $this.getClickEvent();
             if (clickEvent != null) {
-                builder.clickEvent(net.kyori.adventure.text.event.ClickEvent.of(SpongeAdventure.asAdventure(clickEvent.getAction()), clickEvent.getValue()));
+                builder.clickEvent(net.kyori.adventure.text.event.ClickEvent.clickEvent(SpongeAdventure.asAdventure(clickEvent.getAction()), clickEvent.getValue()));
             }
             // insertion
             builder.insertion($this.getInsertion());

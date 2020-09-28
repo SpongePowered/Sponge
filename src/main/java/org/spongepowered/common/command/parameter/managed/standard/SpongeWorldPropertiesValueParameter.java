@@ -26,7 +26,7 @@ package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -84,10 +84,10 @@ public final class SpongeWorldPropertiesValueParameter extends CatalogedArgument
             if (this.selectAll || worldProperties.get().getWorld().isPresent()) {
                 return worldProperties;
             }
-            throw reader.createException(TextComponent.of("World with identifier \"" + resourceLocation.toString() + "\" is not online."));
+            throw reader.createException(Component.text("World with identifier \"" + resourceLocation.toString() + "\" is not online."));
         }
 
-        throw reader.createException(TextComponent.of("Could not find world with identifier \"" + resourceLocation.toString() + "\""));
+        throw reader.createException(Component.text("Could not find world with identifier \"" + resourceLocation.toString() + "\""));
     }
 
     @Override

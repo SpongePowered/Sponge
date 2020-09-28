@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
@@ -51,7 +50,7 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
 
     @Override
     public Component getTeamRepresentation() {
-        return TextComponent.of(this.shadow$getUniqueID().toString());
+        return Component.text(this.shadow$getUniqueID().toString());
     }
 
     @Override

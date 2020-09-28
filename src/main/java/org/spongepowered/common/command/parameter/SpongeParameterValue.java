@@ -150,7 +150,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
             throw currentExceptions.get(0);
         } else {
             final List<Component> errors = currentExceptions.stream().map(ArgumentParseException::getSuperText).collect(Collectors.toList());
-            throw new ArgumentParseException(TextComponent.join(TextComponent.newline(), errors), args.getInput(), args.getCursor());
+            throw new ArgumentParseException(TextComponent.join(Component.newline(), errors), args.getInput(), args.getCursor());
         }
 
     }

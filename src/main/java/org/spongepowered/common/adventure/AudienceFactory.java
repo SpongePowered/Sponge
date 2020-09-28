@@ -37,7 +37,7 @@ public final class AudienceFactory implements Audiences.Factory {
 
     @Override
     public Audience onlinePlayers() {
-        return Audience.of((List<ServerPlayer>) (List) SpongeCommon.getServer().getPlayerList().getPlayers());
+        return Audience.audience((List<ServerPlayer>) (List) SpongeCommon.getServer().getPlayerList().getPlayers());
     }
 
     @Override

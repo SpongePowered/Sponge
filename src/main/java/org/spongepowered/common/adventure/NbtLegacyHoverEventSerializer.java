@@ -28,7 +28,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.gson.LegacyHoverEventSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
@@ -63,7 +62,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
             final CompoundNBT contents = SNBT_CODEC.decode(rawContent);
             final CompoundNBT tag = contents.getCompound(ITEM_TAG);
             return HoverEvent.ShowItem.of(
-                Key.of(contents.getString(ITEM_TYPE)),
+                Key.key(contents.getString(ITEM_TYPE)),
                 contents.contains(ITEM_COUNT) ? contents.getByte(ITEM_COUNT) : 1,
                 tag.isEmpty() ? null : BinaryTagHolder.encode(tag, SNBT_CODEC)
             );
@@ -78,7 +77,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
         try {
             final CompoundNBT contents = SNBT_CODEC.decode(raw);
             return HoverEvent.ShowEntity.of(
-                Key.of(contents.getString(ENTITY_TYPE)),
+                Key.key(contents.getString(ENTITY_TYPE)),
                 UUID.fromString(contents.getString(ENTITY_ID)),
                 componentCodec.decode(contents.getString(ENTITY_NAME))
             );
@@ -100,7 +99,7 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
             }
         }
 
-        return TextComponent.of(SNBT_CODEC.encode(tag));
+        return Component.text(SNBT_CODEC.encode(tag));
     }
 
     @Override
@@ -111,6 +110,6 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
         if (input.name() != null) {
             tag.putString(ENTITY_NAME, componentCodec.encode(input.name()));
         }
-        return TextComponent.of(SNBT_CODEC.encode(tag));
+        return Component.text(SNBT_CODEC.encode(tag));
     }
 }

@@ -115,10 +115,10 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     @Override
     public @NonNull Component getUsage(final @NonNull CommandCause cause) {
-        final Collection<TextComponent> usage =
+        final Collection<Component> usage =
                 Arrays.stream(this.getCachedDispatcher().getAllUsage(this.getCachedDispatcher().getRoot(), (CommandSource) cause, true))
-                    .map(TextComponent::of).collect(Collectors.toList());
-        return TextComponent.join(TextComponent.newline(), usage);
+                    .map(Component::text).collect(Collectors.toList());
+        return TextComponent.join(Component.newline(), usage);
     }
 
     @Override

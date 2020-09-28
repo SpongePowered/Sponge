@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.server.management;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SDisconnectPacket;
@@ -108,7 +107,7 @@ public abstract class PlayerListMixin {
         if (kickReason != null) {
             disconnectMessage = SpongeAdventure.asAdventure(kickReason);
         } else {
-            disconnectMessage = TextComponent.of("You are not allowed to log in to this server.");
+            disconnectMessage = Component.text("You are not allowed to log in to this server.");
         }
 
         net.minecraft.world.server.ServerWorld mcWorld = server.getWorld(mcPlayer.dimension);
