@@ -287,13 +287,12 @@ public final class RecipeTest implements LoadableModule {
                 .result(grid -> {
                     final Optional<ServerPlayer> player = Sponge.getServer().getCauseStackManager().getCurrentCause().first(ServerPlayer.class);
                     final Optional<BiomeType> biome = player.map(p -> p.getWorld().getBiome(p.getBlockPosition()));
-// TODO missing biometype registrations
-                    //                    final String name = biome.map(BiomeType::getKey).map(ResourceKey::toString).orElse("Unknown");
-
+                    final String name = biome.map(BiomeType::getKey).map(ResourceKey::toString).orElse("Unknown");
                     final Integer biomeTemperature = biome.map(BiomeType::getTemperature).map(d -> (int) (d*10)).orElse(0);
                     final Integer biomeHumidity = biome.map(BiomeType::getHumidity).map(d -> (int) (d*10)).orElse(0);
                     final TextComponent temperature = TextComponent.of("Temperature: ").append(TextComponent.of(biomeTemperature));
                     final TextComponent humidity = TextComponent.of("Humidity: ").append(TextComponent.of(biomeHumidity));
+                    writtenBook.offer(Keys.DISPLAY_NAME, TextComponent.of("Biome Data: " + name));
                     writtenBook.offer(Keys.PAGES, Arrays.asList(temperature, humidity));
                     writtenBook.offer(Keys.AUTHOR, TextComponent.of(player.map(ServerPlayer::getName).orElse("Herobrine")));
                     return writtenBook.copy();
