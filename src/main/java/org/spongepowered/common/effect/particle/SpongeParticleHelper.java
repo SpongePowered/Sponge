@@ -50,6 +50,7 @@ import org.spongepowered.math.vector.Vector3f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 public class SpongeParticleHelper {
 
@@ -104,10 +105,11 @@ public class SpongeParticleHelper {
         // Named particles always support OFFSET and QUANTITY.
         final Vector3f offset = effect.getOptionOrDefault(ParticleOptions.OFFSET).get().toFloat();
         final int quantity = effect.getOptionOrDefault(ParticleOptions.QUANTITY).get();
+        final Vector3f velocity = effect.getOptionOrDefault(ParticleOptions.VELOCITY).orElse(Vector3d.ZERO).toFloat();
 
         if (internalType instanceof BasicParticleType) {
             // Simple named particle without any additional supported options.
-            return new NamedCachedPacket((IParticleData) internalType, offset, quantity);
+            return new NamedCachedPacket((IParticleData) internalType, offset, quantity, velocity);
         }
 
         // The only way we can see what options are supported for a particular named particle
@@ -119,14 +121,14 @@ public class SpongeParticleHelper {
             final BlockParticleData particleData = new BlockParticleData(
                     (net.minecraft.particles.ParticleType<BlockParticleData>) internalType,
                     (net.minecraft.block.BlockState) state);
-            return new NamedCachedPacket(particleData, offset, quantity);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType.getDeserializer() == ItemParticleData.DESERIALIZER) {
             // This particle type supports an item option.
             final ItemStackSnapshot snapshot = effect.getOptionOrDefault(ParticleOptions.ITEM_STACK_SNAPSHOT).get();
             final ItemParticleData particleData = new ItemParticleData(
                     (net.minecraft.particles.ParticleType<ItemParticleData>) internalType,
                     (net.minecraft.item.ItemStack) (Object) snapshot.createStack());
-            return new NamedCachedPacket(particleData, offset, quantity);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType.getDeserializer() == RedstoneParticleData.DESERIALIZER) {
             // This particle type supports a color option.
             final Color color = effect.getOptionOrDefault(ParticleOptions.COLOR).get();
@@ -135,7 +137,7 @@ public class SpongeParticleHelper {
                     (float) color.getGreen() / 255,
                     (float) color.getBlue() / 255,
                     1.0f);
-            return new NamedCachedPacket(particleData, offset, quantity);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
         }
 
         // Otherwise, we don't really know how to get a valid IParticleData. Sorry mods!
@@ -203,11 +205,13 @@ public class SpongeParticleHelper {
         private final IParticleData particleData;
         private final Vector3f offset;
         private final int quantity;
+        private final Vector3f velocity;
 
-        public NamedCachedPacket(final IParticleData particleData, final Vector3f offset, final int quantity) {
+        public NamedCachedPacket(final IParticleData particleData, final Vector3f offset, final int quantity, Vector3f velocity) {
             this.particleData = particleData;
             this.offset = offset;
             this.quantity = quantity;
+            this.velocity = velocity;
         }
 
         @Override
@@ -220,16 +224,37 @@ public class SpongeParticleHelper {
             final float offY = offset.getY();
             final float offZ = offset.getZ();
 
-            final SSpawnParticlePacket packet = new SSpawnParticlePacket(
-                    this.particleData,
-                    true,
-                    posX, posY, posZ,
-                    offX, offY, offZ,
-                    0.0F,
-                    this.quantity
-            );
+            if (this.velocity.equals(Vector3f.ZERO)) {
+                final SSpawnParticlePacket packet = new SSpawnParticlePacket(
+                        this.particleData,
+                        true,
+                        posX, posY, posZ,
+                        offX, offY, offZ,
+                        0.0F,
+                        this.quantity
+                );
 
-            output.add(packet);
+                output.add(packet);
+            } else {
+                final float velocityX = velocity.getX();
+                final float velocityY = velocity.getY();
+                final float velocityZ = velocity.getZ();
+                final Random random = new Random();
+                for (int i = 0; i < this.quantity; i++) {
+                    final float px0 = posX + (random.nextFloat() * 2f - 1f) * offX;
+                    final float py0 = posY + (random.nextFloat() * 2f - 1f) * offY;
+                    final float pz0 = posZ + (random.nextFloat() * 2f - 1f) * offZ;
+
+                    final SSpawnParticlePacket message = new SSpawnParticlePacket(
+                            this.particleData,
+                            true,
+                            px0, py0, pz0,
+                            velocityX, velocityY, velocityZ,
+                            1f,
+                            0);
+                    output.add(message);
+                }
+            }
         }
     }
 
