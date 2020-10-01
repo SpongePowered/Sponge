@@ -305,7 +305,11 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
         final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
-        return dataProvider.get(ServerLocation.of(this, new Vector3d(x, y, z)));
+        final Optional<E> value = dataProvider.get(ServerLocation.of(this, new Vector3d(x, y, z)));
+        if (value.isPresent()) {
+            return value;
+        }
+        return this.getBlock(x, y, z).get(key);
     }
 
     // WeatherUniverse
