@@ -188,6 +188,28 @@
         },
         {
             "loader": "java_plain",
+            "id": "interacttest",
+            "name": "InteractTest",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.interacttest.InteractTest",
+            "description": "Testing InteractEvents",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }],
+            "extra": {}
+        },
+        {
+            "loader": "java_plain",
             "id": "recipetest",
             "name": "RecipeTest",
             "version": "8.0.0",
