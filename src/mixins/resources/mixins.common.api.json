@@ -225,6 +225,7 @@
         "mcp.network.ServerStatusResponseMixin_API",
         "mcp.network.rcon.ClientThreadMixin_API",
         "mcp.network.rcon.RConConsoleSourceMixin_API",
+        "mcp.particles.ParticleTypeMixin_API",
         "mcp.potion.EffectInstanceMixin_API",
         "mcp.potion.EffectMixin_API",
         "mcp.potion.PotionMixin_API",

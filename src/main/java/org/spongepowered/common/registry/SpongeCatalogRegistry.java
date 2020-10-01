@@ -114,6 +114,7 @@ import org.spongepowered.api.data.type.TropicalFishShape;
 import org.spongepowered.api.data.type.VillagerType;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WoodType;
+import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -147,10 +148,10 @@ import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
@@ -198,6 +199,7 @@ import org.spongepowered.common.registry.builtin.sponge.MovementTypeStreamGenera
 import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ParrotTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.ParticleOptionStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.PhaseTypeRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.PlaceholderParserStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.PortalTypeStreamGenerator;
@@ -562,6 +564,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(MovementType.class, ResourceKey.sponge("movement_type"), MovementTypeStreamGenerator.stream(), true, true)
             .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true, false)
             .generateRegistry(PandaGene.class, ResourceKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true, false)
+            .generateRegistry(ParticleOption.class, ResourceKey.sponge("particle_option"), ParticleOptionStreamGenerator.stream(), true, false)
             .generateRegistry(PhantomPhase.class, ResourceKey.minecraft("phantom_phase"), Arrays.stream(PhantomEntity.AttackPhase.values()), true, false)
             .generateRegistry(PickupRule.class, ResourceKey.minecraft("pickup_rule"), Arrays.stream(AbstractArrowEntity.PickupStatus.values()), true, false)
             .generateRegistry(PistonType.class, ResourceKey.minecraft("piston_type"), Arrays.stream(net.minecraft.state.properties.PistonType.values()), true, false)
