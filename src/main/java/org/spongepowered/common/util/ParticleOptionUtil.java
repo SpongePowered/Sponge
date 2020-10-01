@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.effect.particle;
+package org.spongepowered.common.util;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.particles.BlockParticleData;
@@ -39,7 +39,7 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class ParticleOptionDefaults {
+public final class ParticleOptionUtil {
 
     /**
      * Generates the default particle options for a given internal ParticleType (non-numerical particles).

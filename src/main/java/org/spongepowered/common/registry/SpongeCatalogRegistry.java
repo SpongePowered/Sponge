@@ -148,10 +148,10 @@ import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
@@ -199,6 +199,7 @@ import org.spongepowered.common.registry.builtin.sponge.MovementTypeStreamGenera
 import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ParrotTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.ParticleOptionStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.PhaseTypeRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.PlaceholderParserStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.PortalTypeStreamGenerator;
@@ -210,7 +211,6 @@ import org.spongepowered.common.registry.builtin.sponge.SerializationBehaviorStr
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WeatherStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.*;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;

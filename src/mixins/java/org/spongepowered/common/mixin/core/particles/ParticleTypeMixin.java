@@ -22,43 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.particles;
+package org.spongepowered.common.mixin.core.particles;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.particles.ParticleType;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.util.ParticleOptionUtil;
 
-import java.util.Map;
-import java.util.Optional;
+@Mixin(ParticleType.class)
+public class ParticleTypeMixin implements ResourceKeyBridge {
 
-@Mixin(net.minecraft.particles.ParticleType.class)
-public abstract class ParticleTypeMixin_API implements org.spongepowered.api.effect.particle.ParticleType {
+    private ResourceKey impl$key;
 
-    private ImmutableMap<ParticleOption<?>, Object> api$defaultOptions = null;
-
-    @SuppressWarnings("unchecked")
     @Override
-    public <V> Optional<V> getDefaultOption(ParticleOption<V> option) {
-        if (this.api$defaultOptions == null) {
-            this.api$defaultOptions = ParticleOptionUtil.generateDefaultsForNamed((ParticleType<?>) (Object) this);
-        }
-        return Optional.ofNullable((V) this.api$defaultOptions.get(option));
+    public ResourceKey bridge$getKey() {
+        return this.impl$key;
     }
 
     @Override
-    public Map<ParticleOption<?>, Object> getDefaultOptions() {
-        if (this.api$defaultOptions == null) {
-            this.api$defaultOptions = ParticleOptionUtil.generateDefaultsForNamed((ParticleType<?>) (Object) this);
-        }
-        return this.api$defaultOptions;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
+    public void bridge$setKey(ResourceKey key) {
+        this.impl$key = key;
     }
 }

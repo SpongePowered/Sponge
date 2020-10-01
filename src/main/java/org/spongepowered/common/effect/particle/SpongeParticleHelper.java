@@ -28,20 +28,19 @@ import net.minecraft.block.Block;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.server.SPlaySoundEventPacket;
 import net.minecraft.network.play.server.SSpawnParticlePacket;
-import net.minecraft.particles.*;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Potion;
+import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.BlockParticleData;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ItemParticleData;
+import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleType;
-import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
@@ -55,7 +54,7 @@ import java.util.Optional;
 public class SpongeParticleHelper {
 
     public static void sendPackets(ParticleEffect particleEffect, Vector3d position, int radius, DimensionType type, PlayerList playerList) {
-        final List<IPacket<?>> packets = toPackets(particleEffect, position);
+        final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
 
         if (!packets.isEmpty()) {
             final double x = position.getX();
@@ -74,7 +73,7 @@ public class SpongeParticleHelper {
         CachedParticlePacket cachedPacket = spongeEffect.cachedPacket;
         if (cachedPacket == null) {
             // Also save the generated packet cache for repeated uses.
-            cachedPacket = spongeEffect.cachedPacket = getCachedPacket(spongeEffect);
+            cachedPacket = spongeEffect.cachedPacket = SpongeParticleHelper.getCachedPacket(spongeEffect);
         }
 
         final List<IPacket<?>> packets = new ArrayList<>();
@@ -87,10 +86,10 @@ public class SpongeParticleHelper {
 
         if (type instanceof NumericalParticleType) {
             // Special cased particle types with numerical IDs.
-            return getNumericalPacket(effect, (NumericalParticleType) type);
+            return SpongeParticleHelper.getNumericalPacket(effect, (NumericalParticleType) type);
         } else {
             // Normal named particle type.
-            return getNamedPacket(effect, (net.minecraft.particles.ParticleType<?>) type);
+            return SpongeParticleHelper.getNamedPacket(effect, (net.minecraft.particles.ParticleType<?>) type);
         }
     }
 

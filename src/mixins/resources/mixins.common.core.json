@@ -57,6 +57,8 @@
         "network.login.ServerLoginNetHandlerMixin",
         "network.play.ServerPlayNetHandlerMixin",
         "network.rcon.RConConsoleSourceMixin",
+        "particles.ParticleTypeMixin",
+        "particles.ParticleTypesMixin",
         "server.CustomServerBossInfoMixin",
         "server.MinecraftServerMixin",
         "server.management.PlayerListMixin",

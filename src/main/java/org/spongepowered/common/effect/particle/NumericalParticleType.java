@@ -38,7 +38,7 @@ import java.util.Optional;
 public final class NumericalParticleType extends SpongeCatalogType implements ParticleType {
 
     private final int id;
-    private final ImmutableMap<ParticleOption<?>, Object> defaultOptions;
+    private final Map<ParticleOption<?>, Object> defaultOptions;
     @Nullable
     private final DataCalculator dataCalculator;
 

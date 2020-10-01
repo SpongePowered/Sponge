@@ -22,43 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.particles;
+package org.spongepowered.common.mixin.core.particles;
 
-import com.google.common.collect.ImmutableMap;
+import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
+import net.minecraft.particles.ParticleTypes;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.util.ParticleOptionUtil;
 
-import java.util.Map;
-import java.util.Optional;
+@Mixin(ParticleTypes.class)
+public class ParticleTypesMixin {
 
-@Mixin(net.minecraft.particles.ParticleType.class)
-public abstract class ParticleTypeMixin_API implements org.spongepowered.api.effect.particle.ParticleType {
-
-    private ImmutableMap<ParticleOption<?>, Object> api$defaultOptions = null;
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <V> Optional<V> getDefaultOption(ParticleOption<V> option) {
-        if (this.api$defaultOptions == null) {
-            this.api$defaultOptions = ParticleOptionUtil.generateDefaultsForNamed((ParticleType<?>) (Object) this);
-        }
-        return Optional.ofNullable((V) this.api$defaultOptions.get(option));
+    @Inject(method = "register(Ljava/lang/String;Lnet/minecraft/particles/IParticleData$IDeserializer;)Lnet/minecraft/particles/ParticleType;", at = @At("RETURN"))
+    private static <T extends IParticleData> void inpl$setCatalogKey(String key, IParticleData.IDeserializer<T> deserializer, CallbackInfoReturnable<ParticleType<T>> cir) {
+        final ParticleType<T> returnValue = cir.getReturnValue();
+        ((ResourceKeyBridge) returnValue).bridge$setKey(ResourceKey.minecraft(key));
     }
 
-    @Override
-    public Map<ParticleOption<?>, Object> getDefaultOptions() {
-        if (this.api$defaultOptions == null) {
-            this.api$defaultOptions = ParticleOptionUtil.generateDefaultsForNamed((ParticleType<?>) (Object) this);
-        }
-        return this.api$defaultOptions;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return ((ResourceKeyBridge) this).bridge$getKey();
+    @Inject(method = "register(Ljava/lang/String;Z)Lnet/minecraft/particles/BasicParticleType;", at = @At("RETURN"))
+    private static void inpl$setCatalogKey2(String key, boolean alwaysShow, CallbackInfoReturnable<BasicParticleType> cir) {
+        final BasicParticleType returnValue = cir.getReturnValue();
+        ((ResourceKeyBridge) returnValue).bridge$setKey(ResourceKey.minecraft(key));
     }
 }
