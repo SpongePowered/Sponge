@@ -61,6 +61,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -69,6 +70,7 @@ import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.provider.CustomDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.util.Constants;
@@ -130,7 +132,10 @@ public final class SpongeDataManager implements DataManager {
     }
 
     @Inject
-    private SpongeDataManager() {}
+    private SpongeDataManager() {
+        // TODO register data builders
+        this.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
+    }
 
     @Override
     public <T extends DataSerializable> void registerBuilder(Class<T> clazz, DataBuilder<T> builder) {

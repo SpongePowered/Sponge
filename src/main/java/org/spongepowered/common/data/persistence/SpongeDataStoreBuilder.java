@@ -69,6 +69,7 @@ public class SpongeDataStoreBuilder implements DataStore.Builder {
         return this.key(key, (view, value) -> view.set(dataQuery, value), v -> deserializer.apply(v, dataQuery));
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public <T> BiFunction<DataView, DataQuery, Optional<T>> getDeserializer(TypeToken<?> elementToken) {
         Class<?> rawType = elementToken.getRawType();
         final BiFunction<DataView, DataQuery, Optional<T>> deserializer;
@@ -82,15 +83,15 @@ public class SpongeDataStoreBuilder implements DataStore.Builder {
             deserializer = (view, dataQuery)  -> (Optional<T>) view.getObject(dataQuery, rawType);
         } else if (elementToken.isSubtypeOf(Set.class)) {
             final Type listType = ((ParameterizedType) elementToken.getType()).getActualTypeArguments()[0];
-            deserializer = (view, dataQuery)  -> (Optional<T>) view.getObjectList(dataQuery, (Class<?>) listType).map(list -> new HashSet(list));
+            deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) listType, view, dataQuery).map(list -> new HashSet(list));
         } else if (elementToken.isSubtypeOf(List.class)) {
             final Type listType = ((ParameterizedType) elementToken.getType()).getActualTypeArguments()[0];
-            deserializer = (view, dataQuery)  -> (Optional<T>) view.getObjectList(dataQuery, (Class<?>) listType);
+            deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) listType, view, dataQuery);
         } else if (elementToken.isSubtypeOf(Collection.class)) {
             throw new UnsupportedOperationException("Collection deserialization is not supported. Provide the deserializer for it.");
         } else if (elementToken.isArray()) {
             final Class arrayType = elementToken.getComponentType().getRawType();
-            deserializer = (view, dataQuery)  -> (Optional<T>) view.getObjectList(dataQuery, (Class<?>) arrayType).map(list -> listToArray(arrayType, list));
+            deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) arrayType, view, dataQuery).map(list -> listToArray(arrayType, list));
         } else if (elementToken.isSubtypeOf(Map.class)) {
             final Type[] parameterTypes = ((ParameterizedType) elementToken.getType()).getActualTypeArguments();
             final Type keyType = parameterTypes[0];
@@ -122,6 +123,23 @@ public class SpongeDataStoreBuilder implements DataStore.Builder {
             deserializer = (view, dataQuery) -> (Optional<T>) view.get(dataQuery);
         }
         return deserializer;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Optional<List<T>> deserializeList(Class<T> listType, DataView view, DataQuery dataQuery) {
+        if (DataView.class.isAssignableFrom(listType)) {
+            return (Optional) view.getViewList(dataQuery);
+        }
+        if (DataSerializable.class.isAssignableFrom(listType)) {
+            return (Optional) view.getSerializableList(dataQuery, (Class<? extends DataSerializable>) listType);
+        }
+        if (CatalogType.class.isAssignableFrom(listType)) {
+            return (Optional) view.getCatalogTypeList(dataQuery, (Class<? extends CatalogType>) listType);
+        }
+        if (SpongeDataManager.getInstance().getTranslator(listType).isPresent()) {
+            return view.getObjectList(dataQuery, listType);
+        }
+        return (Optional) view.getList(dataQuery);
     }
 
     private <AT> AT[] listToArray(Class<AT> componentType, List<AT> list) {
