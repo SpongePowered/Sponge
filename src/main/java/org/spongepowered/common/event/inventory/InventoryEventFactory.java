@@ -319,43 +319,36 @@ public class InventoryEventFactory {
 
         Optional<ViewableInventory> viewable = inventory.asViewable();
         if (viewable.isPresent()) {
-            try {
+            if (viewable.get() instanceof INamedContainerProvider) {
+                INamedContainerProvider namedContainerProvider = (INamedContainerProvider) viewable.get();
                 if (displayName != null) {
-                    ((ServerPlayerEntityBridge) player).bridge$setContainerDisplay(displayName);
+                    namedContainerProvider = new SimpleNamedContainerProvider(namedContainerProvider, SpongeAdventure.asVanilla(displayName));
+                }
+                player.openContainer(namedContainerProvider);
+            } else if (viewable.get() instanceof CarriedInventory) {
+                Optional carrier = ((CarriedInventory) viewable.get()).getCarrier();
+                if (carrier.get() instanceof AbstractHorseEntity) {
+                    player.openHorseInventory(((AbstractHorseEntity) carrier.get()), ((IInventory) viewable.get()));
                 }
 
-                // TODO custom displayname
-                if (viewable.get() instanceof INamedContainerProvider) {
-                    player.openContainer((INamedContainerProvider) viewable.get());
-                } else if (viewable.get() instanceof CarriedInventory) {
-                    Optional carrier = ((CarriedInventory) viewable.get()).getCarrier();
-                    if (carrier.get() instanceof AbstractHorseEntity) {
-                        player.openHorseInventory(((AbstractHorseEntity) carrier.get()), ((IInventory) viewable.get()));
-                    }
-
-                } else if (viewable.get() instanceof IMerchant) {
-                    IMerchant merchant = (IMerchant) viewable.get();
-                    ITextComponent display = null;
-                    int level = 0;
-                    if (merchant instanceof VillagerEntity) {
-                        display = ((VillagerEntity) merchant).getDisplayName();
-                        level = ((VillagerEntity) merchant).getVillagerData().getLevel();
-                    } else if (merchant instanceof WanderingTraderEntity) {
-                        display = ((WanderingTraderEntity) merchant).getDisplayName();
-                        level = 1;
-                    }
-                    if (displayName != null) {
-                        display = SpongeAdventure.asVanilla(displayName);
-                    }
-                    OptionalInt containerId = player.openContainer(new SimpleNamedContainerProvider((id, playerInv, p) ->
-                            new MerchantContainer(id, playerInv, merchant), display));
-                    if (containerId.isPresent() && !merchant.getOffers().isEmpty()) {
-                        player.openMerchantContainer(containerId.getAsInt(), merchant.getOffers(), level, merchant.getXp(), merchant.func_213705_dZ(), merchant.func_223340_ej());
-                    }
+            } else if (viewable.get() instanceof IMerchant) {
+                IMerchant merchant = (IMerchant) viewable.get();
+                ITextComponent display = null;
+                int level = 0;
+                if (merchant instanceof VillagerEntity) {
+                    display = ((VillagerEntity) merchant).getDisplayName();
+                    level = ((VillagerEntity) merchant).getVillagerData().getLevel();
+                } else if (merchant instanceof WanderingTraderEntity) {
+                    display = ((WanderingTraderEntity) merchant).getDisplayName();
+                    level = 1;
                 }
-            } finally {
                 if (displayName != null) {
-                    ((ServerPlayerEntityBridge) player).bridge$setContainerDisplay(null);
+                    display = SpongeAdventure.asVanilla(displayName);
+                }
+                OptionalInt containerId = player.openContainer(new SimpleNamedContainerProvider((id, playerInv, p) ->
+                        new MerchantContainer(id, playerInv, merchant), display));
+                if (containerId.isPresent() && !merchant.getOffers().isEmpty()) {
+                    player.openMerchantContainer(containerId.getAsInt(), merchant.getOffers(), level, merchant.getXp(), merchant.func_213705_dZ(), merchant.func_223340_ej());
                 }
             }
         }
