@@ -42,6 +42,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeColorVa
 import org.spongepowered.common.command.parameter.managed.standard.SpongeDataContainerValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeDateTimeValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeDurationValueParameter;
+import org.spongepowered.common.command.parameter.managed.standard.SpongeGameProfileValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeIPAddressValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeNoneValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongePluginContainerValueParameter;
@@ -79,8 +80,7 @@ public final class CatalogedValueParameterStreamGenerator {
                 // This is for a single entity. We'll have a separate one for multiple.
                 StandardCatalogedArgumentParser.createConverter("entity", EntityArgument.entity(),
                         (reader, cause, selector) -> (Entity) selector.selectOne(cause.getSource())),
-                StandardCatalogedArgumentParser.createConverter("game_profile", GameProfileArgument.gameProfile(),
-                        (reader, cause, converter) -> converter.getNames(cause.getSource())),
+                new SpongeGameProfileValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("integer", IntegerArgumentType.integer()),
                 new SpongeIPAddressValueParameter(),
                 new SpongeServerLocationValueParameter(true),
@@ -88,6 +88,8 @@ public final class CatalogedValueParameterStreamGenerator {
                 StandardCatalogedArgumentParser.createIdentity("long", LongArgumentType.longArg()),
                 StandardCatalogedArgumentParser.createConverter("many_entities", EntityArgument.entities(),
                         (reader, cause, selector) -> selector.select(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())),
+                StandardCatalogedArgumentParser.createConverter("many_game_profiles", GameProfileArgument.gameProfile(),
+                        (reader, cause, converter) -> converter.getNames(cause.getSource())),
                 StandardCatalogedArgumentParser.createConverter("many_players", EntityArgument.players(),
                         (reader, cause, selector) -> (Player) selector.selectPlayers(cause.getSource())),
                 new SpongeNoneValueParameter(),
