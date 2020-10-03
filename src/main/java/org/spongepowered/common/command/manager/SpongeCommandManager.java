@@ -280,6 +280,7 @@ public final class SpongeCommandManager implements CommandManager {
                     originalArgs,
                     originalCommand,
                     originalCommand,
+                    cause,
                     Optional.empty(),
                     false
             );
@@ -414,6 +415,7 @@ public final class SpongeCommandManager implements CommandManager {
                     args,
                     originalCommand,
                     command,
+                    cause,
                     result
             ));
         }
