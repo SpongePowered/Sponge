@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import com.google.inject.internal.cglib.reflect.$FastMember;
 import net.minecraft.entity.item.FireworkRocketEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FireworkRocketItem;
@@ -143,17 +142,7 @@ public abstract class ItemFireworkMixin {
     }
 
     @Inject(method = "onItemUse",
-        at = {
-            @At(value = "INVOKE",
-                target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
-                remap = false
-            ),
-            @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/world/World;func_217376_c(Lnet/minecraft/entity/Entity;)Z",
-                remap = false
-            )
-        },
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
@@ -163,18 +152,7 @@ public abstract class ItemFireworkMixin {
         }
     }
     @Inject(method = "onItemRightClick(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;",
-        at = {
-            @At(
-                value = "INVOKE", // Development
-                target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
-                remap = false
-            ),
-            @At(
-                value = "INVOKE", // Production
-                target = "Lnet/minecraft/world/World;func_217376_c(Lnet/minecraft/entity/Entity;)Z",
-                remap = false
-            )
-        },
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z"),
         locals = LocalCapture.CAPTURE_FAILSOFT,
         cancellable = true
     )
