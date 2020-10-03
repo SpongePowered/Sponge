@@ -45,6 +45,7 @@ public class SpongeScore implements Score {
     private Component name;
     public String legacyName;
     private int score;
+    private boolean locked;
 
     private Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<>();
 
@@ -70,6 +71,16 @@ public class SpongeScore implements Score {
     public void setScore(final int score) {
         this.score = score;
         this.updateScore();
+    }
+
+    @Override
+    public boolean isLocked() {
+        return this.locked;
+    }
+
+    @Override
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 
     private void updateScore() {
