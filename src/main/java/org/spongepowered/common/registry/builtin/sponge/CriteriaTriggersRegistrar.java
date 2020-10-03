@@ -79,6 +79,16 @@ public final class CriteriaTriggersRegistrar {
             .registerCatalogAndSupplier(Trigger.class, "killed_by_crossbow", () -> (Trigger) CriteriaTriggers.KILLED_BY_CROSSBOW)
             .registerCatalogAndSupplier(Trigger.class, "hero_of_the_village", () -> (Trigger) CriteriaTriggers.HERO_OF_THE_VILLAGE)
             .registerCatalogAndSupplier(Trigger.class, "voluntary_exile", () -> (Trigger) CriteriaTriggers.VOLUNTARY_EXILE)
+            .registerCatalogAndSupplier(Trigger.class, "filled_bucket", () -> (Trigger) CriteriaTriggers.FILLED_BUCKET)
+            .registerCatalogAndSupplier(Trigger.class, "effects_changed", () -> (Trigger) CriteriaTriggers.EFFECTS_CHANGED)
+            .registerCatalogAndSupplier(Trigger.class, "fishing_rod_hooked", () -> (Trigger) CriteriaTriggers.FISHING_ROD_HOOKED)
+            .registerCatalogAndSupplier(Trigger.class, "channeled_lightning", () -> (Trigger) CriteriaTriggers.CHANNELED_LIGHTNING)
+            .registerCatalogAndSupplier(Trigger.class, "shot_crossbow", () -> (Trigger) CriteriaTriggers.SHOT_CROSSBOW)
+            .registerCatalogAndSupplier(Trigger.class, "killed_by_crossbow", () -> (Trigger) CriteriaTriggers.KILLED_BY_CROSSBOW)
+            .registerCatalogAndSupplier(Trigger.class, "hero_of_the_village", () -> (Trigger) CriteriaTriggers.HERO_OF_THE_VILLAGE)
+            .registerCatalogAndSupplier(Trigger.class, "voluntary_exile", () -> (Trigger) CriteriaTriggers.VOLUNTARY_EXILE)
+            .registerCatalogAndSupplier(Trigger.class, "safely_harvest_honey", () -> (Trigger) CriteriaTriggers.SAFELY_HARVEST_HONEY)
+            .registerCatalogAndSupplier(Trigger.class, "slide_down_block", () -> (Trigger) CriteriaTriggers.field_229864_K_)
         ;
     }
 }
