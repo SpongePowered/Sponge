@@ -28,12 +28,14 @@ import com.google.common.collect.Sets;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMapInfoData;
@@ -42,6 +44,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Mixin(MapData.class)
 public abstract class MapInfoMixin_API implements MapInfo {
@@ -85,9 +88,15 @@ public abstract class MapInfoMixin_API implements MapInfo {
 
     @Override
     public DataContainer toContainer() {
+        MapInfoData mapInfoData = this.getMapInfoData();
+        // Filter out non-persistent MapDecorations, see MapInfo.toContainer for more details and reasons.
+        mapInfoData.transform(Keys.MAP_DECORATIONS, mapDecorations -> {
+            mapDecorations.removeIf(decoration -> !decoration.isPersistent());
+            return mapDecorations;
+        });
         return DataContainer.createNew()
                 .set(Constants.Map.MAP_ID, ((MapDataBridge) this).bridge$getMapId())
-                .set(Constants.Map.MAP_DATA, this.getMapInfoData());
+                .set(Constants.Map.MAP_DATA, mapInfoData);
     }
 
     @Override

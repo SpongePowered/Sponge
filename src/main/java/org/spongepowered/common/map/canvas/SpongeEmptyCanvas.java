@@ -26,7 +26,6 @@ package org.spongepowered.common.map.canvas;
 
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
@@ -67,7 +66,7 @@ public class SpongeEmptyCanvas implements SpongeMapCanvas {
     }
 
     @Override
-    public Builder toBuilder(MapCanvas canvas) {
+    public Builder toBuilder() {
         return MapCanvas.builder();
     }
 

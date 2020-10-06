@@ -26,7 +26,9 @@ package org.spongepowered.common.map.canvas;
 
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Bytes;
+import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -47,19 +49,18 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
-public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> implements MapCanvas.Builder {
+public class SpongeMapCanvasBuilder implements MapCanvas.Builder {
     // If its being used to build from a DataView, or is blank
     // We don't want to create a big array.
     @Nullable
     private byte[] canvas = null;
-
-    public SpongeMapCanvasBuilder() {
-        super(MapCanvas.class, 1);
-    }
 
     private byte[] getCanvas() {
         if (this.canvas == null) {
@@ -97,6 +98,12 @@ public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> imple
             return MapCanvas.builder();
         }
         this.canvas = ((SpongeMapByteCanvas)canvas).canvas.clone();
+        return this;
+    }
+
+    @Override
+    public MapCanvas.Builder reset() {
+        this.canvas = null;
         return this;
     }
 
@@ -142,14 +149,14 @@ public class SpongeMapCanvasBuilder extends AbstractDataBuilder<MapCanvas> imple
     }
 
     @Override
-    protected Optional<MapCanvas> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(Keys.MAP_CANVAS.getQuery())) {
-            return Optional.empty();
+    public MapCanvas.Builder fromContainer(DataView container) {
+        Preconditions.checkNotNull(container, "container cannot be null");
+        if (!container.contains(Keys.MAP_CANVAS)) {
+            return this;
         }
-        SpongeMapCanvas mapCanvas = new SpongeMapByteCanvas(
-                Bytes.toArray(container.getByteList(Keys.MAP_CANVAS.getQuery()).get())
-        );
-        return Optional.of(mapCanvas);
+        reset();
+        this.canvas = MapUtil.getMapCanvasFromContainer(container);
+        return this;
     }
 
     @Override

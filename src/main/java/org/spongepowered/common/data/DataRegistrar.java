@@ -139,9 +139,8 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.ItemStackSnapshotDuplicateManipulatorUpdater;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
-import org.spongepowered.common.map.canvas.SpongeMapCanvasBuilder;
-import org.spongepowered.common.map.color.SpongeMapColorBuilder;
-import org.spongepowered.common.map.decoration.SpongeMapDecorationBuilder;
+import org.spongepowered.common.map.canvas.SpongeMapCanvasDataBuilder;
+import org.spongepowered.common.map.decoration.SpongeMapDecorationDataBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
@@ -215,9 +214,8 @@ public final class DataRegistrar {
         dataManager.registerBuilder(PotionEffect.class, new SpongePotionBuilder());
 
         // Map stuff
-        dataManager.registerBuilder(MapCanvas.class, new SpongeMapCanvasBuilder());
-        dataManager.registerBuilder(MapColor.class, new SpongeMapColorBuilder());
-        dataManager.registerBuilder(MapDecoration.class, new SpongeMapDecorationBuilder());
+        dataManager.registerBuilder(MapCanvas.class, new SpongeMapCanvasDataBuilder());
+        dataManager.registerBuilder(MapDecoration.class, new SpongeMapDecorationDataBuilder());
 
         // Content Updaters
         dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());

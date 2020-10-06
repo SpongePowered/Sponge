@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test;
 
+import com.flowpowered.math.vector.Vector2i;
 import com.google.inject.Inject;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -42,6 +43,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.MainPlayerInventory;
@@ -54,10 +56,13 @@ import org.spongepowered.api.map.color.MapColorTypes;
 import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.map.decoration.MapDecorationTypes;
+import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
+import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.HoverAction;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.map.MapStorage;
 
@@ -69,6 +74,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -270,20 +276,13 @@ public class MapTest implements LoadableModule {
             final Set<MapDecoration> decorations = new HashSet<>();
             int x = Byte.MIN_VALUE;
             int y = Byte.MIN_VALUE;
-            final Direction[] dirs = new Direction[] {
-                    Direction.NORTH, Direction.NORTH_NORTHEAST, Direction.NORTHEAST,
-                    Direction.EAST_NORTHEAST, Direction.EAST, Direction.EAST_SOUTHEAST, Direction.SOUTHEAST,
-                    Direction.SOUTH_SOUTHEAST, Direction.SOUTH, Direction.SOUTH_SOUTHWEST, Direction.SOUTHWEST,
-                    Direction.WEST_SOUTHWEST, Direction.WEST, Direction.WEST_NORTHWEST,
-                    Direction.NORTHWEST, Direction.NORTH_NORTHWEST
-            };
-            for (final Direction dir : dirs) {
+
+            for (final MapDecorationOrientation dir : Sponge.getRegistry().getAllOf(MapDecorationOrientation.class)) {
                 decorations.add(
                         MapDecoration.builder()
                                 .type(MapDecorationTypes.RED_MARKER)
                                 .rotation(dir)
-                                .x(x)
-                                .y(y)
+                                .position(Vector2i.from(x, y))
                                 .build());
                 src.sendMessage(Text.of("rotation: " + dir.toString()));
                 src.sendMessage(Text.of("x: " + x));
@@ -309,7 +308,7 @@ public class MapTest implements LoadableModule {
             if (!heldMap.isPresent()) {
                 throw new CommandException(Text.of("You must hold a map in your hand"));
             }
-            heldMap.get().require(Keys.MAP_INFO).require(Keys.MAP_DECORATIONS).forEach(decoration -> decoration.setRotation(Direction.SOUTH));
+            heldMap.get().require(Keys.MAP_INFO).require(Keys.MAP_DECORATIONS).forEach(decoration -> decoration.setRotation(MapDecorationOrientations.SOUTH));
             return CommandResult.success();
         });
 
@@ -340,13 +339,33 @@ public class MapTest implements LoadableModule {
                         .orElse(mapStorage.createNewMapInfo().get());
             }
 
-            final DataView dataView = mapInfo.toContainer();
-            this.logger.info("before: " + dataView);
-            dataView.set(DataQuery.of("MapData").then(Keys.MAP_LOCKED.getQuery()), true)
+            final DataView mapInfoView = blankMapDecorationIds(mapInfo.toContainer());
+            mapInfoView.set(DataQuery.of("MapData").then(Keys.MAP_LOCKED.getQuery()), true)
                     .set(DataQuery.of("UnsafeMapId"), 10);
-            this.logger.info("setting to: " + dataView);
-            mapInfo.setRawData(dataView);
-            this.logger.info("after: " + mapInfo.toContainer());
+            mapInfo.setRawData(mapInfoView);
+            final DataView mapInfoViewAfter = blankMapDecorationIds(mapInfo.toContainer());
+            // We change the decoration from things such as a player or frame to a custom decoration, meaning copied decorations will actually persist,
+            // instead of instantly disappearing if the player moves or the location of the new mapinfo is different.
+            // It acts more like a snapshot.
+            checkSerialization(src, "MapInfo", mapInfoView.toString(), mapInfoViewAfter.toString());
+
+            MapColor mapColor = MapColor.builder().baseColor(MapColorTypes.BLUE).build();
+            final DataView mapColorView = mapColor.toContainer();
+            checkSerialization(src, "MapColor", mapColorView.toString(),  MapColor.builder().fromContainer(mapColorView).build().toContainer().toString());
+
+            MapCanvas mapCanvas = MapCanvas.builder().paintAll(MapColor.of(MapColorTypes.GREEN)).build();
+            checkSerialization(src, "MapCanvas", mapCanvas.toContainer().toString(),
+                    MapCanvas.builder().fromContainer(mapCanvas.toContainer()).build().toContainer().toString());
+
+            MapDecoration mapDecoration = MapDecoration.builder().type(MapDecorationTypes.BLUE_MARKER).rotation(MapDecorationOrientations.WEST).build();
+            final DataView mapDecorationView = mapDecoration.toContainer();
+            final DataView mapDecorationViewAfter = MapDecoration.builder().fromContainer(mapDecorationView).build().toContainer();
+
+            mapDecorationView.set(DataQuery.of("id"), "fakeid");
+            mapDecorationViewAfter.set(DataQuery.of("id"), "fakeid"); // Ignore ids for comparison
+
+            checkSerialization(src, "MapDecoration", mapDecorationView.toString(), mapDecorationViewAfter.toString());
+
             return CommandResult.success();
         });
 
@@ -411,6 +430,38 @@ public class MapTest implements LoadableModule {
                 heldMap.get().require(Keys.MAP_INFO).offer(Keys.MAP_UNLIMITED_TRACKING, true);
                 return CommandResult.success();
             });
+    }
+
+    private void checkSerialization(CommandSource src, String testName, String expected, String after) {
+        boolean success = expected.equals(after);
+        Text text = Text.builder().append(Text.of("Test of ")).append(Text.of(TextColors.BLUE, testName))
+                .append(success ? Text.of(TextColors.GREEN, " SUCCEEDED") : Text.of(TextColors.RED, " FAILED"))
+                .build();
+        src.sendMessage(text);
+        if (!success) {
+            logger.info(testName + " Expected: " + expected);
+            logger.info(testName + " Real: " + after);
+        }
+    }
+
+    private DataView blankMapDecorationIds(final DataView dataView) {
+        // Blank changes to id since we always change when serializing them to stop conflicts.
+        final DataQuery decorations = DataQuery.of("MapData", "Decorations");
+        final List<DataView> newData = dataView.getViewList(decorations).get();
+        newData.replaceAll(dataView1 -> dataView1.set(DataQuery.of("id"), "fakeid"));
+        dataView.set(decorations, newData);
+        return dataView;
+    }
+
+    @Listener
+    public void onGameStart(GameStartedServerEvent e) {
+        /*Sponge.getScheduler()
+                .createSyncExecutor(this)
+                .scheduleAtFixedRate(() -> Sponge.getServer().getPlayer("tyhdefu").ifPresent(player -> player.getItemInHand(HandTypes.MAIN_HAND).filter(itemStack -> itemStack.getType() == ItemTypes.FILLED_MAP)
+                        .map(itemStack -> itemStack.require(Keys.MAP_INFO))
+                        .map(mapInfo -> mapInfo.require(Keys.MAP_DECORATIONS))
+                        .ifPresent(mapDecorations -> mapDecorations.forEach(dec -> player.sendMessage(Text.of(dec.toContainer()))))
+                ), 0, 1, TimeUnit.SECONDS);*/
     }
 
     @Override

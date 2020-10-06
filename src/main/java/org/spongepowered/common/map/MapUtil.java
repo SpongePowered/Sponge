@@ -24,26 +24,39 @@
  */
 package org.spongepowered.common.map;
 
+import com.google.common.primitives.Bytes;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.MapInfoData;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.bridge.world.storage.MapStorageBridge;
+import org.spongepowered.common.map.color.SpongeMapColor;
+import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
+import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public final class MapUtil {
     /**
@@ -138,5 +151,45 @@ public final class MapUtil {
             // I don't see this ever happening but lets put logging in anyway
             throw new IllegalStateException("Error converting DataView to MC NBT", e);
         }
+    }
+
+    public static Optional<MapColor> getMapColorFromPixelValue(byte value) {
+        int intColor = Byte.toUnsignedInt(value);
+        int shade = intColor % Constants.Map.MAP_SHADES;
+        int colorIndex = (intColor - shade)/Constants.Map.MAP_SHADES;
+        Optional<MapColorType> mapColorType = MapColorRegistryModule.getByColorValue(colorIndex);
+        Optional<MapShade> mapShade = MapShadeRegistryModule.getInstance().getByShadeNum(shade);
+        if (!mapColorType.isPresent() || !mapShade.isPresent()) {
+            return Optional.empty();
+        }
+        return Optional.of(new SpongeMapColor(mapColorType.get(), mapShade.get()));
+    }
+
+    public static byte[] getMapCanvasFromContainer(DataView container) {
+        final DataQuery canvasQuery = Keys.MAP_CANVAS.getQuery();
+        final List<Byte> data = container.getByteList(canvasQuery)
+                .orElseThrow(() -> new InvalidDataException(canvasQuery + " was not a byte list!"));
+        if (data.size() != Constants.Map.MAP_SIZE) {
+            throw new InvalidDataException(canvasQuery + "had incorrect length, expected: " + Constants.Map.MAP_SIZE + ", got: " + data.size());
+        }
+        final Set<Byte> validPixels = new HashSet<>();
+        // Ensure the data is valid.
+        for (Byte pixel : data) {
+            if (validPixels.contains(pixel)) {
+                continue;
+            }
+            MapUtil.getMapColorFromPixelValue(pixel)
+                    .orElseThrow(() -> new InvalidDataException("Invalid pixel value: " + pixel));
+            validPixels.add(pixel);
+        }
+        return Bytes.toArray(data);
+    }
+
+    // Minecraft's orientation system is weird, it goes positive or negative
+    // depending on what way you start going, and so there are two values for every
+    // rotation. This includes 0, which depending on which way you approach, could be 16 or 0.
+    // To make this make sense when serializing, we run it through this method
+    public static int getMapDecorationOrientation(byte rotation) {
+        return Math.floorMod(rotation, 16); // Different to java modulo, when rotation is negative.
     }
 }

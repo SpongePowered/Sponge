@@ -27,7 +27,6 @@ package org.spongepowered.common.map.canvas;
 import com.google.common.primitives.Bytes;
 import net.minecraft.world.storage.MapData;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
@@ -43,7 +42,6 @@ import org.spongepowered.common.util.Constants;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -78,19 +76,8 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
     }
 
     public MapColor getColor(int pos) {
-        byte color = canvas[pos];
-        int intColor = color;
-        // Make positive so colorIndex is positive
-        if (color < 0) {
-            intColor += 256; // Undo byte wrap around.
-        }
-        int shade = intColor % Constants.Map.MAP_SHADES;
-        int colorIndex = (intColor - shade)/Constants.Map.MAP_SHADES;
-        MapColorType mapColorType = MapColorRegistryModule.getByColorValue(colorIndex)
-                .orElseThrow(() -> new IllegalStateException("Tried to get a color that didn't exist from a map!"));
-        MapShade mapShade = MapShadeRegistryModule.getInstance().getByShadeNum(shade)
-                .orElseThrow(() -> new IllegalStateException("Tried to get a shade that didn't exist from a map!"));
-        return new SpongeMapColor(mapColorType, mapShade);
+        return MapUtil.getMapColorFromPixelValue(this.canvas[pos])
+                .orElseThrow(() -> new IllegalStateException("Tried to get a color that didn't exist! pixel value: " + this.canvas[pos]));
     }
 
     @Override
@@ -121,7 +108,7 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
     }
 
     @Override
-    public Builder toBuilder(MapCanvas canvas) {
-        return MapCanvas.builder();
+    public Builder toBuilder() {
+        return MapCanvas.builder().from(this);
     }
 }

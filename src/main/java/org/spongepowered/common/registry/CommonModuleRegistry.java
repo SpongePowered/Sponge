@@ -99,6 +99,7 @@ import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.map.decoration.MapDecorationType;
+import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
@@ -187,6 +188,7 @@ import org.spongepowered.common.registry.type.advancement.*;
 import org.spongepowered.common.registry.type.block.*;
 import org.spongepowered.common.registry.type.boss.*;
 import org.spongepowered.common.registry.type.data.*;
+import org.spongepowered.common.registry.type.map.MapDecorationOrientationRegistryModule;
 import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
 import org.spongepowered.common.registry.type.service.economy.AccountDeletionResultTypeRegistryModule;
 import org.spongepowered.common.registry.type.service.economy.TransactionTypeRegistryModule;
@@ -494,6 +496,7 @@ public final class CommonModuleRegistry {
                 .registerModule(MapColorType.class, MapColorRegistryModule.getInstance())
                 .registerModule(MapShade.class, MapShadeRegistryModule.getInstance())
                 .registerModule(MapDecorationType.class, MapDecorationRegistryModule.getInstance())
+                .registerModule(MapDecorationOrientation.class, MapDecorationOrientationRegistryModule.getInstance())
                 // Miscellaneous Registries
                 .registerModule(DungeonMobRegistryModule.getInstance())
         ;

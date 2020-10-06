@@ -26,8 +26,6 @@ package org.spongepowered.common.map.color;
 
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
@@ -38,16 +36,11 @@ import org.spongepowered.common.registry.type.map.MapShadeRegistryModule;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
-public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> implements MapColor.Builder {
+public class SpongeMapColorBuilder implements MapColor.Builder {
     @Nullable
     private MapColorType color = null;
     private MapShade shade = MapShades.BASE;
-
-    public SpongeMapColorBuilder() {
-        super(MapColor.class, 1);
-    }
 
     @Override
     public MapColor.Builder shade(MapShade shade) {
@@ -82,33 +75,40 @@ public class SpongeMapColorBuilder extends AbstractDataBuilder<MapColor> impleme
     }
 
     @Override
+    public MapColor.Builder fromContainer(DataView container) {
+        if (!container.contains(Constants.Map.COLOR_INDEX)) {
+            return this;
+        }
+        reset();
+        int colorInt = container.getInt(Constants.Map.COLOR_INDEX).get();
+
+        this.color = MapColorRegistryModule.getByColorValue(colorInt)
+                .orElseThrow(() -> new InvalidDataException("Invalid map color " + colorInt));
+
+        container.getInt(Constants.Map.SHADE_NUM).ifPresent(mapShadeInt -> this.shade = MapShadeRegistryModule.getInstance().getByShadeNum(mapShadeInt)
+                .orElseThrow(() -> new InvalidDataException("Invalid map shade " + mapShadeInt)));
+
+        return this;
+    }
+
+    @Override
     public MapColor build() throws IllegalStateException {
         Preconditions.checkState(this.color != null, "Color has not been set yet");
         return new SpongeMapColor(this.color, this.shade);
     }
 
     @Override
-    protected Optional<MapColor> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(Constants.Map.COLOR_INDEX)
-                || !container.contains(Constants.Map.SHADE_NUM)) {
-            return Optional.empty();
-        }
-        int colorInt = container.getInt(Constants.Map.COLOR_INDEX).get();
-        int mapShadeInt = container.getInt(Constants.Map.SHADE_NUM).get();
-
-        MapColorType color = MapColorRegistryModule.getByColorValue(colorInt)
-                .orElseThrow(() -> new InvalidDataException("Invalid map color " + colorInt));
-        MapShade mapShade = MapShadeRegistryModule.getInstance().getByShadeNum(mapShadeInt)
-                .orElseThrow(() -> new InvalidDataException("Invalid map shade " + mapShadeInt));
-
-        return Optional.of(new SpongeMapColor(color, mapShade));
-    }
-
-    @Override
-    public DataBuilder<MapColor> from(MapColor value) {
+    public MapColor.Builder from(MapColor value) {
         SpongeMapColor mapColorBridge = (SpongeMapColor)value;
         this.color = mapColorBridge.getType();
         this.shade = mapColorBridge.getShade();
+        return this;
+    }
+
+    @Override
+    public MapColor.Builder reset() {
+        this.color = null;
+        this.shade = MapShades.BASE;
         return this;
     }
 }

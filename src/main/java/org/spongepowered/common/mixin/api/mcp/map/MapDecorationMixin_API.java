@@ -29,12 +29,14 @@ import com.google.common.base.Preconditions;
 import net.minecraft.world.storage.MapDecoration;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.map.decoration.MapDecorationType;
-import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.map.MapUtil;
+import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
+import org.spongepowered.common.registry.type.map.MapDecorationOrientationRegistryModule;
 import org.spongepowered.common.registry.type.map.MapDecorationRegistryModule;
 import org.spongepowered.common.util.Constants;
 
@@ -58,16 +60,6 @@ public class MapDecorationMixin_API implements org.spongepowered.api.map.decorat
     }
 
     @Override
-    public int getX() {
-        return this.x;
-    }
-
-    @Override
-    public int getY() {
-        return this.y;
-    }
-
-    @Override
     public void setPosition(Vector2i position) {
         Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.getX()), "x position out of bounds");
         Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.getY()), "y position out of bounds");
@@ -76,30 +68,20 @@ public class MapDecorationMixin_API implements org.spongepowered.api.map.decorat
     }
 
     @Override
-    public void setX(int x) {
-        Preconditions.checkState(MapUtil.isInMapDecorationBounds(x), "x out of bounds");
-        this.x = (byte) x;
+    public void setRotation(MapDecorationOrientation dir) {
+        this.rotation = (byte) ((SpongeMapDecorationOrientation)dir).getOrientationNumber();
     }
 
     @Override
-    public void setY(int y) {
-        Preconditions.checkState(MapUtil.isInMapDecorationBounds(y), "y out of bounds");
-        this.y = (byte)y;
+    public MapDecorationOrientation getRotation() {
+        int rot = MapUtil.getMapDecorationOrientation(this.rotation);
+        return MapDecorationOrientationRegistryModule.getInstance().getByOrientationId(rot)
+                .orElseThrow(() -> new IllegalStateException("A map had a rotation that didn't exist!"));
     }
 
     @Override
-    public void setRotation(Direction dir) {
-        if (!(dir.isCardinal()
-                || dir.isOrdinal()
-                || dir.isSecondaryOrdinal())) {
-            throw new IllegalStateException("Invalid direction. Not a valid direction, must be cardinal, ordinal or secondary ordinal.");
-        }
-        this.rotation = Constants.Map.DIRECTION_CONVERSION_MAP.get(dir);
-    }
-
-    @Override
-    public Direction getRotation() {
-        return Constants.Map.DIRECTION_CONVERSION_MAP.inverse().get(this.rotation);
+    public boolean isPersistent() {
+        return ((MapDecorationBridge)this).bridge$isPersistent();
     }
 
     @Override
@@ -114,6 +96,6 @@ public class MapDecorationMixin_API implements org.spongepowered.api.map.decorat
                 .set(Constants.Map.DECORATION_ID, ((MapDecorationBridge) this).bridge$getKey())
                 .set(Constants.Map.DECORATION_X, this.x)
                 .set(Constants.Map.DECORATION_Y, this.y)
-                .set(Constants.Map.DECORATION_ROTATION, this.rotation);
+                .set(Constants.Map.DECORATION_ROTATION, (byte) MapUtil.getMapDecorationOrientation(this.rotation));
     }
 }
