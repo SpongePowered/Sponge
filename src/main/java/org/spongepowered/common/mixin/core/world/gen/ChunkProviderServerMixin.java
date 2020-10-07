@@ -71,6 +71,7 @@ import org.spongepowered.common.world.storage.WorldStorageUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
@@ -358,7 +359,7 @@ public abstract class ChunkProviderServerMixin implements ChunkProviderServerBri
         if (ShouldFire.SAVE_CHUNK_EVENT_PRE) {
             final org.spongepowered.api.world.Chunk apiChunk = (org.spongepowered.api.world.Chunk) chunkIn;
             if (SpongeImpl.postEvent(SpongeEventFactory.createSaveChunkEventPre(SpongeImpl.getCauseStackManager().getCurrentCause(),
-                apiChunk.getPosition(), apiChunk))) {
+                apiChunk.getPosition(), Optional.of(apiChunk.getWorld().getUniqueId()), apiChunk))) {
                 ci.cancel();
             }
         }

@@ -33,6 +33,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.RegionFileCache;
 import net.minecraft.world.storage.ThreadedFileIOBase;
@@ -59,6 +60,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -67,12 +69,15 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.QueuedChunk;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.util.WorldChunkPos;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Mixin(AnvilChunkLoader.class)
@@ -268,14 +273,14 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
                             this.writeChunkData(chunkpos, nbttagcompound);
                             laste = null;
                             break;
-                        } catch (Exception exception) {
+                        } catch (final Exception exception) {
                             // LOGGER.error((String)"Failed to save chunk",
                             // (Throwable)exception);
                             laste = exception;
                         }
                         try {
                             Thread.sleep(10);
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
@@ -305,11 +310,24 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         return this.chunkSaveLocation.toPath();
     }
 
+    @Redirect(method = "saveChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader.addChunkToPending"
+            + "(Lnet/minecraft/util/math/ChunkPos;Lnet/minecraft/nbt/NBTTagCompound;)V"))
+    private void impl$useWorldChunkPosWhenQueuing(final AnvilChunkLoader anvilChunkLoader, final ChunkPos pos, final NBTTagCompound compound,
+            final World worldIn, final Chunk chunkIn) {
+        this.addChunkToPending(new WorldChunkPos(((org.spongepowered.api.world.World) worldIn).getUniqueId(), pos.x, pos.z), compound);
+    }
+
     @Inject(method = "writeChunkData", at = @At("RETURN"))
-    private void impl$callSaveChunkEventPost(ChunkPos pos, NBTTagCompound compound, CallbackInfo ci) {
+    private void impl$callSaveChunkEventPost(final ChunkPos pos, final NBTTagCompound compound, final CallbackInfo ci) {
         if (ShouldFire.SAVE_CHUNK_EVENT_POST) {
             final Cause cause = Cause.of(EventContext.empty(), Collections.singleton(SpongeImpl.getServer()));
-            SpongeImpl.postEvent(SpongeEventFactory.createSaveChunkEventPost(cause, VecHelper.toVec3i(pos)));
+            final Optional<UUID> worldUUID;
+            if (pos instanceof WorldChunkPos) {
+                worldUUID = Optional.of(((WorldChunkPos) pos).getWorldUUID());
+            } else {
+                worldUUID = Optional.empty();
+            }
+            SpongeImpl.postEvent(SpongeEventFactory.createSaveChunkEventPost(cause, VecHelper.toVec3i(pos), worldUUID));
         }
     }
 }
