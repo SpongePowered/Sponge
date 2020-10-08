@@ -549,7 +549,7 @@ project("SpongeVanilla") {
         add(vanillaLaunch.implementationConfigurationName, vanillaMinecraftConfig)
 
         vanillaInstallerConfig("com.google.code.gson:gson:2.8.0")
-        vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.3")
+        vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.4")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-core:2.11.2")
         vanillaInstallerConfig("org.cadixdev:atlas:0.2.0")
@@ -585,11 +585,11 @@ project("SpongeVanilla") {
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
-        vanillaAppLaunchConfig("cpw.mods:modlauncher:4.1.+") {
+        vanillaAppLaunchConfig("cpw.mods:modlauncher:7.0.+") {
             exclude(group = "org.apache.logging.log4j")
         }
         vanillaAppLaunchConfig("org.ow2.asm:asm-commons:6.2")
-        vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.1.+") {
+        vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.3.+") {
             exclude(group = "org.apache.logging.log4j")
         }
         vanillaAppLaunchConfig("net.minecraftforge:accesstransformers:1.0.+:service") {
