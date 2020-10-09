@@ -22,31 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.advancements;
+package org.spongepowered.common.mixin.core.advancements;
 
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.ICriterionInstance;
-import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import static com.google.common.base.Preconditions.checkState;
+
+import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.util.ResourceLocation;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.advancement.criterion.DefaultedAdvancementCriterion;
-import org.spongepowered.common.bridge.advancements.CriterionBridge;
+import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 
-import java.util.Optional;
+@Mixin(DisplayInfo.class)
+public abstract class DisplayInfoMixin implements DisplayInfoBridge {
 
-@Mixin(Criterion.class)
-public abstract class CriterionMixin_API implements DefaultedAdvancementCriterion {
+    @Shadow @Final @Mutable @Nullable private ResourceLocation background;
 
-    @Shadow @Final private ICriterionInstance criterionInstance;
+    @Nullable private Advancement impl$advancement;
 
     @Override
-    public String getName() {
-        return ((CriterionBridge) this).bridge$getName();
+    public Advancement bridge$getAdvancement() {
+        checkState(this.impl$advancement != null, "The advancement is not yet initialized");
+        return this.impl$advancement;
     }
 
     @Override
-    public Optional<FilteredTrigger<?>> getTrigger() {
-        return Optional.ofNullable((FilteredTrigger<?>) this.criterionInstance);
+    public void bridge$setAdvancement(Advancement advancement) {
+        this.impl$advancement = advancement;
+    }
+
+    @Nullable
+    @Override
+    public String bridge$getBackground() {
+        return this.background == null ? null : this.background.toString();
+    }
+
+    @Override
+    public void bridge$setBackground(@Nullable String background) {
+        this.background = background == null ? null : new ResourceLocation(background);
     }
 }

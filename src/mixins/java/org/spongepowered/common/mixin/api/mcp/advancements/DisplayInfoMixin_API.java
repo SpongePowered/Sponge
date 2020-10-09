@@ -27,10 +27,12 @@ package org.spongepowered.common.mixin.api.mcp.advancements;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.TreeLayoutElement;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -39,6 +41,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.math.vector.Vector2d;
 
 @Mixin(DisplayInfo.class)
@@ -53,6 +56,10 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     @Shadow private float y;
     @Shadow public abstract boolean shadow$shouldAnnounceToChat();
     @Shadow public abstract boolean shadow$isHidden();
+
+    @Shadow @Final private ItemStack icon;
+
+    @Shadow @Final private boolean hidden;
 
     @Override
     public Advancement getAdvancement() {
@@ -84,6 +91,16 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     @Override
     public Component getTitle() {
         return SpongeAdventure.asAdventure(this.title);
+    }
+
+    @Override
+    public ItemStackSnapshot getIcon() {
+        return ItemStackUtil.snapshotOf(this.icon);
+    }
+
+    @Override
+    public boolean isHidden() {
+        return this.hidden;
     }
 
     @Override

@@ -22,29 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.advancement.criterion;
 
-import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
+public interface ImplementationBackedCriterionProgress {
 
-import java.util.Map;
-
-public interface AdvancementProgressBridge {
-
-    Advancement bridge$getAdvancement();
-
-    PlayerAdvancements bridge$getPlayerAdvancements();
-
-    void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
-
-    void bridge$setAdvancementId(ResourceLocation key);
-
-    void bridge$invalidateAchievedState();
-
-    void bridge$updateProgressMap();
-
-    Map<String, ImplementationBackedCriterionProgress> bridge$getProgressMap();
+    void invalidateAchievedState();
 }

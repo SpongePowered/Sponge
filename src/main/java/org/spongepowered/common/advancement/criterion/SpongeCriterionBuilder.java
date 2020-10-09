@@ -22,29 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.advancement.criterion;
 
-import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.advancement.Advancement;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.ICriterionInstance;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
+import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
-import java.util.Map;
+public class SpongeCriterionBuilder extends AbstractCriterionBuilder<AdvancementCriterion, AdvancementCriterion.Builder>
+        implements AdvancementCriterion.Builder {
 
-public interface AdvancementProgressBridge {
-
-    Advancement bridge$getAdvancement();
-
-    PlayerAdvancements bridge$getPlayerAdvancements();
-
-    void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
-
-    void bridge$setAdvancementId(ResourceLocation key);
-
-    void bridge$invalidateAchievedState();
-
-    void bridge$updateProgressMap();
-
-    Map<String, ImplementationBackedCriterionProgress> bridge$getProgressMap();
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    AdvancementCriterion build0() {
+        ICriterionInstance trigger = (ICriterionInstance) this.trigger;
+        if (this.trigger == null) {
+            trigger = SpongeDummyTrigger.Instance.dummy();
+        }
+        final Criterion criterion = new Criterion(trigger);
+        ((CriterionBridge) criterion).bridge$setName(this.name);
+        return (AdvancementCriterion) criterion;
+    }
 }

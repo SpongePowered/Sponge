@@ -22,29 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.advancement.criterion;
 
-import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
+import org.spongepowered.api.advancement.criteria.AndCriterion;
 
-import java.util.Map;
+import java.util.Set;
 
-public interface AdvancementProgressBridge {
+public class SpongeAndCriterion extends SpongeOperatorCriterion implements AndCriterion {
 
-    Advancement bridge$getAdvancement();
+    public static final AndCriterion.Factory FACTORY_INSTANCE = new SpongeAndCriterion.SpongeAndCriterionFactory();
 
-    PlayerAdvancements bridge$getPlayerAdvancements();
+    SpongeAndCriterion(final Set<AdvancementCriterion> criteria) {
+        super("and", criteria);
+    }
 
-    void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
+    private static class SpongeAndCriterionFactory implements AndCriterion.Factory {
 
-    void bridge$setAdvancementId(ResourceLocation key);
+        @Override
+        public AdvancementCriterion of(AdvancementCriterion... criteria) {
+            return AdvancementCriterion.empty().and(criteria);
+        }
 
-    void bridge$invalidateAchievedState();
-
-    void bridge$updateProgressMap();
-
-    Map<String, ImplementationBackedCriterionProgress> bridge$getProgressMap();
+        @Override
+        public AdvancementCriterion of(Iterable<AdvancementCriterion> criteria) {
+            return AdvancementCriterion.empty().and(criteria);
+        }
+    }
 }

@@ -439,7 +439,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         if (this.api$criterion == null) {
             this.api$criterion = new HashMap<>();
         }
-        this.api$criterion.computeIfAbsent(advancement.getName(), k -> new Object2BooleanOpenHashMap<>()).put(criterion.getName(), inverted);
+        this.api$criterion.computeIfAbsent(advancement.getKey().toString(), k -> new Object2BooleanOpenHashMap<>()).put(criterion.getName(), inverted);
         return this;
     }
 

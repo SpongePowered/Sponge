@@ -29,6 +29,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.advancements.FrameType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.monster.PhantomEntity;
 import net.minecraft.entity.monster.SpellcastingIllagerEntity;
@@ -62,6 +63,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
@@ -426,7 +428,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         return this;
     }
 
-    private <T extends CatalogType> SpongeCatalogRegistry generateCallbackRegistry(final Class<T> catalogClass, final ResourceKey key, final BiConsumer<ResourceLocation, T> callback) {
+    public  <T extends CatalogType> SpongeCatalogRegistry generateCallbackRegistry(final Class<T> catalogClass, final ResourceKey key, final BiConsumer<ResourceLocation, T> callback) {
         Objects.requireNonNull(key);
 
         if (this.registries.containsKey(key)) {
@@ -523,9 +525,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         this
             .generateRegistry(AccountDeletionResultType.class, ResourceKey.sponge("account_deletion_result_type"), AccountDeletionResultTypeStreamGenerator.stream(), true, false)
-            .registerRegistry(Advancement.class, ResourceKey.minecraft("advancement"), false)
-            .registerRegistry(AdvancementTree.class, ResourceKey.minecraft("advancement_tree"), false)
-//            .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true)
+            .generateRegistry(AdvancementType.class, ResourceKey.minecraft("advancement_type"), Arrays.stream(FrameType.values()), true, false)
             .generateRegistry(ArmorMaterial.class, ResourceKey.minecraft("armor_material"), Arrays.stream(net.minecraft.item.ArmorMaterial.values()), true, false)
             .generateRegistry(AttachmentSurface.class, ResourceKey.minecraft("attach_face"), Arrays.stream(net.minecraft.state.properties.AttachFace.values()), true, false)
             .generateRegistry(AttributeOperation.class, ResourceKey.minecraft("attribute_operation"), Arrays.stream(AttributeModifier.Operation.values()), true, false)
@@ -635,7 +635,9 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
     public void registerDatapackCatalogues() {
         this.datapackCatalogues.clear();
-        this.registerRegistry(RecipeRegistration.class, ResourceKey.sponge("recipe"), true, true);
+        this.registerRegistry(RecipeRegistration.class, ResourceKey.sponge("recipe"), true, true)
+            .registerRegistry(Advancement.class, ResourceKey.minecraft("advancement"), true, true);
+
     }
 
     private void registerVanillaRegistries() {

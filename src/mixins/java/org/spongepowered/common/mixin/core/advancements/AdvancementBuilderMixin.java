@@ -22,29 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.mixin.core.advancements;
 
-import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
+import net.minecraft.advancements.Advancement;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 
-import java.util.Map;
+@Mixin(Advancement.Builder.class)
+public abstract class AdvancementBuilderMixin implements AdvancementBridge {
+//
+//    @Redirect(method = "serialize", at = @At(value = "INVOKE", target = "Ljava/util/Map;entrySet()Ljava/util/Set;"))
+//    public Set<Map.Entry<String, Criterion>> impl$getCriteraSet(Map<String, Criterion> criteria) {
+//        return criteria.entrySet();
+//    }
 
-public interface AdvancementProgressBridge {
-
-    Advancement bridge$getAdvancement();
-
-    PlayerAdvancements bridge$getPlayerAdvancements();
-
-    void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
-
-    void bridge$setAdvancementId(ResourceLocation key);
-
-    void bridge$invalidateAchievedState();
-
-    void bridge$updateProgressMap();
-
-    Map<String, ImplementationBackedCriterionProgress> bridge$getProgressMap();
 }

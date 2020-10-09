@@ -28,12 +28,15 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 
 import java.util.Collection;
@@ -44,14 +47,20 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 @Mixin(Advancement.class)
-public abstract class AdvancementMixin_API implements org.spongepowered.api.advancement.Advancement {
+public abstract class AdvancementMixin_API implements org.spongepowered.api.advancement.Advancement, AdvancementTree {
 
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private Set<Advancement> children;
+    @Shadow @Final private ResourceLocation id;
+    @Shadow @Final private ITextComponent displayText;
+    @Shadow @Final private Advancement parent;
 
     @Override
     public Optional<AdvancementTree> getTree() {
-        return ((AdvancementBridge) this).bridge$getTree();
+        if (this.parent == null) {
+            return Optional.of(this);
+        }
+        return ((org.spongepowered.api.advancement.Advancement) this.parent).getTree();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -83,16 +92,24 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
 
     @Override
     public ResourceKey getKey() {
-        return ((AdvancementBridge) this).bridge$getKey();
-    }
-
-    @Override
-    public String getName() {
-        throw new UnsupportedOperationException();
+        return (ResourceKey) (Object) this.id;
     }
 
     @Override
     public Component asComponent() {
-        return ((AdvancementBridge) this).bridge$getText();
+        return SpongeAdventure.asAdventure(this.displayText);
+    }
+
+    @Override
+    public org.spongepowered.api.advancement.Advancement getRootAdvancement() {
+        return this;
+    }
+
+    @Override
+    public String getBackgroundPath() {
+        if (this.display == null) {
+            return null;
+        }
+        return this.display.getBackground().getPath();
     }
 }

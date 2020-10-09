@@ -428,7 +428,7 @@ public final class SpongeEventManager implements EventManager {
                 SpongeCommon.setActivePlugin(handler.getPlugin());
                 handler.handle(event);
             } catch (Throwable e) {
-                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().getMetadata().getId(), e);
             } finally {
                 SpongeCommon.setActivePlugin(null);
             }

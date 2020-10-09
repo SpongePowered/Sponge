@@ -30,10 +30,12 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
@@ -103,6 +105,8 @@ public final class SpongeLifecycle {
 
         // After all plugins registered their recipes we serialize them
         SpongeRecipeProvider.registerRecipes(spongeCatalogRegistry.getRegistry(RecipeRegistration.class));
+        SpongeAdvancementProvider.registerAdvancements(spongeCatalogRegistry.getRegistry(Advancement.class));
+
     }
 
     public void callRegisterChannelEvent() {

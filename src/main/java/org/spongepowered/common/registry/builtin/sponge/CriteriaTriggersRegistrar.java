@@ -25,11 +25,12 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.ICriterionTrigger;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
-
-import java.util.stream.Stream;
 
 public final class CriteriaTriggersRegistrar {
 
@@ -38,10 +39,18 @@ public final class CriteriaTriggersRegistrar {
 
     // Oh Vanilla, you're fun...
 
+    private static boolean vanillaRegistered = false;
+
     public static void registerRegistry(final SpongeCatalogRegistry registry) {
-        registry.generateRegistry(Trigger.class, ResourceKey.minecraft("trigger"), Stream.empty(), false, false);
+        registry.generateCallbackRegistry(Trigger.class, ResourceKey.minecraft("trigger"), CriteriaTriggersRegistrar::registerAdditional);
     }
-    
+
+    private static void registerAdditional(ResourceLocation resourceLocation, Trigger<?> t) {
+        if (CriteriaTriggersRegistrar.vanillaRegistered) {
+            CriteriaTriggersAccessor.accessor$register((ICriterionTrigger<?>) t);
+        }
+    }
+
     public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
             .registerCatalogAndSupplier(Trigger.class, "impossible", () -> (Trigger) CriteriaTriggers.IMPOSSIBLE)
@@ -80,5 +89,6 @@ public final class CriteriaTriggersRegistrar {
             .registerCatalogAndSupplier(Trigger.class, "hero_of_the_village", () -> (Trigger) CriteriaTriggers.HERO_OF_THE_VILLAGE)
             .registerCatalogAndSupplier(Trigger.class, "voluntary_exile", () -> (Trigger) CriteriaTriggers.VOLUNTARY_EXILE)
         ;
+        CriteriaTriggersRegistrar.vanillaRegistered = true;
     }
 }
