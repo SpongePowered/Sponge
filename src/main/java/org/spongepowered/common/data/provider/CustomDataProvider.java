@@ -28,6 +28,7 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 
 import java.util.Optional;
@@ -41,13 +42,29 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public Optional<E> get(DataHolder dataHolder) {
         if (this.isSupported(dataHolder)) {
-            return ((CustomDataHolderBridge) dataHolder).bridge$getCustom(this.getKey());
+            final CustomDataHolderBridge customDataHolder = CustomDataProvider.getCustomDataHolder(dataHolder);
+            return customDataHolder.bridge$getCustom(this.getKey());
         }
         return Optional.empty();
     }
 
+    private static CustomDataHolderBridge getCustomDataHolder(DataHolder dataHolder) {
+        final CustomDataHolderBridge customDataHolder;
+        if (dataHolder instanceof ServerLocation) {
+            customDataHolder = (CustomDataHolderBridge) ((ServerLocation) dataHolder).getBlockEntity().get();
+        } else {
+            customDataHolder = (CustomDataHolderBridge) dataHolder;
+        }
+        return customDataHolder;
+    }
+
     @Override
     public boolean isSupported(DataHolder dataHolder) {
+        if (dataHolder instanceof ServerLocation) {
+            if (((ServerLocation) dataHolder).hasBlockEntity()) {
+                return true;
+            }
+        }
         if (!(dataHolder instanceof CustomDataHolderBridge)) {
             return false;
         }
@@ -58,7 +75,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
         if (this.isSupported(dataHolder)) {
-            return ((CustomDataHolderBridge) dataHolder).bridge$offerCustom(this.getKey(),  element);
+            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$offerCustom(this.getKey(),  element);
         }
         return DataTransactionResult.failNoData();
     }
@@ -66,7 +83,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public DataTransactionResult remove(DataHolder.Mutable dataHolder) {
         if (this.isSupported(dataHolder)) {
-            return ((CustomDataHolderBridge) dataHolder).bridge$removeCustom(this.getKey());
+            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$removeCustom(this.getKey());
         }
         return DataTransactionResult.failNoData();
     }
