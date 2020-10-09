@@ -54,7 +54,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -289,18 +288,12 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         return value;
     }
 
-    @Group(name = "sponge$getClosestPlayerInMobEntity", max = 1)
     @Nullable
     @Redirect(
-        method = "checkDespawn()V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/World;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;",
-            remap = false
-        ),
-        expect = 0,
-        require = 0
-    )
+            method = "checkDespawn()V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/World;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
     private PlayerEntity impl$getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entityIn, final double distance) {
         double bestDistance = -1.0D;
         PlayerEntity result = null;
@@ -319,23 +312,6 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         }
 
         return result;
-    }
-
-    @Group(name = "sponge$getClosestPlayerInMobEntity", max = 1)
-    @Nullable
-    @Redirect(
-        method = "checkDespawn()V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/World;func_217362_a(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;",
-            remap = false
-        ),
-        expect = 0,
-        require = 0
-    )
-    private PlayerEntity impl$production_getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entityIn,
-        final double distance) {
-        return this.impl$getClosestPlayerForSpawning(world, entityIn, distance);
     }
 
 }

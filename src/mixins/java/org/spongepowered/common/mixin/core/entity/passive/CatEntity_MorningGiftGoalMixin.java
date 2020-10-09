@@ -48,7 +48,7 @@ public abstract class CatEntity_MorningGiftGoalMixin {
             target = "Lnet/minecraft/entity/passive/CatEntity;attemptTeleport(DDDZ)Z",
             shift = At.Shift.AFTER),
         cancellable = true)
-    private void impl$makeCatsRespectTeleportResult(CallbackInfo ci) {
+    private void impl$makeCatsRespectTeleportResult(final CallbackInfo ci) {
         if (!this.impl$teleportResult) {
             ci.cancel();
         }

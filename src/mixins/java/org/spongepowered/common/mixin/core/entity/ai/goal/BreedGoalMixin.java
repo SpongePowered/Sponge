@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -88,20 +87,10 @@ public abstract class BreedGoalMixin {
     }
 
     @Inject(method = "spawnBaby",
-        at = {
-            @At(value = "INVOKE",
-                target = "Lnet/minecraft/world/World;func_217376_c(Lnet/minecraft/entity/Entity;)Z",
-                shift = At.Shift.AFTER,
-                ordinal = 0,
-                remap = false
-            ),
-            @At(value = "INVOKE",
-                target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
-                shift = At.Shift.AFTER,
-                ordinal = 0,
-                remap = false
-            ),
-        },
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
+            shift = At.Shift.AFTER,
+            ordinal = 0),
         cancellable = true)
     private void impl$cancelSpawnResultIfMarked(final CallbackInfo ci) {
         if (!this.impl$spawnEntityResult) {
@@ -109,17 +98,11 @@ public abstract class BreedGoalMixin {
         }
     }
 
-    @Group(name = "sponge$spawnBabyRedirect", max = 1)
     @Redirect(method = "spawnBaby()V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;addEntity(Lnet/minecraft/entity/Entity;)Z",
-            ordinal = 0,
-            remap = false
-        ),
-        expect = 0,
-        require = 0
-    )
+            ordinal = 0))
     private boolean impl$throwBreedEvent(final World world, final Entity baby) {
         if (ShouldFire.BREEDING_EVENT_BREED) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -136,19 +119,6 @@ public abstract class BreedGoalMixin {
         return this.impl$spawnEntityResult;
     }
 
-    @Group(name = "sponge$spawnBabyRedirect", max = 1)
-    @Redirect(method = "spawnBaby()V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/World;func_217376_c(Lnet/minecraft/entity/Entity;)Z",
-            ordinal = 0,
-            remap = false
-        ),
-        expect = 0,
-        require = 0
-    )
-    private boolean impl$production_throwBreedEvent(final World world, final Entity baby) {
-        return this.impl$throwBreedEvent(world, baby);
-    }
+
 
 }

@@ -22,6 +22,8 @@ val minecraftDep: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
 
+val asmVersion: String by project
+val modlauncherVersion: String by project
 val mixinVersion: String by project
 val pluginSpiVersion: String by project
 val guavaVersion: String by project
@@ -201,8 +203,8 @@ dependencies {
     implementation("javax.inject:javax.inject:1")
 
     // ASM - required for generating event listeners
-    implementation("org.ow2.asm:asm-util:6.2")
-    implementation("org.ow2.asm:asm-tree:6.2")
+    implementation("org.ow2.asm:asm-util:$asmVersion")
+    implementation("org.ow2.asm:asm-tree:$asmVersion")
 
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
@@ -221,8 +223,8 @@ dependencies {
     launchConfig("com.google.inject:guice:4.1.0")
     launchConfig("javax.inject:javax.inject:1")
     launchConfig("com.google.code.gson:gson:2.8.0")
-    launchConfig("org.ow2.asm:asm-tree:6.2")
-    launchConfig("org.ow2.asm:asm-util:6.2")
+    launchConfig("org.ow2.asm:asm-tree:$asmVersion")
+    launchConfig("org.ow2.asm:asm-util:$asmVersion")
     add(launch.get().implementationConfigurationName, launchConfig)
 
     // Applaunch -- initialization that needs to occur without game access
@@ -558,8 +560,8 @@ project("SpongeVanilla") {
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
-        vanillaAppLaunchConfig("org.ow2.asm:asm-util:6.2")
-        vanillaAppLaunchConfig("org.ow2.asm:asm-tree:6.2")
+        vanillaAppLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
+        vanillaAppLaunchConfig("org.ow2.asm:asm-tree:$asmVersion")
         vanillaAppLaunchConfig("com.google.guava:guava:$guavaVersion")
         vanillaAppLaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
         vanillaAppLaunchConfig("javax.inject:javax.inject:1")
@@ -585,10 +587,10 @@ project("SpongeVanilla") {
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
-        vanillaAppLaunchConfig("cpw.mods:modlauncher:4.1.+") {
+        vanillaAppLaunchConfig("cpw.mods:modlauncher:$modlauncherVersion") {
             exclude(group = "org.apache.logging.log4j")
         }
-        vanillaAppLaunchConfig("org.ow2.asm:asm-commons:6.2")
+        vanillaAppLaunchConfig("org.ow2.asm:asm-commons:$asmVersion")
         vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.1.+") {
             exclude(group = "org.apache.logging.log4j")
         }
@@ -984,8 +986,8 @@ if (spongeForge != null) {
             add(forgeLaunch.implementationConfigurationName, project(":SpongeAPI"))
 
             forgeLaunchConfig("org.spongepowered:mixin:$mixinVersion")
-            forgeLaunchConfig("org.ow2.asm:asm-util:6.2")
-            forgeLaunchConfig("org.ow2.asm:asm-tree:6.2")
+            forgeLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
+            forgeLaunchConfig("org.ow2.asm:asm-tree:$asmVersion")
             forgeLaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
             forgeLaunchConfig("javax.inject:javax.inject:1")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
