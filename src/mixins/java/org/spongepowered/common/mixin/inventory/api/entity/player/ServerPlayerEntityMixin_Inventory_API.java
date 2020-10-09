@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
@@ -44,6 +45,8 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Optional;
 
@@ -63,18 +66,18 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
     @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes", "deprecation"})
     @Override
     public Optional<Container> openInventory(final Inventory inventory, final Component displayName) {
-        ContainerBridge openContainer = (ContainerBridge) this.openContainer;
+        final ContainerBridge openContainer = (ContainerBridge) this.openContainer;
         if (openContainer.bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Task.builder().delayTicks(0).execute(() -> {
-                try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            Task.builder().delay(Ticks.zero()).execute(() -> {
+                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
                     cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
                     this.closeInventory(); // Cause close event first. So cursor item is not lost.
                     this.openInventory(inventory); // Then open the inventory
                 }
-            }).plugin(SpongeCommon.getPlugin()).build();
+            }).plugin(Launch.getInstance().getCommonPlugin()).build();
             return this.getOpenInventory();
         }
         return Optional.ofNullable((Container) InventoryEventFactory.displayContainer((ServerPlayerEntity) (Object) this, inventory, displayName));
@@ -83,17 +86,17 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean closeInventory() throws IllegalArgumentException {
-        net.minecraft.inventory.container.Container openContainer = this.openContainer;
+        final net.minecraft.inventory.container.Container openContainer = this.openContainer;
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Task.builder().delayTicks(0).delayTicks(0).execute(() -> {
-                try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            Task.builder().delay(Ticks.zero()).execute(() -> {
+                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
                     cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
                     this.closeInventory();
                 }
-            }).plugin(SpongeCommon.getPlugin()).build();
+            }).plugin(Launch.getInstance().getCommonPlugin()).build();
             return false;
         }
         // Create Close_Window to capture item drops
@@ -104,7 +107,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
                 // intentionally missing the lastCursor to not double throw close event
         ) {
             ctx.buildAndSwitch();
-            PlayerInventory inventory = this.inventory;
+            final PlayerInventory inventory = this.inventory;
             final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(inventory.getItemStack());
             return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(openContainer, (ServerPlayerEntity) (Object) this, cursor, cursor, false).isCancelled();
         }

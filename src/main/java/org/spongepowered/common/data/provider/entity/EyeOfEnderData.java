@@ -28,6 +28,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.entity.item.EyeOfEnderEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class EyeOfEnderData {
 
@@ -42,8 +43,8 @@ public final class EyeOfEnderData {
                         .get(h -> !h.accessor$getShatterOrDrop())
                         .set((h, v) -> h.accessor$setShatterOrDrop(!v))
                     .create(Keys.DESPAWN_DELAY)
-                        .get(h -> Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - h.accessor$getDespawnTimer())
-                        .set((h, v) -> h.accessor$setDespawnTimer(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - v));
+                        .get(h -> new SpongeTicks(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - h.accessor$getDespawnTimer()))
+                        .set((h, v) -> h.accessor$setDespawnTimer(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - (int) v.getTicks()));
     }
     // @formatter:on
 }

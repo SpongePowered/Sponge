@@ -39,6 +39,8 @@ import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.accessor.world.server.EntityTrackerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,8 +81,8 @@ public final class PaintingData {
                                 }
                                 for (final ServerPlayerEntity player : players) {
                                     SpongeCommon.getServerScheduler().submit(Task.builder()
-                                            .plugin(SpongeCommon.getPlugin())
-                                            .delayTicks(SpongeGameConfigs.getForWorld(h.world).get().getEntity().getPaintingRespawnDelay())
+                                            .plugin(Launch.getInstance().getCommonPlugin())
+                                            .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.world).get().getEntity().getPaintingRespawnDelay()))
                                             .execute(() -> {
                                                 final SSpawnPaintingPacket packet = new SSpawnPaintingPacket(h);
                                                 player.connection.sendPacket(packet);

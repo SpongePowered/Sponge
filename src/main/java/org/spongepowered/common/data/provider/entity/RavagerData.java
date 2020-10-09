@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.entity.monster.RavagerEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class RavagerData {
 
@@ -38,8 +39,8 @@ public final class RavagerData {
         registrator
                 .asMutable(RavagerEntityAccessor.class)
                     .create(Keys.ATTACK_TIME)
-                        .get(RavagerEntityAccessor::accessor$getAttackTick)
-                        .set(RavagerEntityAccessor::accessor$setAttackTick)
+                        .get(x -> new SpongeTicks(x.accessor$getAttackTick()))
+                        .set((h, v) -> h.accessor$setAttackTick((int) v.getTicks()))
                     .create(Keys.IS_IMMOBILIZED)
                         .get(h -> h.accessor$getAttackTick() > 0 || h.accessor$getStunTick() > 0 || h.accessor$getRoarTick() > 0)
                     .create(Keys.IS_ROARING)
@@ -47,11 +48,11 @@ public final class RavagerData {
                     .create(Keys.IS_STUNNED)
                         .get(h -> h.accessor$getStunTick() > 0)
                     .create(Keys.ROARING_TIME)
-                        .get(RavagerEntityAccessor::accessor$getRoarTick)
-                        .set(RavagerEntityAccessor::accessor$setRoarTick)
+                        .get(x -> new SpongeTicks(x.accessor$getRoarTick()))
+                        .set((h, v) -> h.accessor$setRoarTick((int) v.getTicks()))
                     .create(Keys.STUNNED_TIME)
-                        .get(RavagerEntityAccessor::accessor$getStunTick)
-                        .set(RavagerEntityAccessor::accessor$setStunTick);
+                        .get(x -> new SpongeTicks(x.accessor$getStunTick()))
+                        .set((h, v) -> h.accessor$setStunTick((int) v.getTicks()));
     }
     // @formatter:on
 }

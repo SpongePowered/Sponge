@@ -87,6 +87,7 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -1542,5 +1543,18 @@ public final class Constants {
         public static final DataQuery VALUE = DataQuery.of("Value");
         public static final DataQuery OPERATOR = DataQuery.of("Operator");
         public static final DataQuery KEY = DataQuery.of("Key");
+    }
+
+    public static final class TickConversions {
+
+        public static final int TICK_DURATION_MS = 50;
+        public static final Duration EFFECTIVE_MINIMUM_DURATION = Duration.ofMillis(TICK_DURATION_MS);
+
+        public static final int MINECRAFT_DAY_TICKS = 24000;
+        public static final int MINECRAFT_HOUR_TICKS = MINECRAFT_DAY_TICKS / 24;
+        public static final double MINECRAFT_MINUTE_TICKS = MINECRAFT_HOUR_TICKS / 60.0;
+        public static final double MINECRAFT_SECOND_TICKS = MINECRAFT_MINUTE_TICKS / 60.0;
+        public static final int MINECRAFT_EPOCH_OFFSET = 6000;
+
     }
 }

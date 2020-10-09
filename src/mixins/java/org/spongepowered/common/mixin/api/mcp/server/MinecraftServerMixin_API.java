@@ -242,6 +242,11 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
+    public int getTargetTicksPerSecond() {
+        return 20;
+    }
+
+    @Override
     public void shutdown() {
         this.shadow$initiateShutdown(false);
     }

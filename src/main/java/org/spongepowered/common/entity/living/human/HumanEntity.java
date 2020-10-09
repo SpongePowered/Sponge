@@ -70,7 +70,9 @@ import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
 import org.spongepowered.common.accessor.network.play.server.SPlayerListItemPacketAccessor;
 import org.spongepowered.common.accessor.network.play.server.SSpawnPlayerPacketAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -372,8 +374,8 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
         } else {
             Sponge.getServer().getScheduler().submit(Task.builder()
                     .execute(removeTask)
-                    .delayTicks(delay)
-                    .plugin(SpongeCommon.getPlugin())
+                    .delay(new SpongeTicks(delay))
+                    .plugin(Launch.getInstance().getCommonPlugin())
                     .build());
         }
     }

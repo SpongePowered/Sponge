@@ -104,7 +104,7 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.TemporalUnits;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -115,6 +115,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -172,7 +173,7 @@ public final class DataTest  {
         this.checkOfferData(player, Keys.AFFECTS_SPAWNING, false);
         this.checkOfferData(player, Keys.AFFECTS_SPAWNING, true);
 
-        Entity sheep = world.createEntity(EntityTypes.SHEEP.get(), position);
+        final Entity sheep = world.createEntity(EntityTypes.SHEEP.get(), position);
         this.checkGetData(sheep, Keys.AGE, 0);
         this.checkOfferData(player, Keys.AGE, 10);
 
@@ -208,18 +209,18 @@ public final class DataTest  {
         // TODO         Keys.ATTACK_DAMAGE
 
         final Entity ravager = world.createEntity(EntityTypes.RAVAGER.get(), position);
-        this.checkGetData(ravager, Keys.ATTACK_TIME, 0);
-        this.checkOfferData(ravager, Keys.ATTACK_TIME, 200);
+        this.checkGetData(ravager, Keys.ATTACK_TIME, Ticks.zero());
+        this.checkOfferData(ravager, Keys.ATTACK_TIME, Ticks.of(200));
 
         final ItemStack writtenBookStack = ItemStack.of(ItemTypes.WRITTEN_BOOK);
         this.checkOfferData(writtenBookStack, Keys.AUTHOR, Component.text("You"));
 
-        BlockState logState = BlockTypes.OAK_LOG.get().getDefaultState();
+        final BlockState logState = BlockTypes.OAK_LOG.get().getDefaultState();
         this.checkWithData(logState, Keys.AXIS, Axis.Y);
         this.checkWithData(logState, Keys.AXIS, Axis.X);
 
-        this.checkOfferData(sheep, Keys.BABY_TICKS, 20);
-        this.checkOfferData(sheep, Keys.BABY_TICKS, 0);
+        this.checkOfferData(sheep, Keys.BABY_TICKS, Ticks.ofWallClockSeconds(Sponge.getServer(), 1));
+        this.checkOfferData(sheep, Keys.BABY_TICKS, Ticks.zero());
 
         final List<BannerPatternLayer> pattern = Arrays.asList(BannerPatternLayer.of(BannerPatternShapes.BASE, DyeColors.BLACK), BannerPatternLayer.of(BannerPatternShapes.RHOMBUS, DyeColors.ORANGE));
 
@@ -290,8 +291,8 @@ public final class DataTest  {
         this.checkGetData(sheep, Keys.BREEDER, null);
         this.checkOfferData(sheep, Keys.BREEDER, player.getUniqueId());
 
-        this.checkGetData(sheep, Keys.BREEDING_COOLDOWN, 0);
-        this.checkOfferData(sheep, Keys.BREEDING_COOLDOWN, 100);
+        this.checkGetData(sheep, Keys.BREEDING_COOLDOWN, Ticks.zero());
+        this.checkOfferData(sheep, Keys.BREEDING_COOLDOWN, Ticks.of(100));
 
         this.checkGetData(jungleAxe, Keys.BURN_TIME, 200);
         this.checkGetData(ItemStack.of(ItemTypes.COAL), Keys.BURN_TIME, 1600);
@@ -368,11 +369,11 @@ public final class DataTest  {
         this.checkGetData(waterBucket, Keys.CONTAINER_ITEM, ItemTypes.BUCKET.get());
 
         world.setBlock(blockPos, BlockTypes.HOPPER.get().getDefaultState());
-        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
-        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 10);
+        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.zero());
+        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.of(10));
         world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().getDefaultState());
-        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 0);
-        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, 15);
+        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.zero());
+        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.of(15));
 
         // TODO Keys.CREATOR
 
@@ -387,7 +388,7 @@ public final class DataTest  {
         this.checkGetData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 2.0);
         this.checkOfferData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 5.0);
 
-        BlockState leavesState = BlockTypes.ACACIA_LEAVES.get().getDefaultState();
+        final BlockState leavesState = BlockTypes.ACACIA_LEAVES.get().getDefaultState();
         this.checkGetData(leavesState, Keys.DECAY_DISTANCE, 7);
         this.checkWithData(leavesState, Keys.DECAY_DISTANCE, 2);
 
@@ -395,9 +396,9 @@ public final class DataTest  {
 
 
         final Entity itemEntity = world.createEntity(EntityTypes.ITEM.get(), position);
-        this.checkGetData(itemEntity, Keys.DESPAWN_DELAY, 6000);
+        this.checkGetData(itemEntity, Keys.DESPAWN_DELAY, Ticks.of(6000));
         final Entity eyeOfEnder = world.createEntity(EntityTypes.EYE_OF_ENDER.get(), position);
-        this.checkOfferData(eyeOfEnder, Keys.DESPAWN_DELAY, 500);
+        this.checkOfferData(eyeOfEnder, Keys.DESPAWN_DELAY, Ticks.of(500));
 
         final Entity tntEntity = world.createEntity(EntityTypes.TNT.get(), position);
         this.checkGetData(tntEntity, Keys.DETONATOR, null);
@@ -433,8 +434,8 @@ public final class DataTest  {
         // TODO Keys.DO_EXACT_TELEPORT
 
         final Entity areaEffectCloud = world.createEntity(EntityTypes.AREA_EFFECT_CLOUD.get(), position);
-        this.checkOfferData(areaEffectCloud, Keys.DURATION, 50);
-        this.checkOfferData(areaEffectCloud, Keys.DURATION_ON_USE, -1); // TODO does it work?
+        this.checkOfferData(areaEffectCloud, Keys.DURATION, Ticks.of(50));
+        this.checkOfferData(areaEffectCloud, Keys.DURATION_ON_USE, Ticks.zero()); // TODO does it work?
 
         this.checkOfferData(cat, Keys.DYE_COLOR, DyeColors.LIME.get());
         this.checkGetData(ItemStack.of(ItemTypes.RED_WOOL), Keys.DYE_COLOR, DyeColors.RED.get());
@@ -454,17 +455,17 @@ public final class DataTest  {
         this.checkOfferData(tropicalFish, Keys.DYE_COLOR, DyeColors.CYAN.get());
 
         final Entity panda = world.createEntity(EntityTypes.PANDA.get(), position);
-        this.checkOfferData(panda, Keys.EATING_TIME, 10);
+        this.checkOfferData(panda, Keys.EATING_TIME, Ticks.of(10));
 
         this.checkGetData(jungleAxe, Keys.EFFICIENCY, 2.0);
         this.checkGetData(ItemStack.of(ItemTypes.DIAMOND_SHOVEL), Keys.EFFICIENCY, 8.0);
 
-        this.checkOfferData(chicken, Keys.EGG_TIME, 0);
-        this.checkOfferData(chicken, Keys.EGG_TIME, 5000);
+        this.checkOfferData(chicken, Keys.EGG_TIME, Ticks.of(0));
+        this.checkOfferData(chicken, Keys.EGG_TIME, Ticks.of(5000));
 
         world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().getDefaultState());
-        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, 0L);
-        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, 100L);
+        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, Ticks.of(0L));
+        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, Ticks.of(100L));
 
         // Keys.EQUIPMENT_TYPE is for inventories
         this.checkOfferData(player, Keys.EXHAUSTION, 1.0);
@@ -489,8 +490,8 @@ public final class DataTest  {
         this.checkGetData(fallingBlock, Keys.FALL_DISTANCE, 0.0);
         this.checkOfferData(fallingBlock, Keys.FALL_DISTANCE, 20.0);
 
-        this.checkGetData(fallingBlock, Keys.FALL_TIME, 0);
-        this.checkOfferData(fallingBlock, Keys.FALL_TIME, 20);
+        this.checkGetData(fallingBlock, Keys.FALL_TIME, Ticks.of(0));
+        this.checkOfferData(fallingBlock, Keys.FALL_TIME, Ticks.of(20));
 
         final ItemStack fireworkStar = ItemStack.of(ItemTypes.FIREWORK_STAR);
         final ItemStack fireworkRocket = ItemStack.of(ItemTypes.FIREWORK_ROCKET);
@@ -501,14 +502,14 @@ public final class DataTest  {
         this.checkOfferListData(rocket, Keys.FIREWORK_EFFECTS, fireworkEffects);
         world.spawnEntity(rocket);
 
-        this.checkOfferData(rocket, Keys.FIREWORK_FLIGHT_MODIFIER, 5);
+        this.checkOfferData(rocket, Keys.FIREWORK_FLIGHT_MODIFIER, Ticks.of(5));
 
-        this.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, 20000);
-        this.checkOfferData(player, Keys.FIRE_DAMAGE_DELAY, 20000);
+        this.checkOfferData(sheep, Keys.FIRE_DAMAGE_DELAY, Ticks.of(20000));
+        this.checkOfferData(player, Keys.FIRE_DAMAGE_DELAY, Ticks.of(20000));
 
-        this.checkOfferData(sheep, Keys.FIRE_TICKS, 10);
+        this.checkOfferData(sheep, Keys.FIRE_TICKS, Ticks.of(10));
 
-        this.checkOfferData(player, Keys.FIRST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
+        this.checkOfferData(player, Keys.FIRST_DATE_JOINED, Instant.now().minus(1, ChronoUnit.DAYS));
 
         final Entity fox = world.createEntity(EntityTypes.FOX.get(), position);
         this.checkOfferData(fox, Keys.FIRST_TRUSTED, player.getUniqueId());
@@ -533,7 +534,7 @@ public final class DataTest  {
         this.checkOfferData(furnaceMinecart, Keys.FUEL, 10);
         // TODO BrewingStand/FurnaceBlockEntity Keys.FUEL
 
-        this.checkOfferData(tntEntity, Keys.FUSE_DURATION, 10);
+        this.checkOfferData(tntEntity, Keys.FUSE_DURATION, Ticks.of(10));
 
         final GameMode gameMode = player.get(Keys.GAME_MODE).orElse(GameModes.CREATIVE.get());
         this.checkOfferData(player, Keys.GAME_MODE, GameModes.SURVIVAL.get());
@@ -642,7 +643,7 @@ public final class DataTest  {
         this.checkGetData(daylightDetectorState, Keys.INVERTED, false);
         this.checkWithData(daylightDetectorState, Keys.INVERTED, true);
 
-        this.checkOfferData(sheep, Keys.INVULNERABILITY_TICKS, 20);
+        this.checkOfferData(sheep, Keys.INVULNERABILITY_TICKS, Ticks.of(20));
 
         this.checkOfferData(sheep, Keys.INVULNERABLE, true);
         this.checkOfferData(sheep, Keys.INVULNERABLE, false);
@@ -928,7 +929,7 @@ public final class DataTest  {
         this.checkOfferData(armorStand, Keys.LEFT_LEG_ROTATION, Vector3d.from(0, -90, -45));
 
         final Entity vex = world.createEntity(EntityTypes.VEX.get(), position);
-        this.checkOfferData(vex, Keys.LIFE_TICKS, 10);
+        this.checkOfferData(vex, Keys.LIFE_TICKS, Ticks.of(10));
 
         this.checkGetData(dirtState, Keys.LIGHT_EMISSION, 0);
         final BlockState glowstoneState = BlockTypes.GLOWSTONE.get().getDefaultState();
@@ -1008,7 +1009,7 @@ public final class DataTest  {
 //        this.checkOfferData(phantom, Keys.PHANTOM_PHASE, PhantomPhases.CIRCLING.get());
 //        this.checkOfferData(phantom, Keys.PHANTOM_PHASE, PhantomPhases.SWOOPING.get());
 
-        this.checkOfferData(itemEntity, Keys.PICKUP_DELAY, 5);
+        this.checkOfferData(itemEntity, Keys.PICKUP_DELAY, Ticks.of(5));
 
         // TODO Keys.PICKUP_RULE
 
@@ -1065,7 +1066,7 @@ public final class DataTest  {
         final BlockState railState = BlockTypes.RAIL.get().getDefaultState();
         this.checkWithData(railState, Keys.RAIL_DIRECTION, RailDirections.ASCENDING_EAST.get());
 
-        this.checkOfferData(areaEffectCloud, Keys.REAPPLICATION_DELAY, 1);
+        this.checkOfferData(areaEffectCloud, Keys.REAPPLICATION_DELAY, Ticks.single());
 
         final BlockState repeaterState = BlockTypes.REPEATER.get().getDefaultState();
         this.checkWithData(repeaterState, Keys.REDSTONE_DELAY, 2);
@@ -1088,7 +1089,7 @@ public final class DataTest  {
         this.checkOfferData(armorStand, Keys.RIGHT_ARM_ROTATION, Vector3d.from(0, 90, 90));
         this.checkOfferData(armorStand, Keys.RIGHT_LEG_ROTATION, Vector3d.from(0, 90, 45));
 
-        this.checkOfferData(ravager, Keys.ROARING_TIME, 20);
+        this.checkOfferData(ravager, Keys.ROARING_TIME, Ticks.of(20));
 
 //        this.checkOfferData(itemFrame, Keys.ROTATION, Rotations.LEFT.get());
 
@@ -1138,7 +1139,7 @@ public final class DataTest  {
 
         this.checkOfferData(minecartEntity, Keys.SLOWS_UNOCCUPIED, false);
 
-        this.checkOfferData(panda, Keys.SNEEZING_TIME, 2);
+        this.checkOfferData(panda, Keys.SNEEZING_TIME, Ticks.of(2));
 
         // Keys.SPAWNABLE_ENTITIES
         // Keys.SPAWN_COUNT
@@ -1172,7 +1173,7 @@ public final class DataTest  {
         this.checkOfferData(sheep, Keys.STUCK_ARROWS, 10);
         this.checkOfferData(player, Keys.STUCK_ARROWS, 10);
 
-        this.checkOfferData(ravager, Keys.STUNNED_TIME, 20);
+        this.checkOfferData(ravager, Keys.STUNNED_TIME, Ticks.of(20));
 
         // Keys.SUCCESS_COUNT
 
@@ -1218,7 +1219,7 @@ public final class DataTest  {
 
         this.checkOfferData(tropicalFish, Keys.TROPICAL_FISH_SHAPE, TropicalFishShapes.BETTY.get());
 
-        this.checkOfferData(panda, Keys.UNHAPPY_TIME, 20);
+        this.checkOfferData(panda, Keys.UNHAPPY_TIME, Ticks.of(20));
 
         // Keys.UNIQUE_ID
 
@@ -1238,7 +1239,7 @@ public final class DataTest  {
         this.checkOfferData(villager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
         this.checkOfferData(zombieVillager, Keys.VILLAGER_TYPE, VillagerTypes.SWAMP.get());
 
-        this.checkOfferData(areaEffectCloud, Keys.WAIT_TIME, 1);
+        this.checkOfferData(areaEffectCloud, Keys.WAIT_TIME, Ticks.single());
 
         this.checkOfferData(player, Keys.WALKING_SPEED, 0.1);
         this.checkOfferData(sheep, Keys.WALKING_SPEED, 0.2);
@@ -1291,7 +1292,7 @@ public final class DataTest  {
     }
 
     private <T> void checkWithData(final DataHolder.Immutable<?> holder, final Supplier<Key<Value<T>>> key, final T value) {
-        DataHolder.Immutable<?> newHolder = holder.with(key, value).get();
+        final DataHolder.Immutable<?> newHolder = holder.with(key, value).get();
         this.checkGetData(newHolder, key, value);
     }
 
