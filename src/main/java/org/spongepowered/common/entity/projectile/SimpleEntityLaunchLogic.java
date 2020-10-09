@@ -24,27 +24,40 @@
  */
 package org.spongepowered.common.entity.projectile;
 
-import net.minecraft.item.Item;
-import net.minecraft.tileentity.DispenserTileEntity;
-import org.spongepowered.api.block.entity.carrier.Dispenser;
+import net.minecraft.entity.LivingEntity;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.api.world.ServerLocation;
+
 import java.util.Optional;
+import java.util.function.Supplier;
 
-public class SimpleItemLaunchLogic<P extends Projectile> extends SimpleEntityLaunchLogic<P> {
+public class SimpleEntityLaunchLogic<P extends Projectile> implements ProjectileLogic<P> {
 
-    private final Item item;
+    protected final EntityType<P> projectileClass;
 
-    public SimpleItemLaunchLogic(Class<P> projectileClass, Item item) {
-        super(projectileClass);
-        this.item = item;
+    public SimpleEntityLaunchLogic(Supplier<EntityType<P>> projectileClass) {
+        this.projectileClass = projectileClass.get();
     }
 
     @Override
     public Optional<P> launch(ProjectileSource source) {
-        if (source instanceof DispenserTileEntity) {
-            return ProjectileLauncher.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileClass, this.item);
+        if (!(source instanceof Entity)) {
+            return Optional.empty();
         }
-        return super.launch(source);
+        ServerLocation loc = ((Entity) source).getServerLocation().add(0, ((net.minecraft.entity.Entity) source).getHeight() / 2, 0);
+        Optional<P> projectile;
+        if (source instanceof LivingEntity) {
+            projectile = this.createProjectile((LivingEntity) source, loc);
+        } else {
+            projectile = this.createProjectile(source, this.projectileClass, loc);
+        }
+        return projectile;
+    }
+
+    protected Optional<P> createProjectile(LivingEntity source, ServerLocation loc) {
+        return this.createProjectile((ProjectileSource) source, this.projectileClass, loc);
     }
 }

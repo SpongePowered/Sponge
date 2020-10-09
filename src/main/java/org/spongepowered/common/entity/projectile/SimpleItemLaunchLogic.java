@@ -22,31 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.tileentity;
+package org.spongepowered.common.entity.projectile;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.DispenserTileEntity;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.entity.projectile.ProjectileLauncher;
-import org.spongepowered.common.mixin.api.mcp.tileentity.LockableLootTileEntityMixin_API;
-import org.spongepowered.math.vector.Vector3d;
-
+import org.spongepowered.api.projectile.source.ProjectileSource;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-@Mixin(DispenserTileEntity.class)
-public abstract class DispenserTileEntityMixin_API extends LockableLootTileEntityMixin_API<Dispenser> implements Dispenser {
+public class SimpleItemLaunchLogic<P extends Projectile> extends SimpleEntityLaunchLogic<P> {
 
-    @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, null);
+    private final Item item;
+
+    public SimpleItemLaunchLogic(Supplier<EntityType<P>> projectileClass, Item item) {
+        super(projectileClass);
+        this.item = item;
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, checkNotNull(velocity, "velocity"));
+    public Optional<P> launch(ProjectileSource source) {
+        if (source instanceof DispenserTileEntity) {
+            return ProjectileUtil.getSourceLogic(Dispenser.class).launch(this, (Dispenser) source, this.projectileClass, this.item);
+        }
+        return super.launch(source);
     }
-
 }

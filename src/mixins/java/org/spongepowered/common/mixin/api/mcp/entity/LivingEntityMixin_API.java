@@ -32,11 +32,16 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.entity.projectile.ProjectileUtil;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 import java.util.Set;
@@ -73,4 +78,19 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
         return values;
     }
 
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType) {
+        return ProjectileUtil.launch(Preconditions.checkNotNull(projectileType, "projectile type"), this, null);
+    }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileType, Vector3d velocity) {
+        return ProjectileUtil.launch(Preconditions.checkNotNull(projectileType, "projectile type"), this, Preconditions.checkNotNull(velocity, "velocity"));
+    }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectileTo(EntityType<T> projectileType, Entity target) {
+        return ProjectileUtil.launchWithArgs(Preconditions.checkNotNull(projectileType, "projectile type"), (Class) this.getClass(), this, null, Preconditions.checkNotNull(target, "target"));
+    }
 }

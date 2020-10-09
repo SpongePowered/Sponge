@@ -15,6 +15,7 @@
         "block.AbstractSkullBlockAccessor",
         "block.BedBlockAccessor",
         "block.BlockAccessor",
+        "block.DispenserBlockAccessor",
         "block.FireBlockAccessor",
         "block.JukeboxBlockAccessor",
         "block.PistonBlockAccessor",

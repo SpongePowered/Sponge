@@ -22,14 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.projectile;
+package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.projectile.source.ProjectileSource;
-import java.util.Optional;
+import net.minecraft.tileentity.DropperTileEntity;
+import org.spongepowered.api.block.entity.carrier.Dropper;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface ProjectileSourceLogic<T extends ProjectileSource> {
-
-    <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, T source, Class<P> projectileClass, Object... args);
+@Mixin(DropperTileEntity.class)
+public abstract class DropperTileEntityMixin_API extends DispenserTileEntityMixin_API implements Dropper {
 
 }

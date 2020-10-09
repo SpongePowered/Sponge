@@ -22,33 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.projectile;
+package org.spongepowered.common.mixin.api.mcp.tileentity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.monster.ShulkerEntity;
-import net.minecraft.entity.projectile.ShulkerBulletEntity;
-import net.minecraft.util.SoundEvents;
-import org.spongepowered.api.entity.living.golem.Shulker;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import net.minecraft.tileentity.DispenserTileEntity;
+import org.spongepowered.api.block.entity.carrier.Dispenser;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.ShulkerBullet;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.entity.projectile.ProjectileUtil;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 
-public class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> {
+@Mixin(DispenserTileEntity.class)
+public abstract class DispenserTileEntityMixin_API extends LockableLootTileEntityMixin_API<Dispenser> implements Dispenser {
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, Shulker source, Class<P> projectileClass, Object... args) {
-        if (projectileClass == ShulkerBullet.class && args.length == 1 && args[0] instanceof Entity) {
-            ShulkerEntity shulker = (ShulkerEntity) source;
-            ShulkerBulletEntity bullet = new ShulkerBulletEntity(shulker.world, shulker, (Entity) args[0], shulker.getAttachmentFacing().getAxis());
-            shulker.world.addEntity(bullet);
-            shulker.playSound(SoundEvents.ENTITY_SHULKER_SHOOT,
-                    2.0F, (shulker.world.rand.nextFloat() - shulker.world.rand.nextFloat()) * 0.2F + 1.0F);
-
-            return Optional.of((P) bullet);
-        }
-
-        return ProjectileLauncher.launch(projectileClass, source, null);
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileClass) {
+        return ProjectileUtil.launch(checkNotNull(projectileClass, "projectileClass"), this, null);
     }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(EntityType<T> projectileClass, Vector3d velocity) {
+        return ProjectileUtil.launch(checkNotNull(projectileClass, "projectileClass"), this, checkNotNull(velocity, "velocity"));
+    }
+
 }
