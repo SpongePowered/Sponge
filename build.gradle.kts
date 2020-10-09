@@ -9,7 +9,7 @@ plugins {
     `java-library`
     idea
     eclipse
-    id("net.minecrell.licenser") version "0.4.1"
+    id("org.cadixdev.licenser") version "0.5.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("org.spongepowered.mixin")
 }
@@ -380,7 +380,7 @@ if (testplugins != null) {
             plugin("java-library")
             plugin("idea")
             plugin("eclipse")
-            plugin("net.minecrell.licenser")
+            plugin("org.cadixdev.licenser")
         }
 
         dependencies {
@@ -416,7 +416,7 @@ project("SpongeVanilla") {
         plugin("maven-publish")
         plugin("idea")
         plugin("eclipse")
-        plugin("net.minecrell.licenser")
+        plugin("org.cadixdev.licenser")
         plugin("com.github.johnrengelman.shadow")
     }
 
@@ -886,7 +886,7 @@ if (spongeForge != null) {
             plugin("maven-publish")
             plugin("idea")
             plugin("eclipse")
-            plugin("net.minecrell.licenser")
+            plugin("org.cadixdev.licenser")
             plugin("com.github.johnrengelman.shadow")
         }
 
