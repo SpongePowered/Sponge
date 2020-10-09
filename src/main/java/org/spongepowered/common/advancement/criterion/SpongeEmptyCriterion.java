@@ -22,29 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.advancement.criterion;
 
-import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
-import java.util.Map;
+import java.util.Optional;
 
-public interface AdvancementProgressBridge {
+public final class SpongeEmptyCriterion implements DefaultedAdvancementCriterion {
 
-    Advancement bridge$getAdvancement();
+    public static final SpongeEmptyCriterion INSTANCE = new SpongeEmptyCriterion();
 
-    PlayerAdvancements bridge$getPlayerAdvancements();
+    private SpongeEmptyCriterion() {
+    }
 
-    void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
+    @Override
+    public String getName() {
+        return "empty";
+    }
 
-    void bridge$setAdvancementId(ResourceLocation key);
-
-    void bridge$invalidateAchievedState();
-
-    void bridge$updateProgressMap();
-
-    Map<String, ImplementationBackedCriterionProgress> bridge$getProgressMap();
+    @Override
+    public Optional<FilteredTrigger<?>> getTrigger() {
+        return Optional.empty();
+    }
 }

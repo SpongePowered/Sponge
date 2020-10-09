@@ -25,7 +25,7 @@
 package org.spongepowered.common.bridge.advancements;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.advancement.SpongeScoreCriterion;
+import org.spongepowered.common.advancement.criterion.SpongeScoreCriterion;
 
 public interface CriterionBridge {
 
@@ -42,4 +42,8 @@ public interface CriterionBridge {
     Integer bridge$getScoreGoal();
 
     void bridge$setScoreGoal(@Nullable Integer goal);
+
+    void bridge$setScoreCriterionName(String name);
+
+    String bridge$getScoreCriterionName();
 }

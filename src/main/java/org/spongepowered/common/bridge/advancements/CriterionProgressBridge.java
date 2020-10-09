@@ -35,5 +35,7 @@ public interface CriterionProgressBridge {
 
     AdvancementProgress bridge$getAdvancementProgress();
 
+    void bridge$setAdvancementProgress(AdvancementProgress advancementProgress);
+
     boolean bridge$isCriterionAvailable();
 }

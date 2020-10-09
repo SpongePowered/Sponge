@@ -32,7 +32,7 @@ import org.spongepowered.api.advancement.criteria.CriterionProgress;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.advancement.ImplementationBackedCriterionProgress;
+import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 
 import java.time.Instant;
@@ -65,16 +65,16 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
     @Override
     public Optional<CriterionProgress> get(AdvancementCriterion criterion) {
         Preconditions.checkNotNull(criterion, "criterion");
-        final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
+        final Map<String, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         Preconditions.checkState(map != null, "progressMap isn't initialized");
-        return Optional.ofNullable((CriterionProgress) map.get(criterion));
+        return Optional.ofNullable((CriterionProgress) map.get(criterion.getName()));
     }
 
     @Override
     public Optional<ScoreCriterionProgress> get(ScoreAdvancementCriterion criterion) {
         Preconditions.checkNotNull(criterion);
-        final Map<AdvancementCriterion, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
+        final Map<String, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         Preconditions.checkState(map != null, "progressMap isn't initialized");
-        return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion));
+        return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion.getName()));
     }
 }

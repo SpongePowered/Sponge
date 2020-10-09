@@ -229,8 +229,7 @@
                 "version": "8.0.0"
             }],
             "extra": {}
-        }
-    ,
+        },
         {
             "loader": "java_plain",
             "id": "particletest",
@@ -238,6 +237,28 @@
             "version": "8.0.0",
             "main-class": "org.spongepowered.test.particle.ParticleTest",
             "description": "Testing particles",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }],
+            "extra": {}
+        },
+        {
+            "loader": "java_plain",
+            "id": "advancementtest",
+            "name": "AdvancementTest",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.advancement.AdvancementTest",
+            "description": "Testing advancements",
             "links": {
                 "homepage": "https://www.spongepowered.org",
                 "source": "https://www.spongepowered.org/source",

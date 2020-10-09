@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.recipe;
+package org.spongepowered.common.advancement;
 
 import com.google.gson.JsonObject;
-import net.minecraft.data.IFinishedRecipe;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.io.FileUtils;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.advancement.Advancement;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -36,43 +35,37 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class SpongeRecipeProvider {
-
+public final class SpongeAdvancementProvider {
     private static final int PACK_VERSION_1_15 = 6;
 
-    public static void registerRecipes(Registry<RecipeRegistration> recipes) {
-        final Path datapackPluginRecipes = Paths.get("world").resolve("datapacks").resolve("plugin-recipes");
+    public static void registerAdvancements(Registry<Advancement> advancements) {
+        final Path datapackPluginAdvancements = Paths.get("world").resolve("datapacks").resolve("plugin-advancements");
         try {
-            FileUtils.deleteDirectory(datapackPluginRecipes.toFile());
+            FileUtils.deleteDirectory(datapackPluginAdvancements.toFile());
         } catch (IOException e) {
-            throw new IllegalStateException("Could not clear plugin-recipes datapack.", e);
+            throw new IllegalStateException("Could not clear plugin-advancements datapack.", e);
         }
-        for (RecipeRegistration recipe : recipes) {
-            final IFinishedRecipe mcRecipe = (IFinishedRecipe) recipe;
-            SpongeRecipeProvider.save(datapackPluginRecipes, mcRecipe);
+        for (Advancement advancement : advancements) {
+            final net.minecraft.advancements.Advancement mcAdvancement = (net.minecraft.advancements.Advancement) advancement;
+            SpongeAdvancementProvider.save(datapackPluginAdvancements, mcAdvancement);
         }
-        if (!recipes.keySet().isEmpty()) {
-
-            final Path packMeta = datapackPluginRecipes.resolve("pack.mcmeta");
+        if (!advancements.keySet().isEmpty()) {
+            final Path packMeta = datapackPluginAdvancements.resolve("pack.mcmeta");
             final JsonObject packDataRoot = new JsonObject();
             final JsonObject packData = new JsonObject();
             packDataRoot.add("pack", packData);
-            packData.addProperty("pack_format", SpongeRecipeProvider.PACK_VERSION_1_15);
-            packData.addProperty("description", "Sponge Plugin provided Recipes");
-            SpongeRecipeProvider.saveToFile(packDataRoot, packMeta);
+            packData.addProperty("pack_format", SpongeAdvancementProvider.PACK_VERSION_1_15);
+            packData.addProperty("description", "Sponge Plugin provided Advancements");
+            SpongeAdvancementProvider.saveToFile(packDataRoot, packMeta);
         }
     }
 
-    private static void save(Path datpackPath, IFinishedRecipe recipe) {
-        final Path namespacedData = datpackPath.resolve("data").resolve(recipe.getID().getNamespace());
-        final Path recipeFile = namespacedData.resolve("recipes").resolve(recipe.getID().getPath() + ".json");
+    private static void save(Path datpackPath, net.minecraft.advancements.Advancement advancement) {
+        final Path namespacedData = datpackPath.resolve("data").resolve(advancement.getId().getNamespace());
+        final Path advancementFile = namespacedData.resolve("advancements").resolve(advancement.getId().getPath() + ".json");
+        SpongeAdvancementProvider.saveToFile(advancement.copy().serialize(), advancementFile);
 
-        SpongeRecipeProvider.saveToFile(recipe.getRecipeJson(), recipeFile);
-        final JsonObject jsonobject = recipe.getAdvancementJson();
-        if (jsonobject != null) {
-            final Path advancementFile = namespacedData.resolve("advancements").resolve(recipe.getAdvancementID().getPath() + ".json");
-            SpongeRecipeProvider.saveToFile(jsonobject, advancementFile);
-        }
+
     }
 
     private static void saveToFile(JsonObject json, Path pathIn) {
@@ -86,6 +79,5 @@ public class SpongeRecipeProvider {
         }
 
     }
-
 
 }

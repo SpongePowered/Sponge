@@ -22,29 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.advancement.criterion;
 
-import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
+import static com.google.common.base.Preconditions.checkState;
 
-import java.util.Map;
+import net.minecraft.advancements.ICriterionInstance;
+import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 
-public interface AdvancementProgressBridge {
+public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreAdvancementCriterion, ScoreAdvancementCriterion.Builder>
+        implements ScoreAdvancementCriterion.Builder {
 
-    Advancement bridge$getAdvancement();
+    private int goal;
 
-    PlayerAdvancements bridge$getPlayerAdvancements();
+    public SpongeScoreCriterionBuilder() {
+        this.reset();
+    }
 
-    void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
+    @Override
+    ScoreAdvancementCriterion build0() {
+        return new SpongeScoreCriterion(this.name, this.goal, (ICriterionInstance) this.trigger);
+    }
 
-    void bridge$setAdvancementId(ResourceLocation key);
+    @Override
+    public ScoreAdvancementCriterion.Builder from(final ScoreAdvancementCriterion value) {
+        this.goal = value.getGoal();
+        return super.from(value);
+    }
 
-    void bridge$invalidateAchievedState();
+    @Override
+    public ScoreAdvancementCriterion.Builder reset() {
+        this.goal = 1;
+        return super.reset();
+    }
 
-    void bridge$updateProgressMap();
-
-    Map<String, ImplementationBackedCriterionProgress> bridge$getProgressMap();
+    @Override
+    public ScoreAdvancementCriterion.Builder goal(final int goal) {
+        checkState(goal > 0, "The goal must be greater than zero.");
+        this.goal = goal;
+        return this;
+    }
 }

@@ -30,6 +30,8 @@ import co.aikar.timings.TimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.AndCriterion;
+import org.spongepowered.api.advancement.criteria.OrCriterion;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
@@ -49,6 +51,8 @@ import org.spongepowered.api.util.Range;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
+import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
 import org.spongepowered.common.adventure.AudienceFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
@@ -126,6 +130,8 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(DataManipulator.Mutable.Factory.class, MutableDataManipulatorFactory.INSTANCE)
             .registerFactory(DataManipulator.Immutable.Factory.class, ImmutableDataManipulatorFactory.INSTANCE)
             .registerFactory(BlockChangeFlag.Factory.class, BlockChangeFlagManager.getInstance().getFactory())
+            .registerFactory(OrCriterion.Factory.class, SpongeOrCriterion.FACTORY_INSTANCE)
+            .registerFactory(AndCriterion.Factory.class, SpongeAndCriterion.FACTORY_INSTANCE)
         ;
     }
 

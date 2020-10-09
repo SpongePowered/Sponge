@@ -378,7 +378,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public AdvancementProgress getProgress(final Advancement advancement) {
         Preconditions.checkNotNull(advancement, "advancement");
-        Preconditions.checkState(((AdvancementBridge) advancement).bridge$isRegistered(), "The advancement must be registered");
         return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
     }
 

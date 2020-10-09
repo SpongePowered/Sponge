@@ -22,29 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.advancements;
+package org.spongepowered.common.advancement.criterion;
 
-import net.minecraft.advancements.PlayerAdvancements;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
+import org.spongepowered.api.advancement.criteria.AndCriterion;
+import org.spongepowered.api.advancement.criteria.OrCriterion;
 
-import java.util.Map;
+import java.util.Arrays;
 
-public interface AdvancementProgressBridge {
+public interface DefaultedAdvancementCriterion extends AdvancementCriterion {
 
-    Advancement bridge$getAdvancement();
+    @Override
+    default AdvancementCriterion and(Iterable<AdvancementCriterion> criteria) {
+        return SpongeCriterionHelper.build(AndCriterion.class, SpongeAndCriterion::new, this, criteria);
+    }
 
-    PlayerAdvancements bridge$getPlayerAdvancements();
+    @Override
+    default AdvancementCriterion and(AdvancementCriterion... criteria) {
+        return SpongeCriterionHelper.build(AndCriterion.class, SpongeAndCriterion::new, this, Arrays.asList(criteria));
+    }
 
-    void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements);
+    @Override
+    default AdvancementCriterion or(Iterable<AdvancementCriterion> criteria) {
+        return SpongeCriterionHelper.build(OrCriterion.class, SpongeOrCriterion::new, this, criteria);
+    }
 
-    void bridge$setAdvancementId(ResourceLocation key);
-
-    void bridge$invalidateAchievedState();
-
-    void bridge$updateProgressMap();
-
-    Map<String, ImplementationBackedCriterionProgress> bridge$getProgressMap();
+    @Override
+    default AdvancementCriterion or(AdvancementCriterion... criteria) {
+        return SpongeCriterionHelper.build(OrCriterion.class, SpongeOrCriterion::new, this, Arrays.asList(criteria));
+    }
 }
