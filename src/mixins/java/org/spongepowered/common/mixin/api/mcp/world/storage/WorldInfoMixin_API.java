@@ -38,6 +38,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.gamerule.GameRule;
@@ -57,6 +58,7 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3i;
@@ -160,23 +162,23 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setSeed(long seed) {
+    public void setSeed(final long seed) {
         this.randomSeed = seed;
     }
 
     @Override
-    public Duration getGameTime() {
-        return Duration.ofMillis(this.shadow$getGameTime());
+    public Ticks getGameTime() {
+        return new SpongeTicks(this.shadow$getGameTime());
     }
 
     @Override
-    public Duration getDayTime() {
-        return Duration.ofMillis(this.shadow$getDayTime());
+    public Ticks getDayTime() {
+        return new SpongeTicks(this.shadow$getDayTime());
     }
 
     @Override
-    public void setDayTime(final Duration time) {
-        this.shadow$setDayTime(time.toMillis());
+    public void setDayTime(final Ticks ticks) {
+        this.shadow$setDayTime(ticks.getTicks());
     }
 
     @Override
@@ -205,7 +207,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public void setStructuresEnabled(boolean state) {
+    public void setStructuresEnabled(final boolean state) {
         this.shadow$setMapFeaturesEnabled(state);
     }
 
@@ -315,7 +317,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         if (this.legacyCustomOptions != null) {
             try {
                 return DataContainer.createNew().set(Constants.Sponge.World.WORLD_CUSTOM_SETTINGS, DataFormats.JSON.get().read(this.legacyCustomOptions));
-            } catch (JsonParseException | IOException ignored) {
+            } catch (final JsonParseException | IOException ignored) {
                 return DataContainer.createNew();
             }
         } else {
@@ -345,7 +347,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Intrinsic
-    public void worldproperties$setWanderingTraderSpawnDelay(int delay) {
+    public void worldproperties$setWanderingTraderSpawnDelay(final int delay) {
         this.shadow$setWanderingTraderSpawnDelay(delay);
     }
 
@@ -355,7 +357,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Intrinsic
-    public void worldproperties$setWanderingTraderSpawnChance(int chance) {
+    public void worldproperties$setWanderingTraderSpawnChance(final int chance) {
         this.shadow$setWanderingTraderSpawnChance(chance);
     }
 
@@ -380,51 +382,51 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public Duration getRemainingWeatherDuration() {
+    public Ticks getRemainingWeatherDuration() {
         if (this.shadow$isRaining()) {
-            return Duration.ofSeconds(this.shadow$getRainTime());
+            return new SpongeTicks(this.shadow$getRainTime());
         } else if (this.shadow$isThundering()) {
-            return Duration.ofSeconds(this.shadow$getThunderTime());
+            return new SpongeTicks(this.shadow$getThunderTime());
         }
-        return Duration.ofSeconds(this.shadow$getClearWeatherTime());
+        return new SpongeTicks(this.shadow$getClearWeatherTime());
     }
 
     @Override
-    public Duration getRunningWeatherDuration() {
+    public Ticks getRunningWeatherDuration() {
         // TODO Minecraft 1.14 - Weather has no finite maximum and we don't know how much it started with so....I guess I'll hardcode it? How do I implement this??
         if (this.shadow$isRaining()) {
-            return Duration.ofSeconds(6000 - this.shadow$getRainTime());
+            return new SpongeTicks(6000 - this.shadow$getRainTime());
         } else if (this.shadow$isThundering()) {
-            return Duration.ofSeconds(6000 - this.shadow$getThunderTime());
+            return new SpongeTicks(6000 - this.shadow$getThunderTime());
         } else {
-            return Duration.ofSeconds(6000 - this.shadow$getClearWeatherTime());
+            return new SpongeTicks(6000 - this.shadow$getClearWeatherTime());
         }
     }
 
     @Override
     public void setWeather(final Weather weather) {
-        this.setWeather(weather, Duration.ofSeconds(6000));
+        this.setWeather(weather, new SpongeTicks(6000 / SpongeTicks.TICK_DURATION_MS));
     }
 
     @Override
-    public void setWeather(final Weather weather, final Duration duration) {
+    public void setWeather(final Weather weather, final Ticks ticks) {
         if (weather == Weathers.CLEAR.get()) {
-            this.shadow$setClearWeatherTime((int) (duration.toMillis() / 1000));
+            this.shadow$setClearWeatherTime((int) ticks.getTicks());
             this.shadow$setRaining(false);
             this.shadow$setRainTime(0);
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
         } else if (weather == Weathers.RAIN.get()) {
             this.shadow$setRaining(true);
-            this.shadow$setRainTime((int) (duration.toMillis() / 1000));
+            this.shadow$setRainTime((int) ticks.getTicks());
             this.shadow$setThundering(false);
             this.shadow$setThunderTime(0);
             this.shadow$setClearWeatherTime(0);
         } else if (weather == Weathers.THUNDER.get()) {
             this.shadow$setRaining(true);
-            this.shadow$setRainTime((int) (duration.toMillis() / 1000));
+            this.shadow$setRainTime((int) ticks.getTicks());
             this.shadow$setThundering(true);
-            this.shadow$setThunderTime((int) (duration.toMillis() / 1000));
+            this.shadow$setThunderTime((int) ticks.getTicks());
             this.shadow$setClearWeatherTime(0);
         }
     }
@@ -442,7 +444,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public <V> void setGameRule(final GameRule<V> gameRule, V value) {
+    public <V> void setGameRule(final GameRule<V> gameRule, final V value) {
         // TODO Minecraft 1.14 - Boy, this is baaaad....
         final GameRules.RuleValue<?> mValue = this.shadow$getGameRulesInstance().get((GameRules.RuleKey<?>) (Object) gameRule);
         ((GameRules_RuleValueAccessor) mValue).accessor$setStringValue(value.toString());
@@ -455,7 +457,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
             ((GameRulesAccessor) this.shadow$getGameRulesInstance()).accessor$getRules();
 
         final Map<GameRule<?>, Object> apiRules = new HashMap<>();
-        for (Map.Entry<GameRules.RuleKey<?>, GameRules.RuleValue<?>> rule : rules.entrySet()) {
+        for (final Map.Entry<GameRules.RuleKey<?>, GameRules.RuleValue<?>> rule : rules.entrySet()) {
             final GameRule<?> key = (GameRule<?>) (Object) rule.getKey();
             final GameRules.RuleValue<?> mValue = rule.getValue();
             Object value = null;

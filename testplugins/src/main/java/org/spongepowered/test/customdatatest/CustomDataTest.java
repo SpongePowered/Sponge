@@ -57,6 +57,7 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
@@ -134,8 +135,8 @@ public final class CustomDataTest {
                             this.customUserData(player.getUniqueId(), number);
                             player.kick(Component.text("Setting User data..."));
                             final Scheduler scheduler = Sponge.getServer().getScheduler();
-                            scheduler.submit(Task.builder().delayTicks(1).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
-                            scheduler.submit(Task.builder().delayTicks(2).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
+                            scheduler.submit(Task.builder().delay(Ticks.SINGLE_TICK).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
+                            scheduler.submit(Task.builder().delay(Ticks.of(2)).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
                             break;
                         case BLOCK:
                             // try out custom data-stores

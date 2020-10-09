@@ -93,7 +93,6 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShapes;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
@@ -103,7 +102,6 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -114,6 +112,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -507,7 +506,7 @@ public final class DataTest  {
 
         this.checkOfferData(sheep, Keys.FIRE_TICKS, 10);
 
-        this.checkOfferData(player, Keys.FIRST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
+        this.checkOfferData(player, Keys.FIRST_DATE_JOINED, Instant.now().minus(1, ChronoUnit.DAYS));
 
         final Entity fox = world.createEntity(EntityTypes.FOX.get(), position);
         this.checkOfferData(fox, Keys.FIRST_TRUSTED, player.getUniqueId());

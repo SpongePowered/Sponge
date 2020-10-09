@@ -60,7 +60,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
-import org.spongepowered.api.util.TemporalUnits;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -82,6 +82,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.api.mcp.world.WorldMixin_API;
 import org.spongepowered.common.util.ChunkUtil;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
@@ -90,7 +91,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -297,13 +297,13 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends Value<E>> key, E value) {
+    public <E> DataTransactionResult offer(final int x, final int y, final int z, final Key<? extends Value<E>> key, final E value) {
         final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
         return dataProvider.offer(ServerLocation.of(this, new Vector3d(x, y, z)), value);
     }
 
     @Override
-    public <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
+    public <E> Optional<E> get(final int x, final int y, final int z, final Key<? extends Value<E>> key) {
         final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
         final Optional<E> value = dataProvider.get(ServerLocation.of(this, new Vector3d(x, y, z)));
         if (value.isPresent()) {
@@ -333,8 +333,8 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    public Duration getRemainingWeatherDuration() {
-        return Duration.of(this.api$getDurationInTicks(), TemporalUnits.MINECRAFT_TICKS);
+    public Ticks getRemainingWeatherDuration() {
+        return new SpongeTicks(this.api$getDurationInTicks());
     }
 
     private long api$getDurationInTicks() {
@@ -351,8 +351,8 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    public Duration getRunningWeatherDuration() {
-        return Duration.of(this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime(), TemporalUnits.MINECRAFT_TICKS);
+    public Ticks getRunningWeatherDuration() {
+        return new SpongeTicks(this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime());
     }
 
     @Override
@@ -362,30 +362,29 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     }
 
     @Override
-    public void setWeather(final Weather weather, final Duration duration) {
+    public void setWeather(final Weather weather, final Ticks ticks) {
         Preconditions.checkNotNull(weather);
         ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
-        final int ticks = (int) (duration.toMillis() / TemporalUnits.MINECRAFT_TICKS.getDuration().toMillis());
-        this.api$setWeather(weather, ticks);
+        this.api$setWeather(weather, ticks.getTicks());
     }
 
-    public void api$setWeather(final Weather weather, final int ticks) {
+    public void api$setWeather(final Weather weather, final long ticks) {
         if (weather == Weathers.CLEAR.get()) {
-            this.worldInfo.setClearWeatherTime(ticks);
+            this.worldInfo.setClearWeatherTime((int) Math.max(Integer.MAX_VALUE, ticks));
             this.worldInfo.setRainTime(0);
             this.worldInfo.setThunderTime(0);
             this.worldInfo.setRaining(false);
             this.worldInfo.setThundering(false);
         } else if (weather == Weathers.RAIN.get()) {
             this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
+            this.worldInfo.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.worldInfo.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
             this.worldInfo.setRaining(true);
             this.worldInfo.setThundering(false);
         } else if (weather == Weathers.THUNDER.get()) {
             this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
+            this.worldInfo.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.worldInfo.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
             this.worldInfo.setRaining(true);
             this.worldInfo.setThundering(true);
         }

@@ -49,6 +49,7 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
@@ -239,7 +240,7 @@ public final class PhaseTracker implements CauseStackManager {
         this.hasRun = true;
         Task.builder()
             .name("Sponge Async To Sync Entity Spawn Task")
-            .intervalTicks(1)
+            .interval(Ticks.SINGLE_TICK)
             .execute(() -> {
                 if (PhaseTracker.ASYNC_CAPTURED_ENTITIES.isEmpty()) {
                     return;
