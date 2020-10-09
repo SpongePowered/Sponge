@@ -310,7 +310,7 @@ public abstract class AnvilChunkLoaderMixin implements AnvilChunkLoaderBridge {
         return this.chunkSaveLocation.toPath();
     }
 
-    @Redirect(method = "saveChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader.addChunkToPending"
+    @Redirect(method = "saveChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;addChunkToPending"
             + "(Lnet/minecraft/util/math/ChunkPos;Lnet/minecraft/nbt/NBTTagCompound;)V"))
     private void impl$useWorldChunkPosWhenQueuing(final AnvilChunkLoader anvilChunkLoader, final ChunkPos pos, final NBTTagCompound compound,
             final World worldIn, final Chunk chunkIn) {
