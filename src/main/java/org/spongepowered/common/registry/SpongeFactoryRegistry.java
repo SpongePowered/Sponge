@@ -47,6 +47,7 @@ import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
@@ -70,6 +71,7 @@ import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlers;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
+import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransformFactory;
@@ -135,6 +137,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(OrCriterion.Factory.class, SpongeOrCriterion.FACTORY_INSTANCE)
             .registerFactory(AndCriterion.Factory.class, SpongeAndCriterion.FACTORY_INSTANCE)
             .registerFactory(Ticks.Factory.class, SpongeTicks.FACTORY_INSTANCE)
+            .registerFactory(MinecraftDayTime.Factory.class, SpongeMinecraftDayTime.FACTORY_INSTANCE)
         ;
     }
 

@@ -38,6 +38,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
+import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.dimension.DimensionType;
@@ -58,6 +59,7 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
@@ -167,18 +169,18 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
     }
 
     @Override
-    public Ticks getGameTime() {
-        return new SpongeTicks(this.shadow$getGameTime());
+    public MinecraftDayTime getGameTime() {
+        return new SpongeMinecraftDayTime(this.shadow$getGameTime());
     }
 
     @Override
-    public Ticks getDayTime() {
-        return new SpongeTicks(this.shadow$getDayTime());
+    public MinecraftDayTime getDayTime() {
+        return new SpongeMinecraftDayTime(this.shadow$getDayTime());
     }
 
     @Override
-    public void setDayTime(final Ticks ticks) {
-        this.shadow$setDayTime(ticks.getTicks());
+    public void setDayTime(final MinecraftDayTime dayTime) {
+        this.shadow$setDayTime(dayTime.asTicks().getTicks());
     }
 
     @Override

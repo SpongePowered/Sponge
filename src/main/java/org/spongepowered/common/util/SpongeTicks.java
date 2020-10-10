@@ -59,8 +59,6 @@ public final class SpongeTicks implements Ticks {
 
     public static final class Factory implements Ticks.Factory {
 
-        private static final long TICKS_PER_MINECRAFT_DAY = 24000;
-
         @Override
         @NonNull
         public Ticks of(final long ticks) {
@@ -70,18 +68,12 @@ public final class SpongeTicks implements Ticks {
 
         @Override
         @NonNull
-        public Ticks of(final int time, @NonNull final TemporalUnit temporalUnit) {
+        public Ticks of(final long time, @NonNull final TemporalUnit temporalUnit) {
             Preconditions.checkArgument(time >= 0, "time parameter must be non-negative");
             final long target = temporalUnit.getDuration().multipliedBy(time).toMillis();
             return this.of((long) Math.ceil(target / (double) SpongeTicks.TICK_DURATION_MS));
         }
 
-        @Override
-        @NonNull
-        public Ticks ofMinecraftDays(final double minecraftDays) {
-            Preconditions.checkArgument(minecraftDays >= 0, "minecraftDays parameter must be non-negative");
-            return this.of((long) Math.ceil(minecraftDays * SpongeTicks.Factory.TICKS_PER_MINECRAFT_DAY));
-        }
     }
 
 }
