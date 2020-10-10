@@ -312,6 +312,13 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
         return this.getBlock(x, y, z).get(key);
     }
 
+    @Override
+    @SuppressWarnings("rawtypes")
+    public DataTransactionResult remove(int x, int y, int z, Key<?> key) {
+        final DataProvider dataProvider = DataProviderRegistry.get().getProvider((Key) key, ServerLocation.class);
+        return dataProvider.remove(ServerLocation.of(this, new Vector3d(x, y, z)));
+    }
+
     // WeatherUniverse
 
     @Override

@@ -116,6 +116,10 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<ServerLocation> getLocation() {
+        final ServerWorld world = this.world.get();
+        if (world != null) {
+            return Optional.of(((org.spongepowered.api.world.server.ServerWorld) world).getLocation(this.pos));
+        }
         return Optional.empty();
     }
 
