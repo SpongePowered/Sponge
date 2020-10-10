@@ -69,6 +69,7 @@ public final class BlockData {
                             }
                             return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)));
                         })
+                        .supports(h -> h.has(ChestBlock.TYPE))
                     .create(Keys.DYE_COLOR)
                         .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
                         .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
