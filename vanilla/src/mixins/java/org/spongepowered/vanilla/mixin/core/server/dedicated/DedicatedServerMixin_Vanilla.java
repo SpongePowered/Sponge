@@ -69,13 +69,15 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
 
         lifecycle.establishRegistries();
         lifecycle.establishDataProviders();
-        lifecycle.establishDataPackRegistries();
 
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();
 
         // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
         lifecycle.callStartingEngineEvent(this);
+
+        lifecycle.establishDataPackRegistries();
+
         super.run();
     }
 

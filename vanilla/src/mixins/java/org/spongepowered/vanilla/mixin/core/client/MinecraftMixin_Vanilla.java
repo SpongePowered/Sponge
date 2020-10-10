@@ -64,10 +64,11 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishRegistries();
         lifecycle.establishDataProviders();
-        lifecycle.establishDataPackRegistries();
 
         // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
         lifecycle.callStartingEngineEvent(this);
+
+        lifecycle.establishDataPackRegistries();
     }
 
     @Inject(method = "shutdownMinecraftApplet", at = @At("HEAD"))
