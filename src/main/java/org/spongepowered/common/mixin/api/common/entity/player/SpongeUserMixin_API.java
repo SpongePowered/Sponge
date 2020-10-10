@@ -61,8 +61,9 @@ public abstract class SpongeUserMixin_API implements User {
     @Shadow private float rotationYaw;
     @Shadow private InventoryEnderChest enderChest;
 
-    @Shadow public abstract void markDirty();
-    @Shadow protected abstract SpongeUser loadEnderInventory();
+    @Shadow public abstract void shadow$markDirty();
+    @Shadow protected abstract SpongeUser shadow$loadEnderInventory();
+    @Shadow public abstract void shadow$initializeIfRequired();
 
     @Override
     public GameProfile getProfile() {
@@ -83,7 +84,7 @@ public abstract class SpongeUserMixin_API implements User {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<CommandSource> getCommandSource() {
-        return (Optional) getPlayer();
+        return (Optional) this.getPlayer();
     }
 
     @Override
@@ -98,24 +99,28 @@ public abstract class SpongeUserMixin_API implements User {
 
     @Override
     public Vector3d getPosition() {
-        return getPlayer()
+        return this.getPlayer()
             .map(User::getPosition)
-            .orElseGet(() -> new Vector3d(this.posX, this.posY, this.posZ));
+            .orElseGet(() -> {
+                this.shadow$initializeIfRequired();
+                return new Vector3d(this.posX, this.posY, this.posZ);
+            });
     }
 
     @Override
     public Optional<UUID> getWorldUniqueId() {
-        final Optional<Player> playerOpt = getPlayer();
+        final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             return playerOpt.get().getWorldUniqueId();
         }
+        this.shadow$initializeIfRequired();
         final Optional<String> folder = WorldManager.getWorldFolderByDimensionId(this.dimension);
         return folder.map(WorldManager::getWorldProperties).flatMap(e -> e.map(WorldProperties::getUniqueId));
     }
 
     @Override
     public boolean setLocation(final Vector3d position, final UUID world) {
-        final Optional<Player> playerOpt = getPlayer();
+        final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             return playerOpt.get().setLocation(position, world);
         }
@@ -124,17 +129,18 @@ public abstract class SpongeUserMixin_API implements User {
         if (dimensionId == null) {
             throw new IllegalArgumentException("Invalid World: missing dimensionID)");
         }
+        this.shadow$initializeIfRequired();
         this.dimension = dimensionId;
         this.posX = position.getX();
         this.posY = position.getY();
         this.posZ = position.getZ();
-        this.markDirty();
+        this.shadow$markDirty();
         return true;
     }
 
     @Override
     public Vector3d getRotation() {
-        return getPlayer()
+        return this.getPlayer()
             .map(Entity::getRotation)
             .orElseGet(() -> new Vector3d(this.rotationPitch, this.rotationYaw, 0));
     }
@@ -142,23 +148,24 @@ public abstract class SpongeUserMixin_API implements User {
     @Override
     public void setRotation(final Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
-        final Optional<Player> playerOpt = getPlayer();
+        final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             playerOpt.get().setRotation(rotation);
             return;
         }
-        this.markDirty();
+        this.shadow$initializeIfRequired();
+        this.shadow$markDirty();
         this.rotationPitch = ((float) rotation.getX()) % 360.0F;
         this.rotationYaw = ((float) rotation.getY()) % 360.0F;
     }
 
     @Override
     public Inventory getEnderChestInventory() {
-        final Optional<Player> playerOpt = getPlayer();
+        final Optional<Player> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             return playerOpt.get().getEnderChestInventory();
         }
-        this.loadEnderInventory();
+        this.shadow$loadEnderInventory();
         return ((Inventory) this.enderChest);
     }
 

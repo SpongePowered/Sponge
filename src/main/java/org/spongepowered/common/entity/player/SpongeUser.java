@@ -151,6 +151,12 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         initializedUsers.remove(this);
     }
 
+    public void initializeIfRequired() {
+        if (!this.isInitialized()) {
+            this.initialize();
+        }
+    }
+
     public void initialize() {
         initializedUsers.add(this);
         this.nbt = new NBTTagCompound();
