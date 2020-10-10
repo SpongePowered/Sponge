@@ -284,7 +284,7 @@ public final class SpongeAdventure {
         } else if (action == ClickEvent.Action.CHANGE_PAGE) {
             return net.minecraft.util.text.event.ClickEvent.Action.CHANGE_PAGE;
         } else if (action == ClickEvent.Action.COPY_TO_CLIPBOARD) {
-            throw new UnsupportedOperationException("newer minecraft");
+            return net.minecraft.util.text.event.ClickEvent.Action.COPY_TO_CLIPBOARD;
         }
         throw new IllegalArgumentException(action.toString());
     }
