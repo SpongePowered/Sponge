@@ -164,6 +164,7 @@
         "world.GameRulesAccessor",
         "world.WorldAccessor",
         "world.WorldTypeAccessor",
+        "world.biome.BiomeContainerAccessor",
         "world.border.WorldBorderAccessor",
         "world.chunk.ChunkAccessor",
         "world.dimension.DimensionAccessor",

@@ -323,6 +323,7 @@
         "mcp.world.WorldTypeMixin_API",
         "mcp.world.biome.BiomeMixin_API",
         "mcp.world.border.WorldBorderMixin_API",
+        "mcp.world.chunk.ChunkMixin_API",
         "mcp.world.raid.Raid_StatusMixin_API",
         "mcp.world.raid.RaidMixin_API",
         "mcp.world.server.ServerWorldMixin_API",
