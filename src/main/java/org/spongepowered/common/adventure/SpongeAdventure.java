@@ -31,6 +31,7 @@ import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
+import net.kyori.adventure.serializer.configurate3.ConfigurateComponentSerializer;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -91,6 +92,10 @@ public final class SpongeAdventure {
             return decoded.toString();
         }
     };
+
+    public static final ConfigurateComponentSerializer CONFIGURATE = ConfigurateComponentSerializer.builder()
+            .scalarSerializer(GSON)
+            .build();
 
     public static Component legacy(final char character, final String string) {
         return LegacyComponentSerializer.legacy(character).deserialize(string);

@@ -295,6 +295,28 @@
                 "version": "8.0.0"
             }],
             "extra": {}
+        },
+        {
+            "loader": "java_plain",
+            "id": "configtest",
+            "name": "ConfigTest",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.configtest.ConfigTest",
+            "description": "Testing configurations",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }],
+            "extra": {}
         }
     ]
 }

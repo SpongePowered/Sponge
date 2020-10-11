@@ -211,6 +211,9 @@ dependencies {
     implementation("org.ow2.asm:asm-util:$asmVersion")
     implementation("org.ow2.asm:asm-tree:$asmVersion")
 
+    // Implementation-only Adventure
+    implementation("net.kyori:adventure-serializer-configurate3:4.0.0-SNAPSHOT")
+
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
@@ -568,6 +571,7 @@ project("SpongeVanilla") {
         vanillaInstallerImplementation(vanillaInstallerConfig)
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
+        vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate3:4.0.0-SNAPSHOT")
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
         vanillaAppLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
         vanillaAppLaunchConfig("org.ow2.asm:asm-tree:$asmVersion")

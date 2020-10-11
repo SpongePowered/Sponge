@@ -26,6 +26,8 @@ package org.spongepowered.common.data.persistence;
 
 import com.google.common.reflect.TypeToken;
 import net.kyori.adventure.text.Component;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -34,6 +36,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.imaginary.Complexd;
 import org.spongepowered.math.imaginary.Complexf;
@@ -107,14 +110,22 @@ public final class DataSerializers {
                 return this.token;
             }
 
+            // Translate via node
+
             @Override
             public Component translate(final DataView view) throws InvalidDataException {
-                throw new UnsupportedOperationException("TODO"); // TODO(adventure)
+                final ConfigurationNode node = ConfigurateTranslator.instance().translate(view);
+                try {
+                    return node.getValue(this.token);
+                } catch (final ObjectMappingException e) {
+                    throw new InvalidDataException(e);
+                }
             }
 
             @Override
             public DataContainer translate(final Component obj) throws InvalidDataException {
-                throw new UnsupportedOperationException("TODO"); // TODO(adventure)
+                final ConfigurationNode node = SpongeAdventure.CONFIGURATE.serialize(obj);
+                return ConfigurateTranslator.instance().translate(node);
             }
         };
         UUID_DATA_SERIALIZER = new DataTranslator<UUID>() {

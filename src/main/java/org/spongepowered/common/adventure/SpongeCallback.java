@@ -27,6 +27,7 @@ package org.spongepowered.common.adventure;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
@@ -52,9 +53,13 @@ public final class SpongeCallback {
             .expireAfterWrite(Duration.ofMinutes(10))
             .build();
 
-    private final Parameter.Key<Consumer<CommandCause>> executorKey = Parameter.key("key", TypeTokens.COMMAND_CAUSE_CONSUMER);
+    private Parameter.@MonotonicNonNull Key<Consumer<CommandCause>> executorKey;
 
     public Command.Parameterized createCommand() {
+        if (this.executorKey == null) {
+            this.executorKey = Parameter.key("key", TypeTokens.COMMAND_CAUSE_CONSUMER);
+        }
+
         this.executors.invalidateAll();
         return Command.builder()
                 .setShortDescription(Component.text("Execute a callback registered as part of a TextComponent. Primarily for internal use"))

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -41,6 +40,7 @@ import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,7 +69,8 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
                     Boolean.class,
                     String.class
                     )
-            );
+            )
+            .withSerializers(coll -> SpongeAdventure.CONFIGURATE.addSerializersTo(coll));
 
     /**
      * Get the instance of this translator.
