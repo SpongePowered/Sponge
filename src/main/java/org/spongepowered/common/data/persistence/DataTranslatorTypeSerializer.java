@@ -30,6 +30,7 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
@@ -42,20 +43,24 @@ public class DataTranslatorTypeSerializer<T> implements TypeSerializer<T> {
     }
 
     @Override
-    public T deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
+    public T deserialize(final TypeToken<?> type, final ConfigurationNode value) throws ObjectMappingException {
         try {
-            return this.dataTranslator.translate(ConfigurateTranslator.instance().translateFrom(value));
-        } catch (InvalidDataException e) {
+            return this.dataTranslator.translate(ConfigurateTranslator.instance().translate(value));
+        } catch (final InvalidDataException e) {
             // Since the value in the config node might be null, return null if an error occurs.
-            return null;
+            throw new ObjectMappingException(e);
         }
     }
 
     @Override
-    public void serialize(TypeToken<?> type, T obj, ConfigurationNode value) throws ObjectMappingException {
+    public void serialize(final TypeToken<?> type, final @Nullable T obj, final ConfigurationNode value) throws ObjectMappingException {
+        if (obj == null) {
+            value.setValue(null);
+        }
+
         try {
-            ConfigurateTranslator.instance().translateContainerToData(value, this.dataTranslator.translate(obj));
-        } catch (InvalidDataException e) {
+            ConfigurateTranslator.instance().translateDataToNode(value, this.dataTranslator.translate(obj));
+        } catch (final InvalidDataException e) {
             throw new ObjectMappingException("Could not serialize. Data was invalid.", e);
         }
 

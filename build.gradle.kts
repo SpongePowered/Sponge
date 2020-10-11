@@ -27,6 +27,7 @@ val modlauncherVersion: String by project
 val mixinVersion: String by project
 val pluginSpiVersion: String by project
 val guavaVersion: String by project
+val junitVersion: String by project
 
 minecraft {
     mappings(mcpType, mcpMappings)
@@ -126,6 +127,10 @@ tasks {
         create("accessorsJar")
         create("launchJar")
         // TODO: does applaunch need to be here? it has no reference to obf classes
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
 }
@@ -258,6 +263,10 @@ dependencies {
     add(accessors.get().implementationConfigurationName, accessorsConfig)
     add(mixins.get().implementationConfigurationName, mixinsConfig)
     add(mixins.get().implementationConfigurationName, project(":SpongeAPI"))
+
+    // Tests
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
 val extraSrgs = file("extra.srgs")
 mixin {

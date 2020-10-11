@@ -37,6 +37,7 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Util;
 import net.minecraft.util.registry.Registry;
+import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.ResourceKey;
@@ -65,6 +66,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.config.CatalogTypeTypeSerializer;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -93,10 +95,12 @@ public final class SpongeDataManager implements DataManager {
     private static final TypeToken<DataSerializable> dataSerializableTypeToken = TypeToken.of(DataSerializable.class);
 
     static {
-        TypeSerializers.getDefaultSerializers().registerPredicate(
-            // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
-            // See https://github.com/SpongePowered/SpongeCommon/issues/1348
-            x -> dataSerializableTypeToken.isSupertypeOf(x) && !catalogTypeToken.isSupertypeOf(x), new DataSerializableTypeSerializer()
+        TypeSerializerCollection.defaults().register(
+                // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
+                // See https://github.com/SpongePowered/SpongeCommon/issues/1348
+                x -> DataSerializableTypeSerializer.TYPE.isSupertypeOf(x)
+                        && !CatalogTypeTypeSerializer.TYPE.isSupertypeOf(x),
+                DataSerializableTypeSerializer.INSTANCE
         );
     }
 

@@ -75,7 +75,7 @@ public class HoconDataFormat extends SpongeCatalogType implements StringDataForm
                 .setSource(source)
                 .build();
         CommentedConfigurationNode node = loader.load();
-        return ConfigurateTranslator.instance().translateFrom(node);
+        return ConfigurateTranslator.instance().translate(node);
     }
 
     @Override
@@ -99,7 +99,8 @@ public class HoconDataFormat extends SpongeCatalogType implements StringDataForm
         HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
                 .setSink(sink)
                 .build();
-        ConfigurationNode node = ConfigurateTranslator.instance().translateData(data);
+        ConfigurationNode node = loader.createEmptyNode();
+        ConfigurateTranslator.instance().translateDataToNode(node, data);
         loader.save(node);
     }
 

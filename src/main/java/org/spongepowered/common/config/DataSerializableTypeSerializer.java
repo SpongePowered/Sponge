@@ -33,30 +33,36 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataTranslators;
+import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 
 /**
  * An implementation of {@link TypeSerializer} so that DataSerializables can be
  * provided in {@link ObjectMapper}-using classes.
  */
 public final class DataSerializableTypeSerializer implements TypeSerializer<DataSerializable> {
+    public static final TypeToken<DataSerializable> TYPE = TypeToken.of(DataSerializable.class);
+    public static final DataSerializableTypeSerializer INSTANCE = new DataSerializableTypeSerializer();
+
+    private DataSerializableTypeSerializer() {
+    }
 
     @Override
     public DataSerializable deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
         if (type.getRawType().isAssignableFrom(CatalogType.class)) {
-            return (DataSerializable) new CatalogTypeTypeSerializer().deserialize(type, value);
+            return (DataSerializable) CatalogTypeTypeSerializer.INSTANCE.deserialize(type, value);
         }
         Class<?> clazz = type.getRawType();
         return Sponge.getDataManager()
-                .deserialize(clazz.asSubclass(DataSerializable.class), DataTranslators.CONFIGURATION_NODE.get().translate(value))
+                .deserialize(clazz.asSubclass(DataSerializable.class), ConfigurateTranslator.instance().translate(value))
                 .orElseThrow(() -> new ObjectMappingException("Could not translate DataSerializable of type: " + clazz.getName()));
     }
 
     @Override
     public void serialize(TypeToken<?> type, DataSerializable obj, ConfigurationNode value) throws ObjectMappingException {
         if (obj instanceof CatalogType) {
-            new CatalogTypeTypeSerializer().serialize(type, (CatalogType) obj, value);
+            CatalogTypeTypeSerializer.INSTANCE.serialize(type, (CatalogType) obj, value);
         } else {
-            value.setValue(DataTranslators.CONFIGURATION_NODE.get().translate(obj.toContainer()));
+            ConfigurateTranslator.instance().translateDataToNode(value, obj.toContainer());
         }
     }
 }

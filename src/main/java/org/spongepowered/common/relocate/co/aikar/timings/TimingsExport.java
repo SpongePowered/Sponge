@@ -236,7 +236,7 @@ class TimingsExport extends Thread {
     }
 
     private static JsonElement serializeConfigNode(ConfigurationNode node) {
-        if (node.hasMapChildren()) {
+        if (node.isMap()) {
             JsonObject object = new JsonObject();
             for (Entry<Object, ? extends ConfigurationNode> entry : node.getChildrenMap().entrySet()) {
                 String fullPath = CONFIG_PATH_JOINER.join(entry.getValue().getPath());
@@ -247,7 +247,7 @@ class TimingsExport extends Thread {
             }
             return object;
         }
-        if (node.hasListChildren()) {
+        if (node.isList()) {
             JsonArray array = new JsonArray();
             for (ConfigurationNode child : node.getChildrenList()) {
                 array.add(serializeConfigNode(child));

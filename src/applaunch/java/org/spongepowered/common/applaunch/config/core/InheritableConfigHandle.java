@@ -24,20 +24,13 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
-import ninja.leaping.configurate.Types;
-import ninja.leaping.configurate.ValueType;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.util.ConfigurationNodeWalker;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.applaunch.config.inheritable.BaseConfig;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -155,54 +148,6 @@ public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<
             throw new IllegalStateException("parent is null");
         }
 
-        Iterator<ConfigurationNodeWalker.VisitedNode<CommentedConfigurationNode>> it = ConfigurationNodeWalker.DEPTH_FIRST_POST_ORDER.walkWithPath(root);
-        while (it.hasNext()) {
-            ConfigurationNodeWalker.VisitedNode<CommentedConfigurationNode> next = it.next();
-            CommentedConfigurationNode node = next.getNode();
-
-            // remove empty maps
-            if (node.hasMapChildren()) {
-                if (node.getChildrenMap().isEmpty()) {
-                    node.setValue(null);
-                }
-                continue;
-            }
-
-            // ignore list values
-            if (node.getParent() != null && node.getParent().getValueType() == ValueType.LIST) {
-                continue;
-            }
-
-            final Object[] currentPath = next.getPath().getArray();
-            // Version node should be equal, but is important to keep
-            if (Arrays.equals(VERSION_PATH, currentPath)) {
-                continue;
-            }
-
-            // if the node already exists in the parent config, remove it
-            CommentedConfigurationNode parentValue = this.parent.mergedNode.getNode(currentPath);
-            if (Objects.equals(node.getValue(), parentValue.getValue())) {
-                node.setValue(null);
-            } else {
-                // Fix list bug
-                if (parentValue.getValue() == null) {
-                    if (node.getValueType() == ValueType.LIST) {
-                        final List<?> nodeList = (List<?>) node.getValue();
-                        if (nodeList.isEmpty()) {
-                            node.setValue(null);
-                        }
-                        continue;
-                    }
-                }
-                // Fix double bug
-                final Double nodeVal = node.getValue(Types::asDouble);
-                if (nodeVal != null) {
-                    Double parentVal = parentValue.getValue(Types::asDouble);
-                    if (parentVal == null && nodeVal.doubleValue() == 0 || (parentVal != null && nodeVal.doubleValue() == parentVal.doubleValue())) {
-                        node.setValue(null);
-                    }
-                }
-            }
-        }
+        DuplicateRemovalVisitor.visit(root, this.parent.mergedNode);
     }
 }

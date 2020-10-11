@@ -22,25 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.translator;
+package org.spongepowered.common.data.persistence;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataSerializable;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataSerializable;
 
 import java.util.Arrays;
 import java.util.List;
 
-class SimpleData implements DataSerializable {
+final class SimpleData implements DataSerializable {
 
     private final int testInt;
     private final double testDouble;
     private final String testString;
     private final String[] testList;
 
-    SimpleData(int testInt, double testDouble, String testString, List<String> testList) {
+    SimpleData(final int testInt, final double testDouble, final String testString, final List<String> testList) {
         this.testInt = testInt;
         this.testDouble = testDouble;
         this.testString = testString;
@@ -70,7 +70,7 @@ class SimpleData implements DataSerializable {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = DataContainer.createNew();
+        final DataContainer container = DataContainer.createNew();
         container.set(DataQuery.of("myInt"), this.testInt);
         container.set(DataQuery.of("myDouble"), this.testDouble);
         container.set(DataQuery.of("myString"), this.testString);
@@ -84,17 +84,17 @@ class SimpleData implements DataSerializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(final Object other) {
+        if (this == other) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (other == null || getClass() != other.getClass()) {
             return false;
         }
-        final SimpleData other = (SimpleData) obj;
-        return Objects.equal(this.testInt, other.testInt)
-                && Objects.equal(this.testDouble, other.testDouble)
-                && Objects.equal(this.testString, other.testString)
-                && Arrays.equals(this.testList, other.testList);
+        final SimpleData that = (SimpleData) other;
+        return Objects.equal(this.testInt, that.testInt)
+                && Objects.equal(this.testDouble, that.testDouble)
+                && Objects.equal(this.testString, that.testString)
+                && Arrays.equals(this.testList, that.testList);
     }
 }
