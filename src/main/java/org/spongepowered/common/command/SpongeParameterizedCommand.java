@@ -64,7 +64,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     private final Function<CommandCause, Optional<Component>> shortDescription;
     private final Function<CommandCause, Optional<Component>> extendedDescription;
     private final Predicate<CommandCause> executionRequirements;
-    private final CommandExecutor executor;
+    @Nullable private final CommandExecutor executor;
     private final boolean isTerminal;
     @Nullable private SpongeCommandDispatcher cachedDispatcher;
 
@@ -74,7 +74,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
             final Function<CommandCause, Optional<Component>> shortDescription,
             final Function<CommandCause, Optional<Component>> extendedDescription,
             final Predicate<CommandCause> executionRequirements,
-            final CommandExecutor executor,
+            @Nullable final CommandExecutor executor,
             final List<Flag> flags,
             final boolean isTerminal) {
         this.subcommands = subcommands;
@@ -156,9 +156,8 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     }
 
     @Override
-    @NonNull
-    public CommandResult execute(@NonNull final CommandContext context) throws CommandException {
-        return this.executor.execute(context);
+    public Optional<CommandExecutor> getExecutor() {
+        return Optional.ofNullable(this.executor);
     }
 
     private SpongeCommandDispatcher getCachedDispatcher() {

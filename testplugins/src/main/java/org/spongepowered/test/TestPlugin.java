@@ -105,7 +105,7 @@ public final class TestPlugin {
                 .child(disableCommand, "disable")
                 .child(toggleCommand, "toggle")
                 .parameter(pluginKey)
-                .setExecutor(toggleCommand)
+                .setExecutor(toggleCommand.getExecutor().get())
                 .build();
         event.register(this.plugin, testPluginCommand, "testplugins");
     }

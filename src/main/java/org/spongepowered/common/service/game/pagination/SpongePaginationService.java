@@ -168,8 +168,8 @@ public final class SpongePaginationService implements PaginationService {
                         Parameter.subcommand(prev, "prev", "p", "previous"),
                         Parameter.subcommand(page, "page")))
                 .child(page, "page")
-                .setExecutor(page)
                 .setShortDescription(Component.text("Helper command for paginations occurring"))
+                .setExecutor(pageExecutor)
                 .build();
     }
 

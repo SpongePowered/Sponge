@@ -73,13 +73,14 @@ public final class SpongeParameterTranslator {
             @NonNull final ArgumentBuilder<CommandSource, ?> rootNode,
             @NonNull final SpongeParameterizedCommand command) {
 
-        final SpongeCommandExecutorWrapper executorWrapper = new SpongeCommandExecutorWrapper(command);
+        final SpongeCommandExecutorWrapper executorWrapper =
+                command.getExecutor().map(SpongeCommandExecutorWrapper::new).orElse(null);
         final ListIterator<Parameter> parameterListIterator = command.parameters().listIterator();
 
         // If we have no parameters, or they are all optional, all literals will get an executor.
         final boolean isTerminal = SpongeParameterTranslator.createNode(
                 parameterListIterator, executorWrapper, rootNode::then, null, new ArrayList<>(), true);
-        if (isTerminal) {
+        if (isTerminal && executorWrapper != null) {
             rootNode.executes(executorWrapper);
         }
         SpongeParameterTranslator.createSubcommands(rootNode, command.subcommands());
