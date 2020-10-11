@@ -59,29 +59,29 @@ public class ConfigurateDataViewTest {
 
     @Test
     void testNodeToData() {
-        ConfigurationNode node = ConfigurationNode.root();
+        final ConfigurationNode node = ConfigurationNode.root();
         node.getNode("foo","int").setValue(1);
         node.getNode("foo", "double").setValue(10.0D);
         node.getNode("foo", "long").setValue(Long.MAX_VALUE);
-        List<String> stringList = Lists.newArrayList();
+        final List<String> stringList = Lists.newArrayList();
         for (int i = 0; i < 100; i ++) {
             stringList.add("String" + i);
         }
         node.getNode("foo", "stringList").setValue(stringList);
-        List<SimpleData> dataList = new ArrayList<>();
+        final List<SimpleData> dataList = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             dataList.add(new SimpleData(i, 10.0 + i, "String" + i, Collections.emptyList()));
         }
         node.getNode("foo", "nested", "Data").setValue(dataList);
 
-        DataContainer manual = DataContainer.createNew();
+        final DataContainer manual = DataContainer.createNew();
         manual.set(DataQuery.of("foo", "int"), 1)
                 .set(DataQuery.of("foo", "double"), 10.0D)
                 .set(DataQuery.of("foo", "long"), Long.MAX_VALUE)
                 .set(DataQuery.of("foo", "stringList"), stringList)
                 .set(DataQuery.of("foo", "nested", "Data"), dataList);
 
-        DataView container = ConfigurateTranslator.instance().translate(node);
+        final DataView container = ConfigurateTranslator.instance().translate(node);
         assertEquals(manual, container);
         ConfigurateTranslator.instance().translate(container);
         //assertEquals(node, translated); // TODO Test is broken, depends on quite a bit of init
@@ -115,73 +115,73 @@ public class ConfigurateDataViewTest {
 
     @Test
     void testColor() throws IOException {
-        Color color = Color.ofRgb(0x66, 0xCC, 0xFF);
-        DataContainer original = color.toContainer();
+        final Color color = Color.ofRgb(0x66, 0xCC, 0xFF);
+        final DataContainer original = color.toContainer();
 
-        String serialized = HOCON.write(original);
-        DataContainer ret = HOCON.read(serialized);
+        final String serialized = HOCON.write(original);
+        final DataContainer ret = HOCON.read(serialized);
 
         assertEquals(original, ret);
     }
 
     @Test
     void testFireworkEffectData() throws IOException {
-        Color color = Color.ofRgb(0x66, 0xCC, 0xFF);
-        FireworkEffect fe = new SpongeFireworkEffectBuilder()
+        final Color color = Color.ofRgb(0x66, 0xCC, 0xFF);
+        final FireworkEffect fe = new SpongeFireworkEffectBuilder()
                 .colors(color, color, color)
                 //.shape(new SpongeFireworkEffect("ball", "Ball"))
                 .build();
-        DataContainer container = fe.toContainer();
+        final DataContainer container = fe.toContainer();
 
-        String s = HOCON.write(container);
-        DataContainer dc = HOCON.read(s);
+        final String s = HOCON.write(container);
+        final DataContainer dc = HOCON.read(s);
 
         assertEquals(container, dc);
     }
 
     @Test
     void testRespawnLocationData() throws IOException {
-        Map<ResourceKey, RespawnLocation> m = new HashMap<>();
+        final Map<ResourceKey, RespawnLocation> m = new HashMap<>();
         for (int i = 0; i < 5; i++) {
             final ResourceKey key = ResourceKey.sponge("overworld" + i);
-            RespawnLocation loc = RespawnLocation.builder().world(key).position(Vector3d.ZERO).build();
+            final RespawnLocation loc = RespawnLocation.builder().world(key).position(Vector3d.ZERO).build();
             m.put(key, loc);
         }
-        DataContainer container = DataContainer.createNew().set(DataQuery.of("respawn_locations"), m);
+        final DataContainer container = DataContainer.createNew().set(DataQuery.of("respawn_locations"), m);
 
-        ConfigurationNode node = ConfigurateTranslator.instance().translate(container);
+        final ConfigurationNode node = ConfigurateTranslator.instance().translate(container);
 
 
-        DataContainer dc = ConfigurateTranslator.instance().translate(node);
+        final DataContainer dc = ConfigurateTranslator.instance().translate(node);
 
         assertEquals(container, dc);
     }
 
     @Test
     void testNumber() throws IOException {
-        DataContainer container = DataContainer.createNew().set(DataQuery.of("double"), 1.0);
+        final DataContainer container = DataContainer.createNew().set(DataQuery.of("double"), 1.0);
 
-        ConfigurationNode node = ConfigurateTranslator.instance().translate(container);
+        final ConfigurationNode node = ConfigurateTranslator.instance().translate(container);
         assertEquals(1.0, node.getNode("double").getValue());
 
-        DataContainer dc = ConfigurateTranslator.instance().translate(node);
+        final DataContainer dc = ConfigurateTranslator.instance().translate(node);
 
         assertEquals(container, dc);
     }
 
     @Test
     void testMapInsideList() throws IOException {
-        JsonDataFormat json = new JsonDataFormat(ResourceKey.sponge("json"));
+        final JsonDataFormat json = new JsonDataFormat(ResourceKey.sponge("json"));
 
-        ConfigurationNode node = CommentedConfigurationNode.root();
-        Map<String, String> map = Collections.singletonMap("mkey", "mvalue");
-        List<Object> list = Arrays.asList("lelement", map);
+        final ConfigurationNode node = CommentedConfigurationNode.root();
+        final Map<String, String> map = Collections.singletonMap("mkey", "mvalue");
+        final List<Object> list = Arrays.asList("lelement", map);
 
         node.getNode("foo").setValue("bar");
         node.getNode("l").setValue(list);
 
-        DataContainer jc = json.read("{\"foo\":\"bar\",\"l\":[\"lelement\",{\"mkey\":\"mvalue\"}]}");
-        DataContainer hc = ConfigurateTranslator.instance().translate(node);
+        final DataContainer jc = json.read("{\"foo\":\"bar\",\"l\":[\"lelement\",{\"mkey\":\"mvalue\"}]}");
+        final DataContainer hc = ConfigurateTranslator.instance().translate(node);
 
         assertEquals(jc.getMap(DataQuery.of()), hc.getMap(DataQuery.of()));
     }
@@ -194,9 +194,9 @@ public class ConfigurateDataViewTest {
 
     @Test
     void testNullMapKey() {
-        ConfigurationNode node = CommentedConfigurationNode.root();
-        Map<String, String> map = Collections.singletonMap(null, "v");
-        List<Object> list = Arrays.asList("e", map);
+        final ConfigurationNode node = CommentedConfigurationNode.root();
+        final Map<String, String> map = Collections.singletonMap(null, "v");
+        final List<Object> list = Arrays.asList("e", map);
 
         node.getNode("foo").setValue("bar");
         node.getNode("l").setValue(list);

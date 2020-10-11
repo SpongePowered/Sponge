@@ -45,8 +45,8 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
     private DuplicateRemovalVisitor() {
     }
 
-    public static void visit(ConfigurationNode child, ConfigurationNode parent) {
-        child.visit(INSTANCE, new AtomicReference<>(parent));
+    public static void visit(final ConfigurationNode child, final ConfigurationNode parent) {
+        child.visit(DuplicateRemovalVisitor.INSTANCE, new AtomicReference<>(parent));
     }
 
     @Override
@@ -54,39 +54,39 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
         throw new IllegalArgumentException("A parent configuration must be provided as the state object to properly remove duplicates");
     }
 
-    private boolean isListElement(ConfigurationNode node) {
+    private boolean isListElement(final ConfigurationNode node) {
         return node.getParent() != null && node.getParent().isList();
     }
 
     @Override
-    public void beginVisit(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
+    public void beginVisit(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
         Objects.requireNonNull(Objects.requireNonNull(parent, "parentRef").get(), "A parent configuration must be provided!");
     }
 
     @Override
-    public void enterNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
+    public void enterNode(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
         if (node.getParent() != null) { // exclude root nodes
             parent.set(parent.get().getNode(node.getKey()));
         }
     }
 
     @Override
-    public void enterMappingNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
+    public void enterMappingNode(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
     }
 
     @Override
-    public void enterListNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
-        if (!isListElement(node) && Objects.equals(node.getValue(), parent.get().getValue())) {
+    public void enterListNode(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
+        if (!this.isListElement(node) && Objects.equals(node.getValue(), parent.get().getValue())) {
             node.setValue(null);
         }
     }
 
     @Override
     @SuppressWarnings("UnnecessaryUnboxing")
-    public void enterScalarNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
-        ConfigurationNode parentNode = popParent(parent);
+    public void enterScalarNode(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
+        final ConfigurationNode parentNode = this.popParent(parent);
         // ignore list values
-        if (isListElement(node)) {
+        if (this.isListElement(node)) {
             return;
         }
 
@@ -99,7 +99,7 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
         // Fix double bug
         final Double nodeVal = node.getValue(Types::asDouble);
         if (nodeVal != null) {
-            Double parentVal = parentNode.getValue(Types::asDouble);
+            final Double parentVal = parentNode.getValue(Types::asDouble);
             if (parentVal == null && nodeVal.doubleValue() == 0 || (parentVal != null && nodeVal.doubleValue() == parentVal.doubleValue())) {
                 node.setValue(null);
             }
@@ -107,30 +107,30 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
     }
 
     @Override
-    public void exitMappingNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
-        popParent(parent);
+    public void exitMappingNode(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
+        this.popParent(parent);
 
         // remove empty maps
-        if (node.isEmpty() && !isListElement(node)) {
+        if (node.isEmpty() && !this.isListElement(node)) {
             node.setValue(null);
         }
     }
 
     @Override
-    public void exitListNode(ConfigurationNode node, AtomicReference<ConfigurationNode> parent) {
-        ConfigurationNode parentNode = popParent(parent);
+    public void exitListNode(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
+        final ConfigurationNode parentNode = this.popParent(parent);
         if (parentNode.isEmpty() && node.isEmpty()) {
             node.setValue(null);
         }
     }
 
     @Override
-    public Void endVisit(AtomicReference<ConfigurationNode> parent) {
+    public Void endVisit(final AtomicReference<ConfigurationNode> parent) {
         return null;
     }
 
-    private ConfigurationNode popParent(AtomicReference<ConfigurationNode> parentRef) {
-        ConfigurationNode parent = parentRef.get();
+    private ConfigurationNode popParent(final AtomicReference<ConfigurationNode> parentRef) {
+        final ConfigurationNode parent = parentRef.get();
         if (parent.getParent() != null) {
             parentRef.set(parent.getParent());
         }

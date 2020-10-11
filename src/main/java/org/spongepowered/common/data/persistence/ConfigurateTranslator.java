@@ -78,7 +78,7 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
      * @return The instance of this translator
      */
     public static ConfigurateTranslator instance() {
-        return INSTANCE;
+        return ConfigurateTranslator.INSTANCE;
     }
 
     private ConfigurateTranslator() {
@@ -86,12 +86,12 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
 
     @Override
     public ResourceKey getKey() {
-        return KEY;
+        return ConfigurateTranslator.KEY;
     }
 
     @Override
     public TypeToken<ConfigurationNode> getToken() {
-        return TOKEN;
+        return ConfigurateTranslator.TOKEN;
     }
 
     // DataView -> ConfigurationNode
@@ -114,7 +114,7 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
         // Unvisited hijinks to preserve any comments that may be present
         final Set<Object> unvisitedKeys = new HashSet<>(originalMap.keySet());
         for (final DataQuery key : view.getKeys(false)) {
-            valueToNode(node.getNode(key.getParts()), view.get(key).orElse(null));
+            this.valueToNode(node.getNode(key.getParts()), view.get(key).orElse(null));
             unvisitedKeys.remove(key.getParts().get(0));
         }
 
@@ -136,11 +136,11 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void valueToNode(final ConfigurationNode node, final @Nullable Object value) {
         if (value instanceof DataView) {
-            translateDataToNode(node, (DataView) value);
+            this.translateDataToNode(node, (DataView) value);
         } else if (value instanceof Collection<?>) {
             node.setValue(ImmutableList.of());
             for (final Object child : ((Collection<?>) value)) {
-                valueToNode(node.appendListNode(), child);
+                this.valueToNode(node.appendListNode(), child);
             }
         } else if (value == null) {
             node.setValue(null);
@@ -166,8 +166,8 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
 
     @Override
     public ConfigurationNode translate(final DataView view) throws InvalidDataException {
-        final ConfigurationNode node = ConfigurationNode.root(DEFAULT_OPTS);
-        translateDataToNode(node, view);
+        final ConfigurationNode node = ConfigurationNode.root(ConfigurateTranslator.DEFAULT_OPTS);
+        this.translateDataToNode(node, view);
         return node;
     }
 
@@ -238,7 +238,7 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
             final Object peek = state.getFirst();
             final DataView ret;
             if (peek instanceof DataView) {
-                ret = ((DataView) peek).createView(queryFrom(node));
+                ret = ((DataView) peek).createView(this.queryFrom(node));
             } else if (peek instanceof List<?>) {
                 ((List) peek).add(ret = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED));
             } else {
@@ -254,7 +254,7 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
 
         @Override
         public void enterScalarNode(final ConfigurationNode node, final VisitState state) {
-            addToFirst(state, node, node.getValue());
+            this.addToFirst(state, node, node.getValue());
         }
 
         @Override
@@ -267,14 +267,14 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
         @Override
         public void exitListNode(final ConfigurationNode node, final VisitState state) {
             final Object popped = state.removeFirst();
-            addToFirst(state, node, popped);
+            this.addToFirst(state, node, popped);
         }
 
         @SuppressWarnings({"unchecked", "rawtypes"})
         private void addToFirst(final Deque<Object> stack, final ConfigurationNode keySource, final Object value) {
             final Object peek = stack.getFirst();
             if (peek instanceof DataView) {
-                ((DataView) peek).set(queryFrom(keySource), value);
+                ((DataView) peek).set(this.queryFrom(keySource), value);
             } else if (peek instanceof List<?>) {
                 ((List) peek).add(value);
             }
