@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.block.entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.tileentity.AbstractFurnaceTileEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class AbstractFurnaceData {
 
@@ -47,16 +48,17 @@ public final class AbstractFurnaceData {
                             return true;
                         })
                     .create(Keys.MAX_BURN_TIME)
-                        .get(AbstractFurnaceTileEntityAccessor::accessor$getRecipesUsed)
-                        .set(AbstractFurnaceTileEntityAccessor::accessor$setRecipesUsed)
+                        .get(x -> new SpongeTicks(x.accessor$getRecipesUsed()))
+                        .set((h, v) -> h.accessor$setRecipesUsed((int) v.getTicks()))
                     .create(Keys.MAX_COOK_TIME)
-                        .get(AbstractFurnaceTileEntityAccessor::accessor$getCookTimeTotal)
-                        .set(AbstractFurnaceTileEntityAccessor::accessor$setCookTimeTotal)
+                        .get(x -> new SpongeTicks(x.accessor$getCookTimeTotal()))
+                        .set((h, v) -> h.accessor$setCookTimeTotal((int) v.getTicks()))
                     .create(Keys.PASSED_COOK_TIME)
-                        .get(AbstractFurnaceTileEntityAccessor::accessor$getCookTime)
+                        .get(x -> new SpongeTicks(x.accessor$getCookTime()))
                         .set((h, v) -> {
-                            if (v < h.accessor$getCookTimeTotal()) {
-                                h.accessor$setCookTime(v);
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < h.accessor$getCookTimeTotal()) {
+                                h.accessor$setCookTime(ticks);
                             }
                         });
     }

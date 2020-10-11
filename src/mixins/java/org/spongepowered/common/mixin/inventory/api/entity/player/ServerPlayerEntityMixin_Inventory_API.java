@@ -70,7 +70,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
         if (openContainer.bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Task.builder().delay(Ticks.ZERO_TICKS).execute(() -> {
+            Task.builder().delay(Ticks.zero()).execute(() -> {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
                     cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
@@ -90,7 +90,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Task.builder().delay(Ticks.ZERO_TICKS).execute(() -> {
+            Task.builder().delay(Ticks.zero()).execute(() -> {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
                     cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));

@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.entity.passive.ChickenEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class ChickenData {
 
@@ -38,12 +39,13 @@ public final class ChickenData {
         registrator
                 .asMutable(ChickenEntity.class)
                     .create(Keys.EGG_TIME)
-                        .get(h -> h.timeUntilNextEgg)
+                        .get(h -> new SpongeTicks(h.timeUntilNextEgg))
                         .setAnd((h, v) -> {
-                            if (v < 0) {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
                                 return false;
                             }
-                            h.timeUntilNextEgg = v;
+                            h.timeUntilNextEgg = ticks;
                             return true;
                         });
     }

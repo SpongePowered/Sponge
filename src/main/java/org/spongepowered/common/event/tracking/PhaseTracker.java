@@ -240,7 +240,7 @@ public final class PhaseTracker implements CauseStackManager {
         this.hasRun = true;
         Task.builder()
             .name("Sponge Async To Sync Entity Spawn Task")
-            .interval(Ticks.SINGLE_TICK)
+            .interval(Ticks.single())
             .execute(() -> {
                 if (PhaseTracker.ASYNC_CAPTURED_ENTITIES.isEmpty()) {
                     return;

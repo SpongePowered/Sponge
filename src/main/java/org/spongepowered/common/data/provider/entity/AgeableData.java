@@ -28,6 +28,7 @@ import net.minecraft.entity.AgeableEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class AgeableData {
 
@@ -39,21 +40,23 @@ public final class AgeableData {
         registrator
                 .asMutable(AgeableEntity.class)
                     .create(Keys.BABY_TICKS)
-                        .get(h -> h.getGrowingAge() < 0 ? -h.getGrowingAge() : null)
+                        .get(h -> h.getGrowingAge() < 0 ? new SpongeTicks(-h.getGrowingAge()) : null)
                         .setAnd((h, v) -> {
-                            if (v < 0) {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
                                 return false;
                             }
-                            h.setGrowingAge(-v);
+                            h.setGrowingAge(-ticks);
                             return true;
                         })
                     .create(Keys.BREEDING_COOLDOWN)
-                        .get(h -> h.getGrowingAge() >= 0 ? h.getGrowingAge() : null)
+                        .get(h -> h.getGrowingAge() >= 0 ? new SpongeTicks(h.getGrowingAge()) : null)
                         .setAnd((h, v) -> {
-                            if (v < 0) {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
                                 return false;
                             }
-                            h.setGrowingAge(v);
+                            h.setGrowingAge(ticks);
                             return true;
                         })
                     .create(Keys.CAN_BREED)

@@ -24,23 +24,19 @@
  */
 package org.spongepowered.test.customdatatest;
 
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.MutableDataProviderBuilder;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
@@ -135,7 +131,7 @@ public final class CustomDataTest {
                             this.customUserData(player.getUniqueId(), number);
                             player.kick(Component.text("Setting User data..."));
                             final Scheduler scheduler = Sponge.getServer().getScheduler();
-                            scheduler.submit(Task.builder().delay(Ticks.SINGLE_TICK).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
+                            scheduler.submit(Task.builder().delay(Ticks.single()).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
                             scheduler.submit(Task.builder().delay(Ticks.of(2)).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
                             break;
                         case BLOCK:

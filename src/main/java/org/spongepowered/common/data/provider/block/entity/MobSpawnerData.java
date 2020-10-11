@@ -44,6 +44,7 @@ import org.spongepowered.common.accessor.world.spawner.AbstractSpawnerAccessor;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class MobSpawnerData {
 
@@ -58,17 +59,17 @@ public final class MobSpawnerData {
                         .get(h -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getMaxNearbyEntities())
                         .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setMaxNearbyEntities(v))
                     .create(Keys.MAX_SPAWN_DELAY)
-                        .get(h -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getMaxSpawnDelay())
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setMaxSpawnDelay(v))
+                        .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getMaxSpawnDelay()))
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setMaxSpawnDelay((int) v.getTicks()))
                     .create(Keys.MIN_SPAWN_DELAY)
-                        .get(h -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getMinSpawnDelay())
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setMinSpawnDelay(v))
+                        .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getMinSpawnDelay()))
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setMinSpawnDelay((int) v.getTicks()))
                     .create(Keys.NEXT_ENTITY_TO_SPAWN)
                         .get(h -> getNextEntity((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()))
                         .set((h, v) -> setNextEntity(h.accessor$getSpawnerLogic(), v))
                     .create(Keys.REMAINING_SPAWN_DELAY)
-                        .get(h -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getSpawnDelay())
-                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setSpawnDelay(v))
+                        .get(h -> new SpongeTicks(((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getSpawnDelay()))
+                        .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setSpawnDelay((int) v.getTicks()))
                     .create(Keys.REQUIRED_PLAYER_RANGE)
                         .get(h -> (double) ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$getActivatingRangeFromPlayer())
                         .set((h, v) -> ((AbstractSpawnerAccessor) h.accessor$getSpawnerLogic()).accessor$setActivatingRangeFromPlayer(v.intValue()))

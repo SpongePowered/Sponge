@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.block.entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.tileentity.BrewingStandTileEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class BrewingStandData {
 
@@ -47,10 +48,10 @@ public final class BrewingStandData {
                             return true;
                         })
                     .create(Keys.REMAINING_BREW_TIME)
-                        .get(h -> h.accessor$canBrew() ? h.accessor$getBrewTime() : null)
+                        .get(h -> h.accessor$canBrew() ? new SpongeTicks(h.accessor$getBrewTime()) : null)
                         .set((h, v) -> {
                             if (h.accessor$canBrew()) {
-                                h.accessor$setBrewTime(v);
+                                h.accessor$setBrewTime((int) v.getTicks());
                             }
                         });
     }

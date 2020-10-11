@@ -66,7 +66,6 @@ import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -407,7 +406,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
 
     @Override
     public void setWeather(final Weather weather) {
-        this.setWeather(weather, new SpongeTicks(6000 / SpongeTicks.TICK_DURATION_MS));
+        this.setWeather(weather, new SpongeTicks(6000 / Constants.TickConversions.TICK_DURATION_MS));
     }
 
     @Override

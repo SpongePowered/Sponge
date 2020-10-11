@@ -29,21 +29,36 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.util.Ticks;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.Objects;
 
 public final class SpongeTicks implements Ticks {
 
     public static final Factory FACTORY_INSTANCE = new Factory();
-
-    public static final int TICK_DURATION_MS = 50;
-    private static final Duration EFFECTIVE_MINIMUM_DURATION = Duration.ofMillis(SpongeTicks.TICK_DURATION_MS);
 
     private final long ticks;
     private final Duration effectiveMinimumDuration;
 
     public SpongeTicks(final long ticks) {
         this.ticks = ticks;
-        this.effectiveMinimumDuration = SpongeTicks.EFFECTIVE_MINIMUM_DURATION.multipliedBy(this.ticks);
+        this.effectiveMinimumDuration = Constants.TickConversions.EFFECTIVE_MINIMUM_DURATION.multipliedBy(this.ticks);
+    }
+
+    @Override
+    public long getMinecraftSeconds() {
+        // We do this to try to ensure we get the most accurate number of seconds we can.
+        // We know the hour rate is 1000 ticks, we can get an accurate hour count. This reduces the potential
+        // for error.
+        //
+        // We get the number of in-game seconds this object fulfils, there may be a few in-game milliseconds.
+        return 60 * 60 * this.ticks / Constants.TickConversions.MINECRAFT_HOUR_TICKS + // 3600 seconds in an hour
+                (long) ((this.ticks % Constants.TickConversions.MINECRAFT_HOUR_TICKS) / Constants.TickConversions.MINECRAFT_SECOND_TICKS);
+    }
+
+    @Override
+    public Duration getMinecraftDayTimeDuration() {
+        return Duration.of(this.getMinecraftSeconds(), ChronoUnit.SECONDS);
     }
 
     @Override
@@ -57,7 +72,29 @@ public final class SpongeTicks implements Ticks {
         return this.ticks;
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final SpongeTicks that = (SpongeTicks) o;
+        return this.ticks == that.ticks;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.ticks);
+    }
+
     public static final class Factory implements Ticks.Factory {
+
+        private final Ticks zero = new SpongeTicks(0);
+        private final Ticks single = new SpongeTicks(1);
+        private final Ticks minecraftHour = new SpongeTicks(Constants.TickConversions.MINECRAFT_HOUR_TICKS);
+        private final Ticks minecraftDay = new SpongeTicks(Constants.TickConversions.MINECRAFT_DAY_TICKS);
 
         @Override
         @NonNull
@@ -68,10 +105,44 @@ public final class SpongeTicks implements Ticks {
 
         @Override
         @NonNull
-        public Ticks of(final long time, @NonNull final TemporalUnit temporalUnit) {
+        public Ticks ofWallClockTime(final long time, @NonNull final TemporalUnit temporalUnit) {
             Preconditions.checkArgument(time >= 0, "time parameter must be non-negative");
             final long target = temporalUnit.getDuration().multipliedBy(time).toMillis();
-            return this.of((long) Math.ceil(target / (double) SpongeTicks.TICK_DURATION_MS));
+            return this.of((long) Math.ceil(target / (double) Constants.TickConversions.TICK_DURATION_MS));
+        }
+
+        @Override
+        @NonNull
+        public Ticks ofMinecraftSeconds(final long seconds) {
+            Preconditions.checkArgument(seconds >= 0, "time parameter must be non-negative");
+            return this.of((long) Math.ceil(seconds * Constants.TickConversions.MINECRAFT_SECOND_TICKS));
+        }
+
+        @Override
+        @NonNull
+        public Ticks ofMinecraftHours(final long hours) {
+            Preconditions.checkArgument(hours >= 0, "time parameter must be non-negative");
+            return this.of(hours * Constants.TickConversions.MINECRAFT_HOUR_TICKS);
+        }
+
+        @Override
+        public Ticks zero() {
+            return this.zero;
+        }
+
+        @Override
+        public Ticks single() {
+            return this.single;
+        }
+
+        @Override
+        public Ticks minecraftHour() {
+            return this.minecraftHour;
+        }
+
+        @Override
+        public Ticks minecraftDay() {
+            return this.minecraftDay;
         }
 
     }

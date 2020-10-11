@@ -29,44 +29,54 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
 
 import java.time.Duration;
+import java.util.Objects;
 
 public final class SpongeMinecraftDayTime implements MinecraftDayTime {
 
     public static final MinecraftDayTime.Factory FACTORY_INSTANCE = new Factory();
 
-    static final int MINECRAFT_DAY_TICKS = 24000;
-    static final int MINECRAFT_HOUR_TICKS = SpongeMinecraftDayTime.MINECRAFT_DAY_TICKS / 24;
-    static final double MINECRAFT_MINUTE_TICKS = SpongeMinecraftDayTime.MINECRAFT_HOUR_TICKS / 60.0;
-    private static final int MINECRAFT_EPOCH_OFFSET = 6000;
-
     static long getTicksFor(final long days, final long hours, final long minutes) {
-        return (long) (days * SpongeMinecraftDayTime.MINECRAFT_DAY_TICKS +
-                        hours * SpongeMinecraftDayTime.MINECRAFT_HOUR_TICKS +
-                        minutes * SpongeMinecraftDayTime.MINECRAFT_MINUTE_TICKS);
+        return (long) (days * Constants.TickConversions.MINECRAFT_DAY_TICKS +
+                        hours * Constants.TickConversions.MINECRAFT_HOUR_TICKS +
+                        minutes * Constants.TickConversions.MINECRAFT_MINUTE_TICKS);
     }
 
     private final long internalTime;
     private final long internalTimeWithOffset;
 
     public SpongeMinecraftDayTime(final long internalTime) {
-        Preconditions.checkArgument(internalTime >= 0, "internalTime cannot be zero");
+        Preconditions.checkArgument(internalTime >= 0, "internalTime cannot be negative");
         this.internalTime = internalTime;
-        this.internalTimeWithOffset = internalTime + SpongeMinecraftDayTime.MINECRAFT_EPOCH_OFFSET;
+        this.internalTimeWithOffset = internalTime + Constants.TickConversions.MINECRAFT_EPOCH_OFFSET;
     }
 
     @Override
     public int day() {
-        return (int) ((this.internalTimeWithOffset) / SpongeMinecraftDayTime.MINECRAFT_DAY_TICKS) + 1;
+        return (int) ((this.internalTimeWithOffset) / Constants.TickConversions.MINECRAFT_DAY_TICKS) + 1;
     }
 
     @Override
     public int hour() {
-        return (int) (((this.internalTimeWithOffset) % SpongeMinecraftDayTime.MINECRAFT_DAY_TICKS) / SpongeMinecraftDayTime.MINECRAFT_HOUR_TICKS);
+        return (int) (((this.internalTimeWithOffset) % Constants.TickConversions.MINECRAFT_DAY_TICKS) / Constants.TickConversions.MINECRAFT_HOUR_TICKS);
     }
 
     @Override
     public int minute() {
-        return (int) (((this.internalTimeWithOffset) % SpongeMinecraftDayTime.MINECRAFT_HOUR_TICKS) / SpongeMinecraftDayTime.MINECRAFT_MINUTE_TICKS);
+        return (int) (((this.internalTimeWithOffset) % Constants.TickConversions.MINECRAFT_HOUR_TICKS) / Constants.TickConversions.MINECRAFT_MINUTE_TICKS);
+    }
+
+    @Override
+    public MinecraftDayTime plus(final Ticks ticks) {
+        return new SpongeMinecraftDayTime(this.internalTime + ticks.getTicks());
+    }
+
+    @Override
+    public MinecraftDayTime minus(final Ticks ticks) {
+        final long time = this.internalTime - ticks.getTicks();
+        if (time <= 0) {
+            throw new IllegalArgumentException("ticks is larger than this day time object");
+        }
+        return new SpongeMinecraftDayTime(this.internalTime - ticks.getTicks());
     }
 
     @Override
@@ -99,12 +109,36 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
         return Ticks.of(this.internalTime);
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final SpongeMinecraftDayTime that = (SpongeMinecraftDayTime) o;
+        return this.internalTime == that.internalTime;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.internalTime);
+    }
+
     public static final class Factory implements MinecraftDayTime.Factory {
+
+        private final MinecraftDayTime epoch = new SpongeMinecraftDayTime(0);
+
+        @Override
+        public MinecraftDayTime epoch() {
+            return this.epoch;
+        }
 
         @Override
         public MinecraftDayTime of(final Duration duration) {
             Preconditions.checkArgument(!duration.isNegative(), "duration is negative");
-            return new SpongeMinecraftDayTime((long) (duration.toMinutes() * SpongeMinecraftDayTime.MINECRAFT_MINUTE_TICKS));
+            return new SpongeMinecraftDayTime((long) (duration.toMinutes() * Constants.TickConversions.MINECRAFT_MINUTE_TICKS));
         }
 
         @Override
@@ -113,7 +147,7 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
             Preconditions.checkArgument(hours >= 0 && hours <= 23 && (days > 1 || hours >= 6),
                     "hours is not between 0 and 23 (or 6 and 23 for day 1)");
             Preconditions.checkArgument(minutes >= 0 && minutes <= 59, "minutes is not between 0 and 59");
-            return new SpongeMinecraftDayTime(SpongeMinecraftDayTime.getTicksFor(days, hours, minutes) - SpongeMinecraftDayTime.MINECRAFT_EPOCH_OFFSET);
+            return new SpongeMinecraftDayTime(SpongeMinecraftDayTime.getTicksFor(days, hours, minutes) - Constants.TickConversions.MINECRAFT_EPOCH_OFFSET);
         }
 
         @Override

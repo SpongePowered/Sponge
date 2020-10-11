@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.common.accessor.entity.passive.PandaEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class PandaData {
 
@@ -62,15 +63,15 @@ public final class PandaData {
                         .get(h -> ((PandaGene) (Object) h.getMainGene()))
                         .set((h, v) -> h.setMainGene((PandaEntity.Type) (Object) v))
                     .create(Keys.SNEEZING_TIME)
-                        .get(PandaEntity::getSneezeCounter)
-                        .set(PandaEntity::setSneezeCounter)
+                        .get(x -> new SpongeTicks(x.getSneezeCounter()))
+                        .set((h, v) -> h.setSneezeCounter((int) v.getTicks()))
                     .create(Keys.UNHAPPY_TIME)
-                        .get(PandaEntity::getUnhappyCounter)
-                        .set(PandaEntity::setUnhappyCounter)
+                        .get(x -> new SpongeTicks(x.getUnhappyCounter()))
+                        .set((h, v) -> h.setUnhappyCounter((int) v.getTicks()))
                 .asMutable(PandaEntityAccessor.class)
                     .create(Keys.EATING_TIME)
-                        .get(PandaEntityAccessor::accessor$getEatCounter)
-                        .set(PandaEntityAccessor::accessor$setEatCounter);
+                        .get(x -> new SpongeTicks(x.accessor$getEatCounter()))
+                        .set((h, v) -> h.accessor$setEatCounter((int) v.getTicks()));
     }
     // @formatter:on
 }
