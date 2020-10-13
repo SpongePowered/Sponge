@@ -26,10 +26,15 @@ package org.spongepowered.common.bridge.command;
 
 import net.minecraft.command.CommandSource;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 
 public interface CommandSourceProviderBridge {
 
     // we do this because of the lectern tile entity
     CommandSource bridge$getCommandSource(Cause cause);
+
+    default void bridge$addToCauseStack(final CauseStackManager.StackFrame frame) {
+        // no-op for most cases.
+    }
 
 }
