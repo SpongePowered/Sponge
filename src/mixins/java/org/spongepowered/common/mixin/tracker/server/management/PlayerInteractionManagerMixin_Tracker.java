@@ -34,7 +34,6 @@ import net.minecraft.item.ItemUseContext;
 import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.network.play.server.SPlayerDiggingPacket;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -131,6 +130,7 @@ public abstract class PlayerInteractionManagerMixin_Tracker {
         final BlockSnapshot snapshot = ((ServerWorld) (this.world)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
         final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(this.player, this.player.getHeldItem(Hand.MAIN_HAND), snapshot, Hand.MAIN_HAND, p_225416_3_, null);
         if (event.isCancelled()) {
+            this.player.connection.sendPacket(new SPlayerDiggingPacket(p_225416_1_, this.world.getBlockState(p_225416_1_), p_225416_2_, false, "block action restricted"));
             ci.cancel();
         }
     }
