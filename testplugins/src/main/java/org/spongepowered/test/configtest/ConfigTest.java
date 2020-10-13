@@ -26,6 +26,7 @@ package org.spongepowered.test.configtest;
 
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -75,7 +76,7 @@ public class ConfigTest implements LoadableModule {
             return;
         }
 
-        event.getPlayer().sendMessage(motd);
+        event.getPlayer().sendMessage(Identity.nil(), motd);
     }
 
 

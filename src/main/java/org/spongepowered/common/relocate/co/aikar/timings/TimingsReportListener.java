@@ -27,6 +27,7 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 import com.google.common.collect.Lists;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.Server;
@@ -86,7 +87,7 @@ public final class TimingsReportListener {
     }
 
     public void send(Component text) {
-        this.audience.sendMessage(text);
+        this.audience.sendMessage(Identity.nil(), text);
     }
 
     public ForwardingAudience getChannel() {

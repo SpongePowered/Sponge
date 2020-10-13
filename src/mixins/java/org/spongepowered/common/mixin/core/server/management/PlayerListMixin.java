@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server.management;
 
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
@@ -212,7 +213,7 @@ public abstract class PlayerListMixin {
                 Optional.of(audience), joinComponent, joinComponent, connection, player, false);
         SpongeCommon.postEvent(event);
         if (!event.isMessageCancelled()) {
-            event.getAudience().ifPresent(audience1 -> audience1.sendMessage(event.getMessage()));
+            event.getAudience().ifPresent(audience1 -> audience1.sendMessage(Identity.nil(), event.getMessage()));
         }
 
         ((ServerPlayerEntityBridge) mcPlayer).bridge$setConnectionMessageToSend(null);
