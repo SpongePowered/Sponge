@@ -72,7 +72,7 @@ public final class SpongeGame implements Game {
     private Client client;
     private Server server;
 
-    private SystemSubject systemSubject;
+    private ServerConsoleSystemSubject systemSubject;
 
     @Inject
     public SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
@@ -100,7 +100,7 @@ public final class SpongeGame implements Game {
     }
 
     @Override
-    public SystemSubject getSystemSubject() {
+    public ServerConsoleSystemSubject getSystemSubject() {
         if (this.systemSubject == null) {
             this.systemSubject = new ServerConsoleSystemSubject();
         }

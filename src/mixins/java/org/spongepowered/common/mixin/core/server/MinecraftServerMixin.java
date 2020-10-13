@@ -38,8 +38,14 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKey;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.asm.mixin.Final;
@@ -79,7 +85,7 @@ import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer, MinecraftServerBridge,
-        CommandSourceProviderBridge {
+        CommandSourceProviderBridge, SubjectProxy {
 
     @Shadow @Final protected Thread serverThread;
     @Shadow @Final private PlayerProfileCache profileCache;
@@ -98,6 +104,11 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     public MinecraftServerMixin(final String name) {
         super(name);
+    }
+
+    @Override
+    public Subject getSubject() {
+        return SpongeCommon.getGame().getSystemSubject();
     }
 
     @Inject(method = "startServerThread", at = @At("HEAD"))
@@ -150,6 +161,15 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
         return this.shadow$getCommandSource();
+    }
+
+    // The Audience of the Server is actually a Forwarding Audience - so any message sent to
+    // the server will be sent to everyone connected. We therefore need to make sure we send
+    // things to the right place. We consider anything done by the server as being done by the
+    // system subject
+    @Override
+    public void bridge$addToCauseStack(final CauseStackManager.StackFrame frame) {
+        frame.pushCause(Sponge.getSystemSubject());
     }
 
     // We want to save the username cache json, as we normally bypass it.
