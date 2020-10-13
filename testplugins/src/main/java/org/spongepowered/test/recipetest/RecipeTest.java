@@ -25,6 +25,7 @@
 package org.spongepowered.test.recipetest;
 
 import com.google.inject.Inject;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.ResourceKey;
@@ -120,7 +121,7 @@ public final class RecipeTest implements LoadableModule {
         final Ingredient redRock = Ingredient.of(ItemTypes.POLISHED_GRANITE);
         final Ingredient redBed = Ingredient.of(ItemTypes.RED_BED);
         final ItemStack redBedRock = bedrock.copy();
-        redBedRock.offer(Keys.DISPLAY_NAME, TextComponent.of("Bedrock", NamedTextColor.RED));
+        redBedRock.offer(Keys.DISPLAY_NAME, Component.text("Bedrock", NamedTextColor.RED));
 
         final RecipeRegistration redBedrockRecipe = CraftingRecipe.shapedBuilder().rows()
                 .aisle("ggg", "gbg", "ggg")
@@ -197,7 +198,7 @@ public final class RecipeTest implements LoadableModule {
         event.register(charcoalToCoalRecipe);
 
         final ItemStack redderBedrock = bedrock.copy();
-        redderBedrock.offer(Keys.DISPLAY_NAME, TextComponent.of("Bedrock", NamedTextColor.DARK_RED));
+        redderBedrock.offer(Keys.DISPLAY_NAME, Component.text("Bedrock", NamedTextColor.DARK_RED));
 
         final RecipeRegistration removeRedOnBedrock = CookingRecipe.builder().type(RecipeTypes.BLASTING)
                 .ingredient(Ingredient.of(redBedRock))
@@ -269,7 +270,7 @@ public final class RecipeTest implements LoadableModule {
                 .result(grid -> {
                     final Optional<ServerPlayer> player = Sponge.getServer().getCauseStackManager().getCurrentCause().first(ServerPlayer.class);
                     final String name = player.map(ServerPlayer::getName).orElse("Steve");
-                    villagerEgg.offer(Keys.DISPLAY_NAME, TextComponent.of(name));
+                    villagerEgg.offer(Keys.DISPLAY_NAME, Component.text(name));
                     return villagerEgg.copy();
                 }, villagerEgg.copy())
                 .key(ResourceKey.of(this.plugin, "villager_spawn_egg"))
@@ -278,8 +279,8 @@ public final class RecipeTest implements LoadableModule {
         event.register(villagerSpawnEggRecipe);
 
         final ItemStack writtenBook = ItemStack.of(ItemTypes.WRITTEN_BOOK);
-        writtenBook.offer(Keys.DISPLAY_NAME, TextComponent.of("Biome Data"));
-        writtenBook.offer(Keys.AUTHOR, TextComponent.of("Herobrine"));
+        writtenBook.offer(Keys.DISPLAY_NAME, Component.text("Biome Data"));
+        writtenBook.offer(Keys.AUTHOR, Component.text("Herobrine"));
         final RecipeRegistration biomeDetectorRecipe = ShapedCraftingRecipe.builder()
                 .aisle("d", "b")
                 .where('d', Ingredient.of(ItemTypes.DAYLIGHT_DETECTOR))
@@ -290,11 +291,11 @@ public final class RecipeTest implements LoadableModule {
                     final String name = biome.map(BiomeType::getKey).map(ResourceKey::toString).orElse("Unknown");
                     final Integer biomeTemperature = biome.map(BiomeType::getTemperature).map(d -> (int) (d*10)).orElse(0);
                     final Integer biomeHumidity = biome.map(BiomeType::getHumidity).map(d -> (int) (d*10)).orElse(0);
-                    final TextComponent temperature = TextComponent.of("Temperature: ").append(TextComponent.of(biomeTemperature));
-                    final TextComponent humidity = TextComponent.of("Humidity: ").append(TextComponent.of(biomeHumidity));
-                    writtenBook.offer(Keys.DISPLAY_NAME, TextComponent.of("Biome Data: " + name));
+                    final TextComponent temperature = Component.text("Temperature: ").append(Component.text(biomeTemperature));
+                    final TextComponent humidity = Component.text("Humidity: ").append(Component.text(biomeHumidity));
+                    writtenBook.offer(Keys.DISPLAY_NAME, Component.text("Biome Data: " + name));
                     writtenBook.offer(Keys.PAGES, Arrays.asList(temperature, humidity));
-                    writtenBook.offer(Keys.AUTHOR, TextComponent.of(player.map(ServerPlayer::getName).orElse("Herobrine")));
+                    writtenBook.offer(Keys.AUTHOR, Component.text(player.map(ServerPlayer::getName).orElse("Herobrine")));
                     return writtenBook.copy();
                 }, writtenBook.copy())
                 .key(ResourceKey.of(this.plugin, "biome_detector"))

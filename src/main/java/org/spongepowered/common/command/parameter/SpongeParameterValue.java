@@ -26,7 +26,6 @@ package org.spongepowered.common.command.parameter;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandException;
 import net.minecraft.util.text.StringTextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -150,7 +149,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
             throw currentExceptions.get(0);
         } else {
             final List<Component> errors = currentExceptions.stream().map(ArgumentParseException::getSuperText).collect(Collectors.toList());
-            throw new ArgumentParseException(TextComponent.join(Component.newline(), errors), args.getInput(), args.getCursor());
+            throw new ArgumentParseException(Component.join(Component.newline(), errors), args.getInput(), args.getCursor());
         }
 
     }

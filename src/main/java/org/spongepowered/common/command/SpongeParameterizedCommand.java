@@ -30,7 +30,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -118,7 +117,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         final Collection<Component> usage =
                 Arrays.stream(this.getCachedDispatcher().getAllUsage(this.getCachedDispatcher().getRoot(), (CommandSource) cause, true))
                     .map(Component::text).collect(Collectors.toList());
-        return TextComponent.join(Component.newline(), usage);
+        return Component.join(Component.newline(), usage);
     }
 
     @Override

@@ -25,6 +25,7 @@
 package org.spongepowered.common.server;
 
 import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.SpongeCommon;
@@ -38,7 +39,7 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject {
     }
 
     @Override
-    public void sendMessage(@NonNull final Component message, @NonNull final MessageType type) {
+    public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
         SpongeCommon.getServer().sendMessage(SpongeAdventure.asVanilla(message));
     }
 }

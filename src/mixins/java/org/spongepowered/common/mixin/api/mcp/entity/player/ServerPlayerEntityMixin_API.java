@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.player;
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
@@ -340,7 +341,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public PlayerChatRouter getChatRouter() {
         if (this.api$chatRouter == null) {
-            this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(
+            this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(player,
                     Component.translatable("chat.type.text", ((EntityBridge) player).bridge$getDisplayNameText(), message));
         }
         return this.api$chatRouter;
@@ -436,13 +437,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     // Audience
 
     @Override
-    public void sendMessage(final Component message, final MessageType type) {
+    public void sendMessage(final Identity identity, final Component message, final MessageType type) {
         if (this.impl$isFake) {
             return;
         }
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(type, "type");
-        this.connection.sendPacket(new SChatPacket(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type)));
+        this.connection.sendPacket(new SChatPacket(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type))); // TODO(1.16) use identity
     }
 
     @Override

@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.game.pagination;
 
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -156,7 +157,7 @@ abstract class ActivePagination {
         }
 
         for (final Component line : toSend) {
-            src.sendMessage(line);
+            src.sendMessage(Identity.nil(), line);
         }
     }
 

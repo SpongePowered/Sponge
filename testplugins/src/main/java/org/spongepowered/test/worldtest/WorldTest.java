@@ -25,6 +25,7 @@
 package org.spongepowered.test.worldtest;
 
 import com.google.inject.Inject;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.ResourceKey;
@@ -164,7 +165,7 @@ public final class WorldTest {
                             final ResourceKey key = context.requireOne(unloadedWorldKeyParameter);
                             Sponge.getServer().getWorldManager().loadWorld(key).whenComplete(((serverWorld, throwable) -> {
                                 if (throwable != null) {
-                                    context.getCause().getAudience().sendMessage(Component.text(throwable.getMessage()));
+                                    context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
                                 }
                             }));
                             return CommandResult.success();
@@ -188,13 +189,13 @@ public final class WorldTest {
                                     .build();
                             Sponge.getServer().getWorldManager().createProperties(key, archetype).whenComplete(((worldProperties, throwable) -> {
                                 if (throwable != null) {
-                                    context.getCause().getAudience().sendMessage(Component.text(throwable.getMessage()));
+                                    context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
                                     return;
                                 }
 
                                 Sponge.getServer().getWorldManager().loadWorld(worldProperties).whenComplete(((serverWorld, throwable1) -> {
                                     if (throwable1 != null) {
-                                        context.getCause().getAudience().sendMessage(Component.text(throwable1.getMessage()));
+                                        context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable1.getMessage()));
                                     }
                                 }));
                             }));
@@ -212,7 +213,7 @@ public final class WorldTest {
                             final WorldProperties properties = context.requireOne(worldParameter);
                             Sponge.getServer().getWorldManager().unloadWorld(properties.getKey()).whenComplete((aBoolean, throwable) -> {
                                 if (throwable != null) {
-                                    context.getCause().getAudience().sendMessage(Component.text(throwable.getMessage()));
+                                    context.getCause().getAudience().sendMessage(Identity.nil(), Component.text(throwable.getMessage()));
                                 }
                             });
 
@@ -227,7 +228,7 @@ public final class WorldTest {
                         .parameter(playerParameter)
                         .setExecutor(context -> {
                             final ServerPlayer player = context.requireOne(playerParameter);
-                            player.sendMessage(Component.text("You are in World ").append(Component.text(player.getWorld().getKey().toString(),
+                            player.sendMessage(Identity.nil(), Component.text("You are in World ").append(Component.text(player.getWorld().getKey().toString(),
                              NamedTextColor.AQUA)).append(Component.text(" at (" + player.getPosition().getFloorX() + ", " + player.getPosition().getFloorY() +
                                     ", " + player.getPosition().getFloorZ() + ")")));
                             return CommandResult.success();

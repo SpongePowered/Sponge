@@ -48,7 +48,7 @@ public class StyleMixin implements StyleBridge {
     @SuppressWarnings("ConstantConditions")
     public net.kyori.adventure.text.format.Style bridge$asAdventure() {
         if (this.bridge$adventure == null) {
-            final net.kyori.adventure.text.format.Style.Builder builder = net.kyori.adventure.text.format.Style.builder();
+            final net.kyori.adventure.text.format.Style.Builder builder = net.kyori.adventure.text.format.Style.style();
             final Style $this = (Style) (Object) this;
             final StyleAccessor $access = (StyleAccessor) this;
             // font

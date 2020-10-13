@@ -25,6 +25,7 @@
 package org.spongepowered.test.projectiletest;
 
 import com.google.inject.Inject;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.Sponge;
@@ -83,30 +84,30 @@ public class ProjectileLaunchTest implements LoadableModule {
                 .parameters(entityTypeParameter, targetParameter)
                 .setExecutor(context -> {
                     final Player player = context.getCause().first(Player.class)
-                            .orElseThrow(() -> new CommandException(TextComponent.of("Only a player can execute this command")));
+                            .orElseThrow(() -> new CommandException(Component.text("Only a player can execute this command")));
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
                     final Optional<Projectile> launched;
                     if (context.requireOne(targetParameter)) {
                         final Collection<? extends Entity> nearbyEntities = player.getNearbyEntities(10,
                                 entity -> entity instanceof Living && entity != player);
                         if (nearbyEntities.isEmpty()) {
-                            return CommandResult.error(TextComponent.of("No entity to target nearby"));
+                            return CommandResult.error(Component.text("No entity to target nearby"));
                         }
                         final Entity target = nearbyEntities.iterator().next();
                         launched = player.launchProjectileTo((EntityType<Projectile>) entityType, target);
                         if (launched.isPresent()) {
-                            player.sendMessage(TextComponent.of("Launched projectile to " + target.getType().key().asString()));
+                            player.sendMessage(Identity.nil(), Component.text("Launched projectile to " + target.getType().key().asString()));
                             return CommandResult.success();
                         }
                     } else {
                         launched = player.launchProjectile((EntityType<Projectile>) entityType);
                         if (launched.isPresent()) {
-                            player.sendMessage(TextComponent.of("Launched projectile"));
+                            player.sendMessage(Identity.nil(), Component.text("Launched projectile"));
                             return CommandResult.success();
                         }
                     }
 
-                    throw new CommandException(TextComponent.of("Could not launch projectile"));
+                    throw new CommandException(Component.text("Could not launch projectile"));
                 })
                 .build();
         event.register(this.plugin, launchCommand, "launch");
@@ -115,29 +116,29 @@ public class ProjectileLaunchTest implements LoadableModule {
                 .parameter(entityTypeParameter)
                 .setExecutor(context -> {
                     final Player player = context.getCause().first(Player.class)
-                            .orElseThrow(() -> new CommandException(TextComponent.of("Only a player can execute this command")));
+                            .orElseThrow(() -> new CommandException(Component.text("Only a player can execute this command")));
                     final Collection<? extends ProjectileSource> nearbyProjectileSources =
                             (Collection<? extends ProjectileSource>) player.getNearbyEntities(10, entity -> entity instanceof ProjectileSource);
                     if (nearbyProjectileSources.isEmpty()) {
-                        return CommandResult.error(TextComponent.of("No projectile source nearby"));
+                        return CommandResult.error(Component.text("No projectile source nearby"));
                     }
 
                     final ProjectileSource projectileSource = nearbyProjectileSources.iterator().next();
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
                     final Optional<? extends Projectile> launched = projectileSource.launchProjectileTo((EntityType<Projectile>) entityType, player);
                     if (launched.isPresent()) {
-                        player.sendMessage(TextComponent.builder()
-                                .append("You made a ").append(((Entity) projectileSource).getType().key().asString())
-                                .append(" shoot a ").append(launched.get().getType().key().asString())
-                                .append(" at you").build()
+                        player.sendMessage(Identity.nil(), Component.text()
+                                .append(Component.text("You made a ")).append(Component.text(((Entity) projectileSource).getType().key().asString()))
+                                .append(Component.text(" shoot a ")).append(Component.text(launched.get().getType().key().asString()))
+                                .append(Component.text(" at you")).build()
                         );
                         return CommandResult.success();
                     }
 
-                    throw new CommandException(TextComponent.builder()
-                            .append("Could not launch a ").append(entityType.key().asString())
-                            .append(" from a ").append(((Entity) projectileSource).getType().key().asString())
-                            .append(" at you").build());
+                    throw new CommandException(Component.text()
+                            .append(Component.text("Could not launch a ")).append(Component.text(entityType.key().asString()))
+                            .append(Component.text(" from a ")).append(Component.text(((Entity) projectileSource).getType().key().asString()))
+                            .append(Component.text(" at you")).build());
                 })
                 .build();
         event.register(this.plugin, launchToMeCommand, "launchtome");
@@ -149,24 +150,24 @@ public class ProjectileLaunchTest implements LoadableModule {
                 .parameters(dispenserParameter, entityTypeParameter)
                 .setExecutor(context -> {
                     final Player player = context.getCause().first(Player.class)
-                            .orElseThrow(() -> new CommandException(TextComponent.of("Only a player can execute this command")));
+                            .orElseThrow(() -> new CommandException(Component.text("Only a player can execute this command")));
                     final BlockEntity dispenser = context.requireOne(dispenserParameter).getBlockEntity().orElse(null);
                     if (dispenser == null) {
-                        return CommandResult.error(TextComponent.of("Could not find dispenser"));
+                        return CommandResult.error(Component.text("Could not find dispenser"));
                     }
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
                     final Optional<? extends Projectile> launched = ((Dispenser) dispenser).launchProjectile((EntityType<Projectile>) entityType);
                     if (launched.isPresent()) {
                         launched.get().offer(Keys.SHOOTER, player);
-                        player.sendMessage(TextComponent.builder()
-                                .append("The dispenser launched a ").append(launched.get().getType().key().asString())
+                        player.sendMessage(Identity.nil(), Component.text()
+                                .append(Component.text("The dispenser launched a ")).append(Component.text(launched.get().getType().key().asString()))
                                 .build()
                         );
                         return CommandResult.success();
                     }
 
-                    return CommandResult.error(TextComponent.builder()
-                            .append("Could not make the dispenser launch a ").append(entityType.key().asString())
+                    return CommandResult.error(Component.text()
+                            .append(Component.text("Could not make the dispenser launch a ")).append(Component.text(entityType.key().asString()))
                             .build());
                 })
                 .build();
@@ -211,7 +212,7 @@ public class ProjectileLaunchTest implements LoadableModule {
                     player.launchProjectile(nextType);
                 }
                 event.setCancelled(true);
-                player.sendMessage(Component.text(nextType.key().toString()));
+                player.sendMessage(Identity.nil(), Component.text(nextType.key().toString()));
             }
 
         }
