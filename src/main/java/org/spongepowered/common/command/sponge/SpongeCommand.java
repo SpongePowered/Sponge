@@ -480,7 +480,7 @@ public class SpongeCommand {
         final CommandMapping mapping = context.requireOne(this.commandMappingKey);
         context.sendMessage(Component.text().append(
                 this.title("Aliases: "),
-                TextComponent.join(Component.text(", "),
+                Component.join(Component.text(", "),
                     mapping.getAllAliases().stream().map(x -> Component.text(x, NamedTextColor.YELLOW)).collect(Collectors.toList())),
                 Component.newline(),
                 this.title("Owned by: "),

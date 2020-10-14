@@ -28,6 +28,7 @@ import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUt
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minecraft.block.Block;
@@ -749,7 +750,7 @@ public final class SpongeCommonEventFactory {
             final Component message = event.getMessage();
             // Check the event isn't cancelled either. If it is, then don't spawn the message.
             if (!event.isCancelled() && !event.isMessageCancelled() && message != Component.empty()) {
-                event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(message));
+                event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(Identity.nil(), message));
             }
             return Optional.of(event);
         }

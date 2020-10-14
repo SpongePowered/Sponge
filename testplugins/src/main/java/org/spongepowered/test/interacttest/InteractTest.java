@@ -25,6 +25,8 @@
 package org.spongepowered.test.interacttest;
 
 import com.google.inject.Inject;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -56,39 +58,39 @@ public class InteractTest implements LoadableModule {
     public static class InteractListener {
         @Listener
         public void onInteractBlock(final InteractBlockEvent event) {
-            Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
-            Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.builder().append("/* Event: ").append(event.getClass().getSimpleName()).build());
-            Sponge.getServer().getBroadcastAudience().sendMessage(
-                    TextComponent.builder().append("/* Hand: ")
-                            .append(event.getContext().get(EventContextKeys.USED_HAND).map(h -> h.getKey().getFormatted()).orElse("UNKNOWN"))
+            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
+            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
+            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(),
+                    Component.text().append(Component.text("/* Hand: "))
+                            .append(Component.text(event.getContext().get(EventContextKeys.USED_HAND).map(h -> h.getKey().getFormatted()).orElse("UNKNOWN")))
                             .build()
             );
-            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
-            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
+            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.getCause().all().toString())).build());
+            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.getContext().toString())).build());
         }
         @Listener
         public void onInteractItem(final InteractItemEvent event) {
-            Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
-            Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.builder().append("/* Event: ").append(event.getClass().getSimpleName()).build());
-            Sponge.getServer().getBroadcastAudience().sendMessage(
-                    TextComponent.builder().append("/* Hand: ")
-                            .append(event.getContext().get(EventContextKeys.USED_HAND).map(h -> h.getKey().getFormatted()).orElse("UNKNOWN"))
+            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
+            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
+            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(),
+                    Component.text().append(Component.text("/* Hand: "))
+                            .append(Component.text(event.getContext().get(EventContextKeys.USED_HAND).map(h -> h.getKey().getFormatted()).orElse("UNKNOWN")))
                             .build()
             );
-            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
-            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
+            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.getCause().all().toString())).build());
+            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.getContext().toString())).build());
         }
         @Listener
         public void onInteractEntity(final InteractEntityEvent event) {
-            Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.of("/*************"));
-            Sponge.getServer().getBroadcastAudience().sendMessage(TextComponent.builder().append("/* Event: ").append(event.getClass().getSimpleName()).build());
-            Sponge.getServer().getBroadcastAudience().sendMessage(
-                    TextComponent.builder().append("/* Hand: ")
-                            .append(event.getContext().get(EventContextKeys.USED_HAND).map(h -> h.getKey().getFormatted()).orElse("UNKNOWN"))
+            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
+            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
+            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(),
+                    Component.text().append(Component.text("/* Hand: "))
+                            .append(Component.text(event.getContext().get(EventContextKeys.USED_HAND).map(h -> h.getKey().getFormatted()).orElse("UNKNOWN")))
                             .build()
             );
-            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Cause: ").append(event.getCause().all().toString()).build());
-            Sponge.getGame().getSystemSubject().sendMessage(TextComponent.builder().append("/ Context: ").append(event.getContext().toString()).build());
+            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.getCause().all().toString())).build());
+            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.getContext().toString())).build());
         }
     }
 }

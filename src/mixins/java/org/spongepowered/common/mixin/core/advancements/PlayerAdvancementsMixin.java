@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.advancements;
 
 import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -198,8 +199,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
         );
         SpongeCommon.postEvent(event);
         if (!event.isMessageCancelled()) {
-            event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(event.getMessage()));
-// TODO what was this.player here for?            event.getChannel().ifPresent(eventChannel -> eventChannel.send(this.player, event.getMessage()));
+            event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(Identity.nil(), event.getMessage()));
         }
 
         this.impl$message = null;
