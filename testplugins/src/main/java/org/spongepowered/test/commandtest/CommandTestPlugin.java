@@ -29,14 +29,17 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorTypes;
@@ -52,6 +55,7 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
@@ -265,17 +269,125 @@ public final class CommandTestPlugin {
                 "testnesting");
 
 
-        event.register(this.plugin,
-                Command.builder().setExecutor(context -> CommandResult.success())
-                        .parameter(Parameter.remainingJoinedStrings().orDefault("default").setKey("defaulted").build())
-                        .child(Command.builder().setExecutor(c -> CommandResult.success()).build(), "subcommand")
+        final Command.Builder builder = Command.builder();
+
+        // TODO test Parameter.string().consumeAllRemaining()...
+
+        final ValueCompleter stringValueCompleter = (c, s) -> s.isEmpty() ? Arrays.asList("x") : Arrays.asList(s, s + "bar", "foo_" + s);
+//        final ValueCompleter stringValueCompleter = null;
+
+        final Parameter.Value<String> r_def = Parameter.remainingJoinedStrings().orDefault("r_defaulted").setKey("r_def").build();
+        final Parameter.Value<String> r_req = Parameter.remainingJoinedStrings().setKey("r_req").setSuggestions(stringValueCompleter).build();
+        final Parameter.Value<String> def1 = Parameter.string().optional().orDefault("defaulted1").setKey("def1").build();
+        final Parameter.Value<String> def2 = Parameter.string().optional().orDefault("defaulted2").setKey("def2").build();
+        final Parameter.Value<String> opt1 = Parameter.string().optional().setKey("opt1").build();
+        final Parameter.Value<String> opt2 = Parameter.string().optional().setKey("opt2").build();
+        final Parameter.Value<String> topt = Parameter.string().optional().setKey("topt").terminal().build();
+        final Parameter.Value<String> req1 = Parameter.string().setKey("req1").setSuggestions(stringValueCompleter).build();
+        final Parameter.Value<String> req2 = Parameter.string().setKey("req2").build();
+        final Parameter.Value<Boolean> lit1 = Parameter.literal(Boolean.class, true, "lit1").setKey("lit1").build();
+        final Parameter.Value<Boolean> lit2 = Parameter.literal(Boolean.class, true, "lit2").setKey("lit2").build();
+        final Parameter optSeq_lit_req1 = Parameter.seqBuilder(lit1).then(req1).optional().build();
+        final Parameter optSeq_lit_req2 = Parameter.seqBuilder(lit2).then(req2).optional().build();
+        final Parameter seq_req_2 = Parameter.seqBuilder(req1).then(req2).build();
+        final Parameter seq_opt_2 = Parameter.seqBuilder(opt1).then(opt2).build();
+        final Parameter seq_opt_2_req = Parameter.seqBuilder(opt1).then(opt2).then(req1).build();
+
+        // <req1>
+        builder.child(Command.builder().setExecutor(context -> CommandTestPlugin.printParameters(context, req1))
+                        .parameter(req1).build(),"required");
+
+        // subcommand|<r_def>
+        builder.child(Command.builder().setExecutor(context -> CommandTestPlugin.printParameters(context, r_def))
+                        .parameter(r_def)
+                        .child(Command.builder().setExecutor(c -> CommandTestPlugin.printParameters(c)).build(), "subcommand")
                         .build(),
-                "testoptionaldefaultwithsubcommand");
+                "default_or_subcmd");
+
+
+        // https://bugs.mojang.com/browse/MC-165562 usage does not show up after a space if there are no completions
+
+        // [def1] <r_req>
+        // TODO missing executed command when only providing a single value
+        builder.child(Command.builder().setExecutor(context -> CommandTestPlugin.printParameters(context, def1, r_req))
+                .parameters(def1, r_req).build(), "default_r_required");
+
+        // [def1] <r_req>
+        // TODO missing executed command when only providing a single value
+        builder.child(Command.builder().setExecutor(context -> CommandTestPlugin.printParameters(context, opt1, r_req))
+                .parameters(opt1, r_req).build(), "optional_r_required");
+
+        // [opt1] [opt2] <r_req>
+        // TODO missing executed command when only providing a single value
+        builder.child(Command.builder().setExecutor(context -> CommandTestPlugin.printParameters(context, opt1, opt2, r_req))
+                .parameters(opt1, opt2, r_req).build(), "optional_optional_required");
+
+        // [def1] [def2] <r_req>
+        // TODO missing executed command when only providing a single value
+        builder.child(Command.builder().setExecutor(context -> CommandTestPlugin.printParameters(context, def1, def2, r_req))
+                .parameters(def1, def2, r_req).build(), "default_default_required");
+
+        // [def1] [def2]
+        builder.child(Command.builder().setExecutor(context -> CommandTestPlugin.printParameters(context, def1, def2))
+                .parameters(def1, def2).build(), "default_default");
+
+        // [opt1] [opt2]
+        // TODO some redundancy in generated nodes because opt1 node can terminate early
+        builder.child(Command.builder().setExecutor(context -> CommandTestPlugin.printParameters(context, opt1, opt2))
+                .parameters(opt1, opt2).build(), "optional_optional");
+
+        // [opt1] [literal <req1>]
+        // TODO completion does not include req1 when opt1/literal is ambigous
+        builder.child(Command.builder().setExecutor(c -> CommandTestPlugin.printParameters(c, opt1, lit1, req1))
+                .parameters(opt1, optSeq_lit_req1).build(), "optional_optsequence_literal_required");
+
+        // [literal <req1>] [literal2 <req2>]
+        // TODO sequences are not optional
+        builder.child(Command.builder().setExecutor(c -> CommandTestPlugin.printParameters(c, lit1, req1, lit2, req2))
+                .parameters(optSeq_lit_req1, optSeq_lit_req2).build(), "opt_sequence_2_literal_required");
+
+        // <<req1> <req2>>
+        builder.child(Command.builder().setExecutor(c -> CommandTestPlugin.printParameters(c, req1, req2))
+                .parameters(seq_req_2).build(), "seq_required_required");
+
+        // <[opt1] [opt2]>
+        // TODO some redundancy in generated nodes because opt1 node can terminate early
+        builder.child(Command.builder().setExecutor(c -> CommandTestPlugin.printParameters(c, opt1, opt2))
+                .parameters(seq_opt_2).build(), "seq_optional_optional");
+
+        // <[opt1] [opt2] <req>>
+        builder.child(Command.builder().setExecutor(c -> CommandTestPlugin.printParameters(c, opt1, opt2, req1))
+                .parameters(seq_opt_2_req).build(), "seq_optional_optional_required");
+
+        // [opt1] <req> [opt2]
+        // TODO some redundancy in generated nodes because req1 node can terminate early
+        builder.child(Command.builder().setExecutor(c -> CommandTestPlugin.printParameters(c, opt1, req1, opt2))
+                .parameters(opt1, req1, opt2).build(), "optional_required_optional");
+
+        // [opt1] [topt] !terminal
+        // or
+        // [opt1] [topt] <req1>
+        builder.child(Command.builder().setExecutor(c -> CommandTestPlugin.printParameters(c, opt1, topt, req1))
+                .parameters(opt1, topt, req1).build(), "optional_toptional_optional");
+
+        event.register(this.plugin, builder.build(), "testcommand", "testcmd");
     }
 
     @Listener
     public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
         event.register(this.plugin, new RawCommandTest(), "rawcommandtest");
+    }
+
+    private static CommandResult printParameters(CommandContext context, Parameter.Value<?>... params)
+    {
+        for (Parameter.Value<?> param : params) {
+            final Object paramValue = context.getOne(param).map(Object::toString).orElse("missing");
+            final String paramUsage = param.getUsage(context.getCause());
+            context.sendMessage(Identity.nil(), Component.text(paramUsage + ": " + paramValue));
+        }
+        // TODO usage starts with "command" - comes from SpogneParameterizedCommand#getCachedDispatcher
+        context.getExecutedCommand().ifPresent(cmd -> context.sendMessage(Identity.nil(), cmd.getUsage(context.getCause()).color(NamedTextColor.GRAY)));
+        return CommandResult.success();
     }
 
     public enum TestEnum {

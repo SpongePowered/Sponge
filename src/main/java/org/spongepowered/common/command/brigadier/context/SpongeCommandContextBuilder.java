@@ -93,6 +93,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         this.modifier = original.modifier;
         this.forks = original.forks;
         this.currentTargetCommand = original.currentTargetCommand;
+        this.getNodes().addAll(original.getNodes());
         this.withChild(original.getChild());
         this.withCommand(original.getCommand());
         original.getArguments().forEach(this::withArgument);
@@ -176,7 +177,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
             return this.transaction.peek().getCopyBuilder().findSuggestionContext(cursor);
         }
 
-        // This is the orignal method, with field access swapped out for method calls
+        // This is the original method, with field access swapped out for method calls
         // where appropriate. There is one change marked below.
         if (this.getRange().getStart() <= cursor) {
             if (this.getRange().getEnd() < cursor) {

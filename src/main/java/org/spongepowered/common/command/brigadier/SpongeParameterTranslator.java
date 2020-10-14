@@ -79,7 +79,7 @@ public final class SpongeParameterTranslator {
 
         // If we have no parameters, or they are all optional, all literals will get an executor.
         final boolean isTerminal = SpongeParameterTranslator.createNode(
-                parameterListIterator, executorWrapper, rootNode::then, null, new ArrayList<>(), true);
+                parameterListIterator, executorWrapper, rootNode::then, null, new ArrayList<>(), true, false);
         if (isTerminal && executorWrapper != null) {
             rootNode.executes(executorWrapper);
         }
@@ -121,7 +121,8 @@ public final class SpongeParameterTranslator {
                             }
                         },
                         new ArrayList<>(),
-                        wrapper != null
+                        wrapper != null,
+                        false
                 );
                 if (isTerminal) {
                     flagLiteral.executes(wrapper);
@@ -155,9 +156,10 @@ public final class SpongeParameterTranslator {
             @NonNull final Consumer<CommandNode<CommandSource>> builtNodeConsumer,
             @Nullable final Consumer<ArgumentBuilder<CommandSource, ?>> lastNodeCallback,
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            final boolean canBeTerminal) {
+            final boolean canBeTerminal,
+            final boolean previousWasOptional) {
         return SpongeParameterTranslator.createNode(parameters, executorWrapper, builtNodeConsumer, lastNodeCallback, potentialOptionalRedirects,
-                canBeTerminal, null);
+                canBeTerminal, previousWasOptional, null);
     }
 
     public static boolean createNode(
@@ -167,6 +169,7 @@ public final class SpongeParameterTranslator {
             @Nullable final Consumer<ArgumentBuilder<CommandSource, ?>> lastNodeCallback,
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
             final boolean canBeTerminal,
+            final boolean previousWasOptional,
             @Nullable final String suffix) {
 
         if (!parameters.hasNext()) {
@@ -175,6 +178,7 @@ public final class SpongeParameterTranslator {
 
         final Parameter currentParameter = parameters.next();
         final boolean hasNext = parameters.hasNext();
+        final boolean isDefault = currentParameter instanceof SpongeParameterValue && ((SpongeParameterValue<?>) currentParameter).getDefaultParser() != null;
 
         // Inferred because it checks to see if everything ahead is optional or terminal.
         boolean isInferredTermination = canBeTerminal && !hasNext;
@@ -191,7 +195,8 @@ public final class SpongeParameterTranslator {
                                     arg::then,
                                     lastNodeCallback,
                                     potentialOptionalRedirects,
-                                    canBeTerminal);
+                                    canBeTerminal,
+                                    currentParameter.isOptional());
 
             isInferredTermination = ((SpongeMultiParameter) currentParameter).createNode(
                     executorWrapper,
@@ -199,6 +204,7 @@ public final class SpongeParameterTranslator {
                     nodeCallback,
                     potentialOptionalRedirects,
                     isInferredTermination,
+                    previousWasOptional,
                     suffix
             ) || isInferredTermination;
         } else if (currentParameter instanceof Parameter.Value<?>) {
@@ -224,7 +230,9 @@ public final class SpongeParameterTranslator {
                         currentNode::then,
                         lastNodeCallback,
                         potentialOptionalRedirects,
-                        canBeTerminal) && canBeTerminal) || isInferredTermination;
+                        canBeTerminal,
+                        currentParameter.isOptional()
+                        ) && canBeTerminal) || isInferredTermination;
             }
 
             if (isInferredTermination || valueParameter.isTerminal()) {
@@ -235,53 +243,39 @@ public final class SpongeParameterTranslator {
                 currentNodes.forEach(lastNodeCallback);
             }
 
-            // Add "then" to nodes that are optional ahead of it, but only if we're not terminating here.
-            if (!isInferredTermination) {
-                for (final CommandNode<CommandSource> optionalRedirect : potentialOptionalRedirects) {
-                    // I would much rather this be redirects, but we can't do that right now thanks to a Brig
-                    // limitation, where you can't have a child and a redirect at the same time.
-                    //
-                    // (with optional, if you go A-B-C-D and B is optional, we can't make B redirect to A because
-                    // that'll let B be selected again, and we can't make A redirect to B as well as have B as a
-                    // child - reasons above)
-                    //
-                    // Another option will be to create dummy nodes that no-one has permissions for and attach them
-                    // to the tree - that'll be messy but may have to be the solution to reduce what is sent to the
-                    // client... hopefully.
-                    //
-                    // If we could change the client completion logic from the server, this would be simpler, alas,
-                    // we cannot.
-                    currentNode.then(optionalRedirect);
-                }
-            }
-
-            // Apply the node to the parent if required.
+            // Apply the node to the parent.
             final CommandNode<CommandSource> builtNode = currentNode.build();
             builtNodeConsumer.accept(builtNode);
             if (isConsumeAll) {
-                // the built child will return to the previous node, which will allow this
-                // to be called again.
+                // the built child will return to the previous node, which will allow this to be called again.
                 builtNode.addChild(currentNode.redirect(builtNode).build());
             }
 
+            // Additional current nodes are all optional/default nodes
+            final ArrayList<CommandNode<CommandSource>> newOptionals = new ArrayList<>();
             for (int i = 1; i < currentNodes.size(); ++i) {
                 final SpongeArgumentCommandNodeBuilder<?> secondaryBuilder = currentNodes.get(i);
-                secondaryBuilder.redirect(builtNode);
+                if (potentialOptionalRedirects.isEmpty()) {
+                    // If the next node is not optional/defaulted we can redirect to the primary current node
+                    secondaryBuilder.redirect(builtNode);
+                } else {
+                    // If instead the next node is optional/defaulted we must attach them to the secondary current nodes as well
+                    potentialOptionalRedirects.forEach(secondaryBuilder::then);
+                }
                 final CommandNode<CommandSource> secondaryNode = secondaryBuilder.build();
+                newOptionals.add(secondaryNode); // pass all optional/default nodes up
+
+                // Attach optional node to previous primary node (the non-optional variant)
                 builtNodeConsumer.accept(secondaryNode);
             }
 
-            if (currentParameter.isOptional() && hasNext) {
-                potentialOptionalRedirects.add(builtNode);
-            } else {
-                potentialOptionalRedirects.clear();
-            }
-
+            potentialOptionalRedirects.clear();
+            potentialOptionalRedirects.addAll(newOptionals);
         }
 
-        // Return true if all arguments are optional and so the preceding parameter should be treated as a termination,
-        // false otherwise.
-        return canBeTerminal && isInferredTermination && currentParameter.isOptional();
+        // Return true if all further arguments are optional and not default.
+        // Meaning the preceding parameter should be treated as a termination,
+        return canBeTerminal && isInferredTermination && currentParameter.isOptional() && !isDefault;
     }
 
     private static void createSubcommands(
@@ -324,18 +318,28 @@ public final class SpongeParameterTranslator {
         argumentBuilder.requires((Predicate) parameter.getRequirement());
 
         if (parameter instanceof SpongeParameterValue) {
-            final SpongeDefaultValueParser<? extends T> defaultValueParser = ((SpongeParameterValue<T>) parameter).getDefaultParser();
-            if (defaultValueParser != null) {
-                final SpongeArgumentCommandNodeBuilder<T> defaultBuilder = new SpongeArgumentCommandNodeBuilder<>(
-                                SpongeParameterKey.getSpongeKey(parameter.getKey()),
-                                new CustomArgumentParser<>(
-                                        ImmutableList.of(defaultValueParser),
-                                        SpongeParameterTranslator.EMPTY_COMPLETER,
-                                        true),
-                                SpongeParameterTranslator.EMPTY_COMPLETER,
-                                parameter.getValueUsage().orElse(null),
-                                suffix + "_default");
-                return ImmutableList.of(argumentBuilder, defaultBuilder);
+            if (parameter.isOptional()) {
+                final SpongeDefaultValueParser<? extends T> defaultValueParser = ((SpongeParameterValue<T>) parameter).getDefaultParser();
+                final CustomArgumentParser<? extends T> optionalParser;
+                final String suffixSuffix;
+                if (defaultValueParser == null) {
+                    // Optional parser just returns null but still needs to be processed as a node
+                    // to allow commands optional parameters in front
+                    optionalParser = new CustomArgumentParser<>(ImmutableList.of(), SpongeParameterTranslator.EMPTY_COMPLETER, true);;
+                    suffixSuffix = suffix + "_optional";
+                } else {
+                    // Default parser returns the default value
+                    optionalParser = new CustomArgumentParser<>(ImmutableList.of(defaultValueParser), SpongeParameterTranslator.EMPTY_COMPLETER, true);
+                    suffixSuffix = suffix + "_default";
+                }
+                final SpongeArgumentCommandNodeBuilder<T> optionalBuilder = new SpongeArgumentCommandNodeBuilder<>(
+                        SpongeParameterKey.getSpongeKey(parameter.getKey()),
+                        optionalParser,
+                        SpongeParameterTranslator.EMPTY_COMPLETER,
+                        parameter.getValueUsage().orElse(null),
+                        suffixSuffix);
+
+                return ImmutableList.of(argumentBuilder, optionalBuilder);
             }
         }
 

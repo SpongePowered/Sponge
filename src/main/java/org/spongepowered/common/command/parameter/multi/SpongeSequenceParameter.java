@@ -32,6 +32,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
 import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -53,16 +54,19 @@ public final class SpongeSequenceParameter extends SpongeMultiParameter {
             final Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
             final boolean isTermination,
+            final boolean previousWasOptional,
             @Nullable final String suffix) {
 
-        return SpongeParameterTranslator.createNode(
+        final boolean isTerminal = SpongeParameterTranslator.createNode(
                 this.getParameterCandidates().listIterator(),
                 executorWrapper,
                 parentNode,
                 nodeCallback,
                 potentialOptionalRedirects,
                 isTermination || this.isTerminal(),
+                previousWasOptional,
                 suffix);
+        return this.isOptional() || isTerminal;
     }
 
 

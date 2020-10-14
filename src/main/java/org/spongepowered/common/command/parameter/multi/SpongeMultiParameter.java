@@ -77,5 +77,6 @@ public abstract class SpongeMultiParameter implements Parameter {
             Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
             List<CommandNode<CommandSource>> potentialOptionalRedirects,
             boolean isTermination,
+            boolean previousWasOptional,
             String suffix);
 }

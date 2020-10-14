@@ -50,6 +50,7 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
             final Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
             final boolean isTermination,
+            final boolean previousWasOptional,
             @Nullable final String suffix) {
         final boolean hasExecutor = isTermination || this.isTerminal();
 
@@ -83,6 +84,7 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
                         first ? nodeCallback : redirector, // latter is used for merging command paths back together.
                         potentialOptionalRedirects,
                         hasExecutor,
+                        previousWasOptional,
                         suffix);
             } else {
                 final List<Parameter> parameters = new ArrayList<>();
@@ -97,6 +99,7 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
                     // redirects within the branch, and to later nodes.
                     first ? potentialOptionalRedirects : new ArrayList<>(potentialOptionalRedirects),
                     hasExecutor,
+                    previousWasOptional,
                     original == 0 ? null : String.valueOf(original));
             }
 
