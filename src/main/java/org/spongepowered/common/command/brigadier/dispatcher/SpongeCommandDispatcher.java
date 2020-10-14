@@ -60,6 +60,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 // For use on the Brigadier dispatcher
 public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
@@ -232,8 +233,11 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         final Collection<? extends CommandNode<CommandSource>> nodes;
         if (isSuggestion && node instanceof SpongeNode) {
             nodes = ((SpongeNode) node).getRelevantNodesForSuggestions(originalReader);
-        } else {
+        } else if (originalReader.canRead()) {
             nodes = node.getRelevantNodes(originalReader);
+        } else { // Reader cannot read anymore so ONLY nodes with parsers that do not read can be processed
+            nodes = node.getChildren().stream().filter(n -> n instanceof SpongeArgumentCommandNode &&
+                    ((SpongeArgumentCommandNode<?>) n).getParser().doesNotRead()).collect(Collectors.toList());
         }
 
         for (final CommandNode<CommandSource> child : nodes) {

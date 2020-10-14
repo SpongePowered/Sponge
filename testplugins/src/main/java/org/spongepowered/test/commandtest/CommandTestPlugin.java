@@ -262,6 +262,14 @@ public final class CommandTestPlugin {
                         .parameter(Parameter.literal(String.class, "6", "6").setKey(stringLiteralKey).build())
                         .build(),
                 "testnesting");
+
+
+        event.register(this.plugin,
+                Command.builder().setExecutor(context -> CommandResult.success())
+                        .parameter(Parameter.remainingJoinedStrings().orDefault("default").setKey("defaulted").build())
+                        .child(Command.builder().setExecutor(c -> CommandResult.success()).build(), "subcommand")
+                        .build(),
+                "testoptionaldefaultwithsubcommand");
     }
 
     @Listener
