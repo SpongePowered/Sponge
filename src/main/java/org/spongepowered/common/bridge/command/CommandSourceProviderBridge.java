@@ -33,6 +33,8 @@ public interface CommandSourceProviderBridge {
     // we do this because of the lectern tile entity
     CommandSource bridge$getCommandSource(Cause cause);
 
+    // Used to forcibly redirect the server to the system subject to avoid issues with the
+    // server-wide forwarding audience.
     default void bridge$addToCauseStack(final CauseStackManager.StackFrame frame) {
         // no-op for most cases.
     }
