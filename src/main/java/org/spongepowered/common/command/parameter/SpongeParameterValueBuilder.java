@@ -26,7 +26,6 @@ package org.spongepowered.common.command.parameter;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
@@ -35,6 +34,7 @@ import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +46,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
 
     private static final ValueCompleter EMPTY_COMPLETER = (context, currentInput) -> ImmutableList.of();
 
-    private final TypeToken<T> typeToken;
+    private final Type typeToken;
     private final List<ValueParser<? extends T>> parsers = new ArrayList<>();
     private Parameter.@Nullable Key<T> key;
     @Nullable private ValueCompleter completer;
@@ -57,7 +57,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     private boolean isOptional;
     private boolean terminal;
 
-    public SpongeParameterValueBuilder(@NonNull final TypeToken<T> token) {
+    public SpongeParameterValueBuilder(@NonNull final Type token) {
         this.typeToken = token;
     }
 

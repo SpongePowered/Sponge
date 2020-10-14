@@ -26,7 +26,7 @@ package org.spongepowered.common.advancement;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.ICriterionTrigger;
@@ -46,6 +46,7 @@ import org.spongepowered.common.accessor.advancements.ICriterionTrigger_Listener
 import org.spongepowered.common.bridge.advancements.TriggerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -55,18 +56,18 @@ import javax.annotation.Nullable;
 @SuppressWarnings("rawtypes")
 public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, TriggerBridge {
 
-    private final Class<FilteredTriggerConfiguration> triggerConfigurationClass;
+    private final Type triggerConfigurationType;
     final Function<JsonObject, FilteredTriggerConfiguration> constructor;
     private final ResourceLocation id;
     private final Multimap<PlayerAdvancements, Listener> listeners = HashMultimap.create();
     @Nullable final Consumer<CriterionEvent.Trigger> eventHandler;
     private final String name;
 
-    SpongeTrigger(final Class<FilteredTriggerConfiguration> triggerConfigurationClass,
+    SpongeTrigger(final Type triggerConfigurationType,
         final Function<JsonObject, FilteredTriggerConfiguration> constructor,
         final ResourceLocation id, @Nullable final Consumer<CriterionEvent.Trigger> eventHandler,
         final String name) {
-        this.triggerConfigurationClass = triggerConfigurationClass;
+        this.triggerConfigurationType = triggerConfigurationType;
         this.eventHandler = eventHandler;
         this.constructor = constructor;
         this.id = id;
@@ -106,7 +107,9 @@ public class SpongeTrigger implements ICriterionTrigger<SpongeFilteredTrigger>, 
     public void bridge$trigger(final ServerPlayer player) {
         final PlayerAdvancements playerAdvancements = ((ServerPlayerEntity) player).getAdvancements();
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
-        final TypeToken<FilteredTriggerConfiguration> typeToken = TypeToken.of(this.triggerConfigurationClass);
+
+        @SuppressWarnings("unchecked") // correct type verified in builder
+        final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken<FilteredTriggerConfiguration>) TypeToken.get(this.triggerConfigurationType);
         for (final Listener listener : new ArrayList<>(this.listeners.get(playerAdvancements))) {
             final ICriterionTrigger_ListenerAccessor mixinListener = (ICriterionTrigger_ListenerAccessor) listener;
             final Advancement advancement = (Advancement) mixinListener.accessor$getAdvancement();

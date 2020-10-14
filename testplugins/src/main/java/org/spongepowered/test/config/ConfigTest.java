@@ -24,54 +24,48 @@
  */
 package org.spongepowered.test.config;
 
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.configurate.reference.ConfigurationReference;
+import org.spongepowered.configurate.reference.ValueReference;
 import org.spongepowered.plugin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
-
-import java.io.IOException;
 
 @Plugin("configtest")
 public final class ConfigTest implements LoadableModule {
 
     private final Logger logger;
-    private final ConfigurationLoader<CommentedConfigurationNode> loader;
-    private ConfigurationNode node;
-    private ExampleConfiguration config;
+    private final ConfigurationReference<CommentedConfigurationNode> reference;
+    private ValueReference<ExampleConfiguration, CommentedConfigurationNode> config;
 
     @Inject
-    ConfigTest(final Logger logger, final @DefaultConfig(sharedRoot = true) ConfigurationLoader<CommentedConfigurationNode> loader) {
+    ConfigTest(final Logger logger, final @DefaultConfig(sharedRoot = true) ConfigurationReference<CommentedConfigurationNode> reference) {
         this.logger = logger;
-        this.loader = loader;
+        this.reference = reference;
     }
 
     @Listener
     public void onConstruction(final ConstructPluginEvent event) {
         try {
-            this.node = this.loader.load();
-            this.config = this.node.getValue(TypeToken.of(ExampleConfiguration.class), new ExampleConfiguration());
-            this.node.setValue(TypeToken.of(ExampleConfiguration.class), this.config);
-            this.loader.save(node);
-        } catch (IOException | ObjectMappingException e) {
-            this.logger.error("Unable to load test configuration", e);
+            this.config = this.reference.referenceTo(ExampleConfiguration.class);
+            this.reference.save();
+        } catch (final ConfigurateException ex) {
+            this.logger.error("Unable to load test configuration", ex);
         }
     }
 
     @Listener
     public void clientConnected(final ServerSideConnectionEvent.Join event) {
-        final Component motd = this.config.getMotd();
+        final Component motd = this.config.get().getMotd();
         if (motd == null || motd == Component.empty()) {
             return;
         }

@@ -25,10 +25,11 @@
 package org.spongepowered.common.applaunch.config.inheritable;
 
 import com.google.common.collect.ImmutableSet;
-import ninja.leaping.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.common.applaunch.config.core.FileMovingConfigurationTransformation;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
+import org.spongepowered.configurate.transformation.NodePath;
 
 import java.util.Set;
 
@@ -36,36 +37,32 @@ public final class GlobalConfig extends BaseConfig {
 
     public static final String FILE_NAME = "global.conf";
 
-    private static Object[] p(final Object... els) {
-        return els;
-    }
-
     // Paths moved to sponge.conf
-    private static final Set<Object[]> MIGRATE_SPONGE_PATHS = ImmutableSet.of(
-            p("world", "auto-player-save-interval"),
-            p("world", "leaf-decay"),
-            p("world", "game-profile-query-task-interval"),
-            p("world", "invalid-lookup-uuids"),
-            p("general"),
-            p("sql"),
-            p("commands"),
-            p("permission"),
-            p("modules"),
-            p("ip-sets"),
-            p("bungeecord"),
-            p("exploits"),
-            p("optimizations"),
-            p("cause-tracker"),
-            p("teleport-helper"),
-            p("broken-mods"),
-            p("service-registration"),
-            p("debug"),
-            p("timings")
+    private static final Set<NodePath> MIGRATE_SPONGE_PATHS = ImmutableSet.of(
+            NodePath.path("world", "auto-player-save-interval"),
+            NodePath.path("world", "leaf-decay"),
+            NodePath.path("world", "game-profile-query-task-interval"),
+            NodePath.path("world", "invalid-lookup-uuids"),
+            NodePath.path("general"),
+            NodePath.path("sql"),
+            NodePath.path("commands"),
+            NodePath.path("permission"),
+            NodePath.path("modules"),
+            NodePath.path("ip-sets"),
+            NodePath.path("bungeecord"),
+            NodePath.path("exploits"),
+            NodePath.path("optimizations"),
+            NodePath.path("cause-tracker"),
+            NodePath.path("teleport-helper"),
+            NodePath.path("broken-mods"),
+            NodePath.path("service-registration"),
+            NodePath.path("debug"),
+            NodePath.path("timings")
     );
 
     // Paths moved to metrics.conf
-    private static final Set<Object[]> MIGRATE_METRICS_PATHS = ImmutableSet.of(
-            p("metrics")
+    private static final Set<NodePath> MIGRATE_METRICS_PATHS = ImmutableSet.of(
+            NodePath.path("metrics")
     );
 
     public GlobalConfig() {

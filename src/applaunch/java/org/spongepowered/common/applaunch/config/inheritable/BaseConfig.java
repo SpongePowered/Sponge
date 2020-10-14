@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.applaunch.config.inheritable;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.ScopedConfigurationNode;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.configurate.transformation.NodePath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,22 +38,24 @@ public abstract class BaseConfig implements Config {
 
     @Setting
     protected WorldCategory world = new WorldCategory();
-    @Setting(value = "player-block-tracker")
+    @Setting
     private PlayerBlockTracker playerBlockTracker = new PlayerBlockTracker();
-    @Setting(value = "entity")
+    @Setting
     private EntityCategory entity = new EntityCategory();
-    @Setting(value = "entity-activation-range")
+    @Setting("entity-activation-range")
     private EntityActivationRangeCategory entityActivationRange = new EntityActivationRangeCategory();
-    @Setting(value = "entity-collisions")
+    @Setting("entity-collisions")
     private EntityCollisionCategory entityCollisionCategory = new EntityCollisionCategory();
     @Setting
     private LoggingCategory logging = new LoggingCategory();
-    @Setting(value = "spawner", comment = "Used to control spawn limits around players. \n"
-                                        + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
+    @Setting("spawner")
+    @Comment("Used to control spawn limits around players. \n"
+            + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
     private SpawnerCategory spawner = new SpawnerCategory();
-    @Setting(value = "tileentity-activation")
+    @Setting("tileentity-activation")
     private BlockEntityActivationCategory blockEntityActivationCategory = new BlockEntityActivationCategory();
-    @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")
+    @Setting("world-generation-modifiers")
+    @Comment("World Generation Modifiers to apply to the world")
     private final List<String> worldModifiers = new ArrayList<>();
     @Setting("movement-checks")
     private MovementChecksCategory movementChecks = new MovementChecksCategory();
@@ -106,8 +111,8 @@ public abstract class BaseConfig implements Config {
 
     protected ConfigurationTransformation buildOneToTwo() {
         return ConfigurationTransformation.builder()
-                .addAction(new Object[] { "world", "portal-agents" }, (path, value) -> {
-                    value.setValue(null);
+                .addAction(NodePath.path("world", "portal-agents"), (path, value) -> {
+                    value.set(null);
                     return null;
                 })
                 .build();
@@ -115,7 +120,7 @@ public abstract class BaseConfig implements Config {
 
     protected ConfigurationTransformation buildInitialToOne() {
         return ConfigurationTransformation.builder()
-                .addAction(new Object[] {"sponge"}, (path, value) -> new Object[0])
+                .addAction(NodePath.path("sponge"), (path, value) -> new Object[0])
                 .build();
     }
 }

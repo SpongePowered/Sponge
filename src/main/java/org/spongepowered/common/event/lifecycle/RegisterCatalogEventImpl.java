@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.lifecycle;
 
 import com.google.common.base.Preconditions;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;

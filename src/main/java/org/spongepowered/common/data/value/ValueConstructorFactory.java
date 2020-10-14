@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.value;
 
+import io.leangen.geantyref.GenericTypeReflector;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.MapValue;
@@ -40,8 +41,8 @@ import java.util.Set;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class ValueConstructorFactory {
 
-    public static <V extends Value<E>, E> ValueConstructor<V, E> getConstructor(SpongeKey<V, E> key) {
-        final Class<?> valueType = key.getValueToken().getRawType();
+    public static <V extends Value<E>, E> ValueConstructor<V, E> getConstructor(final SpongeKey<V, E> key) {
+        final Class<?> valueType = GenericTypeReflector.erase(key.getValueType());
         ValueConstructor<V, E> valueConstructor;
         if (ListValue.class.isAssignableFrom(valueType)) {
             valueConstructor = new SimpleValueConstructor(key,
@@ -65,7 +66,7 @@ public final class ValueConstructorFactory {
             valueConstructor = new SimpleValueConstructor(key,
                     (key1, value) -> new MutableSpongeValue((Key<? extends Value>) key1, value),
                     (key1, value) -> new ImmutableSpongeValue((Key<? extends Value>) key1, value));
-            final Class<?> elementType = key.getElementToken().getRawType();
+            final Class<?> elementType = GenericTypeReflector.erase(key.getElementType());
             if (Enum.class.isAssignableFrom(elementType)) {
                 valueConstructor = new CachedEnumValueConstructor(valueConstructor, elementType);
             } else if (elementType == Boolean.class) {

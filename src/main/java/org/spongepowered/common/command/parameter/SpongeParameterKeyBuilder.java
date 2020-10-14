@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.command.parameter;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.parameter.Parameter;
 
@@ -32,7 +32,12 @@ public class SpongeParameterKeyBuilder implements Parameter.Key.Builder {
 
     @Override
     public <T> Parameter.@NonNull Key<T> build(@NonNull final String key, @NonNull final TypeToken<T> typeToken) {
-        return new SpongeParameterKey<>(key, typeToken);
+        return new SpongeParameterKey<>(key, typeToken.getType());
+    }
+
+    @Override
+    public <T> Parameter.@NonNull Key<T> build(@NonNull final String key, @NonNull final Class<T> type) {
+        return new SpongeParameterKey<>(key, type);
     }
 
     @Override

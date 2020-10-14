@@ -24,39 +24,38 @@
  */
 package org.spongepowered.common.config;
 
-import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * Root for sponge configurations.
+ * Root for plugin configurations.
  */
 public class PluginConfigRoot implements ConfigRoot {
-    private final ObjectMapperFactory mapperFactory;
+    private final TypeSerializerCollection serializers;
     private final String pluginName;
     private final Path baseDir;
 
-    PluginConfigRoot(ObjectMapperFactory mapperFactory, String pluginName, Path baseDir) {
-        this.mapperFactory = mapperFactory;
+    PluginConfigRoot(final TypeSerializerCollection serializers, final String pluginName, final Path baseDir) {
+        this.serializers = serializers;
         this.pluginName = pluginName;
         this.baseDir = baseDir;
     }
 
     @Override
     public Path getConfigPath() {
-        Path configFile = this.baseDir.resolve(this.pluginName + ".conf");
+        final Path configFile = this.baseDir.resolve(this.pluginName + ".conf");
         try {
             Files.createDirectories(this.baseDir);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             SpongeCommon.getLogger().error("Failed to create plugin dir for {} at {}", this.pluginName, this.baseDir, e);
         }
         return configFile;
@@ -64,11 +63,14 @@ public class PluginConfigRoot implements ConfigRoot {
 
     @Override
     public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
+        return this.getConfig(PluginConfigManager.getOptions(this.serializers));
+    }
+
+    @Override
+    public ConfigurationLoader<CommentedConfigurationNode> getConfig(final ConfigurationOptions options) {
         return HoconConfigurationLoader.builder()
-                .setPath(this.getConfigPath())
-                .setDefaultOptions(ConfigurationOptions.defaults()
-                                           .withObjectMapperFactory(this.mapperFactory)
-                                           .withSerializers(coll -> SpongeAdventure.CONFIGURATE.addSerializersTo(coll)))
+                .path(this.getConfigPath())
+                .defaultOptions(options)
                 .build();
     }
 

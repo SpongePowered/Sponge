@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.command.registrar;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -49,7 +49,7 @@ import java.util.Optional;
  */
 public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command.Raw> {
 
-    private static final TypeToken<Command.Raw> COMMAND_TYPE = TypeToken.of(Command.Raw.class);
+    private static final TypeToken<Command.Raw> COMMAND_TYPE = TypeToken.get(Command.Raw.class);
     private static final ResourceKey CATALOG_KEY = ResourceKey.sponge("raw");
     public static final SpongeRawCommandRegistrar INSTANCE = new SpongeRawCommandRegistrar();
 

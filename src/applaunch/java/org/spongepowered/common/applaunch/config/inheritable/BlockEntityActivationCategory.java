@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.applaunch.config.inheritable;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,13 +35,17 @@ import java.util.Map;
 @ConfigSerializable
 public final class BlockEntityActivationCategory {
 
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered block entities will be added to this config with default settings.")
+    @Setting
+    @Comment("If 'true', newly discovered block entities will be added to this config with default settings.")
     private boolean autoPopulate = false;
-    @Setting(value = "default-block-range", comment = "Default activation block range used for all block entities unless overridden.")
+    @Setting
+    @Comment("Default activation block range used for all block entities unless overridden.")
     private int defaultBlockRange = 64;
-    @Setting(value = "default-tick-rate", comment = "Default tick rate used for all block entities unless overridden.")
+    @Setting
+    @Comment("Default tick rate used for all block entities unless overridden.")
     private int defaultTickRate = 1;
-    @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
+    @Setting("mods")
+    @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
     private Map<String, BlockEntityActivationModCategory> modList = new HashMap<>();
 
     public BlockEntityActivationCategory() {

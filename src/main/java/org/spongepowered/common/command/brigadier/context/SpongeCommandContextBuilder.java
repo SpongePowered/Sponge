@@ -26,7 +26,6 @@ package org.spongepowered.common.command.brigadier.context;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.RedirectModifier;
@@ -227,7 +226,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         }
 
         if (addToSpongeMap) {
-            final Parameter.Key<T> objectKey = new SpongeParameterKey<>(name, TypeToken.of((Class<T>) argument.getResult().getClass()));
+            final Parameter.Key<T> objectKey = new SpongeParameterKey<>(name, argument.getResult().getClass());
             this.addToArgumentMap(objectKey, argument.getResult());
         }
         super.withArgument(name, argument); // for getArguments and any mods that use this.

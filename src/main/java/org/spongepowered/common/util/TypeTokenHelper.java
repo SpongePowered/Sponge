@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -39,19 +40,56 @@ import javax.annotation.Nullable;
 @SuppressWarnings({"unchecked", "rawtypes", "WeakerAccess"})
 public final class TypeTokenHelper {
 
-    public static Class<?>  getGenericParam(TypeToken<?> token, int typeIndex) {
+    public static Class<?> getGenericParam(final TypeToken<?> token, final int typeIndex) {
         return (Class) ((ParameterizedType) token.getType()).getActualTypeArguments()[typeIndex];
     }
 
-    public static boolean isAssignable(TypeToken<?> type, TypeToken<?> toType) {
+    /**
+     * Throw an exception if the passed type is raw
+     *
+     * @param input input type
+     * @return type, passed through
+     */
+    public static Type requireCompleteGenerics(final Type input) {
+        if (GenericTypeReflector.isMissingTypeParameters(input)) {
+            throw new IllegalArgumentException("Provided type " + input + " is a raw type, which is not accepted.");
+        }
+        return input;
+    }
+
+    /**
+     * Given a known declared subtype, determine the value of a specific type parameter in a supertype.
+     *
+     * @param sub subtype
+     * @param superType superclass to resolve
+     * @param idx Parameter index to resolve
+     * @return type argument
+     */
+    public static Type typeArgumentFromSupertype(final Type sub, final Class<?> superType, final int idx) {
+        final Type calculatedSuper = GenericTypeReflector.getExactSuperType(sub, superType);
+        if (!(calculatedSuper instanceof ParameterizedType)) {
+            throw new IllegalArgumentException("Calculated supertype " + calculatedSuper + " of original type " + sub + " is not parameterized");
+        }
+        final Type[] parameters = ((ParameterizedType) calculatedSuper).getActualTypeArguments();
+        if (parameters.length < idx) {
+            throw new IllegalArgumentException("Expected calculated supertype " + calculatedSuper + " of type " + sub + " to have at least " + idx
+                                                       + "parameter(s), but got " + parameters.length);
+        }
+        return parameters[idx];
+    }
+
+    // Type comparison functions
+    // Unlike normal GenericTypeReflector#isSupertypeOf, these functions treat generic parameters as covariant.
+
+    public static boolean isAssignable(final TypeToken<?> type, final TypeToken<?> toType) {
         return isAssignable(type.getType(), toType.getType());
     }
 
-    public static boolean isAssignable(Type type, Type toType) {
+    public static boolean isAssignable(final Type type, final Type toType) {
         return isAssignable(type, toType, null, 0);
     }
 
-    private static boolean isAssignable(Type type, Type toType, @Nullable Type parent, int index) {
+    private static boolean isAssignable(final Type type, final Type toType, final @Nullable Type parent, final int index) {
         if (type.equals(toType)) {
             return true;
         }
@@ -136,7 +174,7 @@ public final class TypeTokenHelper {
                 types = otherRaw.getTypeParameters();
             } else {
                 // Get the type parameters based on the super class
-                final ParameterizedType other = (ParameterizedType) TypeToken.of(type).getSupertype((Class) toRaw).getType();
+                final ParameterizedType other = (ParameterizedType) GenericTypeReflector.getExactSuperType(type, toRaw);
                 types = other.getActualTypeArguments();
             }
             if (types.length != toTypes.length) {
@@ -168,7 +206,7 @@ public final class TypeTokenHelper {
                 types = other.getActualTypeArguments();
             } else {
                 // Get the type parameters based on the super class
-                other = (ParameterizedType) TypeToken.of(other).getSupertype((Class) toRaw).getType();
+                other = (ParameterizedType) GenericTypeReflector.getExactSuperType(other, toRaw);
                 types = other.getActualTypeArguments();
             }
             final Type[] toTypes = toType.getActualTypeArguments();
@@ -200,16 +238,16 @@ public final class TypeTokenHelper {
         throw new IllegalStateException("Unsupported type: " + type);
     }
 
-    private static boolean isAssignable(Type type, TypeVariable toType, @Nullable Type parent, int index) {
+    private static boolean isAssignable(final Type type, final TypeVariable toType, final @Nullable Type parent, final int index) {
         return allAssignable(type, toType.getBounds());
     }
 
-    private static boolean isAssignable(Type type, WildcardType toType, @Nullable Type parent, int index) {
+    private static boolean isAssignable(final Type type, final WildcardType toType, final @Nullable Type parent, final int index) {
         return allWildcardAssignable(type, toType.getUpperBounds(), parent, index) &&
                 allSupertypes(type, toType.getLowerBounds());
     }
 
-    private static boolean isAssignable(Type type, GenericArrayType toType, @Nullable Type parent, int index) {
+    private static boolean isAssignable(final Type type, final GenericArrayType toType, final @Nullable Type parent, final int index) {
         if (type instanceof Class) {
             final Class<?> other = (Class<?>) type;
             return other.isArray() && isAssignable(other.getComponentType(), toType.getGenericComponentType(), parent, index);

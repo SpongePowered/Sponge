@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
@@ -70,12 +71,16 @@ public class HoconDataFormat extends SpongeCatalogType implements StringDataForm
         return HoconDataFormat.readFrom(() -> new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8)));
     }
 
-    private static DataContainer readFrom(final Callable<BufferedReader> source) throws IOException {
+    private static DataContainer readFrom(final Callable<BufferedReader> source) throws InvalidDataFormatException {
         final HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
-                .setSource(source)
+                .source(source)
                 .build();
-        final CommentedConfigurationNode node = loader.load();
-        return ConfigurateTranslator.instance().translate(node);
+        try {
+            final CommentedConfigurationNode node = loader.load();
+            return ConfigurateTranslator.instance().translate(node);
+        } catch (final ConfigurateException ex) {
+            throw new InvalidDataFormatException(ex);
+        }
     }
 
     @Override
@@ -97,11 +102,15 @@ public class HoconDataFormat extends SpongeCatalogType implements StringDataForm
 
     private static void writeTo(final Callable<BufferedWriter> sink, final DataView data) throws IOException {
         final HoconConfigurationLoader loader = HoconConfigurationLoader.builder()
-                .setSink(sink)
+                .sink(sink)
                 .build();
-        final ConfigurationNode node = loader.createEmptyNode();
+        final ConfigurationNode node = loader.createNode();
         ConfigurateTranslator.instance().translateDataToNode(node, data);
-        loader.save(node);
+        try {
+            loader.save(node);
+        } catch (final ConfigurateException ex) {
+            throw new IOException(ex);
+        }
     }
 
     private static BufferedReader createBufferedReader(final Reader reader) {

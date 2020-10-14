@@ -25,7 +25,7 @@
 package org.spongepowered.common.service.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -86,7 +86,7 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
     protected <T> ProvideServiceEventImpl<T> createEvent(PluginContainer container, Service<T> service) {
         return new ProvideEngineServiceEventImpl<>(Cause.of(EventContext.empty(), this.getGame()),
                 this.getGame(),
-                TypeToken.of(service.getServiceClass()),
+                TypeToken.get(service.getServiceClass()),
                 this.server
         );
     }

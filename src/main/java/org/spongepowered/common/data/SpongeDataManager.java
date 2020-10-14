@@ -26,14 +26,13 @@ package org.spongepowered.common.data;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixerBuilder;
+import io.leangen.geantyref.TypeToken;
 import net.minecraft.util.Util;
 import net.minecraft.util.registry.Registry;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializerCollection;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -59,8 +58,6 @@ import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.config.CatalogTypeTypeSerializer;
-import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotDataBuilder;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.datastore.DataStoreRegistry;
@@ -92,17 +89,6 @@ public final class SpongeDataManager implements DataManager {
     private final DataStoreRegistry dataStoreRegistry = new DataStoreRegistry();
     private final DataProviderRegistry dataProviderRegistry = new DataProviderRegistry();
     private final Map<ResourceKey, SpongeDataRegistration> registrations = new HashMap<>();
-
-    static {
-        TypeSerializerCollection.defaults().register(
-                // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
-                // See https://github.com/SpongePowered/SpongeCommon/issues/1348
-                x -> DataSerializableTypeSerializer.TYPE.isSupertypeOf(x)
-                        && !CatalogTypeTypeSerializer.TYPE.isSupertypeOf(x),
-                DataSerializableTypeSerializer.INSTANCE
-        );
-    }
-
 
     public static final DataFixer spongeDataFixer = addFixers(new DataFixerBuilder(Constants.Sponge.SPONGE_DATA_VERSION)).build(Util.getServerExecutor());
 

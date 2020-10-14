@@ -25,7 +25,7 @@
 package org.spongepowered.test.command;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
@@ -116,8 +116,8 @@ public final class CommandTest {
                 "checkuser"
         );
 
-        final Parameter.Key<String> testKey = Parameter.key("testKey", TypeToken.of(String.class));
-        final Parameter.Key<Component> requiredKey = Parameter.key("requiredKey", TypeToken.of(Component.class));
+        final Parameter.Key<String> testKey = Parameter.key("testKey", String.class);
+        final Parameter.Key<Component> requiredKey = Parameter.key("requiredKey", Component.class);
         event.register(
                 this.plugin,
                 Command.builder()
@@ -169,7 +169,7 @@ public final class CommandTest {
                 "testselector"
         );
 
-        final Parameter.Key<ServerLocation> serverLocationKey = Parameter.key("serverLocation", TypeToken.of(ServerLocation.class));
+        final Parameter.Key<ServerLocation> serverLocationKey = Parameter.key("serverLocation", ServerLocation.class);
         final Parameter.Value<ServerLocation> serverLocationParmeter = Parameter.location().setKey(serverLocationKey).build();
         event.register(
                 this.plugin,
@@ -202,8 +202,8 @@ public final class CommandTest {
                 "testcatalogcompletion"
         );
 
-        final Parameter.Key<TestEnum> enumParameterKey = Parameter.key("enum", TypeToken.of(TestEnum.class));
-        final Parameter.Key<String> stringKey = Parameter.key("stringKey", TypeToken.of(String.class));
+        final Parameter.Key<TestEnum> enumParameterKey = Parameter.key("enum", TestEnum.class);
+        final Parameter.Key<String> stringKey = Parameter.key("stringKey", String.class);
         event.register(
                 this.plugin,
                 Command.builder()
@@ -218,7 +218,7 @@ public final class CommandTest {
         );
 
 
-        final Parameter.Key<ResourceKey> resourceKeyKey = Parameter.key("rk", TypeToken.of(ResourceKey.class));
+        final Parameter.Key<ResourceKey> resourceKeyKey = Parameter.key("rk", ResourceKey.class);
         event.register(
                 this.plugin,
                 Command.builder()
@@ -231,7 +231,7 @@ public final class CommandTest {
                 "testrk"
         );
 
-        final Parameter.Key<User> userKey = Parameter.key("user", TypeToken.of(User.class));
+        final Parameter.Key<User> userKey = Parameter.key("user", User.class);
         event.register(
                 this.plugin,
                 Command.builder()
@@ -244,7 +244,7 @@ public final class CommandTest {
                 "getuser"
                 );
 
-        final Parameter.Key<String> stringLiteralKey = Parameter.key("literal", TypeToken.of(String.class));
+        final Parameter.Key<String> stringLiteralKey = Parameter.key("literal", String.class);
         event.register(
                 this.plugin,
                 Command.builder()

@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.inheritable;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,18 +34,20 @@ import java.util.List;
 @ConfigSerializable
 public final class PlayerBlockTracker {
 
-    @Setting(value = "enabled", comment = "If 'true', adds player tracking support for block positions. \n"
-                                        + "Note: This should only be disabled if you do not care who caused a block to change.")
+    @Setting("enabled")
+    @Comment("If 'true', adds player tracking support for block positions. \n"
+             + "Note: This should only be disabled if you do not care who caused a block to change.")
     private boolean enabled = true;
 
-    @Setting(value = "block-blacklist", comment = "Block IDs that will be blacklisted for player block placement tracking.")
+    @Setting("block-blacklist")
+    @Comment("Block IDs that will be blacklisted for player block placement tracking.")
     private List<String> blockBlacklist = new ArrayList<>();
 
     public boolean isEnabled() {
         return this.enabled;
     }
 
-    public void setEnabled(boolean flag) {
+    public void setEnabled(final boolean flag) {
         this.enabled = flag;
     }
 

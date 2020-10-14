@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.inheritable;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,11 +34,12 @@ import java.util.Map;
 @ConfigSerializable
 public final class EntityActivationModCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', entity activation rules for this mod will be ignored and always tick.")
+    @Setting("enabled")
+    @Comment("If 'false', entity activation rules for this mod will be ignored and always tick.")
     private boolean isEnabled = true;
-    @Setting(value = "defaults")
+    @Setting("defaults")
     private Map<String, Integer> defaultRanges = new HashMap<>();
-    @Setting(value = "entities")
+    @Setting("entities")
     private Map<String, Integer> entityList = new HashMap<>();
 
     public boolean isEnabled() {

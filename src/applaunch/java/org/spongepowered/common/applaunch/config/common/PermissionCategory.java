@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public class PermissionCategory {
 
-    @Setting(value = "forge-permissions-handler", comment = "If 'true', Sponge plugins will be used to handle permissions rather "
+    @Setting(value = "forge-permissions-handler")
+    @Comment("If 'true', Sponge plugins will be used to handle permissions rather "
             + "than any Forge mod")
     private boolean enableHandler = false;
 

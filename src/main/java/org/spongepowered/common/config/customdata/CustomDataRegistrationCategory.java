@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.config.customdata;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.Collection;
 import java.util.Set;
@@ -47,16 +48,17 @@ public class CustomDataRegistrationCategory {
      *
      * This should be populated after the default registrations are done.
      */
-    @Setting(value = "registered-data", comment = "An auto generated list, by Sponge, to provide a list of \n"
-                                                + "registered custom data manipulators by plugins. Since \n"
-                                                + "the list is generated AFTER the game starts, modifying \n"
-                                                + "this list will not affect Sponge's system in any way. \n"
-                                                + "However, it is advisable to view what registered datas \n"
-                                                + "exist on a server instance, such that when Sponge completes \n"
-                                                + "startup, it will be verified that all existing registrations \n"
-                                                + "are accounted for. A warning will be emitted for any existing \n"
-                                                + "registrations that were not registered, and moved to the \n"
-                                                + "'failed-data-list'.")
+    @Setting(value = "registered-data")
+    @Comment("An auto generated list, by Sponge, to provide a list of \n"
+                 + "registered custom data manipulators by plugins. Since \n"
+                 + "the list is generated AFTER the game starts, modifying \n"
+                 + "this list will not affect Sponge's system in any way. \n"
+                 + "However, it is advisable to view what registered datas \n"
+                 + "exist on a server instance, such that when Sponge completes \n"
+                 + "startup, it will be verified that all existing registrations \n"
+                 + "are accounted for. A warning will be emitted for any existing \n"
+                 + "registrations that were not registered, and moved to the \n"
+                 + "'failed-data-list'.")
     private Set<String> registeredDataIds = new ConcurrentSkipListSet<>();
 
     /**
@@ -64,30 +66,33 @@ public class CustomDataRegistrationCategory {
      * read from file, except after startup, to specify which id's can
      * be "saved".
      */
-    @Setting(value = "failed-data-list", comment = "An auto generated list, by Sponge, to discover and list \n"
-                                                 + "all failed custom data deserializations at runtime due \n"
-                                                 + "to a lack of the registrations being made by a plugin. \n"
-                                                 + "Not to be confused by failed deserialization due to bad data. \n"
-                                                 + "Modifying the list will result in no effect as Sponge auto \n"
-                                                 + "generates this list. This is merely for user configuration.")
+    @Setting(value = "failed-data-list")
+    @Comment("An auto generated list, by Sponge, to discover and list \n"
+             + "all failed custom data deserializations at runtime due \n"
+             + "to a lack of the registrations being made by a plugin. \n"
+             + "Not to be confused by failed deserialization due to bad data. \n"
+             + "Modifying the list will result in no effect as Sponge auto \n"
+             + "generates this list. This is merely for user configuration.")
     private Set<String> discoveredFailedDatas = new ConcurrentSkipListSet<>();
 
     /**
      * This is a configurable list of id's that are to be "purged" on
      * discovery.
      */
-    @Setting(value = "data-to-purge", comment = "A configurable list of registration ids that are to be removed \n"
-                                              + "when discovered for deserialization. This can be controlled by \n"
-                                              + "commands in sponge. It is adviseable to refer to the lists made \n"
-                                              + "available through 'failed-data-list', as using any id's from \n"
-                                              + "'registered-data' will result in custom data being deleted at \n"
-                                              + "every load.")
+    @Setting(value = "data-to-purge")
+    @Comment("A configurable list of registration ids that are to be removed \n"
+                 + "when discovered for deserialization. This can be controlled by \n"
+                 + "commands in sponge. It is adviseable to refer to the lists made \n"
+                 + "available through 'failed-data-list', as using any id's from \n"
+                 + "'registered-data' will result in custom data being deleted at \n"
+                 + "every load.")
     private Set<String> purgeDatas = new ConcurrentSkipListSet<>();
 
-    @Setting(value = "print-on-discovery", comment = "In the cases where there is already previously discovered data \n"
-                                                   + "we don't want to spam the log on each discovery in certain \n"
-                                                   + "contexts. If it is required, we still can emit the log warning \n"
-                                                   + "when necessary.")
+    @Setting(value = "print-on-discovery")
+    @Comment("In the cases where there is already previously discovered data \n"
+             + "we don't want to spam the log on each discovery in certain \n"
+             + "contexts. If it is required, we still can emit the log warning \n"
+             + "when necessary.")
     private boolean printFailedDataOnDiscovery = false;
 
 

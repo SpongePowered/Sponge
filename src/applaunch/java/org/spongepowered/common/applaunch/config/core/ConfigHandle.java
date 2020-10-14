@@ -26,16 +26,17 @@ package org.spongepowered.common.applaunch.config.core;
 
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMapper;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import io.leangen.geantyref.TypeToken;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -74,13 +75,13 @@ public class ConfigHandle<T extends Config> {
      * @implNote Default save suppression is {@code true}.
      * @param suppressed whether saves should be suppressed
      */
-    public static void setSaveSuppressed(boolean suppressed) {
+    public static void setSaveSuppressed(final boolean suppressed) {
         ConfigHandle.saveSuppressed = suppressed;
         if (!suppressed && !ConfigHandle.saveQueue.isEmpty()) {
             for (final Iterator<ConfigHandle<?>> it = ConfigHandle.saveQueue.iterator(); it.hasNext();) {
                 try {
                     it.next().doSave();
-                } catch (IOException | ObjectMappingException ex) {
+                } catch (final ConfigurateException ex) {
                     LOGGER.error("Unable to save a Sponge configuration!", ex);
                 }
                 it.remove();
@@ -88,27 +89,34 @@ public class ConfigHandle<T extends Config> {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private static <T> ObjectMapper.Mutable<T> mutableMapper(final T instance) {
+        try {
+            final ObjectMapper<?> mapper = SpongeConfigs.OBJECT_MAPPERS.get(instance.getClass());
+            if (mapper instanceof ObjectMapper.Mutable<?>) {
+                return (ObjectMapper.Mutable<T>) mapper;
+            }
+        } catch (final SerializationException ex) {
+            throw new AssertionError(ex);
+        }
+        // object mapper classes are constant from compile onwards, this failure will always happen.
+        throw new AssertionError("Object mapper for " + instance + " was not mutable");
+    }
+
     protected final @Nullable ConfigurationLoader<? extends CommentedConfigurationNode> loader;
-    protected final ObjectMapper<T>.BoundInstance mapper;
+    protected final ObjectMapper.Mutable<T> mapper;
+    protected final T instance;
     protected @MonotonicNonNull CommentedConfigurationNode node;
 
     ConfigHandle(final T instance) {
-        try {
-            this.mapper = ObjectMapper.forObject(instance);
-        } catch (final ObjectMappingException ex) {
-            // object mapper classes are constant from compile onwards, this failure will always happen.
-            throw new AssertionError(ex);
-        }
+        this.mapper = mutableMapper(instance);
+        this.instance = instance;
         this.loader = null;
     }
 
     ConfigHandle(final T instance, final @Nullable ConfigurationLoader<? extends CommentedConfigurationNode> loader) {
-        try {
-            this.mapper = ObjectMapper.forObject(instance);
-        } catch (ObjectMappingException ex) {
-            // object mapper classes are constant from compile onwards, this failure will always happen.
-            throw new AssertionError(ex);
-        }
+        this.mapper = mutableMapper(instance);
+        this.instance = instance;
         this.loader = loader;
     }
 
@@ -124,11 +132,11 @@ public class ConfigHandle<T extends Config> {
     }
 
     public T get() {
-        return this.mapper.getInstance();
+        return this.instance;
     }
 
     public CompletableFuture<T> updateAndSave(final UnaryOperator<T> updater) {
-        final T updated = requireNonNull(updater, "updater").apply(this.mapper.getInstance());
+        final T updated = requireNonNull(updater, "updater").apply(this.instance);
         return asyncFailableFuture(() -> {
             // TODO: Force one save at a time
             this.save();
@@ -136,31 +144,31 @@ public class ConfigHandle<T extends Config> {
         }, ForkJoinPool.commonPool());
     }
 
-    void load() throws IOException, ObjectMappingException {
+    void load() throws ConfigurateException {
         if (this.loader == null) { // we are virtual
             return;
         }
 
         this.node = this.loader.load();
         this.doVersionUpdate();
-        this.mapper.populate(this.node);
+        this.mapper.load(this.instance, this.node);
         this.doSave();
     }
 
-    protected final void doVersionUpdate() {
-        final boolean wasEmpty = this.node.isEmpty();
-        final CommentedConfigurationNode versionNode = this.node.getNode(VERSION_PATH);
+    protected final void doVersionUpdate() throws ConfigurateException {
+        final boolean wasEmpty = this.node.empty();
+        final CommentedConfigurationNode versionNode = this.node.node(VERSION_PATH);
         final int existingVersion = versionNode.getInt(-1);
-        this.mapper.getInstance().getTransformation().apply(this.node);
+        this.instance.<CommentedConfigurationNode>getTransformation().apply(this.node);
         final int newVersion = versionNode.getInt(-1);
         if (!wasEmpty && newVersion > existingVersion) {
-            LOGGER.info("Updated {} from version {} to {}", this.mapper.getInstance(), existingVersion, newVersion);
+            LOGGER.info("Updated {} from version {} to {}", this.instance, existingVersion, newVersion);
         }
-        versionNode.setCommentIfAbsent(VERSION_COMMENT);
-        this.node.getNode(VERSION_PATH).setValue(versionNode); // workaround for some weird issue, can remove @configurate 4.0
+        versionNode.commentIfAbsent(VERSION_COMMENT);
+        this.node.node(VERSION_PATH).set(versionNode);
     }
 
-    public void reload() throws IOException, ObjectMappingException {
+    public void reload() throws ConfigurateException {
         // TODO: Something nicer?
         this.load();
     }
@@ -171,52 +179,52 @@ public class ConfigHandle<T extends Config> {
         } else {
             try {
                 doSave();
-            } catch (final IOException | ObjectMappingException ex) {
+            } catch (final ConfigurateException ex) {
                 LOGGER.error("Unable to save configuration to {}", this.loader, ex);
             }
         }
     }
 
-    protected void doSave() throws ObjectMappingException, IOException {
+    protected void doSave() throws ConfigurateException {
         if (this.loader == null) {
             return;
         }
 
         if (this.node == null) {
-            this.node = this.loader.createEmptyNode();
+            this.node = this.loader.createNode();
         }
 
-        this.mapper.serialize(this.node);
+        this.mapper.save(this.instance, this.node);
         this.loader.save(this.node);
     }
 
-    @Nullable
-    private CommentedConfigurationNode getSetting(String key) {
+    private @Nullable CommentedConfigurationNode getSetting(final String key) {
         if (key.equalsIgnoreCase("config-enabled")) {
-            return this.node.getNode(key);
+            return this.node.node(key);
         } else if (!key.contains(".") || key.indexOf('.') == key.length() - 1) {
             return null;
         } else {
-            CommentedConfigurationNode node = this.node;
+            final CommentedConfigurationNode node = this.node;
             final String[] split = key.split("\\.");
-            return node.getNode((Object[]) split);
+            return node.node((Object[]) split);
         }
     }
 
-    public CompletableFuture<CommentedConfigurationNode> updateSetting(String key, Object value) {
+    public CompletableFuture<CommentedConfigurationNode> updateSetting(final String key, final Object value) {
         return asyncFailableFuture(() -> {
-            CommentedConfigurationNode upd = this.getSetting(key);
-            this.mapper.populate(this.node);
+            final CommentedConfigurationNode upd = this.getSetting(key);
+            upd.set(value);
+            this.mapper.load(this.instance, this.node);
             this.save();
             return upd;
         }, ForkJoinPool.commonPool());
     }
 
-    public <V> CompletableFuture<CommentedConfigurationNode> updateSetting(String key, V value, TypeToken<V> token) {
+    public <V> CompletableFuture<CommentedConfigurationNode> updateSetting(final String key, final V value, final TypeToken<V> token) {
         return asyncFailableFuture(() -> {
-            CommentedConfigurationNode upd = this.getSetting(key);
-            upd.setValue(token, value);
-            this.mapper.populate(this.node);
+            final CommentedConfigurationNode upd = this.getSetting(key);
+            upd.set(token, value);
+            this.mapper.load(this.instance, this.node);
             this.save();
             return upd;
         }, ForkJoinPool.commonPool());
@@ -227,7 +235,7 @@ public class ConfigHandle<T extends Config> {
         executor.execute(() -> {
             try {
                 future.complete(action.call());
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 future.completeExceptionally(ex);
             }
         });

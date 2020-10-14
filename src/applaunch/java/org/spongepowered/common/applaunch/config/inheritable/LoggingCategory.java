@@ -24,50 +24,67 @@
  */
 package org.spongepowered.common.applaunch.config.inheritable;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public final class LoggingCategory {
 
-    @Setting(value = "block-break", comment = "Log when blocks are broken")
+    @Setting("block-break")
+    @Comment("Log when blocks are broken")
     private boolean blockBreakLogging = false;
-    @Setting(value = "block-modify", comment = "Log when blocks are modified")
+    @Setting("block-modify")
+    @Comment("Log when blocks are modified")
     private boolean blockModifyLogging = false;
-    @Setting(value = "block-place", comment = "Log when blocks are placed")
+    @Setting("block-place")
+    @Comment("Log when blocks are placed")
     private boolean blockPlaceLogging = false;
-    @Setting(value = "block-populate", comment = "Log when blocks are populated in a chunk")
+    @Setting("block-populate")
+    @Comment("Log when blocks are populated in a chunk")
     private boolean blockPopulateLogging = false;
-    @Setting(value = "block-tracking", comment = "Log when blocks are placed by players and tracked")
+    @Setting("block-tracking")
+    @Comment("Log when blocks are placed by players and tracked")
     private boolean blockTrackLogging = false;
-    @Setting(value = "chunk-load", comment = "Log when chunks are loaded")
+    @Setting("chunk-load")
+    @Comment("Log when chunks are loaded")
     private boolean chunkLoadLogging = false;
-    @Setting(value = "chunk-unload", comment = "Log when chunks are unloaded")
+    @Setting("chunk-unload")
+    @Comment("Log when chunks are unloaded")
     private boolean chunkUnloadLogging = false;
-    @Setting(value = "chunk-gc-queue-unload", comment = "Log when chunks are queued to be unloaded by the chunk garbage collector.")
+    @Setting("chunk-gc-queue-unload")
+    @Comment("Log when chunks are queued to be unloaded by the chunk garbage collector.")
     private boolean chunkGCQueueUnloadLogging = false;
-    @Setting(value = "entity-spawn", comment = "Log when living entities are spawned")
+    @Setting("entity-spawn")
+    @Comment("Log when living entities are spawned")
     private boolean entitySpawnLogging = false;
-    @Setting(value = "entity-despawn", comment = "Log when living entities are despawned")
+    @Setting("entity-despawn")
+    @Comment("Log when living entities are despawned")
     private boolean entityDespawnLogging = false;
-    @Setting(value = "entity-death", comment = "Log when living entities are destroyed")
+    @Setting("entity-death")
+    @Comment("Log when living entities are destroyed")
     private boolean entityDeathLogging = false;
-    @Setting(value = "exploit-itemstack-name-overflow", comment = "Log when server receives exploited packet with itemstack name exceeding string limit.")
+    @Setting("exploit-itemstack-name-overflow")
+    @Comment("Log when server receives exploited packet with itemstack name exceeding string limit.")
     public boolean logExploitItemStackNameOverflow = false;
-    @Setting(value = "log-stacktraces", comment = "Add stack traces to dev logging")
+    @Setting("log-stacktraces")
+    @Comment("Add stack traces to dev logging")
     private boolean logWithStackTraces = false;
-    @Setting(value = "entity-collision-checks", comment = "Whether to log entity collision/count checks")
+    @Setting("entity-collision-checks")
+    @Comment("Whether to log entity collision/count checks")
     private boolean logEntityCollisionChecks = false;
-    @Setting(value = "entity-speed-removal", comment = "Whether to log entity removals due to speed")
+    @Setting("entity-speed-removal")
+    @Comment("Whether to log entity removals due to speed")
     private boolean logEntitySpeedRemoval = false;
-    @Setting(value = "world-auto-save", comment = "Log when a world auto-saves its chunk data. Note: This may be spammy depending on the auto-save-interval configured for world.")
+    @Setting("world-auto-save")
+    @Comment("Log when a world auto-saves its chunk data. Note: This may be spammy depending on the auto-save-interval configured for world.")
     private boolean logWorldAutomaticSaving = false;
 
     public boolean blockBreakLogging() {
         return this.blockBreakLogging;
     }
 
-    public void setBlockBreakLogging(boolean flag) {
+    public void setBlockBreakLogging(final boolean flag) {
         this.blockBreakLogging = flag;
     }
 
@@ -75,7 +92,7 @@ public final class LoggingCategory {
         return this.blockModifyLogging;
     }
 
-    public void setBlockModifyLogging(boolean flag) {
+    public void setBlockModifyLogging(final boolean flag) {
         this.blockModifyLogging = flag;
     }
 
@@ -83,7 +100,7 @@ public final class LoggingCategory {
         return this.blockPlaceLogging;
     }
 
-    public void setBlockPlaceLogging(boolean flag) {
+    public void setBlockPlaceLogging(final boolean flag) {
         this.blockPlaceLogging = flag;
     }
 
@@ -91,7 +108,7 @@ public final class LoggingCategory {
         return this.blockPopulateLogging;
     }
 
-    public void setBlockPopulateLogging(boolean flag) {
+    public void setBlockPopulateLogging(final boolean flag) {
         this.blockPopulateLogging = flag;
     }
 
@@ -99,7 +116,7 @@ public final class LoggingCategory {
         return this.blockTrackLogging;
     }
 
-    public void setBlockTrackLogging(boolean flag) {
+    public void setBlockTrackLogging(final boolean flag) {
         this.blockTrackLogging = flag;
     }
 
@@ -107,7 +124,7 @@ public final class LoggingCategory {
         return this.chunkLoadLogging;
     }
 
-    public void setChunkLoadLogging(boolean flag) {
+    public void setChunkLoadLogging(final boolean flag) {
         this.chunkLoadLogging = flag;
     }
 
@@ -115,11 +132,11 @@ public final class LoggingCategory {
         return this.chunkUnloadLogging;
     }
 
-    public void setChunkUnloadLogging(boolean flag) {
+    public void setChunkUnloadLogging(final boolean flag) {
         this.chunkUnloadLogging = flag;
     }
 
-    public void setChunkGCQueueUnloadLogging(boolean flag) {
+    public void setChunkGCQueueUnloadLogging(final boolean flag) {
         this.chunkGCQueueUnloadLogging = flag;
     }
 
@@ -131,7 +148,7 @@ public final class LoggingCategory {
         return this.entitySpawnLogging;
     }
 
-    public void setEntitySpawnLogging(boolean flag) {
+    public void setEntitySpawnLogging(final boolean flag) {
         this.entitySpawnLogging = flag;
     }
 
@@ -139,7 +156,7 @@ public final class LoggingCategory {
         return this.entityDespawnLogging;
     }
 
-    public void setEntityDespawnLogging(boolean flag) {
+    public void setEntityDespawnLogging(final boolean flag) {
         this.entityDespawnLogging = flag;
     }
 
@@ -147,7 +164,7 @@ public final class LoggingCategory {
         return this.entityDeathLogging;
     }
 
-    public void setEntityDeathLogging(boolean flag) {
+    public void setEntityDeathLogging(final boolean flag) {
         this.entityDeathLogging = flag;
     }
 
@@ -155,7 +172,7 @@ public final class LoggingCategory {
         return this.logWithStackTraces;
     }
 
-    public void setLogWithStackTraces(boolean flag) {
+    public void setLogWithStackTraces(final boolean flag) {
         this.logWithStackTraces = flag;
     }
 
@@ -163,7 +180,7 @@ public final class LoggingCategory {
         return this.logEntityCollisionChecks;
     }
 
-    public void setLogEntityCollisionChecks(boolean flag) {
+    public void setLogEntityCollisionChecks(final boolean flag) {
         this.logEntityCollisionChecks = flag;
     }
 
@@ -171,7 +188,7 @@ public final class LoggingCategory {
         return this.logEntitySpeedRemoval;
     }
 
-    public void setLogEntitySpeedRemoval(boolean flag) {
+    public void setLogEntitySpeedRemoval(final boolean flag) {
         this.logEntitySpeedRemoval = flag;
     }
 

@@ -25,10 +25,11 @@
 package org.spongepowered.common.event;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.configurate.util.Types;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -88,20 +89,25 @@ public final class ListenerChecker {
         this.updateFields(eventClass, false);
     }
 
-    private Class<?> getClassForField(Field field) {
-        String name = field.getName();
+    private Class<?> getClassForField(final Field field) {
+        final String name = field.getName();
 
         final Method[] methods = SpongeEventFactory.class.getMethods();
-        for (Method eventMethod : methods) {
+        for (final Method eventMethod : methods) {
             // Not all fields will directly correspond to an event in SpongeEventFactory.
             // For example, SpongeEventFactory has no method to create a ChangeBlockEvent,
             // (only methods for its subtypes), but ShouldFire.CHANGE_BLOCK_EVENT exists, and is valid
             // Therefore, we check all superinterfaces of each listed event.
-            for (TypeToken<?> eventType: TypeToken.of(eventMethod.getReturnType()).getTypes()) {
-                String eventMethodName = getName(eventType.getRawType());
-                if (name.equals(eventMethodName)) {
-                    return eventType.getRawType();
-                }
+            final Class<?> possibleType = Types.allSuperTypesAndInterfaces(eventMethod.getGenericReturnType())
+                    .map(GenericTypeReflector::erase)
+                    .filter(eventType -> {
+                        final String eventMethodName = getName(eventType);
+                        return name.equals(eventMethodName);
+                    })
+                    .findFirst().orElse(null);
+
+            if (possibleType != null) {
+                return possibleType;
             }
         }
         throw new IllegalStateException(String.format("ShouldFire field %s does not correspond to any SpongeAPI event! Check that the field is written in UPPER_CASE_UNDERSCORE format.", field));
@@ -128,9 +134,13 @@ public final class ListenerChecker {
         // to be set to 'true'. This allows the implementation to check the most-specific flag for its particular event,
         // while ensuring that all plugins listening for an event will recieve it
 
-        Set<Class<? super T>> superTypes = TypeToken.of(eventClass).getTypes().rawTypes().stream().filter(c -> c != eventClass).collect(Collectors.toCollection(ReferenceOpenHashSet::new));
+        @SuppressWarnings("unchecked")
+        final Set<Class<? super T>> superTypes = Types.allSuperTypesAndInterfaces(eventClass)
+                .map(t -> (Class<? super T>) GenericTypeReflector.erase(t))
+                .filter(c -> c != eventClass)
+                .collect(Collectors.toCollection(ReferenceOpenHashSet::new));
 
-        for (Map.Entry<Class<?>, FieldData> entry: this.fieldClassMap.entrySet()) {
+        for (final Map.Entry<Class<?>, FieldData> entry: this.fieldClassMap.entrySet()) {
 
             // We check for two things:
 

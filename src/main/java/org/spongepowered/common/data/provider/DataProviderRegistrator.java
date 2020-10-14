@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.data.provider;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
@@ -45,7 +46,9 @@ import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.copy.CopyHelper;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
+import org.spongepowered.common.util.TypeTokenHelper;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -304,7 +307,7 @@ public class DataProviderRegistrator {
         public DataProvider<?, ?> build(Class<H> target) {
             final MutableRegistrationBase<H, E, R> registration = this;
             return new GenericMutableDataProvider<H, E>(registration.key, target) {
-                final boolean isBooleanKey = registration.key.getElementToken().getRawType() == Boolean.class;
+                final boolean isBooleanKey = registration.key.getElementType() == Boolean.class;
 
                 @Override
                 protected Value<E> constructValue(final H dataHolder, final E element) {
@@ -450,10 +453,10 @@ public class DataProviderRegistrator {
             return (R) this;
         }
 
-        public DataProvider<?, ?> build(Class<H> target) {
+        public DataProvider<?, ?> build(final Class<H> target) {
             final ImmutableRegistrationBase<H, E, R> registration = this;
             return new GenericImmutableDataProvider<H, E>(registration.key, target) {
-                final boolean isBooleanKey = registration.key.getElementToken().getRawType() == Boolean.class;
+                final boolean isBooleanKey = GenericTypeReflector.erase(registration.key.getElementType())== Boolean.class;
 
                 @Override
                 protected Value<E> constructValue(final H dataHolder, final E element) {
@@ -528,7 +531,7 @@ public class DataProviderRegistrator {
     public static class SpongeImmutableDataProviderBuilder<H extends DataHolder, V extends Value<E>, E, R extends ImmutableRegistrationBase<H, E, R>> implements ImmutableDataProviderBuilder<H, V, E> {
 
         private ImmutableRegistrationBase<H, E, R> registration;
-        private TypeToken<H> holder;
+        private Type holder;
 
         @Override
         public <NV extends Value<NE>, NE> ImmutableDataProviderBuilder<H, NV, NE> key(Key<NV> key) {
@@ -537,8 +540,14 @@ public class DataProviderRegistrator {
         }
 
         @Override
-        public  <NH extends H> ImmutableDataProviderBuilder<NH, V, E> dataHolder(TypeToken<NH> holder) {
-            this.holder = (TypeToken) holder;
+        public <NH extends H> ImmutableDataProviderBuilder<NH, V, E> dataHolder(TypeToken<NH> holder) {
+            this.holder = holder.getType();
+            return (SpongeImmutableDataProviderBuilder) this;
+        }
+
+        @Override
+        public <NH extends H> ImmutableDataProviderBuilder<NH, V, E> dataHolder(final Class<NH> holder) {
+            this.holder = TypeTokenHelper.requireCompleteGenerics(holder);
             return (SpongeImmutableDataProviderBuilder) this;
         }
 
@@ -568,14 +577,14 @@ public class DataProviderRegistrator {
 
         @Override
         public DataProvider<? extends Value<E>, E> build() {
-            return this.registration.build((Class) this.holder.getRawType());
+            return this.registration.build((Class) GenericTypeReflector.erase(this.holder));
         }
     }
 
     public static class SpongeMutableDataProviderBuilder<H extends DataHolder.Mutable, V extends Value<E>, E, R extends MutableRegistrationBase<H, E, R>> implements MutableDataProviderBuilder<H, V, E> {
 
         private MutableRegistrationBase<H, E, R> registration;
-        private TypeToken<H> holder;
+        private Type holder;
 
         @Override
         public <NV extends Value<NE>, NE> MutableDataProviderBuilder<H, NV, NE> key(Key<NV> key) {
@@ -584,8 +593,14 @@ public class DataProviderRegistrator {
         }
 
         @Override
-        public <NH extends H> MutableDataProviderBuilder<NH, V, E> dataHolder(TypeToken<NH> holder) {
-            this.holder = (TypeToken) holder;
+        public <NH extends H> MutableDataProviderBuilder<NH, V, E> dataHolder(final TypeToken<NH> holder) {
+            this.holder = holder.getType();
+            return (SpongeMutableDataProviderBuilder) this;
+        }
+
+        @Override
+        public <NH extends H> MutableDataProviderBuilder<NH, V, E> dataHolder(final Class<NH> holder) {
+            this.holder = TypeTokenHelper.requireCompleteGenerics(holder);
             return (SpongeMutableDataProviderBuilder) this;
         }
 
@@ -657,7 +672,7 @@ public class DataProviderRegistrator {
 
         @Override
         public DataProvider<V, E> build() {
-            return this.registration.build((Class) this.holder.getRawType());
+            return this.registration.build((Class) GenericTypeReflector.erase(this.holder));
         }
     }
 

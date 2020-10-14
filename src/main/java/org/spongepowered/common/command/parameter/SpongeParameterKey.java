@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.command.parameter;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.parameter.Parameter;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +38,7 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
     private final static Map<Parameter.Key<?>, SpongeParameterKey<?>> keyCache = new HashMap<>();
 
     private final String key;
-    private final TypeToken<T> typeToken;
+    private final Type type;
 
     @SuppressWarnings("unchecked")
     public static <T> SpongeParameterKey<T> getSpongeKey(final Parameter.@NonNull Key<? super T> key) {
@@ -49,12 +50,13 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
     }
 
     private SpongeParameterKey(final Parameter.@NonNull Key<T> parameterKey) {
-        this(parameterKey.key(), parameterKey.getTypeToken());
+        this.key = parameterKey.key();
+        this.type = parameterKey.getType();
     }
 
-    public SpongeParameterKey(@NonNull final String key, @NonNull final TypeToken<T> typeToken) {
+    public SpongeParameterKey(final @NonNull String key, final @NonNull Type type) {
         this.key = key;
-        this.typeToken = typeToken;
+        this.type = type;
     }
 
     @Override
@@ -65,8 +67,19 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
 
     @Override
     @NonNull
-    public TypeToken<T> getTypeToken() {
-        return this.typeToken;
+    public Type getType() {
+        return this.type;
+    }
+
+    @Override
+    public boolean isInstance(final Object value) {
+        return value != null && GenericTypeReflector.erase(this.type).isInstance(value);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T cast(final Object value) {
+        return (T) value;
     }
 
     @Override
@@ -78,17 +91,17 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
             return false;
         }
         final SpongeParameterKey<?> that = (SpongeParameterKey<?>) o;
-        return this.key.equals(that.key) && this.typeToken.equals(that.typeToken);
+        return this.key.equals(that.key) && this.type.equals(that.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.key, this.typeToken);
+        return Objects.hash(this.key, this.type);
     }
 
     @Override
     public String toString() {
-        return "Key: " + this.key + ", Class " + this.typeToken.getType().getTypeName();
+        return "Key: " + this.key + ", Class " + this.type.getTypeName();
     }
 
 }

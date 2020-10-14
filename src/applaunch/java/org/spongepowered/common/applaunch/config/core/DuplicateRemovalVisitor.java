@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.ConfigurationVisitor;
-import ninja.leaping.configurate.Types;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationVisitor;
+import org.spongepowered.configurate.serialize.Scalars;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -55,7 +55,7 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
     }
 
     private boolean isListElement(final ConfigurationNode node) {
-        return node.getParent() != null && node.getParent().isList();
+        return node.parent() != null && node.parent().isList();
     }
 
     @Override
@@ -65,8 +65,8 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
 
     @Override
     public void enterNode(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
-        if (node.getParent() != null) { // exclude root nodes
-            parent.set(parent.get().getNode(node.getKey()));
+        if (node.parent() != null) { // exclude root nodes
+            parent.set(parent.get().node(node.key()));
         }
     }
 
@@ -76,8 +76,8 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
 
     @Override
     public void enterListNode(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
-        if (!this.isListElement(node) && Objects.equals(node.getValue(), parent.get().getValue())) {
-            node.setValue(null);
+        if (!this.isListElement(node) && Objects.equals(node.raw(), parent.get().raw())) {
+            node.raw(null);
         }
     }
 
@@ -91,17 +91,17 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
         }
 
         // if the node already exists in the parent config, remove it
-        if (Objects.equals(node.getValue(), parentNode.getValue())) {
-            node.setValue(null);
+        if (Objects.equals(node.raw(), parentNode.raw())) {
+            node.raw(null);
             return;
         }
 
         // Fix double bug
-        final Double nodeVal = node.getValue(Types::asDouble);
+        final Double nodeVal = Scalars.DOUBLE.tryDeserialize(node.raw());
         if (nodeVal != null) {
-            final Double parentVal = parentNode.getValue(Types::asDouble);
+            final Double parentVal = Scalars.DOUBLE.tryDeserialize(parentNode.raw());
             if (parentVal == null && nodeVal.doubleValue() == 0 || (parentVal != null && nodeVal.doubleValue() == parentVal.doubleValue())) {
-                node.setValue(null);
+                node.raw(null);
             }
         }
     }
@@ -111,16 +111,16 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
         this.popParent(parent);
 
         // remove empty maps
-        if (node.isEmpty() && !this.isListElement(node)) {
-            node.setValue(null);
+        if (node.empty() && !this.isListElement(node)) {
+            node.raw(null);
         }
     }
 
     @Override
     public void exitListNode(final ConfigurationNode node, final AtomicReference<ConfigurationNode> parent) {
         final ConfigurationNode parentNode = this.popParent(parent);
-        if (parentNode.isEmpty() && node.isEmpty()) {
-            node.setValue(null);
+        if (parentNode.empty() && node.empty()) {
+            node.raw(null);
         }
     }
 
@@ -131,8 +131,8 @@ class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReferen
 
     private ConfigurationNode popParent(final AtomicReference<ConfigurationNode> parentRef) {
         final ConfigurationNode parent = parentRef.get();
-        if (parent.getParent() != null) {
-            parentRef.set(parent.getParent());
+        if (parent.parent() != null) {
+            parentRef.set(parent.parent());
         }
         return parent;
     }

@@ -27,12 +27,13 @@ package org.spongepowered.common.data.persistence;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.ConfigurationVisitor;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import io.leangen.geantyref.TypeToken;
+import org.spongepowered.configurate.BasicConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.ConfigurationVisitor;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -42,7 +43,6 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
@@ -59,9 +59,10 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
 
     private static final ResourceKey KEY = ResourceKey.sponge("configuration_node");
     private static final ConfigurateTranslator INSTANCE = new ConfigurateTranslator();
-    private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.of(ConfigurationNode.class);
+    private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.get(ConfigurationNode.class);
     private static final ConfigurationOptions DEFAULT_OPTS = ConfigurationOptions.defaults()
-            .withNativeTypes(ImmutableSet.of(Map.class,
+            .nativeTypes(ImmutableSet.of(
+                    Map.class,
                     List.class,
                     Double.class,
                     Long.class,
@@ -70,7 +71,7 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
                     String.class
                     )
             )
-            .withSerializers(coll -> SpongeAdventure.CONFIGURATE.addSerializersTo(coll));
+            .serializers(coll -> coll.registerAll(SpongeAdventure.CONFIGURATE.serializers()));
 
     /**
      * Get the instance of this translator.
@@ -106,15 +107,15 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
         Objects.requireNonNull(node, "node");
         Objects.requireNonNull(view, "container");
 
-        final Map<Object, ? extends ConfigurationNode> originalMap = node.getChildrenMap();
+        final Map<Object, ? extends ConfigurationNode> originalMap = node.childrenMap();
         if (originalMap.isEmpty()) {
-            node.setValue(ImmutableMap.of());
+            node.raw(ImmutableMap.of());
         }
 
         // Unvisited hijinks to preserve any comments that may be present
         final Set<Object> unvisitedKeys = new HashSet<>(originalMap.keySet());
         for (final DataQuery key : view.getKeys(false)) {
-            this.valueToNode(node.getNode(key.getParts()), view.get(key).orElse(null));
+            this.valueToNode(node.node(key), view.get(key).orElse(null));
             unvisitedKeys.remove(key.getParts().get(0));
         }
 
@@ -138,27 +139,26 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
         if (value instanceof DataView) {
             this.translateDataToNode(node, (DataView) value);
         } else if (value instanceof Collection<?>) {
-            node.setValue(ImmutableList.of());
+            node.raw(ImmutableList.of());
             for (final Object child : ((Collection<?>) value)) {
                 this.valueToNode(node.appendListNode(), child);
             }
         } else if (value == null) {
-            node.setValue(null);
+            node.raw(null);
         } else {
             final Class<?> vClazz = value.getClass();
-            if (node.getOptions().acceptsType(vClazz)) {
-                node.setValue(value);
+            if (node.options().acceptsType(vClazz)) {
+                node.raw(value);
             } else {
-                final TypeToken<?> token = TypeToken.of(vClazz); // hey let's guess at a type
-                final @Nullable TypeSerializer serial = node.getOptions().getSerializers().get(token);
+                final @Nullable TypeSerializer serial = node.options().serializers().get(vClazz);
                 if (serial != null) {
                     try {
-                        serial.serialize(token, value, node);
-                    } catch (final ObjectMappingException e) {
+                        serial.serialize(vClazz, value, node);
+                    } catch (final SerializationException e) {
                         throw new IllegalArgumentException(e);
                     }
                 } else {
-                    throw new IllegalArgumentException("DataView value type of " + token + " is not supported by the provided ConfigurationNode");
+                    throw new IllegalArgumentException("DataView value type of " + vClazz + " is not supported by the provided ConfigurationNode");
                 }
             }
         }
@@ -166,7 +166,7 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
 
     @Override
     public ConfigurationNode translate(final DataView view) throws InvalidDataException {
-        final ConfigurationNode node = ConfigurationNode.root(ConfigurateTranslator.DEFAULT_OPTS);
+        final BasicConfigurationNode node = BasicConfigurationNode.root(ConfigurateTranslator.DEFAULT_OPTS);
         this.translateDataToNode(node, view);
         return node;
     }
@@ -202,9 +202,9 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
         }
 
         private DataQuery queryFrom(final ConfigurationNode node) {
-            final Object key = node.getKey();
+            final Object key = node.key();
             if (key == null) {
-                throw new IllegalArgumentException("Null keys are not supported in data views (at " + Arrays.toString(node.getPath()) + ")");
+                throw new IllegalArgumentException("Null keys are not supported in data views (at " + node.path() + ")");
             }
             return DataQuery.of(key.toString());
         }
@@ -218,7 +218,7 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
 
         @Override
         public void beginVisit(final ConfigurationNode node, final VisitState state) {
-            if (!node.isEmpty() && !node.isMap()) {
+            if (!node.empty() && !node.isMap()) {
                 throw new IllegalArgumentException("Only mapping nodes can be represented in DataViews");
             }
             state.start = node;
@@ -254,7 +254,7 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
 
         @Override
         public void enterScalarNode(final ConfigurationNode node, final VisitState state) {
-            this.addToFirst(state, node, node.getValue());
+            this.addToFirst(state, node, node.raw());
         }
 
         @Override

@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.inheritable;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,13 +34,16 @@ import java.util.Map;
 @ConfigSerializable
 public final class EntityCollisionCategory {
 
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered entities/blocks will be added to this config with a default value.")
+    @Setting("auto-populate")
+    @Comment("If 'true', newly discovered entities/blocks will be added to this config with a default value.")
     private boolean autoPopulate = false;
-    @Setting(value = "max-entities-within-aabb", comment = "Maximum amount of entities any given entity or block can collide with. This improves \n"
-                                                         + "performance when there are more than 8 entities on top of each other such as a 1x1 \n"
-                                                         + "spawn pen. Set to 0 to disable.")
+    @Setting("max-entities-within-aabb")
+    @Comment("Maximum amount of entities any given entity or block can collide with. This improves \n"
+             + "performance when there are more than 8 entities on top of each other such as a 1x1 \n"
+             + "spawn pen. Set to 0 to disable.")
     private int maxEntitiesWithinAABB = 8;
-    @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
+    @Setting("mods")
+    @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
     private Map<String, CollisionModCategory> modList = new HashMap<>();
 
     public EntityCollisionCategory() {
@@ -59,7 +63,7 @@ public final class EntityCollisionCategory {
         return this.maxEntitiesWithinAABB;
     }
 
-    public void setMaxEntitiesWithinAABB(int maxEntities) {
+    public void setMaxEntitiesWithinAABB(final int maxEntities) {
         this.maxEntitiesWithinAABB = maxEntities;
     }
 }

@@ -29,12 +29,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.applaunch.config.inheritable.GlobalConfig;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
@@ -43,7 +42,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
 
-import javax.annotation.Nullable;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -58,14 +57,24 @@ public final class SpongeCommon {
             Constants.MINECRAFT_PROTOCOL_VERSION
     );
 
-    // Can't @Inject these because they are referenced before everything is initialized
-    @Nullable private static InheritableConfigHandle<GlobalConfig> globalConfigAdapter;
-
     @Inject @Nullable private static SpongeGame game;
 
     @Nullable private static PluginContainer activePlugin;
 
     private SpongeCommon() {
+    }
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            final @Nullable SpongeGame game = SpongeCommon.game;
+            if (game != null) {
+                try {
+                    game.getConfigManager().close();
+                } catch (final IOException e) {
+                    SpongeCommon.getLogger().error("Failed to shut down configuration watch service", e);
+                }
+            }
+        }, "Sponge shutdown thread"));
     }
 
     private static <T> T check(@Nullable T instance) {
@@ -206,4 +215,5 @@ public final class SpongeCommon {
                 return Direction.NONE;
         }
     }
+
 }

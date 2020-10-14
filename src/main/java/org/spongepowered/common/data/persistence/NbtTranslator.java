@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.collect.Lists;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
@@ -60,7 +60,7 @@ import java.util.Map;
 public final class NbtTranslator extends SpongeCatalogType implements DataTranslator<CompoundNBT> {
 
     private static final NbtTranslator instance = new NbtTranslator();
-    private static final TypeToken<CompoundNBT> TOKEN = TypeToken.of(CompoundNBT.class);
+    private static final TypeToken<CompoundNBT> TOKEN = TypeToken.get(CompoundNBT.class);
     public static final String BOOLEAN_IDENTIFIER = "$Boolean";
 
     public static NbtTranslator getInstance() {

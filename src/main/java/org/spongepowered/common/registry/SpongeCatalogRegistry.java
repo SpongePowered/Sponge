@@ -25,7 +25,8 @@
 package org.spongepowered.common.registry;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -493,7 +494,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
     public <C extends CatalogType> C registerCatalog(final TypeToken<C> catalog, final C catalogType) {
         Objects.requireNonNull(catalogType);
 
-        final Registry<C> registry = (Registry<C>) this.registriesByType.get(catalog.getRawType());
+        final Registry<C> registry = (Registry<C>) this.registriesByType.get(GenericTypeReflector.erase(catalog.getType()));
         if (registry == null) {
             throw new UnknownTypeException(String.format("Catalog '%s' with id '%s' has no registry registered!", catalogType.getClass(), catalogType.getKey()));
         }
@@ -511,7 +512,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
     private void callRegisterCatalogEvents(final Cause cause, final Game game, List<Class<? extends CatalogType>> catalogs) {
         for (final Class<? extends CatalogType> dynamicCatalog : catalogs) {
-            final TypeToken<? extends CatalogType> token = TypeToken.of(dynamicCatalog);
+            final TypeToken<? extends CatalogType> token = TypeToken.get(dynamicCatalog);
             game.getEventManager().post(new RegisterCatalogEventImpl<>(cause, game, (TypeToken<CatalogType>) token));
         }
     }

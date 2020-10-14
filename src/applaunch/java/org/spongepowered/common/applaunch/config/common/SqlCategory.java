@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +34,8 @@ import java.util.Map;
 @ConfigSerializable
 public class SqlCategory {
 
-    @Setting(comment = "Aliases for SQL connections, in the format jdbc:protocol://[username[:password]@]host/database")
+    @Setting
+    @Comment("Aliases for SQL connections, in the format jdbc:protocol://[username[:password]@]host/database")
     private Map<String, String> aliases = new HashMap<>();
 
     public Map<String, String> getAliases() {

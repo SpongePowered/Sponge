@@ -25,7 +25,7 @@
 package org.spongepowered.common.service;
 
 import com.google.common.base.Preconditions;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.apache.logging.log4j.Level;

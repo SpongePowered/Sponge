@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.service.game;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -63,7 +63,7 @@ public final class SpongeGameScopedServiceProvider extends SpongeServiceProvider
     protected final <T> ProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service) {
         return new ProvideServiceEventImpl<T>(Cause.of(EventContext.empty(), this.getGame()),
                 this.getGame(),
-                TypeToken.of(service.getServiceClass()));
+                TypeToken.get(service.getServiceClass()));
     }
 
     @Override

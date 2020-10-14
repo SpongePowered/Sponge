@@ -27,26 +27,32 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.EventContextKey;
 
-@SuppressWarnings("UnstableApiUsage")
+import java.lang.reflect.Type;
+
 public final class SpongeEventContextKey<T> implements EventContextKey<T> {
 
     private final ResourceKey key;
-    private final TypeToken<T> allowed;
+    private final Type allowed;
 
-    SpongeEventContextKey(SpongeEventContextKeyBuilder<T> builder) {
+    SpongeEventContextKey(final SpongeEventContextKeyBuilder<T> builder) {
         this.key = builder.key;
         this.allowed = builder.typeClass;
     }
 
-    public SpongeEventContextKey(ResourceKey key, TypeToken<T> allowed) {
+    public SpongeEventContextKey(final ResourceKey key, final TypeToken<T> allowed) {
         this.key = checkNotNull(key, "key");
-        this.allowed = checkNotNull(allowed, "Allowed");
+        this.allowed = checkNotNull(allowed, "allowed").getType();
     }
 
+    public SpongeEventContextKey(final ResourceKey key, final Class<T> allowed) {
+        this.key = checkNotNull(key, "key");
+        this.allowed = checkNotNull(allowed, "allowed");
+    }
 
     @Override
     public ResourceKey getKey() {
@@ -54,9 +60,21 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
     }
 
     @Override
-    public TypeToken<T> getAllowedType() {
+    public Type getAllowedType() {
         return this.allowed;
     }
+
+    @Override
+    public boolean isInstance(final Object value) {
+        return value != null && GenericTypeReflector.erase(this.allowed).isInstance(value);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T cast(final Object value) {
+        return (T) value;
+    }
+
 
     @Override
     public String toString() {

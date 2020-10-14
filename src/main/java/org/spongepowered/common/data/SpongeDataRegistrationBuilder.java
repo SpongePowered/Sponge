@@ -26,7 +26,7 @@ package org.spongepowered.common.data;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
@@ -38,6 +38,7 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,12 +49,12 @@ import java.util.Map;
 public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<DataRegistration, DataRegistration.Builder> implements DataRegistration.Builder{
 
     Multimap<Key, DataProvider> dataProviderMap = HashMultimap.create();
-    Map<TypeToken, DataStore> dataStoreMap = new IdentityHashMap<>();
+    Map<Type, DataStore> dataStoreMap = new HashMap<>();
     List<Key<?>> keys = new ArrayList<>();
 
     @Override
-    public DataRegistration.Builder store(DataStore store) throws DuplicateDataStoreException {
-        for (TypeToken<? extends DataHolder> holderType : store.getSupportedTokens()) {
+    public DataRegistration.Builder store(final DataStore store) throws DuplicateDataStoreException {
+        for (final Type holderType : store.getSupportedTypes()) {
             this.dataStoreMap.put(holderType, store);
         }
         return this;
