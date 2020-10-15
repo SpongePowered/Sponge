@@ -217,7 +217,7 @@ public final class DataTest  {
         this.checkWithData(logState, Keys.AXIS, Axis.Y);
         this.checkWithData(logState, Keys.AXIS, Axis.X);
 
-        this.checkOfferData(sheep, Keys.BABY_TICKS, Ticks.ofWallClockSeconds(1));
+        this.checkOfferData(sheep, Keys.BABY_TICKS, Ticks.ofWallClockSeconds(Sponge.getServer(), 1));
         this.checkOfferData(sheep, Keys.BABY_TICKS, Ticks.zero());
 
         final List<BannerPatternLayer> pattern = Arrays.asList(BannerPatternLayer.of(BannerPatternShapes.BASE, DyeColors.BLACK), BannerPatternLayer.of(BannerPatternShapes.RHOMBUS, DyeColors.ORANGE));
