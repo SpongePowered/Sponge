@@ -330,7 +330,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.reset();
         builder.blockState(state)
-            .world(((WorldProperties) this.worldInfo).getKey())
+            .world((ServerWorld) (Object) this)
             .position(VecHelper.toVector3i(pos));
         final Chunk chunk = this.shadow$getChunkAt(pos);
         if (chunk == null) {

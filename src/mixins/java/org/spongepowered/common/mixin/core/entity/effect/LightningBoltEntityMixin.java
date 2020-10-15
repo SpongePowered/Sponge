@@ -29,6 +29,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -37,7 +38,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -78,12 +78,12 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
             final Transaction<BlockSnapshot> transaction = new Transaction<>(
                 SpongeBlockSnapshotBuilder.pooled()
                     .blockState(world.getBlockState(pos))
-                    .world(((ServerWorld) world).getProperties())
+                    .world((ServerWorld) world)
                     .position(pos3i)
                     .build(),
                 SpongeBlockSnapshotBuilder.pooled()
                     .blockState(blockState)
-                    .world(((ServerWorld) world).getProperties())
+                    .world((ServerWorld) world)
                     .position(pos3i)
                     .build());
             if (!this.impl$struckBlocks.contains(transaction)) {

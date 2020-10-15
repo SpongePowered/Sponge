@@ -116,9 +116,11 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Optional<ServerLocation> getLocation() {
-        final ServerWorld world = this.world.get();
-        if (world != null) {
-            return Optional.of(((org.spongepowered.api.world.server.ServerWorld) world).getLocation(this.pos));
+        if (this.world != null) {
+            final ServerWorld world = this.world.get();
+            if (world != null) {
+                return Optional.of(((org.spongepowered.api.world.server.ServerWorld) world).getLocation(this.pos));
+            }
         }
         return Optional.empty();
     }
@@ -313,8 +315,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState(this.blockState)
-            .position(this.pos)
-            .world(this.worldKey);
+               .position(this.pos);
+        if (this.world != null && this.world.get() != null) {
+            builder.world(this.world.get());
+        } else {
+            builder.world(this.worldKey);
+        }
         if (this.compound != null) {
             builder.unsafeNbt(this.compound);
         }

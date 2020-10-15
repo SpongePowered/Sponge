@@ -30,6 +30,7 @@ import net.minecraft.fluid.IFluidState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.IProperty;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -90,7 +91,7 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
                 .blockState((net.minecraft.block.BlockState) (Object) this)
                 .position(location.getBlockPosition())
-                .world(location.getWorld().getKey());
+                .world((ServerWorld) location.getWorld());
         if (this.shadow$getBlock().hasTileEntity() && location.getBlock().getType().equals(this.shadow$getBlock())) {
             final BlockEntity tileEntity = location.getBlockEntity()
                     .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));

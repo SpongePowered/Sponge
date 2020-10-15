@@ -149,12 +149,15 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
 
     @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
-        return SpongeBlockSnapshotBuilder.pooled()
-            .world(this.original.getWorld())
-            .position(this.original.getPosition())
-            .blockState((org.spongepowered.api.block.BlockState) this.newState)
-            .build()
-            ;
+        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
+                .position(this.original.getPosition())
+                .blockState((org.spongepowered.api.block.BlockState) this.newState);
+        if (this.original.getServerWorld().isPresent()) {
+            builder.world(this.original.getServerWorld().get());
+        } else {
+            builder.world(this.original.getWorld());
+        }
+        return builder.build();
     }
 
     @Override

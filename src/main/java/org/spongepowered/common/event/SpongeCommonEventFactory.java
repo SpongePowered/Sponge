@@ -400,8 +400,8 @@ public final class SpongeCommonEventFactory {
             final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).getProperties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
-            final Transaction<BlockSnapshot> transaction = new Transaction<>(BlockSnapshot.builder().blockState(fromState).world(world).position(position).build(),
-                                                                       BlockSnapshot.builder().blockState(toState).world(world).position(position).build());
+            final Transaction<BlockSnapshot> transaction = new Transaction<>(SpongeBlockSnapshotBuilder.unpooled().blockState(fromState).world((ServerWorld) worldIn).position(position).build(),
+                            SpongeBlockSnapshotBuilder.unpooled().blockState(toState).world((ServerWorld) worldIn).position(position).build());
             final ChangeBlockEvent.Modify event = SpongeEventFactory.createChangeBlockEventModify(frame.getCurrentCause(),
                     Collections.singletonList(transaction));
 
@@ -429,8 +429,8 @@ public final class SpongeCommonEventFactory {
             final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).getProperties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
-            final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world(world).position(position).build();
-            final SpongeBlockSnapshot to = SpongeBlockSnapshotBuilder.pooled().blockState(toState).world(world).position(position).build();
+            final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world((ServerWorld) worldIn).position(position).build();
+            final SpongeBlockSnapshot to = SpongeBlockSnapshotBuilder.pooled().blockState(toState).world((ServerWorld) worldIn).position(position).build();
             final Transaction<BlockSnapshot> transaction = new Transaction<>(from, to);
             final ChangeBlockEvent.Break event = SpongeEventFactory.createChangeBlockEventBreak(frame.getCurrentCause(),
                 Collections.singletonList(transaction));
