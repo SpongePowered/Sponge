@@ -25,6 +25,7 @@
 package org.spongepowered.common.util;
 
 import com.google.common.base.Preconditions;
+import org.spongepowered.api.Engine;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
 
@@ -136,7 +137,7 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
         }
 
         @Override
-        public MinecraftDayTime of(final Duration duration) {
+        public MinecraftDayTime of(final Engine engine, final Duration duration) {
             Preconditions.checkArgument(!duration.isNegative(), "duration is negative");
             return new SpongeMinecraftDayTime((long) (duration.toMinutes() * Constants.TickConversions.MINECRAFT_MINUTE_TICKS));
         }
@@ -151,7 +152,7 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
         }
 
         @Override
-        public MinecraftDayTime of(final Ticks ticks) {
+        public MinecraftDayTime of(final Engine engine, final Ticks ticks) {
             return new SpongeMinecraftDayTime(ticks.getTicks());
         }
     }
