@@ -40,6 +40,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -373,7 +374,7 @@ public final class SpongeCommandManager implements CommandManager {
             }
 
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
-            result.getErrorMessage().ifPresent(cause::sendMessage);
+            result.getErrorMessage().ifPresent(x -> cause.sendMessage(Identity.nil(), x));
             return result;
         }
     }

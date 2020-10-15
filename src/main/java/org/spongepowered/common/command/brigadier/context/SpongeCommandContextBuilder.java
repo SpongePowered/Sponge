@@ -37,6 +37,8 @@ import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.context.SuggestionContext;
 import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.kyori.adventure.identity.Identified;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -357,8 +359,13 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public void sendMessage(@NonNull final Component message) {
-        this.getCause().sendMessage(message);
+    public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
+        this.getCause().sendMessage(identity, message);
+    }
+
+    @Override
+    public void sendMessage(@NonNull final Identity identity, @NonNull final Component message) {
+        this.getCause().sendMessage(identity, message);
     }
 
     Collection<?> getFrom(final SpongeParameterKey<?> key) {

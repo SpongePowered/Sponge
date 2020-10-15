@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.sponge;
 
 import co.aikar.timings.Timings;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -180,7 +181,7 @@ public class SpongeCommand {
         final PluginContainer apiPlugin = Launch.getInstance().getApiPlugin();
         final PluginContainer minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
 
-        context.sendMessage(Component.text().append(
+        context.sendMessage(Identity.nil(), Component.text().append(
                 Component.text("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(Component.space()),
                 Component.text("Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"),
                 Component.newline(),
@@ -199,7 +200,7 @@ public class SpongeCommand {
                     .flatMap(x -> x.getAliases().stream())
                     .collect(Collectors.joining(", "));
             if (!subcommands.isEmpty()) {
-                context.sendMessage(Component.text().append(
+                context.sendMessage(Identity.nil(), Component.text().append(
                         Component.newline(),
                         Component.text("Available subcommands:"),
                         Component.newline(),
@@ -222,7 +223,7 @@ public class SpongeCommand {
         final Command.Parameterized globalCommand = Command.builder()
                 .setExecutor(context -> {
                     for (final ServerWorld world : SpongeCommon.getGame().getServer().getWorldManager().getWorlds()) {
-                        context.sendMessage(Component.text().content("World ")
+                        context.sendMessage(Identity.nil(), Component.text().content("World ")
                                         .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
                                         .append(this.getChunksInfo(world))
                                         .build());
@@ -236,7 +237,7 @@ public class SpongeCommand {
                     final WorldProperties properties = context.requireOne(this.worldPropertiesKey);
                     final ServerWorld world = properties.getWorld()
                             .orElseThrow(() -> new CommandException(Component.text("The world " + properties.getKey().toString() + " is not loaded!")));
-                    context.sendMessage(Component.text().content("World ")
+                    context.sendMessage(Identity.nil(), Component.text().content("World ")
                             .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
                             .append(this.getChunksInfo(world))
                             .build());
@@ -249,9 +250,9 @@ public class SpongeCommand {
                 .setExecutor(context -> {
                     final File file = new File(new File(new File("."), "chunk-dumps"),
                             "chunk-info-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.txt");
-                    context.sendMessage(Component.text("Writing chunk info to: " + file.getAbsolutePath()));
+                    context.sendMessage(Identity.nil(), Component.text("Writing chunk info to: " + file.getAbsolutePath()));
                     // ChunkSaveHelper.writeChunks(file, context.hasAny(dumpAllKey));
-                    context.sendMessage(Component.text("Chunk info complete"));
+                    context.sendMessage(Identity.nil(), Component.text("Chunk info complete"));
                     return CommandResult.success();
                 })
                 .build();
@@ -278,14 +279,14 @@ public class SpongeCommand {
     @NonNull
     private CommandResult pluginsListSubcommand(final CommandContext context) {
         final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().getPlugins();
-        context.sendMessage(this.title("Plugins (" + plugins.size() + ")"));
+        context.sendMessage(Identity.nil(), this.title("Plugins (" + plugins.size() + ")"));
         for (final PluginContainer specificContainer : plugins) {
             final PluginMetadata metadata = specificContainer.getMetadata();
             final TextComponent.Builder builder = Component.text();
             this.createShortContainerMeta(builder.append(INDENT_COMPONENT), metadata);
             // builder.clickEvent(SpongeComponents.executeCallback(cause ->
             //         cause.sendMessage(this.createContainerMeta(metadata))));
-            context.sendMessage(builder.build());
+            context.sendMessage(Identity.nil(), builder.build());
         }
 
         return CommandResult.success();
@@ -294,7 +295,7 @@ public class SpongeCommand {
     @NonNull
     private CommandResult pluginsInfoSubcommand(final CommandContext context) {
         final PluginContainer pluginContainer = context.requireOne(this.pluginContainerKey);
-        context.sendMessage(this.createContainerMeta(pluginContainer.getMetadata()));
+        context.sendMessage(Identity.nil(), this.createContainerMeta(pluginContainer.getMetadata()));
         return CommandResult.success();
     }
 
@@ -307,14 +308,14 @@ public class SpongeCommand {
         );
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
-            context.sendMessage(Component.text("Sending refresh event to" + pluginContainer.get().getMetadata().getId() + ", please wait..."));
+            context.sendMessage(Identity.nil(), Component.text("Sending refresh event to" + pluginContainer.get().getMetadata().getId() + ", please wait..."));
             ((SpongeEventManager) SpongeCommon.getGame().getEventManager()).post(event, pluginContainer.get());
         } else {
-            context.sendMessage(Component.text("Sending refresh event to all plugins, please wait..."));
+            context.sendMessage(Identity.nil(), Component.text("Sending refresh event to all plugins, please wait..."));
             SpongeCommon.getGame().getEventManager().post(event);
         }
 
-        context.sendMessage(Component.text("Completed plugin refresh."));
+        context.sendMessage(Identity.nil(), Component.text("Completed plugin refresh."));
         return CommandResult.success();
     }
 
@@ -325,18 +326,18 @@ public class SpongeCommand {
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.reset();
-                            context.sendMessage(Component.text("Timings reset"));
+                            context.sendMessage(Identity.nil(), Component.text("Timings reset"));
                             return CommandResult.success();
                         })
                         .build(), "reset")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.generateReport(context.getCause().getAudience());
@@ -346,46 +347,46 @@ public class SpongeCommand {
                 .child(Command.builder()
                         .setExecutor(context -> {
                             Timings.setTimingsEnabled(true);
-                            context.sendMessage(Component.text("Enabled Timings & Reset"));
+                            context.sendMessage(Identity.nil(), Component.text("Enabled Timings & Reset"));
                             return CommandResult.success();
                         })
                         .build(), "on")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             Timings.setTimingsEnabled(false);
-                            context.sendMessage(Component.text("Disabled Timings"));
+                            context.sendMessage(Identity.nil(), Component.text("Disabled Timings"));
                             return CommandResult.success();
                         })
                         .build(), "off")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.setVerboseTimingsEnabled(true);
-                            context.sendMessage(Component.text("Enabled Verbose Timings"));
+                            context.sendMessage(Identity.nil(), Component.text("Enabled Verbose Timings"));
                             return CommandResult.success();
                         })
                         .build(), "verbon")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.setVerboseTimingsEnabled(false);
-                            context.sendMessage(Component.text("Disabled Verbose Timings"));
+                            context.sendMessage(Identity.nil(), Component.text("Disabled Verbose Timings"));
                             return CommandResult.success();
                         })
                         .build(), "verboff")
                 .child(Command.builder()
                         .setExecutor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Component.text("Please enable timings by typing /sponge timings on"));
+                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            context.sendMessage(Component.text("Timings cost: " + SpongeTimingsFactory.getCost()));
+                            context.sendMessage(Identity.nil(), Component.text("Timings cost: " + SpongeTimingsFactory.getCost()));
                             return CommandResult.success();
                         })
                         .build(), "cost")
@@ -471,14 +472,14 @@ public class SpongeCommand {
             this.versionText = builder.build();
         }
 
-        context.sendMessage(this.versionText);
+        context.sendMessage(Identity.nil(), this.versionText);
         return CommandResult.success();
     }
 
     @NonNull
     private CommandResult whichExecutor(final CommandContext context) {
         final CommandMapping mapping = context.requireOne(this.commandMappingKey);
-        context.sendMessage(Component.text().append(
+        context.sendMessage(Identity.nil(), Component.text().append(
                 this.title("Aliases: "),
                 Component.join(Component.text(", "),
                     mapping.getAllAliases().stream().map(x -> Component.text(x, NamedTextColor.YELLOW)).collect(Collectors.toList())),

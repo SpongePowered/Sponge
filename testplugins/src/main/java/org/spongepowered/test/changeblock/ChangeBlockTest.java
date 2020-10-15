@@ -25,6 +25,7 @@
 package org.spongepowered.test.changeblock;
 
 import com.google.inject.Inject;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Level;
@@ -82,7 +83,7 @@ public class ChangeBlockTest implements LoadableModule {
             .setExecutor(context -> {
                 this.cancelAll = !this.cancelAll;
                 final Component newState = Component.text(this.cancelAll ? "OFF" : "ON", this.cancelAll ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(Component.text("Turning Block Changes: ").append(newState));
+                context.sendMessage(Identity.nil(), Component.text("Turning Block Changes: ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleBlockChanges"
@@ -91,7 +92,7 @@ public class ChangeBlockTest implements LoadableModule {
             .setExecutor(context -> {
                 this.waterProofRedstone = !this.waterProofRedstone;
                 final Component newState = Component.text(this.waterProofRedstone ? "ON" : "OFF", this.waterProofRedstone ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(Component.text("Waterproof Redstone : ").append(newState));
+                context.sendMessage(Identity.nil(), Component.text("Waterproof Redstone : ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleRedstoneWaterProofing"
@@ -100,7 +101,7 @@ public class ChangeBlockTest implements LoadableModule {
             .setExecutor(context -> {
                 this.printEntityHarvests = !this.printEntityHarvests;
                 final Component newState = Component.text(this.printEntityHarvests ? "ON" : "OFF", this.printEntityHarvests ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(Component.text("Logging Entity Harvests : ").append(newState));
+                context.sendMessage(Identity.nil(), Component.text("Logging Entity Harvests : ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleEntityHarvestPrinting"
@@ -109,7 +110,7 @@ public class ChangeBlockTest implements LoadableModule {
             .setExecutor(context -> {
                 this.printEntityDeaths = !this.printEntityDeaths;
                 final Component newState = Component.text(this.printEntityDeaths ? "ON" : "OFF", this.printEntityDeaths ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(Component.text("Logging Entity Harvests : ").append(newState));
+                context.sendMessage(Identity.nil(), Component.text("Logging Entity Harvests : ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleEntityDeathPrinting"
@@ -118,7 +119,7 @@ public class ChangeBlockTest implements LoadableModule {
             .setExecutor(context -> {
                 this.printEntitySpawns = !this.printEntitySpawns;
                 final Component newState = Component.text(this.printEntitySpawns ? "ON" : "OFF", this.printEntitySpawns ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(Component.text("Logging Entity Spawns : ").append(newState));
+                context.sendMessage(Identity.nil(), Component.text("Logging Entity Spawns : ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleEntitySpawnPrinting"

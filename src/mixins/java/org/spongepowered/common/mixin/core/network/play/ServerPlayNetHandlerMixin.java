@@ -29,6 +29,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -102,7 +103,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
                             mapping.getRegistrar().suggestions(cause, mapping, command[0], command[1]).forEach(builder::suggest);
                             this.netManager.sendPacket(new STabCompletePacket(p_195518_1_.getTransactionId(), builder.build()));
                         } catch (final CommandException e) {
-                            cause.sendMessage(Component.text("Unable to create suggestions for your tab completion"));
+                            cause.sendMessage(Identity.nil(), Component.text("Unable to create suggestions for your tab completion"));
                             this.netManager.sendPacket(new STabCompletePacket(p_195518_1_.getTransactionId(), Suggestions.empty().join()));
                         }
                     } else {
