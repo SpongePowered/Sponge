@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import com.google.common.base.Preconditions;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Engine;
 import org.spongepowered.api.util.Ticks;
 
 import java.time.Duration;
@@ -46,7 +47,7 @@ public final class SpongeTicks implements Ticks {
     }
 
     @Override
-    public long getMinecraftSeconds() {
+    public long getMinecraftSeconds(@NonNull final Engine engine) {
         // We do this to try to ensure we get the most accurate number of seconds we can.
         // We know the hour rate is 1000 ticks, we can get an accurate hour count. This reduces the potential
         // for error.
@@ -57,13 +58,14 @@ public final class SpongeTicks implements Ticks {
     }
 
     @Override
-    public Duration getMinecraftDayTimeDuration() {
-        return Duration.of(this.getMinecraftSeconds(), ChronoUnit.SECONDS);
+    @NonNull
+    public Duration getMinecraftDayTimeDuration(@NonNull final Engine engine) {
+        return Duration.of(this.getMinecraftSeconds(engine), ChronoUnit.SECONDS);
     }
 
     @Override
     @NonNull
-    public Duration getExpectedDuration() {
+    public Duration getExpectedDuration(@NonNull final Engine engine) {
         return this.effectiveMinimumDuration;
     }
 
@@ -105,7 +107,7 @@ public final class SpongeTicks implements Ticks {
 
         @Override
         @NonNull
-        public Ticks ofWallClockTime(final long time, @NonNull final TemporalUnit temporalUnit) {
+        public Ticks ofWallClockTime(@NonNull final Engine engine, final long time, @NonNull final TemporalUnit temporalUnit) {
             Preconditions.checkArgument(time >= 0, "time parameter must be non-negative");
             final long target = temporalUnit.getDuration().multipliedBy(time).toMillis();
             return this.of((long) Math.ceil(target / (double) Constants.TickConversions.TICK_DURATION_MS));
@@ -113,14 +115,14 @@ public final class SpongeTicks implements Ticks {
 
         @Override
         @NonNull
-        public Ticks ofMinecraftSeconds(final long seconds) {
+        public Ticks ofMinecraftSeconds(@NonNull final Engine engine, final long seconds) {
             Preconditions.checkArgument(seconds >= 0, "time parameter must be non-negative");
             return this.of((long) Math.ceil(seconds * Constants.TickConversions.MINECRAFT_SECOND_TICKS));
         }
 
         @Override
         @NonNull
-        public Ticks ofMinecraftHours(final long hours) {
+        public Ticks ofMinecraftHours(@NonNull final Engine engine, final long hours) {
             Preconditions.checkArgument(hours >= 0, "time parameter must be non-negative");
             return this.of(hours * Constants.TickConversions.MINECRAFT_HOUR_TICKS);
         }
