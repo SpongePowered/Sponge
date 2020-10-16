@@ -45,10 +45,13 @@ public abstract class EntityAgeableMixin_RealTime extends EntityMixin_RealTime {
         }
         // Subtract the one the original update method added
         final int diff = (int) ((RealTimeTrackingBridge) this.world).realTimeBridge$getRealTimeTicks() - 1;
-        // age is positive ? subtract : add
-        final int new_age = age - (int) Math.signum(age) * diff;
-        // if sign changed - return 0
-        this.setGrowingAge((age ^ new_age) < 0 ? 0 : new_age);
+        if (diff == 0) {
+            this.setGrowingAge(age);
+        } else if (age > 0) {
+            this.setGrowingAge(Math.max(0, age - diff));
+        } else {
+            this.setGrowingAge(Math.min(0, age + diff));
+        }
     }
 
 
