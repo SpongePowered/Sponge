@@ -34,6 +34,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
+import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -233,6 +234,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             final ParsedArgument<CommandSource, T> parsed = new ParsedArgument<>(start, reader.getCursor(), result);
             builder.withArgumentInternal(this.getName(), parsed, false);
             builder.withNode(this, parsed.getRange());
+        } else if (this.parser.doesNotRead()) {
+            // Assume this is a null "optional" parser and add the node as read so that we dont end up with an empty context
+            builder.withNode(this, StringRange.at(start));
         }
     }
 
