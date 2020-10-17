@@ -22,34 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.util;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
-import org.spongepowered.common.event.tracking.UnwindingState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import net.minecraft.util.math.ChunkPos;
 
-public final class GeneralPhase {
+import java.util.UUID;
 
-    public static final class State {
-        public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
-        public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
-        public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
-        public static final IPhaseState<SaveHandlerCreationContext> SAVE_HANDLER_CREATION = new SaveHandlerCreationPhase();
-        public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
+// Used in AnvilChunkLoaderMixin
+public final class WorldChunkPos extends ChunkPos {
 
-        private State() { }
+    private final UUID uuid;
+
+    public WorldChunkPos(final UUID uuid, final int x, final int z) {
+        super(x, z);
+        this.uuid = uuid;
     }
 
-    public static final class Post {
-        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = UnwindingState.getInstance();
-
-        private Post() { }
+    public UUID getWorldUUID() {
+        return this.uuid;
     }
-
-
-    private GeneralPhase() {
-    }
-
 
 }

@@ -22,34 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
-import org.spongepowered.common.event.tracking.UnwindingState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
-public final class GeneralPhase {
+public final class EntityCollisionState extends EntityPhaseState<BasicEntityContext> {
 
-    public static final class State {
-        public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
-        public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
-        public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
-        public static final IPhaseState<SaveHandlerCreationContext> SAVE_HANDLER_CREATION = new SaveHandlerCreationPhase();
-        public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
-
-        private State() { }
+    @Override
+    protected BasicEntityContext createNewContext(final PhaseTracker tracker) {
+        return new BasicEntityContext(this, tracker);
     }
 
-    public static final class Post {
-        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = UnwindingState.getInstance();
-
-        private Post() { }
+    @Override
+    public boolean isCollision() {
+        return true;
     }
-
-
-    private GeneralPhase() {
-    }
-
-
 }

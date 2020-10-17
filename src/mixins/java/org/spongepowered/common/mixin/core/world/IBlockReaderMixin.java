@@ -22,34 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.mixin.core.world;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
-import org.spongepowered.common.event.tracking.UnwindingState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import net.minecraft.block.BlockState;
+import net.minecraft.fluid.IFluidState;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IBlockReader;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.IBlockReaderBridge;
 
-public final class GeneralPhase {
+@Mixin(value = IBlockReader.class)
+public interface IBlockReaderMixin extends IBlockReaderBridge {
 
-    public static final class State {
-        public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
-        public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
-        public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
-        public static final IPhaseState<SaveHandlerCreationContext> SAVE_HANDLER_CREATION = new SaveHandlerCreationPhase();
-        public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
+    // @formatter:off
+    @Shadow public BlockState shadow$getBlockState(BlockPos pos);
+    // @formatter:on
 
-        private State() { }
+    @Override
+    @Nullable
+    default BlockState bridge$getBlockIfLoaded(final BlockPos pos) {
+        return this.shadow$getBlockState(pos);
     }
-
-    public static final class Post {
-        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = UnwindingState.getInstance();
-
-        private Post() { }
-    }
-
-
-    private GeneralPhase() {
-    }
-
-
 }

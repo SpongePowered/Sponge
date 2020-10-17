@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -37,7 +39,9 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
@@ -45,6 +49,7 @@ import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
+import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
@@ -53,12 +58,17 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.AudienceFactory;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.user.SpongeUserManager;
@@ -67,6 +77,7 @@ import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 // See also: SubjectMixin_API and SubjectMixin
 @Mixin(ServerPlayerEntity.class)
@@ -81,6 +92,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow public abstract net.minecraft.world.server.ServerWorld shadow$getServerWorld();
     @Shadow public abstract void shadow$setSpectatingEntity(Entity p_175399_1_);
     @Shadow public abstract void shadow$stopRiding();
+
+    @Shadow public abstract void shadow$closeContainer();
 
     // @formatter:on
 
@@ -335,4 +348,37 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     public void bridge$refreshExp() {
         this.lastExperience = -1;
     }
+
+    @Override
+    public boolean bridge$kick(final Component message) {
+        final Component messageToSend;
+        if (ShouldFire.KICK_PLAYER_EVENT) {
+            final KickPlayerEvent kickEvent = SpongeEventFactory.createKickPlayerEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                message,
+                message,
+                (ServerPlayer) this
+                );
+            if (Sponge.getEventManager().post(kickEvent)) {
+                return false;
+            }
+            messageToSend = kickEvent.getMessage();
+        } else {
+            messageToSend = message;
+        }
+        final ITextComponent component = SpongeAdventure.asVanilla(messageToSend);
+        this.connection.disconnect(component);
+        return true;
+    }
+
+    @Redirect(
+        method = {"openContainer", "openHorseInventory"},
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;closeScreen()V"
+        )
+    )
+    private void impl$closePreviousContainer(final ServerPlayerEntity self) {
+        this.shadow$closeContainer();
+    }
+
 }

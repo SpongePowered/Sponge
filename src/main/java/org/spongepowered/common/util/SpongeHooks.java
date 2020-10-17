@@ -47,6 +47,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
@@ -165,6 +166,19 @@ public final class SpongeHooks {
                     world.getDimension().getType(),
                     transaction.getOriginal().getState(),
                     transaction.getFinal().getState());
+            logStack(configAdapter);
+        }
+    }
+
+    public static void logChunkQueueLoad(final net.minecraft.world.World world, final Vector3i chunkPos) {
+        if (world.isRemote()) {
+            return;
+        }
+
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().chunkLoadLogging()) {
+            logInfo("Queue Chunk At [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
+                    chunkPos.getZ());
             logStack(configAdapter);
         }
     }

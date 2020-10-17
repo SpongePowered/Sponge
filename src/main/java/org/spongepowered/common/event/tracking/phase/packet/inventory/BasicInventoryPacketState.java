@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CClickWindowPacket;
@@ -136,7 +137,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
 
-    private static Set<Class<?>> containersFailedCapture = new HashSet<>();
+    private static Set<Class<?>> containersFailedCapture = new ReferenceOpenHashSet<>();
 
     @Override
     public void unwind(final InventoryPacketContext context) {
@@ -213,8 +214,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 if (!((TrackedContainerBridge) trackedInventory).bridge$capturePossible()) {
                     // TODO When this happens a mod probably overrides Container#detectAndSendChanges
                     // We are currently unable to detect changes in this case.
-                    if (!containersFailedCapture.contains(trackedInventory.getClass())) {
-                        containersFailedCapture.add(trackedInventory.getClass());
+                    if (containersFailedCapture.add(trackedInventory.getClass())) {
                         SpongeCommon
                             .getLogger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
                     }

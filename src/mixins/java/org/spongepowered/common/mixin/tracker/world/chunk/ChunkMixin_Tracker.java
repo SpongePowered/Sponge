@@ -227,7 +227,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     private void tracker$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
         final java.util.function.Predicate<? super Entity> filter, final CallbackInfo ci
     ) {
-        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().isCollision()) {
             return;
         }
 

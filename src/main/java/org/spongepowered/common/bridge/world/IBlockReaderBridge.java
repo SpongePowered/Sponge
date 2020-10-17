@@ -22,34 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.bridge.world;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
-import org.spongepowered.common.event.tracking.UnwindingState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class GeneralPhase {
+/**
+ * A bridge onto {@link net.minecraft.world.IBlockReader} to allow for
+ * some simplified "get Block if loaded" methods on all block readers.
+ */
+public interface IBlockReaderBridge {
 
-    public static final class State {
-        public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
-        public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
-        public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
-        public static final IPhaseState<SaveHandlerCreationContext> SAVE_HANDLER_CREATION = new SaveHandlerCreationPhase();
-        public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
-
-        private State() { }
-    }
-
-    public static final class Post {
-        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = UnwindingState.getInstance();
-
-        private Post() { }
-    }
-
-
-    private GeneralPhase() {
-    }
-
+    @Nullable BlockState bridge$getBlockIfLoaded(BlockPos pos);
 
 }

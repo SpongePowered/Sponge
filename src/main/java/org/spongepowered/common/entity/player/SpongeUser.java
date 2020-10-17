@@ -95,6 +95,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge {
 
     public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
+    public static final Set<SpongeUser> initializedUsers = ConcurrentHashMap.newKeySet();
 
     private final GameProfile profile;
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
@@ -154,9 +155,17 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.enderChest = null;
 
         ((CustomDataHolderBridge) (Object) this).bridge$getFailedData().clear();
+        initializedUsers.remove(this);
+    }
+
+    public void initializeIfRequired() {
+        if (!this.isInitialized()) {
+            this.initialize();
+        }
     }
 
     public void initialize() {
+        initializedUsers.add(this);
         this.compound = new CompoundNBT();
         final ServerWorld world = ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDefaultWorld();
         if (world == null) {
@@ -479,7 +488,13 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         if (this.isConstructing) {
             return;
         }
-        dirtyUsers.add(this);
+        if (!this.isInitialized()) {
+            SpongeCommon.getLogger()
+                    .warn("Unable to mark user data for [{}] as dirty, data is not initialized! Any changes may be lost.",
+                            this.profile.getId());
+        } else {
+            dirtyUsers.add(this);
+        }
     }
 
     public void save() {

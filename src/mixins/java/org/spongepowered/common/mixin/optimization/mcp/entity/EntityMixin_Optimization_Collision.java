@@ -29,6 +29,7 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldReader;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -53,8 +54,8 @@ public abstract class EntityMixin_Optimization_Collision {
     @Redirect(method = "doBlockCollisions",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/IWorldReader;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean activeCollision$ignoreWorldIsAreaLoaded(final IWorldReader world, final BlockPos from, final BlockPos to) {
+            target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))
+    private boolean activeCollision$ignoreWorldIsAreaLoaded(final World world, final BlockPos from, final BlockPos to) {
         return true;
     }
 
@@ -68,8 +69,8 @@ public abstract class EntityMixin_Optimization_Collision {
 
     @SuppressWarnings("deprecation")
     @Redirect(method = "handleFluidAcceleration",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/IWorldReader;isAreaLoaded(IIIIII)Z"))
-    private boolean activeCollision$IgnoreAreaIsLoaded(final IWorldReader world, final int xStart, final int yStart, final int zStart,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIII)Z"))
+    private boolean activeCollision$IgnoreAreaIsLoaded(final World world, final int xStart, final int yStart, final int zStart,
             final int xEnd, final int yEnd, final int zEnd) {
         if (((WorldBridge) world).bridge$isFake()) {
             return world.isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd);

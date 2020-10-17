@@ -61,11 +61,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public boolean ignoresEntityCollisions() {
-        return true;
-    }
-
-    @Override
     public void unwind(final ExplosionContext context) {
         TrackingUtil.processBlockCaptures(context);
 //        context.getCapturedEntitySupplier()

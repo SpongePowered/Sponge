@@ -24,32 +24,22 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
-import org.spongepowered.common.event.tracking.UnwindingState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.PooledPhaseState;
 
-public final class GeneralPhase {
+public class SaveHandlerCreationPhase extends PooledPhaseState<SaveHandlerCreationContext> {
 
-    public static final class State {
-        public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
-        public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
-        public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
-        public static final IPhaseState<SaveHandlerCreationContext> SAVE_HANDLER_CREATION = new SaveHandlerCreationPhase();
-        public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
-
-        private State() { }
+    @Override
+    protected SaveHandlerCreationContext createNewContext(final PhaseTracker phaseTracker) {
+        return new SaveHandlerCreationContext(this, phaseTracker);
     }
 
-    public static final class Post {
-        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = UnwindingState.getInstance();
-
-        private Post() { }
+    @Override
+    public void unwind(SaveHandlerCreationContext phaseContext) {
     }
 
-
-    private GeneralPhase() {
+    @Override
+    public boolean shouldCreateWorldDirectories(SaveHandlerCreationContext phaseContext) {
+        return phaseContext.isCreateFiles();
     }
-
-
 }

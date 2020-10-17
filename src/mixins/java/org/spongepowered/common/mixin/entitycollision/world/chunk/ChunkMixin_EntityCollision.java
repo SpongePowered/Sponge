@@ -90,7 +90,7 @@ public abstract class ChunkMixin_EntityCollision {
             return true;
         }
 
-        if (PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+        if (PhaseTracker.getInstance().getCurrentState().isCollision()) {
             // allow explosions
             return true;
         }

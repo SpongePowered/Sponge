@@ -50,6 +50,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -74,6 +75,8 @@ import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.world.server.SpongeWorldManager;
+
+import java.util.List;
 
 /**
  * Contains default Vanilla implementations for features that are only
@@ -121,6 +124,21 @@ public class SpongeImplHooks {
 
     public static double getBlockReachDistance(final ServerPlayerEntity player) {
         return 5.0d;
+    }
+
+    /**
+     * @author Polyacov_Yury
+     * @reason Forge reachDistance attribute compatibility
+     * @param player the player whose reach is being checked
+     * @param entity the entity that is being reached
+     * @return square of maximum player reach distance
+     */
+    public static double getEntityReachDistanceSq(final ServerPlayerEntity player, Entity entity) {
+        double d0 = 36.0d; // 6 blocks
+        if (!player.canEntityBeSeen(entity)) {  // TODO: this check introduces MC-107103
+            d0 = 9.0D; // 3 blocks
+        }
+        return d0;
     }
 
     // Block
@@ -493,5 +511,17 @@ public class SpongeImplHooks {
 
     public static TileEntity createTileEntity(final BlockState newState, final World world) {
         return ((ITileEntityProvider) newState.getBlock()).createNewTileEntity(world);
+    }
+
+    /**
+     * @author JBYoshi
+     * @reason Forge compatibility
+     * @param world The world in which the event takes place
+     * @param entityIn The entity that called collisions
+     * @param aabb The bounding box
+     * @param collided The entities that were collided with
+     */
+    public static void onForgeCollision(final World world, @Nullable final Entity entityIn, final AxisAlignedBB aabb,
+            final List<AxisAlignedBB> collided) {
     }
 }

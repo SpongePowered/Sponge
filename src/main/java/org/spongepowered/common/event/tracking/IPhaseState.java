@@ -38,6 +38,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -67,7 +68,6 @@ import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.world.BlockChange;
 
-import javax.annotation.Nullable;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Random;
@@ -280,14 +280,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state will ignore triggering entity collision events or not. Since there are
-     * many states that perform operations that would be slowed down by having spammed events, we
-     * can occasionally ignore collision events for those states. Examples include world generation,
-     * or explosions.
+     * Gets whether this state fires {@link org.spongepowered.api.event.entity.CollideEntityEvent}s.
+     * This is used for firing the events and for related optimizations.
      *
-     * @return Whether this state will throw entity collision events when calling {@link Chunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, java.util.function.Predicate)}
+     * @return Whether this state should fire entity collision events
      */
-    default boolean ignoresEntityCollisions() {
+    default boolean isCollision() {
         return false;
     }
 
@@ -460,7 +458,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param playerIn
      * @param context
      */
-    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final ServerPlayerEntity playerIn, final C context) {
+    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayerEntity playerIn, final C context) {
 
     }
 
@@ -537,6 +535,18 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
     default boolean isRestoring() {
         return false;
+    }
+
+    /**
+     * When false, prevents directories from being created during the creation
+     * of an {@link net.minecraft.world.chunk.storage.AnvilSaveHandler}. Used
+     * for {@link org.spongepowered.api.world.SerializationBehaviors#NONE}.
+     *
+     * @param phaseContext The appropriate phase context
+     * @return True if directories can be created; false otherwise
+     */
+    default boolean shouldCreateWorldDirectories(final C phaseContext) {
+        return true;
     }
 
     default boolean isConvertingMaps() {

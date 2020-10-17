@@ -101,7 +101,6 @@ import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
@@ -138,6 +137,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
@@ -147,8 +147,8 @@ import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -464,7 +464,7 @@ public final class SpongeCommonEventFactory {
             }
             PhaseTracker.getCauseStackManager().pushCause(locatable);
 
-            final Map<Direction, BlockState> neighbors = new HashMap<>();
+            final Map<Direction, BlockState> neighbors = new EnumMap<>(Direction.class);
             for (final net.minecraft.util.Direction notificationSide : notifiedSides) {
                 final BlockPos offset = sourcePos.offset(notificationSide);
                 final Direction direction = DirectionFacingProvider.getInstance().getKey(notificationSide).get();
@@ -751,6 +751,9 @@ public final class SpongeCommonEventFactory {
             // Check the event isn't cancelled either. If it is, then don't spawn the message.
             if (!event.isCancelled() && !event.isMessageCancelled() && message != Component.empty()) {
                 event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(Identity.nil(), message));
+            }
+            if (!event.isCancelled()) {
+                SpongeHooks.logEntityDeath(entity);
             }
             return Optional.of(event);
         }

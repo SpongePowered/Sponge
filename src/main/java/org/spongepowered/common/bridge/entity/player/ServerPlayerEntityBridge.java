@@ -140,4 +140,7 @@ public interface ServerPlayerEntityBridge {
 
     default void bridge$sendViewerEnvironment(final SpongeDimensionType dimensionType) {
     }
+
+    boolean bridge$kick(final Component message);
+
 }

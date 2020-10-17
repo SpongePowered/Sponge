@@ -6,7 +6,6 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
-        "SpongeImplHooksMixin_Item_Pre_Merge",
         "mcp.entity.EntityMixin_Optimization_Collision",
         "mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
         "mcp.entity.passive.TameableEntity_Optimization_Owner",
@@ -15,6 +14,7 @@
         "mcp.tileentity.EnderChestTileEntityMixin_Optimization_TileEntity",
         "mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",
         "mcp.tileentity.TileEntityMixin_Optimization_Hopper",
+        "mcp.world.IBlockReaderMixin_RayTraceChunkLoadOptimizations",
         "mcp.world.WorldMixin_Optimization_Collision",
         "mcp.world.server.ServerWorldMixin_Optimization_Collision",
         "mcp.world.storage.MapData_MapInfoMixin_Optimization_Map"

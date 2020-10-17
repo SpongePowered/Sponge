@@ -22,34 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.mixin.core.command.impl;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
-import org.spongepowered.common.event.tracking.UnwindingState;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import net.minecraft.command.impl.KickCommand;
+import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 
-public final class GeneralPhase {
+@Mixin(KickCommand.class)
+public abstract class KickCommandMixin {
 
-    public static final class State {
-        public static final IPhaseState<CommandPhaseContext> COMMAND = new CommandState();
-        public static final IPhaseState<ExplosionContext> EXPLOSION = new ExplosionState();
-        public static final IPhaseState<GeneralizedContext> COMPLETE = new CompletePhase();
-        public static final IPhaseState<SaveHandlerCreationContext> SAVE_HANDLER_CREATION = new SaveHandlerCreationPhase();
-        public static final IPhaseState<?> WORLD_UNLOAD = new WorldUnload();
-
-        private State() { }
+    // Multi-target, any disconnection in the command should have an event associated with it.
+    @Redirect(method = "kickPlayers", at =
+        @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;disconnect(Lnet/minecraft/util/text/ITextComponent;)V"))
+    private static void impl$fireEventOnDisconnect(final ServerPlayNetHandler netHandlerPlayServer, final ITextComponent textComponent) {
+        ((ServerPlayerEntityBridge) netHandlerPlayServer.player).bridge$kick(SpongeAdventure.asAdventure(textComponent));
     }
-
-    public static final class Post {
-        public static final IPhaseState<UnwindingPhaseContext> UNWINDING = UnwindingState.getInstance();
-
-        private Post() { }
-    }
-
-
-    private GeneralPhase() {
-    }
-
 
 }

@@ -32,11 +32,14 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CTabCompletePacket;
+import net.minecraft.network.play.client.CUseEntityPacket;
 import net.minecraft.network.play.server.STabCompletePacket;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
@@ -46,9 +49,13 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -135,6 +142,48 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             return commandString.substring(1).split(" ", 2);
         }
         return commandString.split(" ", 2);
+    }
+
+    /**
+     * A workaround to resolve <a href="https://bugs.mojang.com/browse/MC-107103">MC-107103</a>
+     * since the server will expect the client is trying to interact with the "eyes" of the entity.
+     * If the check is desired, {@link #impl$getPlatformReach(double)}
+     * is where the seen check should be done.
+     */
+    @Redirect(
+        method = "processUseEntity",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;canEntityBeSeen(Lnet/minecraft/entity/Entity;)Z"
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/entity/player/ServerPlayerEntity;markPlayerActive()V"
+            ),
+            to = @At(
+                value = "CONSTANT",
+                args = "doubleValue=36.0D"
+            )
+        )
+    )
+    private boolean impl$preventMC_107103(final ServerPlayerEntity serverPlayerEntity, final Entity entityIn) {
+        this.impl$targetedEntity = entityIn;
+        return true;
+    }
+    private @Nullable Entity impl$targetedEntity = null;
+
+    /**
+     * Specifically hooks the reach distance to use the forge hook.
+     */
+    @ModifyConstant(
+        method = "processUseEntity",
+        constant = @Constant(doubleValue = 36.0D)
+    )
+    private double impl$getPlatformReach(final double thirtySix) {
+        final Entity targeted = this.impl$targetedEntity;
+        this.impl$targetedEntity = null;
+        return SpongeImplHooks.getEntityReachDistanceSq(this.player, targeted);
     }
 
 }

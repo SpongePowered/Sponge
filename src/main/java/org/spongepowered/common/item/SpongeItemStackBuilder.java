@@ -115,8 +115,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         this.quantity = itemStack.getQuantity();
         if ((Object) itemStack instanceof net.minecraft.item.ItemStack) {
             final CompoundNBT itemCompound = ((net.minecraft.item.ItemStack) (Object) itemStack).getTag();
-            if (itemCompound != null) {
+            if (itemCompound != null && !itemCompound.isEmpty()) {
                 this.compound = itemCompound.copy();
+            } else {
+                this.compound = null;
             }
 //            this.itemDataSet.addAll(((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators());
 
@@ -188,7 +190,11 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
             if (compound.contains(Constants.Sponge.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
                 compound.remove(Constants.Sponge.SPONGE_DATA);
             }
-            this.compound = compound;
+            if (!compound.isEmpty()) {
+                this.compound = compound;
+            } else {
+                this.compound = null;
+            }
         }
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
@@ -273,8 +279,10 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack((Item) itemType, count);
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             final CompoundNBT compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
-            fixEnchantmentData(itemType, compound);
-            itemStack.setTag(compound);
+            if (!compound.isEmpty()) {
+                fixEnchantmentData(itemType, compound);
+                itemStack.setTag(compound);
+            }
         }
         if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
@@ -310,7 +318,7 @@ public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> imple
         }
 
         final ItemStack stack = (ItemStack) (Object) new net.minecraft.item.ItemStack((Item) this.type, this.quantity);
-        if (this.compound != null) {
+        if (this.compound != null && !this.compound.isEmpty()) {
             ((net.minecraft.item.ItemStack) (Object) stack).setTag(this.compound.copy());
         }
 //        if (this.itemDataSet != null) {

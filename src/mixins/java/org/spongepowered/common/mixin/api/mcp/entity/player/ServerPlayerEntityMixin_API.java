@@ -256,22 +256,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public boolean kick(final Component message) {
-        Component messageToSend;
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final KickPlayerEvent kickPlayerEvent = SpongeEventFactory.createKickPlayerEvent(
-                    frame.getCurrentCause(),
-                    message,
-                    message,
-                    (ServerPlayer) this
-            );
-            if (Sponge.getEventManager().post(kickPlayerEvent)) {
-                return false;
-            }
-            messageToSend = kickPlayerEvent.getMessage();
-        }
-        final ITextComponent component = SpongeAdventure.asVanilla(messageToSend);
-        this.connection.disconnect(component);
-        return true;
+        return ((ServerPlayerEntityBridge) this).bridge$kick(message);
     }
 
     @Override
