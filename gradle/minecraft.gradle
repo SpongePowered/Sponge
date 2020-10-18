@@ -33,9 +33,9 @@ minecraft {
 
 // Mixins
 sourceSets {
-    main {
+    main(({
         ext.refMap = "mixins.${implementation.toLowerCase()}.refmap.json"
-    }
+    } as String))
 }
 
 // Java 6 source set for compatibility checking
