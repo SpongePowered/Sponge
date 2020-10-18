@@ -25,16 +25,16 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.util.Constants;
 
 public final class TileEntityDataProviders extends DataProviderRegistratorBuilder {
 
-    public TileEntityDataProviders(final DataProviderRegistry registry) {
-        super(registry);
+    public TileEntityDataProviders() {
+        super(Constants.Sponge.Entity.DataRegistration.TILEENTITY);
     }
 
     @Override
-    public void register() {
+    public void registerProviders() {
         BannerData.register(this.registrator);
         BeaconData.register(this.registrator);
         BrewingStandData.register(this.registrator);

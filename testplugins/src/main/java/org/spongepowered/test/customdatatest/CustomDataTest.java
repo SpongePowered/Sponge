@@ -24,23 +24,21 @@
  */
 package org.spongepowered.test.customdatatest;
 
-import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.MutableDataProviderBuilder;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
@@ -74,7 +72,8 @@ import java.util.UUID;
 public final class CustomDataTest {
 
     private final PluginContainer plugin;
-    private Key<Value<Integer>> myKey;
+    private Key<Value<Integer>> myDataKey;
+    private Key<Value<String>> mySimpleDataKey;
 
     @Inject
     public CustomDataTest(final PluginContainer plugin) {
@@ -103,31 +102,33 @@ public final class CustomDataTest {
                     switch (context.requireOne(type)) {
                         case ITEMSTACK:
                             final ItemStack stack = ItemStack.of(ItemTypes.PAPER);
-                            stack.offer(this.myKey, number);
+                            stack.offer(this.myDataKey, number);
+                            stack.offer(this.mySimpleDataKey, "It works! " + number);
                             player.getInventory().offer(stack);
-                            final List<Slot> slots = player.getInventory().query(QueryTypes.ITEM_STACK_CUSTOM.get().of(s -> s.get(this.myKey).isPresent())).slots();
-                            final int itemSum = slots.stream().map(Slot::peek).mapToInt(item -> item.get(this.myKey).get()).sum();
+                            final List<Slot> slots = player.getInventory().query(QueryTypes.ITEM_STACK_CUSTOM.get().of(s -> s.get(this.myDataKey).isPresent())).slots();
+                            final int itemSum = slots.stream().map(Slot::peek).mapToInt(item -> item.get(this.myDataKey).get()).sum();
                             player.sendActionBar(Component.text(itemSum));
+                            slots.stream().map(Slot::peek).map(s -> s.get(this.mySimpleDataKey)).forEach(data -> data.ifPresent(value -> player.sendMessage(Identity.nil(), Component.text(value))));
                             break;
                         case ENTITY:
                             final Entity entity = player.getWorld().createEntity(EntityTypes.MINECART.get(), player.getPosition().add(0, 3, 0));
-                            entity.offer(this.myKey, number);
+                            entity.offer(this.myDataKey, number);
                             player.getWorld().spawnEntity(entity);
-                            final int entitySum = player.getNearbyEntities(5).stream().filter(e -> e.get(this.myKey).isPresent()).mapToInt(e -> e.get(this.myKey).get()).sum();
+                            final int entitySum = player.getNearbyEntities(5).stream().filter(e -> e.get(this.myDataKey).isPresent()).mapToInt(e -> e.get(this.myDataKey).get()).sum();
                             player.sendActionBar(Component.text(entitySum));
                             break;
                         case BLOCKENTITY:
                             player.getWorld().setBlock(player.getBlockPosition(), BlockTypes.DISPENSER.get().getDefaultState());
                             final BlockEntity blockEntity = player.getWorld().getBlockEntity(player.getBlockPosition()).get();
-                            blockEntity.offer(this.myKey, number);
-                            final int blockEntitySum = player.getWorld().getBlockEntities().stream().filter(e -> e.get(this.myKey).isPresent())
-                                    .mapToInt(e -> e.get(this.myKey).get()).sum();
+                            blockEntity.offer(this.myDataKey, number);
+                            final int blockEntitySum = player.getWorld().getBlockEntities().stream().filter(e -> e.get(this.myDataKey).isPresent())
+                                    .mapToInt(e -> e.get(this.myDataKey).get()).sum();
                             player.sendActionBar(Component.text(blockEntitySum));
                             break;
                         case PLAYER:
-                            final Integer integer = player.get(this.myKey).orElse(0);
+                            final Integer integer = player.get(this.myDataKey).orElse(0);
                             player.sendActionBar(Component.text(integer));
-                            player.offer(this.myKey, number);
+                            player.offer(this.myDataKey, number);
                             break;
                         case USER:
                             // delegate to player
@@ -139,9 +140,9 @@ public final class CustomDataTest {
                             break;
                         case BLOCK:
                             // try out custom data-stores
-                            final Integer oldNumber = player.getWorld().get(player.getBlockPosition(), this.myKey).orElse(0);
+                            final Integer oldNumber = player.getWorld().get(player.getBlockPosition(), this.myDataKey).orElse(0);
                             player.sendActionBar(Component.text(oldNumber));
-                            player.getWorld().offer(player.getBlockPosition(), this.myKey, oldNumber + number);
+                            player.getWorld().offer(player.getBlockPosition(), this.myDataKey, oldNumber + number);
                     }
                     return CommandResult.success();
                 })
@@ -151,25 +152,28 @@ public final class CustomDataTest {
 
     @Listener
     public void onRegisterData(final RegisterCatalogEvent<DataRegistration> event) {
-        this.myKey = Key.builder().key(ResourceKey.of(this.plugin, "mydata")).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
-
+        final ResourceKey key = ResourceKey.of(this.plugin, "mydata");
+        this.myDataKey = Key.builder().key(key).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
 
         final DataProvider<Value<Integer>, Integer> blockDataProvider = DataProvider.mutableBuilder()
-                .key(this.myKey).dataHolder(TypeTokens.SERVER_LOCATION_TOKEN)
+                .key(this.myDataKey).dataHolder(TypeTokens.SERVER_LOCATION_TOKEN)
                 .get(this::getData).set(this::setData).delete(this::removeData)
                 .build();
-        final DataStore dataStore = DataStore.builder().key(this.myKey, "mykey")
-                .holder(TypeTokens.ITEM_TYPE_TOKEN, TypeTokens.USER_TOKEN, TypeTokens.PLAYER_TOKEN)
-                .build();
 
+
+        final DataStore dataStore = DataStore.of(this.myDataKey, DataQuery.of("mykey"), ItemStack.class, User.class, ServerPlayer.class, BlockEntity.class);
         final DataRegistration myRegistration = DataRegistration.builder()
-                .key(this.myKey)
+                .dataKey(this.myDataKey)
                 .store(dataStore)
                 .provider(blockDataProvider)
-                .key(ResourceKey.of(this.plugin, "mydataregistration"))
+                .key(key)
                 .build();
 
         event.register(myRegistration);
+
+        // Or if it is super simple data
+        this.mySimpleDataKey = Key.of(this.plugin, "mysimpledata", TypeTokens.STRING_VALUE_TOKEN);
+        event.register(DataRegistration.of(this.mySimpleDataKey, ItemStack.class));
     }
 
     // replace with mongoDB - for web-scale
@@ -180,13 +184,13 @@ public final class CustomDataTest {
         if (removed == null) {
             return DataTransactionResult.failNoData();
         }
-        return DataTransactionResult.successRemove(Value.immutableOf(this.myKey, removed));
+        return DataTransactionResult.successRemove(Value.immutableOf(this.myDataKey, removed));
     }
 
     private DataTransactionResult setData(ServerLocation serverLocation, Integer value) {
         final Map<Vector3i, Integer> worldData = this.myCustomData.computeIfAbsent(serverLocation.getWorldKey(), k -> new HashMap<>());
         worldData.put(serverLocation.getBlockPosition(), value);
-        return DataTransactionResult.successResult(Value.immutableOf(this.myKey, value));
+        return DataTransactionResult.successResult(Value.immutableOf(this.myDataKey, value));
     }
 
     private Integer getData(ServerLocation serverLocation) {
@@ -195,16 +199,16 @@ public final class CustomDataTest {
 
     @Listener
     public void onJoin(final ServerSideConnectionEvent.Join event) {
-        final Optional<Integer> myValue = event.getPlayer().get(this.myKey);
+        final Optional<Integer> myValue = event.getPlayer().get(this.myDataKey);
         myValue.ifPresent(integer -> this.plugin.getLogger().info("CustomData: {}", integer));
     }
 
     private void customUserData(final UUID playerUUID, final int number) {
         final Optional<User> user = Sponge.getServer().getUserManager().get(playerUUID);
         if (user.isPresent()) {
-            final Integer integer = user.get().get(this.myKey).orElse(0);
+            final Integer integer = user.get().get(this.myDataKey).orElse(0);
             this.plugin.getLogger().info("Custom data on user {}: {}", user.get().getName(), integer);
-            user.get().offer(this.myKey, number);
+            user.get().offer(this.myDataKey, number);
         }
     }
 }

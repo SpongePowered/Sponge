@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.provider;
 
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
@@ -32,11 +34,15 @@ import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvider<V, E> {
 
-    public CustomDataProvider(Key<V> key) {
+    private final Set<TypeToken<? extends DataHolder>> supportedTokens;
+
+    public CustomDataProvider(Key<V> key, Set<TypeToken<? extends DataHolder>> supportedTokens) {
         super(key);
+        this.supportedTokens = supportedTokens;
     }
 
     @Override
@@ -61,15 +67,38 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public boolean isSupported(DataHolder dataHolder) {
         if (dataHolder instanceof ServerLocation) {
-            if (((ServerLocation) dataHolder).hasBlockEntity()) {
-                return true;
+            if (!((ServerLocation) dataHolder).hasBlockEntity()) {
+                return false;
             }
+            for (TypeToken<? extends DataHolder> token : this.supportedTokens) {
+                if (token.getRawType().isAssignableFrom(BlockEntity.class)) {
+                    return true;
+                }
+            }
+            return false;
         }
         if (!(dataHolder instanceof CustomDataHolderBridge)) {
             return false;
         }
-        // TODO supported dataholders in registration?
-        return true;
+        for (TypeToken<? extends DataHolder> token : this.supportedTokens) {
+            if (token.getRawType().isAssignableFrom(dataHolder.getClass())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isSupported(TypeToken<? extends DataHolder> dataHolder) {
+        if (!CustomDataHolderBridge.class.isAssignableFrom(dataHolder.getRawType())) {
+            return true;
+        }
+        for (TypeToken<? extends DataHolder> token : this.supportedTokens) {
+            if (token.isSupertypeOf(dataHolder)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

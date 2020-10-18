@@ -26,7 +26,6 @@ package org.spongepowered.common.data.provider;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
@@ -51,12 +50,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class DataProviderRegistry {
-
-    private static final DataProviderRegistry INSTANCE = new DataProviderRegistry();
-
-    public static DataProviderRegistry get() {
-        return INSTANCE;
-    }
 
     private static class LookupKey {
 
@@ -88,7 +81,6 @@ public final class DataProviderRegistry {
 
     }
     private final Multimap<Key<?>, DataProvider<?,?>> dataProviders = HashMultimap.create();
-
     private final Map<LookupKey, DataProvider<?,?>> dataProviderCache = new ConcurrentHashMap<>();
     private final Map<Class<?>, DataProviderLookup> dataProviderLookupCache = new ConcurrentHashMap<>();
 
@@ -169,7 +161,7 @@ public final class DataProviderRegistry {
      * @param <E> The element type
      * @return The delegate data provider
      */
-    public <V extends Value<E>, E> DataProvider<V, E> buildDelegate(final Key<V> key, final Predicate<DataProvider<V, E>> predicate) {
+    private  <V extends Value<E>, E> DataProvider<V, E> buildDelegate(final Key<V> key, final Predicate<DataProvider<V, E>> predicate) {
         @SuppressWarnings({"unchecked", "rawtypes"})
         final Collection<DataProvider<V, E>> providers = (Collection) this.dataProviders.get(key);
         return DataProviderRegistry.buildDelegateProvider(key, providers.stream()
@@ -185,18 +177,6 @@ public final class DataProviderRegistry {
      */
     public Collection<DataProvider<?,?>> getAllProviders(final Class<?> dataHolderType) {
         return this.getProviderLookup(dataHolderType).getAllProviders();
-    }
-
-    /**
-     * Gets a delegate data provider for the given {@link Key}.
-     *
-     * @param key The key
-     * @param <V> The value type
-     * @param <E> The element type of the value
-     * @return The delegate data provider
-     */
-    public <V extends Value<E>, E> DataProvider<V, E> getProvider(final Key<V> key) {
-        return this.getProvider(key, DataHolder.class);
     }
 
     /**
@@ -226,15 +206,15 @@ public final class DataProviderRegistry {
 
     public void registerDefaultProviders() {
         this.registerDefaultProviders(
-                new LocationDataProviders(this),
-                new BlockStateDataProviders(this),
-                new NBTDataProviders(this),
-                new ItemDataProviders(this),
-                new TileEntityDataProviders(this),
-                new GenericDataProviders(this),
-                new ItemStackDataProviders(this),
-                new InventoryDataProviders(this),
-                new EntityDataProviders(this)
+                new LocationDataProviders(),
+                new BlockStateDataProviders(),
+                new NBTDataProviders(),
+                new ItemDataProviders(),
+                new TileEntityDataProviders(),
+                new GenericDataProviders(),
+                new ItemStackDataProviders(),
+                new InventoryDataProviders(),
+                new EntityDataProviders()
         );
     }
 
@@ -243,6 +223,7 @@ public final class DataProviderRegistry {
             dataProviderRegistratorBuilder.register();
         }
     }
+
 
 
 }

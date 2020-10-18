@@ -28,6 +28,8 @@ public final class NBTDataTypes {
 
     public static final NBTDataType ENTITY = new NBTDataType("entity");
     public static final NBTDataType BLOCK_ENTITY = new NBTDataType("block_entity");
+    public static final NBTDataType ITEMSTACK = new NBTDataType("itemstack");
+    public static final NBTDataType PLAYER = new NBTDataType("player");
 
     private NBTDataTypes() {
     }

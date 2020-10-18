@@ -45,7 +45,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
+import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -62,18 +63,29 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
 
     @Shadow private CompoundNBT tag;
 
+    @Shadow private boolean isEmpty;
+
     @Override
     public <E> DataTransactionResult bridge$offerCustom(final Key<@NonNull ? extends Value<E>> key, final E value) {
+        if (this.isEmpty) {
+            return DataTransactionResult.failNoData();
+        }
         return CustomDataHolderBridge.super.bridge$offerCustom(key, value);
     }
 
     @Override
     public <E> Optional<E> bridge$getCustom(final Key<@NonNull ? extends Value<E>> key) {
+        if (this.isEmpty) {
+            return Optional.empty();
+        }
         return CustomDataHolderBridge.super.bridge$getCustom(key);
     }
 
     @Override
     public <E> DataTransactionResult bridge$removeCustom(final Key<@NonNull ? extends Value<E>> key) {
+        if (this.isEmpty) {
+            return DataTransactionResult.failNoData();
+        }
         return CustomDataHolderBridge.super.bridge$removeCustom(key);
     }
 
@@ -91,21 +103,20 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "copy", at = @At("RETURN"))
     private void impl$onCopy(final CallbackInfoReturnable<ItemStack> info) {
-        ((CustomDataHolderBridge) (Object) info.getReturnValue()).bridge$getManipulator().copyFrom(this.bridge$getManipulator());
+        ((CustomDataHolderBridge) (Object) info.getReturnValue()).bridge$mergeDeserialized(this.bridge$getManipulator());
     }
 
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "split", at = @At("RETURN"))
     private void impl$onSplit(final int amount, final CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
-        ((CustomDataHolderBridge) (Object) info.getReturnValue()).bridge$getManipulator().copyFrom(this.bridge$getManipulator());
+        ((CustomDataHolderBridge) (Object) info.getReturnValue()).bridge$mergeDeserialized(this.bridge$getManipulator());
     }
 
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/CompoundNBT;)V", at = @At("RETURN"))
     private void impl$onRead(final CompoundNBT compound, final CallbackInfo info) {
-        if (this.data$hasSpongeData()) {
-            SpongeDataManager.getInstance().deserializeCustomData(this.data$getSpongeData(), this);
-            SpongeDataManager.getInstance().syncCustomToTag(this);
+        if (!this.isEmpty) {
+            CustomDataHolderBridge.syncCustomToTag(this);
         }
         // Prune empty stack tag compound if its empty to enable stacking.
         if (this.tag != null && this.tag.isEmpty()) {
@@ -127,10 +138,7 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
         if (this.shadow$getTag() != compound) {
             this.bridge$clearCustomData();
         }
-        if (this.data$hasSpongeData()) {
-            SpongeDataManager.getInstance().deserializeCustomData(this.data$getSpongeData(), this);
-            SpongeDataManager.getInstance().syncCustomToTag(this);
-        }
+        CustomDataHolderBridge.syncTagToCustom(this);
     }
 
 
@@ -156,5 +164,8 @@ public abstract class ItemStackMixin implements CustomDataHolderBridge, DataComp
         }
     }
 
-
+    @Override
+    public NBTDataType data$getNbtDataType() {
+        return NBTDataTypes.ITEMSTACK;
+    }
 }

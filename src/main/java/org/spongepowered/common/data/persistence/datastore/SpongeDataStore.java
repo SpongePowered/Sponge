@@ -22,9 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.persistence;
+package org.spongepowered.common.data.persistence.datastore;
 
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
@@ -43,7 +44,7 @@ public final class SpongeDataStore implements DataStore {
     private Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>>  queriesByKey;
     private Collection<TypeToken<? extends DataHolder>> tokens;
 
-    public SpongeDataStore(Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>>  queriesByKey, Collection<TypeToken<? extends DataHolder>> token) {
+    public SpongeDataStore(Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> queriesByKey, Collection<TypeToken<? extends DataHolder>> token) {
         this.queriesByKey = queriesByKey;
         this.tokens = token;
     }
@@ -71,4 +72,5 @@ public final class SpongeDataStore implements DataStore {
             deserializer.apply(view).ifPresent(value -> dataManipulator.set((Key) entry.getKey(), value));
         }
     }
+
 }

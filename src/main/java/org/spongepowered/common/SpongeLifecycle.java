@@ -38,6 +38,7 @@ import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
@@ -174,6 +175,6 @@ public final class SpongeLifecycle {
     }
 
     public void establishDataProviders() {
-        DataProviderRegistry.get().registerDefaultProviders();
+        SpongeDataManager.getInstance().registerDefaultProviders();
     }
 }

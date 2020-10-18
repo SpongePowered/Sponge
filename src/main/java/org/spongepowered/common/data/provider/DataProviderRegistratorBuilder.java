@@ -24,22 +24,18 @@
  */
 package org.spongepowered.common.data.provider;
 
-import org.spongepowered.api.data.DataProvider;
-
 public abstract class DataProviderRegistratorBuilder {
 
     protected final DataProviderRegistrator registrator;
-    protected final DataProviderRegistry registry;
 
-    public DataProviderRegistratorBuilder(final DataProviderRegistry registry) {
-        this.registry = registry;
-        this.registrator = new DataProviderRegistrator(this);
+    public DataProviderRegistratorBuilder(String name) {
+        this.registrator = new DataProviderRegistrator(name);
     }
 
-    public DataProviderRegistratorBuilder register(final DataProvider<?, ?> provider) {
-        this.registry.register(provider);
-        return this;
+    public void register() {
+        this.registerProviders();
+        this.registrator.buildAndRegister();
     }
 
-    public abstract void register();
+    protected abstract void registerProviders();
 }

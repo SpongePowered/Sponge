@@ -25,55 +25,76 @@
 package org.spongepowered.common.entity;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.data.AbstractArchetype;
+import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.provider.DataProviderLookup;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
+import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
-public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype {
+import javax.annotation.Nullable;
+
+public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype,
+        DataContainerHolder.Mutable {
+
+    // TODO actually validate stuff
+    public static final ImmutableList<RawDataValidator> VALIDATORS = ImmutableList.of();
+
+    private static final DataProviderLookup lookup = SpongeDataManager.getProviderRegistry().getProviderLookup(SpongeEntityArchetype.class);
 
     @Nullable
     private Vector3d position;
 
     SpongeEntityArchetype(SpongeEntityArchetypeBuilder builder) {
-        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundNBT() : NbtTranslator.getInstance().translateData(builder.entityData));
+        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundNBT() : NbtTranslator.getInstance().translate(builder.entityData));
     }
 
     @Override
-    public EntityType getType() {
+    public EntityType<?> getType() {
         return this.type;
     }
 
     @Nullable
     public CompoundNBT getData() {
         return this.data;
+    }
+
+    @Override
+    public DataProviderLookup getLookup() {
+        return SpongeEntityArchetype.lookup;
     }
 
     public Optional<Vector3d> getPosition() {
@@ -96,38 +117,34 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Override
+    public DataContainer data$getDataContainer() {
+        return this.getEntityData();
+    }
+
+    @Override
+    public void data$setDataContainer(DataContainer container) {
+        this.data = NbtTranslator.getInstance().translate(container);
+    }
+
+    @Override
     public DataContainer getEntityData() {
         return NbtTranslator.getInstance().translateFrom(this.data);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<org.spongepowered.api.entity.Entity> apply(ServerLocation location) {
-        final Vector3d position = location.getPosition();
-        final double x = position.getX();
-        final double y = position.getY();
-        final double z = position.getZ();
-        final BlockPos blockPos = new BlockPos(x, y, z);
-        final World world = location.getWorld();
-        final ServerWorld worldServer = (ServerWorld) world;
-
-        Entity entity = null;
-
-        try {
-            Class<? extends Entity> oclass = (Class<? extends Entity>) this.type.getEntityClass();
-            if (oclass != null) {
-                entity = oclass.getConstructor(net.minecraft.world.World.class).newInstance(world);
-            }
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        if (!SpongeImplHooks.onServerThread()) {
+            return Optional.empty();
         }
+        final org.spongepowered.api.world.server.ServerWorld spongeWorld = location.getWorld();
+        final ServerWorld worldServer = (ServerWorld) spongeWorld;
 
+        final Entity entity = ((net.minecraft.entity.EntityType<?>) this.type).create(worldServer);
         if (entity == null) {
             return Optional.empty();
         }
+        entity.setPosition(location.getX(), location.getY(), location.getZ()); // Set initial position
 
-        this.data.put("Pos", Constants.NBT.newDoubleNBTList(x, y, z));
-        this.data.putInt("Dimension", ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId());
         final boolean requiresInitialSpawn;
         if (this.data.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
             requiresInitialSpawn = !this.data.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
@@ -135,27 +152,40 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         } else {
             requiresInitialSpawn = true;
         }
-        entity.read(this.data);
-        this.data.remove("Pos");
-        this.data.remove("Dimension");
 
+        if (entity instanceof MobEntity) {
+            MobEntity mobentity = (MobEntity) entity;
+            mobentity.rotationYawHead = mobentity.rotationYaw;
+            mobentity.renderYawOffset = mobentity.rotationYaw;
+            if (requiresInitialSpawn) {
+                // TODO null reason?
+                mobentity.onInitialSpawn(worldServer, worldServer.getDifficultyForLocation(new BlockPos(mobentity)), null, null, null);
+            }
+        }
+
+        // like applyItemNBT
+        final CompoundNBT mergedNbt = entity.writeWithoutTypeId(new CompoundNBT());
+        final UUID uniqueID = entity.getUniqueID();
+
+        mergedNbt.merge(this.data);
+        mergedNbt.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
+        final Integer dimensionId = ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId();
+        // TODO null dimensionId possible?
+        mergedNbt.putInt(Constants.Entity.ENTITY_DIMENSION, dimensionId); // Fix dimension
+        mergedNbt.putUniqueId(Constants.Entity.ENTITY_UUID, uniqueID); // TODO can we avoid this when the entity is only spawned once?
+        entity.read(mergedNbt); // Read in all data
+        entity.setPosition(location.getX(), location.getY(), location.getZ());
+
+        // Finished building the entity. Now spawn it if not cancelled.
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
         final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
         entities.add(spongeEntity);
+
         // We require spawn types. This is more of a sanity check to throw an IllegalStateException otherwise for the plugin developer to properly associate the type.
-        final SpawnType require = Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(Sponge.getCauseStackManager().getCurrentCause(), entities);
+        final SpawnType require = PhaseTracker.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
         if (!event.isCancelled()) {
-            final ServerWorldBridge mixinWorldServer = (ServerWorldBridge) worldServer;
-            entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
-            mixinWorldServer.bridge$forceSpawnEntity(entity);
-            if (entity instanceof MobEntity) {
-                // This is ok to force spawn since we aren't considering custom items.
-                if (requiresInitialSpawn) {
-                    ((MobEntity) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);
-                }
-                ((MobEntity) entity).spawnExplosionParticle();
-            }
+            worldServer.addEntity(entity);
             return Optional.of(spongeEntity);
         }
         return Optional.empty();
@@ -166,13 +196,22 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
         CompoundNBT newCompound = this.data.copy();
-        newCompound.put("Pos", Constants.NBT
-                .newDoubleNBTList(new double[] { location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ() }));
-        newCompound.putInt("Dimension", ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId());
+        final Vector3d pos = location.getPosition();
+        newCompound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(pos.getX(), pos.getY(), pos.getZ()));
+        newCompound.putInt(Constants.Entity.ENTITY_DIMENSION, ((WorldInfoBridge) location.getWorld().getProperties()).bridge$getDimensionId());
         builder.compound = newCompound;
-        builder.worldId = location.getWorld().getProperties().getUniqueId();
-        builder.position = location.getPosition();
+        builder.worldKey = location.getWorld().getProperties().getKey();
+        builder.position = pos;
+        builder.rotation = this.getRotation();
+        builder.scale = Vector3d.ONE;
         return builder.build();
+    }
+
+    private Vector3d getRotation() {
+        final ListNBT listnbt3 = this.data.getList("Rotation", 5);
+        float rotationYaw = listnbt3.getFloat(0);
+        float rotationPitch = listnbt3.getFloat(1);
+        return new Vector3d(rotationPitch, rotationYaw, 0);
     }
 
     @Override
@@ -184,13 +223,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Constants.Sponge.EntityArchetype.ENTITY_TYPE, this.type)
-                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.getEntityData())
-                ;
-    }
-
-    @Override
-    protected NBTDataType getDataType() {
-        return NBTDataTypes.ENTITY;
+                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.getEntityData());
     }
 
     @Override
@@ -222,6 +255,11 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Override
+    protected ImmutableList<RawDataValidator> getValidators() {
+        return SpongeEntityArchetype.VALIDATORS;
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), this.position);
     }
@@ -229,8 +267,8 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("position", this.position)
-            .add("type", this.type)
-            .toString();
+                .add("position", this.position)
+                .add("type", this.type)
+                .toString();
     }
 }

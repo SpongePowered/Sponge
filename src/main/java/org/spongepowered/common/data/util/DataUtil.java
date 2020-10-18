@@ -34,10 +34,13 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.UUID;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 public final class DataUtil {
 
@@ -49,27 +52,32 @@ public final class DataUtil {
     }
 
     public static ServerLocation getLocation(final DataView view, final boolean castToInt) {
-        final ResourceKey world = view.getKey(Queries.WORLD_KEY).orElseThrow(dataNotFound());
-        final double x = view.getDouble(Queries.POSITION_X).orElseThrow(dataNotFound());
-        final double y = view.getDouble(Queries.POSITION_Y).orElseThrow(dataNotFound());
-        final double z = view.getDouble(Queries.POSITION_Z).orElseThrow(dataNotFound());
+        final ResourceKey world = view.getKey(Queries.WORLD_KEY).orElseThrow(DataUtil.dataNotFound());
+        final Vector3d pos = DataUtil.getPosition3d(view, null);
         if (castToInt) {
-            return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(world).orElseThrow(dataNotFound()), (int) x, (int) y
-                , (int) z);
+            return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(world).orElseThrow(DataUtil.dataNotFound()), pos.toInt());
         }
-        return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(world).orElseThrow(dataNotFound()), x, y, z);
+        return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().getWorld(world).orElseThrow(DataUtil.dataNotFound()), pos);
     }
 
     public static Vector3i getPosition3i(final DataView view) {
         DataUtil.checkDataExists(view, Constants.Sponge.SNAPSHOT_WORLD_POSITION);
-        final DataView internal = view.getView(Constants.Sponge.SNAPSHOT_WORLD_POSITION).orElseThrow(dataNotFound());
-        final int x = internal.getInt(Queries.POSITION_X).orElseThrow(dataNotFound());
-        final int y = internal.getInt(Queries.POSITION_Y).orElseThrow(dataNotFound());
-        final int z = internal.getInt(Queries.POSITION_Z).orElseThrow(dataNotFound());
+        final DataView internal = view.getView(Constants.Sponge.SNAPSHOT_WORLD_POSITION).orElseThrow(DataUtil.dataNotFound());
+        final int x = internal.getInt(Queries.POSITION_X).orElseThrow(DataUtil.dataNotFound());
+        final int y = internal.getInt(Queries.POSITION_Y).orElseThrow(DataUtil.dataNotFound());
+        final int z = internal.getInt(Queries.POSITION_Z).orElseThrow(DataUtil.dataNotFound());
         return new Vector3i(x, y, z);
     }
 
     private static Supplier<InvalidDataException> dataNotFound() {
         return () -> new InvalidDataException("not found");
+    }
+
+    public static Vector3d getPosition3d(final DataView view, @Nullable final DataQuery query) {
+        final DataView internal = query == null ? view : view.getView(query).orElseThrow(DataUtil.dataNotFound());
+        final double x = internal.getDouble(Queries.POSITION_X).orElseThrow(DataUtil.dataNotFound());
+        final double y = internal.getDouble(Queries.POSITION_Y).orElseThrow(DataUtil.dataNotFound());
+        final double z = internal.getDouble(Queries.POSITION_Z).orElseThrow(DataUtil.dataNotFound());
+        return new Vector3d(x, y, z);
     }
 }

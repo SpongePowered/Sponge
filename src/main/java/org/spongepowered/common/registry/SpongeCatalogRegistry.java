@@ -62,7 +62,6 @@ import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityType;
@@ -611,7 +610,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
         ;
         final ResourceKey dataRegistrationKey = ResourceKey.sponge("data_registration");
         this.generateCallbackRegistry(DataRegistration.class, dataRegistrationKey,
-                (key, value) -> SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) value));
+                (key, value) -> SpongeDataManager.getInstance().registerCustomDataRegistration((SpongeDataRegistration) value));
         this.registerRegistry(SpongeDataRegistration.class, dataRegistrationKey, (Registry) this.getRegistry(DataRegistration.class));
         this.registerDatapackCatalogues();
 

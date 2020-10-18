@@ -29,7 +29,7 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.data.SpongeDataManager;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -52,7 +52,7 @@ public interface SpongeDataHolder extends DataHolder {
      * @return The data provider
      */
     default <V extends Value<E>, E> DataProvider<V, E> getProviderFor(Key<V> key) {
-        return DataProviderRegistry.get().getProvider(key, this.delegateDataHolder().getClass());
+        return SpongeDataManager.getProviderRegistry().getProvider(key, this.delegateDataHolder().getClass());
     }
 
     /**
@@ -64,16 +64,8 @@ public interface SpongeDataHolder extends DataHolder {
         return this;
     }
 
-    /**
-     * Attempts to get a {@link DataProvider} for the given {@link Key}.
-     *
-     * This method can be overridden to support customized data providers,
-     * which add caching, etc.
-     *
-     * @return The data providers
-     */
     default Collection<DataProvider<?, ?>> getAllProviders() {
-        return DataProviderRegistry.get().getAllProviders(this.delegateDataHolder().getClass());
+        return SpongeDataManager.getProviderRegistry().getAllProviders(this.delegateDataHolder().getClass());
     }
 
     @Override

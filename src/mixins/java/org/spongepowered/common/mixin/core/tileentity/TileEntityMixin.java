@@ -41,10 +41,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.TimingBridge;
-import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
+import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.common.util.Constants;
 
@@ -96,6 +97,11 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
         this.impl$nbt = nbt;
     }
 
+    @Override
+    public NBTDataType data$getNbtDataType() {
+        return NBTDataTypes.BLOCK_ENTITY;
+    }
+
     @Inject(method = "writeInternal", at = @At("RETURN"))
     private void impl$WriteSpongeDataToCompound(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
         if (this.data$hasSpongeData()) {
@@ -117,10 +123,10 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
         if (this.data$hasSpongeData()) {
             // Deserialize our data...
-            SpongeDataManager.getInstance().deserializeCustomData(this.data$getSpongeData(), this);
+            CustomDataHolderBridge.syncTagToCustom(this);
             this.data$setCompound(null);; // For vanilla this will be recreated empty in the next call - for Forge it reuses the existing compound instead
             // ReSync our data (includes failed data)
-            SpongeDataManager.getInstance().syncCustomToTag(this);
+            CustomDataHolderBridge.syncCustomToTag(this);
         } else {
             this.data$setCompound(null); // No data? No need to keep the nbt
         }

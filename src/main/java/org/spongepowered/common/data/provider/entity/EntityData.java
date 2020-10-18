@@ -30,9 +30,14 @@ import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.entity.SpongeEntityArchetype;
+import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
@@ -169,6 +174,13 @@ public final class EntityData {
                         .get(EntityBridge::bridge$getDisplayNameText)
                         .set(EntityBridge::bridge$setDisplayName)
                         .delete(h -> h.bridge$setDisplayName(null));
+
+        registrator.newDataStore(SpongeEntitySnapshot.class, SpongeEntityArchetype.class)
+                .dataStore(Keys.DISPLAY_NAME,
+                    (dv, v) -> dv.set(Constants.Entity.CUSTOM_NAME, SpongeAdventure.json(v)),
+                    dv -> dv.getString(Constants.Entity.CUSTOM_NAME).map(SpongeAdventure::json));
+
+        // @formatter:on
     }
-    // @formatter:on
+
 }

@@ -25,15 +25,26 @@
 package org.spongepowered.common.data.provider;
 
 import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataProvider;
+import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.ImmutableDataProviderBuilder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.MutableDataProviderBuilder;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataStore;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.OptBool;
+import org.spongepowered.common.bridge.data.DataContainerHolder;
+import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeDataRegistration;
+import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -46,10 +57,70 @@ import javax.annotation.Nullable;
 
 public class DataProviderRegistrator {
 
-    protected final DataProviderRegistratorBuilder builder;
+    private static final TypeToken<DataContainerHolder.Mutable> MUTABLE = TypeToken.of(DataContainerHolder.Mutable.class);
+    private static final TypeToken<DataContainerHolder.Immutable> IMMUTABLE = TypeToken.of(DataContainerHolder.Immutable.class);
 
-    public DataProviderRegistrator(final DataProviderRegistratorBuilder builder) {
-        this.builder = builder;
+    SpongeDataRegistrationBuilder registrationBuilder;
+    SpongeDataStoreBuilder dataStoreBuilder;
+
+    public DataProviderRegistrator(final String name) {
+        this.registrationBuilder = (SpongeDataRegistrationBuilder) DataRegistration.builder().key(ResourceKey.minecraft(name));
+        this.dataStoreBuilder = (SpongeDataStoreBuilder) DataStore.builder().vanillaData();
+    }
+
+    public DataProviderRegistrator(SpongeDataRegistrationBuilder registrationBuilder) {
+        this.registrationBuilder = registrationBuilder;
+    }
+
+    public DataProviderRegistrator newDataStore(Class<? extends DataHolder>... dataHolders) {
+        if (!this.dataStoreBuilder.isEmpty()) {
+            this.registrationBuilder.store(this.dataStoreBuilder.buildVanillaDataStore());
+        }
+        this.dataStoreBuilder.reset();
+        for (Class<? extends DataHolder> dataholder : dataHolders) {
+            this.dataStoreBuilder.holder(TypeToken.of(dataholder));
+        }
+        return this;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public <K, V extends Value<K>> DataProviderRegistrator dataStore(final Supplier<Key<V>> key, final BiConsumer<DataView, K> serializer, final Function<DataView, Optional<K>> deserializer) {
+        this.dataStoreBuilder.key(key.get(), serializer, deserializer);
+        this.dataStoreBuilder.getDataHolderTypes().forEach(typeToken -> this.registerDataStoreDelegatingProvider(key, typeToken));
+        return this;
+    }
+
+    public <H extends DataHolder, K, V extends Value<K>> void registerDataStoreDelegatingProvider(Supplier<Key<V>> key, TypeToken<H> typeToken) {
+        // Create dataprovider for mutable and immutable DataContainerHolders
+        if (DataProviderRegistrator.MUTABLE.isSupertypeOf(typeToken)) {
+            this.asMutable(typeToken.getRawType())
+                    .create(key)
+                    .get(holder -> {
+                        final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
+                        return SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).deserialize(dataContainer).get(key).orElse(null);
+                    })
+                    .set((holder, v) -> {
+                        final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
+                        final DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
+                        manipulator.set(key.get(), v);
+                        SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).serialize(manipulator, dataContainer);
+                        ((DataContainerHolder.Mutable) holder).data$setDataContainer(dataContainer);
+                    });
+        } else if (DataProviderRegistrator.IMMUTABLE.isSupertypeOf(typeToken)) {
+            this.asImmutable(typeToken.getRawType())
+                    .create(key)
+                    .get(holder -> {
+                        final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
+                        return SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).deserialize(dataContainer).get(key).orElse(null);
+                    })
+                    .set((holder, v) -> {
+                        final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
+                        final DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
+                        manipulator.set(key.get(), v);
+                        SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).serialize(manipulator, dataContainer);
+                        return (H)((DataContainerHolder.Immutable) holder).data$withDataContainer(dataContainer);
+                    });
+        }
     }
 
     /**
@@ -57,7 +128,7 @@ public class DataProviderRegistrator {
      * @return The registrator
      */
     public <T> MutableRegistrator<T> asMutable(final Class<T> target) {
-        return new MutableRegistrator<>(this.builder, target);
+        return new MutableRegistrator<>(this.registrationBuilder, target);
     }
 
     /**
@@ -65,14 +136,21 @@ public class DataProviderRegistrator {
      * @return The registrator
      */
     public <T> ImmutableRegistrator<T> asImmutable(final Class<T> target) {
-        return new ImmutableRegistrator<>(this.builder, target);
+        return new ImmutableRegistrator<>(this.registrationBuilder, target);
+    }
+
+    public void buildAndRegister() {
+        if (!this.dataStoreBuilder.isEmpty()) {
+            this.registrationBuilder.store(this.dataStoreBuilder.buildVanillaDataStore());
+        }
+        SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) this.registrationBuilder.build());
     }
 
     public static final class MutableRegistrator<T> extends DataProviderRegistrator {
 
         private final Class<T> target;
 
-        public MutableRegistrator(final DataProviderRegistratorBuilder builder, final Class<T> target) {
+        public MutableRegistrator(final SpongeDataRegistrationBuilder builder, final Class<T> target) {
             super(builder);
             this.target = target;
         }
@@ -101,7 +179,8 @@ public class DataProviderRegistrator {
 
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         protected <K, V extends Value<K>> MutableRegistrator<T> register(final MutableRegistration<T, K> registration) {
-            this.builder.register(registration.build(target));
+            final DataProvider<?, ?> provider = registration.build(target);
+            this.registrationBuilder.dataKey(provider.getKey()).provider(provider);
             return this;
         }
     }
@@ -110,7 +189,7 @@ public class DataProviderRegistrator {
 
         private final Class<T> target;
 
-        public ImmutableRegistrator(final DataProviderRegistratorBuilder builder, final Class<T> target) {
+        public ImmutableRegistrator(final SpongeDataRegistrationBuilder builder, final Class<T> target) {
             super(builder);
             this.target = target;
         }
@@ -139,7 +218,8 @@ public class DataProviderRegistrator {
 
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         protected <K, V> ImmutableRegistrator<T> register(final ImmutableRegistration<T, K> registration) {
-            this.builder.register(registration.build(this.target));
+            final DataProvider<?, ?> provider = registration.build(this.target);
+            this.registrationBuilder.dataKey(provider.getKey()).provider(provider);
             return this;
         }
     }
@@ -326,7 +406,7 @@ public class DataProviderRegistrator {
          * @return The registrator
          */
         public <NT> MutableRegistrator<NT> asMutable(final Class<NT> target) {
-            return new MutableRegistrator<>(this.registrator.builder, target);
+            return new MutableRegistrator<>(this.registrator.registrationBuilder, target);
         }
 
         /**
@@ -334,7 +414,7 @@ public class DataProviderRegistrator {
          * @return The registrator
          */
         public <NT> ImmutableRegistrator<NT> asImmutable(final Class<NT> target) {
-            return new ImmutableRegistrator<>(this.registrator.builder, target);
+            return new ImmutableRegistrator<>(this.registrator.registrationBuilder, target);
         }
     }
 
@@ -433,7 +513,7 @@ public class DataProviderRegistrator {
          * @return The registrator
          */
         public <NT> MutableRegistrator<NT> asMutable(final Class<NT> target) {
-            return new MutableRegistrator<>(this.registrator.builder, target);
+            return new MutableRegistrator<>(this.registrator.registrationBuilder, target);
         }
 
         /**
@@ -441,7 +521,7 @@ public class DataProviderRegistrator {
          * @return The registrator
          */
         public <NT> ImmutableRegistrator<NT> asImmutable(final Class<NT> target) {
-            return new ImmutableRegistrator<>(this.registrator.builder, target);
+            return new ImmutableRegistrator<>(this.registrator.registrationBuilder, target);
         }
     }
 

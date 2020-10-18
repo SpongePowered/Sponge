@@ -22,5 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
-package org.spongepowered.common.data.holder.nbt;
+package org.spongepowered.common.bridge.data;
+
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.persistence.DataContainer;
+
+public interface DataContainerHolder {
+
+    DataContainer data$getDataContainer();
+
+    interface Mutable extends DataContainerHolder {
+        void data$setDataContainer(DataContainer container);
+    }
+
+    interface Immutable<T extends DataHolder> extends DataContainerHolder {
+        T data$withDataContainer(DataContainer container);
+    }
+}

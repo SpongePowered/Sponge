@@ -25,38 +25,34 @@
 package org.spongepowered.common.data.holder;
 
 import net.minecraft.nbt.CompoundNBT;
-import org.spongepowered.api.data.DataProvider;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.world.Archetype;
-import org.spongepowered.api.world.LocatableSnapshot;
-import org.spongepowered.common.data.holder.nbt.NbtCompoundDataHolder;
-import org.spongepowered.common.data.provider.DataProviderLookup;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
 
-import java.util.Collection;
+/**
+ * Simple mutable data holder wrapper around a nbt compound. {@link org.spongepowered.common.bridge.data.CustomDataHolderBridge} is mixed in.
+ * Used for preparing data for Immutable data holders like {@link org.spongepowered.api.entity.EntitySnapshot}
+ */
+public class SimpleNbtDataHolder implements DataCompoundHolder, SpongeMutableDataHolder {
+    private CompoundNBT nbt;
+    private final NBTDataType dataType;
 
-public abstract class SpongeArchetype<S extends LocatableSnapshot<S>, T> implements SpongeMutableDataHolder, NbtCompoundDataHolder, Archetype<S, T> {
-
-    private final CompoundNBT compound;
-    private final DataProviderLookup lookup = DataProviderRegistry.get().getProviderLookup(this.getClass());
-
-    protected SpongeArchetype(CompoundNBT compound) {
-        this.compound = compound;
+    public SimpleNbtDataHolder(CompoundNBT nbt, NBTDataType dataType) {
+        this.nbt = nbt;
+        this.dataType = dataType;
     }
 
     @Override
-    public CompoundNBT getNbtCompound() {
-        return this.compound;
+    public CompoundNBT data$getCompound() {
+        return this.nbt;
     }
 
-    @Override
-    public <V extends Value<E>, E> DataProvider<V, E> getProviderFor(Key<V> key) {
-        return this.lookup.getProvider(key);
+    @Override 
+    public void data$setCompound(CompoundNBT nbt) {
+        this.nbt = nbt;
     }
 
-    @Override
-    public Collection<DataProvider<?, ?>> getAllProviders() {
-        return this.lookup.getAllProviders();
+    @Override 
+    public NBTDataType data$getNbtDataType() {
+        return this.dataType;
     }
 }
