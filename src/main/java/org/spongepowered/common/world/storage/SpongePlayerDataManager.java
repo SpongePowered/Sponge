@@ -30,7 +30,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.world.server.SpongeWorldManager;
@@ -115,7 +114,7 @@ public final class SpongePlayerDataManager {
     }
 
     private CompoundNBT createCompoundFor(final SpongePlayerData data) {
-        return NbtTranslator.getInstance().translateData(data.toContainer());
+        return NbtTranslator.getInstance().translate(data.toContainer());
     }
 
     private void saveFile(final String id, final CompoundNBT compound) {

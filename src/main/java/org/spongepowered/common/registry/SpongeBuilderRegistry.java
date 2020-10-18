@@ -52,6 +52,8 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.LookRandomlyGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
@@ -126,11 +128,13 @@ import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.SpongeKeyValueMatcherBuilder;
 import org.spongepowered.common.data.builder.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.data.key.SpongeKeyBuilder;
-import org.spongepowered.common.data.persistence.SpongeDataStoreBuilder;
+import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
+import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
 import org.spongepowered.common.entity.ai.goal.builtin.SpongeLookRandomlyGoalBuilder;
 import org.spongepowered.common.entity.ai.goal.builtin.SpongeSwimGoalBuilder;
@@ -236,7 +240,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(Explosion.Builder.class, SpongeExplosionBuilder::new)
             .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .register(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
-//            .register(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
+            .register(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
             .register(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
             .register(RandomWalkingGoal.Builder.class, SpongeRandomWalkingGoalBuilder::new)
             .register(AvoidLivingGoal.Builder.class, SpongeAvoidLivingGoalBuilder::new)
@@ -255,7 +259,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(TabListEntry.Builder.class, TabListEntryBuilder::new)
             .register(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .register(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
-//            .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
+            .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
 //            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
 //            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
             .register(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)

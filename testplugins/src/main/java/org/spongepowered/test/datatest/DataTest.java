@@ -81,6 +81,8 @@ import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.animal.Sheep;
@@ -93,7 +95,6 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShapes;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
@@ -1264,6 +1265,13 @@ public final class DataTest  {
         this.checkOfferData(boat, Keys.BOAT_TYPE, BoatTypes.ACACIA.get());
         final BlockState woodState = BlockTypes.ACACIA_WOOD.get().getDefaultState();
         this.checkGetData(woodState, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
+
+        // And now test nbt data
+        final EntitySnapshot snapshot = sheep.createSnapshot();
+        this.checkWithData(snapshot, Keys.DISPLAY_NAME, Component.text("Snapshot"));
+
+        final EntityArchetype archetype = sheep.createArchetype();
+        this.checkOfferData(archetype, Keys.DISPLAY_NAME, Component.text("Archetype"));
 
         world.setBlock(blockPos, oldState);
     }

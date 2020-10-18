@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.data.provider;
 
+import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.TypeTokens;
 
 import java.util.List;
 import java.util.Optional;
@@ -63,6 +65,11 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
 
     @Override
     public boolean isSupported(DataHolder dataHolder) {
+        return this.providers.stream().anyMatch(provider -> provider.isSupported(dataHolder));
+    }
+
+    @Override
+    public boolean isSupported(TypeToken<? extends DataHolder> dataHolder) {
         return this.providers.stream().anyMatch(provider -> provider.isSupported(dataHolder));
     }
 

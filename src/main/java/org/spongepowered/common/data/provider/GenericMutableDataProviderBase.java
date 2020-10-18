@@ -177,6 +177,11 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
+    public boolean isSupported(TypeToken<? extends DataHolder> dataHolder) {
+        return this.holderType.isAssignableFrom(dataHolder.getRawType());
+    }
+
+    @Override
     public final Optional<V> getValue(final DataHolder dataHolder) {
         if (!this.isSupported(dataHolder)) {
             return Optional.empty();

@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.nbt;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.holder.nbt.NbtCompoundDataHolder;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.util.NbtHelper;
 import org.spongepowered.common.util.Constants;
@@ -37,14 +37,17 @@ public final class NBTComponentData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(NbtCompoundDataHolder.class)
-                    .create(Keys.CAN_FLY)
-                        .get(h -> NbtHelper.getNullableCompound(h.getNbtCompound(), Constants.Entity.Player.ABILITIES).getBoolean(Constants.Entity.Player.Abilities.CAN_FLY))
-                        .set((h, v) -> NbtHelper.getOrCreateCompound(h.getNbtCompound(), Constants.Entity.Player.ABILITIES).putBoolean(Constants.Entity.Player.Abilities.CAN_FLY, v))
-                    .create(Keys.IS_FLYING)
-                        .get(h -> NbtHelper.getNullableCompound(h.getNbtCompound(), Constants.Entity.Player.ABILITIES).getBoolean(Constants.Entity.Player.Abilities.IS_FLYING))
-                        .set((h, v) -> NbtHelper.getOrCreateCompound(h.getNbtCompound(), Constants.Entity.Player.ABILITIES).putBoolean(Constants.Entity.Player.Abilities.IS_FLYING, v));
+        // TODO register for implementations that are allowed instead of DataCompoungHolder
+//        registrator
+//                .asMutable(DataCompoundHolder.class)
+//                    .create(Keys.CAN_FLY)
+//                        .get(h -> NbtHelper.getNullableCompound(h.data$getCompound(), Constants.Entity.Player.ABILITIES).getBoolean(Constants.Entity.Player.Abilities.CAN_FLY))
+//                        .set((h, v) -> NbtHelper.getOrCreateCompound(h.data$getCompound(), Constants.Entity.Player.ABILITIES).putBoolean(Constants.Entity.Player.Abilities.CAN_FLY, v))
+//                        .supports(holder -> holder.getNbtDataType() == NBTDataTypes.ENTITY)
+//                    .create(Keys.IS_FLYING)
+//                        .get(h -> NbtHelper.getNullableCompound(h.data$getCompound(), Constants.Entity.Player.ABILITIES).getBoolean(Constants.Entity.Player.Abilities.IS_FLYING))
+//                        .set((h, v) -> NbtHelper.getOrCreateCompound(h.data$getCompound(), Constants.Entity.Player.ABILITIES).putBoolean(Constants.Entity.Player.Abilities.IS_FLYING, v))
+//                        .supports(holder -> holder.getNbtDataType() == NBTDataTypes.ENTITY);
     }
     // @formatter:on
 }

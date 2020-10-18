@@ -76,7 +76,7 @@ import org.spongepowered.common.accessor.world.raid.RaidManagerAccessor;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -298,13 +298,13 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends Value<E>> key, E value) {
-        final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
+        final DataProvider<? extends Value<E>, E> dataProvider = SpongeDataManager.getProviderRegistry().getProvider(key, ServerLocation.class);
         return dataProvider.offer(ServerLocation.of(this, new Vector3d(x, y, z)), value);
     }
 
     @Override
     public <E> Optional<E> get(int x, int y, int z, Key<? extends Value<E>> key) {
-        final DataProvider<? extends Value<E>, E> dataProvider = DataProviderRegistry.get().getProvider(key, ServerLocation.class);
+        final DataProvider<? extends Value<E>, E> dataProvider = SpongeDataManager.getProviderRegistry().getProvider(key, ServerLocation.class);
         final Optional<E> value = dataProvider.get(ServerLocation.of(this, new Vector3d(x, y, z)));
         if (value.isPresent()) {
             return value;
@@ -315,7 +315,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     @SuppressWarnings("rawtypes")
     public DataTransactionResult remove(int x, int y, int z, Key<?> key) {
-        final DataProvider dataProvider = DataProviderRegistry.get().getProvider((Key) key, ServerLocation.class);
+        final DataProvider dataProvider = SpongeDataManager.getProviderRegistry().getProvider((Key) key, ServerLocation.class);
         return dataProvider.remove(ServerLocation.of(this, new Vector3d(x, y, z)));
     }
 

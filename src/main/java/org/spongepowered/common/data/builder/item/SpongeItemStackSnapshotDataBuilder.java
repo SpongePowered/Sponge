@@ -61,7 +61,7 @@ public class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilder<Item
 
             @Nullable final CompoundNBT compound;
             if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-                compound = NbtTranslator.getInstance().translateData(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+                compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
                 SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);
             } else {
                 compound = null;

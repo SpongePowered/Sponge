@@ -74,7 +74,7 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
     private static CompoundNBT containerToCompound(final DataView container) {
         checkNotNull(container);
         CompoundNBT compound = new CompoundNBT();
-        containerToCompound(container, compound);
+        NbtTranslator.containerToCompound(container, compound);
         return compound;
     }
 
@@ -294,10 +294,6 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
         }
     }
 
-    public CompoundNBT translateData(DataView container) {
-        return NbtTranslator.containerToCompound(container);
-    }
-
     public void translateContainerToData(CompoundNBT node, DataView container) {
         NbtTranslator.containerToCompound(container, node);
     }
@@ -313,12 +309,12 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
 
     @Override
     public CompoundNBT translate(DataView view) throws InvalidDataException {
-        return containerToCompound(view);
+        return NbtTranslator.containerToCompound(view);
     }
 
     @Override
     public DataContainer translate(CompoundNBT obj) throws InvalidDataException {
-        return getViewFromCompound(obj);
+        return NbtTranslator.getViewFromCompound(obj);
     }
 
     @Override
@@ -326,7 +322,7 @@ public final class NbtTranslator extends SpongeCatalogType implements DataTransl
         for (String key : compound.keySet()) {
             INBT base = compound.get(key);
             byte type = base.getId();
-            setInternal(base, type, container, key); // gotta love recursion
+            NbtTranslator.setInternal(base, type, container, key); // gotta love recursion
         }
         return container;
     }

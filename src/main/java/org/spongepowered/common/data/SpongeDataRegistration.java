@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data;
 
+import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
@@ -35,6 +36,8 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,7 +47,7 @@ public final class SpongeDataRegistration implements DataRegistration {
     final ResourceKey key;
     final List<Key<?>> keys;
     final Map<TypeToken, DataStore> dataStoreMap;
-    final Map<Key, DataProvider> dataProviderMap;
+    final Multimap<Key, DataProvider> dataProviderMap;
     final PluginContainer plugin;
 
     SpongeDataRegistration(ResourceKey key, PluginContainer plugin, SpongeDataRegistrationBuilder builder) {
@@ -56,8 +59,9 @@ public final class SpongeDataRegistration implements DataRegistration {
     }
 
     @Override
-    public <V extends Value<E>, E> Optional<DataProvider<V, E>> getProviderFor(Key<V> key) throws UnregisteredKeyException {
-        return Optional.ofNullable(this.dataProviderMap.get(key));
+    @SuppressWarnings("unchecked")
+    public <V extends Value<E>, E> Collection<DataProvider<V, E>> getProvidersFor(Key<V> key) throws UnregisteredKeyException {
+        return (Collection) this.dataProviderMap.get(key);
     }
 
     @Override
@@ -89,5 +93,13 @@ public final class SpongeDataRegistration implements DataRegistration {
     @Override
     public PluginContainer getPluginContainer() {
         return this.plugin;
+    }
+
+    public Collection<DataStore> getDataStores() {
+        return dataStoreMap.values();
+    }
+
+    public Collection<DataProvider> getDataProviders() {
+        return this.dataProviderMap.values();
     }
 }

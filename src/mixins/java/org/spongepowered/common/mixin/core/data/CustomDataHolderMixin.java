@@ -32,11 +32,17 @@ import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.data.holder.SimpleNbtDataHolder;
+import org.spongepowered.common.entity.SpongeEntityArchetype;
+import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.entity.player.SpongeUser;
 
 import java.util.List;
 
-@Mixin({TileEntity.class, Entity.class, SpongeUser.class, ItemStack.class})
+@Mixin({TileEntity.class, Entity.class, SpongeUser.class, ItemStack.class,
+        SpongeEntityArchetype.class,
+        SpongeEntitySnapshot.class,
+        SimpleNbtDataHolder.class})
 public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
 
     private DataManipulator.Mutable impl$manipulator;
@@ -46,8 +52,17 @@ public abstract class CustomDataHolderMixin implements CustomDataHolderBridge {
     public DataManipulator.Mutable bridge$getManipulator() {
         if (this.impl$manipulator == null) {
             this.impl$manipulator = DataManipulator.mutableOf();
+            CustomDataHolderBridge.syncTagToCustom(this);
         }
         return this.impl$manipulator;
+    }
+
+    @Override
+    public void bridge$mergeDeserialized(DataManipulator.Mutable manipulator) {
+        if (this.impl$manipulator == null) {
+            this.impl$manipulator = DataManipulator.mutableOf();
+        }
+        this.impl$manipulator.copyFrom(manipulator);
     }
 
     @Override

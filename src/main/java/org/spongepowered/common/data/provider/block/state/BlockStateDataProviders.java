@@ -25,17 +25,17 @@
 package org.spongepowered.common.data.provider.block.state;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.util.Constants;
 
 
 public class BlockStateDataProviders extends DataProviderRegistratorBuilder {
 
-    public BlockStateDataProviders(final DataProviderRegistry registry) {
-        super(registry);
+    public BlockStateDataProviders() {
+        super(Constants.Sponge.Entity.DataRegistration.BLOCKSTATE);
     }
 
     @Override
-    public void register() {
+    public void registerProviders() {
         AbstractBannerData.register(this.registrator);
         AbstractButtonData.register(this.registrator);
         AbstractCoralPlantData.register(this.registrator);
