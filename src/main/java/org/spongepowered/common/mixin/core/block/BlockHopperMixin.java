@@ -32,11 +32,13 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
@@ -47,7 +49,10 @@ public abstract class BlockHopperMixin extends BlockMixin {
     @SuppressWarnings("RedundantTypeArguments") // some java compilers will not calculate this generic correctly
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getDirectionalData(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(
+            impl$getDirectionalData(blockState),
+            impl$getPoweredData(blockState)
+        );
     }
 
     @Override
@@ -70,11 +75,19 @@ public abstract class BlockHopperMixin extends BlockMixin {
             final Direction dir = Constants.DirectionFunctions.checkDirectionNotUp((Direction) value);
             return Optional.of((BlockState) blockState.withProperty(BlockHopper.FACING, Constants.DirectionFunctions.getFor(dir)));
         }
+        if (key.equals(Keys.POWERED)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockHopper.ENABLED, (Boolean) value));
+        }
         return super.bridge$getStateWithValue(blockState, key, value);
     }
 
     private ImmutableDirectionalData impl$getDirectionalData(final IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
                 Constants.DirectionFunctions.getFor(blockState.getValue(BlockHopper.FACING)));
+    }
+
+    private ImmutablePoweredData impl$getPoweredData(final IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class,
+            blockState.getValue(BlockHopper.ENABLED));
     }
 }
