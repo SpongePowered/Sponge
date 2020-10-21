@@ -561,6 +561,7 @@ project("SpongeVanilla") {
 
         vanillaInstallerConfig("com.google.code.gson:gson:2.8.0")
         vanillaInstallerConfig("org.spongepowered:configurate-hocon:4.0.0-SNAPSHOT")
+        vanillaInstallerConfig("org.spongepowered:configurate-core:4.0.0-SNAPSHOT")
         vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.3")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-core:2.11.2")
