@@ -68,9 +68,10 @@ public final class SignData {
 
     private static void setSignLines(final SignTileEntity holder, final List<Component> value) {
         for (int i = 0; i < holder.signText.length; i++) {
-            holder.signText[i] = SpongeAdventure.asVanilla(i > value.size() ? Component.empty() : value.get(i));
+            holder.signText[i] = SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i));
         }
         holder.markDirty();
+        holder.getWorld().notifyBlockUpdate(holder.getPos(), holder.getBlockState(), holder.getBlockState(), 3);
     }
 
     private static List<Component> getSignLines(ServerLocation h) {
