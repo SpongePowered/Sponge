@@ -77,7 +77,6 @@ public abstract class ServerChunkProviderMixin implements ServerChunkProviderBri
 
     @Nullable private SpongeEmptyChunk impl$EMPTY_CHUNK;
     private boolean impl$denyChunkRequests = true;
-    private boolean impl$forceChunkRequests = false;
     private long impl$chunkUnloadDelay = Constants.World.DEFAULT_CHUNK_UNLOAD_DELAY;
     private int impl$maxChunkUnloads = Constants.World.MAX_CHUNK_UNLOADS;
 
@@ -231,18 +230,8 @@ public abstract class ServerChunkProviderMixin implements ServerChunkProviderBri
     }
 
     @Override
-    public boolean bridge$getForceChunkRequests() {
-        return this.impl$forceChunkRequests;
-    }
-
-    @Override
     public void bridge$setMaxChunkUnloads(final int maxUnloads) {
         this.impl$maxChunkUnloads = maxUnloads;
-    }
-
-    @Override
-    public void bridge$setForceChunkRequests(final boolean flag) {
-        this.impl$forceChunkRequests = flag;
     }
 
     @Override

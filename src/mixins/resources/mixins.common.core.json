@@ -96,6 +96,7 @@
         "util.text.TranslationTextComponentMixin",
         "world.BossInfoMixin",
         "world.IBlockReaderMixin",
+        "world.ServerChunkProviderMixin",
         "world.TeleporterMixin",
         "world.TrackedEntityMixin",
         "world.WorldMixin",

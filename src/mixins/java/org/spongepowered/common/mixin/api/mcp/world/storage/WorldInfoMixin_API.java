@@ -39,6 +39,7 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.gen.GeneratorModifierType;
@@ -471,5 +472,12 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         }
 
         return apiRules;
+    }
+
+    @Override
+    public WorldBorder getWorldBorder() {
+        final net.minecraft.world.border.WorldBorder mcBorder = new net.minecraft.world.border.WorldBorder();
+        mcBorder.copyFrom((WorldInfo) (Object) this);
+        return (WorldBorder) mcBorder;
     }
 }
