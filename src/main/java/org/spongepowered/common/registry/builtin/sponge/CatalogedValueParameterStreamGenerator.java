@@ -34,6 +34,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigDecimalValueParameter;
@@ -51,6 +52,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetB
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetEntityValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeUserValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeWorldPropertiesValueParameter;
+import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector2d;
 
@@ -83,6 +85,9 @@ public final class CatalogedValueParameterStreamGenerator {
                 new SpongeGameProfileValueParameter(),
                 StandardCatalogedArgumentParser.createIdentity("integer", IntegerArgumentType.integer()),
                 new SpongeIPAddressValueParameter(),
+                StandardCatalogedArgumentParser.createConverter("item_stack_snapshot", ItemArgument.item(),
+                        (reader, cause, converter) ->
+                                new SpongeItemStackSnapshot((ItemStack) (Object) converter.createStack(1, true))),
                 new SpongeServerLocationValueParameter(true),
                 new SpongeServerLocationValueParameter(false),
                 StandardCatalogedArgumentParser.createIdentity("long", LongArgumentType.longArg()),
