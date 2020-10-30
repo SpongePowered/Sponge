@@ -52,6 +52,7 @@ import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -138,6 +139,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract Vec3d shadow$getPositionVector();
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setWorld(World worldIn);
+    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
 
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
@@ -992,5 +994,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         } else {
             this.data$setCompound(null); // No data? No need to keep the nbt
         }
+    }
+
+    @Override
+    public void bridge$setLocationAndAngles(Transform transform) {
+        this.shadow$setPosition(transform.getPosition().getX(), transform.getPosition().getY(), transform.getPosition().getZ());
+        this.shadow$setRotation((float) transform.getYaw(), (float) transform.getPitch());
     }
 }

@@ -139,9 +139,7 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
     @Shadow private void captureCurrentPosition() {}
     @Shadow protected abstract long currentTimeMillis();
 
-    private boolean impl$justTeleported = false;
     private long impl$lastTryBlockPacketTimeStamp = 0;
-    @Nullable private ServerLocation impl$lastMoveLocation = null;
     @Nullable private ResourcePack impl$lastReceivedPack, lastAcceptedPack;
     private final AtomicInteger impl$numResourcePacksInTransit = new AtomicInteger();
     private final LongObjectHashMap<Runnable> impl$customKeepAliveCallbacks = new LongObjectHashMap<>();
@@ -256,133 +254,6 @@ public abstract class ServerPlayNetHandlerMixin implements ServerPlayNetHandlerB
     private void impl$setTeleported(
         final double x, final double y, final double z, final float yaw, final float pitch, final Set<?> relativeSet, final CallbackInfo ci) {
         this.impl$justTeleported = true;
-    }
-
-    /**
-     * @author gabizou - June 22nd, 2016
-     * @reason Sponge has to throw the movement events before we consider moving the player and there's
-     * no clear way to go about it with the target position being null and the last position update checks.
-     * @param packetIn
-     */
-    @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;queuedEndExit:Z"))
-    private boolean throwMoveEvent(final ServerPlayerEntity playerMP, final CPlayerPacket packetIn) {
-        if (!playerMP.queuedEndExit) {
-
-            // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
-            // We don't fire an event to avoid confusing plugins.
-            if (!((CPlayerPacketAccessor) packetIn).accessor$getMoving() && !((CPlayerPacketAccessor) packetIn).accessor$getRotating()) {
-                return playerMP.queuedEndExit;
-            }
-
-            // Sponge Start - Movement event
-            final Player player = (Player) this.player;
-            final ServerPlayerEntityBridge mixinPlayer = (ServerPlayerEntityBridge) this.player;
-            final Vector3d fromRotation = player.getRotation();
-
-            // If Sponge used the player's current location, the delta might never be triggered which could be exploited
-            ServerLocation fromLocation = player.getLocation();
-            if (this.impl$lastMoveLocation != null) {
-                fromLocation = this.impl$lastMoveLocation;
-            }
-
-            ServerLocation toLocation = ServerLocation.of(player.getWorld(), ((CPlayerPacketAccessor) packetIn).accessor$getX(), ((CPlayerPacketAccessor) packetIn).accessor$getY(), ((CPlayerPacketAccessor) packetIn).accessor$getZ());
-            Vector3d toRotation = new Vector3d(((CPlayerPacketAccessor) packetIn).accessor$getPitch(), ((CPlayerPacketAccessor) packetIn).accessor$getYaw(), 0);
-
-            // If we have zero movement, we have rotation only, we might as well note that now.
-            final boolean zeroMovement = !((CPlayerPacketAccessor) packetIn).accessor$getMoving() || toLocation.getPosition().equals(fromLocation.getPosition());
-
-            // Minecraft does the same with rotation when it's only a positional update
-            // Branch executed for CPacketPlayer.Position
-            boolean firePositionEvent = ((CPlayerPacketAccessor) packetIn).accessor$getMoving() && !((CPlayerPacketAccessor) packetIn).accessor$getRotating();
-            if (firePositionEvent) {
-                // Correct the new rotation to match the old rotation
-                toRotation = fromRotation;
-
-                firePositionEvent = !zeroMovement && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
-            }
-
-            // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
-            // Branch executed for CPacketPlayer.Rotation
-            boolean fireRotationEvent = !((CPlayerPacketAccessor) packetIn).accessor$getMoving() && ((CPlayerPacketAccessor) packetIn).accessor$getRotating();
-
-
-            if (fireRotationEvent) {
-                // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
-                // In this case it's only a rotation update, which isn't related to the to location
-                fromLocation = player.getLocation();
-                toLocation = fromLocation;
-
-                fireRotationEvent = ShouldFire.ROTATE_ENTITY_EVENT;
-            }
-
-            // Branch executed for CPacketPlayer.PositionRotation
-            if (((CPlayerPacketAccessor) packetIn).accessor$getMoving() && ((CPlayerPacketAccessor) packetIn).accessor$getRotating()) {
-                firePositionEvent = !zeroMovement && ShouldFire.MOVE_ENTITY_EVENT_POSITION;
-                fireRotationEvent = ShouldFire.ROTATE_ENTITY_EVENT;
-            }
-
-            mixinPlayer.bridge$setVelocityOverride(toLocation.getPosition().sub(fromLocation.getPosition()));
-
-            // These magic numbers are sad but help prevent excessive lag from this event.
-            // eventually it would be nice to not have them
-            final boolean significantMovement =
-                    !zeroMovement && toLocation.getPosition().distanceSquared(fromLocation.getPosition())  > ((1f / 16) * (1f / 16));
-            final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
-
-            if (significantMovement || significantRotation) {
-                final Transform fromTransform = player.getTransform().withPosition(fromLocation).setRotation(fromRotation);
-                Transform toTransform = player.getTransform().withPosition(toLocation).setRotation(toRotation);
-                final Transform originalToTransform = toTransform;
-
-                // We should only have fireRotationEvent set to true only if there is no movement and so we are not
-                // firing the MoveEntityEvent.Position event anyway. Otherwise, there would be a bug (pointed out in
-                // https://github.com/SpongePowered/SpongeCommon/pull/2373#issuecomment-541351230) where the rotate event will be
-                // fired if ShouldFire.MOVE_ENTITY_EVENT_POSITION is false and the event would normally be the MoveEntityEvent.Position,
-                // rather than a RotateEntityEvent.
-                //
-                // Note that, as the code is written above, if there is a significant rotation but NOT a significant movement (but still
-                // non-zero), then a MoveEntityEvent.Position will be fired, not a rotation event, as some movement is still involved.
-                //
-                // See the API javadocs for RotateEntityEvent for this restriction.
-                fireRotationEvent = fireRotationEvent && zeroMovement;
-
-                if (fireRotationEvent || firePositionEvent) {
-                    final Event event;
-                    if (fireRotationEvent) {
-                        event = SpongeEventFactory.createRotateEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
-                    } else {
-                        event = SpongeEventFactory.createMoveEntityEventPosition(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, player);
-                    }
-                    if (SpongeCommon.postEvent(event)) {
-                        ((EntityBridge) mixinPlayer).bridge$setLocationAndAngles(fromTransform);
-                        this.impl$lastMoveLocation = fromLocation;
-                        mixinPlayer.bridge$setVelocityOverride(null);
-                        return true;
-                    }
-                    if (fireRotationEvent) {
-                        toTransform = ((RotateEntityEvent) event).getToTransform();
-                    } else {
-                        toTransform = ((MoveEntityEvent) event).getToTransform();
-                    }
-                }
-                if (!toTransform.equals(originalToTransform)) {
-                    ((EntityBridge) mixinPlayer).bridge$setLocationAndAngles(toTransform);
-                    this.impl$lastMoveLocation = toTransform.getLocation();
-                    mixinPlayer.bridge$setVelocityOverride(null);
-                    return true;
-                } else if (!fromTransform.getLocation().equals(player.getLocation()) && this.impl$justTeleported) {
-                    this.impl$lastMoveLocation = player.getLocation();
-                    // Prevent teleports during the move event from causing odd behaviors
-                    this.impl$justTeleported = false;
-                    mixinPlayer.bridge$setVelocityOverride(null);
-                    return true;
-                } else {
-                    this.impl$lastMoveLocation = toTransform.getLocation();
-                }
-                this.bridge$resendLatestResourcePackRequest();
-            }
-        }
-        return playerMP.queuedEndExit;
     }
 
     @Inject(

@@ -100,6 +100,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow private int lastExperience;
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private @Nullable ITextComponent impl$connectionMessage;
+    @Nullable private Vector3d impl$velocityOverride = null;
 
     @Override
     public @Nullable ITextComponent bridge$getConnectionMessageToSend() {
@@ -377,8 +378,18 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             target = "Lnet/minecraft/entity/player/ServerPlayerEntity;closeScreen()V"
         )
     )
+
     private void impl$closePreviousContainer(final ServerPlayerEntity self) {
         this.shadow$closeContainer();
     }
 
+    @Override
+    public void bridge$setVelocityOverride(@Nullable Vector3d velocity) {
+        this.impl$velocityOverride = velocity;
+    }
+
+    @Override
+    @Nullable public Vector3d bridge$getVelocityOverride() {
+        return this.impl$velocityOverride;
+    }
 }

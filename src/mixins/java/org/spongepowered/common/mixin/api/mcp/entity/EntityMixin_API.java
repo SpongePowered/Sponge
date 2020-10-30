@@ -26,11 +26,9 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SPlayerPositionLookPacket;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
@@ -63,13 +61,14 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$"))
@@ -123,6 +122,15 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public boolean setLocation(ServerLocation location) {
         Preconditions.checkNotNull(location, "The location was null!");
         return ((EntityBridge) this).bridge$setLocation(location);
+    }
+
+    @Override
+    public boolean setLocationAndRotation(ServerLocation location, Vector3d rotation) {
+        if (this.setLocation(location)) {
+            this.setRotation(rotation);
+            return true;
+        }
+        return false;
     }
 
     @Override
