@@ -348,7 +348,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     @SuppressWarnings("unchecked")
     public boolean processTransactions(final PhaseContext<@NonNull ?> context) {
         if ((GameTransaction<@NonNull ?>) this.head == null) {
-            return true;
+            return false;
         }
         final ImmutableList<EventByTransaction<@NonNull ?>> batched = TransactionalCaptureSupplier.batchTransactions(
             this.head, this.head, context
@@ -384,7 +384,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 }
             }
         }
-        return cancelledAny;
+        return !cancelledAny;
     }
 
     @SuppressWarnings("unchecked")
