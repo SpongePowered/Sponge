@@ -83,36 +83,6 @@ public abstract class NetHandlerPlayServerMixin_Vanilla implements RemoteConnect
         ((VanillaChannelRegistrar) Sponge.getChannelRegistrar()).registerChannels((NetHandlerPlayServer) (Object) this);
     }
 
-    @Inject(method = "processChatMessage",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;Z)V"),
-        cancellable = true,
-        locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vanilla$onProcessChatMessage(CPacketChatMessage packet, CallbackInfo ci, String s, ITextComponent component) {
-        ChatFormatter.formatChatComponent((TextComponentTranslation) component);
-        final Text[] message = SpongeTexts.splitChatMessage((TextComponentTranslation) component); // safe cast
-        final MessageChannel originalChannel = ((Player) this.player).getMessageChannel();
-        Sponge.getCauseStackManager().pushCause(this.player);
-        final MessageChannelEvent.Chat event = SpongeEventFactory.createMessageChannelEventChat(
-                Sponge.getCauseStackManager().getCurrentCause(), originalChannel, Optional.of(originalChannel),
-                new MessageEvent.MessageFormatter(message[0], message[1]), Text.of(s), false);
-        if (!SpongeCommon.postEvent(event) && !event.isMessageCancelled()) {
-            event.getChannel().ifPresent(channel -> channel.send(this.player, event.getMessage(), ChatTypes.CHAT));
-        } else {
-            ci.cancel();
-        }
-        Sponge.getCauseStackManager().popCause();
-    }
-
-    @Redirect(method = "processChatMessage",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;Z)V") )
-    private void vanilla$cancelSendChatMsgImpl(PlayerList manager, ITextComponent component, boolean chat) {
-        // Do nothing
-    }
-
     @Inject(method = "processCustomPayload",
         at = @At(
             value = "INVOKE",
