@@ -33,6 +33,7 @@ import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.DoubleSidedInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.MerchantInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.tileentity.LockableTileEntity;
@@ -64,8 +65,9 @@ import javax.annotation.Nullable;
         CraftResultInventory.class,
         ContainerMinecartEntity.class,
         ArmorStandEntity.class,
-        MobEntity.class
-}, priority = 999)
+        MobEntity.class,
+        MerchantInventory.class
+}, targets = "net.minecraft.tileentity.LecternTileEntity$1", priority = 999)
 public abstract class TraitMixin_InventoryBridge_Inventory implements InventoryAdapter, InventoryBridge {
 
     @Nullable private SlotLensProvider impl$provider;
