@@ -113,7 +113,8 @@ public class SpongeUserStorageService implements UserStorageService {
         Collection<GameProfile> allProfiles = UserDiscoverer.getAllProfiles();
         Collection<GameProfile> matching = Sets.newHashSet();
         for (GameProfile profile : allProfiles) {
-            if (profile.getName().isPresent() && profile.getName().get().startsWith(lastKnownName)) {
+            Optional<String> name = profile.getName();
+            if (name.isPresent() && name.get().toLowerCase(Locale.ROOT).startsWith(lastKnownName)) {
                 matching.add(profile);
             }
         }
