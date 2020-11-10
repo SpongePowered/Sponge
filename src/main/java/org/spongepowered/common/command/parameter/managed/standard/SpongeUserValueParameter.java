@@ -73,7 +73,7 @@ public final class SpongeUserValueParameter extends CatalogedArgumentParser<User
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
-        return Sponge.getServer().getUserManager().streamOfMatches(currentInput).filter(GameProfile::isFilled)
+        return Sponge.getServer().getUserManager().streamOfMatches(currentInput).filter(GameProfile::hasName)
                 .map(x -> x.getName().orElse("")).collect(Collectors.toList());
     }
 
