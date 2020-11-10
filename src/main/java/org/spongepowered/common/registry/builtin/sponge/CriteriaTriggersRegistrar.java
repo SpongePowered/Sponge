@@ -25,12 +25,11 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.ICriterionTrigger;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.registry.SpongeCatalogRegistry;
+
+import java.util.stream.Stream;
 
 public final class CriteriaTriggersRegistrar {
 
@@ -39,56 +38,57 @@ public final class CriteriaTriggersRegistrar {
 
     // Oh Vanilla, you're fun...
 
-    private static boolean vanillaRegistered = false;
-
     public static void registerRegistry(final SpongeCatalogRegistry registry) {
-        registry.generateCallbackRegistry(Trigger.class, ResourceKey.minecraft("trigger"), CriteriaTriggersRegistrar::registerAdditional);
-    }
-
-    private static void registerAdditional(ResourceLocation resourceLocation, Trigger<?> t) {
-        if (CriteriaTriggersRegistrar.vanillaRegistered) {
-            CriteriaTriggersAccessor.accessor$register((ICriterionTrigger<?>) t);
-        }
+        registry.generateRegistry(Trigger.class, ResourceKey.minecraft("trigger"), Stream.empty(), false, false);
     }
 
     public static void registerSuppliers(final SpongeCatalogRegistry registry) {
         registry
-            .registerCatalogAndSupplier(Trigger.class, "impossible", () -> (Trigger) CriteriaTriggers.IMPOSSIBLE)
-            .registerCatalogAndSupplier(Trigger.class, "player_killed_entity", () -> (Trigger) CriteriaTriggers.PLAYER_KILLED_ENTITY)
-            .registerCatalogAndSupplier(Trigger.class, "entity_killed_player", () -> (Trigger) CriteriaTriggers.ENTITY_KILLED_PLAYER)
-            .registerCatalogAndSupplier(Trigger.class, "enter_block", () -> (Trigger) CriteriaTriggers.ENTER_BLOCK)
-            .registerCatalogAndSupplier(Trigger.class, "inventory_changed", () -> (Trigger) CriteriaTriggers.INVENTORY_CHANGED)
-            .registerCatalogAndSupplier(Trigger.class, "recipe_unlocked", () -> (Trigger) CriteriaTriggers.RECIPE_UNLOCKED)
-            .registerCatalogAndSupplier(Trigger.class, "player_hurt_entity", () -> (Trigger) CriteriaTriggers.PLAYER_HURT_ENTITY)
-            .registerCatalogAndSupplier(Trigger.class, "entity_hurt_player", () -> (Trigger) CriteriaTriggers.ENTITY_HURT_PLAYER)
-            .registerCatalogAndSupplier(Trigger.class, "enchanted_item", () -> (Trigger) CriteriaTriggers.ENCHANTED_ITEM)
-            .registerCatalogAndSupplier(Trigger.class, "filled_bucket", () -> (Trigger) CriteriaTriggers.FILLED_BUCKET)
-            .registerCatalogAndSupplier(Trigger.class, "brewed_potion", () -> (Trigger) CriteriaTriggers.BREWED_POTION)
-            .registerCatalogAndSupplier(Trigger.class, "construct_beacon", () -> (Trigger) CriteriaTriggers.CONSTRUCT_BEACON)
-            .registerCatalogAndSupplier(Trigger.class, "used_ender_eye", () -> (Trigger) CriteriaTriggers.USED_ENDER_EYE)
-            .registerCatalogAndSupplier(Trigger.class, "summoned_entity", () -> (Trigger) CriteriaTriggers.SUMMONED_ENTITY)
-            .registerCatalogAndSupplier(Trigger.class, "bred_animals", () -> (Trigger) CriteriaTriggers.BRED_ANIMALS)
-            .registerCatalogAndSupplier(Trigger.class, "location", () -> (Trigger) CriteriaTriggers.LOCATION)
-            .registerCatalogAndSupplier(Trigger.class, "slept_in_bed", () -> (Trigger) CriteriaTriggers.SLEPT_IN_BED)
-            .registerCatalogAndSupplier(Trigger.class, "cured_zombie_villager", () -> (Trigger) CriteriaTriggers.CURED_ZOMBIE_VILLAGER)
-            .registerCatalogAndSupplier(Trigger.class, "villager_trade", () -> (Trigger) CriteriaTriggers.VILLAGER_TRADE)
-            .registerCatalogAndSupplier(Trigger.class, "item_durability_changed", () -> (Trigger) CriteriaTriggers.ITEM_DURABILITY_CHANGED)
-            .registerCatalogAndSupplier(Trigger.class, "levitation", () -> (Trigger) CriteriaTriggers.LEVITATION)
-            .registerCatalogAndSupplier(Trigger.class, "changed_dimension", () -> (Trigger) CriteriaTriggers.CHANGED_DIMENSION)
-            .registerCatalogAndSupplier(Trigger.class, "tick", () -> (Trigger) CriteriaTriggers.TICK)
-            .registerCatalogAndSupplier(Trigger.class, "tame_animal", () -> (Trigger) CriteriaTriggers.TAME_ANIMAL)
-            .registerCatalogAndSupplier(Trigger.class, "placed_block", () -> (Trigger) CriteriaTriggers.PLACED_BLOCK)
-            .registerCatalogAndSupplier(Trigger.class, "consume_item", () -> (Trigger) CriteriaTriggers.CONSUME_ITEM)
-            .registerCatalogAndSupplier(Trigger.class, "effects_changed", () -> (Trigger) CriteriaTriggers.EFFECTS_CHANGED)
-            .registerCatalogAndSupplier(Trigger.class, "used_totem", () -> (Trigger) CriteriaTriggers.USED_TOTEM)
-            .registerCatalogAndSupplier(Trigger.class, "nether_travel", () -> (Trigger) CriteriaTriggers.NETHER_TRAVEL)
-            .registerCatalogAndSupplier(Trigger.class, "fishing_rod_hooked", () -> (Trigger) CriteriaTriggers.FISHING_ROD_HOOKED)
-            .registerCatalogAndSupplier(Trigger.class, "channeled_lightning", () -> (Trigger) CriteriaTriggers.CHANNELED_LIGHTNING)
-            .registerCatalogAndSupplier(Trigger.class, "shot_crossbow", () -> (Trigger) CriteriaTriggers.SHOT_CROSSBOW)
-            .registerCatalogAndSupplier(Trigger.class, "killed_by_crossbow", () -> (Trigger) CriteriaTriggers.KILLED_BY_CROSSBOW)
-            .registerCatalogAndSupplier(Trigger.class, "hero_of_the_village", () -> (Trigger) CriteriaTriggers.HERO_OF_THE_VILLAGE)
-            .registerCatalogAndSupplier(Trigger.class, "voluntary_exile", () -> (Trigger) CriteriaTriggers.VOLUNTARY_EXILE)
+                .registerCatalogAndSupplier(Trigger.class, "impossible", () -> (Trigger) CriteriaTriggers.IMPOSSIBLE)
+                .registerCatalogAndSupplier(Trigger.class, "player_killed_entity", () -> (Trigger) CriteriaTriggers.PLAYER_KILLED_ENTITY)
+                .registerCatalogAndSupplier(Trigger.class, "entity_killed_player", () -> (Trigger) CriteriaTriggers.ENTITY_KILLED_PLAYER)
+                .registerCatalogAndSupplier(Trigger.class, "enter_block", () -> (Trigger) CriteriaTriggers.ENTER_BLOCK)
+                .registerCatalogAndSupplier(Trigger.class, "inventory_changed", () -> (Trigger) CriteriaTriggers.INVENTORY_CHANGED)
+                .registerCatalogAndSupplier(Trigger.class, "recipe_unlocked", () -> (Trigger) CriteriaTriggers.RECIPE_UNLOCKED)
+                .registerCatalogAndSupplier(Trigger.class, "player_hurt_entity", () -> (Trigger) CriteriaTriggers.PLAYER_HURT_ENTITY)
+                .registerCatalogAndSupplier(Trigger.class, "entity_hurt_player", () -> (Trigger) CriteriaTriggers.ENTITY_HURT_PLAYER)
+                .registerCatalogAndSupplier(Trigger.class, "enchanted_item", () -> (Trigger) CriteriaTriggers.ENCHANTED_ITEM)
+                .registerCatalogAndSupplier(Trigger.class, "filled_bucket", () -> (Trigger) CriteriaTriggers.FILLED_BUCKET)
+                .registerCatalogAndSupplier(Trigger.class, "brewed_potion", () -> (Trigger) CriteriaTriggers.BREWED_POTION)
+                .registerCatalogAndSupplier(Trigger.class, "construct_beacon", () -> (Trigger) CriteriaTriggers.CONSTRUCT_BEACON)
+                .registerCatalogAndSupplier(Trigger.class, "used_ender_eye", () -> (Trigger) CriteriaTriggers.USED_ENDER_EYE)
+                .registerCatalogAndSupplier(Trigger.class, "summoned_entity", () -> (Trigger) CriteriaTriggers.SUMMONED_ENTITY)
+                .registerCatalogAndSupplier(Trigger.class, "bred_animals", () -> (Trigger) CriteriaTriggers.BRED_ANIMALS)
+                .registerCatalogAndSupplier(Trigger.class, "location", () -> (Trigger) CriteriaTriggers.LOCATION)
+                .registerCatalogAndSupplier(Trigger.class, "slept_in_bed", () -> (Trigger) CriteriaTriggers.SLEPT_IN_BED)
+                .registerCatalogAndSupplier(Trigger.class, "cured_zombie_villager", () -> (Trigger) CriteriaTriggers.CURED_ZOMBIE_VILLAGER)
+                .registerCatalogAndSupplier(Trigger.class, "villager_trade", () -> (Trigger) CriteriaTriggers.VILLAGER_TRADE)
+                .registerCatalogAndSupplier(Trigger.class, "item_durability_changed", () -> (Trigger) CriteriaTriggers.ITEM_DURABILITY_CHANGED)
+                .registerCatalogAndSupplier(Trigger.class, "levitation", () -> (Trigger) CriteriaTriggers.LEVITATION)
+                .registerCatalogAndSupplier(Trigger.class, "changed_dimension", () -> (Trigger) CriteriaTriggers.CHANGED_DIMENSION)
+                .registerCatalogAndSupplier(Trigger.class, "tick", () -> (Trigger) CriteriaTriggers.TICK)
+                .registerCatalogAndSupplier(Trigger.class, "tame_animal", () -> (Trigger) CriteriaTriggers.TAME_ANIMAL)
+                .registerCatalogAndSupplier(Trigger.class, "placed_block", () -> (Trigger) CriteriaTriggers.PLACED_BLOCK)
+                .registerCatalogAndSupplier(Trigger.class, "consume_item", () -> (Trigger) CriteriaTriggers.CONSUME_ITEM)
+                .registerCatalogAndSupplier(Trigger.class, "effects_changed", () -> (Trigger) CriteriaTriggers.EFFECTS_CHANGED)
+                .registerCatalogAndSupplier(Trigger.class, "used_totem", () -> (Trigger) CriteriaTriggers.USED_TOTEM)
+                .registerCatalogAndSupplier(Trigger.class, "nether_travel", () -> (Trigger) CriteriaTriggers.NETHER_TRAVEL)
+                .registerCatalogAndSupplier(Trigger.class, "fishing_rod_hooked", () -> (Trigger) CriteriaTriggers.FISHING_ROD_HOOKED)
+                .registerCatalogAndSupplier(Trigger.class, "channeled_lightning", () -> (Trigger) CriteriaTriggers.CHANNELED_LIGHTNING)
+                .registerCatalogAndSupplier(Trigger.class, "shot_crossbow", () -> (Trigger) CriteriaTriggers.SHOT_CROSSBOW)
+                .registerCatalogAndSupplier(Trigger.class, "killed_by_crossbow", () -> (Trigger) CriteriaTriggers.KILLED_BY_CROSSBOW)
+                .registerCatalogAndSupplier(Trigger.class, "hero_of_the_village", () -> (Trigger) CriteriaTriggers.HERO_OF_THE_VILLAGE)
+                .registerCatalogAndSupplier(Trigger.class, "voluntary_exile", () -> (Trigger) CriteriaTriggers.VOLUNTARY_EXILE)
+                .registerCatalogAndSupplier(Trigger.class, "filled_bucket", () -> (Trigger) CriteriaTriggers.FILLED_BUCKET)
+                .registerCatalogAndSupplier(Trigger.class, "effects_changed", () -> (Trigger) CriteriaTriggers.EFFECTS_CHANGED)
+                .registerCatalogAndSupplier(Trigger.class, "fishing_rod_hooked", () -> (Trigger) CriteriaTriggers.FISHING_ROD_HOOKED)
+                .registerCatalogAndSupplier(Trigger.class, "channeled_lightning", () -> (Trigger) CriteriaTriggers.CHANNELED_LIGHTNING)
+                .registerCatalogAndSupplier(Trigger.class, "shot_crossbow", () -> (Trigger) CriteriaTriggers.SHOT_CROSSBOW)
+                .registerCatalogAndSupplier(Trigger.class, "killed_by_crossbow", () -> (Trigger) CriteriaTriggers.KILLED_BY_CROSSBOW)
+                .registerCatalogAndSupplier(Trigger.class, "hero_of_the_village", () -> (Trigger) CriteriaTriggers.HERO_OF_THE_VILLAGE)
+                .registerCatalogAndSupplier(Trigger.class, "voluntary_exile", () -> (Trigger) CriteriaTriggers.VOLUNTARY_EXILE)
+                .registerCatalogAndSupplier(Trigger.class, "safely_harvest_honey", () -> (Trigger) CriteriaTriggers.SAFELY_HARVEST_HONEY)
+                .registerCatalogAndSupplier(Trigger.class, "slide_down_block", () -> (Trigger) CriteriaTriggers.field_229864_K_)
         ;
-        CriteriaTriggersRegistrar.vanillaRegistered = true;
     }
 }
