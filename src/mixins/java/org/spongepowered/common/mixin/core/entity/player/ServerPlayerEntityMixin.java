@@ -71,6 +71,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
@@ -125,7 +126,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             return this.bridge$getUserObject();
         }
         // Ensure that the game profile is up to date.
-        return ((SpongeUserManager) SpongeCommon.getGame().getServer().getUserManager()).forceRecreateUser((GameProfile) this.shadow$getGameProfile());
+        return ((SpongeUserManager) SpongeCommon.getGame().getServer().getUserManager()).forceRecreateUser(SpongeGameProfile.of(this.shadow$getGameProfile()));
     }
 
     @Override

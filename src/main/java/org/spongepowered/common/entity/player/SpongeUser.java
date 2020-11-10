@@ -63,6 +63,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
@@ -94,7 +95,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public final class SpongeUser implements User, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder, SpongeBridgeSubject, SubjectBridge,
-        DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge {
+        DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge, GameProfileHolderBridge {
 
     public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
     public static final Set<SpongeUser> initializedUsers = ConcurrentHashMap.newKeySet();
@@ -788,4 +789,10 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             .add("profile", this.getProfile())
             .toString();
     }
+
+    @Override
+    public GameProfile bridge$getGameProfile() {
+        return this.profile;
+    }
+
 }

@@ -29,6 +29,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeGame;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -57,7 +59,7 @@ public class UserCollection extends SpongeSubjectCollection {
 
     private GameProfile uuidToGameProfile(final UUID uuid) {
         try {
-            return (GameProfile) Sponge.getServer().getGameProfileManager().getBasicProfile(uuid).get();
+            return SpongeGameProfile.toMcProfile(Sponge.getServer().getGameProfileManager().getBasicProfile(uuid).get());
         } catch (final Exception e) {
             SpongeCommon.getLogger().warn("Failed to lookup game profile for {}", uuid, e);
             // TODO: I'm sure this is null for a reason, but it breaks subjects.

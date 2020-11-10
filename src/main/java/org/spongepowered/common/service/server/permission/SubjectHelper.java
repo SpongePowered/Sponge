@@ -25,14 +25,16 @@
 package org.spongepowered.common.service.server.permission;
 
 import com.google.common.base.Preconditions;
-import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 /**
  * {@link SubjectBridge} helper class to apply the appropriate subject to the
@@ -54,9 +56,9 @@ public final class SubjectHelper {
             final SpongePermissionService serv = (SpongePermissionService) service;
             final SpongeSubjectCollection collection = serv.get(ref.bridge$getSubjectCollectionIdentifier());
 
-            if (ref instanceof User && collection instanceof UserCollection) {
+            if (ref instanceof GameProfileHolderBridge && collection instanceof UserCollection) {
                 // GameProfile is already resolved, use it directly
-                subject = ((UserCollection) collection).get((GameProfile) ((User) ref).getProfile()).asSubjectReference();
+                subject = ((UserCollection) collection).get(((GameProfileHolderBridge) ref).bridge$getGameProfile()).asSubjectReference();
             } else {
                 subject = collection.get(((Subject) ref).getIdentifier()).asSubjectReference();
             }

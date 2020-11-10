@@ -64,6 +64,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
+import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -81,7 +82,7 @@ import org.spongepowered.math.vector.Vector3d;
 import javax.annotation.Nullable;
 
 @Mixin(PlayerEntity.class)
-public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerEntityBridge, LocationTargetingBridge {
+public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerEntityBridge, LocationTargetingBridge, GameProfileHolderBridge {
 
     @Shadow public int experienceLevel;
     @Shadow public int experienceTotal;
@@ -104,6 +105,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
     @Shadow @Final public PlayerContainer container;
 
+    @Shadow @Final private GameProfile gameProfile;
     private boolean impl$affectsSpawning = true;
     private Vector3d impl$targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
     private boolean impl$dontRecalculateExperience;
@@ -303,6 +305,11 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         return this.impl$shouldRestoreInventory;
     }
 
+    @Override
+    public GameProfile bridge$getGameProfile() {
+        return this.gameProfile;
+    }
+
     @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
     private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
         if (this.impl$hasCustomFireImmuneTicks) {
@@ -310,7 +317,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         }
     }
 
-/*    @Override
+    /*    @Override
     public boolean impl$isImmuneToFireForIgniteEvent() {
         return this.shadow$isSpectator() || this.shadow$isCreative();
     }*/
