@@ -67,12 +67,20 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
     }
 
     @Override
-    public MinecraftDayTime plus(final Ticks ticks) {
+    public MinecraftDayTime add(final Ticks ticks) {
         return new SpongeMinecraftDayTime(this.internalTime + ticks.getTicks());
     }
 
     @Override
-    public MinecraftDayTime minus(final Ticks ticks) {
+    public MinecraftDayTime add(final int days, final int hours, final int minutes) {
+        Preconditions.checkArgument(days >= 0, "days is negative");
+        Preconditions.checkArgument(hours >= 0 && hours <= 23, "hours is not between 0 and 23");
+        Preconditions.checkArgument(minutes >= 0 && minutes <= 59, "minutes is not between 0 and 59");
+        return new SpongeMinecraftDayTime(this.internalTime + SpongeMinecraftDayTime.getTicksFor(days, hours, minutes));
+    }
+
+    @Override
+    public MinecraftDayTime subtract(final Ticks ticks) {
         final long time = this.internalTime - ticks.getTicks();
         if (time <= 0) {
             throw new IllegalArgumentException("ticks is larger than this day time object");
@@ -81,15 +89,7 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
     }
 
     @Override
-    public MinecraftDayTime plus(final int days, final int hours, final int minutes) {
-        Preconditions.checkArgument(days >= 0, "days is negative");
-        Preconditions.checkArgument(hours >= 0 && hours <= 23, "hours is not between 0 and 23");
-        Preconditions.checkArgument(minutes >= 0 && minutes <= 59, "minutes is not between 0 and 59");
-        return new SpongeMinecraftDayTime(this.internalTime + SpongeMinecraftDayTime.getTicksFor(days, hours, minutes));
-    }
-
-    @Override
-    public MinecraftDayTime minus(final int days, final int hours, final int minutes) {
+    public MinecraftDayTime subtract(final int days, final int hours, final int minutes) {
         Preconditions.checkArgument(days >= 0, "days is negative");
         Preconditions.checkArgument(hours >= 0 && hours <= 23, "hours is not between 0 and 23");
         Preconditions.checkArgument(minutes >= 0 && minutes <= 59, "minutes is not between 0 and 59");
