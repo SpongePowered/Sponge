@@ -1,16 +1,7 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        maven("https://files.minecraftforge.net/maven")
-        maven("https://repo-new.spongepowered.org/repository/maven-public")
-        maven("https://repo.spongepowered.org/maven")
-        mavenCentral()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath("org.spongepowered:mixingradle:0.7-SNAPSHOT")
-    }
-}
+import org.apache.commons.codec.digest.DigestUtils
+import java.io.FileInputStream
+import java.util.StringJoiner
+import java.util.Locale
 
 plugins {
     id("net.minecraftforge.gradle")
@@ -18,12 +9,9 @@ plugins {
     `java-library`
     idea
     eclipse
-    id("net.minecrell.licenser") version "0.4.1"
-}
-
-
-apply {
-    plugin("org.spongepowered.mixin")
+    id("org.cadixdev.licenser") version "0.5.0"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("org.spongepowered.mixin")
 }
 
 val apiProject = project.project("SpongeAPI")
@@ -33,6 +21,13 @@ val mcpMappings: String by project
 val minecraftDep: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
+
+val asmVersion: String by project
+val modlauncherVersion: String by project
+val mixinVersion: String by project
+val pluginSpiVersion: String by project
+val guavaVersion: String by project
+val junitVersion: String by project
 
 minecraft {
     mappings(mcpType, mcpMappings)
@@ -51,6 +46,7 @@ minecraft {
 tasks {
     compileJava {
         options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
+        options.encoding = "UTF-8"
     }
     jar {
         manifest {
@@ -65,24 +61,97 @@ tasks {
             ))
         }
     }
+    val mixinsJar by registering(Jar::class) {
+        getArchiveClassifier().set("mixins")
+        manifest {
+            attributes(mapOf(
+                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Vendor" to "SpongePowered",
+                    "Specification-Version" to apiProject.version,
+                    "Implementation-Title" to project.name,
+                    "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                    "Implementation-Vendor" to "SpongePowered"
+//                            "Implementation-Timestamp" to Instant.now().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            ))
+        }
+        from(mixins.get().output)
+    }
+    val accessorsJar by registering(Jar::class) {
+        getArchiveClassifier().set("accessors")
+        manifest {
+            attributes(mapOf(
+                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Vendor" to "SpongePowered",
+                    "Specification-Version" to apiProject.version,
+                    "Implementation-Title" to project.name,
+                    "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                    "Implementation-Vendor" to "SpongePowered"
+//                            "Implementation-Timestamp" to Instant.now().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            ))
+        }
+        from(accessors.get().output)
+    }
+    val launchJar by registering(Jar::class) {
+        getArchiveClassifier().set("launch")
+        manifest {
+            attributes(mapOf(
+                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Vendor" to "SpongePowered",
+                    "Specification-Version" to apiProject.version,
+                    "Implementation-Title" to project.name,
+                    "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                    "Implementation-Vendor" to "SpongePowered"
+//                            "Implementation-Timestamp" to Instant.now().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            ))
+        }
+        from(launch.get().output)
+    }
+    val applaunchJar by registering(Jar::class) {
+        getArchiveClassifier().set("applaunch")
+        manifest {
+            attributes(mapOf(
+                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Vendor" to "SpongePowered",
+                    "Specification-Version" to apiProject.version,
+                    "Implementation-Title" to project.name,
+                    "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                    "Implementation-Vendor" to "SpongePowered"
+//                            "Implementation-Timestamp" to Instant.now().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            ))
+        }
+        from(applaunch.get().output)
+    }
+
+    reobf {
+        create("mixinsJar")
+        create("accessorsJar")
+        create("launchJar")
+        // TODO: does applaunch need to be here? it has no reference to obf classes
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
 }
+
 version = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
 
 // Configurations
 val minecraftConfig by configurations.named("minecraft")
 
+val applaunchConfig by configurations.register("applaunch")
+
 val launchConfig by configurations.register("launch") {
     extendsFrom(minecraftConfig)
+    extendsFrom(applaunchConfig)
 }
 val accessorsConfig by configurations.register("accessors") {
     extendsFrom(minecraftConfig)
     extendsFrom(launchConfig)
 }
 val mixinsConfig by configurations.register("mixins") {
-    extendsFrom(launchConfig)
-    extendsFrom(minecraftConfig)
-}
-val modlauncherConfig by configurations.register("modlauncher") {
+    extendsFrom(applaunchConfig)
     extendsFrom(launchConfig)
     extendsFrom(minecraftConfig)
 }
@@ -90,7 +159,14 @@ val modlauncherConfig by configurations.register("modlauncher") {
 // create the sourcesets
 val main by sourceSets
 
+val applaunch by sourceSets.registering {
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = this, targetSource = main, implProject = project, dependencyConfigName = main.implementationConfigurationName)
+    project.dependencies {
+        mixinsConfig(this@registering.output)
+    }
+}
 val launch by sourceSets.registering {
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = applaunch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     project.dependencies {
         mixinsConfig(this@registering.output)
     }
@@ -106,17 +182,15 @@ val accessors by sourceSets.registering {
 }
 val mixins by sourceSets.registering {
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = launch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
+    applyNamedDependencyOnOutput(originProject = project, sourceAdding = applaunch.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = accessors.get(), targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
     applyNamedDependencyOnOutput(originProject = project, sourceAdding = main, targetSource = this, implProject = project, dependencyConfigName = this.implementationConfigurationName)
 }
 
-configure<org.spongepowered.asm.gradle.plugins.MixinExtension> {}
 repositories {
-    mavenLocal()
-    maven("https://files.minecraftforge.net/maven")
     maven {
-        name = "Sonatype Snapshots"
-        setUrl("https://oss.sonatype.org/content/repositories/snapshots/")
+        name = "sponge v2"
+        setUrl("https://repo-new.spongepowered.org/repository/maven-public/")
     }
 }
 dependencies {
@@ -124,13 +198,6 @@ dependencies {
 
     // api
     api(project(":SpongeAPI"))
-    api("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
-        exclude(group = "com.google.inject", module = "guice") // We use our own version
-    }
-
-    api("net.kyori:adventure-api:4.0.0-SNAPSHOT")
-    api("net.kyori:adventure-text-serializer-gson:4.0.0-SNAPSHOT")
-    api("net.kyori:adventure-text-serializer-legacy:4.0.0-SNAPSHOT")
 
     // Database stuffs... likely needs to be looked at
     implementation("com.zaxxer:HikariCP:2.6.3")
@@ -138,19 +205,23 @@ dependencies {
     implementation("com.h2database:h2:1.4.196")
     implementation("org.xerial:sqlite-jdbc:3.20.0")
     implementation("com.google.inject:guice:4.1.0")
+    implementation("javax.inject:javax.inject:1")
 
     // ASM - required for generating event listeners
-    implementation("org.ow2.asm:asm-util:6.2")
-    implementation("org.ow2.asm:asm-tree:6.2")
+    implementation("org.ow2.asm:asm-util:$asmVersion")
+    implementation("org.ow2.asm:asm-tree:$asmVersion")
+
+    // Implementation-only Adventure
+    implementation("net.kyori:adventure-serializer-configurate3:4.1.1")
+
+    annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig(project(":SpongeAPI"))
-    launchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
-        exclude(group = "com.google.inject", module = "guice") // We use our own version
-    }
-    launchConfig("org.spongepowered:mixin:0.8")
-    launchConfig("org.checkerframework:checker-qual:2.8.1")
-    launchConfig("com.google.guava:guava:21.0") {
+    launchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
+    launchConfig("org.spongepowered:mixin:$mixinVersion")
+    launchConfig("org.checkerframework:checker-qual:3.4.1")
+    launchConfig("com.google.guava:guava:$guavaVersion") {
         exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
         exclude(group = "com.google.j2objc", module = "j2objc-annotations")
@@ -158,28 +229,53 @@ dependencies {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
     launchConfig("com.google.inject:guice:4.1.0")
-
+    launchConfig("javax.inject:javax.inject:1")
     launchConfig("com.google.code.gson:gson:2.8.0")
-    launchConfig("org.ow2.asm:asm-tree:6.2")
-    launchConfig("org.ow2.asm:asm-util:6.2")
-    launchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
-    launchConfig("org.spongepowered:configurate-core:3.6.1")
-    launchConfig("org.spongepowered:configurate-hocon:3.6.1")
-    launchConfig("org.spongepowered:configurate-json:3.6.1")
-    launchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
+    launchConfig("org.ow2.asm:asm-tree:$asmVersion")
+    launchConfig("org.ow2.asm:asm-util:$asmVersion")
     add(launch.get().implementationConfigurationName, launchConfig)
 
+    // Applaunch -- initialization that needs to occur without game access
+    applaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
+    applaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
+    applaunchConfig("com.google.guava:guava:$guavaVersion")
+    applaunchConfig("org.spongepowered:configurate-core:3.7.1") {
+        exclude(group = "com.google.inject", module = "guice")
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+    }
+    applaunchConfig("org.spongepowered:configurate-hocon:3.7.1") {
+        exclude(group = "org.spongepowered", module = "configurate-core")
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+    }
+    applaunchConfig("org.spongepowered:configurate-json:3.7.1") {
+        exclude(group = "org.spongepowered", module = "configurate-core")
+        exclude(group = "com.google.guava", module = "guava")
+        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+    }
+    applaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
+    add(applaunch.get().implementationConfigurationName, applaunchConfig)
+
     // Annotation Processor
-    "accessorsAnnotationProcessor"(launchConfig)
-    "mixinsAnnotationProcessor"(launchConfig)
-    "accessorsAnnotationProcessor"("org.spongepowered:mixin:0.8")
-    "mixinsAnnotationProcessor"("org.spongepowered:mixin:0.8")
+    "accessorsAnnotationProcessor"("org.spongepowered:mixin:$mixinVersion:processor")
+    "mixinsAnnotationProcessor"("org.spongepowered:mixin:$mixinVersion:processor")
+    "accessorsAnnotationProcessor"("org.apache.logging.log4j:log4j-core:2.11.2")
+    "mixinsAnnotationProcessor"("org.apache.logging.log4j:log4j-core:2.11.2")
     mixinsConfig(sourceSets["main"].output)
     add(accessors.get().implementationConfigurationName, accessorsConfig)
     add(mixins.get().implementationConfigurationName, mixinsConfig)
     add(mixins.get().implementationConfigurationName, project(":SpongeAPI"))
-}
 
+    // Tests
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+}
+val extraSrgs = file("extra.srgs")
+mixin {
+    add("mixins", "spongecommon.mixins.refmap.json")
+    add("accessors", "spongecommon.accessors.refmap.json")
+}
 fun debug(logger: Logger, messsage: String) {
     println(message = messsage)
     if (System.getProperty("sponge.gradleDebug", "false")!!.toBoolean()) {
@@ -218,26 +314,28 @@ allprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
 
+    base {
+        archivesBaseName = name.toLowerCase(Locale.ENGLISH)
+    }
+
     tasks {
         withType(JavaCompile::class) {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
+            options.encoding = "UTF-8"
         }
     }
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
+    tasks.withType<AbstractArchiveTask> {
+        isPreserveFileTimestamps = false
+        isReproducibleFileOrder = true
+    }
     repositories {
-        mavenLocal()
         maven {
             name = "sponge v2"
             setUrl("https://repo-new.spongepowered.org/repository/maven-public/")
-        }
-        maven("https://repo.spongepowered.org/maven")
-        maven {
-            name = "Sonatype Snapshots"
-            setUrl("https://oss.sonatype.org/content/repositories/snapshots/")
         }
     }
     val spongeSnapshotRepo: String? by project
@@ -284,6 +382,8 @@ allprojects {
         }
     }
 }
+data class ProjectDep(val group: String, val module: String, val version: String)
+
 
 val testplugins: Project? = subprojects.find { "testplugins".equals(it.name) }
 if (testplugins != null) {
@@ -292,7 +392,7 @@ if (testplugins != null) {
             plugin("java-library")
             plugin("idea")
             plugin("eclipse")
-            plugin("net.minecrell.licenser")
+            plugin("org.cadixdev.licenser")
         }
 
         dependencies {
@@ -328,31 +428,39 @@ project("SpongeVanilla") {
         plugin("maven-publish")
         plugin("idea")
         plugin("eclipse")
-        plugin("net.minecrell.licenser")
+        plugin("org.cadixdev.licenser")
+        plugin("com.github.johnrengelman.shadow")
     }
 
     description = "The SpongeAPI implementation for Vanilla Minecraft"
     version = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
 
     val vanillaMinecraftConfig by configurations.named("minecraft")
-    val vanillaModLauncherConfig by configurations.register("modlauncher") {
-        extendsFrom(vanillaMinecraftConfig)
+    val vanillaAppLaunchConfig by configurations.register("applaunch") {
+    }
+    val vanillaInstallerConfig by configurations.register("installer") {
+    }
+
+    val vanillaInstaller by sourceSets.register("installer") {
     }
 
     val vanillaMain by sourceSets.named("main") {
         // implementation (compile) dependencies
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
     }
     val vanillaLaunch by sourceSets.register("launch") {
         // implementation (compile) dependencies
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaMain, implProject = vanillaProject, dependencyConfigName = vanillaMain.implementationConfigurationName)
     }
     val vanillaAccessors by sourceSets.register("accessors") {
         // implementation (compile) dependencies
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaMain, implProject = vanillaProject, dependencyConfigName = vanillaMain.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
@@ -363,14 +471,17 @@ project("SpongeVanilla") {
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaAccessors, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMain, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
     }
-    val vanillaModLauncher by sourceSets.register("modlauncher") {
+    val vanillaAppLaunch by sourceSets.register("applaunch") {
         // implementation (compile) dependencies
-        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
-        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaLaunch, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = vanillaLaunch, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaInstaller, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.implementationConfigurationName)
+        applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = this, targetSource = vanillaLaunch, implProject = vanillaProject, dependencyConfigName = vanillaLaunch.implementationConfigurationName)
         // runtime dependencies - literally add the rest of the project, because we want to launch the game
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaMixins, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
         applyNamedDependencyOnOutput(originProject = vanillaProject, sourceAdding = vanillaAccessors, targetSource = this, implProject = vanillaProject, dependencyConfigName = this.runtimeConfigurationName)
@@ -387,10 +498,11 @@ project("SpongeVanilla") {
         extendsFrom(vanillaMinecraftConfig)
     }
     val vanillaMixinsAnnotationProcessor by configurations.named(vanillaMixins.annotationProcessorConfigurationName)
-    val vanillaModLauncherImplementation by configurations.named(vanillaModLauncher.implementationConfigurationName) {
+    val vanillaInstallerImplementation by configurations.named(vanillaInstaller.implementationConfigurationName)
+    val vanillaAppLaunchImplementation by configurations.named(vanillaAppLaunch.implementationConfigurationName) {
         extendsFrom(launchConfig)
     }
-    val vanillaModLauncherRuntime by configurations.named(vanillaModLauncher.runtimeConfigurationName)
+    val vanillaAppLaunchRuntime by configurations.named(vanillaAppLaunch.runtimeConfigurationName)
 
     configure<net.minecraftforge.gradle.userdev.UserDevExtension> {
         mappings(mcpType, mcpMappings)
@@ -398,7 +510,8 @@ project("SpongeVanilla") {
             create("server") {
                 workingDirectory(vanillaProject.file("./run"))
                 args.addAll(listOf("nogui", "--launchTarget", "sponge_server_dev"))
-                main = "org.spongepowered.vanilla.modlauncher.Main"
+                main = "org.spongepowered.vanilla.applaunch.Main"
+                ideaModule("${rootProject.name}.${project.name}.applaunch")
             }
 
             create("client") {
@@ -406,15 +519,17 @@ project("SpongeVanilla") {
                 workingDirectory(vanillaProject.file("./run"))
                 args.addAll(listOf(
                         "--launchTarget", "sponge_client_dev",
-                        "--version", "1.14.4",
+                        "--version", "1.15.2",
                         "--accessToken", "0",
-                        "--assetIndex", "1.14",
+                        "--assetIndex", "1.15",
                         "--assetsDir", (tasks.findByName("downloadAssets") as net.minecraftforge.gradle.common.task.DownloadAssets).output.absolutePath
                 ))
+                property("org.lwjgl.system.SharedLibraryExtractDirectory", "lwjgl_dll")
                 jvmArgs.addAll(listOf(
                         "-Djava.library.path=" + (tasks.findByName("extractNatives") as net.minecraftforge.gradle.common.task.ExtractNatives).output.absolutePath
                 ))
-                main = "org.spongepowered.vanilla.modlauncher.Main"
+                main = "org.spongepowered.vanilla.applaunch.Main"
+                ideaModule("${rootProject.name}.${project.name}.applaunch")
             }
         }
         commonProject.sourceSets["main"].resources
@@ -436,55 +551,90 @@ project("SpongeVanilla") {
         api(launch.get().output)
         implementation(accessors.get().output)
         implementation(project(commonProject.path)) {
-            exclude(group = "net.minecraft", module = "$minecraftDep")
+            exclude(group = "net.minecraft", module = minecraftDep)
         }
+        annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
+
         vanillaMixinsImplementation(project(commonProject.path)) {
-            exclude(group = "net.minecraft", module = "$minecraftDep")
+            exclude(group = "net.minecraft", module = minecraftDep)
         }
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
-        add(vanillaLaunch.implementationConfigurationName, vanillaModLauncherConfig)
+        add(vanillaLaunch.implementationConfigurationName, vanillaAppLaunchConfig)
+        add(vanillaLaunch.implementationConfigurationName, vanillaMinecraftConfig)
 
-        vanillaModLauncherConfig(project(":SpongeAPI"))
-        vanillaModLauncherConfig("org.spongepowered:mixin:0.8")
-        vanillaModLauncherConfig("org.ow2.asm:asm-util:6.2")
-        vanillaModLauncherConfig("org.ow2.asm:asm-tree:6.2")
-        vanillaModLauncherConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
-            exclude(group = "com.google.inject", module = "guice") // We use our own version
+        vanillaInstallerConfig("com.google.code.gson:gson:2.8.0")
+        vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.3")
+        vanillaInstallerConfig("org.apache.logging.log4j:log4j-api:2.11.2")
+        vanillaInstallerConfig("org.apache.logging.log4j:log4j-core:2.11.2")
+        vanillaInstallerConfig("org.cadixdev:atlas:0.2.0")
+        vanillaInstallerConfig("org.cadixdev:lorenz-asm:0.5.4")
+        vanillaInstallerImplementation(vanillaInstallerConfig)
+
+        vanillaAppLaunchConfig(project(":SpongeAPI"))
+        vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate3:4.1.1")
+        vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
+        vanillaAppLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
+        vanillaAppLaunchConfig("org.ow2.asm:asm-tree:$asmVersion")
+        vanillaAppLaunchConfig("com.google.guava:guava:$guavaVersion")
+        vanillaAppLaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
+        vanillaAppLaunchConfig("javax.inject:javax.inject:1")
+        vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
+        vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
+        vanillaAppLaunchConfig("com.zaxxer:HikariCP:2.6.3")
+        vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
+        vanillaAppLaunchConfig("org.spongepowered:configurate-core:3.7.1") {
+            exclude(group = "com.google.guava", module = "guava")
+            exclude(group = "com.google.inject", module = "guice")
+            exclude(group = "org.checkerframework", module = "checker-qual")
         }
-        vanillaModLauncherConfig("org.apache.logging.log4j:log4j-api:2.11.2")
-        vanillaModLauncherConfig("org.apache.logging.log4j:log4j-core:2.11.2")
-        vanillaModLauncherRuntime("com.zaxxer:HikariCP:2.6.3")
-        vanillaModLauncherRuntime("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
+        vanillaAppLaunchConfig("org.spongepowered:configurate-hocon:3.7.1") {
+            exclude(group = "org.spongepowered", module = "configurate-core")
+            exclude(group = "com.google.guava", module = "guava")
+            exclude(group = "org.checkerframework", module = "checker-qual")
+        }
+        vanillaAppLaunchConfig("org.spongepowered:configurate-json:3.7.1") {
+            exclude(group = "org.spongepowered", module = "configurate-core")
+            exclude(group = "com.google.guava", module = "guava")
+            exclude(group = "org.checkerframework", module = "checker-qual")
+        }
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer
-        vanillaModLauncherImplementation("cpw.mods:modlauncher:4.1.+") {
+        vanillaAppLaunchConfig("cpw.mods:modlauncher:$modlauncherVersion") {
             exclude(group = "org.apache.logging.log4j")
         }
-        vanillaModLauncherImplementation("org.ow2.asm:asm-commons:6.2")
-        vanillaModLauncherImplementation("cpw.mods:grossjava9hacks:1.1.+") {
+        vanillaAppLaunchConfig("org.ow2.asm:asm-commons:$asmVersion")
+        vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.1.+") {
             exclude(group = "org.apache.logging.log4j")
         }
-        vanillaModLauncherImplementation("net.minecraftforge:accesstransformers:1.0.+:shadowed") {
+        vanillaAppLaunchConfig("net.minecraftforge:accesstransformers:1.0.+:service") {
             exclude(group = "org.apache.logging.log4j")
         }
-        vanillaModLauncherImplementation(vanillaModLauncherConfig)
-        vanillaMixinsImplementation(vanillaModLauncherConfig)
-        vanillaAccessorsImplementation(vanillaModLauncherConfig)
+        vanillaAppLaunchImplementation(vanillaAppLaunchConfig)
+        vanillaMixinsImplementation(vanillaAppLaunchConfig)
+        vanillaMixinsImplementation(vanillaMinecraftConfig)
+        vanillaAccessorsImplementation(vanillaAppLaunchConfig)
+        vanillaAccessorsImplementation(vanillaMinecraftConfig)
 
         // Annotation Processor
-        vanillaAccessorsAnnotationProcessor(vanillaModLauncherImplementation)
-        vanillaMixinsAnnotationProcessor(vanillaModLauncherImplementation)
-        vanillaAccessorsAnnotationProcessor("org.spongepowered:mixin:0.8")
-        vanillaMixinsAnnotationProcessor("org.spongepowered:mixin:0.8")
+        vanillaAccessorsAnnotationProcessor(vanillaAppLaunchImplementation)
+        vanillaMixinsAnnotationProcessor(vanillaAppLaunchImplementation)
+        vanillaAccessorsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
+        vanillaMixinsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
+        vanillaAccessorsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion")
+        vanillaMixinsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion")
 
         testplugins?.apply {
-            vanillaModLauncherRuntime(project(testplugins.path)) {
+            vanillaAppLaunchRuntime(project(testplugins.path)) {
                 exclude(group = "org.spongepowered")
             }
         }
     }
 
+    mixin {
+        add(vanillaMixins, "spongevanilla.mixins.refmap.json")
+        add(vanillaAccessors, "spongevanilla.accessors.refmap.json")
+    }
 
     tasks {
         jar {
@@ -496,9 +646,140 @@ project("SpongeVanilla") {
                         "Implementation-Title" to project.name,
                         "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
                         "Implementation-Vendor" to "SpongePowered"
-//                            "Implementation-Timestamp" to Instant.now().format("yyyy-MM-dd'T'HH:mm:ssZ")
                 ))
             }
+        }
+        val vanillaInstallerJar by registering(Jar::class) {
+            getArchiveClassifier().set("installer")
+            manifest {
+                attributes(mapOf(
+                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Vendor" to "SpongePowered",
+                        "Specification-Version" to apiProject.version,
+                        "Implementation-Title" to project.name,
+                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Vendor" to "SpongePowered"
+                ))
+            }
+            from(vanillaInstaller.output)
+        }
+        val vanillaAppLaunchJar by registering(Jar::class) {
+            getArchiveClassifier().set("applaunch")
+            manifest {
+                attributes(mapOf(
+                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Vendor" to "SpongePowered",
+                        "Specification-Version" to apiProject.version,
+                        "Implementation-Title" to project.name,
+                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Vendor" to "SpongePowered"
+                ))
+            }
+            from(vanillaAppLaunch.output)
+        }
+        val vanillaLaunchJar by registering(Jar::class) {
+            getArchiveClassifier().set("launch")
+            manifest {
+                attributes(mapOf(
+                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Vendor" to "SpongePowered",
+                        "Specification-Version" to apiProject.version,
+                        "Implementation-Title" to project.name,
+                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Vendor" to "SpongePowered"
+                ))
+            }
+            from(vanillaLaunch.output)
+        }
+        val vanillaMixinsJar by registering(Jar::class) {
+            getArchiveClassifier().set("mixins")
+            manifest {
+                attributes(mapOf(
+                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Vendor" to "SpongePowered",
+                        "Specification-Version" to apiProject.version,
+                        "Implementation-Title" to project.name,
+                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Vendor" to "SpongePowered"
+                ))
+            }
+            from(vanillaMixins.output)
+        }
+        val vanillaAccessorsJar by registering(Jar::class) {
+            getArchiveClassifier().set("accessors")
+            manifest {
+                attributes(mapOf(
+                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Vendor" to "SpongePowered",
+                        "Specification-Version" to apiProject.version,
+                        "Implementation-Title" to project.name,
+                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Vendor" to "SpongePowered"
+                ))
+            }
+            from(vanillaAccessors.output)
+        }
+
+        val installerResources = vanillaProject.layout.buildDirectory.dir("generated/resources/installer")
+        vanillaInstaller.resources.srcDir(installerResources)
+        val emitDependencies by registering(OutputDependenciesToJson::class) {
+            group = "sponge"
+            // everything in applaunch
+            configuration.set(vanillaAppLaunchConfig)
+            // except what we're providing through the installer
+            excludeConfiguration.set(vanillaInstallerConfig)
+            // for accesstransformers
+            allowedClassifiers.add("service")
+
+            outputFile.set(installerResources.map { it.file("libraries.json") })
+        }
+        named(vanillaInstaller.processResourcesTaskName).configure {
+            dependsOn(emitDependencies)
+        }
+
+        shadowJar {
+            mergeServiceFiles()
+            val generateImplementationVersionString = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
+
+            archiveClassifier.set("universal")
+            manifest {
+                attributes(mapOf(
+                        "AT" to "common_at.cfg",
+                        "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
+                        "Launch-Target" to "sponge_server_prod",
+                        "Multi-Release" to true,
+                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Vendor" to "SpongePowered",
+                        "Specification-Version" to apiProject.version,
+                        "Implementation-Title" to project.name,
+                        "Implementation-Version" to generateImplementationVersionString,
+                        "Implementation-Vendor" to "SpongePowered"
+                ))
+            }
+            from(commonProject.tasks.jar)
+            from(commonProject.tasks.getByName("mixinsJar"))
+            from(commonProject.tasks.getByName("accessorsJar"))
+            from(commonProject.tasks.getByName("launchJar"))
+            from(commonProject.tasks.getByName("applaunchJar"))
+            from(jar)
+            from(vanillaInstallerJar)
+            from(vanillaAppLaunchJar)
+            from(vanillaLaunchJar)
+            from(vanillaMixinsJar)
+            from(vanillaAccessorsJar)
+            from(vanillaInstallerConfig)
+            dependencies {
+                include(project(":"))
+                include(project(":SpongeAPI"))
+            }
+        }
+
+        reobf {
+            create("vanillaAppLaunchJar")
+            create("vanillaLaunchJar")
+            create("vanillaMixinsJar")
+            create("vanillaAccessorsJar")
+            create("shadowJar")
         }
     }
 
@@ -514,6 +795,99 @@ project("SpongeVanilla") {
         newLine = false
     }
 }
+
+abstract class OutputDependenciesToJson: DefaultTask() {
+
+    companion object {
+        val GSON: com.google.gson.Gson = com.google.gson.GsonBuilder().also {
+            it.setPrettyPrinting()
+        }.create()
+    }
+
+    /**
+     * A single dependency
+     */
+    data class DependencyDescriptor(val group: String, val module: String, val version: String, val md5: String)
+
+    /**
+     * A manifest containing a list of dependencies.
+     *
+     * At runtime, transitive dependencies won't be traversed, so this needs to
+     * include direct + transitive depends.
+     */
+    data class DependencyManifest(val dependencies: List<DependencyDescriptor>)
+
+    /**
+     * Configuration to gather depenency artifacts from
+     */
+    @get:org.gradle.api.tasks.Input
+    abstract val configuration: Property<Configuration>
+
+    /**
+     * Excludes configuration, to remove certain entries from dependencies and transitive dependencies of [configuration]
+     */
+    @get:org.gradle.api.tasks.Input
+    abstract val excludeConfiguration: Property<Configuration>
+
+    /**
+     * Classifiers to include in the dependency manifest. The empty string identifies no classifier.
+     */
+    @get:org.gradle.api.tasks.Input
+    abstract val allowedClassifiers: SetProperty<String>
+
+    @get:org.gradle.api.tasks.OutputFile
+    abstract val outputFile: RegularFileProperty
+
+    init {
+        allowedClassifiers.add("")
+    }
+
+    @org.gradle.api.tasks.TaskAction
+    fun generateDependenciesJson() {
+        val foundConfig = if (this.excludeConfiguration.isPresent) {
+            val config = project.configurations.detachedConfiguration(*this.configuration.get().allDependencies.toTypedArray())
+            val excludes = this.excludeConfiguration.get()
+            excludes.allDependencies.forEach {
+                config.exclude(group = it.group, module = it.name)
+            }
+            config
+        } else {
+            this.configuration.get()
+        }
+
+        val manifest = foundConfig.resolvedConfiguration.firstLevelModuleDependencies.asSequence()
+                .flatMap { it.allModuleArtifacts.asSequence() }
+                // only jars with the allowed classifiers
+                .filter { it.extension == "jar" && allowedClassifiers.get().contains(it.classifier ?: "") }
+                .filter { it.moduleVersion.id.name != "SpongeAPI" }
+                .distinct()
+                .map { dependency ->
+
+                    val ident = dependency.moduleVersion.id
+                    val version = (dependency.id.componentIdentifier as? ModuleComponentIdentifier)?.version ?: ident.version
+                    // Get file input stream for reading the file content
+                    val md5hash = dependency.file.inputStream().use {
+                        DigestUtils.md5Hex(it)
+                    }
+
+                    // create descriptor
+                    DependencyDescriptor(
+                            group = ident.group,
+                            module = ident.name,
+                            version = version,
+                            md5 = md5hash
+                    )
+                }.toList().run {
+                    DependencyManifest(this)
+                }
+
+        println("Writing to ${outputFile.get().asFile}")
+        this.outputFile.get().asFile.bufferedWriter(Charsets.UTF_8).use {
+            GSON.toJson(manifest, it)
+        }
+    }
+
+}
 val spongeForge: Project? = subprojects.find { "SpongeForge".equals(it.name) }
 if (spongeForge != null) {
     project("SpongeForge") {
@@ -525,7 +899,8 @@ if (spongeForge != null) {
             plugin("maven-publish")
             plugin("idea")
             plugin("eclipse")
-            plugin("net.minecrell.licenser")
+            plugin("org.cadixdev.licenser")
+            plugin("com.github.johnrengelman.shadow")
         }
 
         val forgeDep: String by project
@@ -544,16 +919,19 @@ if (spongeForge != null) {
             // implementation (compile) dependencies
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
+            applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
         }
         val forgeLaunch by sourceSets.register("launch") {
             // implementation (compile) dependencies
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
+            applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = this, targetSource = forgeMain, implProject = forgeProject, dependencyConfigName = forgeMain.implementationConfigurationName)
         }
         val forgeAccessors by sourceSets.register("accessors") {
             // implementation (compile) dependencies
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
+            applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = this, targetSource = forgeMain, implProject = forgeProject, dependencyConfigName = forgeMain.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = forgeLaunch, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
@@ -564,6 +942,7 @@ if (spongeForge != null) {
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = accessors.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = forgeAccessors, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = launch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
+            applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = applaunch.get(), targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = commonProject, sourceAdding = main, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = forgeMain, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
             applyNamedDependencyOnOutput(originProject = forgeProject, sourceAdding = forgeLaunch, targetSource = this, implProject = forgeProject, dependencyConfigName = this.implementationConfigurationName)
@@ -588,7 +967,7 @@ if (spongeForge != null) {
                 create("client") {
                     environment("target", "client")
                     workingDirectory(forgeProject.file("./run"))
-                    args.addAll(listOf("--launchTarget", "sponge_client_dev", "--version", "1.14.4", "--accessToken", "0"))
+                    args.addAll(listOf("--launchTarget", "sponge_client_dev", "--version", "1.15.2", "--accessToken", "0"))
                     main = "org.spongepowered.forge.modlauncher.Main"
                 }
             }
@@ -611,19 +990,19 @@ if (spongeForge != null) {
             api(launch.get().output)
             implementation(accessors.get().output)
             implementation(project(commonProject.path)) {
-                exclude(group = "net.minecraft", module = "$minecraftDep")
+                exclude(group = "net.minecraft", module = minecraftDep)
             }
             forgeMixinsImplementation(project(commonProject.path)) {
-                exclude(group = "net.minecraft", module = "$minecraftDep")
+                exclude(group = "net.minecraft", module = minecraftDep)
             }
+            annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
             add(forgeLaunch.implementationConfigurationName, project(":SpongeAPI"))
 
-            forgeLaunchConfig("org.spongepowered:mixin:0.8")
-            forgeLaunchConfig("org.ow2.asm:asm-util:6.2")
-            forgeLaunchConfig("org.ow2.asm:asm-tree:6.2")
-            forgeLaunchConfig("org.spongepowered:plugin-spi:0.1.1-SNAPSHOT") {
-                exclude(group = "com.google.inject", module = "guice") // We use our own version
-            }
+            forgeLaunchConfig("org.spongepowered:mixin:$mixinVersion")
+            forgeLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
+            forgeLaunchConfig("org.ow2.asm:asm-tree:$asmVersion")
+            forgeLaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
+            forgeLaunchConfig("javax.inject:javax.inject:1")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
             forgeLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
             runtime("com.zaxxer:HikariCP:2.6.3")
@@ -635,14 +1014,21 @@ if (spongeForge != null) {
             forgeAccessorsImplementation(forgeLaunchConfig)
 
             // Annotation Processor
-            forgeAccessorsAnnotationProcessor("org.spongepowered:mixin:0.8")
-            forgeMixinsAnnotationProcessor("org.spongepowered:mixin:0.8")
+            forgeAccessorsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
+            forgeMixinsAnnotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
+            forgeAccessorsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
+            forgeMixinsAnnotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
 
             testplugins?.apply {
                 add(forgeLaunch.runtimeConfigurationName, project(testplugins.path)) {
                     exclude(group = "org.spongepowered")
                 }
             }
+        }
+
+        mixin {
+            add(forgeMixins, "spongeforge.mixins.refmap.json")
+            add(forgeAccessors, "spongeforge.accessors.refmap.json")
         }
 
         tasks {
@@ -655,12 +1041,14 @@ if (spongeForge != null) {
                             "Implementation-Title" to project.name,
                             "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion, forgeVersion),
                             "Implementation-Vendor" to "SpongePowered"
-//                            "Implementation-Timestamp" to Instant.now().format("yyyy-MM-dd'T'HH:mm:ssZ")
                     ))
                 }
             }
-        }
+            reobf {
 
+            }
+
+        }
 
         license {
             (this as ExtensionAware).extra.apply {

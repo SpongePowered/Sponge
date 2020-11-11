@@ -70,4 +70,18 @@ public abstract class ScoreMixin implements ScoreBridge {
         ci.cancel();
     }
 
+    @Inject(method = "setLocked", at = @At("HEAD"), cancellable = true)
+    private void impl$sUpdateSpongeScoreLocked(final boolean locked, final CallbackInfo ci) {
+        if (this.scoreboard != null && ((ScoreboardBridge) this.scoreboard).bridge$isClient()) {
+            return; // Let the normal logic take over.
+        }
+        if (this.impl$spongeScore == null) {
+            SpongeCommon.getLogger().warn("Returning score because null score!");
+            ci.cancel();
+            return;
+        }
+        this.impl$spongeScore.setLocked(locked);
+        ci.cancel();
+    }
+
 }

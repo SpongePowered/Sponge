@@ -28,6 +28,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class FusedExplosiveData {
 
@@ -39,23 +40,25 @@ public final class FusedExplosiveData {
         registrator
                 .asMutable(FusedExplosive.class)
                     .create(Keys.FUSE_DURATION)
-                        .get(h -> ((FusedExplosiveBridge) h).bridge$getFuseDuration())
+                        .get(h -> new SpongeTicks(((FusedExplosiveBridge) h).bridge$getFuseDuration()))
                         .setAnd((h, v) -> {
-                            if (v < 0) {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
                                 return false;
                             }
-                            ((FusedExplosiveBridge) h).bridge$setFuseDuration(v);
+                            ((FusedExplosiveBridge) h).bridge$setFuseDuration(ticks);
                             return true;
                         })
                     .create(Keys.TICKS_REMAINING)
-                        .get(h -> ((FusedExplosiveBridge) h).bridge$getFuseTicksRemaining())
+                        .get(h -> new SpongeTicks(((FusedExplosiveBridge) h).bridge$getFuseTicksRemaining()))
                         .setAnd((h, v) -> {
-                            if (v < 0) {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
                                 return false;
                             }
                             // TODO isPrimed on bridge?
                             if (h.primed().get()) {
-                                ((FusedExplosiveBridge) h).bridge$setFuseTicksRemaining(v);
+                                ((FusedExplosiveBridge) h).bridge$setFuseTicksRemaining(ticks);
                             }
                             return true;
                         });

@@ -119,52 +119,9 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         return false;
     }
 
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return false;
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(final P context) {
-        return false;
-    }
-
-    @Override
-    public boolean doesBulkBlockCapture(final P context) {
-        return true;
-    }
-
-    /**
-     * A defaulted method to handle entities that are spawned due to packet placement during post processing.
-     * Examples can include a player placing a redstone block priming a TNT explosive.
-     * @param context The phase context
-     * @param entities The list of entities to spawn
-     */
-    @Override
-    public void postProcessSpawns(final P context, final ArrayList<Entity> entities) {
-        final Player player = context.getSpongePlayer();
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            frame.pushCause(player);
-            SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(final P context, final Entity entity) {
-        return this.shouldCaptureEntity()
-        ? context.getCapturedEntities().add(entity)
-        : this.spawnEntity(context, entity);
-    }
 
     public boolean shouldCaptureEntity() {
         return false;
-    }
-
-
-    @Override
-    public boolean doesCaptureEntitySpawns() {
-        return this.shouldCaptureEntity();
     }
 
 

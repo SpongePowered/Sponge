@@ -36,6 +36,7 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -56,7 +57,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
@@ -111,9 +112,9 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
+    @NonNull
     public ChunkPipeline bridge$createChunkPipeline(final BlockPos pos, final BlockState newState, final BlockState currentState,
-        final SpongeBlockChangeFlag flag
-    ) {
+            final SpongeBlockChangeFlag flag) {
         final boolean isFake = ((WorldBridge) this.world).bridge$isFake();
         if (isFake) {
             throw new IllegalStateException("Cannot call ChunkBridge.bridge$buildChunkPipeline in non-Server managed worlds");
@@ -126,9 +127,9 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final int zPos = pos.getZ() & 15;
         // Sponge - get the moving flag from our flag construct
         ChunkSection chunksection = this.sections[yPos >> 4];
-        if (chunksection == EMPTY_SECTION) {
+        if (chunksection == ChunkMixin_Tracker.EMPTY_SECTION) {
             if (newState.isAir()) {
-                return null;
+                return ChunkPipeline.NULL_RETURN;
             }
 
             chunksection = new ChunkSection(yPos >> 4 << 4);
@@ -136,7 +137,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         }
 
         // Sponge Start - Build out the BlockTransaction
-        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
         final IPhaseState state = context.state;
         final @Nullable TileEntity existing = this.shadow$getTileEntity(pos, Chunk.CreateEntityType.CHECK);
         // Build a transaction maybe?
@@ -150,7 +151,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         final Block newBlock = newState.getBlock();
         final Block currentBlock = currentState.getBlock();
 
-        final BlockTransaction.ChangeBlock transaction = state.createTransaction(context, snapshot, newState, flag);
+        final ChangeBlock transaction = state.createTransaction(context, snapshot, newState, flag);
 
         snapshot.blockChange = state.associateBlockChangeWithSnapshot(
             context,
@@ -172,7 +173,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
             .world((ServerWorld) this.world);
 
         // Populate the effects
-        transaction.populateChunkEffects(context.getBlockTransactor(), builder, chunksection);
+        transaction.populateChunkEffects(builder);
 
         return builder.build();
     }
@@ -226,7 +227,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
     private void tracker$ThrowCollisionEvent(final Entity entityIn, final AxisAlignedBB aabb, final List<Entity> listToFill,
         final java.util.function.Predicate<? super Entity> filter, final CallbackInfo ci
     ) {
-        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
+        if (((WorldBridge) this.world).bridge$isFake() || PhaseTracker.getInstance().getCurrentState().isCollision()) {
             return;
         }
 

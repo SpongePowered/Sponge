@@ -51,8 +51,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.service.permission.SpongePermissions;
+import org.spongepowered.common.service.server.permission.SpongePermissions;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -96,6 +97,9 @@ public abstract class CommandSourceMixin implements CommandSourceBridge {
     ) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(p_i49553_1_);
+            if (p_i49553_1_ instanceof CommandSourceProviderBridge) {
+                ((CommandSourceProviderBridge) p_i49553_1_).bridge$addToCauseStack(frame);
+            }
             this.impl$cause = frame.getCurrentCause();
             final EventContext context = this.impl$cause.getContext();
 

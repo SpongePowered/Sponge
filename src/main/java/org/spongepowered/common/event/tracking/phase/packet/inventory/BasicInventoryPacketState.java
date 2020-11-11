@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.client.CClickWindowPacket;
@@ -54,12 +55,11 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 public class BasicInventoryPacketState extends PacketState<InventoryPacketContext> {
 
@@ -101,11 +101,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         this.stateMask = stateMask;
     }
 
-    @Override
-    public boolean doesBulkBlockCapture(final InventoryPacketContext context) {
-        return false;
-    }
-
     @Nullable
     public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
             final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {
@@ -142,7 +137,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
 
-    private static Set<Class<?>> containersFailedCapture = new HashSet<>();
+    private static Set<Class<?>> containersFailedCapture = new ReferenceOpenHashSet<>();
 
     @Override
     public void unwind(final InventoryPacketContext context) {
@@ -171,9 +166,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
         final int usedButton = packetIn.getUsedButton();
         final List<Entity> capturedItems = new ArrayList<>();
-        context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> items.stream().map(entity -> (Entity) entity).forEach(capturedItems::add));
-        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(capturedItems::addAll);
-
         // MAKE SURE THAT THIS IS KEPT IN SYNC WITH THE REST OF THE METHOD
         // If you add any logic that does something even if no event listenres
         // are registered, add it here.
@@ -222,8 +214,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 if (!((TrackedContainerBridge) trackedInventory).bridge$capturePossible()) {
                     // TODO When this happens a mod probably overrides Container#detectAndSendChanges
                     // We are currently unable to detect changes in this case.
-                    if (!containersFailedCapture.contains(trackedInventory.getClass())) {
-                        containersFailedCapture.add(trackedInventory.getClass());
+                    if (containersFailedCapture.add(trackedInventory.getClass())) {
                         SpongeCommon
                             .getLogger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
                     }

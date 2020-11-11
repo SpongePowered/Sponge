@@ -31,6 +31,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.mixin.api.mcp.entity.CreatureEntityMixin_API;
 
+import java.util.Objects;
+import java.util.UUID;
+
 @Mixin(value = HumanEntity.class, remap = false)
 public abstract class HumanEntityMixin_API extends CreatureEntityMixin_API implements Human {
 
@@ -41,4 +44,17 @@ public abstract class HumanEntityMixin_API extends CreatureEntityMixin_API imple
         return this.fakeProfile.getName();
     }
 
+    @Override
+    public boolean useSkinFor(UUID minecraftAccount) {
+        Objects.requireNonNull(minecraftAccount);
+
+        return ((HumanEntity) (Object) this).getOrLoadSkin(minecraftAccount);
+    }
+
+    @Override
+    public boolean useSkinFor(String minecraftAccount) {
+        Objects.requireNonNull(minecraftAccount);
+
+        return ((HumanEntity) (Object) this).getOrLoadSkin(minecraftAccount);
+    }
 }

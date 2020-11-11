@@ -24,11 +24,18 @@
  */
 package org.spongepowered.common.bridge.server;
 
+import com.google.inject.Injector;
 import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Game;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 public interface MinecraftServerBridge {
+
+    void bridge$initServices(Game game, Injector injector);
+
+    SpongeServerScopedServiceProvider bridge$getServiceProvider();
 
     long[] bridge$getWorldTickTimes(DimensionType dimensionType);
 

@@ -49,6 +49,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.projectile.ThrowableEntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 
@@ -119,16 +120,15 @@ public abstract class EnderPearlEntityMixin extends ThrowableEntityMixin {
             }
 
             // This seems odd but we move the pearl so that the pearl's logic will move the living entity later in the impact method
-            this.posX = event.getDestinationPosition().getX();
-            this.posY = event.getDestinationPosition().getY();
-            this.posZ = event.getDestinationPosition().getZ();
+            final Vector3d destinationPosition = event.getDestinationPosition();
+            this.shadow$setPosition(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ());
         }
     }
 
     @Override
     @Nullable
-    public Entity shadow$changeDimension(final DimensionType dimensionIn) {
-        final Entity entity = super.shadow$changeDimension(dimensionIn);
+    public Entity changeDimension(final DimensionType dimensionIn) {
+        final Entity entity = super.changeDimension(dimensionIn);
 
         if (entity instanceof EnderPearlEntity) {
             // We actually teleported so...

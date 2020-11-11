@@ -44,10 +44,8 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IWorldReader;
-import net.minecraft.world.LightType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -55,6 +53,7 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -63,15 +62,11 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.chunk.Chunk;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -79,7 +74,6 @@ import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketA
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeRecordType;
@@ -89,7 +83,6 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -106,15 +99,12 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Shadow protected @Final WorldInfo worldInfo;
     @Shadow @Final public List<TileEntity> loadedTileEntityList;
 
-    @Shadow public abstract Biome shadow$getBiome(BlockPos p_180494_1_);
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract net.minecraft.world.chunk.Chunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
     @Shadow public abstract boolean shadow$setBlockState(BlockPos p_180501_1_, BlockState p_180501_2_, int p_180501_3_);
     @Shadow public abstract boolean shadow$removeBlock(BlockPos p_217377_1_, boolean p_217377_2_);
-    @Shadow public abstract boolean shadow$destroyBlock(BlockPos p_175655_1_, boolean p_175655_2_);
     @Shadow public abstract int shadow$getHeight(Heightmap.Type p_201676_1_, int p_201676_2_, int p_201676_3_);
-    @Shadow public abstract int shadow$getLightFor(LightType p_175642_1_, BlockPos p_175642_2_);
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable PlayerEntity p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos p_175625_1_);
@@ -132,7 +122,6 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Shadow public abstract Dimension shadow$getDimension();
     @Shadow public abstract Random shadow$getRandom();
     @Shadow public abstract boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<BlockState> p_217375_2_);
-    @Shadow public abstract BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
 
     private Context impl$context;
 
@@ -155,9 +144,8 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
         }
         final BlockPos pos = new BlockPos(x, y, z);
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
-        builder
-                .world(((ServerWorld) this).getKey())
-                .position(new Vector3i(x, y, z));
+        builder.world((ServerWorld) (Object) this)
+               .position(new Vector3i(x, y, z));
         final net.minecraft.world.chunk.Chunk chunk = this.shadow$getChunkAt(pos);
         final net.minecraft.block.BlockState state = chunk.getBlockState(pos);
         builder.blockState(state);
@@ -209,7 +197,7 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
         if (chunkProvider instanceof ServerChunkProvider) {
             final ChunkManagerAccessor chunkManager = (ChunkManagerAccessor) ((ServerChunkProvider) chunkProvider).chunkManager;
             final List<Chunk> chunks = new ArrayList<>();
-            chunkManager.accessor$getLoadedChunksIterable().forEach(holder -> chunks.add((Chunk) holder.func_219298_c()));
+            chunkManager.accessor$getLoadedChunksIterable().forEach(holder -> chunks.add((Chunk) holder.getChunkIfComplete()));
             return chunks;
         }
         return Collections.emptyList();
@@ -237,78 +225,6 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Override
     public Vector3i getBlockSize() {
         return Constants.World.BLOCK_SIZE;
-    }
-
-    // WeatherUniverse
-
-    @Override
-    public Weather getWeather() {
-        if (this.shadow$isThundering()) {
-            return Weathers.THUNDER_STORM.get();
-        }
-        if (this.shadow$isRaining()) {
-            return Weathers.RAIN.get();
-        }
-        return Weathers.CLEAR.get();
-    }
-
-    @Override
-    public Duration getRemainingWeatherDuration() {
-        return Duration.of(this.impl$getDurationInTicks(), TemporalUnits.MINECRAFT_TICKS);
-    }
-
-    private long impl$getDurationInTicks() {
-        if (this.shadow$isThundering()) {
-            return this.worldInfo.getThunderTime();
-        }
-        if (this.shadow$isRaining()) {
-            return this.worldInfo.getRainTime();
-        }
-        if (this.worldInfo.getClearWeatherTime() > 0) {
-            return this.worldInfo.getClearWeatherTime();
-        }
-        return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
-    }
-
-    @Override
-    public Duration getRunningWeatherDuration() {
-        return Duration.of(this.worldInfo.getGameTime() - ((ServerWorldBridge) this).bridge$getWeatherStartTime(), TemporalUnits.MINECRAFT_TICKS);
-    }
-
-    @Override
-    public void setWeather(final Weather weather) {
-        Preconditions.checkNotNull(weather);
-        this.impl$setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
-    }
-
-    @Override
-    public void setWeather(final Weather weather, final Duration duration) {
-        Preconditions.checkNotNull(weather);
-        ((ServerWorldBridge) this).bridge$setPreviousWeather(this.getWeather());
-        final int ticks = (int) (duration.toMillis() / TemporalUnits.MINECRAFT_TICKS.getDuration().toMillis());
-        this.impl$setWeather(weather, ticks);
-    }
-
-    public void impl$setWeather(final Weather weather, final int ticks) {
-        if (weather == Weathers.CLEAR.get()) {
-            this.worldInfo.setClearWeatherTime(ticks);
-            this.worldInfo.setRainTime(0);
-            this.worldInfo.setThunderTime(0);
-            this.worldInfo.setRaining(false);
-            this.worldInfo.setThundering(false);
-        } else if (weather == Weathers.RAIN.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(false);
-        } else if (weather == Weathers.THUNDER_STORM.get()) {
-            this.worldInfo.setClearWeatherTime(0);
-            this.worldInfo.setRainTime(ticks);
-            this.worldInfo.setThunderTime(ticks);
-            this.worldInfo.setRaining(true);
-            this.worldInfo.setThundering(true);
-        }
     }
 
     // ContextSource

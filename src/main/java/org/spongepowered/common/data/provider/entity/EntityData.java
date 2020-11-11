@@ -26,13 +26,19 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.entity.SpongeEntityArchetype;
+import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.stream.Collectors;
@@ -48,7 +54,13 @@ public final class EntityData {
                 .asMutable(Entity.class)
                     .create(Keys.AGE)
                         .get(h -> h.ticksExisted)
-                        .set((h, v) -> h.ticksExisted = v)
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.ticksExisted = v;
+                            return true;
+                        })
                     .create(Keys.BASE_SIZE)
                         .get(h -> (double) h.getWidth())
                     .create(Keys.BASE_VEHICLE)
@@ -57,15 +69,31 @@ public final class EntityData {
                         .get(h -> (double) h.getEyeHeight())
                     .create(Keys.EYE_POSITION)
                         .get(h -> VecHelper.toVector3d(h.getEyePosition(1f)))
-                    .create(Keys.FIRE_DAMAGE_DELAY)
-                        .get(h -> ((EntityAccessor) h).accessor$getFireImmuneTicks())
+                    .create(Keys.FALL_DISTANCE)
+                        .get(h -> (double) h.fallDistance)
                         .setAnd((h, v) -> {
-                            ((EntityBridge) h).bridge$setFireImmuneTicks(v);
-                            return ((EntityAccessor) h).accessor$getFireImmuneTicks() == v;
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.fallDistance = v.floatValue();
+                            return true;
+                        })
+                    .create(Keys.FIRE_DAMAGE_DELAY)
+                        .get(h -> new SpongeTicks(((EntityAccessor) h).accessor$getFireImmuneTicks()))
+                        .setAnd((h, v) -> {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 1 || ticks > Short.MAX_VALUE) {
+                                return false;
+                            }
+                            ((EntityBridge) h).bridge$setFireImmuneTicks(ticks);
+                            return ((EntityAccessor) h).accessor$getFireImmuneTicks() == ticks;
                         })
                     .create(Keys.FIRE_TICKS)
-                        .get(h -> ((EntityAccessor) h).accessor$getFire() > 0 ? ((EntityAccessor) h).accessor$getFire() : null)
-                        .set((h, v) -> ((EntityAccessor) h).accessor$setFire(Math.max(v, Constants.Entity.MINIMUM_FIRE_TICKS)))
+                        .get(h -> ((EntityAccessor) h).accessor$getFire() > 0 ? Ticks.of(((EntityAccessor) h).accessor$getFire()) : null)
+                        .set((h, v) -> {
+                            final int ticks = (int) v.getTicks();
+                            ((EntityAccessor) h).accessor$setFire(Math.max(ticks, Constants.Entity.MINIMUM_FIRE_TICKS));
+                        })
                         .deleteAndGet(h -> {
                             final EntityAccessor accessor = (EntityAccessor) h;
                             final int ticks = accessor.accessor$getFire();
@@ -73,20 +101,26 @@ public final class EntityData {
                                 return DataTransactionResult.failNoData();
                             }
                             final DataTransactionResult.Builder dtrBuilder = DataTransactionResult.builder();
-                            dtrBuilder.replace(Value.immutableOf(Keys.FIRE_TICKS, ticks));
-                            dtrBuilder.replace(Value.immutableOf(Keys.FIRE_DAMAGE_DELAY, ((EntityAccessor) h).accessor$getFireImmuneTicks()));
+                            dtrBuilder.replace(Value.immutableOf(Keys.FIRE_TICKS, new SpongeTicks(ticks)));
+                            dtrBuilder.replace(Value.immutableOf(Keys.FIRE_DAMAGE_DELAY,
+                                    new SpongeTicks(((EntityAccessor) h).accessor$getFireImmuneTicks())));
                             h.extinguish();
                             return dtrBuilder.result(DataTransactionResult.Type.SUCCESS).build();
                         })
                     .create(Keys.HEIGHT)
                         .get(h -> (double) h.getHeight())
                     .create(Keys.INVULNERABILITY_TICKS)
-                        .get(h -> h.hurtResistantTime)
-                        .set((h, v) -> {
-                            h.hurtResistantTime = v;
-                            if (h instanceof LivingEntity) {
-                                ((LivingEntity) h).hurtTime = v;
+                        .get(h -> new SpongeTicks(h.hurtResistantTime))
+                        .setAnd((h, v) -> {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
+                                return false;
                             }
+                            h.hurtResistantTime = ticks;
+                            if (h instanceof LivingEntity) {
+                                ((LivingEntity) h).hurtTime = ticks;
+                            }
+                            return true;
                         })
                     .create(Keys.IS_CUSTOM_NAME_VISIBLE)
                         .get(Entity::isCustomNameVisible)
@@ -94,6 +128,7 @@ public final class EntityData {
                     .create(Keys.IS_FLYING)
                         .get(h -> h.isAirBorne)
                         .set((h, v) -> h.isAirBorne = v)
+                        .supports(h -> !(h instanceof PlayerEntity))
                     .create(Keys.IS_GLOWING)
                         .get(Entity::isGlowing)
                         .set(Entity::setGlowing)
@@ -127,17 +162,31 @@ public final class EntityData {
                             h.getTags().clear();
                             h.getTags().addAll(v);
                         })
+                    .create(Keys.TRANSIENT)
+                        .get(h -> ((EntityAccessor) h).accessor$getEntityString() == null)
+                        .set((h, v) -> ((EntityBridge) h).bridge$setTransient(v))
                     .create(Keys.VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getRidingEntity())
                         .set((h, v) -> h.startRiding((Entity) v, true))
                     .create(Keys.VELOCITY)
                         .get(h -> VecHelper.toVector3d(h.getMotion()))
                         .set((h, v) -> h.setMotion(VecHelper.toVec3d(v)))
+                    .create(Keys.SWIFTNESS)
+                        .get(m -> m.getMotion().length())
+                        .set((m, v) -> m.setMotion(m.getMotion().normalize().scale(v)))
+                        .supports(m -> m.getMotion().lengthSquared() > 0)
                 .asMutable(EntityBridge.class)
                     .create(Keys.DISPLAY_NAME)
                         .get(EntityBridge::bridge$getDisplayNameText)
                         .set(EntityBridge::bridge$setDisplayName)
                         .delete(h -> h.bridge$setDisplayName(null));
+
+        registrator.newDataStore(SpongeEntitySnapshot.class, SpongeEntityArchetype.class)
+                .dataStore(Keys.DISPLAY_NAME,
+                    (dv, v) -> dv.set(Constants.Entity.CUSTOM_NAME, SpongeAdventure.json(v)),
+                    dv -> dv.getString(Constants.Entity.CUSTOM_NAME).map(SpongeAdventure::json));
+
+        // @formatter:on
     }
-    // @formatter:on
+
 }

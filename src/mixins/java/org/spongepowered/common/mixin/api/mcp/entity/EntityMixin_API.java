@@ -26,22 +26,21 @@ package org.spongepowered.common.mixin.api.mcp.entity;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SPlayerPositionLookPacket;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
@@ -64,7 +63,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
@@ -72,33 +70,30 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 @Mixin(net.minecraft.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$"))
 public abstract class EntityMixin_API implements org.spongepowered.api.entity.Entity {
 
     // @formatter:off
 
-    @Shadow public double posX;
-    @Shadow public double posY;
-    @Shadow public double posZ;
-    @Shadow public Vec3d motion;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
     @Shadow public boolean removed;
-    @Shadow private EntitySize size;
-    @Shadow protected Random rand;
+    @Final @Shadow protected Random rand;
     @Shadow public int ticksExisted;
-    @Shadow public int fire;
     @Shadow public DimensionType dimension;
     @Shadow protected UUID entityUniqueID;
     @Shadow @Final private net.minecraft.entity.EntityType<?> type;
 
+    @Shadow public abstract double shadow$getPosX();
+    @Shadow public abstract double shadow$getPosY();
+    @Shadow public abstract double shadow$getPosZ();
     @Shadow public abstract net.minecraft.world.World shadow$getEntityWorld();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
     @Shadow public abstract void shadow$remove();
-    @Shadow public abstract int shadow$getAir();
-    @Shadow public abstract void shadow$setAir(int air);
     @Shadow public abstract UUID shadow$getUniqueID();
     @Shadow public abstract void shadow$setFire(int seconds);
     @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
@@ -107,7 +102,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
     @Shadow public abstract boolean shadow$writeUnlessRemoved(CompoundNBT compound);
-    @Shadow @Nullable public abstract Team shadow$getTeam();
 
     // @formatter:on
 
@@ -118,7 +112,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public Vector3d getPosition() {
-        return new Vector3d(this.posX, this.posY, this.posZ);
+        return new Vector3d(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ());
     }
 
     @Override
@@ -130,6 +124,15 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public boolean setLocation(ServerLocation location) {
         Preconditions.checkNotNull(location, "The location was null!");
         return ((EntityBridge) this).bridge$setLocation(location);
+    }
+
+    @Override
+    public boolean setLocationAndRotation(ServerLocation location, Vector3d rotation) {
+        if (this.setLocation(location)) {
+            this.setRotation(rotation);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -257,7 +260,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         final Transform transform = this.getTransform();
         final CompoundNBT compound = new CompoundNBT();
         this.shadow$writeUnlessRemoved(compound);
-        Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
@@ -278,12 +280,10 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Queries.POSITION_Y, transform.getScale().getY())
                 .set(Queries.POSITION_Z, transform.getScale().getZ())
                 .getContainer()
-                .set(Constants.Entity.TYPE, net.minecraft.entity.EntityType.getKey(this.type).toString())
+                .set(Constants.Entity.TYPE, this.getType().getKey())
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
-        // TODO - Custom data store
         return container;
     }
-
 
     @Override
     public org.spongepowered.api.entity.Entity copy() {
@@ -293,7 +293,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         try {
             final CompoundNBT compound = new CompoundNBT();
             this.shadow$writeUnlessRemoved(compound);
-            final Entity entity = net.minecraft.entity.EntityType.func_220335_a(compound, this.shadow$getEntityWorld(), (createdEntity) -> {
+            final Entity entity = net.minecraft.entity.EntityType.loadEntityAndExecute(compound, this.shadow$getEntityWorld(), (createdEntity) -> {
                 compound.putUniqueId(Constants.UUID, createdEntity.getUniqueID());
                 createdEntity.read(compound);
                 return createdEntity;
@@ -317,10 +317,21 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         return this.api$getVanillaValues();
     }
 
+    @Override
+    public EntitySnapshot createSnapshot() {
+        return EntitySnapshot.builder().from(this).build();
+    }
+
+    @Override
+    public EntityArchetype createArchetype() {
+        return EntityArchetype.builder().from(this).build();
+    }
+
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = new HashSet<>();
 
         values.add(this.displayName().asImmutable());
+        values.add(this.fallDistance().asImmutable());
         values.add(this.passengers().asImmutable());
         values.add(this.onGround().asImmutable());
         values.add(this.velocity().asImmutable());
@@ -331,6 +342,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         this.creator().map(Value::asImmutable).ifPresent(values::add);
         this.notifier().map(Value::asImmutable).ifPresent(values::add);
         this.fireTicks().map(Value::asImmutable).ifPresent(values::add);
+        this.fireImmuneTicks().map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

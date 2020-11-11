@@ -24,11 +24,27 @@
  */
 package org.spongepowered.common.data.provider;
 
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataProvider;
+import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.ImmutableDataProviderBuilder;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.MutableDataProviderBuilder;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataStore;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.OptBool;
+import org.spongepowered.common.bridge.data.DataContainerHolder;
+import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeDataRegistration;
+import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -41,10 +57,70 @@ import javax.annotation.Nullable;
 
 public class DataProviderRegistrator {
 
-    protected final DataProviderRegistratorBuilder builder;
+    private static final TypeToken<DataContainerHolder.Mutable> MUTABLE = TypeToken.of(DataContainerHolder.Mutable.class);
+    private static final TypeToken<DataContainerHolder.Immutable> IMMUTABLE = TypeToken.of(DataContainerHolder.Immutable.class);
 
-    public DataProviderRegistrator(final DataProviderRegistratorBuilder builder) {
-        this.builder = builder;
+    SpongeDataRegistrationBuilder registrationBuilder;
+    SpongeDataStoreBuilder dataStoreBuilder;
+
+    public DataProviderRegistrator(final String name) {
+        this.registrationBuilder = (SpongeDataRegistrationBuilder) DataRegistration.builder().key(ResourceKey.minecraft(name));
+        this.dataStoreBuilder = (SpongeDataStoreBuilder) DataStore.builder().vanillaData();
+    }
+
+    public DataProviderRegistrator(SpongeDataRegistrationBuilder registrationBuilder) {
+        this.registrationBuilder = registrationBuilder;
+    }
+
+    public DataProviderRegistrator newDataStore(Class<? extends DataHolder>... dataHolders) {
+        if (!this.dataStoreBuilder.isEmpty()) {
+            this.registrationBuilder.store(this.dataStoreBuilder.buildVanillaDataStore());
+        }
+        this.dataStoreBuilder.reset();
+        for (Class<? extends DataHolder> dataholder : dataHolders) {
+            this.dataStoreBuilder.holder(TypeToken.of(dataholder));
+        }
+        return this;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public <K, V extends Value<K>> DataProviderRegistrator dataStore(final Supplier<Key<V>> key, final BiConsumer<DataView, K> serializer, final Function<DataView, Optional<K>> deserializer) {
+        this.dataStoreBuilder.key(key.get(), serializer, deserializer);
+        this.dataStoreBuilder.getDataHolderTypes().forEach(typeToken -> this.registerDataStoreDelegatingProvider(key, typeToken));
+        return this;
+    }
+
+    public <H extends DataHolder, K, V extends Value<K>> void registerDataStoreDelegatingProvider(Supplier<Key<V>> key, TypeToken<H> typeToken) {
+        // Create dataprovider for mutable and immutable DataContainerHolders
+        if (DataProviderRegistrator.MUTABLE.isSupertypeOf(typeToken)) {
+            this.asMutable(typeToken.getRawType())
+                    .create(key)
+                    .get(holder -> {
+                        final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
+                        return SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).deserialize(dataContainer).get(key).orElse(null);
+                    })
+                    .set((holder, v) -> {
+                        final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
+                        final DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
+                        manipulator.set(key.get(), v);
+                        SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).serialize(manipulator, dataContainer);
+                        ((DataContainerHolder.Mutable) holder).data$setDataContainer(dataContainer);
+                    });
+        } else if (DataProviderRegistrator.IMMUTABLE.isSupertypeOf(typeToken)) {
+            this.asImmutable(typeToken.getRawType())
+                    .create(key)
+                    .get(holder -> {
+                        final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
+                        return SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).deserialize(dataContainer).get(key).orElse(null);
+                    })
+                    .set((holder, v) -> {
+                        final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
+                        final DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
+                        manipulator.set(key.get(), v);
+                        SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).serialize(manipulator, dataContainer);
+                        return (H)((DataContainerHolder.Immutable) holder).data$withDataContainer(dataContainer);
+                    });
+        }
     }
 
     /**
@@ -52,7 +128,7 @@ public class DataProviderRegistrator {
      * @return The registrator
      */
     public <T> MutableRegistrator<T> asMutable(final Class<T> target) {
-        return new MutableRegistrator<>(this.builder, target);
+        return new MutableRegistrator<>(this.registrationBuilder, target);
     }
 
     /**
@@ -60,14 +136,21 @@ public class DataProviderRegistrator {
      * @return The registrator
      */
     public <T> ImmutableRegistrator<T> asImmutable(final Class<T> target) {
-        return new ImmutableRegistrator<>(this.builder, target);
+        return new ImmutableRegistrator<>(this.registrationBuilder, target);
+    }
+
+    public void buildAndRegister() {
+        if (!this.dataStoreBuilder.isEmpty()) {
+            this.registrationBuilder.store(this.dataStoreBuilder.buildVanillaDataStore());
+        }
+        SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) this.registrationBuilder.build());
     }
 
     public static final class MutableRegistrator<T> extends DataProviderRegistrator {
 
         private final Class<T> target;
 
-        public MutableRegistrator(final DataProviderRegistratorBuilder builder, final Class<T> target) {
+        public MutableRegistrator(final SpongeDataRegistrationBuilder builder, final Class<T> target) {
             super(builder);
             this.target = target;
         }
@@ -78,7 +161,7 @@ public class DataProviderRegistrator {
          * @param <K> The key type
          * @return The registration
          */
-        public <K> MutableRegistration<K, T> create(final Supplier<? extends Key<? extends Value<K>>> suppliedKey) {
+        public <K> MutableRegistration<T, K> create(final Supplier<? extends Key<? extends Value<K>>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 
@@ -88,89 +171,16 @@ public class DataProviderRegistrator {
          * @param <K> The key type
          * @return The registration
          */
-        public <K> MutableRegistration<K, T> create(final Key<? extends Value<K>> key) {
-            final MutableRegistration<K, T> registration = new MutableRegistration<>(this, key);
+        public <K> MutableRegistration<T, K> create(final Key<? extends Value<K>> key) {
+            final MutableRegistration<T, K> registration = new MutableRegistration<>(this, key);
             this.register(registration);
             return registration;
         }
 
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-        protected <K> MutableRegistrator<T> register(final MutableRegistration<K, T> registration) {
-            this.builder.register(
-                    new GenericMutableDataProvider<T, K>(registration.key, this.target) {
-                        final boolean isBooleanKey = registration.key.getElementToken().getRawType() == Boolean.class;
-
-                        @Override
-                        protected Value<K> constructValue(final T dataHolder, final K element) {
-                            if (registration.constructValue != null) {
-                                return registration.constructValue.apply(dataHolder, element);
-                            }
-                            return super.constructValue(dataHolder, element);
-                        }
-
-                        @Override
-                        protected Optional<K> getFrom(final T dataHolder) {
-                            if (this.isBooleanKey) {
-                                return (Optional<K>) OptBool.of((Boolean) registration.get.apply(dataHolder));
-                            }
-                            return Optional.ofNullable(registration.get.apply(dataHolder));
-                        }
-
-                        @Override
-                        protected boolean set(final T dataHolder, final K value) {
-                            if (registration.setAnd != null) {
-                                return registration.setAnd.apply(dataHolder, value);
-                            }
-                            if (registration.set != null) {
-                                registration.set.accept(dataHolder, value);
-                                return true;
-                            }
-                            return super.set(dataHolder, value);
-                        }
-
-                        @Override
-                        protected boolean delete(final T dataHolder) {
-                            if (registration.deleteAnd != null) {
-                                return registration.deleteAnd.apply(dataHolder);
-                            }
-                            if (registration.delete != null) {
-                                registration.delete.accept(dataHolder);
-                                return true;
-                            }
-                            if (registration.resetOnDelete != null) {
-                                return this.set(dataHolder, registration.resetOnDelete.apply(dataHolder));
-                            }
-                            return super.delete(dataHolder);
-                        }
-
-                        @Override
-                        protected DataTransactionResult setAndGetResult(final T dataHolder, final K value) {
-                            if (registration.setAndGet != null) {
-                                return registration.setAndGet.apply(dataHolder, value);
-                            }
-                            return super.setAndGetResult(dataHolder, value);
-                        }
-
-                        @Override
-                        protected DataTransactionResult deleteAndGetResult(final T dataHolder) {
-                            if (registration.deleteAndGet != null) {
-                                return registration.deleteAndGet.apply(dataHolder);
-                            }
-                            if (registration.resetOnDelete != null) {
-                                return setAndGetResult(dataHolder, registration.resetOnDelete.apply(dataHolder));
-                            }
-                            return super.deleteAndGetResult(dataHolder);
-                        }
-
-                        @Override
-                        protected boolean supports(final T dataHolder) {
-                            if (registration.supports != null) {
-                                registration.supports.apply(dataHolder);
-                            }
-                            return super.supports(dataHolder);
-                        }
-                    }
-            );
+        protected <K, V extends Value<K>> MutableRegistrator<T> register(final MutableRegistration<T, K> registration) {
+            final DataProvider<?, ?> provider = registration.build(target);
+            this.registrationBuilder.dataKey(provider.getKey()).provider(provider);
             return this;
         }
     }
@@ -179,7 +189,7 @@ public class DataProviderRegistrator {
 
         private final Class<T> target;
 
-        public ImmutableRegistrator(final DataProviderRegistratorBuilder builder, final Class<T> target) {
+        public ImmutableRegistrator(final SpongeDataRegistrationBuilder builder, final Class<T> target) {
             super(builder);
             this.target = target;
         }
@@ -190,7 +200,7 @@ public class DataProviderRegistrator {
          * @param <K> The key type
          * @return The registration
          */
-        public <K> ImmutableRegistration<K, T> create(final Supplier<? extends Key<? extends Value<K>>> suppliedKey) {
+        public <K> ImmutableRegistration<T, K> create(final Supplier<? extends Key<? extends Value<K>>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 
@@ -200,139 +210,193 @@ public class DataProviderRegistrator {
          * @param <K> The key type
          * @return The registration
          */
-        public <K> ImmutableRegistration<K, T> create(final Key<? extends Value<K>> key) {
-            final ImmutableRegistration<K, T> registration = new ImmutableRegistration<>(this, key);
+        public <K> ImmutableRegistration<T, K> create(final Key<? extends Value<K>> key) {
+            final ImmutableRegistration<T, K> registration = new ImmutableRegistration<>(this, key);
             this.register(registration);
             return registration;
         }
 
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-        protected <K> ImmutableRegistrator<T> register(final ImmutableRegistration<K, T> registration) {
-            this.builder.register(
-                    new GenericImmutableDataProvider<T, K>(registration.key, this.target) {
-                        final boolean isBooleanKey = registration.key.getElementToken().getRawType() == Boolean.class;
-
-                        @Override
-                        protected Value<K> constructValue(final T dataHolder, final K element) {
-                            if (registration.constructValue != null) {
-                                return registration.constructValue.apply(dataHolder, element);
-                            }
-                            return super.constructValue(dataHolder, element);
-                        }
-
-                        @Override
-                        protected Optional<K> getFrom(final T dataHolder) {
-                            if (this.isBooleanKey) {
-                                return (Optional<K>) OptBool.of((Boolean) registration.get.apply(dataHolder));
-                            }
-                            return Optional.ofNullable(registration.get.apply(dataHolder));
-                        }
-
-                        @Override
-                        protected Optional<T> set(final T dataHolder, final K value) {
-                            if (this.isBooleanKey) {
-                                return (Optional<T>) OptBool.of((Boolean) registration.set.apply(dataHolder, value));
-                            }
-                            return Optional.ofNullable(registration.set.apply(dataHolder, value));
-                        }
-
-                        @Override
-                        protected boolean supports(final T dataHolder) {
-                            if (registration.supports != null) {
-                                registration.supports.apply(dataHolder);
-                            }
-                            return super.supports(dataHolder);
-                        }
-                    }
-            );
+        protected <K, V> ImmutableRegistrator<T> register(final ImmutableRegistration<T, K> registration) {
+            final DataProvider<?, ?> provider = registration.build(this.target);
+            this.registrationBuilder.dataKey(provider.getKey()).provider(provider);
             return this;
         }
     }
 
-    public static final class MutableRegistration<K, T> {
+    @SuppressWarnings("unchecked")
+    private static class MutableRegistrationBase<H, E, R extends MutableRegistrationBase<H, E, R>> {
 
-        private final MutableRegistrator<T> registrator;
-        private final Key<? extends Value<K>> key;
-        @Nullable private BiFunction<T, K, Value<K>> constructValue;
-        @Nullable private Function<T, K> get;
-        @Nullable private BiFunction<T, K, Boolean> setAnd;
-        @Nullable private BiConsumer<T, K> set;
-        @Nullable private Function<T, Boolean> deleteAnd;
-        @Nullable private Consumer<T> delete;
-        @Nullable private Function<T, DataTransactionResult> deleteAndGet;
-        @Nullable private Function<T, K> resetOnDelete;
-        @Nullable private BiFunction<T, K, DataTransactionResult> setAndGet;
-        @Nullable private Function<T, Boolean> supports;
+        private final Key<? extends Value<E>> key;
+        @Nullable private BiFunction<H, E, Value<E>> constructValue;
+        @Nullable private Function<H, E> get;
+        @Nullable private BiFunction<H, E, Boolean> setAnd;
+        @Nullable private BiConsumer<H, E> set;
+        @Nullable private Function<H, Boolean> deleteAnd;
+        @Nullable private Consumer<H> delete;
+        @Nullable private Function<H, DataTransactionResult> deleteAndGet;
+        @Nullable private Function<H, E> resetOnDelete;
+        @Nullable private BiFunction<H, E, DataTransactionResult> setAndGet;
+        @Nullable private Function<H, Boolean> supports;
 
-        private MutableRegistration(final MutableRegistrator<T> registrator, final Key<? extends Value<K>> key) {
-            this.registrator = registrator;
+        public MutableRegistrationBase(Key<? extends Value<E>> key) {
             this.key = key;
         }
 
-        public MutableRegistration<K, T> constructValue(final BiFunction<T, K, Value<K>> constructValue) {
+        public R constructValue(final BiFunction<H, E, Value<E>> constructValue) {
             this.constructValue = constructValue;
-            return this;
+            return (R) this;
         }
 
-        public MutableRegistration<K, T> get(final Function<T, K> get) {
+        public R get(final Function<H, E> get) {
             this.get = get;
-            return this;
+            return (R) this;
         }
 
-        public MutableRegistration<K, T> set(final BiConsumer<T, K> set) {
+        public R set(final BiConsumer<H, E> set) {
             this.set = set;
-            return this;
+            return (R) this;
         }
 
-        public MutableRegistration<K, T> setAnd(final BiFunction<T, K, Boolean> setAnd) {
+        public R setAnd(final BiFunction<H, E, Boolean> setAnd) {
             this.setAnd = setAnd;
-            return this;
+            return (R) this;
         }
 
-        public MutableRegistration<K, T> delete(final Consumer<T> delete) {
+        public R delete(final Consumer<H> delete) {
             this.delete = delete;
-            return this;
+            return (R) this;
         }
 
-        public MutableRegistration<K, T> deleteAnd(final Function<T, Boolean> deleteAnd) {
+        public R deleteAnd(final Function<H, Boolean> deleteAnd) {
             this.deleteAnd = deleteAnd;
-            return this;
+            return (R) this;
         }
 
-        public MutableRegistration<K, T> deleteAndGet(final Function<T, DataTransactionResult> deleteAndGet) {
+        public R deleteAndGet(final Function<H, DataTransactionResult> deleteAndGet) {
             this.deleteAndGet = deleteAndGet;
-            return this;
+            return (R) this;
         }
 
-        public MutableRegistration<K, T> resetOnDelete(final K value) {
+        public R resetOnDelete(final E value) {
             return this.resetOnDelete(CopyHelper.createSupplier(value));
         }
 
-        public MutableRegistration<K, T> resetOnDelete(final Supplier<K> resetOnDeleteTo) {
+        public R resetOnDelete(final Supplier<E> resetOnDeleteTo) {
             return this.resetOnDelete(h -> resetOnDeleteTo.get());
         }
 
-        public MutableRegistration<K, T> resetOnDelete(final Function<T, K> resetOnDeleteTo) {
+        public R resetOnDelete(final Function<H, E> resetOnDeleteTo) {
             this.resetOnDelete = resetOnDeleteTo;
-            return this;
+            return (R) this;
         }
 
-        public MutableRegistration<K, T> setAndGet(final BiFunction<T, K, DataTransactionResult> setAndGet) {
+        public R setAndGet(final BiFunction<H, E, DataTransactionResult> setAndGet) {
             this.setAndGet = setAndGet;
-            return this;
+            return (R) this;
         }
 
-        public MutableRegistration<K, T> supports(final Function<T, Boolean> supports) {
+        public R supports(final Function<H, Boolean> supports) {
             this.supports = supports;
-            return this;
+            return (R) this;
         }
 
-        public <NK> MutableRegistration<NK, T> create(final Supplier<? extends Key<? extends Value<NK>>> suppliedKey) {
+        public DataProvider<?, ?> build(Class<H> target) {
+            final MutableRegistrationBase<H, E, R> registration = this;
+            return new GenericMutableDataProvider<H, E>(registration.key, target) {
+                final boolean isBooleanKey = registration.key.getElementToken().getRawType() == Boolean.class;
+
+                @Override
+                protected Value<E> constructValue(final H dataHolder, final E element) {
+                    if (registration.constructValue != null) {
+                        return registration.constructValue.apply(dataHolder, element);
+                    }
+                    return super.constructValue(dataHolder, element);
+                }
+
+                @Override
+                protected Optional<E> getFrom(final H dataHolder) {
+                    if (this.isBooleanKey) {
+                        return (Optional<E>) OptBool.of((Boolean) registration.get.apply(dataHolder));
+                    }
+                    return Optional.ofNullable(registration.get.apply(dataHolder));
+                }
+
+                @Override
+                protected boolean set(final H dataHolder, final E value) {
+                    if (registration.setAnd != null) {
+                        return registration.setAnd.apply(dataHolder, value);
+                    }
+                    if (registration.set != null) {
+                        registration.set.accept(dataHolder, value);
+                        return true;
+                    }
+                    return super.set(dataHolder, value);
+                }
+
+                @Override
+                protected boolean delete(final H dataHolder) {
+                    if (registration.deleteAnd != null) {
+                        return registration.deleteAnd.apply(dataHolder);
+                    }
+                    if (registration.delete != null) {
+                        registration.delete.accept(dataHolder);
+                        return true;
+                    }
+                    if (registration.resetOnDelete != null) {
+                        return this.set(dataHolder, registration.resetOnDelete.apply(dataHolder));
+                    }
+                    return super.delete(dataHolder);
+                }
+
+                @Override
+                protected DataTransactionResult setAndGetResult(final H dataHolder, final E value) {
+                    if (registration.setAndGet != null) {
+                        return registration.setAndGet.apply(dataHolder, value);
+                    }
+                    return super.setAndGetResult(dataHolder, value);
+                }
+
+                @Override
+                protected DataTransactionResult deleteAndGetResult(final H dataHolder) {
+                    if (registration.deleteAndGet != null) {
+                        return registration.deleteAndGet.apply(dataHolder);
+                    }
+                    if (registration.resetOnDelete != null) {
+                        return setAndGetResult(dataHolder, registration.resetOnDelete.apply(dataHolder));
+                    }
+                    return super.deleteAndGetResult(dataHolder);
+                }
+
+                @Override
+                protected boolean supports(final H dataHolder) {
+                    if (registration.supports != null) {
+                        return registration.supports.apply(dataHolder);
+                    }
+                    return super.supports(dataHolder);
+                }
+            };
+
+
+        }
+
+    }
+
+    public static final class MutableRegistration<H, E> extends MutableRegistrationBase<H, E, MutableRegistration<H, E>> {
+
+        private final MutableRegistrator<H> registrator;
+
+        private MutableRegistration(final MutableRegistrator<H> registrator, final Key<? extends Value<E>> key) {
+            super(key);
+            this.registrator = registrator;
+        }
+
+        public <NE> MutableRegistration<H, NE> create(final Supplier<? extends Key<? extends Value<NE>>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 
-        public <NK> MutableRegistration<NK, T> create(final Key<? extends Value<NK>> key) {
-            final MutableRegistration<NK, T> registration = new MutableRegistration<>(this.registrator, key);
+        public <NE> MutableRegistration<H, NE> create(final Key<? extends Value<NE>> key) {
+            final MutableRegistration<H, NE> registration = new MutableRegistration<>(this.registrator, key);
             this.registrator.register(registration);
             return registration;
         }
@@ -342,7 +406,7 @@ public class DataProviderRegistrator {
          * @return The registrator
          */
         public <NT> MutableRegistrator<NT> asMutable(final Class<NT> target) {
-            return new MutableRegistrator<>(this.registrator.builder, target);
+            return new MutableRegistrator<>(this.registrator.registrationBuilder, target);
         }
 
         /**
@@ -350,50 +414,96 @@ public class DataProviderRegistrator {
          * @return The registrator
          */
         public <NT> ImmutableRegistrator<NT> asImmutable(final Class<NT> target) {
-            return new ImmutableRegistrator<>(this.registrator.builder, target);
+            return new ImmutableRegistrator<>(this.registrator.registrationBuilder, target);
         }
     }
 
-    public static final class ImmutableRegistration<K, T> {
+    @SuppressWarnings("unchecked")
+    private static class ImmutableRegistrationBase<H, E, R extends ImmutableRegistrationBase<H, E, R>> {
+        private final Key<? extends Value<E>> key;
+        @Nullable private BiFunction<H, E, Value<E>> constructValue;
+        @Nullable private Function<H, E> get;
+        @Nullable private BiFunction<H, E, H> set;
+        @Nullable private Function<H, Boolean> supports;
 
-        private final ImmutableRegistrator<T> registrator;
-        private final Key<? extends Value<K>> key;
-        @Nullable private BiFunction<T, K, Value<K>> constructValue;
-        @Nullable private Function<T, K> get;
-        @Nullable private BiFunction<T, K, T> set;
-        @Nullable private Function<T, Boolean> supports;
-
-        private ImmutableRegistration(final ImmutableRegistrator<T> registrator, final Key<? extends Value<K>> key) {
-            this.registrator = registrator;
+        public ImmutableRegistrationBase(Key<? extends Value<E>> key) {
             this.key = key;
         }
 
-        public ImmutableRegistration<K, T> constructValue(final BiFunction<T, K, Value<K>> constructValue) {
+        public R constructValue(final BiFunction<H, E, Value<E>> constructValue) {
             this.constructValue = constructValue;
-            return this;
+            return (R) this;
         }
 
-        public ImmutableRegistration<K, T> get(final Function<T, K> get) {
+        public R get(final Function<H, E> get) {
             this.get = get;
-            return this;
+            return (R) this;
         }
 
-        public ImmutableRegistration<K, T> set(final BiFunction<T, K, T> set) {
+        public R set(final BiFunction<H, E, H> set) {
             this.set = set;
-            return this;
+            return (R) this;
         }
 
-        public ImmutableRegistration<K, T> supports(final Function<T, Boolean> supports) {
+        public R supports(final Function<H, Boolean> supports) {
             this.supports = supports;
-            return this;
+            return (R) this;
         }
 
-        public <NK> ImmutableRegistration<NK, T> create(final Supplier<? extends Key<? extends Value<NK>>> suppliedKey) {
+        public DataProvider<?, ?> build(Class<H> target) {
+            final ImmutableRegistrationBase<H, E, R> registration = this;
+            return new GenericImmutableDataProvider<H, E>(registration.key, target) {
+                final boolean isBooleanKey = registration.key.getElementToken().getRawType() == Boolean.class;
+
+                @Override
+                protected Value<E> constructValue(final H dataHolder, final E element) {
+                    if (registration.constructValue != null) {
+                        return registration.constructValue.apply(dataHolder, element);
+                    }
+                    return super.constructValue(dataHolder, element);
+                }
+
+                @Override
+                protected Optional<E> getFrom(final H dataHolder) {
+                    if (this.isBooleanKey) {
+                        return (Optional<E>) OptBool.of((Boolean) registration.get.apply(dataHolder));
+                    }
+                    return Optional.ofNullable(registration.get.apply(dataHolder));
+                }
+
+                @Override
+                protected Optional<H> set(final H dataHolder, final E value) {
+                    return Optional.ofNullable(registration.set.apply(dataHolder, value));
+                }
+
+                @Override
+                protected boolean supports(final H dataHolder) {
+                    if (registration.supports != null) {
+                        return registration.supports.apply(dataHolder);
+                    }
+                    return super.supports(dataHolder);
+                }
+            };
+
+        }
+
+    }
+
+    public static final class ImmutableRegistration<H, E> extends ImmutableRegistrationBase<H, E, ImmutableRegistration<H, E>> {
+
+        private final ImmutableRegistrator<H> registrator;
+
+        private ImmutableRegistration(final ImmutableRegistrator<H> registrator, final Key<? extends Value<E>> key) {
+            super(key);
+            this.registrator = registrator;
+        }
+
+        public <NE> ImmutableRegistration<H, NE> create(final Supplier<? extends Key<? extends Value<NE>>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 
-        public <NK> ImmutableRegistration<NK, T> create(final Key<? extends Value<NK>> key) {
-            final ImmutableRegistration<NK, T> registration = new ImmutableRegistration<>(this.registrator, key);
+        public <NE> ImmutableRegistration<H, NE> create(final Key<? extends Value<NE>> key) {
+            final ImmutableRegistration<H, NE> registration = new ImmutableRegistration<>(this.registrator, key);
             this.registrator.register(registration);
             return registration;
         }
@@ -403,7 +513,7 @@ public class DataProviderRegistrator {
          * @return The registrator
          */
         public <NT> MutableRegistrator<NT> asMutable(final Class<NT> target) {
-            return new MutableRegistrator<>(this.registrator.builder, target);
+            return new MutableRegistrator<>(this.registrator.registrationBuilder, target);
         }
 
         /**
@@ -411,7 +521,144 @@ public class DataProviderRegistrator {
          * @return The registrator
          */
         public <NT> ImmutableRegistrator<NT> asImmutable(final Class<NT> target) {
-            return new ImmutableRegistrator<>(this.registrator.builder, target);
+            return new ImmutableRegistrator<>(this.registrator.registrationBuilder, target);
         }
     }
+
+    public static class SpongeImmutableDataProviderBuilder<H extends DataHolder, V extends Value<E>, E, R extends ImmutableRegistrationBase<H, E, R>> implements ImmutableDataProviderBuilder<H, V, E> {
+
+        private ImmutableRegistrationBase<H, E, R> registration;
+        private TypeToken<H> holder;
+
+        @Override
+        public <NV extends Value<NE>, NE> ImmutableDataProviderBuilder<H, NV, NE> key(Key<NV> key) {
+            this.registration = new ImmutableRegistrationBase(key);
+            return (SpongeImmutableDataProviderBuilder) this;
+        }
+
+        @Override
+        public  <NH extends H> ImmutableDataProviderBuilder<NH, V, E> dataHolder(TypeToken<NH> holder) {
+            this.holder = (TypeToken) holder;
+            return (SpongeImmutableDataProviderBuilder) this;
+        }
+
+        @Override
+        public ImmutableDataProviderBuilder<H, V, E> get(Function<H, E> get) {
+            this.registration.get(get);
+            return this;
+        }
+
+        @Override
+        public ImmutableDataProviderBuilder<H, V, E> set(BiFunction<H, E, H> set) {
+            this.registration.set(set);
+            return this;
+        }
+
+        @Override
+        public ImmutableDataProviderBuilder<H, V, E> supports(Function<H, Boolean> supports) {
+            this.registration.supports(supports);
+            return this;
+        }
+
+        @Override
+        public ImmutableDataProviderBuilder<H, V, E> reset() {
+            this.registration = null;
+            return this;
+        }
+
+        @Override
+        public DataProvider<? extends Value<E>, E> build() {
+            return this.registration.build((Class) this.holder.getRawType());
+        }
+    }
+
+    public static class SpongeMutableDataProviderBuilder<H extends DataHolder.Mutable, V extends Value<E>, E, R extends MutableRegistrationBase<H, E, R>> implements MutableDataProviderBuilder<H, V, E> {
+
+        private MutableRegistrationBase<H, E, R> registration;
+        private TypeToken<H> holder;
+
+        @Override
+        public <NV extends Value<NE>, NE> MutableDataProviderBuilder<H, NV, NE> key(Key<NV> key) {
+            this.registration = new MutableRegistrationBase(key);
+            return (SpongeMutableDataProviderBuilder) this;
+        }
+
+        @Override
+        public <NH extends H> MutableDataProviderBuilder<NH, V, E> dataHolder(TypeToken<NH> holder) {
+            this.holder = (TypeToken) holder;
+            return (SpongeMutableDataProviderBuilder) this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> get(Function<H, E> get) {
+            this.registration.get(get);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> set(BiConsumer<H, E> set) {
+            this.registration.set(set);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> setAnd(BiFunction<H, E, Boolean> setAnd) {
+            this.registration.setAnd(setAnd);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> delete(Consumer<H> delete) {
+            this.registration.delete(delete);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> deleteAnd(Function<H, Boolean> delete) {
+            this.registration.deleteAnd(delete);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> deleteAndGet(Function<H, DataTransactionResult> delete) {
+            this.registration.deleteAndGet(delete);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> resetOnDelete(Supplier<E> resetOnDeleteTo) {
+            this.registration.resetOnDelete(resetOnDeleteTo);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> resetOnDelete(Function<H, E> resetOnDeleteTo) {
+            this.registration.resetOnDelete(resetOnDeleteTo);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> setAndGet(BiFunction<H, E, DataTransactionResult> setAndGet) {
+            this.registration.setAndGet(setAndGet);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> supports(Function<H, Boolean> supports) {
+            this.registration.supports(supports);
+            return this;
+        }
+
+        @Override
+        public MutableDataProviderBuilder<H, V, E> reset() {
+            this.registration = null;
+            return this;
+        }
+
+        @Override
+        public DataProvider<V, E> build() {
+            return this.registration.build((Class) this.holder.getRawType());
+        }
+    }
+
 }

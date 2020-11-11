@@ -25,15 +25,26 @@
 package org.spongepowered.common.adventure;
 
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.ForwardingAudience;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class AudienceFactory implements Audiences.Factory {
+
     @Override
     public Audience onlinePlayers() {
-        return Audience.of((List<ServerPlayer>) (List) SpongeCommon.getServer().getPlayerList().getPlayers());
+        return Audience.audience((List<ServerPlayer>) (List) SpongeCommon.getServer().getPlayerList().getPlayers());
+    }
+
+    @Override
+    public Audience withPermission(String permission) {
+        return (ForwardingAudience) () -> SpongeCommon.getServer().getPlayerList().getPlayers().stream()
+                .map(p -> (ServerPlayer) p)
+                .filter(p -> p.hasPermission(permission))
+                .collect(Collectors.toList());
     }
 }

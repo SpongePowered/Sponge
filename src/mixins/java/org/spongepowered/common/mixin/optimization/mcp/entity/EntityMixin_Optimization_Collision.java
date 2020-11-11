@@ -28,6 +28,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.tags.Tag;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -67,7 +68,8 @@ public abstract class EntityMixin_Optimization_Collision {
     }
 
     @SuppressWarnings("deprecation")
-    @Redirect(method = "handleFluidAcceleration", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIII)Z"))
+    @Redirect(method = "handleFluidAcceleration",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIII)Z"))
     private boolean activeCollision$IgnoreAreaIsLoaded(final World world, final int xStart, final int yStart, final int zStart,
             final int xEnd, final int yEnd, final int zEnd) {
         if (((WorldBridge) world).bridge$isFake()) {

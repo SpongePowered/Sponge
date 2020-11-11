@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.optimization.mcp.world;
 
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

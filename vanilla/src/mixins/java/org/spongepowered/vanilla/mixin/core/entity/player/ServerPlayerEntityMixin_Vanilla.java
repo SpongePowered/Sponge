@@ -32,6 +32,7 @@ import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -57,13 +58,13 @@ public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEnt
     }
 
     @Override
-    public void bridge$sendChangeDimension(final DimensionType toDimensionType, final WorldType generator, final GameType gameType) {
+    public void bridge$sendChangeDimension(final DimensionType toDimensionType, long seed, final WorldType generator, final GameType gameType) {
         final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
 
         if (this.bridge$getClientType() == ClientType.SPONGE_VANILLA) {
-            player.connection.sendPacket(new SRespawnPacket(toDimensionType, generator, gameType));
+            player.connection.sendPacket(new SRespawnPacket(toDimensionType, seed, generator, gameType));
         } else {
-            this.vanilla$hackChangeVanillaClientDimension(((DimensionTypeBridge) toDimensionType).bridge$getSpongeDimensionType(), generator,
+            this.vanilla$hackChangeVanillaClientDimension(((DimensionTypeBridge) toDimensionType).bridge$getSpongeDimensionType(), seed, generator,
                     gameType, true);
         }
     }
@@ -76,11 +77,13 @@ public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEnt
             final WorldType generator = ((ServerPlayerEntity) (Object) this).getEntityWorld().getWorldInfo().getGenerator();
             final GameType gameType = ((ServerPlayerEntity) (Object) this).interactionManager.getGameType();
 
-            this.vanilla$hackChangeVanillaClientDimension(dimensionType, generator, gameType, false);
+            this.vanilla$hackChangeVanillaClientDimension(dimensionType, WorldInfo.byHashing(this.shadow$getServerWorld().getSeed()), generator,
+                gameType, false);
         }
     }
 
-    private void vanilla$hackChangeVanillaClientDimension(final SpongeDimensionType logicType, final WorldType generator, final GameType gameType,
+    private void vanilla$hackChangeVanillaClientDimension(final SpongeDimensionType logicType, final long seed, final WorldType generator,
+            final GameType gameType,
             boolean actualWorldChange) {
         final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
 
@@ -90,25 +93,25 @@ public abstract class ServerPlayerEntityMixin_Vanilla implements ServerPlayerEnt
         // Trick the Vanilla client to dump it's rendered chunks as we cannot send unknown registered dimensions to the client
         if (currentLogicType == logicType) {
             if (logicType == DimensionTypes.OVERWORLD.get()) {
-                player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, generator, gameType));
+                player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, seed, generator, gameType));
             } else if (logicType == DimensionTypes.THE_NETHER.get()) {
-                player.connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, generator, gameType));
+                player.connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, seed, generator, gameType));
             } else {
-                player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, generator, gameType));
+                player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, seed, generator, gameType));
             }
         }
 
         // Now send the fake client type
         if (logicType == DimensionTypes.OVERWORLD.get()) {
-            player.connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, generator, gameType));
+            player.connection.sendPacket(new SRespawnPacket(DimensionType.OVERWORLD, seed, generator, gameType));
         } else if (logicType == DimensionTypes.THE_NETHER.get()) {
-            player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, generator, gameType));
+            player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_NETHER, seed, generator, gameType));
         } else {
-            player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_END, generator, gameType));
+            player.connection.sendPacket(new SRespawnPacket(DimensionType.THE_END, seed, generator, gameType));
         }
 
         if (!actualWorldChange) {
-            player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+            player.connection.setPlayerLocation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, player.rotationPitch);
             // TODO This needs more work for Vanilla clients...
         }
     }

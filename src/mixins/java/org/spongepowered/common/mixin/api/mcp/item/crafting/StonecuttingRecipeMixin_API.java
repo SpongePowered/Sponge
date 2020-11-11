@@ -27,9 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.item.crafting;
 import net.minecraft.item.crafting.StonecuttingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.recipe.crafting.custom.SpongeStonecuttingRecipe;
 
-@Mixin(value = {StonecuttingRecipe.class, SpongeStonecuttingRecipe.class})
+@Mixin(StonecuttingRecipe.class)
 public abstract class StonecuttingRecipeMixin_API implements StoneCutterRecipe {
 
 }

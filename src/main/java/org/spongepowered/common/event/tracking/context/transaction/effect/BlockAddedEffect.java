@@ -30,7 +30,14 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class BlockAddedEffect implements ProcessingSideEffect {
 
-    public BlockAddedEffect() {
+    private static final class Holder {
+        static final BlockAddedEffect INSTANCE = new BlockAddedEffect();
+    }
+    BlockAddedEffect() {
+    }
+
+    public static BlockAddedEffect getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

@@ -711,6 +711,10 @@ public final class BlockSupplier {
             .registerSupplier(BlockType.class, "structure_block", () -> (BlockType) Blocks.STRUCTURE_BLOCK)
             .registerSupplier(BlockType.class, "jigsaw", () -> (BlockType) Blocks.JIGSAW)
             .registerSupplier(BlockType.class, "composter", () -> (BlockType) Blocks.COMPOSTER)
+            .registerSupplier(BlockType.class, "bee_nest", () -> (BlockType) Blocks.BEE_NEST)
+            .registerSupplier(BlockType.class, "beehive", () -> (BlockType) Blocks.BEEHIVE)
+            .registerSupplier(BlockType.class, "honey_block", () -> (BlockType) Blocks.HONEY_BLOCK)
+            .registerSupplier(BlockType.class, "honeycomb_block", () -> (BlockType) Blocks.HONEYCOMB_BLOCK)
         ;
     }
 }

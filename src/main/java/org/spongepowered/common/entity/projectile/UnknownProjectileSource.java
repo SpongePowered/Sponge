@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity.projectile;
 
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.math.vector.Vector3d;
@@ -39,17 +40,17 @@ public final class UnknownProjectileSource implements ProjectileSource {
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType) {
         return Optional.empty();
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
+    public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType, final Vector3d velocity) {
         return Optional.empty();
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectileTo(Class<T> projectileClass, Entity target) {
+    public <T extends Projectile> Optional<T> launchProjectileTo(final EntityType<T> projectileType, final Entity target) {
         return Optional.empty();
     }
 }

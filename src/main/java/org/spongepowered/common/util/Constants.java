@@ -87,6 +87,7 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
@@ -250,9 +251,26 @@ public final class Constants {
                 public static final String PROJECTILE_SOURCE = "projectileSource";
             }
 
+            public static final class EyeOfEnder {
+
+                public static final int DESPAWN_TIMER_MAX = 80;
+            }
+
             public static final class Player {
 
                 public static final String HEALTH_SCALE = "HealthScale";
+            }
+
+            public static final class DataRegistration {
+                public static final String INVENTORY = "inventory";
+                public static final String TILEENTITY = "tileentity";
+                public static final String LOCATION = "location";
+                public static final String BLOCKSTATE = "blockstate";
+                public static final String ENTITY = "entity";
+                public static final String GENERIC = "generic";
+                public static final String ITEMSTACK = "itemstack";
+                public static final String ITEM = "item";
+                public static final String NBT = "nbt";
             }
 
         }
@@ -526,7 +544,7 @@ public final class Constants {
         // These are the various tag compound id's for getting to various places
         public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
         public static final String BLOCK_ENTITY_ID = "id";
-        public static final String ITEM_ENCHANTMENT_LIST = "ench";
+        public static final String ITEM_ENCHANTMENT_LIST = "Enchantments";
         public static final String ITEM_STORED_ENCHANTMENTS_LIST = "StoredEnchantments";
         public static final String ITEM_DISPLAY = "display";
         public static final String ITEM_DISPLAY_NAME = "Name";
@@ -609,6 +627,27 @@ public final class Constants {
             public static final String SHAPE_TYPE = "Type";
             public static final String FLIGHT = "Flight";
         }
+    }
+
+    public static final class Recipe {
+        public static final String GROUP = "group";
+
+        public static final String RESULT = "result";
+        public static final String ITEM = "item";
+        public static final String COUNT = "count";
+
+        public static final String SPONGE_RESULT = "sponge:result";
+        public static final String SPONGE_RESULTFUNCTION = "sponge:result_function";
+        public static final String SPONGE_REMAINING_ITEMS = "sponge:remaining_items";
+
+        public static final String COOKING_EXP = "experience";
+        public static final String COOKING_TIME = "cookingtime";
+
+        public static final String COOKING_INGREDIENT = "ingredient";
+        public static final String STONECUTTING_INGREDIENT = "ingredient";
+        public static final String SHAPED_PATTERN = "pattern";
+        public static final String SHAPED_INGREDIENTS = "key";
+        public static final String SHAPELESS_INGREDIENTS = "ingredients";
     }
 
     public static final class TileEntity {
@@ -731,6 +770,15 @@ public final class Constants {
         }
     }
 
+    public static final class Profile {
+
+        public static final DataQuery UUID = of("UUID");
+        public static final DataQuery NAME = of("Name");
+        public static final DataQuery PROPERTIES = DataQuery.of("Properties");
+        public static final DataQuery VALUE = DataQuery.of("Value");
+        public static final DataQuery SIGNATURE = DataQuery.of("Signature");
+    }
+
     public static final class Entity {
 
         public static final double DEFAULT_ABSORPTION = 0.0f;
@@ -751,12 +799,14 @@ public final class Constants {
         public static final String ENTITY_DIMENSION = "Dimension";
         public static final String PASSENGERS = "Passengers";
         public static final String ENTITY_ROTATION = "Rotation";
+        public static final String ENTITY_UUID = "UUID";
         // Entities
         public static final DataQuery CLASS = of("EntityClass");
         public static final DataQuery UUID = of("EntityUniqueId");
         public static final DataQuery TYPE = of("EntityType");
         public static final DataQuery ROTATION = of("Rotation");
         public static final DataQuery SCALE = of("Scale");
+        public static final DataQuery CUSTOM_NAME = of("CustomName");
 
         public static final String ATTACK_ENTITY_FROM_MAPPING = "attackEntityFrom";
         public static final String ATTACK_ENTITY_FROM_OBFUSCATED = "func_70097_a";
@@ -1127,7 +1177,7 @@ public final class Constants {
             final ListNBT nbttaglist = new ListNBT();
 
             for (final double d1 : numbers) {
-                nbttaglist.add(new DoubleNBT(d1));
+                nbttaglist.add(DoubleNBT.valueOf(d1));
             }
 
             return nbttaglist;
@@ -1137,7 +1187,7 @@ public final class Constants {
             final ListNBT nbttaglist = new ListNBT();
 
             for (final float f : numbers) {
-                nbttaglist.add(new FloatNBT(f));
+                nbttaglist.add(FloatNBT.valueOf(f));
             }
 
             return nbttaglist;
@@ -1212,6 +1262,8 @@ public final class Constants {
         // RepresentedPlayerData
         public static final DataQuery GAME_PROFILE_ID = of("Id");
         public static final DataQuery GAME_PROFILE_NAME = of("Name");
+
+        public static final String DUMMY_NAME = "[sponge]";
     }
 
     public static final class Block {
@@ -1493,5 +1545,25 @@ public final class Constants {
          * A minecraft channel used to unregister channels keys.
          */
         public static final ResourceKey UNREGISTER_KEY = ResourceKey.minecraft("unregister");
+    }
+
+    public static final class KeyValueMatcher {
+
+        public static final DataQuery VALUE = DataQuery.of("Value");
+        public static final DataQuery OPERATOR = DataQuery.of("Operator");
+        public static final DataQuery KEY = DataQuery.of("Key");
+    }
+
+    public static final class TickConversions {
+
+        public static final int TICK_DURATION_MS = 50;
+        public static final Duration EFFECTIVE_MINIMUM_DURATION = Duration.ofMillis(TICK_DURATION_MS);
+
+        public static final int MINECRAFT_DAY_TICKS = 24000;
+        public static final int MINECRAFT_HOUR_TICKS = MINECRAFT_DAY_TICKS / 24;
+        public static final double MINECRAFT_MINUTE_TICKS = MINECRAFT_HOUR_TICKS / 60.0;
+        public static final double MINECRAFT_SECOND_TICKS = MINECRAFT_MINUTE_TICKS / 60.0;
+        public static final int MINECRAFT_EPOCH_OFFSET = 6000;
+
     }
 }

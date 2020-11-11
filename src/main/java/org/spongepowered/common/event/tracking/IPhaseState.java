@@ -33,52 +33,48 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.context.transaction.BlockTransaction;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
+import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
-import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * A literal phase state of which the {@link World} is currently running
@@ -214,112 +210,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     void unwind(C phaseContext);
 
     /**
-     * Based on whether this state is allowed to capture entity spawns in bulk
-     * for later processing in {@link #unwind(PhaseContext)}, or whether entities
-     * are to be spawned directly after throwing an event is used here. By default,
-     * this will create and call a single {@link SpawnEntityEvent} and then spawn
-     * the entity. Other states may override and provide their own custom handling
-     * based on various situations (like world generation).
-     *
-     * <p>NOTE: This method should only be called and handled if and only if {@link IPhaseState#doesAllowEntitySpawns()}
-     * returns {@code true}. Violation of this will have unforeseen consequences.</p>
-     *
-     *
-     * @param context The current context
-     * @param entity The entity being captured
-     * @return True if the entity was successfully captured
-     */
-    default boolean spawnEntityOrCapture(final C context, final org.spongepowered.api.entity.Entity entity) {
-        final ArrayList<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(1);
-        entities.add(entity);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
-    }
-
-    /**
-     * A phase specific method that determines whether it is needed to capture the entity based onto the
-     * entity-specific lists of drops, or a generalized list of drops.
-     *
-     * Cases for entity specific drops:
-     * - Explosions
-     * - Entity deaths
-     * - Commands killing mass entities and those entities dropping items
-     *
-     * Cases for generalized drops:
-     * - Phase states for specific entity deaths
-     * - Phase states for generalization, like packet handling
-     * - Using items
-     *
-     * @param phaseContext The current context
-     * @param entity The entity performing the drop or "source" of the drop
-     * @param entityitem The item to be dropped
-     * @return True if we are capturing, false if we are to let the item spawn
-     */
-    default boolean spawnItemOrCapture(final C phaseContext, final Entity entity, final ItemEntity entityitem) {
-        if (this.doesCaptureEntityDrops(phaseContext)) {
-            if (this.tracksEntitySpecificDrops()) {
-                // We are capturing per entity drop
-                // This has to be handled specially for the entity in forge environments to
-                // specifically syncronize the list used for sponge's tracking and forge's partial tracking
-                SpongeImplHooks.capturePerEntityItemDrop(phaseContext, entity, entityitem);
-            } else {
-                // We are adding to a general list - usually for EntityPhase.State.DEATH
-                phaseContext.getCapturedItemsSupplier().get().add(entityitem);
-            }
-            // Return the item, even if it wasn't spawned in the world.
-            return true;
-        }
-        return false;
-    }
-    /**
-     * Specifically used when block changes have taken place in place (after block events are thrown),
-     * some captures may take place, and those captures may need to be "depth first" processed. Imagining
-     * that every block change that is bulk captured would be iterated and the changes from those block changes
-     * iterated in a fashion of a "Depth First" iteration of a tree. This is to propogate Minecraft block
-     * physics correctly and allow mechanics to function that otherwise would not function correctly.
-     *
-     * Case in point: Once we had done the "breadth first" strategy of processing, which broke redstone
-     * contraptions, but allowed some "interesting" new contraptions, including but not excluded to a new
-     * easy machine that could create quantum redstone clocks where redstone would be flipped twice in a
-     * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
-     *
-     * @param context The context to re-check for captures
-     * @param depth THe current processing depth
-     */
-    default void performOnBlockAddedSpawns(final C context, final int depth) {
-
-    }
-    /**
-     * Specifically used when block changes have taken place in place (after block events are thrown),
-     * some captures may take place, and those captures may need to be "depth first" processed. Imagining
-     * that every block change that is bulk captured would be iterated and the changes from those block changes
-     * iterated in a fashion of a "Depth First" iteration of a tree. This is to propogate Minecraft block
-     * physics correctly and allow mechanics to function that otherwise would not function correctly.
-     *
-     * Case in point: Once we had done the "breadth first" strategy of processing, which broke redstone
-     * contraptions, but allowed some "interesting" new contraptions, including but not excluded to a new
-     * easy machine that could create quantum redstone clocks where redstone would be flipped twice in a
-     * "single" tick. It was pretty cool, but did not work out as it broke vanilla mechanics.
-     *
-     * Due the recursive nature of the "depth first" strategy, certain mod blocks may
-     * cause this method to infinite recurse if they generate new transactions on every pass through.
-     * To avoid a StackOverflowError (which causes us to lose all of the associated context),
-     * we track the current depth . If the processing depth exceeeds a configurable threshold,
-     * processing is aborted, and the current tracker state and phase data are logged.
-     * @param context The context to re-check for captures
-     * @param newState
-     * @param changeFlag
-     * @param currentDepth The current processing depth, to prevenet stack overflows
-     */
-    default void performPostBlockNotificationsAndNeighborUpdates(final C context,
-        final BlockState newState, final SpongeBlockChangeFlag changeFlag,
-        final int currentDepth) {
-
-    }
-
-    /**
      * Used to create any extra specialized events for {@link ChangeBlockEvent.Post} as necessary.
      * An example of this being used specially is for explosions needing to create a child classed
      * post event.
@@ -336,11 +226,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
-     * {@link Transaction} has taken place. The provided {@link BlockChange} is usually
-     * provided from either {@link TrackingUtil#performTransactionProcess(Transaction, PhaseContext, int)}
-     * or {@link IPhaseState#postBlockTransactionApplication(BlockChange, Transaction, PhaseContext)} due to
-     * delegation to the underlying context during post processing of reactionary
-     * side effects (like water spread from a bucket).
+     * {@link Transaction} has taken place.
      *
      * @param blockChange The block change performed
      * @param snapshotTransaction The transaction of the old and new snapshots
@@ -348,20 +234,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> snapshotTransaction,
         final C context) { }
-
-    /**
-     * During {@link UnwindingState#unwind(UnwindingPhaseContext)}, this delegates to the "unwinding" state to perform
-     * any extra handling with contexts to spawn entities that were captured.
-     *
-     * @param unwindingContext
-     * @param entities
-     */
-    default void postProcessSpawns(final C unwindingContext, final ArrayList<org.spongepowered.api.entity.Entity> entities) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-            SpongeCommonEventFactory.callSpawnEntity(entities, unwindingContext);
-        }
-    }
 
     /**
      * Specifically gets whether this state ignores any attempts at storing
@@ -378,62 +250,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default boolean tracksCreatorsAndNotifiers() {
         return true;
     }
-    /**
-     * Gets whether this state specifically supports splitting up {@link Block#spawnDrops(BlockState, net.minecraft.world.World, BlockPos, TileEntity, Entity, net.minecraft.item.ItemStack)}
-     * drops as some blocks may drop multiple items at once. In some cases, the individual block
-     * transactions can be associated directly with captured item/entity spawns. In other
-     * cases, we cannot safely perform these captures as some mods may be expecting those items to
-     * throw events immediately after the blocks have been changed. In other cases, like when an
-     * explosion occurs, we can safely track the block drops and entity spawns per block.
-     *
-     * <p>This has potential for being configurable on a block id based basis.</p>
-     * @return Whether per-block drops are being captured
-     * @param context
-     */
-    default boolean tracksBlockSpecificDrops(final C context) {
-        return false;
-    }
-    /**
-     * Gets whether this state will capture entity spawns per entity during this specific phase.
-     * Occasionally we can expect some phases to be able to determine these custom drops per
-     * entity, however, they are far and few. Some to name the least will be certain ones like
-     * Commands, explosions, etc. where multiple entities can be killed and drops can occur.
-     *
-     * @return True if this phase is aware enough to handle entity death drops per entity, or will
-     *     cause {@link EntityPhase.State#DEATH} to be entered and handle it's own drops
-     */
-    default boolean tracksEntitySpecificDrops() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state is performing logic/captures for entity deaths. Usually deaths
-     * are very specific depending on the {@link DamageSource} that killed an entity, so
-     * depending on the phase state this is, we may need to switch to {@link EntityPhase.State#DEATH}
-     * when an entity is dying. Naturally, this state will be "parented" so the death state will
-     * enter and exit, possibly multiple times.
-     *
-     * Specifically however, this means that entity, item, and block captures related to
-     * an entity dying will be handled in THIS state if this returns true.
-     *
-     * @return True if this state already handles the block, item, and entity captures for
-     *      entity deaths
-     */
-    default boolean tracksEntityDeaths() {
-        return false;
-    }
-
-    /**
-     * Gets whether this {@link IPhaseState} is going to actually capture entity drops,
-     * or whether entity drops are going to be directly spawned into the world (potentially with
-     * an event, depending on {@link #doesDropEventTracking(PhaseContext)}).
-     *
-     * @param context The context, usually to provide the boolean value depending on the source of the phase
-     * @return True if entity drops are captured
-     */
-    default boolean doesCaptureEntityDrops(final C context) {
-        return false;
-    }
 
     /**
      * Gets whether this state will allow entities to spawn, in general, not whether they're captured,
@@ -444,20 +260,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return True if entities are allowed to spawn
      */
     default boolean doesAllowEntitySpawns() {
-        return true;
-    }
-
-    /**
-     * Gets whether this state, with the provided context, will perform bulk block capturing to
-     * later perform said block mechanics during {@link #unwind(PhaseContext)}. This is usually
-     * dependent on the provided {@link PhaseContext} since some contexts cannot be bulk capturing
-     * due to mod compatibility reasons. In vanilla, everything usually can be bulk captured,
-     * except in corner cases for things like the ender dragon due to their precise nature.
-     *
-     * @param context The context to provide extra information whether captures can take place
-     * @return True or false
-     */
-    default boolean doesBulkBlockCapture(final C context) {
         return true;
     }
 
@@ -473,53 +275,17 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    /**
-     * Gets whether this state will capture entity spawns during block changes.
-     * Not 100% sure
-     * @return
-     */
-    default boolean doesCaptureEntitySpawns() {
-        return false;
-    }
-    /**
-     * An alternative to {@link #doesBulkBlockCapture(PhaseContext)} to where if capturing is expressly
-     * disabled, we can still track the block change through normal methods, and throw events,
-     * but we won't be capturing directly or delaying any block related physics.
-     *
-     * <p>If this and {@link #doesBulkBlockCapture(PhaseContext)} both return {@code false}, vanilla
-     * mechanics will take place, and no tracking or capturing is taking place unless otherwise
-     * noted by
-     * {@link #associateNeighborStateNotifier(PhaseContext, BlockPos, Block, BlockPos, ServerWorld, PlayerTracker.Type)}</p>
-     *
-     * @return True by default, false for things like world gen
-     * @param context
-     */
     default boolean doesBlockEventTracking(final C context) {
         return true;
     }
 
     /**
-     * An alternative to {@link #doesCaptureEntityDrops(PhaseContext)} to where if capturing is expressly
-     * disabled, we can still track the item drop through normal methods, and throw events, but the items
-     * will not be directly added to our capture lists.
-     * // TODO - not implemented as of yet. Supposed to mimic what we did for block events
-     * @param context
-     * @return
-     */
-    // TODO -implement this into the config, and wherever else
-    default boolean doesDropEventTracking(final C context) {
-        return true;
-    }
-
-    /**
-     * Gets whether this state will ignore triggering entity collision events or not. Since there are
-     * many states that perform operations that would be slowed down by having spammed events, we
-     * can occasionally ignore collision events for those states. Examples include world generation,
-     * or explosions.
+     * Gets whether this state fires {@link org.spongepowered.api.event.entity.CollideEntityEvent}s.
+     * This is used for firing the events and for related optimizations.
      *
-     * @return Whether this state will throw entity collision events when calling {@link Chunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, java.util.function.Predicate)}
+     * @return Whether this state should fire entity collision events
      */
-    default boolean ignoresEntityCollisions() {
+    default boolean isCollision() {
         return false;
     }
 
@@ -555,38 +321,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default boolean ignoresScheduledUpdates() {
         return false;
-    }
-
-    /**
-     * Gets whether this state will specifically ignore attempting to merge {@link ItemStack}s
-     * within capture lists and avoid creating the {@link ItemEntity} speicifcally. In some cases
-     * however, these items need to be directly created as entities for them to be acted upon
-     * during the phase process and therefor cannot be captured. Examples can include where
-     * mods are attempting to modify the captured entities by providing their own form of a
-     * "captured" loot bag of sorts.
-     *
-     * @return True if itemstack pre-merging is ignored
-     */
-    default boolean ignoresItemPreMerging() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state will capture the provided position block change, or not.
-     * This does not bypass the creation of the block changes, it just bypasses whether
-     * the block change is going to be captured. May be qualified for removal pending some
-     * cleanup with block captures and method duplications.
-     *
-     * @param phaseContext
-     * @param pos
-     * @param currentState
-     * @param newState
-     * @param flags
-     * @return
-     */
-    default boolean shouldCaptureBlockChangeOrSkip(final C phaseContext, final BlockPos pos, final BlockState currentState,
-        final BlockState newState, final BlockChangeFlag flags) {
-        return true;
     }
 
     /**
@@ -630,26 +364,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return True if entity tick processing is already handled in this state
      */
     default boolean alreadyCapturingTileTicks() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state is alraedy expecting to capture or process item drops from
-     * blocks. Usually used for post states, explosions, interaction packets, and a few other cases.
-     *
-     * @return
-     */
-    default boolean alreadyProcessingBlockItemDrops() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state is expecting to capture a block position. Used for explosions
-     * to determine where the origination of the explosion took place.
-     *
-     * @return True if a block position is going to be captured for explosions
-     */
-    default boolean requiresBlockPosTracking() {
         return false;
     }
 
@@ -744,7 +458,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param playerIn
      * @param context
      */
-    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final ServerPlayerEntity playerIn, final C context) {
+    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayerEntity playerIn, final C context) {
 
     }
 
@@ -765,20 +479,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return true;
     }
 
-    /**
-     * Gets the populator offset for the given {@link Chunk} that will be passed to
-     * {@link Feature}s. Normally, during any sort of world generation, the offset
-     * is 8, but sometimes, for chunk regeneration, we don't want to use an offset.
-     *
-     * @param chunk The chunk
-     * @param chunkX the x position
-     * @param chunkZ the z position
-     * @return The chunk populator offset
-     */
-    default Vector3i getChunkPopulatorOffset(final org.spongepowered.api.world.chunk.Chunk chunk, final int chunkX, final int chunkZ) {
-        return  new Vector3i(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
-    }
-
     default boolean isRegeneration() {
         return false;
     }
@@ -789,29 +489,18 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Specifically captures a block change by {@link ChunkMixin_Tracker#bridge$setBlockState(BlockPos, BlockState, BlockState, BlockChangeFlag)}
+     * Specifically captures a block change by {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier#logBlockChange(SpongeBlockSnapshot, BlockState, BlockChangeFlag)}
      * such that the change of a {@link BlockState} will be appropriately logged, along with any changes of tile entities being removed
      * or added, likewise, this will avoid duplicating transactions later after the fact, in the event that multiple changes are taking
      * place, including but not withstanding, tile entity replacements after the fact.
      * @return
      */
-    default BlockTransaction.ChangeBlock createTransaction(final C phaseContext,
+    default ChangeBlock createTransaction(final C phaseContext,
         final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState, final BlockChangeFlag flags) {
-        final BlockTransaction.ChangeBlock changeBlock = phaseContext.getBlockTransactor()
+        final ChangeBlock changeBlock = phaseContext.getTransactor()
             .logBlockChange(originalBlockSnapshot, newState, flags);
 
         return changeBlock;
-    }
-
-    default void processCancelledTransaction(final C context, final Transaction<BlockSnapshot> transaction, final BlockSnapshot original) {
-        if (this.tracksBlockSpecificDrops(context)) {
-            // Cancel any block drops or harvests for the block change.
-            // This prevents unnecessary spawns.
-            if (transaction.getOriginal() instanceof SpongeBlockSnapshot) {
-                final BlockPos pos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
-                context.getBlockDropSupplier().removeAllIfNotEmpty(pos);
-            }
-        }
     }
 
     default boolean doesCaptureNeighborNotifications(final C context) {
@@ -848,6 +537,18 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
+    /**
+     * When false, prevents directories from being created during the creation
+     * of an {@link net.minecraft.world.chunk.storage.AnvilSaveHandler}. Used
+     * for {@link org.spongepowered.api.world.SerializationBehaviors#NONE}.
+     *
+     * @param phaseContext The appropriate phase context
+     * @return True if directories can be created; false otherwise
+     */
+    default boolean shouldCreateWorldDirectories(final C phaseContext) {
+        return true;
+    }
+
     default boolean isConvertingMaps() {
         return false;
     }
@@ -862,5 +563,26 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param phaseContext The appropriate phase context
      */
     default void markTeleported(final C phaseContext) {
+    }
+
+    default Supplier<SpawnType> getSpawnTypeForTransaction(final C context, final Entity entityToSpawn) {
+        if (entityToSpawn instanceof ItemEntity) {
+            return SpawnTypes.DROPPED_ITEM;
+        }
+        return SpawnTypes.PASSIVE;
+    }
+
+    default SpawnEntityEvent createSpawnEvent(final C context,
+        final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
+        final Cause currentCause) {
+        return SpongeEventFactory.createSpawnEntityEvent(currentCause,
+            collect.stream()
+                .map(Tuple::getFirst)
+                .collect(Collectors.toList())
+        );
+    }
+
+    default boolean recordsEntitySpawns(C context) {
+        return true;
     }
 }

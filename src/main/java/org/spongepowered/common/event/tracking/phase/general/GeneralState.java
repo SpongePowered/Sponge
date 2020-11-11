@@ -24,47 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-
-import java.util.ArrayList;
 
 abstract class GeneralState<G extends PhaseContext<G>> extends PooledPhaseState<G> implements IPhaseState<G> {
 
     @Override
     public abstract void unwind(G context);
-
-    /**
-     * A duplicate of {@link IPhaseState#spawnEntityOrCapture(PhaseContext, Entity)}
-     * such that the general states will not know what to do for entity spawns. Eventually, this is going to be centralized
-     * so that it's not always delegated between the phases and phase states.
-     *
-     * Basically, for this method, this is included only for the {@link GeneralPhase.State#COMPLETE}, all other
-     * will capture or spawn appropriately. In the case of explosions for example, the entities must be mapped
-     * according to the blocks broken so that the blocks themselves can be cancelled and the entities spawned
-     * are dropped from the game entirely before throwing additional events.
-     *
-     * @param context
-     * @param entity
-     * @return
-     */
-    @Override
-    public boolean spawnEntityOrCapture(final G context, final Entity entity) {
-        final ArrayList<Entity> entities = new ArrayList<>(1);
-        entities.add(entity);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
-    }
 
     private final String desc = TrackingUtil.phaseStateToString("General", this);
 

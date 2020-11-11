@@ -31,6 +31,7 @@ import org.spongepowered.common.accessor.entity.AreaEffectCloudEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.util.PotionEffectHelper;
 import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class AreaEffectCloudData {
 
@@ -45,8 +46,15 @@ public final class AreaEffectCloudData {
                         .get(h -> Color.ofRgb(h.getColor()))
                         .set((h, v) -> h.setColor(v.getRgb()))
                     .create(Keys.DURATION)
-                        .get(AreaEffectCloudEntity::getDuration)
-                        .set(AreaEffectCloudEntity::setDuration)
+                        .get(x -> new SpongeTicks(x.getDuration()))
+                        .setAnd((h, v) -> {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
+                                return false;
+                            }
+                            h.setDuration(ticks);
+                            return true;
+                        })
                     .create(Keys.PARTICLE_EFFECT)
                         .get(h -> {
                             throw new MissingImplementationException("AreaEffectCloudData", "PARTICLE_EFFECT::getter");
@@ -64,18 +72,18 @@ public final class AreaEffectCloudData {
                         .get(h -> (double) ((AreaEffectCloudEntityAccessor) h).accessor$getRadiusPerTick())
                         .set((h, v) -> h.setRadiusPerTick(v.floatValue()))
                     .create(Keys.WAIT_TIME)
-                        .get(h -> ((AreaEffectCloudEntityAccessor) h).accessor$getWaitTime())
-                        .set(AreaEffectCloudEntity::setWaitTime)
+                        .get(h -> new SpongeTicks(((AreaEffectCloudEntityAccessor) h).accessor$getWaitTime()))
+                        .set((h, v) -> h.setWaitTime((int) v.getTicks()))
                 .asMutable(AreaEffectCloudEntityAccessor.class)
                     .create(Keys.DURATION_ON_USE)
-                        .get(AreaEffectCloudEntityAccessor::accessor$getDurationOnUse)
-                        .set(AreaEffectCloudEntityAccessor::accessor$setDurationOnUse)
+                        .get(h -> new SpongeTicks(h.accessor$getDurationOnUse()))
+                        .set((h, v) -> h.accessor$setDurationOnUse((int) v.getTicks()))
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> PotionEffectHelper.copyAsPotionEffects(h.accessor$getEffects()))
                         .set((h, v) -> h.accessor$setEffects(PotionEffectHelper.copyAsEffectInstances(v)))
                     .create(Keys.REAPPLICATION_DELAY)
-                        .get(AreaEffectCloudEntityAccessor::accessor$getReapplicationDelay)
-                        .set(AreaEffectCloudEntityAccessor::accessor$setReapplicationDelay);
+                        .get(h -> new SpongeTicks(h.accessor$getReapplicationDelay()))
+                        .set((h, v) -> h.accessor$setReapplicationDelay((int) v.getTicks()));
     }
     // @formatter:on
 }

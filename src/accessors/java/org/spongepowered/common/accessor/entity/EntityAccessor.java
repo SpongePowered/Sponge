@@ -84,4 +84,6 @@ public interface EntityAccessor {
     @Accessor("lastPortalPos") void accessor$setLastPortalPos(BlockPos value);
 
     @Accessor("timeUntilPortal") void accessor$setTimeUntilPortal(int value);
+
+    @Invoker("getEntityString") String accessor$getEntityString();
 }

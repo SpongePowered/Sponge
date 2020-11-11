@@ -39,13 +39,4 @@ public final class TeleportPhaseState extends EntityPhaseState<TeleportContext> 
         return !context.isPlayer();
     }
 
-    @Override
-    public boolean tracksEntitySpecificDrops() {
-        return false;
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(final TeleportContext context) {
-        return false;
-    }
 }

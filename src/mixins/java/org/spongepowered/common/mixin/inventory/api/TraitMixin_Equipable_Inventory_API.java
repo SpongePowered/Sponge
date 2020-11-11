@@ -24,50 +24,29 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.Equipable;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-
-// All living implementors of Equipable
-@Mixin({PlayerEntity.class,
-        ArmorStandEntity.class,
+@Mixin({ArmorStandEntity.class,
         MobEntity.class})
 public abstract class TraitMixin_Equipable_Inventory_API implements Equipable {
 
-    // TODO can we implement canEquip?
-    // We might want to allow plugins to set any item
-    // but we should least expose checks if an item can be equipped normally
+    private EquipmentInventory impl$equipmentInventory = null;
 
     @Override
-    public boolean canEquip(final EquipmentType type) {
-        return true;
-    }
-
-    @Override
-    public boolean canEquip(final EquipmentType type, @Nullable final ItemStack equipment) {
-        return true;
-    }
-
-    @Override
-    public Optional<ItemStack> getEquipped(final EquipmentType type) {
-        throw new MissingImplementationException("TraitMixin_Equipable_Inventory_API", "getEquipped");
-    }
-
-    @Override
-    public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
-        throw new MissingImplementationException("TraitMixin_Equipable_Inventory_API", "equip");
+    public EquipmentInventory getEquipment() {
+        if (this.impl$equipmentInventory == null) {
+            final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
+            final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
+            this.impl$equipmentInventory = (EquipmentInventory) lens.getAdapter(inv.inventoryAdapter$getFabric(), null);
+        }
+        return impl$equipmentInventory;
     }
 
 }

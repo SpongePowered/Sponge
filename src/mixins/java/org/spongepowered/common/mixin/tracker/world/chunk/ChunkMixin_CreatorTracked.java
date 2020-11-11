@@ -44,18 +44,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeHooks;
@@ -251,7 +252,7 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
             // get player if online
             final PlayerEntity player = this.shadow$getWorld().getPlayerByUuid(userUniqueId);
             if (player != null) {
-                return Optional.of((User) player);
+                return Optional.ofNullable(((ServerPlayerEntityBridge) player).bridge$getUser());
             }
             // player is not online, get or create user from storage
             return this.tracker$getUserFromId(userUniqueId);
@@ -359,8 +360,8 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
         this.tracker$trackedShortBlockPositions = trackedPositions;
     }
 
-    @Inject(method = "onLoad", at = @At("HEAD"))
-    private void tracker$startLoad(final CallbackInfo callbackInfo) {
+    @Inject(method = "setLoaded(Z)V", at = @At("HEAD"))
+    private void tracker$startLoad(final boolean loaded, final CallbackInfo callbackInfo) {
         final boolean isFake = ((WorldBridge) this.shadow$getWorld()).bridge$isFake();
         if (isFake) {
             return;
@@ -389,8 +390,8 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
             .buildAndSwitch();
     }
 
-    @Inject(method = "setLoaded", at = @At("RETURN"))
-    private void tracker$endLoad(final CallbackInfo callbackInfo) {
+    @Inject(method = "setLoaded(Z)V", at = @At("RETURN"))
+    private void tracker$endLoad(final boolean loaded, final CallbackInfo callbackInfo) {
         if (!((WorldBridge) this.shadow$getWorld()).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;

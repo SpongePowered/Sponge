@@ -59,11 +59,11 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
     public BasicInventoryAdapter(final Fabric fabric, @Nullable final Lens root, @Nullable final Inventory parent) {
         this.fabric = fabric;
         this.parent = parent == null ? this : parent;
-        this.slotLenses = this.initSlots(fabric, parent);
+        this.slotLenses = this.initSlotsLenses(fabric, parent);
         this.lens = root != null ? root : LensRegistrar.getLens(this, this.slotLenses, fabric.fabric$getSize()) ;
     }
 
-    private SlotLensProvider initSlots(final Fabric fabric, @Nullable final Inventory parent) {
+    private SlotLensProvider initSlotsLenses(final Fabric fabric, @Nullable final Inventory parent) {
         if (parent instanceof InventoryAdapter) {
             return ((InventoryAdapter) parent).inventoryAdapter$getSlotLensProvider();
         }
@@ -105,6 +105,15 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
             this.children = this.impl$generateChildren();
         }
         return this.children;
+    }
+
+    @Override
+    public Optional<Slot> inventoryAdapter$getSlot(int ordinal) {
+        final List<Slot> slots = this.slots();
+        if (ordinal >= slots.size()) {
+            return Optional.empty();
+        }
+        return Optional.of(slots.get(ordinal));
     }
 
     public static Optional<Slot> forSlot(final Fabric fabric, final SlotLens slotLens, final Inventory parent) {

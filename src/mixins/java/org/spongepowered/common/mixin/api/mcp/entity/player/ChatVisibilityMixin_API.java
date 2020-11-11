@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.entity.player.ChatVisibility;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,8 +41,7 @@ import org.spongepowered.common.bridge.entity.player.ChatVisibilityBridge;
 @Mixin(ChatVisibility.class)
 public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.entity.living.player.chat.ChatVisibility {
 
-    @Shadow private String field_221257_f;
-
+    @Shadow @Final private String resourceKey;
     private ResourceKey api$key;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -56,7 +56,7 @@ public abstract class ChatVisibilityMixin_API implements org.spongepowered.api.e
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.field_221257_f);
+        return Component.translatable(this.resourceKey);
     }
 
     @Override

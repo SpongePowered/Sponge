@@ -47,12 +47,12 @@ public abstract class BoatEntityMixin_API extends EntityMixin_API implements Boa
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
+        values.add(this.type().asImmutable());
         values.add(this.inWater().asImmutable());
         values.add(this.moveOnLand().asImmutable());
         values.add(this.maxSpeed().asImmutable());
         values.add(this.unoccupiedDeceleration().asImmutable());
         values.add(this.occupiedDeceleration().asImmutable());
-        values.add(this.woodType().asImmutable());
 
         return values;
     }

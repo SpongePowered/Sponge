@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -54,10 +54,10 @@ public final class SpongeTargetBlockValueParameter extends CatalogedZeroAdvanceV
         final Object root = context.getCause().getCause().root();
         if (root instanceof Living) {
             // TODO: BlockRay, where art thou?
-            throw reader.createException(TextComponent.of("The cause root is not looking at a block!"));
+            throw reader.createException(Component.text("The cause root is not looking at a block!"));
         }
 
-        throw reader.createException(TextComponent.of("The cause root must be a Living!"));
+        throw reader.createException(Component.text("The cause root must be a Living!"));
     }
 
 }

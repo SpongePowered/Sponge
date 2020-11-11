@@ -155,7 +155,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Nullable private GameType impl$pendingGameType;
     private Scoreboard impl$spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
     @Nullable private ServerPlayerEntity impl$delegate;
-    @Nullable private Vector3d impl$velocityOverride = null;
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     private float impl$cachedModifiedHealth = -1;
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((ServerPlayerEntity) (Object) this);
@@ -392,17 +391,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     @Override
-    public void bridge$setVelocityOverride(@Nullable final Vector3d velocity) {
-        this.impl$velocityOverride = velocity;
-    }
-
-    @Nullable
-    @Override
-    public Vector3d bridge$getVelocityOverride() {
-        return this.impl$velocityOverride;
-    }
-
-    @Override
     public Set<SkinPart> bridge$getSkinParts() {
         return this.impl$skinParts;
     }
@@ -463,7 +451,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     @Nullable
     public Component bridge$getDisplayNameText() {
-        return TextComponent.of(this.shadow$getScoreboardName());
+        return Component.text(this.shadow$getScoreboardName());
     }
 
     @Override

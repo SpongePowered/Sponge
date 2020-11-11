@@ -29,6 +29,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
+import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
@@ -40,22 +41,26 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
     private final ArgumentParser<? extends T> type;
     @Nullable private final ValueCompleter completer;
     @Nullable private final String suffix;
+    @Nullable private final ValueUsage usage;
 
     public SpongeArgumentCommandNodeBuilder(
             final SpongeParameterKey<? super T> key,
             final ArgumentParser<? extends T> type,
-            final ValueCompleter completer) {
-        this(key, type, completer, null);
+            final ValueCompleter completer,
+            @Nullable final ValueUsage usage) {
+        this(key, type, completer, usage, null);
     }
 
     public SpongeArgumentCommandNodeBuilder(
             final SpongeParameterKey<? super T> key,
             final ArgumentParser<? extends T> type,
             final ValueCompleter completer,
+            @Nullable final ValueUsage usage,
             @Nullable final String suffix) {
         this.key = key;
         this.type = type;
         this.completer = type == completer && type instanceof StandardCatalogedArgumentParser ? null : completer;
+        this.usage = usage;
         this.suffix = suffix;
     }
 
@@ -68,6 +73,7 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
     public SpongeArgumentCommandNode<? extends T> build() {
         final SpongeArgumentCommandNode<? extends T> node = new SpongeArgumentCommandNode<>(
                 this.key,
+                this.usage,
                 this.type,
                 this.completer,
                 this.getCommand(),

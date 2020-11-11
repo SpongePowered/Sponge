@@ -32,7 +32,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -108,7 +107,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
                             this.getDispatcher().parse(this.createCommandString(command, arguments), (CommandSource) cause))).build();
         } catch (final CommandSyntaxException e) {
             // We'll unwrap later.
-            throw new CommandException(TextComponent.of(e.getMessage()), e);
+            throw new CommandException(Component.text(e.getMessage()), e);
         }
     }
 

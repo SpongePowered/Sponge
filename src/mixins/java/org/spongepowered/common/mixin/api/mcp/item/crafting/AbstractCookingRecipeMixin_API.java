@@ -29,18 +29,18 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
-import org.spongepowered.api.item.recipe.smelting.SmeltingResult;
+import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
+import org.spongepowered.api.item.recipe.cooking.CookingResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.item.recipe.crafting.IngredientUtil;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Optional;
 
 @Mixin(AbstractCookingRecipe.class)
-public abstract class AbstractCookingRecipeMixin_API implements SmeltingRecipe {
+public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
 
     @Shadow @Final protected Ingredient ingredient;
     @Shadow @Final protected ResourceLocation id;
@@ -58,22 +58,21 @@ public abstract class AbstractCookingRecipeMixin_API implements SmeltingRecipe {
     }
 
     @Override
-    public Optional<SmeltingResult> getResult(ItemStackSnapshot ingredient) {
+    public Optional<CookingResult> getResult(ItemStackSnapshot ingredient) {
         if (this.isValid(ingredient)) {
-            return Optional.of(new SmeltingResult(this.getExemplaryResult(), this.shadow$getExperience()));
+            return Optional.of(new CookingResult(this.getExemplaryResult(), this.shadow$getExperience()));
         }
         return Optional.empty();
     }
 
     @Override
-    public int getSmeltTime() {
+    public int getCookingTime() {
         return this.shadow$getCookTime();
     }
 
-    @Override
-    public float getExperience() {
-        return this.getExperience();
-    }
+//    public float recipe$getExperience() {
+//        return this.shadow$getExperience();
+//    }
 
     @Override
     public ResourceKey getKey() {

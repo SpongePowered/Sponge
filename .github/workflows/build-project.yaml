@@ -33,7 +33,16 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew -PenableTestPlugins=true -PenableSpongeForge=true build
+      - name: Archive artifacts for build
+        uses: actions/upload-artifact@v2
+        with:
+          name: Sponge Jars
+          path: |
+            ${{ github.workspace }}/SpongeAPI/build/libs/*.jar
+            ${{ github.workspace }}/build/libs/*.jar
+            ${{ github.workspace }}/vanilla/build/libs/*.jar
+            ${{ github.workspace }}/forge/build/libs/*.jar
       # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
       # the publishing section of your build.gradle
       - name: Publish to Sponge Maven & GitHub Packages

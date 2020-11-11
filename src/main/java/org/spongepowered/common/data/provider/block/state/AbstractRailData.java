@@ -42,10 +42,10 @@ public final class AbstractRailData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.RAIL_DIRECTION)
-                        .get(h -> (RailDirection) ((AbstractRailBlock) (Object) h).getShapeProperty())
+                        .get(h -> (RailDirection) (Object) h.get(((AbstractRailBlock) h.getBlock()).getShapeProperty()))
                         .set((h, v) -> {
                             final RailShape shape = (RailShape) (Object) v;
-                            final IProperty<RailShape> property = ((AbstractRailBlock) (Object) h).getShapeProperty();
+                            final IProperty<RailShape> property = ((AbstractRailBlock) h.getBlock()).getShapeProperty();
                             if (!property.getAllowedValues().contains(shape)) {
                                 return h;
                             }

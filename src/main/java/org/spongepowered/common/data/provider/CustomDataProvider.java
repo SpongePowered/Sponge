@@ -24,41 +24,87 @@
  */
 package org.spongepowered.common.data.provider;
 
+import com.google.common.reflect.TypeToken;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvider<V, E> {
 
-    public CustomDataProvider(Key<V> key) {
+    private final Set<TypeToken<? extends DataHolder>> supportedTokens;
+
+    public CustomDataProvider(Key<V> key, Set<TypeToken<? extends DataHolder>> supportedTokens) {
         super(key);
+        this.supportedTokens = supportedTokens;
     }
 
     @Override
     public Optional<E> get(DataHolder dataHolder) {
         if (this.isSupported(dataHolder)) {
-            return ((CustomDataHolderBridge) dataHolder).bridge$getCustom(this.getKey());
+            final CustomDataHolderBridge customDataHolder = CustomDataProvider.getCustomDataHolder(dataHolder);
+            return customDataHolder.bridge$getCustom(this.getKey());
         }
         return Optional.empty();
     }
 
+    private static CustomDataHolderBridge getCustomDataHolder(DataHolder dataHolder) {
+        final CustomDataHolderBridge customDataHolder;
+        if (dataHolder instanceof ServerLocation) {
+            customDataHolder = (CustomDataHolderBridge) ((ServerLocation) dataHolder).getBlockEntity().get();
+        } else {
+            customDataHolder = (CustomDataHolderBridge) dataHolder;
+        }
+        return customDataHolder;
+    }
+
     @Override
     public boolean isSupported(DataHolder dataHolder) {
+        if (dataHolder instanceof ServerLocation) {
+            if (!((ServerLocation) dataHolder).hasBlockEntity()) {
+                return false;
+            }
+            for (TypeToken<? extends DataHolder> token : this.supportedTokens) {
+                if (token.getRawType().isAssignableFrom(BlockEntity.class)) {
+                    return true;
+                }
+            }
+            return false;
+        }
         if (!(dataHolder instanceof CustomDataHolderBridge)) {
             return false;
         }
-        // TODO supported dataholders in registration?
-        return true;
+        for (TypeToken<? extends DataHolder> token : this.supportedTokens) {
+            if (token.getRawType().isAssignableFrom(dataHolder.getClass())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isSupported(TypeToken<? extends DataHolder> dataHolder) {
+        if (!CustomDataHolderBridge.class.isAssignableFrom(dataHolder.getRawType())) {
+            return true;
+        }
+        for (TypeToken<? extends DataHolder> token : this.supportedTokens) {
+            if (token.isSupertypeOf(dataHolder)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
         if (this.isSupported(dataHolder)) {
-            return ((CustomDataHolderBridge) dataHolder).bridge$offerCustom(this.getKey(),  element);
+            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$offerCustom(this.getKey(),  element);
         }
         return DataTransactionResult.failNoData();
     }
@@ -66,7 +112,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public DataTransactionResult remove(DataHolder.Mutable dataHolder) {
         if (this.isSupported(dataHolder)) {
-            return ((CustomDataHolderBridge) dataHolder).bridge$removeCustom(this.getKey());
+            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$removeCustom(this.getKey());
         }
         return DataTransactionResult.failNoData();
     }

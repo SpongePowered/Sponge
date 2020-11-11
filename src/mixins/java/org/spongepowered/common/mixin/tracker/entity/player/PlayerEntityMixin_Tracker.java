@@ -28,29 +28,38 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.CUseEntityPacket;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.tracker.entity.LivingEntityMixin_Tracker;
@@ -66,10 +75,6 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
 
     //@formatter:off
     @Shadow @Final public PlayerInventory inventory;
-
-    @Shadow public void wakeUpPlayer(final boolean immediately, final boolean updateWorldFlag, final boolean setSpawn) {
-        throw new UnsupportedOperationException("Shadowed");
-    }
 
     @Shadow public abstract void shadow$addStat(Stat<?> stat);
     @Shadow public abstract void shadow$addStat(ResourceLocation stat);
@@ -102,8 +107,8 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
         }
         // Sponge end
         super.onDeath(cause);
+        this.shadow$recenterBoundingBox();
 
-        this.shadow$setPosition(this.posX, this.posY, this.posZ);
         if (!this.shadow$isSpectator()) {
             this.shadow$spawnDrops(cause);
         }
@@ -145,17 +150,14 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
             ((PlayerEntityBridge) this).bridge$shouldRestoreInventory(false);
             final PlayerEntity player = (PlayerEntity) (PlayerEntityBridge) this;
 
-            final double posX1 = player.posX;
-            final double posY1 = player.posY - 0.3 + player.getEyeHeight();
-            final double posZ1 = player.posZ;
+            final double posX1 = player.getPosX();
+            final double posY1 = player.getPosY() - 0.3 + player.getEyeHeight();
+            final double posZ1 = player.getPosZ();
             // Now the real fun begins.
             final ItemStack item;
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);
             final List<ItemStackSnapshot> original = new ArrayList<>();
             original.add(snapshot);
-
-            final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
-            @SuppressWarnings("RawTypeCanBeGeneric") final IPhaseState currentState = phaseContext.state;
 
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 
@@ -191,11 +193,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
                     final float f6 = 0.02F * this.rand.nextFloat();
                     itemEntity.setMotion((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
                 }
-                // FIFTH - Capture the entity maybe?
-                if (currentState.spawnItemOrCapture(phaseContext, (PlayerEntity) (PlayerEntityBridge) this, itemEntity)) {
-                    return itemEntity;
-                }
-                // TODO - Investigate whether player drops are adding to the stat list in captures.
+
                 final ItemStack stack = itemEntity.getItem();
                 player.world.addEntity(itemEntity);
 
@@ -234,6 +232,14 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
         }
 
         return itemEntity;
+    }
+
+    @Inject(method = "interactOn", cancellable = true, at = @At(value = "HEAD"))
+    public void onRightClickEntity(Entity entityToInteractOn, Hand hand, CallbackInfoReturnable<ActionResultType> cir) {
+        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary((ServerPlayerEntity) (Object) this, this.getHeldItem(hand), entityToInteractOn, hand, null);
+        if (event.isCancelled()) {
+            cir.setReturnValue(ActionResultType.FAIL);
+        }
     }
 
 }

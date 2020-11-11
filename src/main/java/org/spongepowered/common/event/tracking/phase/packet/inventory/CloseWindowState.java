@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.network.IPacket;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
@@ -41,10 +38,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class CloseWindowState extends BasicPacketState {
 
@@ -71,7 +64,7 @@ public final class CloseWindowState extends BasicPacketState {
             stackManager.popCause();
         }
 
-        if (context.getCapturedItemsSupplier().isEmpty() && context.getCapturedItemStackSupplier().isEmpty() && context.getBlockTransactor().isEmpty()) {
+        if (context.getTransactor().isEmpty()) {
             return;
         }
 
@@ -79,28 +72,15 @@ public final class CloseWindowState extends BasicPacketState {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             // items
-            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
-                final List<Entity> entities = items
-                    .stream()
-                    .map(entity -> (Entity) entity)
-                    .collect(Collectors.toList());
-                if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
-                }
-            });
-            // Pre-merged items
-            context.getCapturedItemStackSupplier().acceptAndClearIfNotEmpty(stacks -> {
-                final List<ItemEntity> items = stacks.stream()
-                    .map(drop -> drop.create(player.getServerWorld()))
-                    .collect(Collectors.toList());
-                final List<Entity> entities = items
-                    .stream()
-                    .map(entity -> (Entity) entity)
-                    .collect(Collectors.toList());
-                if (!entities.isEmpty()) {
-                    SpongeCommonEventFactory.callDropItemCustom(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
-                }
-            });
+//            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
+//                final List<Entity> entities = items
+//                    .stream()
+//                    .map(entity -> (Entity) entity)
+//                    .collect(Collectors.toList());
+//                if (!entities.isEmpty()) {
+//                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
+//                }
+//            });
         }
         // TODO - Determine if we need to pass the supplier or perform some parameterized
         //  process if not empty method on the capture object.
@@ -108,8 +88,4 @@ public final class CloseWindowState extends BasicPacketState {
 
     }
 
-    @Override
-    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
-        return true;
-    }
 }

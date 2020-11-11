@@ -36,15 +36,19 @@ public abstract class CatEntity_MorningGiftGoalMixin {
 
     private boolean impl$teleportResult;
 
-    @Redirect(method = "func_220804_h", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/CatEntity;attemptTeleport(DDDZ)Z"))
+    @Redirect(method = "func_220804_h()V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/CatEntity;attemptTeleport(DDDZ)Z"))
     private boolean impl$storeTeleportResult(CatEntity entity, double x, double y, double z, boolean changeState) {
         this.impl$teleportResult = entity.attemptTeleport(x, y, z, changeState);
         return this.impl$teleportResult;
     }
 
-    @Inject(method = "func_220804_h", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/entity/passive/CatEntity;attemptTeleport(DDDZ)Z",
-            shift = At.Shift.AFTER), cancellable = true)
-    private void impl$makeCatsRespectTeleportResult(CallbackInfo ci) {
+    @Inject(method = "func_220804_h()V",
+        at = @At(value = "INVOKE_ASSIGN",
+            target = "Lnet/minecraft/entity/passive/CatEntity;attemptTeleport(DDDZ)Z",
+            shift = At.Shift.AFTER),
+        cancellable = true)
+    private void impl$makeCatsRespectTeleportResult(final CallbackInfo ci) {
         if (!this.impl$teleportResult) {
             ci.cancel();
         }

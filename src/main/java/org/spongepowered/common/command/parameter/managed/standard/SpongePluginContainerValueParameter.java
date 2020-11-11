@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -32,7 +32,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.List;
@@ -51,8 +51,9 @@ public final class SpongePluginContainerValueParameter extends CatalogedArgument
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return Launcher.getInstance().getPluginManager().getPlugins().stream().map(x -> x.getMetadata().getId()).collect(Collectors.toList());
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+        return Launch.getInstance().getPluginManager().getPlugins().stream().map(x -> x.getMetadata().getId()).filter(x -> x.startsWith(currentInput))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -63,12 +64,12 @@ public final class SpongePluginContainerValueParameter extends CatalogedArgument
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
         final String id = reader.parseString();
-        final Optional<PluginContainer> container = Launcher.getInstance().getPluginManager().getPlugin(id);
+        final Optional<PluginContainer> container = Launch.getInstance().getPluginManager().getPlugin(id);
         if (container.isPresent()) {
             return container;
         }
 
-        throw reader.createException(TextComponent.of("Could not find plugin with ID \"" + id + "\""));
+        throw reader.createException(Component.text("Could not find plugin with ID \"" + id + "\""));
     }
 
 }

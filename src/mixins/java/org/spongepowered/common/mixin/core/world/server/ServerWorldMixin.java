@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.server;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
@@ -46,8 +47,11 @@ import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
+import org.spongepowered.math.vector.Vector3d;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 
@@ -88,6 +92,24 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         }
 
         return this.impl$bossBarManager;
+    }
+
+    private final Map<Entity, Vector3d> impl$rotationUpdates = new HashMap<>();
+
+    @Override
+    public void bridge$addEntityRotationUpdate(final net.minecraft.entity.Entity entity, final Vector3d rotation) {
+        this.impl$rotationUpdates.put(entity, rotation);
+    }
+
+    // TODO actually call this
+    @Override
+    public void bridge$updateRotation(final net.minecraft.entity.Entity entityIn) {
+        final Vector3d rotationUpdate = this.impl$rotationUpdates.get(entityIn);
+        if (rotationUpdate != null) {
+            entityIn.rotationPitch = (float) rotationUpdate.getX();
+            entityIn.rotationYaw = (float) rotationUpdate.getY();
+        }
+        this.impl$rotationUpdates.remove(entityIn);
     }
 
     @Override

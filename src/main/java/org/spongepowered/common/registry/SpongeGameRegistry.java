@@ -26,6 +26,8 @@ package org.spongepowered.common.registry;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.AdventureRegistry;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
@@ -70,7 +72,7 @@ public final class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public RecipeRegistry getRecipeRegistry() {
-        throw new UnsupportedOperationException("implement me");
+        return ((RecipeRegistry) ((MinecraftServer) Sponge.getServer()).getRecipeManager());
     }
 
     @Override

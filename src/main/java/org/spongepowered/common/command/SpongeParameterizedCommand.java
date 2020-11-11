@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.command;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -65,7 +63,8 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     private final Function<CommandCause, Optional<Component>> shortDescription;
     private final Function<CommandCause, Optional<Component>> extendedDescription;
     private final Predicate<CommandCause> executionRequirements;
-    private final CommandExecutor executor;
+    @Nullable private final CommandExecutor executor;
+    private final boolean isTerminal;
     @Nullable private SpongeCommandDispatcher cachedDispatcher;
 
     SpongeParameterizedCommand(
@@ -74,8 +73,9 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
             final Function<CommandCause, Optional<Component>> shortDescription,
             final Function<CommandCause, Optional<Component>> extendedDescription,
             final Predicate<CommandCause> executionRequirements,
-            final CommandExecutor executor,
-            final List<Flag> flags) {
+            @Nullable final CommandExecutor executor,
+            final List<Flag> flags,
+            final boolean isTerminal) {
         this.subcommands = subcommands;
         this.parameters = parameters;
         this.shortDescription = shortDescription;
@@ -83,6 +83,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         this.executionRequirements = executionRequirements;
         this.executor = executor;
         this.flags = flags;
+        this.isTerminal = isTerminal;
     }
 
     @Override
@@ -113,21 +114,31 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     @Override
     public @NonNull Component getUsage(final @NonNull CommandCause cause) {
-        final Collection<TextComponent> usage =
+        final Collection<Component> usage =
                 Arrays.stream(this.getCachedDispatcher().getAllUsage(this.getCachedDispatcher().getRoot(), (CommandSource) cause, true))
-                    .map(TextComponent::of).collect(Collectors.toList());
-        return TextComponent.join(TextComponent.newline(), usage);
+                    .map(Component::text).collect(Collectors.toList());
+        return Component.join(Component.newline(), usage);
     }
 
     @Override
     public List<Flag> flags() {
-        return ImmutableList.copyOf(this.flags);
+        return new ArrayList<>(this.flags);
     }
 
     @Override
     @NonNull
     public List<Parameter> parameters() {
-        return ImmutableList.copyOf(this.parameters);
+        return new ArrayList<>(this.parameters);
+    }
+
+    @Override
+    public List<Parameter.Subcommand> subcommands() {
+        return new ArrayList<>(this.subcommands);
+    }
+
+    @Override
+    public boolean isTerminal() {
+        return this.isTerminal;
     }
 
     @Override
@@ -144,9 +155,8 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     }
 
     @Override
-    @NonNull
-    public CommandResult execute(@NonNull final CommandContext context) throws CommandException {
-        return this.executor.execute(context);
+    public Optional<CommandExecutor> getExecutor() {
+        return Optional.ofNullable(this.executor);
     }
 
     private SpongeCommandDispatcher getCachedDispatcher() {
@@ -164,13 +174,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
         if (this.executor == null) {
             return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTreeWithSubcommandsOnly(primary, this.subcommands);
         } else {
-            return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTree(
-                    primary,
-                    this.flags,
-                    this.parameters,
-                    this.subcommands,
-                    this
-            );
+            return (LiteralCommandNode<CommandSource>) SpongeParameterTranslator.createCommandTree(primary, this);
         }
     }
 
@@ -183,7 +187,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
             final LiteralArgumentBuilder<CommandSource> secondary = LiteralArgumentBuilder.literal(iterable.next());
             secondary.executes(built.getCommand());
             secondary.requires(built.getRequirement());
-            nodes.add(new SpongeLiteralCommandNode(secondary.redirect(built)));
+            nodes.add(new SpongeLiteralCommandNode(secondary.redirect(built), this));
         }
 
         return nodes;

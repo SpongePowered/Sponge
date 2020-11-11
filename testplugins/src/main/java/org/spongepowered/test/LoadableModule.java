@@ -29,7 +29,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 
 public interface LoadableModule {
 
-    default void disable(CommandContext ctx) {
+    default void disable(final CommandContext ctx) {
         Sponge.getEventManager().unregisterPluginListeners(Sponge.getPluginManager().fromInstance(this).get());
     }
 

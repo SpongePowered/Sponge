@@ -36,13 +36,23 @@ public interface StyleAccessor {
 
     @Accessor("color") void accessor$setColor(TextFormatting color);
 
+    @Accessor("bold") Boolean accessor$getBold();
+
     @Accessor("bold") void accessor$setBold(Boolean bold);
+
+    @Accessor("italic") Boolean accessor$getItalic();
 
     @Accessor("italic") void accessor$setItalic(Boolean italic);
 
+    @Accessor("underlined") Boolean accessor$getUnderlined();
+
     @Accessor("underlined") void accessor$setUnderlined(Boolean underlined);
 
+    @Accessor("strikethrough") Boolean accessor$getStrikethrough();
+
     @Accessor("strikethrough") void accessor$setStrikethrough(Boolean strikethrough);
+
+    @Accessor("obfuscated") Boolean accessor$getObfuscated();
 
     @Accessor("obfuscated") void accessor$setObfuscated(Boolean obfuscated);
 }

@@ -30,6 +30,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
+import net.minecraft.world.biome.FuzzedBiomeMagnifier;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.User;
@@ -37,6 +39,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnectionTypes;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
+import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
@@ -107,7 +110,8 @@ public final class SpongePacketHandler {
 
                     final DimensionType registeredType = DimensionTypeAccessor.accessor$construct(packet.dimensionId, "", packet.actualDimension.getPath(),
                             logicType.getDimensionFactory(),
-                            logicType.hasSkylight());
+                            logicType.hasSkylight(), logicType == DimensionTypes.OVERWORLD.get() ? ColumnFuzzedBiomeMagnifier.INSTANCE :
+                                    FuzzedBiomeMagnifier.INSTANCE);
                     DimensionTypeAccessor.accessor$register(packet.actualDimension.toString(), registeredType);
 
                     ((DimensionTypeBridge) registeredType).bridge$setSpongeDimensionType(logicType);

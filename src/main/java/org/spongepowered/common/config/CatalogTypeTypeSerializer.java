@@ -38,11 +38,16 @@ import java.util.Optional;
  * A {@link TypeSerializer} implementation that allows CatalogType values to be used in object-mapped classes.
  */
 public final class CatalogTypeTypeSerializer implements TypeSerializer<CatalogType> {
+    public static final TypeToken<CatalogType> TYPE = TypeToken.of(CatalogType.class);
+    public static final CatalogTypeTypeSerializer INSTANCE = new CatalogTypeTypeSerializer();
+
+    private CatalogTypeTypeSerializer() {
+    }
 
     @Override
-    public CatalogType deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        Optional<? extends CatalogType> ret = SpongeCommon.getRegistry().getCatalogRegistry().get(type.getRawType().asSubclass(CatalogType.class),
-            ResourceKey.resolve(value.getString()));
+    public CatalogType deserialize(final TypeToken<?> type, final ConfigurationNode value) throws ObjectMappingException {
+        final Optional<? extends CatalogType> ret = SpongeCommon.getRegistry().getCatalogRegistry()
+                        .get(type.getRawType().asSubclass(CatalogType.class), ResourceKey.resolve(value.getString()));
         if (!ret.isPresent()) {
             throw new ObjectMappingException("Input '" + value.getValue() + "' was not a valid value for type " + type);
         }
@@ -50,7 +55,7 @@ public final class CatalogTypeTypeSerializer implements TypeSerializer<CatalogTy
     }
 
     @Override
-    public void serialize(TypeToken<?> type, CatalogType obj, ConfigurationNode value) {
+    public void serialize(final TypeToken<?> type, final CatalogType obj, final ConfigurationNode value) {
         value.setValue(obj.getKey().getFormatted());
     }
 }

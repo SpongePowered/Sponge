@@ -58,7 +58,7 @@ public abstract class ChunkManager_EntityTrackerMixin {
      * @param ci The callback info
      * @param entity The player entity
      */
-    @Inject(method = "sendToAllTracking",
+    @Inject(method = "sendToAllTracking(Lnet/minecraft/network/IPacket;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/network/play/ServerPlayNetHandler;sendPacket(Lnet/minecraft/network/IPacket;)V",
@@ -83,7 +83,7 @@ public abstract class ChunkManager_EntityTrackerMixin {
      * @param p_219391_1_
      * @param ci
      */
-    @Inject(method = "sendToAllTracking", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "sendToAllTracking(Lnet/minecraft/network/IPacket;)V", at = @At("HEAD"), cancellable = true)
     private void impl$ignoreVanished(IPacket<?> p_219391_1_, CallbackInfo ci) {
         if (this.entity instanceof VanishableBridge) {
             if (((VanishableBridge) this.entity).bridge$isVanished()) {

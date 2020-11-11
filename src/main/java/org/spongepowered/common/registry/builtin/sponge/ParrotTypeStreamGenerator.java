@@ -42,7 +42,7 @@ public final class ParrotTypeStreamGenerator {
             Tuple.of(new SpongeParrotType(ResourceKey.minecraft("blue"), 1), 1),
             Tuple.of(new SpongeParrotType(ResourceKey.minecraft("green"), 2), 2),
             Tuple.of(new SpongeParrotType(ResourceKey.minecraft("yellow_and_blue"), 3), 3),
-            Tuple.of(new SpongeParrotType(ResourceKey.minecraft("gray"), 4), 4)
+            Tuple.of(new SpongeParrotType(ResourceKey.minecraft("grey"), 4), 4)
         );
     }
 }

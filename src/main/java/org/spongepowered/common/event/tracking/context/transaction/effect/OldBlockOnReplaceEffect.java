@@ -29,6 +29,13 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Bloc
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class OldBlockOnReplaceEffect implements ProcessingSideEffect {
+    private static final class Holder {
+        static final OldBlockOnReplaceEffect INSTANCE = new OldBlockOnReplaceEffect();
+    }
+    OldBlockOnReplaceEffect() {}
+    public static OldBlockOnReplaceEffect getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,

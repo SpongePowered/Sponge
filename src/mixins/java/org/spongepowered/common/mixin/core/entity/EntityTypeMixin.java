@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import co.aikar.timings.Timing;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;

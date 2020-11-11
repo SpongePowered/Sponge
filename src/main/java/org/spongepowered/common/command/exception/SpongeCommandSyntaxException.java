@@ -27,7 +27,6 @@ package org.spongepowered.common.command.exception;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -35,7 +34,7 @@ import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 
 public final class SpongeCommandSyntaxException extends CommandSyntaxException {
 
-    private static final Component ERROR_MESSAGE = TextComponent.of("Error running command: ", NamedTextColor.RED);
+    private static final Component ERROR_MESSAGE = Component.text("Error running command: ", NamedTextColor.RED);
 
     private final CommandException innerException;
     private final SpongeCommandContext commandContext;

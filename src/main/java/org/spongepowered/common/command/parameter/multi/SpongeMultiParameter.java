@@ -33,19 +33,33 @@ import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrap
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class SpongeMultiParameter implements Parameter {
 
     private final List<Parameter> parameterCandidates;
     private final boolean isOptional;
+    private final boolean isTerminal;
 
-    protected SpongeMultiParameter(final List<Parameter> parameterCandidates, final boolean isOptional) {
+    protected SpongeMultiParameter(final List<Parameter> parameterCandidates, final boolean isOptional, final boolean isTerminal) {
         this.parameterCandidates = ImmutableList.copyOf(parameterCandidates);
         this.isOptional = isOptional;
+        this.isTerminal = isTerminal;
     }
 
     public List<Parameter> getParameterCandidates() {
-        return this.parameterCandidates;
+        // put subcommands first.
+        return this.parameterCandidates.stream().sorted((x1, x2) -> {
+            final boolean firstIs = x1 instanceof Parameter.Subcommand;
+            final boolean secondIs = x2 instanceof Parameter.Subcommand;
+            if (firstIs != secondIs) {
+                if (firstIs) {
+                    return -1;
+                }
+                return 1;
+            }
+            return 0;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -53,9 +67,16 @@ public abstract class SpongeMultiParameter implements Parameter {
         return this.isOptional;
     }
 
+    @Override
+    public boolean isTerminal() {
+        return this.isTerminal;
+    }
+
     public abstract boolean createNode(SpongeCommandExecutorWrapper executorWrapper,
-            Consumer<CommandNode<CommandSource>> buildNodeConsumer,
+            Consumer<CommandNode<CommandSource>> parentNode,
             Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
             List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            boolean isTermination);
+            boolean isTermination,
+            boolean previousWasOptional,
+            String suffix);
 }

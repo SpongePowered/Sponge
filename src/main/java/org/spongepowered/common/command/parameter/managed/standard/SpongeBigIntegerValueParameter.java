@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -58,13 +58,13 @@ public final class SpongeBigIntegerValueParameter extends CatalogedArgumentParse
         try {
             return Optional.of(new BigInteger(result));
         } catch (final NumberFormatException ex) {
-            throw reader.createException(TextComponent.of(ex.getMessage()));
+            throw reader.createException(Component.text(ex.getMessage()));
         }
     }
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
         return ImmutableList.of();
     }
 

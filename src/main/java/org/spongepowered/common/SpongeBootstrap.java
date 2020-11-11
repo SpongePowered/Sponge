@@ -33,19 +33,21 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.inject.SpongeModule;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
-import org.spongepowered.plugin.PluginKeys;
+import org.spongepowered.plugin.Blackboard;
 
 import java.util.List;
 
 public final class SpongeBootstrap {
 
     private static SpongeLifecycle lifecycle;
-    
+
+    public static Blackboard.Key<Injector> PARENT_INJECTOR = Blackboard.Key.of("parent_injector", Injector.class);
+
     public static void perform(final String engineName, final Runnable engineStart) {
-        final Stage stage = SpongeGuice.getInjectorStage(Launcher.getInstance().getInjectionStage());
+        final Stage stage = SpongeGuice.getInjectorStage(Launch.getInstance().getInjectionStage());
         SpongeCommon.getLogger().debug("Creating injector in stage '{}'", stage);
         final List<Module> modules = Lists.newArrayList(
                 new SpongeModule(),
@@ -53,9 +55,10 @@ public final class SpongeBootstrap {
         );
         final Injector bootstrapInjector = Guice.createInjector(stage, modules);
 
-        Launcher.getInstance().getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.PARENT_INJECTOR, () -> bootstrapInjector);
+        Launch.getInstance().getPluginEngine().getPluginEnvironment().getBlackboard().getOrCreate(SpongeBootstrap.PARENT_INJECTOR,
+                () -> bootstrapInjector);
         SpongeBootstrap.lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);
-        Launcher.getInstance().loadPlugins();
+        Launch.getInstance().loadPlugins();
         SpongeBootstrap.lifecycle.establishFactories();
         SpongeBootstrap.lifecycle.establishBuilders();
         SpongeBootstrap.lifecycle.initTimings();
@@ -64,11 +67,11 @@ public final class SpongeBootstrap {
         SpongeBootstrap.lifecycle.callRegisterFactoryEvent();
         SpongeBootstrap.lifecycle.callRegisterBuilderEvent();
         SpongeBootstrap.lifecycle.callRegisterChannelEvent();
-        SpongeBootstrap.lifecycle.establishServices();
+        SpongeBootstrap.lifecycle.establishGlobalServices();
 
         SpongePacketHandler.init((SpongeChannelRegistry) Sponge.getChannelRegistry());
 
-        Launcher.getInstance().getLogger().info("Loading Minecraft '{}', please wait...", engineName);
+        Launch.getInstance().getLogger().info("Loading Minecraft {}, please wait...", engineName);
         engineStart.run();
     }
 

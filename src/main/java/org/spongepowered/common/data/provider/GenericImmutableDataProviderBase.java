@@ -125,6 +125,11 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
     }
 
     @Override
+    public boolean isSupported(TypeToken<? extends DataHolder> dataHolder) {
+        return this.holderType.isAssignableFrom(dataHolder.getRawType());
+    }
+
+    @Override
     public <I extends DataHolder.Immutable<I>> Optional<I> with(final I immutable, final E value) {
         if (!this.isSupported(immutable)) {
             return Optional.empty();

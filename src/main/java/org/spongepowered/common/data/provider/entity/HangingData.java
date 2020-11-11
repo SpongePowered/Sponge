@@ -41,7 +41,8 @@ public final class HangingData {
                 .asMutable(HangingEntityAccessor.class)
                     .create(Keys.DIRECTION)
                         .get(h -> h.accessor$facingDirection() == null ? Direction.NONE :
-                                Constants.DirectionFunctions.getFor(h.accessor$facingDirection()));
+                                Constants.DirectionFunctions.getFor(h.accessor$facingDirection()))
+                        .set((h, v) -> h.accessor$updateFacingWithBoundingBox(Constants.DirectionFunctions.getFor(v)));
     }
     // @formatter:on
 }

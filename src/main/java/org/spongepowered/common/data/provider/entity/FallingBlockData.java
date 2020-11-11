@@ -29,6 +29,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class FallingBlockData {
 
@@ -56,11 +57,24 @@ public final class FallingBlockData {
                         .get(h -> (double) h.accessor$getFallHurtAmount())
                         .set((h, v) -> h.accessor$setFallHurtAmount(v.floatValue()))
                     .create(Keys.FALL_TIME)
-                        .get(FallingBlockEntityAccessor::accessor$getFallTime)
-                        .set(FallingBlockEntityAccessor::accessor$setFallTime)
+                        .get(x -> new SpongeTicks(x.accessor$getFallTime()))
+                        .setAnd((h, v) -> {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
+                                return false;
+                            }
+                            h.accessor$setFallTime(ticks);
+                            return true;
+                        })
                     .create(Keys.MAX_FALL_DAMAGE)
                         .get(h -> (double) h.accessor$getFallHurtMax())
-                        .set((h, v) -> h.accessor$setFallHurtMax(v.intValue()));
+                        .setAnd((h, v) -> {
+                            if (v < 0) {
+                                return false;
+                            }
+                            h.accessor$setFallHurtMax(v.intValue());
+                            return true;
+                        });
     }
     // @formatter:on
 }

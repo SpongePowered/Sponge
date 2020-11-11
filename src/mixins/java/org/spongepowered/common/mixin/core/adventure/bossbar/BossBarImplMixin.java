@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.adventure.bossbar;
 
 import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.world.server.ServerBossInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;

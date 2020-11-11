@@ -124,8 +124,8 @@ public final class PacketPhase {
         static final IPhaseState<BasicPacketContext> INVALID = new InvalidPacketState();
         static final IPhaseState<BasicPacketContext> START_RIDING_JUMP = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> ANIMATION = new AnimationPacketState();
-        static final IPhaseState<BasicPacketContext> START_SNEAKING = new BasicPacketState();
-        static final IPhaseState<BasicPacketContext> STOP_SNEAKING = new BasicPacketState();
+        static final IPhaseState<BasicPacketContext> PRESS_SHIFT_KEY = new BasicPacketState();
+        static final IPhaseState<BasicPacketContext> RELEASE_SHIFT_KEY = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> START_SPRINTING = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> STOP_SPRINTING = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> STOP_SLEEPING = new StopSleepingPacketState();
@@ -349,8 +349,8 @@ public final class PacketPhase {
     }
 
     private static final ImmutableMap<CEntityActionPacket.Action, IPhaseState<? extends PacketContext<?>>> PLAYER_ACTION_MAPPINGS = ImmutableMap.<CEntityActionPacket.Action, IPhaseState<? extends PacketContext<?>>>builder()
-            .put(CEntityActionPacket.Action.START_SNEAKING, PacketPhase.General.START_SNEAKING)
-            .put(CEntityActionPacket.Action.STOP_SNEAKING, PacketPhase.General.STOP_SNEAKING)
+            .put(CEntityActionPacket.Action.PRESS_SHIFT_KEY, PacketPhase.General.PRESS_SHIFT_KEY)
+            .put(CEntityActionPacket.Action.RELEASE_SHIFT_KEY, PacketPhase.General.RELEASE_SHIFT_KEY)
             .put(CEntityActionPacket.Action.STOP_SLEEPING, PacketPhase.General.STOP_SLEEPING)
             .put(CEntityActionPacket.Action.START_SPRINTING, PacketPhase.General.START_SPRINTING)
             .put(CEntityActionPacket.Action.STOP_SPRINTING, PacketPhase.General.STOP_SPRINTING)

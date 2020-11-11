@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
@@ -45,7 +47,7 @@ import java.util.Map;
 
 public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<DataRegistration, DataRegistration.Builder> implements DataRegistration.Builder{
 
-    Map<Key, DataProvider> dataProviderMap = new HashMap<>();
+    Multimap<Key, DataProvider> dataProviderMap = HashMultimap.create();
     Map<TypeToken, DataStore> dataStoreMap = new IdentityHashMap<>();
     List<Key<?>> keys = new ArrayList<>();
 
@@ -64,20 +66,20 @@ public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<Da
     }
 
     @Override
-    public DataRegistration.Builder key(Key<?> key) {
+    public DataRegistration.Builder dataKey(Key<?> key) {
         this.keys.add(key);
         return this;
     }
 
     @Override
-    public DataRegistration.Builder key(Key<?> key, Key<?>... others) {
+    public DataRegistration.Builder dataKey(Key<?> key, Key<?>... others) {
         this.keys.add(key);
         Collections.addAll(this.keys, others);
         return this;
     }
 
     @Override
-    public DataRegistration.Builder key(Iterable<Key<?>> keys) {
+    public DataRegistration.Builder dataKey(Iterable<Key<?>> keys) {
         keys.forEach(this.keys::add);
         return this;
     }
@@ -90,7 +92,7 @@ public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<Da
     @Override
     public SpongeDataRegistrationBuilder reset() {
         super.reset();
-        this.dataProviderMap = new HashMap<>();
+        this.dataProviderMap = HashMultimap.create();
         this.dataStoreMap = new IdentityHashMap<>();
         this.keys = new ArrayList<>();
         return this;

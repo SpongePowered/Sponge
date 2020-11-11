@@ -30,7 +30,7 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.advancement.DefaultedAdvancementCriterion;
+import org.spongepowered.common.advancement.criterion.DefaultedAdvancementCriterion;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
 import java.util.Optional;

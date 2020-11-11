@@ -28,9 +28,4 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
 public final class IgnoredPacketState extends BasicPacketState {
 
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
-    }
-
 }

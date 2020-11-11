@@ -26,7 +26,6 @@ package org.spongepowered.common.command.registrar;
 
 import com.google.common.reflect.TypeToken;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -73,7 +72,6 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
                 this,
                 container,
                 command.commandTree(),
-                command::canExecute,
                 primaryAlias,
                 secondaryAliases
         );
@@ -87,7 +85,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
         if (commandToExecute.canExecute(cause)) {
             return commandToExecute.process(cause, arguments);
         }
-        throw new CommandPermissionException(TextComponent.of("You do not have permission to run /" + command));
+        throw new CommandPermissionException(Component.text("You do not have permission to run /" + command));
     }
 
     @Override

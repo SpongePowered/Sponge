@@ -88,11 +88,13 @@ class TimingHandler implements Timing {
 
     @Override
     public void startTimingIfSync() {
-        if (!this.enabled ) {
+        if (!this.enabled) {
             return;
         }
 
-        this.startTiming();
+        if (Sponge.isServerAvailable() && SpongeCommon.getServer().isOnExecutionThread()) {
+            this.startTiming();
+        }
     }
 
     @Override
@@ -101,7 +103,9 @@ class TimingHandler implements Timing {
             return;
         }
 
-        this.stopTiming();
+        if (Sponge.isServerAvailable() && SpongeCommon.getServer().isOnExecutionThread()) {
+            this.stopTiming();
+        }
     }
 
     @Override

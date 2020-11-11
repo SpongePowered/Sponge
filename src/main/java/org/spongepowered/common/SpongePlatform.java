@@ -33,7 +33,7 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.HashMap;
@@ -62,11 +62,11 @@ public final class SpongePlatform implements Platform {
     public SpongePlatform(MinecraftVersion minecraftVersion) {
         this.minecraftVersion = checkNotNull(minecraftVersion, "minecraftVersion");
 
-        this.apiPlugin = Launcher.getInstance().getApiPlugin();
-        this.platformPlugin = Launcher.getInstance().getPlatformPlugin();
-        this.minecraftPlugin = Launcher.getInstance().getMinecraftPlugin();
+        this.apiPlugin = Launch.getInstance().getApiPlugin();
+        this.platformPlugin = Launch.getInstance().getPlatformPlugin();
+        this.minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
 
-        final PluginContainer common = Launcher.getInstance().getCommonPlugin();
+        final PluginContainer common = Launch.getInstance().getCommonPlugin();
         this.platformMap.put("Type", this.getType());
         this.platformMap.put("ApiName", this.apiPlugin.getMetadata().getName());
         this.platformMap.put("ApiVersion", this.apiPlugin.getMetadata().getVersion());
@@ -79,7 +79,7 @@ public final class SpongePlatform implements Platform {
 
     @Override
     public Type getType() {
-        return !Launcher.getInstance().isDedicatedServer() ? Type.CLIENT : Type.SERVER;
+        return !Launch.getInstance().isDedicatedServer() ? Type.CLIENT : Type.SERVER;
     }
 
     @Override

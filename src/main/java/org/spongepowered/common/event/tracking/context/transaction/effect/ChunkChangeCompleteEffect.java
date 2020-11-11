@@ -31,7 +31,14 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class ChunkChangeCompleteEffect implements ProcessingSideEffect {
 
-    public ChunkChangeCompleteEffect() {
+    private static final class Holder {
+        static final ChunkChangeCompleteEffect INSTANCE = new ChunkChangeCompleteEffect();
+    }
+    ChunkChangeCompleteEffect() {
+    }
+
+    public static ChunkChangeCompleteEffect getInstance() {
+        return Holder.INSTANCE;
     }
 
     @Override

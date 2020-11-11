@@ -41,7 +41,6 @@ public class BlockTrackerCategory {
 
     public BlockTrackerCategory() {
         this.modMapping.put("minecraft", new BlockTrackerModCategory("minecraft"));
-        this.modMapping.put("extrautils2", new BlockTrackerModCategory("extrautils2"));
     }
 
     public Map<String, BlockTrackerModCategory> getModMappings() {

@@ -62,25 +62,22 @@ public abstract class LivingEntityMixin_Inventory {
     @Shadow public abstract ItemStack getItemStackFromSlot(EquipmentSlotType slotIn);
     @Shadow public abstract void setItemStackToSlot(EquipmentSlotType slotIn, ItemStack stack);
 
-    private EnumMap<EquipmentSlotType, SlotLens> slotLens = new EnumMap<>(EquipmentSlotType.class);
+    private final EnumMap<EquipmentSlotType, SlotLens> slotLens = new EnumMap<>(EquipmentSlotType.class);
 
-    @Surrogate
-    private void onGetItemStackFromSlot(final CallbackInfo ci, final EquipmentSlotType[] slots, final int j, final int k,
-            final EquipmentSlotType entityEquipmentSlot, final ItemStack before) {
-        this.onGetItemStackFromSlot(ci, 0, slots, j, k, entityEquipmentSlot, before);
-    }
-
-    @SuppressWarnings("ConstantConditions")
     @Inject(method = "tick", locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getItemStackFromSlot(Lnet/minecraft/inventory/EquipmentSlotType;)Lnet/minecraft/item/ItemStack;"))
-    private void onGetItemStackFromSlot(final CallbackInfo ci, final int i_unused, final EquipmentSlotType[] slots, final int j, final int k,
-            final EquipmentSlotType entityEquipmentSlot, final ItemStack before) {
+    private void inventory$throwInventoryEvent(final CallbackInfo ci, final int i, final int j, final EquipmentSlotType[] var3, final int var4, final int var5, final EquipmentSlotType equipmentslottype, final ItemStack itemstack) {
+        this.inventory$throwInventoryEvent(ci, var3, var4, var5, equipmentslottype, itemstack);
+    }
+
+    @Surrogate
+    private void inventory$throwInventoryEvent(final CallbackInfo ci, final EquipmentSlotType[] var3, final int var4, final int var5, final EquipmentSlotType equipmentslottype, final ItemStack itemstack) {
         if (((Entity)(Object)this).ticksExisted == 1 && (LivingEntity) (Object) this instanceof PlayerEntity) {
             return; // Ignore Equipment on player spawn/respawn
         }
-        final ItemStack after = this.getItemStackFromSlot(entityEquipmentSlot);
+        final ItemStack after = this.getItemStackFromSlot(equipmentslottype);
         final LivingEntity entity = (LivingEntity) (Object) this;
-        if (!ItemStack.areItemStacksEqual(after, before)) {
+        if (!ItemStack.areItemStacksEqual(after, itemstack)) {
             final Inventory slotAdapter;
             if (entity instanceof ServerPlayerEntity) {
                 final SlotLens slotLens;
@@ -88,7 +85,7 @@ public abstract class LivingEntityMixin_Inventory {
                 final Lens inventoryLens = ((InventoryAdapter) inventory).inventoryAdapter$getRootLens();
                 final Fabric fabric = ((InventoryAdapter) inventory).inventoryAdapter$getFabric();
                 if (inventoryLens instanceof PlayerInventoryLens) {
-                    switch (entityEquipmentSlot) {
+                    switch (equipmentslottype) {
                         case OFFHAND:
                             slotLens = ((PlayerInventoryLens) inventoryLens).getOffhandLens();
                             break;
@@ -97,10 +94,10 @@ public abstract class LivingEntityMixin_Inventory {
                             slotLens = hotbarLens.getSlotLens(fabric, hotbarLens.getSelectedSlotIndex(fabric));
                             break;
                         default:
-                            slotLens = ((PlayerInventoryLens) inventoryLens).getEquipmentLens().getSlotLens(fabric, entityEquipmentSlot.getIndex());
+                            slotLens = ((PlayerInventoryLens) inventoryLens).getEquipmentLens().getSlotLens(fabric, equipmentslottype.getIndex());
                     }
                 } else {
-                    slotLens = inventoryLens.getSlotLens(fabric, entityEquipmentSlot.getIndex());
+                    slotLens = inventoryLens.getSlotLens(fabric, equipmentslottype.getIndex());
                 }
 
                 slotAdapter = slotLens.getAdapter(fabric, (Inventory) inventory);
@@ -110,23 +107,23 @@ public abstract class LivingEntityMixin_Inventory {
                         this.slotLens.put(slot, new BasicSlotLens(slot.getSlotIndex()));
                     }
                 }
-                slotAdapter = this.slotLens.get(entityEquipmentSlot).getAdapter((Fabric) this, null);
+                slotAdapter = this.slotLens.get(equipmentslottype).getAdapter((Fabric) this, null);
             }
             final ChangeEntityEquipmentEvent event = InventoryEventFactory.callChangeEntityEquipmentEvent(entity,
-                    ItemStackUtil.snapshotOf(before), ItemStackUtil.snapshotOf(after), (SlotAdapter) slotAdapter);
+                    ItemStackUtil.snapshotOf(itemstack), ItemStackUtil.snapshotOf(after), (SlotAdapter) slotAdapter);
             if (event.isCancelled()) {
-                this.setItemStackToSlot(entityEquipmentSlot, before);
+                this.setItemStackToSlot(equipmentslottype, itemstack);
                 return;
             }
             final Transaction<ItemStackSnapshot> transaction = event.getTransaction();
             if (!transaction.isValid()) {
-                this.setItemStackToSlot(entityEquipmentSlot, before);
+                this.setItemStackToSlot(equipmentslottype, itemstack);
                 return;
             }
             final Optional<ItemStackSnapshot> optional = transaction.getCustom();
             if (optional.isPresent()) {
                 final ItemStack custom = ItemStackUtil.fromSnapshotToNative(optional.get());
-                this.setItemStackToSlot(entityEquipmentSlot, custom);
+                this.setItemStackToSlot(equipmentslottype, custom);
             }
         }
     }

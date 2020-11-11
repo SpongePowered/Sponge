@@ -27,33 +27,15 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
-import java.util.ArrayList;
-
 import javax.annotation.Nullable;
 
 abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState<C> implements IPhaseState<C> {
-
-    @Override
-    public boolean doesCaptureEntityDrops(final C context) {
-        return true;
-    }
-
-    @Override
-    public boolean tracksBlockSpecificDrops(final C context) {
-        return true;
-    }
 
     @Override
     public boolean isTicking() {
@@ -77,22 +59,9 @@ abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState
     }
 
     @Override
-    public void postProcessSpawns(final C phaseContext, final ArrayList<Entity> entities) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (!frame.getCurrentContext().get(EventContextKeys.SPAWN_TYPE).isPresent()) {
-                frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-            }
-            SpongeCommonEventFactory.callSpawnEntity(entities, phaseContext);
-        }
-    }
-
-    @Override
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final C context) {
 
     }
-
-    @Override
-    public abstract boolean spawnEntityOrCapture(C context, Entity entity);
 
     @Override
     public boolean doesDenyChunkRequests(final C context) {

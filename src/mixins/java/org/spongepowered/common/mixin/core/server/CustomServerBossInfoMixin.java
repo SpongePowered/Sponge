@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.mixin.core.world.ServerBossInfoMixin;
+import org.spongepowered.common.mixin.core.world.server.ServerBossInfoMixin;
 
 @Mixin(CustomServerBossInfo.class)
 public abstract class CustomServerBossInfoMixin extends ServerBossInfoMixin {

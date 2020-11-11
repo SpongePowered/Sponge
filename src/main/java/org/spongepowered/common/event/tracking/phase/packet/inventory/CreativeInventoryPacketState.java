@@ -25,36 +25,20 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
 public final class CreativeInventoryPacketState extends BasicPacketState {
 
     @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(BasicPacketContext context) {
-        // We specifically capture because the entities are already
-        // being captured in a drop event, and therefor will be
-        // spawned manually into the world by the creative event handling.
-        return true;
-    }
-
-    @Override
     public void unwind(BasicPacketContext context) {
         final ServerPlayerEntity player = context.getPacketPlayer();
-        context.getCapturedItemsSupplier()
-            .acceptAndClearIfNotEmpty(items -> {
-                try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    frame.pushCause(player);
-                    SpongeCommonEventFactory.callDropItemDrop(player, items, context);
-                }
-            });
+//        context.getCapturedItemsSupplier()
+//            .acceptAndClearIfNotEmpty(items -> {
+//                try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+//                    frame.pushCause(player);
+//                    SpongeCommonEventFactory.callDropItemDrop(player, items, context);
+//                }
+//            });
     }
 }

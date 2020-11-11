@@ -44,7 +44,7 @@ public abstract class CatalogedZeroAdvanceValueParameter<T> extends CatalogedArg
 
     @Override
     @NonNull
-    public final List<String> complete(@NonNull final CommandContext context) {
+    public final List<String> complete(@NonNull final CommandContext context, String currentInput) {
         return ImmutableList.of();
     }
 

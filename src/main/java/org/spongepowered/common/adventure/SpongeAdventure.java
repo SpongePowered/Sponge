@@ -31,6 +31,7 @@ import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
+import net.kyori.adventure.serializer.configurate3.ConfigurateComponentSerializer;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -52,7 +53,7 @@ import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.BossInfo;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
@@ -91,6 +92,10 @@ public final class SpongeAdventure {
             return decoded.toString();
         }
     };
+
+    public static final ConfigurateComponentSerializer CONFIGURATE = ConfigurateComponentSerializer.builder()
+            .scalarSerializer(GSON)
+            .build();
 
     public static Component legacy(final char character, final String string) {
         return LegacyComponentSerializer.legacy(character).deserialize(string);
@@ -284,7 +289,7 @@ public final class SpongeAdventure {
         } else if (action == ClickEvent.Action.CHANGE_PAGE) {
             return net.minecraft.util.text.event.ClickEvent.Action.CHANGE_PAGE;
         } else if (action == ClickEvent.Action.COPY_TO_CLIPBOARD) {
-            throw new UnsupportedOperationException("newer minecraft");
+            return net.minecraft.util.text.event.ClickEvent.Action.COPY_TO_CLIPBOARD;
         }
         throw new IllegalArgumentException(action.toString());
     }
@@ -302,7 +307,7 @@ public final class SpongeAdventure {
     public static ListNBT listTagJson(final List<Component> components) {
         final ListNBT nbt = new ListNBT();
         for (final Component component : components) {
-            nbt.add(new StringNBT(json(component)));
+            nbt.add(StringNBT.valueOf(json(component)));
         }
         return nbt;
     }

@@ -26,6 +26,8 @@ package org.spongepowered.common.network.status;
 
 import org.spongepowered.api.MinecraftVersion;
 
+import java.util.OptionalInt;
+
 public class SpongeLegacyMinecraftVersion implements MinecraftVersion {
 
     public static final SpongeLegacyMinecraftVersion V1_3 = new SpongeLegacyMinecraftVersion("<=1.3", 39);
@@ -53,6 +55,11 @@ public class SpongeLegacyMinecraftVersion implements MinecraftVersion {
     @Override
     public boolean isLegacy() {
         return true;
+    }
+
+    @Override
+    public OptionalInt getDataVersion() {
+        return OptionalInt.empty();
     }
 
     @Override

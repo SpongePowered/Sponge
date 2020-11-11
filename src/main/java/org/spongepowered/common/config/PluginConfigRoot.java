@@ -31,6 +31,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -65,7 +66,9 @@ public class PluginConfigRoot implements ConfigRoot {
     public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
         return HoconConfigurationLoader.builder()
                 .setPath(this.getConfigPath())
-                .setDefaultOptions(ConfigurationOptions.defaults().setObjectMapperFactory(this.mapperFactory))
+                .setDefaultOptions(ConfigurationOptions.defaults()
+                                           .withObjectMapperFactory(this.mapperFactory)
+                                           .withSerializers(coll -> SpongeAdventure.CONFIGURATE.addSerializersTo(coll)))
                 .build();
     }
 

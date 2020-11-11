@@ -29,9 +29,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 import javax.annotation.Nullable;
@@ -59,12 +63,13 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
      * We captured the dye color when creating the Block.Properties.
      * As the Properties objects are discarded we transfer it over to the Block itself now.
      */
-/*
+
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setUpSpongeFields(Block.Properties properties, CallbackInfo ci) {
-        ((DyeColorBlockBridge)this).bridge$setDyeColor(((DyeColorBlockBridge)properties).bridge$getDyeColor().orElse(null));
+    private void impl$setUpSpongeFields(final Block.Properties properties, final CallbackInfo ci) {
+        ((DyeColorBlockBridge) this).bridge$setDyeColor(((DyeColorBlockBridge)properties).bridge$getDyeColor().orElse(null));
     }
 
+/*
     @Inject(method = "spawnAsEntity",
             at = @At(value = "NEW", target = "net/minecraft/entity/item/ItemEntity"),
             cancellable = true,

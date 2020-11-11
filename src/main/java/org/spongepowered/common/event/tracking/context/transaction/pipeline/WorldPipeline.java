@@ -30,6 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -94,7 +95,7 @@ public final class WorldPipeline implements BlockPipeline {
         final PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.worldEffects) {
-            try (final EffectTransactor ignored = context.pushTransactor(effect)) {
+            try (final EffectTransactor ignored = context.getTransactor().pushEffect(effect)) {
                 final EffectResult result = effect.effect.processSideEffect(
                     this,
                     formerState,
@@ -123,7 +124,7 @@ public final class WorldPipeline implements BlockPipeline {
         final Supplier<ServerWorld> serverWorld;
         final Supplier<Chunk> chunkSupplier;
         final Supplier<ChunkSection> sectionSupplier;
-        List<ResultingTransactionBySideEffect> effects;
+        @MonotonicNonNull List<ResultingTransactionBySideEffect> effects;
         final ChunkPipeline chunkPipeline;
 
         Builder(final ChunkPipeline chunkPipeline) {

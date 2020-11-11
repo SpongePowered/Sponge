@@ -54,7 +54,6 @@ public interface EntityBridge {
 
     void bridge$setFireImmuneTicks(int ticks);
 
-
     default void bridge$clearWrappedCaptureList() {
 
     }
@@ -73,4 +72,6 @@ public interface EntityBridge {
     default void bridge$onCancelledBlockChange(EntityTickContext phaseContext) {
 
     }
+
+    void bridge$setTransient(boolean value);
 }

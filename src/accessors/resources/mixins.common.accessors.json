@@ -2,7 +2,7 @@
     "required": true,
     "minVersion": "0.8",
     "package": "org.spongepowered.common.accessor",
-    "refmap": "mixins.common.refmap.json",
+    "refmap": "spongecommon.accessors.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
@@ -15,6 +15,7 @@
         "block.AbstractSkullBlockAccessor",
         "block.BedBlockAccessor",
         "block.BlockAccessor",
+        "block.DispenserBlockAccessor",
         "block.FireBlockAccessor",
         "block.JukeboxBlockAccessor",
         "block.PistonBlockAccessor",
@@ -53,6 +54,7 @@
         "entity.monster.GuardianEntityAccessor",
         "entity.monster.PatrollerEntityAccessor",
         "entity.monster.PhantomEntityAccessor",
+        "entity.monster.PillagerEntityAccessor",
         "entity.monster.RavagerEntityAccessor",
         "entity.monster.SlimeEntityAccessor",
         "entity.monster.SpellcastingIllagerEntity_UseSpellGoalAccessor",
@@ -162,9 +164,9 @@
         "world.GameRulesAccessor",
         "world.WorldAccessor",
         "world.WorldTypeAccessor",
+        "world.biome.BiomeContainerAccessor",
         "world.border.WorldBorderAccessor",
         "world.chunk.ChunkAccessor",
-        "world.chunk.storage.RegionFileAccessor",
         "world.dimension.DimensionAccessor",
         "world.dimension.DimensionTypeAccessor",
         "world.end.DragonFightManagerAccessor",
@@ -177,7 +179,9 @@
         "world.server.ServerWorldAccessor",
         "world.spawner.AbstractSpawnerAccessor",
         "world.storage.SaveHandlerAccessor",
-        "entity.item.BoatEntityAccessor"
+        "entity.item.BoatEntityAccessor",
+        "entity.EntityTypeAccessor",
+        "entity.passive.fish.TropicalFishEntityAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

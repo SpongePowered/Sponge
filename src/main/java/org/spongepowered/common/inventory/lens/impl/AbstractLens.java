@@ -39,9 +39,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import javax.annotation.Nullable;
 
@@ -50,11 +50,11 @@ public abstract class AbstractLens implements Lens {
     protected Class<? extends Inventory> adapterType;
 
     protected final int base;
-    protected Lens parent;
+    private Lens parent;
 
     protected List<Lens> spanningChildren = new ArrayList<>();
     protected List<Lens> children = new ArrayList<>();
-    protected Map<Lens, Map<Key<?>, Object>> handleMap = new HashMap<>();
+    protected Map<Lens, Map<Key<?>, Object>> handleMap = new LinkedHashMap<>();
 
     protected int size;
 
@@ -191,7 +191,7 @@ public abstract class AbstractLens implements Lens {
                 }
             }
 
-            throw new NoSuchElementException("Specified child lens is not a descendant of this lens");
+            return Collections.emptyMap();
         }
         return this.handleMap.get(child);
     }

@@ -29,11 +29,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class EffectTransactor implements AutoCloseable {
     final @Nullable ResultingTransactionBySideEffect previousEffect;
-    final @Nullable BlockTransaction<@NonNull ?> parent;
+    final @Nullable GameTransaction<@NonNull ?> parent;
     private final TransactionalCaptureSupplier supplier;
     private final ResultingTransactionBySideEffect effect;
 
-    EffectTransactor(final ResultingTransactionBySideEffect effect, final @Nullable BlockTransaction<@NonNull ?> parent,
+    EffectTransactor(final ResultingTransactionBySideEffect effect, final @Nullable GameTransaction<@NonNull ?> parent,
         final @Nullable ResultingTransactionBySideEffect previousEffect, final TransactionalCaptureSupplier transactor) {
         /*
         | ChangeBlock(1) <- head will be RemoveTileEntity(1), tail is still RemoveTileentity(1)

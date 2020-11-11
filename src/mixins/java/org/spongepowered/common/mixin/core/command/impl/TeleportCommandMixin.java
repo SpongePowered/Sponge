@@ -105,7 +105,7 @@ public abstract class TeleportCommandMixin {
 
                 if (entityIn instanceof ServerPlayerEntity) {
                     if (((ServerPlayerEntity)entityIn).isSleeping()) {
-                        ((ServerPlayerEntity)entityIn).wakeUpPlayer(true, true, false);
+                        ((ServerPlayerEntity)entityIn).stopSleepInBed(true, true);
                     }
 
                     entityIn.stopRiding();
@@ -175,7 +175,7 @@ public abstract class TeleportCommandMixin {
                     result.setLocationAndAngles(posEvent.getDestinationPosition().getX(), posEvent.getDestinationPosition().getY(),
                             posEvent.getDestinationPosition().getZ(), (float) actualYaw, (float) actualPitch);
                     result.setRotationYawHead((float) actualYaw);
-                    worldIn.func_217460_e(result);
+                    worldIn.addFromAnotherDimension(result);
                     entityIn.removed = true;
 
                     PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(result, fromWorld,

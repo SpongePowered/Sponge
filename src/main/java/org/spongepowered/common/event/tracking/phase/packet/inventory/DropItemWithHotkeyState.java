@@ -36,8 +36,8 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.CauseStackManager.StackFrame;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
@@ -58,22 +58,16 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
     public DropItemWithHotkeyState() {
         super(
             Constants.Networking.MODE_DROP | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_INSIDE_WINDOW);
-    }
-
-    @Override
-    public boolean doesCaptureEntityDrops(final InventoryPacketContext context) {
-        return true;
     }
 
     @Override
@@ -86,62 +80,57 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
             TrackingUtil.processBlockCaptures(context);
-            context.getCapturedItemsSupplier()
-                .acceptAndClearIfNotEmpty(items -> {
+            { // TODO - figure this out with transactions
+                final List<ItemEntity> items = new ArrayList<>();
 
-                    final ArrayList<Entity> entities = new ArrayList<>();
-                    for (final ItemEntity item : items) {
-                        entities.add((Entity) item);
+                final ArrayList<Entity> entities = new ArrayList<>();
+                for (final ItemEntity item : items) {
+                    entities.add((Entity) item);
+                }
+
+                final int usedButton;
+                final Slot slot;
+                if (context.getPacket() instanceof CPlayerDiggingPacket) {
+                    final CPlayerDiggingPacket packetIn = context.getPacket();
+                    usedButton = packetIn.getAction() == CPlayerDiggingPacket.Action.DROP_ITEM
+                        ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID
+                        : 1;
+                    slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(
+                        EquipmentTypes.MAIN_HAND).orElse(null);
+                } else {
+                    final CClickWindowPacket packetIn = context.getPacket();
+                    usedButton = packetIn.getUsedButton();
+                    slot = ((InventoryAdapter) player.inventory).inventoryAdapter$getSlot(
+                        packetIn.getSlotId()).orElse(null);
+                }
+
+                final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.empty(),
+                    ItemStackSnapshot.empty());
+                final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
+                final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
+                final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(player,
+                    ContainerUtil.fromNative(player.openContainer),
+                    cursorTrans, Lists.newArrayList(slotTrans), entities, usedButton, slot);
+
+                SpongeCommon.postEvent(dropItemEvent);
+                if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
+                    dropItemEvent.getTransactions())) {
+                    ((ServerPlayerEntityBridge) player).bridge$restorePacketItem(Hand.MAIN_HAND);
+                    PacketPhaseUtil.handleSlotRestore(player, player.openContainer, dropItemEvent.getTransactions(),
+                        true);
+                } else {
+                    processSpawnedEntities(player, dropItemEvent);
+                }
+                for (Entity entity : entities) {
+                    if (((EntityBridge) entity).bridge$isConstructing()) {
+                        ((EntityBridge) entity).bridge$fireConstructors();
                     }
+                }
+                slotTrans.clear();
+                mixinContainer.bridge$setCaptureInventory(false);
+            }
 
-                    final int usedButton;
-                    final Slot slot;
-                    if (context.getPacket() instanceof CPlayerDiggingPacket) {
-                        final CPlayerDiggingPacket packetIn = context.getPacket();
-                        usedButton = packetIn.getAction() == CPlayerDiggingPacket.Action.DROP_ITEM
-                            ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID
-                            : 1;
-                        slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(
-                            EquipmentTypes.MAIN_HAND).orElse(null);
-                    } else {
-                        final CClickWindowPacket packetIn = context.getPacket();
-                        usedButton = packetIn.getUsedButton();
-                        slot = ((InventoryAdapter) player.inventory).inventoryAdapter$getSlot(
-                            packetIn.getSlotId()).orElse(null);
-                    }
-
-                    final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.empty(),
-                        ItemStackSnapshot.empty());
-                    final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
-                    final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
-                    final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(player,
-                        ContainerUtil.fromNative(player.openContainer),
-                        cursorTrans, Lists.newArrayList(slotTrans), entities, usedButton, slot);
-
-                    SpongeCommon.postEvent(dropItemEvent);
-                    if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
-                        dropItemEvent.getTransactions())) {
-                        ((ServerPlayerEntityBridge) player).bridge$restorePacketItem(Hand.MAIN_HAND);
-                        PacketPhaseUtil.handleSlotRestore(player, player.openContainer, dropItemEvent.getTransactions(),
-                            true);
-                    } else {
-                        processSpawnedEntities(player, dropItemEvent);
-                    }
-                    for (Entity entity : entities) {
-                        if (((EntityBridge) entity).bridge$isConstructing()) {
-                            ((EntityBridge) entity).bridge$fireConstructors();
-                        }
-                    }
-                    slotTrans.clear();
-                    mixinContainer.bridge$setCaptureInventory(false);
-                });
-            context.getPerEntityItemDropSupplier()
-                .acceptAndClearIfNotEmpty(itemMapping -> {
-
-                });
             final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
             mixinContainer.bridge$setCaptureInventory(false);
             mixinContainer.bridge$getCapturedSlotTransactions().clear();
@@ -178,11 +167,6 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             // the event call, somehow should not release this frame until after the event is posted
             return event;
         }
-    }
-
-    @Override
-    public boolean ignoresItemPreMerging() {
-        return true;
     }
 
 }

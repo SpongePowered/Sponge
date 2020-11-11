@@ -25,8 +25,9 @@
 package org.spongepowered.common.bridge.tileentity;
 
 import com.mojang.authlib.GameProfile;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface SkullTileEntityBridge {
 
-    void bridge$setPlayerProfile(GameProfile mcProfile, boolean update);
+    void bridge$setUnresolvedPlayerProfile(@Nullable GameProfile mcProfile);
 }

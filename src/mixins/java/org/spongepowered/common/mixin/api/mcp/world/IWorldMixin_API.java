@@ -46,7 +46,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -68,7 +67,6 @@ import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NonNullArrayList;
@@ -87,7 +85,6 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
 
     @Shadow long shadow$getSeed();
     @Shadow net.minecraft.world.World shadow$getWorld();
-    @Shadow WorldInfo shadow$getWorldInfo();
     @Shadow DifficultyInstance shadow$getDifficultyForLocation(BlockPos p_175649_1_);
     @Shadow AbstractChunkProvider shadow$getChunkProvider();
     @Shadow boolean shadow$chunkExists(int p_217354_1_, int p_217354_2_);
@@ -155,12 +152,14 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
     // MutableEntityVolume
 
     @Override
-    default Entity createEntity(final EntityType<?> type, final Vector3d position) throws IllegalArgumentException, IllegalStateException {
+    default <E extends Entity> E createEntity(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException,
+            IllegalStateException {
         return this.impl$createEntity(type, position, false);
     }
 
     @Override
-    default Entity createEntityNaturally(final EntityType<?> type, final Vector3d position) throws IllegalArgumentException, IllegalStateException {
+    default <E extends Entity> E createEntityNaturally(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException,
+            IllegalStateException {
         return this.impl$createEntity(type, position, true);
     }
 
@@ -174,7 +173,8 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
         throw new UnsupportedOperationException("Implement me"); // TODO implement me
     }
 
-    default Entity impl$createEntity(final EntityType<?> type, final Vector3d position, final boolean naturally) throws IllegalArgumentException, IllegalStateException {
+    default <E extends Entity> E impl$createEntity(final EntityType<E> type, final Vector3d position, final boolean naturally) throws IllegalArgumentException,
+            IllegalStateException {
         checkNotNull(type, "The entity type cannot be null!");
         checkNotNull(position, "The position cannot be null!");
 
@@ -195,7 +195,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
         // TODO - archetypes should solve the problem of calling the correct constructor
         if (type == net.minecraft.entity.EntityType.ENDER_PEARL) {
             final ArmorStandEntity tempEntity = new ArmorStandEntity(thisWorld, x, y, z);
-            tempEntity.posY -= tempEntity.getEyeHeight();
+            tempEntity.setPosition(tempEntity.getPosX(), tempEntity.getPosY() - tempEntity.getEyeHeight(), tempEntity.getPosZ());
             entity = new EnderPearlEntity(thisWorld, tempEntity);
             ((EnderPearl) entity).offer(Keys.SHOOTER, UnknownProjectileSource.UNKNOWN);
         }
@@ -242,7 +242,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
             ((PaintingEntity) entity).art = PaintingType.KEBAB;
         }
 
-        return (Entity) entity;
+        return (E) entity;
     }
 
     @Override
@@ -268,16 +268,7 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
     @Override
     default boolean spawnEntity(final Entity entity) {
         Preconditions.checkNotNull(entity, "The entity cannot be null!");
-        final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final IPhaseState<?> state = phaseTracker.getCurrentState();
-        if (!state.alreadyCapturingEntitySpawns()) {
-            try (final BasicPluginContext context = PluginPhase.State.CUSTOM_SPAWN.createPhaseContext(PhaseTracker.SERVER)) {
-                context.buildAndSwitch();
-                phaseTracker.spawnEntityWithCause((org.spongepowered.api.world.World<?>) (Object) this, entity);
-                return true;
-            }
-        }
-        return phaseTracker.spawnEntityWithCause((org.spongepowered.api.world.World<?>) (Object) this, entity);
+            return ((IWorld) this).addEntity((net.minecraft.entity.Entity) entity);
     }
 
     // MutableBlockVolume

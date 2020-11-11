@@ -60,7 +60,7 @@ import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.filter.type.Include;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.api.util.generator.GeneratorUtils;
+import org.spongepowered.common.util.generator.GeneratorUtils;
 import org.spongepowered.common.event.filter.delegate.AfterCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.AllCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.BeforeCauseFilterSourceDelegate;

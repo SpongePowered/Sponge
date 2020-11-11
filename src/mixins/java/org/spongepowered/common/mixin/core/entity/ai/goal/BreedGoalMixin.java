@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.core.entity.ai.goal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.goal.BreedGoal;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.world.IWorldWriter;
 import net.minecraft.world.World;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.event.CauseStackManager;
@@ -50,23 +50,23 @@ import javax.annotation.Nullable;
 @Mixin(BreedGoal.class)
 public abstract class BreedGoalMixin {
 
-    @Shadow @Final private AnimalEntity animal;
-    @Shadow private AnimalEntity field_75391_e;
-    @Shadow @Nullable private AnimalEntity getNearbyMate() {
+    @Shadow @Final protected AnimalEntity animal;
+    @Shadow protected AnimalEntity targetMate;
+
+    @Shadow @Nullable private AnimalEntity shadow$getNearbyMate() {
         // Shadow implements
         return null;
     }
 
     private boolean impl$spawnEntityResult;
 
-    @SuppressWarnings("deprecation")
     @Nullable
     @Redirect(method = "shouldExecute",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/ai/goal/BreedGoal;getNearbyMate()Lnet/minecraft/entity/passive/AnimalEntity;"))
     private AnimalEntity impl$callFindMateEvent(final BreedGoal entityAIMate) {
-        AnimalEntity nearbyMate = this.getNearbyMate();
+        AnimalEntity nearbyMate = this.shadow$getNearbyMate();
         if (nearbyMate == null) {
             return null;
         }
@@ -98,7 +98,6 @@ public abstract class BreedGoalMixin {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Redirect(method = "spawnBaby()V",
         at = @At(
             value = "INVOKE",
@@ -109,7 +108,7 @@ public abstract class BreedGoalMixin {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 // TODO API 8 is removing this TargetXXXX nonsense so that is why I put the parents into the Cause
                 frame.pushCause(this.animal);
-                frame.pushCause(this.field_75391_e);
+                frame.pushCause(this.targetMate);
                 final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
                     SpongeEventFactory.createBreedingEventBreed(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ageable) baby);
                 this.impl$spawnEntityResult = !SpongeCommon.postEvent(event) && world.addEntity(baby);

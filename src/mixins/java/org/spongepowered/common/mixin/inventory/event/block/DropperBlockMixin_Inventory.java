@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.inventory.event.block;
 
+import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.DropperBlock;
 import net.minecraft.dispenser.ProxyBlockSource;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.DispenserTileEntity;
+import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -37,6 +39,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
@@ -71,26 +74,29 @@ public abstract class DropperBlockMixin_Inventory {
         callbackInfo.cancel();
     }
 
-    /* TODO
     @Surrogate
     private void afterDispense(final World worldIn, final BlockPos pos, final CallbackInfo callbackInfo,
-            final ProxyBlockSource blocksourceimpl, final DispenserTileEntity tileentitydispenser, final int i, final ItemStack itemstack,
+            final ProxyBlockSource proxyblocksource, final DispenserTileEntity dispensertileentity, final int i, final ItemStack itemstack,
             final ItemStack itemstack1) {
         // after setInventorySlotContents
-        tileentitydispenser.setInventorySlotContents(i, itemstack1);
-        // Transfer worked if remainder is one less than the original stack
-        if (itemstack1.getCount() == itemstack.getCount() - 1) {
-            final TrackedInventoryBridge capture = impl$forCapture(tileentitydispenser);
-            final Inventory sourceInv = ((Inventory) tileentitydispenser);
-            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
-            final Direction enumfacing = worldIn.getBlockState(pos).get(DispenserBlock.FACING);
-            final BlockPos blockpos = pos.offset(enumfacing);
-            final IInventory iinventory = HopperTileEntity.getInventoryAtPosition(worldIn, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
-            InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
+        dispensertileentity.setInventorySlotContents(i, itemstack1);
+
+        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
+            // Transfer worked if remainder is one less than the original stack
+            if (itemstack1.getCount() == itemstack.getCount() - 1) {
+                final TrackedInventoryBridge capture = impl$forCapture(dispensertileentity);
+                final Inventory sourceInv = ((Inventory) dispensertileentity);
+                SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+                final Direction enumfacing = worldIn.getBlockState(pos).get(DispenserBlock.FACING);
+                final BlockPos blockpos = pos.offset(enumfacing);
+                final IInventory iinventory = HopperTileEntity.getInventoryAtPosition(worldIn, blockpos.getX(), blockpos.getY(), blockpos.getZ());
+                InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
+            }
         }
+
+        // dont call setInventorySlotContents twice
         callbackInfo.cancel();
     }
-     */
 
     @Inject(method = "dispense", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",

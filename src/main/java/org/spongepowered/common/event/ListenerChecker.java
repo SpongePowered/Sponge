@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.reflect.TypeToken;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.common.SpongeCommon;
 
@@ -33,6 +34,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,7 +46,7 @@ public final class ListenerChecker {
 
     private final Class<?> clazz;
     private Map<String, FieldData> fields = new HashMap<>();
-    private Map<Class<?>, FieldData> fieldClassMap = new HashMap<>();
+    private Map<Class<?>, FieldData> fieldClassMap = new IdentityHashMap<>();
 
 
     private static String getName(Class<?> clazz) {
@@ -126,7 +128,7 @@ public final class ListenerChecker {
         // to be set to 'true'. This allows the implementation to check the most-specific flag for its particular event,
         // while ensuring that all plugins listening for an event will recieve it
 
-        Set<Class<? super T>> superTypes = TypeToken.of(eventClass).getTypes().rawTypes().stream().filter(c -> c != eventClass).collect(Collectors.toSet());
+        Set<Class<? super T>> superTypes = TypeToken.of(eventClass).getTypes().rawTypes().stream().filter(c -> c != eventClass).collect(Collectors.toCollection(ReferenceOpenHashSet::new));
 
         for (Map.Entry<Class<?>, FieldData> entry: this.fieldClassMap.entrySet()) {
 

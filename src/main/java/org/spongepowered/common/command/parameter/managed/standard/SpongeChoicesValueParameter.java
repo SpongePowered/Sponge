@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.google.common.collect.ImmutableList;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -74,8 +74,8 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return ImmutableList.copyOf(this.choices.get());
+    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+        return this.choices.get().stream().filter(x -> x.startsWith(currentInput)).collect(Collectors.toList());
     }
 
     @Override
@@ -99,14 +99,14 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
         }
 
         if (this.showInUsage) {
-            throw reader.createException(TextComponent.builder(entry + " is not a valid choice!")
-                    .append(TextComponent.newline())
-                    .append(TextComponent.newline())
-                    .append("Valid choices include: " + this.choices.get().stream()
+            throw reader.createException(Component.text().content(entry + " is not a valid choice!")
+                    .append(Component.newline())
+                    .append(Component.newline())
+                    .append(Component.text("Valid choices include: " + this.choices.get().stream()
                             .filter(x -> !x.equals(entry))
-                            .limit(5).collect(Collectors.joining(", "))).build());
+                            .limit(5).collect(Collectors.joining(", ")))).build());
         }
-        throw reader.createException(TextComponent.of(entry + " is not a valid choice!"));
+        throw reader.createException(Component.text(entry + " is not a valid choice!"));
     }
 
 }

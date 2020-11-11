@@ -26,13 +26,19 @@ package org.spongepowered.common;
 
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.common.advancement.SpongeAdvancementProvider;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
@@ -42,6 +48,7 @@ import org.spongepowered.common.event.lifecycle.StartedEngineEventImpl;
 import org.spongepowered.common.event.lifecycle.StartingEngineEventImpl;
 import org.spongepowered.common.event.lifecycle.StoppingEngineEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.item.recipe.SpongeRecipeProvider;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeBuilderRegistry;
@@ -58,10 +65,12 @@ import java.util.stream.Collectors;
 public final class SpongeLifecycle {
 
     private final Game game;
+    private final Injector injector;
 
     @Inject
-    public SpongeLifecycle(final Game game) {
+    public SpongeLifecycle(final Game game, final Injector injector) {
         this.game = game;
+        this.injector = injector;
     }
 
     public void establishFactories() {
@@ -81,12 +90,24 @@ public final class SpongeLifecycle {
     }
 
     public void establishRegistries() {
-        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultRegistries();
-        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).registerDefaultSuppliers();
+        final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
+
+        spongeCatalogRegistry.registerDefaultRegistries();
+        spongeCatalogRegistry.registerDefaultSuppliers();
 
         this.game.getEventManager().post(new RegisterCatalogRegistryEventImpl(Cause.of(EventContext.empty(), this.game), this.game));
 
-        ((SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry()).callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+        spongeCatalogRegistry.callRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+    }
+
+    public void establishDataPackRegistries() {
+        final SpongeCatalogRegistry spongeCatalogRegistry = (SpongeCatalogRegistry) this.game.getRegistry().getCatalogRegistry();
+        spongeCatalogRegistry.callDataPackRegisterCatalogEvents(Cause.of(EventContext.empty(), this.game), this.game);
+
+        // After all plugins registered their recipes we serialize them
+        SpongeRecipeProvider.registerRecipes(spongeCatalogRegistry.getRegistry(RecipeRegistration.class));
+        SpongeAdvancementProvider.registerAdvancements(spongeCatalogRegistry.getRegistry(Advancement.class));
+
     }
 
     public void callRegisterChannelEvent() {
@@ -97,8 +118,12 @@ public final class SpongeLifecycle {
         SpongeTimingsFactory.INSTANCE.init();
     }
 
-    public void establishServices() {
+    public void establishGlobalServices() {
         ((SpongeServiceProvider) this.game.getServiceProvider()).init();
+    }
+
+    public void establishServerServices() {
+        ((MinecraftServerBridge) this.game.getServer()).bridge$initServices(this.game, this.injector);
     }
 
     public void establishServerFeatures() {
@@ -150,6 +175,6 @@ public final class SpongeLifecycle {
     }
 
     public void establishDataProviders() {
-        DataProviderRegistry.get().registerDefaultProviders();
+        SpongeDataManager.getInstance().registerDefaultProviders();
     }
 }

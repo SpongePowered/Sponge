@@ -40,13 +40,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class SpongeScore implements Score {
+public final class SpongeScore implements Score {
 
-    private Component name;
+    private final Component name;
     public String legacyName;
     private int score;
+    private boolean locked;
 
-    private Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<>();
+    private final Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<>();
 
     public SpongeScore(final Component name) {
         this.name = name;
@@ -70,6 +71,16 @@ public class SpongeScore implements Score {
     public void setScore(final int score) {
         this.score = score;
         this.updateScore();
+    }
+
+    @Override
+    public boolean isLocked() {
+        return this.locked;
+    }
+
+    @Override
+    public void setLocked(final boolean locked) {
+        this.locked = locked;
     }
 
     private void updateScore() {

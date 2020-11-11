@@ -29,10 +29,8 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 public final class EntityPhase {
 
     public static final class State {
-        public static final IPhaseState<EntityDeathContext> DEATH = new EntityDeathState();
-        public static final IPhaseState<BasicEntityContext> DEATH_UPDATE = new DeathUpdateState();
         public static final IPhaseState<BasicEntityContext> PLAYER_WAKE_UP = new PlayerWakeUpState();
-        public static final IPhaseState<TeleportContext> TELEPORT = new TeleportPhaseState();
+        public static final IPhaseState<BasicEntityContext> COLLISION = new EntityCollisionState();
 
         private State() {
         }

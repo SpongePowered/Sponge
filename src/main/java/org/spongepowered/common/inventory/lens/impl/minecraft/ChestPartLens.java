@@ -55,9 +55,9 @@ public class ChestPartLens extends RealLens {
         }
         if (fabric instanceof DoubleSidedInventory) {
             if (this.upper) {
-                return (Inventory) ((DoubleSidedInventoryAccessor) fabric).accessor$getField_70477_b();
+                return (Inventory) ((DoubleSidedInventoryAccessor) fabric).accessor$getUpperChest();
             } else {
-                return (Inventory) ((DoubleSidedInventoryAccessor) fabric).accessor$getField_70478_c();
+                return (Inventory) ((DoubleSidedInventoryAccessor) fabric).accessor$getLowerChest();
             }
         }
         return super.getAdapter(fabric, parent);

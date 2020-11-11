@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.entity.player;
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
@@ -51,9 +52,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.ServerBossInfo;
+import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -69,8 +71,10 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -147,7 +151,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
 
         if (!packets.isEmpty()) {
-            if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
+            if (position.sub(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ()).lengthSquared() < (long) radius * (long) radius) {
                 for (final IPacket<?> packet : packets) {
                     this.connection.sendPacket(packet);
                 }
@@ -246,14 +250,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public void kick() {
-        this.kick(TranslatableComponent.of("disconnect.disconnected"));
+    public boolean kick() {
+        return this.kick(Component.translatable("disconnect.disconnected"));
     }
 
     @Override
-    public void kick(final Component message) {
-        final ITextComponent component = SpongeAdventure.asVanilla(message);
-        this.connection.disconnect(component);
+    public boolean kick(final Component message) {
+        return ((ServerPlayerEntityBridge) this).bridge$kick(message);
     }
 
     @Override
@@ -323,8 +326,8 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public PlayerChatRouter getChatRouter() {
         if (this.api$chatRouter == null) {
-            this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(
-                    TranslatableComponent.of("chat.type.text", ((EntityBridge) player).bridge$getDisplayNameText(), message));
+            this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(player,
+                    Component.translatable("chat.type.text", ((EntityBridge) player).bridge$getDisplayNameText(), message));
         }
         return this.api$chatRouter;
     }
@@ -361,7 +364,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     @Override
     public AdvancementProgress getProgress(final Advancement advancement) {
         Preconditions.checkNotNull(advancement, "advancement");
-        Preconditions.checkState(((AdvancementBridge) advancement).bridge$isRegistered(), "The advancement must be registered");
         return (AdvancementProgress) this.advancements.getProgress((net.minecraft.advancements.Advancement) advancement);
     }
 
@@ -420,13 +422,13 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     // Audience
 
     @Override
-    public void sendMessage(final Component message, final MessageType type) {
+    public void sendMessage(final Identity identity, final Component message, final MessageType type) {
         if (this.impl$isFake) {
             return;
         }
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(type, "type");
-        this.connection.sendPacket(new SChatPacket(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type)));
+        this.connection.sendPacket(new SChatPacket(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type))); // TODO(1.16) use identity
     }
 
     @Override
@@ -444,7 +446,10 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
             return;
         }
         Objects.requireNonNull(title, "title");
-        this.connection.sendPacket(new STitlePacket(ticks(title.fadeInTime()), ticks(title.fadeOutTime()), ticks(title.stayTime())));
+        final Title.Times times = title.times();
+        if (times != null) {
+            this.connection.sendPacket(new STitlePacket(ticks(times.fadeIn()), ticks(times.stay()), ticks(times.fadeOut())));
+        }
         this.connection.sendPacket(new STitlePacket(STitlePacket.Type.SUBTITLE, SpongeAdventure.asVanilla(title.subtitle())));
         this.connection.sendPacket(new STitlePacket(STitlePacket.Type.TITLE, SpongeAdventure.asVanilla(title.title())));
     }
@@ -494,7 +499,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void playSound(final Sound sound) {
-        this.playSound(sound, this.posX, this.posY, this.posZ);
+        this.playSound(sound, this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ());
     }
 
     @Override
@@ -532,5 +537,4 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         Objects.requireNonNull(book, "book");
         BookUtil.fakeBookView(book, Collections.singletonList(this));
     }
-
 }

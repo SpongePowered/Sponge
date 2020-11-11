@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.service.permission.SubjectHelper;
+import org.spongepowered.common.service.server.permission.SubjectHelper;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -51,13 +51,6 @@ public abstract class SubjectMixin implements SubjectBridge {
 
     @Nullable
     private SubjectReference impl$subjectReference;
-
-    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
-    private void subjectConstructor(final CallbackInfo ci) {
-        if (SpongeCommon.isInitialized()) {
-            SubjectHelper.applySubject(this);
-        }
-    }
 
     @Override
     public void bridge$setSubject(final SubjectReference subj) {

@@ -103,11 +103,12 @@ public class DispenserBlockMixin_Tracker {
     private void tracker$setInventoryContentsCallEvent(final DispenserTileEntity dispenserTileEntity, final int index, final ItemStack stack) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         // If we captured nothing, simply set the slot contents and return
-        if (context.getCapturedItemsOrEmptyList().isEmpty()) {
-            dispenserTileEntity.setInventorySlotContents(index, stack);
-            return;
-        }
-        final ItemStack dispensedItem = context.getCapturedItems().get(0).getItem();
+        // TODO - figure out how to get captured item transactions
+//        if (context.getCapturedItemsOrEmptyList().isEmpty()) {
+//            dispenserTileEntity.setInventorySlotContents(index, stack);
+//            return;
+//        }
+        final ItemStack dispensedItem = ItemStack.EMPTY;
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(dispensedItem);
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
@@ -117,11 +118,7 @@ public class DispenserBlockMixin_Tracker {
             SpongeCommon.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
                 dispenserTileEntity.setInventorySlotContents(index, this.tracker$originalItem);
-                context.getCapturedItems().clear();
                 return;
-            }
-            if (dropEvent.getDroppedItems().isEmpty()) {
-                context.getCapturedItems().clear();
             }
 
             dispenserTileEntity.setInventorySlotContents(index, stack);

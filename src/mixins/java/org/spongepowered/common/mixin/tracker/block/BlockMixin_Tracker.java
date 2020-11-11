@@ -26,17 +26,26 @@ package org.spongepowered.common.mixin.tracker.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.block.TrackedBlockBridge;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.launch.Launch;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(Block.class)
 public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
 
@@ -46,12 +55,13 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
     }
     // @formatter:on
     private boolean tracker$hasNeighborLogicOverridden = false;
+    @Nullable private static EffectTransactor tracker$effectTransactorForDrops = null;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void tracker$initializeTrackerOptimizations(final Block.Properties properties, final CallbackInfo ci) {
         // neighborChanged
         try {
-            final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? "neighborChanged" : "func_220069_a";
+            final String mapping = Launch.getInstance().isDeveloperEnvironment() ? "neighborChanged" : "func_220069_a";
             final Class<?>[] argTypes = {net.minecraft.block.BlockState.class, net.minecraft.world.World.class, BlockPos.class, Block.class, BlockPos.class, boolean.class};
             final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             this.tracker$hasNeighborLogicOverridden = !clazz.equals(Block.class);
@@ -81,7 +91,6 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
     @Inject(
         method = {
             // Effectively, all the spawnDrops injection points we can scatter
-            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/storage/loot/LootContext$Builder;)V",
             "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
             "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
             "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V"
@@ -95,5 +104,84 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
                 ci.cancel();
             }
         }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Inject(
+        method = "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
+        at = @At("HEAD")
+    )
+    private static void tracker$captureBlockProposedToBeSpawningDrops(final BlockState state, final World worldIn,
+        final BlockPos pos, final CallbackInfo ci) {
+        final PhaseTracker server = PhaseTracker.SERVER;
+        if (server.getSidedThread() != Thread.currentThread()) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = server.getPhaseContext();
+        if(!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+            return;
+        }
+        BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
+            .logBlockDrops(context, worldIn, pos, state, null);
+    }
+
+    @Inject(
+        method = "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+        at = @At("HEAD")
+    )
+    private static void tracker$captureBlockProposedToBeSpawningDrops(
+        final BlockState state, final World worldIn,
+        final BlockPos pos, final @Nullable TileEntity tileEntity, final CallbackInfo ci
+    ) {
+        final PhaseTracker server = PhaseTracker.SERVER;
+        if (server.getSidedThread() != Thread.currentThread()) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = server.getPhaseContext();
+        if (!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+            return;
+        }
+        BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
+            .logBlockDrops(context, worldIn, pos, state, tileEntity);
+    }
+
+    @Inject(
+        method = "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V",
+        at = @At("HEAD")
+    )
+    private static void tracker$captureBlockProposedToBeSpawningDrops(final BlockState state, final World worldIn,
+        final BlockPos pos, final @Nullable TileEntity tileEntity, final Entity entity, final ItemStack itemStack,
+        final CallbackInfo ci) {
+        final PhaseTracker server = PhaseTracker.SERVER;
+        if (server.getSidedThread() != Thread.currentThread()) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = server.getPhaseContext();
+        if(!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+            return;
+        }
+        BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
+            .logBlockDrops(context, worldIn, pos, state, tileEntity);
+    }
+
+
+    @Inject(
+        method = {
+            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V",
+            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;)V",
+            "spawnDrops(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/entity/Entity;Lnet/minecraft/item/ItemStack;)V"
+        },
+        at = @At("TAIL")
+    )
+    private static void tracker$closeEffectIfCapturing(final CallbackInfo ci) {
+        final PhaseTracker server = PhaseTracker.SERVER;
+        if (server.getSidedThread() != Thread.currentThread()) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = server.getPhaseContext();
+        if(!((IPhaseState) context.state).recordsEntitySpawns(context)) {
+            return;
+        }
+        context.getTransactor().completeBlockDrops(BlockMixin_Tracker.tracker$effectTransactorForDrops);
     }
 }

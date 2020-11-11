@@ -39,7 +39,7 @@ public final class HorseStyleStreamGenerator {
     public static Stream<Tuple<HorseStyle, Integer>> stream() {
         return Stream.of(
             Tuple.of(new SpongeHorseStyle(ResourceKey.minecraft("none"), 0), 0),
-            Tuple.of(new SpongeHorseStyle(ResourceKey.minecraft("white_style"), 1), 1),
+            Tuple.of(new SpongeHorseStyle(ResourceKey.minecraft("white"), 1), 1),
             Tuple.of(new SpongeHorseStyle(ResourceKey.minecraft("whitefield"), 2), 2),
             Tuple.of(new SpongeHorseStyle(ResourceKey.minecraft("white_dots"), 3), 3),
             Tuple.of(new SpongeHorseStyle(ResourceKey.minecraft("black_dots"), 4), 4)

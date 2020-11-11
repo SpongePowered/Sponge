@@ -53,7 +53,7 @@ public abstract class RabbitEntity_RaidFarmGoalMixin extends MoveToBlockGoal {
      * @param cir
      */
     @Inject(
-        method = "shouldExecute",
+        method = "shouldExecute()Z",
         at = @At(value = "HEAD"),
         cancellable = true
     )

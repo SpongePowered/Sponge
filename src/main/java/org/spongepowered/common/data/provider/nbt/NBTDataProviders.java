@@ -25,16 +25,16 @@
 package org.spongepowered.common.data.provider.nbt;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
+import org.spongepowered.common.util.Constants;
 
 public final class NBTDataProviders extends DataProviderRegistratorBuilder {
 
-    public NBTDataProviders(final DataProviderRegistry registry) {
-        super(registry);
+    public NBTDataProviders() {
+        super(Constants.Sponge.Entity.DataRegistration.NBT);
     }
 
     @Override
-    public void register() {
-        PlayerData.register(this.registrator);
+    public void registerProviders() {
+        NBTComponentData.register(this.registrator);
     }
 }

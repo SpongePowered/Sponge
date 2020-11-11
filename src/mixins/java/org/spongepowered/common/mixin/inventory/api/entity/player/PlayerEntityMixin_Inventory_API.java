@@ -30,6 +30,7 @@ import net.minecraft.inventory.EnderChestInventory;
 import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +45,12 @@ public abstract class PlayerEntityMixin_Inventory_API implements Player {
 
     @Override
     public org.spongepowered.api.item.inventory.entity.PlayerInventory getInventory() {
-        return  (org.spongepowered.api.item.inventory.entity.PlayerInventory) this.inventory;
+        return (org.spongepowered.api.item.inventory.entity.PlayerInventory) this.inventory;
+    }
+
+    @Override
+    public EquipmentInventory getEquipment() {
+        return this.getInventory().getEquipment();
     }
 
     @Override

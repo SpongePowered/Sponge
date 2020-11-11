@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.border;
 
-import org.spongepowered.api.util.TemporalUnits;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -34,6 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 @Mixin(net.minecraft.world.border.WorldBorder.class)
 @Implements(@Interface(iface = WorldBorder.class, prefix = "worldBorder$"))
@@ -58,7 +58,7 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
 
     @Intrinsic
     public Duration worldBorder$getWarningTime() {
-        return Duration.of(this.shadow$getWarningTime(), TemporalUnits.MILLIS);
+        return Duration.of(this.shadow$getWarningTime(), ChronoUnit.MILLIS);
     }
 
     @Intrinsic
@@ -103,7 +103,7 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
 
     @Override
     public Duration getTimeRemaining() {
-        return Duration.of(this.getTimeUntilTarget(), TemporalUnits.MILLIS);
+        return Duration.of(this.getTimeUntilTarget(), ChronoUnit.MILLIS);
     }
 
     @Override

@@ -25,7 +25,6 @@
 package org.spongepowered.common.command.registrar;
 
 import com.google.common.reflect.TypeToken;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
@@ -33,7 +32,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -51,7 +49,7 @@ import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongePermissionWrappedLiteralCommandNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayList;
@@ -90,7 +88,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         final PluginContainer container = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
                 .orElseThrow(() -> new IllegalStateException("Cannot register command without knowing its origin."));
 
-        if (!this.hasVanillaRegistered && Launcher.getInstance().getMinecraftPlugin() == container) {
+        if (!this.hasVanillaRegistered && Launch.getInstance().getMinecraftPlugin() == container) {
             final LiteralCommandNode<CommandSource> vanillaCommand = this.applyNamespace(container, command, false);
             this.vanilla.add(vanillaCommand);
             return vanillaCommand;
@@ -108,7 +106,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         // then they can register anyway.
         this.hasVanillaRegistered = true;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final PluginContainer container = Launcher.getInstance().getMinecraftPlugin();
+            final PluginContainer container = Launch.getInstance().getMinecraftPlugin();
             frame.pushCause(container);
             for (final LiteralCommandNode<CommandSource> node : this.vanilla) {
                 this.registerInternal(this, container, node, new String[0], true);
@@ -211,8 +209,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
             return CommandResult.builder().setResult(result).build();
         } catch (final CommandSyntaxException e) {
-            // TODO: CommandException when text is working
-            throw new RuntimeException(e.getMessage(), e);
+            throw new CommandException(Component.text(e.getMessage()), e);
         }
     }
 
@@ -224,7 +221,8 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             @NonNull final String command,
             @NonNull final String arguments) {
         final CompletableFuture<Suggestions> suggestionsCompletableFuture =
-                this.dispatcher.getCompletionSuggestions(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
+                this.dispatcher.getCompletionSuggestions(
+                        this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause, true));
         // TODO: Fix so that we keep suggestions in the Mojang format?
         return suggestionsCompletableFuture.join().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }
@@ -234,7 +232,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final CommandMapping mapping) {
         final CommandNode<CommandSource> node = this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias()));
         if (node != null) {
-            return Optional.of(TextComponent.of(this.dispatcher.getSmartUsage(node, (CommandSource) cause).toString()));
+            return Optional.of(Component.text(this.dispatcher.getSmartUsage(node, (CommandSource) cause).toString()));
         }
 
         return Optional.empty();
@@ -245,7 +243,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         return this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias())).getRequirement().test((CommandSource) cause);
     }
 
-    public CommandDispatcher<CommandSource> getDispatcher() {
+    public SpongeCommandDispatcher getDispatcher() {
         return this.dispatcher;
     }
 

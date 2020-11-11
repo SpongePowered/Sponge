@@ -26,20 +26,21 @@ package org.spongepowered.common.mixin.tracker.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import net.minecraft.util.Hand;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
@@ -47,8 +48,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.entity.EntityDeathContext;
-import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
@@ -66,34 +66,51 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
     @Shadow protected abstract void shadow$dropLoot(DamageSource damageSourceIn, boolean p_213354_2_);
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
     @Shadow @Nullable public abstract LivingEntity shadow$getAttackingEntity();
-    @Shadow public abstract void shadow$onDeath(DamageSource cause);
+    @Shadow public void shadow$onDeath(final DamageSource cause) {}
     @Shadow public abstract boolean shadow$isSleeping();
-
+    @Shadow public abstract void shadow$wakeUp();
     @Shadow protected abstract void shadow$spawnDrops(DamageSource damageSourceIn);
-
+    @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
     @Shadow public float attackedAtYaw;
+
+    @Shadow public abstract ItemStack getHeldItem(Hand p_184586_1_);
+
     // @formatter:on
     private int tracker$deathEventsPosted;
 
 
     /**
-     * @author i509VCB - February 17th, 2020 - 1.14.4
+     * We can enter in to the entity drops transaction here which will
+     * successfully batch the side effects (this is effectively a singular side
+     * effect/transaction instead of a pipeline) to perform some things around
+     * the entity's death. This successfully records the transactions associated
+     * with this entity entering into the death state.
      *
-     * @reason Enter phase state on entity death.
+     * @author i509VCB - February 17th, 2020 - 1.14.4
+     * @author gabizou - August 30th, 2020 - 1.15.2
+     *
      * @param livingEntity The entity which is dying.
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "baseTick()V",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/entity/LivingEntity;onDeathUpdate()V"))
     private void tracker$enterPhaseOnDeath(final LivingEntity livingEntity) {
-        if (!((WorldBridge) this.world).bridge$isFake()) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
-                 final PhaseContext<?> context = EntityPhase.State.DEATH_UPDATE.createPhaseContext(PhaseTracker.SERVER).source(livingEntity)) {
-                context.buildAndSwitch();
-                frame.pushCause(this);
-                this.shadow$onDeathUpdate();
-            }
-        } else {
+        final PhaseTracker instance = PhaseTracker.SERVER;
+        if (!instance.onSidedThread()) {
+            this.shadow$onDeathUpdate();
+            return;
+        }
+        if (((WorldBridge) this.world).bridge$isFake()) {
+            this.shadow$onDeathUpdate();
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
+        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+            this.shadow$onDeathUpdate();
+            return;
+        }
+        try (final EffectTransactor transactor = context.getTransactor().ensureEntityDropTransactionEffect((LivingEntity) (Object) this)) {
             this.shadow$onDeathUpdate();
         }
     }
@@ -107,7 +124,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
      * @param attackingPlayer
      * @return
      */
-    @Redirect(method = "onDeathUpdate",
+    @Redirect(method = "dropExperience()V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/LivingEntity;getExperiencePoints(Lnet/minecraft/entity/player/PlayerEntity;)I"))
     protected int tracker$modifyExperiencePointsOnDeath(final LivingEntity entity, final PlayerEntity attackingPlayer) {
@@ -121,6 +138,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
      * @param thisEntity
      * @param cause
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "attackEntityFrom",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/LivingEntity;onDeath(Lnet/minecraft/util/DamageSource;)V"
@@ -128,10 +146,20 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
     )
     private void tracker$wrapOnDeathWithState(final LivingEntity thisEntity, final DamageSource cause) {
         // Sponge Start - notify the cause tracker
-        try (final EntityDeathContext context = this.tracker$createOrNullDeathPhase(true, cause)) {
-            if (context != null) {
-                context.buildAndSwitch();
-            }
+        final PhaseTracker instance = PhaseTracker.SERVER;
+        if (!instance.onSidedThread()) {
+            return;
+        }
+        if (((WorldBridge) this.world).bridge$isFake()) {
+            return;
+        }
+        final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
+        if (!((IPhaseState) context.state).doesBlockEventTracking(context)) {
+            return;
+        }
+        try (final EffectTransactor transactor = context.getTransactor().ensureEntityDropTransactionEffect((LivingEntity) (Object) this)) {
+            // Create new EntityDeathTransaction
+            // Add new EntityDeathEffect
             this.shadow$onDeath(cause);
         }
         // Sponge End
@@ -166,58 +194,43 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
         } else {
             this.tracker$deathEventsPosted = 0;
         }
+        // Sponge End
 
-        // Double check that the PhaseTracker is already capturing the Death phase
-        try (final EntityDeathContext context = this.tracker$createOrNullDeathPhase(isMainThread, cause)) {
-            // We re-enter the state only if we aren't already in the death state. This can usually happen when
-            // and only when the onDeath method is called outside of attackEntityFrom, which should never happen.
-            // but then again, mods....
-            if (context != null) {
-                context.buildAndSwitch();
-            }
-            // Sponge End
-            if (this.dead) {
-                return;
-            }
+        if (this.dead || this.removed) {
+            return;
+        }
 
-            final Entity entity = cause.getTrueSource();
-            final LivingEntity entitylivingbase = this.shadow$getAttackingEntity();
+        final Entity entity = cause.getTrueSource();
+        final LivingEntity livingEntity = this.shadow$getAttackingEntity();
 
-            if (this.scoreValue >= 0 && entitylivingbase != null) {
-                entitylivingbase.awardKillScore((LivingEntity) (Object) this, this.scoreValue, cause);
-            }
+        if (this.scoreValue >= 0 && livingEntity != null) {
+            livingEntity.awardKillScore((LivingEntity) (Object) this, this.scoreValue, cause);
+        }
 
-            if (entity != null) {
-                entity.onKillEntity((LivingEntity) (Object) this);
-            }
+        if (entity != null) {
+            entity.onKillEntity((LivingEntity) (Object) this);
+        }
 
-            this.dead = true;
-            this.shadow$getCombatTracker().reset();
+        if (this.shadow$isSleeping()) {
+            this.shadow$wakeUp();
+        }
 
-            if (!this.world.isRemote) {
-                int i = 0;
+        this.dead = true;
+        this.shadow$getCombatTracker().reset();
 
-                if (entity instanceof PlayerEntity) {
-                    // Sponge Start - use Forge hooks for the looting modifier.
-                    //i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
-                    i = SpongeImplHooks.getLootingEnchantmentModifier((LivingEntity) (Object) this, (LivingEntity) entity, cause);
-                }
-
-                if (this.shadow$canDropLoot() && this.world.getGameRules().getBoolean(GameRules.DO_MOB_LOOT)) {
-                    final boolean flag = this.recentlyHit > 0;
-                    this.shadow$dropLoot(cause, flag);
-                }
-
-            }
-
-            // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
-            if (!((LivingEntity) (Object) this instanceof HumanEntity)) {
-                this.world.setEntityState((LivingEntity) (Object) this, (byte) 3);
-            }
+        if (!this.world.isRemote) {
+            // TODO - Determine what Forge needs here
+            this.shadow$spawnDrops(cause);
+            this.shadow$createWitherRose(livingEntity);
 
         }
 
+        // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
+        if (!((LivingEntity) (Object) this instanceof HumanEntity)) {
+            this.world.setEntityState((LivingEntity) (Object) this, (byte) 3);
+        }
         // Sponge End
+        this.shadow$setPose(Pose.DYING);
     }
 
     @Override
@@ -225,25 +238,5 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
         this.tracker$deathEventsPosted = 0;
     }
 
-    @Nullable
-    private EntityDeathContext tracker$createOrNullDeathPhase(final boolean isMainThread, final DamageSource source) {
-        final boolean tracksEntityDeaths;
-        if (((WorldBridge) this.world).bridge$isFake() || !isMainThread) { // Short circuit to avoid erroring on handling
-            return null;
-        }
-        final IPhaseState<?> state = PhaseTracker.getInstance().getPhaseContext().state;
-        tracksEntityDeaths = !state.tracksEntityDeaths() && state != EntityPhase.State.DEATH;
-        if (tracksEntityDeaths) {
-            final EntityDeathContext context = EntityPhase.State.DEATH.createPhaseContext(PhaseTracker.SERVER)
-                    .setDamageSource((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source)
-                    .source(this);
-            if (this instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) this).tracked$getNotifierReference().ifPresent(context::notifier);
-                ((CreatorTrackedBridge) this).tracked$getCreatorReference().ifPresent(context::creator);
-            }
-            return context;
-        }
-        return null;
-    }
 
 }

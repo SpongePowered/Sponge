@@ -116,7 +116,7 @@ public final class ItemStackData {
                         .set((h, v) -> {
                             if (h.getItem() == Items.WRITTEN_BOOK) {
                                 final String legacy = SpongeAdventure.legacySection(v);
-                                h.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, new StringNBT(legacy));
+                                h.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, StringNBT.valueOf(legacy));
                             } else {
                                 h.setDisplayName(SpongeAdventure.asVanilla(v));
                             }
@@ -158,6 +158,10 @@ public final class ItemStackData {
                         .delete(ItemStackData::deleteLore)
                     .create(Keys.MAX_DURABILITY)
                         .get(h -> h.getItem().isDamageable() ? h.getItem().getMaxDamage() : null)
+                        .supports(h -> h.getItem().isDamageable())
+                    .create(Keys.ITEM_DURABILITY)
+                        .get(stack -> stack.getMaxDamage() - stack.getDamage())
+                        .set((stack, durability) -> stack.setDamage(stack.getMaxDamage() - durability))
                         .supports(h -> h.getItem().isDamageable())
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {

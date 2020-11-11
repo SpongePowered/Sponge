@@ -733,6 +733,7 @@ public final class ItemSupplier {
             .registerSupplier(ItemType.class, "ender_eye", () -> (ItemType) Items.ENDER_EYE)
             .registerSupplier(ItemType.class, "glistering_melon_slice", () -> (ItemType) Items.GLISTERING_MELON_SLICE)
             .registerSupplier(ItemType.class, "bat_spawn_egg", () -> (ItemType) Items.BAT_SPAWN_EGG)
+            .registerSupplier(ItemType.class, "bee_spawn_egg", () -> (ItemType) Items.BEE_SPAWN_EGG)
             .registerSupplier(ItemType.class, "blaze_spawn_egg", () -> (ItemType) Items.BLAZE_SPAWN_EGG)
             .registerSupplier(ItemType.class, "cat_spawn_egg", () -> (ItemType) Items.CAT_SPAWN_EGG)
             .registerSupplier(ItemType.class, "cave_spider_spawn_egg", () -> (ItemType) Items.CAVE_SPIDER_SPAWN_EGG)
@@ -912,6 +913,12 @@ public final class ItemSupplier {
             .registerSupplier(ItemType.class, "lantern", () -> (ItemType) Items.LANTERN)
             .registerSupplier(ItemType.class, "sweet_berries", () -> (ItemType) Items.SWEET_BERRIES)
             .registerSupplier(ItemType.class, "campfire", () -> (ItemType) Items.CAMPFIRE)
+            .registerSupplier(ItemType.class, "honeycomb", () -> (ItemType) Items.HONEYCOMB)
+            .registerSupplier(ItemType.class, "bee_nest", () -> (ItemType) Items.BEE_NEST)
+            .registerSupplier(ItemType.class, "beehive", () -> (ItemType) Items.BEEHIVE)
+            .registerSupplier(ItemType.class, "honey_bottle", () -> (ItemType) Items.HONEY_BOTTLE)
+            .registerSupplier(ItemType.class, "honey_block", () -> (ItemType) Items.HONEY_BLOCK)
+            .registerSupplier(ItemType.class, "honeycomb_block", () -> (ItemType) Items.HONEYCOMB_BLOCK)
         ;
     }
 }

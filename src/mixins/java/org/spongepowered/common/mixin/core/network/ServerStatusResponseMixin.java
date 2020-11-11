@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.network;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -50,7 +49,7 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
     @Shadow @Nullable private ITextComponent description;
     @Shadow @Nullable private String favicon;
 
-    private Component impl$descriptionText = TextComponent.empty();
+    private Component impl$descriptionText = Component.empty();
     @Nullable private ServerStatusResponse.Players impl$playerBackup;
     @Nullable private Favicon impl$faviconHandle;
 
@@ -72,7 +71,7 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
             this.impl$descriptionText = SpongeAdventure.asAdventure(motd);
         } else {
             this.description = new StringTextComponent("");
-            this.impl$descriptionText = TextComponent.empty();
+            this.impl$descriptionText = Component.empty();
         }
     }
 
@@ -91,7 +90,7 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
             try {
                 this.impl$faviconHandle = new SpongeFavicon(faviconBlob);
                 this.favicon = faviconBlob;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -104,7 +103,7 @@ public abstract class ServerStatusResponseMixin implements ServerStatusResponseB
 
     @Override
     public void bridge$setDescription(@Nullable final Component text) {
-        this.impl$descriptionText = text == null ? TextComponent.empty() : text;
+        this.impl$descriptionText = text == null ? Component.empty() : text;
     }
 
     @Override

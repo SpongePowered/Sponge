@@ -41,7 +41,7 @@ public abstract class SilverfishEntity_HideInStoneGoalMixin extends RandomWalkin
         super(creatureIn, speedIn);
     }
 
-    @Redirect(method = "shouldExecute",
+    @Redirect(method = "shouldExecute()Z",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/block/SilverfishBlock;canContainSilverfish(Lnet/minecraft/block/BlockState;)Z"))
     private boolean impl$onCanGrief(final BlockState blockState) {
         return SilverfishBlock.canContainSilverfish(blockState) && ((GrieferBridge) this.creature).bridge$canGrief();

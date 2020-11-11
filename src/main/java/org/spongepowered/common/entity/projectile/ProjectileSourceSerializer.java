@@ -50,10 +50,10 @@ public class ProjectileSourceSerializer {
 
     public static INBT toNbt(final ProjectileSource projectileSource) {
         if (projectileSource instanceof Entity) {
-            return new StringNBT(((Entity) projectileSource).getUniqueId().toString());
+            return StringNBT.valueOf(((Entity) projectileSource).getUniqueId().toString());
         }
         else if (projectileSource instanceof BlockProjectileSource) {
-            return new LongNBT(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation()).toLong());
+            return LongNBT.valueOf(VecHelper.toBlockPos(((BlockProjectileSource) projectileSource).getLocation()).toLong());
         }
         return null;
     }
@@ -61,7 +61,7 @@ public class ProjectileSourceSerializer {
     public static ProjectileSource fromNbt(final World worldObj, final INBT tag) {
         if (tag instanceof StringNBT) {
             final Entity entity =
-                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(((StringNBT) tag).getString())).orElse(null);
+                    ((org.spongepowered.api.world.World) worldObj).getEntity(UUID.fromString(tag.getString())).orElse(null);
             if (entity instanceof ProjectileSource) {
                 return (ProjectileSource) entity;
             }
@@ -91,7 +91,7 @@ public class ProjectileSourceSerializer {
     public static void writeSourceToNbt(final CompoundNBT compound, final ProjectileSource projectileSource, final UUID entityUid) {
         final INBT projectileNbt;
         if (projectileSource == null && entityUid != null) {
-            projectileNbt = new StringNBT(entityUid.toString());
+            projectileNbt = StringNBT.valueOf(entityUid.toString());
         } else {
             projectileNbt = toNbt(projectileSource);
         }

@@ -26,7 +26,6 @@ package org.spongepowered.common.command.parameter;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.command.CommandException;
 import net.minecraft.util.text.StringTextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -44,6 +43,7 @@ import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -149,7 +149,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
             throw currentExceptions.get(0);
         } else {
             final List<Component> errors = currentExceptions.stream().map(ArgumentParseException::getSuperText).collect(Collectors.toList());
-            throw new ArgumentParseException(TextComponent.join(TextComponent.newline(), errors), args.getInput(), args.getCursor());
+            throw new ArgumentParseException(Component.join(Component.newline(), errors), args.getInput(), args.getCursor());
         }
 
     }
@@ -163,19 +163,19 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     @Override
     @NonNull
     public List<String> complete(final ArgumentReader.@NonNull Immutable reader, @NonNull final CommandContext context) {
-        return this.completer.complete(context);
+        return this.completer.complete(context, reader.getRemaining());
     }
 
     @Override
     @NonNull
-    public Component getUsage(@NonNull final CommandCause cause) {
+    public String getUsage(@NonNull final CommandCause cause) {
         if (this.usage != null) {
             return this.usage.getUsage(this.key.key());
         }
 
-        final Component usage = TextComponent.of(this.key.key());
+        final String usage = this.key.key();
         if (this.isOptional) {
-            return TextComponent.builder().append("[").append(usage).append("]").build();
+            return "[" + usage + "]";
         }
 
         return usage;
@@ -191,6 +191,11 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     @NonNull
     public ValueCompleter getCompleter() {
         return this.completer;
+    }
+
+    @Override
+    public Optional<ValueUsage> getValueUsage() {
+        return Optional.ofNullable(this.usage);
     }
 
     @Override

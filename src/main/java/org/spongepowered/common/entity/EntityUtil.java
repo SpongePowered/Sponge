@@ -39,17 +39,13 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.common.SpongeImplHooks;
@@ -62,22 +58,14 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionChangeResult;
 import org.spongepowered.common.world.portal.PortalHelper;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
@@ -119,8 +107,7 @@ public final class EntityUtil {
         if (portal instanceof WrappedITeleporterPortalType) {
             // Use platform teleporter hook
             result = ((WrappedITeleporterPortalType) portal).getTeleporter().bridge$placeEntity(entity, fromWorld, toWorld, entity.rotationYaw,
-                    PortalHelper
-                    .createVanillaEntityPortalLogic(entity, entity.getPositionVec(), fromWorld, toWorld, portal));
+                    PortalHelper.createVanillaEntityPortalLogic(entity, entity.getPositionVec(), fromWorld, toWorld, portal));
 
             if (result == null) {
                 return new DimensionChangeResult<>(entity, false, true);
@@ -149,7 +136,7 @@ public final class EntityUtil {
         ServerWorld toWorld = originalToWorld;
 
         final ChangeEntityWorldEvent.Pre event = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre(player, toWorld);
-        if (event == null || event.isCancelled() || ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
+        if (event == null || event.isCancelled()) {
             return new DimensionChangeResult<>(player, false, false);
         }
 
@@ -171,11 +158,12 @@ public final class EntityUtil {
                 return new DimensionChangeResult<>(player, false, false);
             }
         } else if (!portal.teleport((org.spongepowered.api.entity.Entity) player, ServerLocation.of((org.spongepowered.api.world.server.ServerWorld)
-                    fromWorld, VecHelper.toVector3d(player.getPositionVector())), true)) {
+                fromWorld, VecHelper.toVector3d(player.getPositionVector())), true)) {
             return new DimensionChangeResult<>(player, false, false);
         }
 
-        final boolean isVanillaPortal = portal instanceof WrappedITeleporterPortalType && ((WrappedITeleporterPortalType) portal).getTeleporter().bridge$isVanilla();
+        final boolean isVanillaPortal = portal instanceof WrappedITeleporterPortalType && ((WrappedITeleporterPortalType) portal).getTeleporter()
+                .bridge$isVanilla();
 
         // Only show the credits if coming from Vanilla's The End to the default dimension
         if (fromDimensionType == DimensionType.THE_END && toWorld.getDimension().getType() == DimensionType.OVERWORLD && isVanillaPortal) {
@@ -183,7 +171,8 @@ public final class EntityUtil {
             player.getServerWorld().removePlayer(player);
             if (!player.queuedEndExit) {
                 player.queuedEndExit = true;
-                player.connection.sendPacket(new SChangeGameStatePacket(4, ((ServerPlayerEntityAccessor) player).accessor$getSeenCredits() ? 0.0F : 1.0F));
+                player.connection.sendPacket(new SChangeGameStatePacket(4, ((ServerPlayerEntityAccessor) player).accessor$getSeenCredits() ?
+                        0.0F : 1.0F));
                 ((ServerPlayerEntityAccessor) player).accessor$setSeenCredits(true);
             }
 
@@ -201,12 +190,16 @@ public final class EntityUtil {
         ((ServerPlayerEntityBridge) player).bridge$sendDimensionData(player.connection.netManager, toWorld.dimension.getType());
         // Sponge End
         WorldInfo worldinfo = toWorld.getWorldInfo();
-        // Sponge Start - Allow the platform to handle how dimension changes are sent down
-        ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(toWorld.dimension.getType(), worldinfo.getGenerator(), player.interactionManager.getGameType());
+        // We send dimension change for portals before loading chunks
+        if (!isPortal) {
+            // Sponge Start - Allow the platform to handle how dimension changes are sent down
+            ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(toWorld.dimension.getType(), WorldInfo.byHashing(worldinfo.getSeed()),
+                    worldinfo.getGenerator(), player.interactionManager.getGameType());
+        }
         player.dimension = toWorld.dimension.getType();
         // Sponge End
         player.connection.sendPacket(new SServerDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
-        PlayerList playerlist = player.getServer().getPlayerList();
+        final PlayerList playerlist = player.getServer().getPlayerList();
         playerlist.updatePermissionLevel(player);
 
         // Sponge Start - Have the platform handle removing the entity from the world. Move this to after the event call so
@@ -216,7 +209,7 @@ public final class EntityUtil {
         // Sponge End
 
         player.setWorld(toWorld);
-        toWorld.func_217447_b(player);
+        toWorld.addRespawnedPlayer(player);
         if (isPortal) {
             ((ServerPlayerEntityAccessor) player).accessor$func_213846_b(toWorld);
         }
@@ -240,8 +233,10 @@ public final class EntityUtil {
         ((ServerPlayerEntityAccessor) player).accessor$setLastHealth(-1.0f);
         ((ServerPlayerEntityAccessor) player).accessor$setLastFoodLevel(-1);
 
-        player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
-        player.connection.captureCurrentPosition();
+        if (!isPortal) {
+            player.connection.setPlayerLocation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, player.rotationPitch);
+            player.connection.captureCurrentPosition();
+        }
 
         // Sponge Start - Call platform event hook after changing dimensions
         PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(player, fromWorld, originalToWorld);
@@ -307,79 +302,6 @@ public final class EntityUtil {
         ((net.minecraft.world.World) entity.getWorld()).addEntity((Entity) entity);
         return true;
     }
-
-
-    private static Vec3d getPositionEyes(final Entity entity, final float partialTicks)
-    {
-        if (partialTicks == 1.0F)
-        {
-            return new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
-        }
-
-        final double interpX = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks;
-        final double interpY = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks + entity.getEyeHeight();
-        final double interpZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
-        return new Vec3d(interpX, interpY, interpZ);
-    }
-
-    /**
-     * A simple redirected static util method for {@link Entity#entityDropItem(ItemStack, float)}.
-     * What this does is ensures that any possibly required wrapping of captured drops is performed.
-     * Likewise, it ensures that the phase state is set up appropriately.
-     *
-     * @param entity The entity dropping the item
-     * @param itemStack The itemstack to spawn
-     * @param offsetY The offset y coordinate
-     * @return The item entity
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Nullable
-    public static ItemEntity entityOnDropItem(final Entity entity, final ItemStack itemStack, final float offsetY, final double xPos, final double zPos) {
-        if (itemStack.isEmpty()) {
-            // Sanity check, just like vanilla
-            return null;
-        }
-        // Now the real fun begins.
-        final ItemStack item;
-        final double posX = xPos;
-        final double posY = entity.posY + offsetY;
-        final double posZ = zPos;
-
-        // FIRST we want to throw the DropItemEvent.PRE
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
-        final List<ItemStackSnapshot> original = new ArrayList<>();
-        original.add(snapshot);
-
-        // Gather phase states to determine whether we're merging or capturing later
-        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<?> currentState = phaseContext.state;
-
-        // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            // Perform the event throws first, if they return false, return null
-            item = SpongeCommonEventFactory.throwDropItemAndConstructEvent(entity, posX, posY, posZ, snapshot, original, frame);
-
-            if (item == null || item.isEmpty()) {
-                return null;
-            }
-
-
-            // This is where we could perform item pre merging, and cancel before we create a new entity.
-            // For now, we aren't performing pre merging.
-
-            final ItemEntity entityitem = new ItemEntity(entity.world, posX, posY, posZ, item);
-            entityitem.setDefaultPickupDelay();
-
-            // FIFTH - Capture the entity maybe?
-            if (((IPhaseState) currentState).spawnItemOrCapture(phaseContext, entity, entityitem)) {
-                return entityitem;
-            }
-            // FINALLY - Spawn the entity in the world if all else didn't fail
-            EntityUtil.processEntitySpawn((org.spongepowered.api.entity.Entity) entityitem, Optional::empty);
-            return entityitem;
-        }
-    }
-
 
     /**
      * This is used to create the "dropping" motion for items caused by players. This

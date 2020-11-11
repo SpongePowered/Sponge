@@ -52,6 +52,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -62,21 +63,25 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
-import org.spongepowered.common.service.permission.SpongeBridgeSubject;
-import org.spongepowered.common.service.permission.SubjectHelper;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
+import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
+import org.spongepowered.common.service.server.permission.SpongeBridgeSubject;
+import org.spongepowered.common.service.server.permission.SubjectHelper;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -89,12 +94,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
-
 public final class SpongeUser implements User, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder, SpongeBridgeSubject, SubjectBridge,
-        DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge {
+        DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge, GameProfileHolderBridge {
 
     public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
+    public static final Set<SpongeUser> initializedUsers = ConcurrentHashMap.newKeySet();
 
     private final GameProfile profile;
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
@@ -154,9 +158,17 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.enderChest = null;
 
         ((CustomDataHolderBridge) (Object) this).bridge$getFailedData().clear();
+        initializedUsers.remove(this);
+    }
+
+    public void initializeIfRequired() {
+        if (!this.isInitialized()) {
+            this.initialize();
+        }
     }
 
     public void initialize() {
+        initializedUsers.add(this);
         this.compound = new CompoundNBT();
         final ServerWorld world = ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDefaultWorld();
         if (world == null) {
@@ -206,7 +218,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.invulnerable = compound.getBoolean(Constants.Entity.Player.INVULNERABLE);
         final CompoundNBT spongeCompound = compound.getCompound(Constants.Forge.FORGE_DATA).getCompound(Constants.Sponge.SPONGE_DATA);
         this.isConstructing = true;
-        SpongeDataManager.getInstance().deserializeCustomData(spongeCompound, this);
+        CustomDataHolderBridge.syncTagToCustom(this);
         this.isConstructing = false;
 
         if (spongeCompound.isEmpty()) {
@@ -378,6 +390,11 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
+    public EquipmentInventory getEquipment() {
+        return this.getInventory().getEquipment();
+    }
+
+    @Override
     public ItemStack getItemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND.get()) {
             this.getEquipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new);
@@ -474,7 +491,13 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         if (this.isConstructing) {
             return;
         }
-        dirtyUsers.add(this);
+        if (!this.isInitialized()) {
+            SpongeCommon.getLogger()
+                    .warn("Unable to mark user data for [{}] as dirty, data is not initialized! Any changes may be lost.",
+                            this.profile.getId());
+        } else {
+            dirtyUsers.add(this);
+        }
     }
 
     public void save() {
@@ -534,7 +557,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public org.spongepowered.api.profile.GameProfile getProfile() {
-        return (org.spongepowered.api.profile.GameProfile) this.profile;
+        return SpongeGameProfile.of(this.profile);
     }
 
     @Override
@@ -652,7 +675,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public void bridge$setInvulnerable(final boolean value) {
-        final Optional<ServerPlayer> playerOpt = ((User) this).getPlayer();
+        final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             ((InvulnerableTrackedBridge) playerOpt.get()).bridge$setInvulnerable(value);
             return;
@@ -668,7 +691,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public void bridge$setVanished(final boolean vanished) {
-        final Optional<ServerPlayer> playerOpt = ((User) this).getPlayer();
+        final Optional<ServerPlayer> playerOpt = this.getPlayer();
         if (playerOpt.isPresent()) {
             ((VanishableBridge) playerOpt.get()).bridge$setVanished(vanished);
             return;
@@ -679,17 +702,17 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public boolean bridge$isVanished() {
-        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isVanished()).orElseGet(() -> this.isVanished);
+        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isVanished()).orElseGet(() -> this.isVanished);
     }
 
     @Override
     public boolean bridge$isInvisible() {
-        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isInvisible()).orElseGet(() -> this.isInvisible);
+        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isInvisible()).orElseGet(() -> this.isInvisible);
     }
 
     @Override
     public void bridge$setInvisible(final boolean invisible) {
-        final Optional<ServerPlayer> player = ((User) this).getPlayer();
+        final Optional<ServerPlayer> player = this.getPlayer();
         if (player.isPresent()) {
             ((VanishableBridge) player.get()).bridge$setInvisible(invisible);
             return;
@@ -699,12 +722,12 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public boolean bridge$isUncollideable() {
-        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isUncollideable()).orElseGet(() -> this.isVanishCollide);
+        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isUncollideable()).orElseGet(() -> this.isVanishCollide);
     }
 
     @Override
     public void bridge$setUncollideable(final boolean uncollideable) {
-        final Optional<ServerPlayer> player = ((User) this).getPlayer();
+        final Optional<ServerPlayer> player = this.getPlayer();
         if (player.isPresent()) {
             ((VanishableBridge) player.get()).bridge$setUncollideable(uncollideable);
             return;
@@ -714,12 +737,12 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public boolean bridge$isUntargetable() {
-        return ((User) this).getPlayer().map(player -> ((VanishableBridge) player).bridge$isUntargetable()).orElseGet(() -> this.isVanishTarget);
+        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isUntargetable()).orElseGet(() -> this.isVanishTarget);
     }
 
     @Override
     public void bridge$setUntargetable(final boolean untargetable) {
-        final Optional<ServerPlayer> player = ((User) this).getPlayer();
+        final Optional<ServerPlayer> player = this.getPlayer();
         if (player.isPresent()) {
             ((VanishableBridge) player.get()).bridge$setUntargetable(untargetable);
             return;
@@ -735,6 +758,11 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     @Override
     public void data$setCompound(CompoundNBT nbt) {
         this.compound = nbt;
+    }
+
+    @Override
+    public NBTDataType data$getNbtDataType() {
+        return NBTDataTypes.PLAYER;
     }
 
     @Override
@@ -757,8 +785,14 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("isOnline", ((User) this).isOnline())
-            .add("profile", ((User) this).getProfile())
+            .add("isOnline", this.isOnline())
+            .add("profile", this.getProfile())
             .toString();
     }
+
+    @Override
+    public GameProfile bridge$getGameProfile() {
+        return this.profile;
+    }
+
 }

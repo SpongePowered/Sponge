@@ -27,13 +27,10 @@ package org.spongepowered.common.block;
 import net.minecraft.block.Blocks;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ServerMultiWorld;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -255,7 +252,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         creatorUuid.ifPresent(s -> builder.creator(UUID.fromString(s)));
         notifierUuid.ifPresent(s -> builder.notifier(UUID.fromString(s)));
         container.getView(Constants.Sponge.UNSAFE_NBT)
-                .map(dataView -> NbtTranslator.getInstance().translateData(dataView))
+                .map(dataView -> NbtTranslator.getInstance().translate(dataView))
                 .ifPresent(builder::unsafeNbt);
         if (container.contains(Constants.Sponge.SNAPSHOT_TILE_DATA)) {
             final List<DataView> dataViews = container.getViewList(Constants.Sponge.SNAPSHOT_TILE_DATA).get();

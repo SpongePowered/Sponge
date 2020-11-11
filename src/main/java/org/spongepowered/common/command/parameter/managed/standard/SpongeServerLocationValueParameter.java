@@ -30,7 +30,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.ILocationArgument;
@@ -44,7 +44,6 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
@@ -53,7 +52,6 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -61,24 +59,36 @@ import java.util.stream.Collectors;
 
 public final class SpongeServerLocationValueParameter extends CatalogedArgumentParser<ServerLocation> implements ComplexSuggestionNodeProvider {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("location");
     private static final Vec3Argument VEC_3_ARGUMENT = Vec3Argument.vec3(false);
     private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("^\\s*((-)?[0-9]|~|\\^)");
+    private final ResourceKey resourceKey;
+    private final boolean selectAllWorlds;
+
+    public SpongeServerLocationValueParameter(final boolean selectAllWorlds) {
+        this.selectAllWorlds = selectAllWorlds;
+        this.resourceKey = selectAllWorlds ?  ResourceKey.sponge("location_all") : ResourceKey.sponge("location_online_only");
+    }
 
     @Override
     @NonNull
     public ResourceKey getKey() {
-        return SpongeServerLocationValueParameter.RESOURCE_KEY;
+        return this.resourceKey;
     }
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context) {
-        return this.complete();
+    public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+        return this.complete(currentInput);
     }
 
-    private List<String> complete() {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties().stream().map(WorldProperties::getKey).map(ResourceKey::getFormatted).collect(Collectors.toList());
+    private List<String> complete(final String currentInput) {
+        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
+                .stream()
+                .filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
+                .map(WorldProperties::getKey)
+                .map(ResourceKey::getFormatted)
+                .filter(x -> x.startsWith(currentInput))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -88,12 +98,13 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         final ArgumentReader.Immutable state = reader.getImmutable();
-        ServerWorld world;
+        WorldProperties worldProperties;
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-            world = SpongeCommon.getGame().getServer().getWorldManager().getWorld(resourceLocation)
+            worldProperties = SpongeCommon.getGame().getServer().getWorldManager()
+                    .getProperties(resourceLocation).filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
                     .orElseThrow(() -> reader.createException(
-                            TextComponent.of("Could not get world with key \"" + resourceLocation.toString() + "\"")));
+                            Component.text("Could not get world with key \"" + resourceLocation.toString() + "\"")));
         } catch (final ArgumentParseException e) {
             final Optional<ServerLocation> location = context.getCause().getLocation();
             if (location.isPresent()) {
@@ -101,7 +112,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
                 if (!SpongeServerLocationValueParameter.STARTS_WITH_NUMBER.matcher(state.getRemaining()).find()) {
                     throw e;
                 }
-                world = location.get().getWorld();
+                worldProperties = location.get().getWorld().getProperties();
             } else {
                 throw e;
             }
@@ -111,9 +122,13 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
         try {
             reader.skipWhitespace();
             final Vec3d vec3d = VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
-            return Optional.of(world.getLocation(vec3d.x, vec3d.y, vec3d.z));
+            final ResourceKey key = worldProperties.getKey();
+            return Optional.of(
+                    worldProperties.getWorld()
+                            .map(x -> x.getLocation(vec3d.x, vec3d.y, vec3d.z))
+                            .orElseGet(() -> ServerLocation.of(key, vec3d.x, vec3d.y, vec3d.z)));
         } catch (final CommandSyntaxException e) {
-            throw reader.createException(TextComponent.of(e.getMessage()));
+            throw reader.createException(Component.text(e.getMessage()));
         }
     }
 
@@ -126,14 +141,17 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
     public CommandNode<ISuggestionProvider> createSuggestions(final CommandNode<ISuggestionProvider> rootNode, final String key,
             final boolean isTerminal,
             final Consumer<List<CommandNode<ISuggestionProvider>>> firstNodes,
-            final Consumer<CommandNode<ISuggestionProvider>> redirectionNodes) {
+            final Consumer<CommandNode<ISuggestionProvider>> redirectionNodes,
+            final boolean allowCustomSuggestionsOnTheFirstElement) {
 
         final RequiredArgumentBuilder<ISuggestionProvider, ResourceLocation> firstNode =
                 RequiredArgumentBuilder.argument(key, Constants.Command.RESOURCE_LOCATION_TYPE);
-        firstNode.suggests((context, builder) -> {
-            this.complete().forEach(builder::suggest);
-            return builder.buildFuture();
-        });
+        if (allowCustomSuggestionsOnTheFirstElement) {
+            firstNode.suggests((context, builder) -> {
+                this.complete("").forEach(builder::suggest);
+                return builder.buildFuture();
+            });
+        }
         final RequiredArgumentBuilder<ISuggestionProvider, ILocationArgument> secondNode =
                 RequiredArgumentBuilder.argument(key + "_pos", Vec3Argument.vec3());
         if (isTerminal) {

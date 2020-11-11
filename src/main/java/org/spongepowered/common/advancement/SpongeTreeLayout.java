@@ -25,8 +25,10 @@
 package org.spongepowered.common.advancement;
 
 import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;
+import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.TreeLayout;
 import org.spongepowered.api.advancement.TreeLayoutElement;
 
@@ -35,9 +37,9 @@ import java.util.Optional;
 
 public final class SpongeTreeLayout implements TreeLayout {
 
-    private final SpongeAdvancementTree tree;
+    private final AdvancementTree tree;
 
-    public SpongeTreeLayout(final SpongeAdvancementTree tree) {
+    public SpongeTreeLayout(final AdvancementTree tree) {
         this.tree = tree;
     }
 
@@ -49,20 +51,33 @@ public final class SpongeTreeLayout implements TreeLayout {
     @Override
     public Collection<TreeLayoutElement> getElements() {
         final ImmutableSet.Builder<TreeLayoutElement> elements = ImmutableSet.builder();
-        collectElements(this.tree.getRootAdvancement(), elements);
+        SpongeTreeLayout.collectElements(this.tree.getRootAdvancement(), elements);
         return elements.build();
     }
 
     private static void collectElements(final Advancement advancement, final ImmutableSet.Builder<TreeLayoutElement> elements) {
         advancement.getDisplayInfo().ifPresent(displayInfo -> elements.add((TreeLayoutElement) displayInfo));
-        advancement.getChildren().forEach(child -> collectElements(child, elements));
+        advancement.getChildren().forEach(child -> SpongeTreeLayout.collectElements(child, elements));
     }
     @Override
     public Optional<TreeLayoutElement> getElement(final Advancement advancement) {
         final Optional<AdvancementTree> tree = advancement.getTree();
-        if (!tree.isPresent() || !advancement.getDisplayInfo().isPresent() || tree.get() != this.tree) {
+        if (!tree.isPresent() || !advancement.getDisplayInfo().isPresent() || !tree.get().equals(this.tree)) {
             return Optional.empty();
         }
-        return Optional.of((TreeLayoutElement) advancement.getDisplayInfo().get());
+        return SpongeTreeLayout.findElementInfo(this.tree.getRootAdvancement(), advancement.getKey()).map(TreeLayoutElement.class::cast);
+    }
+
+    private static Optional<DisplayInfo> findElementInfo(Advancement advancement, ResourceKey key) {
+        if (advancement.getKey().equals(key)) {
+            return advancement.getDisplayInfo();
+        }
+        for (Advancement child : advancement.getChildren()) {
+            final Optional<DisplayInfo> info = SpongeTreeLayout.findElementInfo(child, key);
+            if (info.isPresent()) {
+                return info;
+            }
+        }
+        return Optional.empty();
     }
 }

@@ -34,6 +34,7 @@ import org.spongepowered.common.accessor.entity.item.FireworkRocketEntityAccesso
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.data.provider.util.FireworkUtils;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class FireworkRocketData {
 
@@ -53,15 +54,20 @@ public final class FireworkRocketData {
                             final ItemStack item = FireworkUtils.getItem(h);
                             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
                             if (fireworks.contains(Constants.Item.Fireworks.FLIGHT)) {
-                                return (int) fireworks.getByte(Constants.Item.Fireworks.FLIGHT);
+                                return new SpongeTicks(fireworks.getByte(Constants.Item.Fireworks.FLIGHT));
                             }
                             return null;
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0 || ticks > Byte.MAX_VALUE) {
+                                return false;
+                            }
                             final ItemStack item = FireworkUtils.getItem(h);
                             final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
-                            fireworks.putByte(Constants.Item.Fireworks.FLIGHT, v.byteValue());
-                            ((FireworkRocketEntityAccessor) h).accessor$setLifeTime(10 * v.byteValue() + ((EntityAccessor) h).accessor$getRand().nextInt(6) + ((EntityAccessor) h).accessor$getRand().nextInt(7));
+                            fireworks.putByte(Constants.Item.Fireworks.FLIGHT, (byte) ticks);
+                            ((FireworkRocketEntityAccessor) h).accessor$setLifeTime(10 * ticks + ((EntityAccessor) h).accessor$getRand().nextInt(6) + ((EntityAccessor) h).accessor$getRand().nextInt(7));
+                            return true;
                         });
     }
     // @formatter:on

@@ -27,10 +27,8 @@ package org.spongepowered.common.mixin.core.entity.item;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.util.DamageSource;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,7 +40,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -74,12 +71,12 @@ public abstract class EnderCrystalEntityMixin extends EntityMixin implements Exp
     private net.minecraft.world.Explosion impl$throwEventWithEntity(final net.minecraft.world.World world,
         final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
         final net.minecraft.world.Explosion.Mode modeIn, final DamageSource source, final float damage) {
-        return this.bridge$ThrowEventWithDetonation(world, entityIn, xIn, yIn, zIn, modeIn.compareTo(net.minecraft.world.Explosion.Mode.DESTROY) <= 0, source);
+        return this.bridge$throwEventWithDetonation(world, entityIn, xIn, yIn, zIn, modeIn.compareTo(net.minecraft.world.Explosion.Mode.DESTROY) <= 0, source);
     }
 
     @Nullable
     @Override
-    public net.minecraft.world.Explosion bridge$ThrowEventWithDetonation(final net.minecraft.world.World world,
+    public net.minecraft.world.Explosion bridge$throwEventWithDetonation(final net.minecraft.world.World world,
         @Nullable final Entity nil, final double x, final double y, final double z, final boolean smoking,
         @Nullable final DamageSource source) {
         final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();

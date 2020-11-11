@@ -67,6 +67,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer impl
     @Override
     public void run() {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        lifecycle.establishServerServices();
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();
 

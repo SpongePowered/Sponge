@@ -26,7 +26,8 @@ package org.spongepowered.common.adventure;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
@@ -52,12 +53,16 @@ public final class SpongeCallback {
             .expireAfterWrite(Duration.ofMinutes(10))
             .build();
 
-    private final Parameter.Key<Consumer<CommandCause>> executorKey = Parameter.key("key", TypeTokens.COMMAND_CAUSE_CONSUMER);
+    private Parameter.@MonotonicNonNull Key<Consumer<CommandCause>> executorKey;
 
     public Command.Parameterized createCommand() {
+        if (this.executorKey == null) {
+            this.executorKey = Parameter.key("key", TypeTokens.COMMAND_CAUSE_CONSUMER);
+        }
+
         this.executors.invalidateAll();
         return Command.builder()
-                .setShortDescription(TextComponent.of("Execute a callback registered as part of a TextComponent. Primarily for internal use"))
+                .setShortDescription(Component.text("Execute a callback registered as part of a TextComponent. Primarily for internal use"))
                 .parameter(Parameter.builder(TypeTokens.COMMAND_CAUSE_CONSUMER).setKey(this.executorKey).parser(new CallbackValueParameter()).build())
                 .setExecutor(this::commandCallback)
                 .build();
@@ -78,8 +83,9 @@ public final class SpongeCallback {
 
         @Override
         @NonNull
-        public List<String> complete(@NonNull final CommandContext context) {
-            return SpongeCallback.this.executors.asMap().keySet().stream().map(UUID::toString).collect(Collectors.toList());
+        public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+            return SpongeCallback.this.executors.asMap().keySet().stream().map(UUID::toString).filter(x -> x.startsWith(currentInput))
+                    .collect(Collectors.toList());
         }
 
         @Override
@@ -93,13 +99,13 @@ public final class SpongeCallback {
                 final UUID id = UUID.fromString(next);
                 final Consumer<CommandCause> ret = SpongeCallback.this.executors.getIfPresent(id);
                 if (ret == null) {
-                    throw reader.createException(TextComponent.of(
+                    throw reader.createException(Component.text(
                             "The callback you provided was not valid. Keep in mind that callbacks will expire after 10 " +
                             "minutes, so you might want to consider clicking faster next time!"));
                 }
                 return Optional.of(ret);
             } catch (final IllegalArgumentException ex) {
-                throw reader.createException(TextComponent.of("Input " + next + " was not a valid UUID"));
+                throw reader.createException(Component.text("Input " + next + " was not a valid UUID"));
             }
         }
 

@@ -28,9 +28,12 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -54,6 +57,14 @@ public interface LivingEntityAccessor {
     }
 
     @Accessor("ARROW_COUNT_IN_ENTITY") static DataParameter<Integer> accessor$getArrowCountInEntity() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("BEE_STING_COUNT") static DataParameter<Integer> accessor$getBeeStringCount() {
+        throw new IllegalStateException("Untransformed Accessor!");
+    }
+
+    @Accessor("BED_POSITION") static DataParameter<Optional<BlockPos>> accessor$getBedPosition() {
         throw new IllegalStateException("Untransformed Accessor!");
     }
 

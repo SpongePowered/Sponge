@@ -36,7 +36,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
@@ -51,6 +50,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -72,14 +72,11 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.ItemDropData;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Contains default Vanilla implementations for features that are only
@@ -127,6 +124,21 @@ public class SpongeImplHooks {
 
     public static double getBlockReachDistance(final ServerPlayerEntity player) {
         return 5.0d;
+    }
+
+    /**
+     * @author Polyacov_Yury
+     * @reason Forge reachDistance attribute compatibility
+     * @param player the player whose reach is being checked
+     * @param entity the entity that is being reached
+     * @return square of maximum player reach distance
+     */
+    public static double getEntityReachDistanceSq(final ServerPlayerEntity player, Entity entity) {
+        double d0 = 36.0d; // 6 blocks
+        if (!player.canEntityBeSeen(entity)) {  // TODO: this check introduces MC-107103
+            d0 = 9.0D; // 3 blocks
+        }
+        return d0;
     }
 
     // Block
@@ -195,13 +207,6 @@ public class SpongeImplHooks {
     }
 
     // Item stack merging
-
-    public static void addItemStackToListForSpawning(final Collection<ItemDropData> dropData, @Nullable final ItemDropData drop) {
-        // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
-        if (drop != null) {
-            dropData.add(drop);
-        }
-    }
 
     public static int getMaxSpawnPackSize(final MobEntity mob) {
         return mob.getMaxSpawnedInChunk();
@@ -276,14 +281,6 @@ public class SpongeImplHooks {
     public static InventoryAdapter findInventoryAdapter(final Object inventory) {
         SpongeCommon.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         throw new IllegalArgumentException("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
-    }
-
-    public static void onTileEntityInvalidate(final TileEntity tileEntity) {
-        tileEntity.remove();
-    }
-
-    public static void capturePerEntityItemDrop(final PhaseContext<?> phaseContext, final Entity owner, final ItemEntity item) {
-        phaseContext.getPerEntityItemEntityDropSupplier().get().put(owner.getUniqueID(), item);
     }
 
     /**
@@ -514,5 +511,17 @@ public class SpongeImplHooks {
 
     public static TileEntity createTileEntity(final BlockState newState, final World world) {
         return ((ITileEntityProvider) newState.getBlock()).createNewTileEntity(world);
+    }
+
+    /**
+     * @author JBYoshi
+     * @reason Forge compatibility
+     * @param world The world in which the event takes place
+     * @param entityIn The entity that called collisions
+     * @param aabb The bounding box
+     * @param collided The entities that were collided with
+     */
+    public static void onForgeCollision(final World world, @Nullable final Entity entityIn, final AxisAlignedBB aabb,
+            final List<AxisAlignedBB> collided) {
     }
 }

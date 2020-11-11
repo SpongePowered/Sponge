@@ -30,23 +30,29 @@ import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.state.StateContainer;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Mixin(value = Block.class, priority = 999)
 public abstract class BlockMixin_API implements BlockType {
 
     @Shadow @Final @org.spongepowered.asm.mixin.Mutable protected boolean ticksRandomly;
     @Shadow @Final protected SoundType soundType;
+    @Shadow @Final protected StateContainer<Block, net.minecraft.block.BlockState> stateContainer;
     @Shadow public abstract Item shadow$asItem();
     @Shadow public abstract String shadow$getTranslationKey();
     @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
@@ -92,6 +98,27 @@ public abstract class BlockMixin_API implements BlockType {
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.shadow$getTranslationKey());
+        return Component.translatable(this.shadow$getTranslationKey());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<StateProperty<?>> getStateProperties() {
+        return (Collection<StateProperty<?>>) (Object) stateContainer.getProperties();
+    }
+
+    @Override
+    public Optional<StateProperty<?>> getStatePropertyByName(String name) {
+        return Optional.ofNullable((StateProperty<?>) stateContainer.getProperty(name));
+    }
+
+    @Override
+    public boolean isAnyOf(Supplier<BlockType>... types) {
+        return Arrays.stream(types).map(Supplier::get).anyMatch(type -> type == this);
+    }
+
+    @Override
+    public boolean isAnyOf(BlockType... types) {
+        return Arrays.stream(types).anyMatch(type -> type == this);
     }
 }

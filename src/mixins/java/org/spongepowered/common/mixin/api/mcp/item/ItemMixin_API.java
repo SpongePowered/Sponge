@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.item;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.item.Item;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;
@@ -35,7 +34,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
+
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Mixin(Item.class)
 public abstract class ItemMixin_API implements ItemType {
@@ -57,7 +59,7 @@ public abstract class ItemMixin_API implements ItemType {
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.shadow$getTranslationKey());
+        return Component.translatable(this.shadow$getTranslationKey());
     }
 
     @Override
@@ -70,4 +72,13 @@ public abstract class ItemMixin_API implements ItemType {
         return Optional.ofNullable(this.blockType);
     }
 
+    @Override
+    public boolean isAnyOf(Supplier<ItemType>... types) {
+        return Arrays.stream(types).map(Supplier::get).anyMatch(type -> type == this);
+    }
+
+    @Override
+    public boolean isAnyOf(ItemType... types) {
+        return Arrays.stream(types).anyMatch(type -> type == this);
+    }
 }

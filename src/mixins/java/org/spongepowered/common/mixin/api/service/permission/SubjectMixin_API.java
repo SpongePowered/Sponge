@@ -29,7 +29,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.tileentity.CommandBlockTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.service.permission.SpongeBridgeSubject;
+import org.spongepowered.common.service.server.permission.SpongeBridgeSubject;
 
 /**
  * Mixin to provide a common implementation of subject that refers to the

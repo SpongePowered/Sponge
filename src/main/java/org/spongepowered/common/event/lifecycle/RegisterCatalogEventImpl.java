@@ -52,7 +52,7 @@ public final class RegisterCatalogEventImpl<C extends CatalogType> extends Abstr
     public C register(C catalog) throws DuplicateRegistrationException {
         Preconditions.checkNotNull(catalog);
 
-        return ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerCatalog(catalog);
+        return ((SpongeCatalogRegistry) Sponge.getRegistry().getCatalogRegistry()).registerCatalog(this.token, catalog);
     }
 
     @Override

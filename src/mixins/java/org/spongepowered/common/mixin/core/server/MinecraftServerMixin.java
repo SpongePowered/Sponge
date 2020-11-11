@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.google.inject.Injector;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -32,10 +33,19 @@ import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKey;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.service.permission.Subject;
+import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.asm.mixin.Final;
@@ -50,17 +60,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.item.recipe.SpongeRecipeProvider;
+import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
+import org.spongepowered.common.registry.SpongeCatalogRegistry;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
+import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 import java.net.URISyntaxException;
 import java.util.function.BooleanSupplier;
@@ -69,7 +85,7 @@ import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer, MinecraftServerBridge,
-        CommandSourceProviderBridge {
+        CommandSourceProviderBridge, SubjectProxy {
 
     @Shadow @Final protected Thread serverThread;
     @Shadow @Final private PlayerProfileCache profileCache;
@@ -82,11 +98,17 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract boolean shadow$isServerRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
 
+    @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;
     private boolean impl$enableSaving = true;
 
     public MinecraftServerMixin(final String name) {
         super(name);
+    }
+
+    @Override
+    public Subject getSubject() {
+        return SpongeCommon.getGame().getSystemSubject();
     }
 
     @Inject(method = "startServerThread", at = @At("HEAD"))
@@ -132,13 +154,22 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
-    private void impl$tickServerScheduler(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
+    private void impl$tickServerScheduler(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
         this.getScheduler().tick();
     }
 
     @Override
     public CommandSource bridge$getCommandSource(final Cause cause) {
         return this.shadow$getCommandSource();
+    }
+
+    // The Audience of the Server is actually a Forwarding Audience - so any message sent to
+    // the server will be sent to everyone connected. We therefore need to make sure we send
+    // things to the right place. We consider anything done by the server as being done by the
+    // system subject
+    @Override
+    public void bridge$addToCauseStack(final CauseStackManager.StackFrame frame) {
+        frame.pushCause(Sponge.getSystemSubject());
     }
 
     // We want to save the username cache json, as we normally bypass it.
@@ -195,7 +226,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 //    }
 
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000, ordinal = 0))
-    private int getSaveTickInterval(int tickInterval) {
+    private int getSaveTickInterval(final int tickInterval) {
         if (!this.shadow$isDedicatedServer()) {
             return tickInterval;
         } else if (!this.shadow$isServerRunning()) {
@@ -219,7 +250,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
      */
     @Overwrite
-    public boolean save(boolean suppressLog, boolean flush, boolean forced) {
+    public boolean save(final boolean suppressLog, final boolean flush, final boolean forced) {
         if (!this.impl$enableSaving) {
             return false;
         }
@@ -267,9 +298,33 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      * @reason Set the difficulty without marking as custom
      */
     @Overwrite
-    public void setDifficultyForAllWorlds(Difficulty difficulty, boolean forceDifficulty) {
-        for (ServerWorld world : this.shadow$getWorlds()) {
+    public void setDifficultyForAllWorlds(final Difficulty difficulty, final boolean forceDifficulty) {
+        for (final ServerWorld world : this.shadow$getWorlds()) {
             ((SpongeServer) SpongeCommon.getServer()).getWorldManager().adjustWorldForDifficulty(world, difficulty, forceDifficulty);
         }
+    }
+
+    @Override
+    public void bridge$initServices(final Game game, final Injector injector) {
+        if (this.impl$serviceProvider == null) {
+            this.impl$serviceProvider = new SpongeServerScopedServiceProvider(this, game, injector);
+            this.impl$serviceProvider.init();
+        }
+    }
+
+    @Override
+    public SpongeServerScopedServiceProvider bridge$getServiceProvider() {
+        return this.impl$serviceProvider;
+    }
+
+    @Inject(method = "reload", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourcePackList;reloadPacksFromFinders()V"))
+    public void impl$reloadPluginRecipes(CallbackInfo ci) {
+        final SpongeCatalogRegistry catalogRegistry = SpongeCommon.getRegistry().getCatalogRegistry();
+        catalogRegistry.registerDatapackCatalogues();
+        SpongeIngredient.clearCache();
+        ResultUtil.clearCache();
+        catalogRegistry.callDataPackRegisterCatalogEvents(Sponge.getServer().getCauseStackManager().getCurrentCause(), Sponge.getGame());
+        SpongeRecipeProvider.registerRecipes(catalogRegistry.getRegistry(RecipeRegistration.class));
+        SpongeAdvancementProvider.registerAdvancements(catalogRegistry.getRegistry(Advancement.class));
     }
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.vanilla.world;
 
 import com.google.gson.JsonElement;
-import com.mojang.datafixers.DataFixer;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.crash.CrashReport;
@@ -45,11 +44,14 @@ import net.minecraft.world.ForcedChunksSaveData;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
+import net.minecraft.world.biome.FuzzedBiomeMagnifier;
 import net.minecraft.world.chunk.listener.IChunkStatusListener;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
+import net.minecraft.world.storage.CommandStorage;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.SessionLockException;
@@ -59,19 +61,21 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
 import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
 import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
@@ -259,8 +263,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                         .resolve(properties.getKey().getValue());
         final boolean isOnDisk = Files.exists(worldDirectory);
 
-        final SaveHandler saveHandler = new SaveHandler(worldDirectory.getParent().toFile(), properties.getKey().getValue(), this.server,
+        final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
                 this.server.getDataFixer());
+        final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(properties.getKey()), this.server);
 
         if (isOnDisk) {
             properties = (WorldProperties) saveHandler.loadWorldInfo();
@@ -420,8 +425,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir().resolve(this.server.getFolderName())
                         .resolve(properties.getKey().getValue());
 
-        final SaveHandler saveHandler = new SaveHandler(worldDirectory.getParent().toFile(), worldDirectory.getFileName().toString(), this.server,
+        final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
                 this.server.getDataFixer());
+        final SaveHandler saveHandler = saveFormat.getSaveLoader(this.getDirectoryName(properties.getKey()), this.server);
+
         saveHandler.saveWorldInfo((WorldInfo) properties);
 
         return CompletableFuture.completedFuture(true);
@@ -508,8 +515,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         try {
             this.loadExistingWorldRegistrations();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             SpongeCommon.getLogger().error("Exception caught registering existing Sponge worlds!", e);
+            return;
         }
 
         final Path savesDirectory = ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir();
@@ -558,7 +566,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
 
-            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeConfigs.createWorld(logicType, key);
+            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(logicType, key);
             if (!isDefaultWorld) {
                 if (!configAdapter.get().getWorld().isWorldEnabled()) {
                     MinecraftServerAccessor_Vanilla.accessor$getLogger().warn("World '{}' ({}/{}) has been disabled in the configuration. "
@@ -646,6 +654,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
 
+            worldInfo.func_230145_a_(this.server.getServerModName(), this.server.func_230045_q_().isPresent());
+
             final ServerWorld serverWorld = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
                     dimensionType, this.server.getProfiler(), chunkStatusListener);
 
@@ -662,7 +672,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         } else {
             this.server.setDifficultyForAllWorlds(this.server.getDifficulty(), true);
         }
-
 
         // TODO May not be the best spot for this...
         ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();
@@ -681,7 +690,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setServerTime(Util.milliTime());
         chunkProvider.registerTicket(TicketType.START, spawnChunkPos, 11, Unit.INSTANCE);
 
-        while (chunkProvider.func_217229_b() != 441) {
+        while (chunkProvider.getLoadedChunksCount() != 441) {
             ((MinecraftServerAccessor_Vanilla) this.server).accessor$setServerTime(Util.milliTime() + 10L);
             ((MinecraftServerAccessor_Vanilla) this.server).accessor$runScheduledTasks();
         }
@@ -709,7 +718,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     private DimensionType createDimensionType(final ResourceKey key, final SpongeDimensionType logicType, final String worldDirectory,
             final int dimensionId) {
         final DimensionType registeredType = DimensionTypeAccessor.accessor$construct(dimensionId, "", worldDirectory, logicType.getDimensionFactory(),
-                logicType.hasSkylight());
+                logicType.hasSkylight(), logicType == DimensionTypes.OVERWORLD.get() ? ColumnFuzzedBiomeMagnifier.INSTANCE : FuzzedBiomeMagnifier.INSTANCE);
         DimensionTypeAccessor.accessor$register(key.getFormatted(), registeredType);
 
         ((DimensionTypeBridge) registeredType).bridge$setSpongeDimensionType(logicType);
@@ -726,8 +735,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final CompoundNBT worldCompound;
             try {
                 worldCompound = CompressedStreamTools.readCompressed(new FileInputStream(path.resolve(Constants.Sponge.World.LEVEL_SPONGE_DAT).toFile()));
-            } catch (IOException ex) {
-                SpongeCommon.getLogger().error("Attempt to load world '{}' sponge level data failed!", worldDirectory, ex);
+            } catch (final IOException ex) {
+                SpongeCommon.getLogger().error("Attempt to load sponge level data for world '{}' failed!", worldDirectory, ex);
                 continue;
             }
             final CompoundNBT spongeDataCompound = worldCompound.getCompound(Constants.Sponge.SPONGE_DATA);
@@ -737,7 +746,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 key = ResourceKey.sponge(worldDirectory.toLowerCase());
                 SpongeCommon.getLogger().warn("World '{}' was created on an older Sponge version (before Minecraft 1.15) which had no concept of "
                         + "which plugin created it. To compensate, this world will be created with the key '{}'. Please specify this key to any plugins"
-                        + " that need to know of this world", worldDirectory, key);
+                        + " that need to know of this world.", worldDirectory, key);
             } else {
                 key = ResourceKey.resolve(rawKey);
             }
@@ -756,13 +765,13 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             final String rawLogicType = spongeDataCompound.getString(Constants.Sponge.World.DIMENSION_TYPE);
 
-            final SpongeDimensionType logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.spongepowered
+            SpongeDimensionType logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.spongepowered
                     .api.world.dimension.DimensionType.class, ResourceKey.resolve(rawLogicType)).orElse(null);
 
             if (logicType == null) {
-                SpongeCommon.getLogger().error("World '{}' has an unknown dimension type '{}'. Skipping...",
-                        worldDirectory, rawLogicType);
-                continue;
+                SpongeCommon.getLogger().warn("World '{}' has an unknown dimension type '{}'. Falling back to '{}'.",
+                        worldDirectory, rawLogicType, DimensionTypes.OVERWORLD.get().getKey());
+                logicType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
             }
 
             registeredType = this.createDimensionType(key, logicType, worldDirectory, dimensionId + 1);
@@ -774,8 +783,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         return "DIM-1".equals(directoryName) || "DIM1" .equals(directoryName);
     }
 
-    private WorldSettings createDefaultSettings(@Nullable WorldSettings providedSettings, boolean isDefaultWorld, long seed, WorldType worldType,
-            @Nullable JsonElement generatorOptions) {
+    private WorldSettings createDefaultSettings(@Nullable WorldSettings providedSettings, final boolean isDefaultWorld, final long seed,
+                                                final WorldType worldType, @Nullable final JsonElement generatorOptions) {
         // Pure fresh Vanilla worlds situation (plugins registering worlds to load before now *must* give us an archetype)
         if (providedSettings == null) {
             if (this.server.isDemo()) {
@@ -798,12 +807,20 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     private void performPostLoadWorldLogic(final ServerWorld serverWorld, final WorldSettings defaultSettings, final Path worldDirectory,
             final IChunkStatusListener listener) {
 
+        final boolean isDefaultWorld = serverWorld.getDimension().getType() == DimensionType.OVERWORLD;
+
         if (serverWorld.getWorldInfo().getGameType() == GameType.NOT_SET) {
             serverWorld.getWorldInfo().setGameType(this.server.getGameType());
         }
 
         // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$func_213204_a(serverWorld.getSavedData());
+
+        // TODO Dualspiral, look this over...Per world commands?
+        if (isDefaultWorld) {
+            ((MinecraftServerAccessor) this.server).accessor$setfield_229733_al(new CommandStorage(serverWorld.getSavedData()));
+        }
+
         serverWorld.getWorldBorder().copyFrom(serverWorld.getWorldInfo());
         if (!serverWorld.getWorldInfo().isInitialized()) {
             try {
@@ -826,7 +843,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         // Initialize PlayerData in PlayerList, add WorldBorder listener. We change the method in PlayerList to handle per-world border
         this.server.getPlayerList().func_212504_a(serverWorld);
-        if (serverWorld.dimension.getType() == DimensionType.OVERWORLD) {
+        if (isDefaultWorld) {
             ((SpongeUserManager) ((Server) this.server).getUserManager()).init();
         }
 
@@ -834,11 +851,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             ((ServerWorldBridge) serverWorld).bridge$getBossBarManager().read(serverWorld.getWorldInfo().getCustomBossEvents());
         }
 
-        SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(
-                PhaseTracker.getCauseStackManager().getCurrentCause(),
+        SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 (org.spongepowered.api.world.server.ServerWorld) serverWorld));
 
-        if (serverWorld.dimension.getType() == DimensionType.OVERWORLD || ((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad()) {
+        if (isDefaultWorld || ((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad()) {
             this.loadSpawnChunks(serverWorld, listener);
         }
     }

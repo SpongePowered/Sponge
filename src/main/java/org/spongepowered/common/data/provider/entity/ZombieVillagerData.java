@@ -43,13 +43,13 @@ public final class ZombieVillagerData {
                 .asMutable(ZombieVillagerEntity.class)
                     .create(Keys.PROFESSION_LEVEL)
                         .get(h -> h.getVillagerData().getLevel())
-                        .set((h, v) -> h.func_213792_a(h.getVillagerData().withLevel(v)))
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withLevel(v)))
                     .create(Keys.PROFESSION_TYPE)
                         .get(h -> (ProfessionType) h.getVillagerData().getProfession())
-                        .set((h, v) -> h.func_213792_a(h.getVillagerData().withProfession((VillagerProfession) v)))
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withProfession((VillagerProfession) v)))
                     .create(Keys.VILLAGER_TYPE)
                         .get(h -> (VillagerType) h.getVillagerData().getType())
-                        .set((h, v) -> h.func_213792_a(h.getVillagerData().withType((IVillagerType) v)));
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().withType((IVillagerType) v)));
     }
     // @formatter:on
 }

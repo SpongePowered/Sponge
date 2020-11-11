@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.block.entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.tileentity.HopperTileEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class HopperData {
 
@@ -38,12 +39,13 @@ public final class HopperData {
         registrator
                 .asMutable(HopperTileEntityAccessor.class)
                     .create(Keys.COOLDOWN)
-                        .get(h -> h.accessor$getTransferCooldown() < 1 ? null : h.accessor$getTransferCooldown())
+                        .get(h -> new SpongeTicks(Math.max(h.accessor$getTransferCooldown(), 0)))
                         .setAnd((h, v) -> {
-                            if (v < 1) {
+                            final int ticks = (int) v.getTicks();
+                            if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setTransferCooldown(v);
+                            h.accessor$setTransferCooldown(ticks);
                             return true;
                         });
     }

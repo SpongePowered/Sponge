@@ -35,6 +35,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IEntityReader;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.Entity;
@@ -200,7 +201,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
      * @return True if the attack was successful
      */
     @Overwrite
-    public boolean attackEntityAsMob(net.minecraft.entity.Entity targetEntity) {
+    public boolean attackEntityAsMob(final net.minecraft.entity.Entity targetEntity) {
         // Sponge Start - Prepare our event values
         // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
         final double originalBaseDamage = this.shadow$getAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getValue();
@@ -228,7 +229,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
         }
         knockbackModifier = event.getKnockbackModifier();
         // boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causeMobDamage(this), baseDamage);
-        boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
+        final boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
         // Sponge End
         if (attackSucceeded) {
             if (knockbackModifier > 0 && targetEntity instanceof LivingEntity) {
@@ -237,18 +238,18 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
                 this.shadow$setMotion(this.shadow$getMotion().mul(0.6D, 1.0D, 0.6D));
             }
 
-            int j = EnchantmentHelper.getFireAspectModifier((MobEntity) (Object) this);
+            final int j = EnchantmentHelper.getFireAspectModifier((MobEntity) (Object) this);
 
             if (j > 0) {
                 targetEntity.setFire(j * 4);
             }
 
             if (targetEntity instanceof PlayerEntity) {
-                PlayerEntity playerentity = (PlayerEntity) targetEntity;
-                ItemStack itemstack = this.shadow$getHeldItemMainhand();
-                ItemStack itemstack1 = playerentity.isHandActive() ? playerentity.getActiveItemStack() : ItemStack.EMPTY;
+                final PlayerEntity playerentity = (PlayerEntity) targetEntity;
+                final ItemStack itemstack = this.shadow$getHeldItemMainhand();
+                final ItemStack itemstack1 = playerentity.isHandActive() ? playerentity.getActiveItemStack() : ItemStack.EMPTY;
                 if (!itemstack.isEmpty() && !itemstack1.isEmpty() && itemstack.getItem() instanceof AxeItem && itemstack1.getItem() == Items.SHIELD) {
-                    float f2 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier((MobEntity) (Object) this) * 0.05F;
+                    final float f2 = 0.25F + (float)EnchantmentHelper.getEfficiencyModifier((MobEntity) (Object) this) * 0.05F;
                     if (this.rand.nextFloat() < f2) {
                         playerentity.getCooldownTracker().setCooldown(Items.SHIELD, 100);
                         this.world.setEntityState(playerentity, (byte)30);
@@ -289,11 +290,11 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
 
     @Nullable
     @Redirect(
-            method = "checkDespawn",
+            method = "checkDespawn()V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/World;getClosestPlayer(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/PlayerEntity;"))
-    private PlayerEntity impl$getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entity, final double distance) {
+    private PlayerEntity impl$getClosestPlayerForSpawning(final World world, final net.minecraft.entity.Entity entityIn, final double distance) {
         double bestDistance = -1.0D;
         PlayerEntity result = null;
 
@@ -302,7 +303,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
                 continue;
             }
 
-            final double playerDistance = player.getDistanceSq(entity.posX, entity.posY, entity.posZ);
+            final double playerDistance = player.getDistanceSq(entityIn.getPosX(), entityIn.getPosY(), entityIn.getPosZ());
 
             if ((distance < 0.0D || playerDistance < distance * distance) && (bestDistance == -1.0D || playerDistance < bestDistance)) {
                 bestDistance = playerDistance;

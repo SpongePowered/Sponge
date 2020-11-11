@@ -25,9 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.math.vector.Vector3i;
+
 import java.util.function.BiConsumer;
 
 public final class ChunkRegeneratePhaseState extends GeneralGenerationPhaseState<ChunkRegenerateContext> {
@@ -49,11 +48,6 @@ public final class ChunkRegeneratePhaseState extends GeneralGenerationPhaseState
     @Override
     public BiConsumer<CauseStackManager.StackFrame, ChunkRegenerateContext> getFrameModifier() {
         return this.CHUNK_REGENERATE_MODIFIER;
-    }
-
-    @Override
-    public Vector3i getChunkPopulatorOffset(final Chunk chunk, final int chunkX, final int chunkZ) {
-        return chunk.getBlockMin();
     }
 
     @Override

@@ -36,6 +36,7 @@ import com.mojang.datafixers.DataFixer;
 import java.util.Collections;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.Commands;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -58,6 +59,7 @@ import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
+import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.api.world.storage.ChunkLayout;
@@ -70,6 +72,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -77,6 +80,7 @@ import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.UsernameCache;
 import org.spongepowered.common.world.server.SpongeWorldManager;
@@ -104,7 +108,6 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     @Shadow public abstract void shadow$initiateShutdown(boolean p_71263_1_);
     @Shadow public abstract int shadow$getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
-    @Shadow public abstract void shadow$sendMessage(ITextComponent p_145747_1_);
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
@@ -116,14 +119,14 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     private GameProfileManager api$profileManager;
     private SpongeUserManager api$userManager;
 
-    public MinecraftServerMixin_API(String name) {
+    public MinecraftServerMixin_API(final String name) {
         super(name);
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void api$initializeSpongeFields(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn, Commands p_i50590_4_,
-        YggdrasilAuthenticationService p_i50590_5_, MinecraftSessionService p_i50590_6_, GameProfileRepository p_i50590_7_,
-        PlayerProfileCache p_i50590_8_, IChunkStatusListenerFactory p_i50590_9_, String p_i50590_10_, CallbackInfo ci) {
+    private void api$initializeSpongeFields(final File p_i50590_1_, final Proxy p_i50590_2_, final DataFixer dataFixerIn, final Commands p_i50590_4_,
+        final YggdrasilAuthenticationService p_i50590_5_, final MinecraftSessionService p_i50590_6_, final GameProfileRepository p_i50590_7_,
+        final PlayerProfileCache p_i50590_8_, final IChunkStatusListenerFactory p_i50590_9_, final String p_i50590_10_, final CallbackInfo ci) {
 
         this.api$scheduler = new ServerScheduler();
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
@@ -197,7 +200,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public Optional<ServerPlayer> getPlayer(UUID uniqueId) {
+    public Optional<ServerPlayer> getPlayer(final UUID uniqueId) {
         Preconditions.checkNotNull(uniqueId);
         if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
@@ -206,7 +209,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public Optional<ServerPlayer> getPlayer(String name) {
+    public Optional<ServerPlayer> getPlayer(final String name) {
         if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
         }
@@ -236,6 +239,11 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         final double nanoSPerTick = MathHelper.average(this.tickTimeArray);
         // Cap at 20 TPS
         return 1000 / Math.max(50, nanoSPerTick / 1000000);
+    }
+
+    @Override
+    public int getTargetTicksPerSecond() {
+        return 20;
     }
 
     @Override
@@ -286,7 +294,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Intrinsic
-    public void server$setPlayerIdleTimeout(int timeout) {
+    public void server$setPlayerIdleTimeout(final int timeout) {
         this.shadow$setPlayerIdleTimeout(timeout);
     }
 
@@ -330,8 +338,13 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public void sendMessage(final Component message, final MessageType type) {
-        this.shadow$sendMessage(SpongeAdventure.asVanilla(message));
+    public void sendMessage(final Identity identity, final Component message, final MessageType type) {
+        this.shadow$getPlayerList().sendMessage(SpongeAdventure.asVanilla(message));
+    }
+
+    @Override
+    public ServiceProvider.ServerScoped getServiceProvider() {
+        return ((MinecraftServerBridge) this).bridge$getServiceProvider();
     }
 
 }

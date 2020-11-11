@@ -27,6 +27,7 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
@@ -69,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -104,8 +106,8 @@ public final class SpongeEventManager implements EventManager {
         this.logger = logger;
         this.lock = new Object();
         this.handlersByEvent = HashMultimap.create();
-        this.classLoaders = new HashMap<>();
-        this.registeredListeners = new HashSet<>();
+        this.classLoaders = new IdentityHashMap<>();
+        this.registeredListeners = new ReferenceOpenHashSet<>();
         this.checker = new ListenerChecker(ShouldFire.class);
 
         // Caffeine offers no control over the concurrency level of the
@@ -428,7 +430,7 @@ public final class SpongeEventManager implements EventManager {
                 SpongeCommon.setActivePlugin(handler.getPlugin());
                 handler.handle(event);
             } catch (Throwable e) {
-                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().getMetadata().getId(), e);
             } finally {
                 SpongeCommon.setActivePlugin(null);
             }

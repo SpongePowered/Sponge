@@ -57,7 +57,7 @@ public abstract class SilverfishEntity_SummonSilverfishGoalMixin extends Goal {
         method = "tick()V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;destroyBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"
+            target = "Lnet/minecraft/world/World;destroyBlock(Lnet/minecraft/util/math/BlockPos;ZLnet/minecraft/entity/Entity;)Z"
         )
     )
     private boolean impl$onCanGrief(final World world, final BlockPos pos, final boolean dropBlock) {

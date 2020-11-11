@@ -44,6 +44,7 @@ import java.util.LinkedList;
 public final class SpongeCommandContextBuilderTransaction implements CommandContext.Builder.Transaction {
 
     private static final LinkedList<SpongeCommandContextBuilderTransaction> TRANSACTION_POOL = new LinkedList<>();
+
     public static SpongeCommandContextBuilderTransaction getTransactionFromPool(final SpongeCommandContextBuilder builder) {
         SpongeCommandContextBuilderTransaction chosenTransaction = null;
         for (final SpongeCommandContextBuilderTransaction transaction : TRANSACTION_POOL) {
@@ -73,6 +74,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
     private final LinkedList<Tuple<Parameter.@NonNull Key<?>, ?>> putEntryCapture = new LinkedList<>();
     private final LinkedList<CommandContextBuilder<CommandSource>> withChildCapture = new LinkedList<>();
     private final LinkedList<Command<CommandSource>> withCommandCapture = new LinkedList<>();
+    private org.spongepowered.api.command.Command.Parameterized currentTargetCommandCapture = null;
 
     private boolean isActive = false;
 
@@ -150,12 +152,16 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
     }
 
     public void addFlagInvocation(final Flag flag) {
-        flag.getAliases().forEach(x -> this.flagCapture.addTo(x, 1));
+        flag.getUnprefixedAliases().forEach(x -> this.flagCapture.addTo(x, 1));
         this.copyBuilder.addFlagInvocation(flag);
     }
 
     public SpongeCommandContextBuilder getCopyBuilder() {
         return this.copyBuilder;
+    }
+
+    public void setCurrentTargetCommand(final org.spongepowered.api.command.Command.Parameterized command) {
+        this.currentTargetCommandCapture = command;
     }
 
     public boolean isActive() {
@@ -178,6 +184,9 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
             this.withCommandCapture.forEach(builderRef::withCommand);
             this.putEntryCapture.forEach(x -> this.putEntryAbusingGenerics(builderRef, x.getFirst(), x.getSecond()));
             this.flagCapture.forEach(builderRef::addFlagInvocation);
+            if (this.currentTargetCommandCapture != null) {
+                builderRef.setCurrentTargetCommand(this.currentTargetCommandCapture);
+            }
         }
 
         // we're clearing anyway!
@@ -192,6 +201,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
         this.withChildCapture.clear();
         this.putEntryCapture.clear();
         this.flagCapture.clear();
+        this.currentTargetCommandCapture = null;
         this.copyBuilder = null;
         this.builder = null;
     }

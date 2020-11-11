@@ -26,7 +26,9 @@ package org.spongepowered.common.command.parameter.multi;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.command.CommandSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
 import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
@@ -37,8 +39,8 @@ import java.util.function.Consumer;
 
 public final class SpongeFirstOfParameter extends SpongeMultiParameter {
 
-    protected SpongeFirstOfParameter(final List<Parameter> parameterCandidates, final boolean isOptional) {
-        super(parameterCandidates, isOptional);
+    protected SpongeFirstOfParameter(final List<Parameter> parameterCandidates, final boolean isOptional, final boolean isTerminal) {
+        super(parameterCandidates, isOptional, isTerminal);
     }
 
     @Override
@@ -47,7 +49,10 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
             final Consumer<CommandNode<CommandSource>> builtNodeConsumer,
             final Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            final boolean isTermination) {
+            final boolean isTermination,
+            final boolean previousWasOptional,
+            @Nullable final String suffix) {
+        final boolean hasExecutor = isTermination || this.isTerminal();
 
         // If we have a termination, this is easy!
         // If not, it's a little more complicated. But it's all handled by `nodeCallback` anyway.
@@ -59,16 +64,28 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
         // The redirector redirects to the grabbed node - which will continue execution to the node after this.
         final Consumer<ArgumentBuilder<CommandSource, ?>> redirector = node -> node.redirect(grabber.grabbed);
 
+        final Object2IntOpenHashMap<String> counter = new Object2IntOpenHashMap<>();
         for (final Parameter parameter : this.getParameterCandidates()) {
+            final int original;
+            if (parameter instanceof Parameter.Value<?>) {
+                original = counter.addTo(((Value<?>) parameter).getKey().key(), 1);
+            } else if (parameter instanceof Parameter.Subcommand) {
+                ((Subcommand) parameter).getAliases().forEach(x -> counter.addTo(x, 1));
+                original = 0;
+            } else {
+                original = 0;
+            }
             if (parameter instanceof SpongeSequenceParameter) {
                 final SpongeSequenceParameter sequenceParameter = ((SpongeSequenceParameter) parameter);
                 final boolean grab = first && !sequenceParameter.endsWithSubcommand();
                 ((SpongeSequenceParameter) parameter).createNode(
                         executorWrapper,
                         grab ? grabber : builtNodeConsumer,
-                        first && isTermination ? nodeCallback : redirector, // latter is used for merging command paths back together.
+                        first ? nodeCallback : redirector, // latter is used for merging command paths back together.
                         potentialOptionalRedirects,
-                        isTermination);
+                        hasExecutor,
+                        previousWasOptional,
+                        suffix);
             } else {
                 final List<Parameter> parameters = new ArrayList<>();
                 parameters.add(parameter);
@@ -76,12 +93,14 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
                     parameters.listIterator(),
                     executorWrapper,
                     first && !(parameter instanceof Parameter.Subcommand) ? grabber : builtNodeConsumer,
-                    first && isTermination ? nodeCallback : redirector, // latter is used for merging command paths back together.
+                    grabber.grabbed == null ? nodeCallback : redirector, // latter is used for merging command paths back together.
 
                     // we don't want to redirect to secondary branches, so we hand a copy of the list, BUT we will want there to be
                     // redirects within the branch, and to later nodes.
                     first ? potentialOptionalRedirects : new ArrayList<>(potentialOptionalRedirects),
-                    isTermination);
+                    hasExecutor,
+                    previousWasOptional,
+                    original == 0 ? null : String.valueOf(original));
             }
 
             if (first && grabber.isValid()) {

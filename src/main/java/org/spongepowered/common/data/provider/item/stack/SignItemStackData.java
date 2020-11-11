@@ -26,7 +26,6 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.Lists;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.data.Keys;
@@ -65,7 +64,7 @@ public final class SignItemStackData {
                             final CompoundNBT tag = h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
                             tag.putString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
                             for (int i = 0; i < 4; i++) {
-                                final Component line = v.size() > i ? v.get(i) : TextComponent.empty();
+                                final Component line = v.size() > i ? v.get(i) : Component.empty();
                                 if (line == null) {
                                     throw new IllegalArgumentException("A null line was given at index " + i);
                                 }

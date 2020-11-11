@@ -29,24 +29,23 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Client;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.inheritable.GlobalConfig;
-import org.spongepowered.common.launch.Launcher;
+import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.inheritable.GlobalConfig;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Singleton
@@ -75,7 +74,7 @@ public final class SpongeCommon {
     }
 
     public static Logger getLogger() {
-        return Launcher.getInstance().getLogger();
+        return Launch.getInstance().getLogger();
     }
 
     public static boolean isInitialized() {
@@ -103,11 +102,12 @@ public final class SpongeCommon {
     }
 
     public static Path getGameDirectory() {
-        return Launcher.getInstance().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY).orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
+        return Launch.getInstance().getPluginEngine().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
+                .orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
     }
 
     public static Path getPluginConfigDirectory() {
-        return SpongeCommon.getGameDirectory().resolve(SpongeConfigs.getCommon().get().getGeneral().configDir());
+        return Paths.get(SpongeConfigs.getCommon().get().getGeneral().configDir());
     }
 
     public static Path getSpongeConfigDirectory() {
@@ -116,22 +116,22 @@ public final class SpongeCommon {
 
     @Deprecated
     public static PluginContainer getMinecraftPlugin() {
-        return Launcher.getInstance().getMinecraftPlugin();
+        return Launch.getInstance().getMinecraftPlugin();
     }
 
     @Deprecated
     public static PluginContainer getPlugin() {
-        return Launcher.getInstance().getCommonPlugin();
+        return Launch.getInstance().getCommonPlugin();
     }
 
     @Deprecated
     public static List<PluginContainer> getInternalPlugins() {
-        return Launcher.getInstance().getLauncherPlugins();
+        return Launch.getInstance().getLauncherPlugins();
     }
 
     public static PluginContainer getActivePlugin() {
         if (SpongeCommon.activePlugin == null) {
-            return Launcher.getInstance().getMinecraftPlugin();
+            return Launch.getInstance().getMinecraftPlugin();
         }
 
         return SpongeCommon.activePlugin;

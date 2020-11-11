@@ -47,12 +47,13 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.InheritableConfigHandle;
-import org.spongepowered.common.config.SpongeConfigs;
-import org.spongepowered.common.config.inheritable.LoggingCategory;
-import org.spongepowered.common.config.inheritable.BaseConfig;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.config.inheritable.LoggingCategory;
+import org.spongepowered.common.applaunch.config.inheritable.BaseConfig;
+import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -169,6 +170,19 @@ public final class SpongeHooks {
         }
     }
 
+    public static void logChunkQueueLoad(final net.minecraft.world.World world, final Vector3i chunkPos) {
+        if (world.isRemote()) {
+            return;
+        }
+
+        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+        if (configAdapter.get().getLogging().chunkLoadLogging()) {
+            logInfo("Queue Chunk At [{0}] ({1}, {2})", world.getDimension().getType(), chunkPos.getX(),
+                    chunkPos.getZ());
+            logStack(configAdapter);
+        }
+    }
+
     public static void logChunkLoad(final net.minecraft.world.World world, final Vector3i chunkPos) {
         if (world.isRemote()) {
             return;
@@ -208,22 +222,6 @@ public final class SpongeHooks {
         }
     }
 
-    public static void logExploitSignCommandUpdates(final PlayerEntity player, final TileEntity tileEntity, final String command) {
-        if (player.getEntityWorld().isRemote()) {
-            return;
-        }
-
-        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.get().getLogging().logExploitSignCommandUpdates) {
-            logInfo("[EXPLOIT] Player '{0}' attempted to exploit sign in dimension '{1}' located at '{2}' with command '{3}'",
-                    player.getName(),
-                    tileEntity.getWorld().getDimension().getType(),
-                    tileEntity.getPos().getX() + ", " + tileEntity.getPos().getY() + ", " + tileEntity.getPos().getZ(),
-                    command);
-            logStack(configAdapter);
-        }
-    }
-
     public static void logExploitItemNameOverflow(final PlayerEntity player, final int length) {
         if (player.getEntityWorld().isRemote()) {
             return;
@@ -235,19 +233,6 @@ public final class SpongeHooks {
                             + "length is 32767). This has been blocked to avoid server overflow.",
                     player.getName(),
                     length);
-            logStack(configAdapter);
-        }
-    }
-
-    public static void logExploitRespawnInvisibility(final PlayerEntity player) {
-        if (player.getEntityWorld().isRemote()) {
-            return;
-        }
-
-        final InheritableConfigHandle<WorldConfig> configAdapter = ((WorldInfoBridge) player.getEntityWorld().getWorldInfo()).bridge$getConfigAdapter();
-        if (configAdapter.get().getLogging().logExploitRespawnInvisibility) {
-            logInfo("[EXPLOIT] Player '{0}' attempted to perform a respawn invisibility exploit to surrounding players.",
-                    player.getName());
             logStack(configAdapter);
         }
     }

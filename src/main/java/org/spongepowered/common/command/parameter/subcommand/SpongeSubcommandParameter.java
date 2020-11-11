@@ -48,6 +48,11 @@ public final class SpongeSubcommandParameter implements Parameter.Subcommand {
     }
 
     @Override
+    public boolean isTerminal() {
+        return this.command.isTerminal();
+    }
+
+    @Override
     public Command.@NonNull Parameterized getCommand() {
         return this.command;
     }

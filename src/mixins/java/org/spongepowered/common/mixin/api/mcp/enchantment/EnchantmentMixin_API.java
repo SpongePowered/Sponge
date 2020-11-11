@@ -115,7 +115,7 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     @Override
     public Component asComponent() {
-        return TranslatableComponent.of(this.shadow$getName(), this.shadow$isCurse() ? NamedTextColor.RED : NamedTextColor.GRAY);
+        return Component.translatable(this.shadow$getName(), this.shadow$isCurse() ? NamedTextColor.RED : NamedTextColor.GRAY);
     }
 
     @Override

@@ -298,6 +298,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     public Set<Value.Immutable<?>> getValues() {
         throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
+  
     public Optional<ServerWorld> getServerWorld() {
         @Nullable ServerWorld world = this.world != null ? this.world.get() : null;
         if (world == null) {
@@ -316,8 +317,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     public SpongeBlockSnapshotBuilder createBuilder() {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         builder.blockState(this.blockState)
-            .position(this.pos)
-            .world(this.worldKey);
+               .position(this.pos);
+        if (this.world != null && this.world.get() != null) {
+            builder.world(this.world.get());
+        } else {
+            builder.world(this.worldKey);
+        }
         if (this.compound != null) {
             builder.unsafeNbt(this.compound);
         }

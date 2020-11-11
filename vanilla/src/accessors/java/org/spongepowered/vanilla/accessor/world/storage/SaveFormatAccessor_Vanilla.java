@@ -42,8 +42,4 @@ public interface SaveFormatAccessor_Vanilla {
     @Accessor("savesDir") Path accessor$getSavesDir();
 
     @Accessor("dataFixer") DataFixer accessor$getDataFixer();
-
-    @Invoker("func_215783_a") static SaveHandler accessor$func_215783_a(Path parentDirectory, DataFixer dataFixer, String worldDirectory, @Nullable MinecraftServer server) {
-        throw new IllegalStateException("Untransformed Accessor!");
-    }
 }

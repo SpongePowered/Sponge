@@ -24,10 +24,16 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContextBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.CommandSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.Collection;
 
@@ -35,8 +41,15 @@ public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> 
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
+    private final Command.@Nullable Parameterized subcommandIfApplicable;
 
     public SpongeLiteralCommandNode(final LiteralArgumentBuilder<CommandSource> argumentBuilder) {
+        this(argumentBuilder, null);
+    }
+
+    public SpongeLiteralCommandNode(
+            final LiteralArgumentBuilder<CommandSource> argumentBuilder,
+            final Command.@Nullable Parameterized associatedSubcommand) {
         super(argumentBuilder.getLiteral(),
                 argumentBuilder.getCommand(),
                 argumentBuilder.getRequirement(),
@@ -44,6 +57,7 @@ public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> 
                 argumentBuilder.getRedirectModifier(),
                 argumentBuilder.isFork());
         argumentBuilder.getArguments().forEach(this::addChild);
+        this.subcommandIfApplicable = associatedSubcommand;
     }
 
     @Override
@@ -57,4 +71,11 @@ public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> 
         return this.nodeHolder.getChildrenForSuggestions();
     }
 
+    @Override
+    public void parse(final StringReader reader, final CommandContextBuilder<CommandSource> contextBuilder) throws CommandSyntaxException {
+        super.parse(reader, contextBuilder);
+        if (this.subcommandIfApplicable != null && contextBuilder instanceof SpongeCommandContextBuilder) {
+            ((SpongeCommandContextBuilder) contextBuilder).setCurrentTargetCommand(this.subcommandIfApplicable);
+        }
+    }
 }
