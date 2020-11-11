@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
@@ -58,12 +59,14 @@ public abstract class DamagingProjectileEntityMixin extends EntityMixin {
 
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/DamagingProjectileEntity;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
     private void onProjectileImpact(DamagingProjectileEntity projectile, RayTraceResult movingObjectPosition) {
-        if (this.world.isRemote || movingObjectPosition.getType() == RayTraceResult.Type.MISS) {
+        if (movingObjectPosition.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.world).bridge$isFake()) {
             this.onImpact(movingObjectPosition);
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((FireballEntity) this).get(Keys.SHOOTER).orElse(null), movingObjectPosition)) {
+        if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((FireballEntity) this).get(Keys.SHOOTER).orElse(null), movingObjectPosition)) {
+            this.shadow$remove();
+        } else {
             this.onImpact(movingObjectPosition);
         }
     }

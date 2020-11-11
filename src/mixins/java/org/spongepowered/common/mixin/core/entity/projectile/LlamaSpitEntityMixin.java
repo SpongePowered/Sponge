@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.projectile.ShulkerBulletEntity;
+import net.minecraft.entity.projectile.LlamaSpitEntity;
 import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
@@ -36,14 +36,17 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
-@Mixin(ShulkerBulletEntity.class)
-public abstract class ShulkerBulletEntityMixin extends EntityMixin {
+@Mixin(LlamaSpitEntity.class)
+public abstract class LlamaSpitEntityMixin extends EntityMixin {
 
-    @Inject(method = "bulletHit", at = @At("HEAD"), cancellable = true)
-    private void onBulletHitBlock(final RayTraceResult result, final CallbackInfo ci) {
-        if (!((WorldBridge) this.world).bridge$isFake() && result.getType() != RayTraceResult.Type.MISS
-                && SpongeCommonEventFactory.handleCollideImpactEvent(
-                (net.minecraft.entity.Entity) (Object) this, ((Projectile) this).get(Keys.SHOOTER).orElse(null), result)) {
+    @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
+    private void impl$onHitCollideEvent(final RayTraceResult hitResult, final CallbackInfo ci) {
+        if (((WorldBridge) this.world).bridge$isFake() || hitResult.getType() == RayTraceResult.Type.MISS) {
+            return;
+        }
+
+        if (SpongeCommonEventFactory.handleCollideImpactEvent((LlamaSpitEntity) (Object) this,
+                ((Projectile) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
             this.shadow$remove();
             ci.cancel();
         }

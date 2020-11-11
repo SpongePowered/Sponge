@@ -30,6 +30,8 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.server.MinecraftServer;
@@ -139,6 +141,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract Vec3d shadow$getPositionVector();
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract void shadow$setWorld(World worldIn);
+    @Shadow @Nullable public abstract ItemEntity shadow$entityDropItem(ItemStack stack, float offsetY);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
 
     private boolean impl$isConstructing = true;

@@ -35,16 +35,18 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootParameterSets;
 import net.minecraft.world.storage.loot.LootParameters;
 import net.minecraft.world.storage.loot.LootTable;
 import net.minecraft.world.storage.loot.LootTables;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.FishingBobber;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.projectile.source.ProjectileSource;
@@ -54,8 +56,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
@@ -185,5 +190,19 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
     public void impl$writeToSpongeCompound(CompoundNBT compound) {
         super.impl$writeToSpongeCompound(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, ((FishingBobber) this).shooter().get(), this.angler);
+    }
+
+    @Inject(method = "checkCollision", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/RayTraceResult;getType()Lnet/minecraft/util/math/RayTraceResult$Type;"))
+    private void impl$callCollideImpactEvent(final CallbackInfo ci, final RayTraceResult hitResult) {
+        if (hitResult.getType() == RayTraceResult.Type.MISS || ((WorldBridge) this.world).bridge$isFake()) {
+            return;
+        }
+
+        if (SpongeCommonEventFactory.handleCollideImpactEvent((FishingBobberEntity) (Object) this,
+                ((Projectile) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
+            this.shadow$remove();
+            ci.cancel();
+        }
     }
 }

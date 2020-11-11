@@ -66,14 +66,16 @@ public abstract class ThrowableEntityMixin extends EntityMixin {
             target = "Lnet/minecraft/entity/projectile/ThrowableEntity;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"
         )
     )
-    private void impl$handleProjectileImpact(ThrowableEntity projectile, RayTraceResult movingObjectPosition) {
+    private void impl$handleProjectileImpact(final ThrowableEntity projectile, final RayTraceResult movingObjectPosition) {
         if (((WorldBridge) this.world).bridge$isFake() || movingObjectPosition.getType() == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }
 
-        //if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, (ProjectileSource) this.shadow$getThrower(),  movingObjectPosition)) {
+        if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, (ProjectileSource) this.shadow$getThrower(), movingObjectPosition)) {
+            this.shadow$remove();
+        } else {
             this.onImpact(movingObjectPosition);
-        //}
+        }
     }
 }
