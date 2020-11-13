@@ -35,6 +35,9 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag) {
+        if (!flag.updateLighting()) {
+            return EffectResult.NULL_PASS;
+        }
         final int originalOpactiy = oldState.opacity;
         final ServerWorld serverWorld = pipeline.getServerWorld();
         final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos);

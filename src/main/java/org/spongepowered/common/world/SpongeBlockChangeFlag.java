@@ -43,6 +43,8 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     private final boolean ignoreRender;
     private final boolean forceReRender;
     private final boolean blockMoving;
+    private final boolean lighting;
+    private final boolean pathfinding;
     private final int rawFlag;
     private final String name;
 
@@ -54,6 +56,8 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         this.ignoreRender = (flag & Constants.BlockChangeFlags.IGNORE_RENDER) != 0;
         this.forceReRender = (flag & Constants.BlockChangeFlags.FORCE_RE_RENDER) != 0 && !this.ignoreRender;
         this.blockMoving = (flag & Constants.BlockChangeFlags.BLOCK_MOVING) != 0;
+        this.lighting = (flag & Constants.BlockChangeFlags.LIGHTING_UPDATES) != 0;
+        this.pathfinding = (flag & Constants.BlockChangeFlags.PATHFINDING_UPDATES) != 0;
         this.rawFlag = flag;
         this.name = name;
     }
@@ -73,6 +77,14 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         return this.notifyObservers;
     }
 
+    public boolean updateLighting() {
+        return this.lighting;
+    }
+
+    public boolean notifyPathfinding() {
+        return this.pathfinding;
+    }
+
     @Override
     public SpongeBlockChangeFlag withUpdateNeighbors(final boolean updateNeighbors) {
         if (this.updateNeighbors == updateNeighbors) {
@@ -83,7 +95,9 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                    | (this.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
                                    | (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                                    | (this.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
-                                   | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);
+                                   | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
+                                   | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
+                                   | (this.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
@@ -97,7 +111,9 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                    | (this.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
                                    | (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                                    | (this.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
-                                   | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);
+                                   | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
+                                   | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
+                                   | (this.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
@@ -111,9 +127,43 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                    | (notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
                                    | (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                                    | (this.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
-                                   | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);
+                                   | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
+                                   | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
+                                   | (this.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
 
+    }
+
+    @Override
+    public BlockChangeFlag withLightingUpdates(boolean lighting) {
+        if (this.lighting == lighting) {
+            return this;
+        }
+        final int maskedFlag = (this.updateNeighbors ? Constants.BlockChangeFlags.NEIGHBOR_MASK : 0)
+            | (this.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
+            | (this.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
+            | (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
+            | (this.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
+            | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
+            | (lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
+            | (this.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
+        return BlockChangeFlagManager.fromNativeInt(maskedFlag);
+    }
+
+    @Override
+    public BlockChangeFlag withPathfindingUpdates(boolean pathfindingUpdates) {
+        if (this.pathfinding == pathfindingUpdates) {
+            return this;
+        }
+        final int maskedFlag = (this.updateNeighbors ? Constants.BlockChangeFlags.NEIGHBOR_MASK : 0)
+            | (this.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
+            | (this.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
+            | (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
+            | (this.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
+            | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
+            | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
+            | (pathfindingUpdates ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
+        return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
     @Override
@@ -135,7 +185,9 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                    | (this.notifyObservers || o.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
                                    | (this.notifyClients || o.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                                    | (this.ignoreRender || o.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
-                                   | (this.forceReRender || o.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);
+                                   | (this.forceReRender || o.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
+                                   | (this.lighting || o.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
+                                   | (this.pathfinding || o.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
@@ -147,7 +199,9 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                                | (this.notifyObservers && !o.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
                                | (this.notifyClients && !o.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                                | (this.ignoreRender && !o.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
-                               | (this.forceReRender && !o.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0);
+                               | (this.forceReRender && !o.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
+                               | (this.lighting && !o.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
+                               | (this.pathfinding && !o.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 

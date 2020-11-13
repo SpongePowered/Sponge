@@ -32,8 +32,9 @@ public final class WorldBlockChangeCompleteEffect implements ProcessingSideEffec
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag) {
-        pipeline.getServerWorld().onBlockStateChange(oldState.pos, oldState.state, newState);
-
+        if (flag.notifyPathfinding()) {
+            pipeline.getServerWorld().onBlockStateChange(oldState.pos, oldState.state, newState);
+        }
         return new EffectResult(oldState.state, true);
     }
 }

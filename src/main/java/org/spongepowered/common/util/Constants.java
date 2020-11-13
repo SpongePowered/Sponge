@@ -1072,6 +1072,8 @@ public final class Constants {
         public static final int NEIGHBOR_DROPS =  1 << 5; // 32
         public static final int BLOCK_MOVING =    1 << 6; // 64
         public static final int PHYSICS_MASK =    1 << 7; // Sponge Added mask, because vanilla doesn't support it yet
+        public static final int LIGHTING_UPDATES = 1 << 8; // Sponge Added mask, because vanilla doesn't allow bypassing lighting
+        public static final int PATHFINDING_UPDATES = 1 << 9; // Sponge Added mask, because vanilla doesn't allow bypassing notifications to ai pathfinders
         // All of these flags are what we "expose" to the API
         // The flags that are naturally inverted are already inverted here by being masked in
         // with the opposite OR.
