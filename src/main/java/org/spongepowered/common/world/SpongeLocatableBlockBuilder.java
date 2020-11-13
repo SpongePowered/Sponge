@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world;
 
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -56,14 +55,14 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
 
     @Override
     public SpongeLocatableBlockBuilder state(final BlockState blockState) {
-        Preconditions.checkNotNull(blockState, "BlockState cannot be null!");
+        Objects.requireNonNull(blockState, "BlockState cannot be null!");
         this.blockState = () -> blockState;
         return this;
     }
 
     @Override
     public SpongeLocatableBlockBuilder location(final ServerLocation location) {
-        Preconditions.checkNotNull(location, "LocationBridge cannot be null!");
+        Objects.requireNonNull(location, "LocationBridge cannot be null!");
         this.blockState = location::getBlock;
         this.position = location::getBlockPosition;
         this.world = () -> location.getWorld().getKey();
@@ -74,7 +73,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
 
     @Override
     public SpongeLocatableBlockBuilder position(final Vector3i position) {
-        Preconditions.checkNotNull(position, "Position cannot be null!");
+        Objects.requireNonNull(position, "Position cannot be null!");
         this.position = () -> position;
         return this;
     }
@@ -97,7 +96,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
 
     @Override
     public SpongeLocatableBlockBuilder world(final ServerWorld world) {
-        Preconditions.checkNotNull(world, "World cannot be null!");
+        Objects.requireNonNull(world, "World cannot be null!");
         final WeakReference<ServerWorld> reference = new WeakReference<>(world);
         this.worldReference = () -> Objects.requireNonNull(reference.get(), "ServerWorld refrence dereferenced");
         this.world = () -> this.worldReference.get().getKey();
@@ -106,7 +105,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
 
     @Override
     public SpongeLocatableBlockBuilder from(final LocatableBlock value) {
-        Preconditions.checkNotNull(value, "LocatableBlock cannot be null!");
+        Objects.requireNonNull(value, "LocatableBlock cannot be null!");
         this.position = value::getBlockPosition;
         this.world = () -> value.getServerLocation().getWorld().getKey();
         final WeakReference<ServerWorld> worldRef = new WeakReference<>(value.getServerLocation().getWorld());
@@ -116,9 +115,9 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
 
     @Override
     public LocatableBlock build() {
-        Preconditions.checkNotNull(this.position, "Position cannot be null!");
-        Preconditions.checkNotNull(this.world, "World UUID cannot be null!");
-        Preconditions.checkNotNull(this.worldReference, "World reference cannot be null!");
+        Objects.requireNonNull(this.position, "Position cannot be null!");
+        Objects.requireNonNull(this.world, "World UUID cannot be null!");
+        Objects.requireNonNull(this.worldReference, "World reference cannot be null!");
         return new SpongeLocatableBlock(this);
     }
 
@@ -141,7 +140,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
                 .orElseThrow(() -> new InvalidDataException("Could not locate an \"y\" coordinate in the container!"));
         final int z = container.getInt(Queries.POSITION_Z)
                 .orElseThrow(() -> new InvalidDataException("Could not locate an \"z\" coordinate in the container!"));
-        final BlockState blockState = container.getCatalogType(Constants.Block.BLOCK_STATE, BlockState.class)
+        final BlockState blockState = container.getSerializable(Constants.Block.BLOCK_STATE, BlockState.class)
                 .orElseThrow(() -> new InvalidDataException("Could not locate a BlockState"));
         return Sponge.getServer().getWorldManager().getWorld(worldKey)
                 .map(world -> new SpongeLocatableBlockBuilder()

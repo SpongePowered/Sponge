@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
-
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -35,8 +32,10 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> implements BlockState.Builder {
@@ -49,14 +48,14 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> imp
 
     @Override
     public BlockState.Builder blockType(final BlockType blockType) {
-        this.blockState = checkNotNull(blockType).getDefaultState();
+        this.blockState = Objects.requireNonNull(blockType).getDefaultState();
         return this;
     }
 
 
     @Override
     public <V> SpongeBlockStateBuilder add(final Key<? extends Value<V>> key, final V value) {
-        checkNotNull(key, "key");
+        Objects.requireNonNull(key, "key");
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);
         return this;
     }
@@ -83,9 +82,9 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> imp
         if (!container.contains(Constants.Block.BLOCK_STATE)) {
             return Optional.empty();
         }
-        checkDataExists(container, Constants.Block.BLOCK_STATE);
+        DataUtil.checkDataExists(container, Constants.Block.BLOCK_STATE);
         try {
-            return container.getCatalogType(Constants.Block.BLOCK_STATE, BlockState.class);
+            return container.getString(Constants.Block.BLOCK_STATE).flatMap(BlockStateSerializerDeserializer::deserialize);
         } catch (final Exception e) {
             throw new InvalidDataException("Could not retrieve a blockstate!", e);
         }
