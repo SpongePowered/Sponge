@@ -22,52 +22,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util.gen;
+package org.spongepowered.common.world.volume.buffer.block;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteTypes;
-import org.spongepowered.api.world.volume.StorageType;
-import org.spongepowered.api.world.volume.block.ImmutableBlockVolume;
 import org.spongepowered.api.world.volume.block.MutableBlockVolume;
-import org.spongepowered.api.world.volume.block.UnmodifiableBlockVolume;
-import org.spongepowered.common.world.schematic.BimapPalette;
+import org.spongepowered.api.world.volume.stream.StreamOptions;
+import org.spongepowered.api.world.volume.stream.VolumeElement;
+import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.schematic.GlobalPalette;
+import org.spongepowered.common.world.schematic.MutableBimapPalette;
+import org.spongepowered.common.world.volume.SpongeVolumeStream;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
+public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume<ArrayMutableBlockBuffer> {
 
     /**
-     * If the area is lower than this amount, a global palette will be used.<br/>
+     * If the area is lower than this amount, a global palette will be used.
+     * <p>
      * Example: If its only a 4 block area why allocate a local palette that
      * by its self will take up more space in memory than it saves.
      */
     private static final int SMALL_AREA_THRESHOLD = 256;
 
-    @SuppressWarnings("ConstantConditions")
-    private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
+    private static final BlockState AIR = BlockTypes.AIR.get().getDefaultState();
 
-    private Palette<BlockState> palette;
+    private Palette.Mutable<BlockState> palette;
     private BackingData data;
 
-    @SuppressWarnings("deprecation")
-    public ArrayMutableBlockBuffer(Vector3i start, Vector3i size) {
-        this(size.getX() * size.getY() * size.getZ() > SMALL_AREA_THRESHOLD ?
-             new BlockPaletteWrapper(new BimapPalette<>(PaletteTypes.LOCAL_BLOCKS), org.spongepowered.api.world.schematic.BlockPaletteTypes.LOCAL) : GlobalPalette.getBlockPalette(), start, size);
+    public ArrayMutableBlockBuffer(final Vector3i start, final Vector3i size) {
+        this(size.getX() * size.getY() * size.getZ() > ArrayMutableBlockBuffer.SMALL_AREA_THRESHOLD
+            ?
+             new MutableBimapPalette<>(PaletteTypes.BLOCK_STATE_PALETTE.get()) : GlobalPalette.getBlockPalette(), start, size);
     }
 
-    public ArrayMutableBlockBuffer(Palette<BlockState> palette, Vector3i start, Vector3i size) {
+    public ArrayMutableBlockBuffer(final Palette<BlockState> palette, final Vector3i start, final Vector3i size) {
         super(start, size);
-        this.palette = palette;
-        int airId = palette.getOrAssign(AIR);
+        final Palette.Mutable<BlockState> mutablePalette = palette.asMutable();
+        this.palette = mutablePalette;
+        final int airId = mutablePalette.getOrAssign(ArrayMutableBlockBuffer.AIR);
 
-        int dataSize = this.area();
+        final int dataSize = this.area();
         this.data = new PackedBackingData(dataSize, palette.getHighestId());
 
         // all blocks default to air
@@ -78,9 +86,9 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         }
     }
 
-    public ArrayMutableBlockBuffer(Palette<BlockState> palette, Vector3i start, Vector3i size, char[] blocks) {
+    public ArrayMutableBlockBuffer(final Palette<BlockState> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
         super(start, size);
-        this.palette = palette;
+        this.palette = palette.asMutable();
         this.data = new CharBackingData(blocks);
     }
 
@@ -92,9 +100,9 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
      * @param start The start block position
      * @param size The block size
      */
-    ArrayMutableBlockBuffer(Palette<BlockState> palette, BackingData blocks, Vector3i start, Vector3i size) {
+    ArrayMutableBlockBuffer(final Palette<BlockState> palette, final BackingData blocks, final Vector3i start, final Vector3i size) {
         super(start, size);
-        this.palette = palette;
+        this.palette = palette.asMutable();
         this.data = blocks;
     }
 
@@ -104,23 +112,23 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block) {
+    public boolean setBlock(final int x, final int y, final int z, final BlockState block) {
         this.checkRange(x, y, z);
         int id = this.palette.getOrAssign(block);
         if (id > this.data.getMax()) {
 
             int highId = this.palette.getHighestId();
-            int dataSize = this.area();
-            BackingData newdata;
+            final int dataSize = this.area();
+            final BackingData newdata;
             if (highId * 2 > GlobalPalette.getBlockPalette().getHighestId()) {
                 // we are only saving about 1 bit at this point, so transition to a global palette
-                Palette<BlockState> newpalette = GlobalPalette.getBlockPalette();
+                final Palette.Mutable<BlockState> newpalette = GlobalPalette.getBlockPalette().asMutable();
                 id = newpalette.getOrAssign(block);
                 highId = newpalette.getHighestId();
 
                 newdata = new PackedBackingData(dataSize, highId);
                 for (int i = 0; i < dataSize; i++) {
-                    newdata.set(i, newpalette.getOrAssign(this.palette.get(this.data.get(i)).orElse(AIR)));
+                    newdata.set(i, newpalette.getOrAssign(this.palette.get(this.data.get(i)).orElse(ArrayMutableBlockBuffer.AIR)));
                 }
                 this.palette = newpalette;
             } else {
@@ -137,47 +145,25 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
-    public BlockState getBlock(int x, int y, int z) {
+    public boolean removeBlock(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        return this.palette.get(this.data.get(this.getIndex(x, y, z))).orElse(AIR);
+        return this.setBlock(x, y, z, BlockTypes.AIR.get().getDefaultState());
     }
 
     @Override
-    public MutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
-        this.checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        this.checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
-        return new MutableBlockViewDownsize(this, newMin, newMax);
+    public BlockState getBlock(final int x, final int y, final int z) {
+        this.checkRange(x, y, z);
+        return this.palette.get(this.data.get(this.getIndex(x, y, z))).orElse(ArrayMutableBlockBuffer.AIR);
     }
 
     @Override
-    public MutableBlockVolume getBlockView(DiscreteTransform3 transform) {
-        return new MutableBlockViewTransform(this, transform);
+    public FluidState getFluid(final int x, final int y, final int z) {
+        return this.getBlock(x, y, z).getFluidState();
     }
 
     @Override
-    public MutableBlockVolumeStream<? extends MutableBlockVolume> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
-    }
-
-    @Override
-    public UnmodifiableBlockVolume getUnmodifiableBlockView() {
-        return new UnmodifiableBlockVolumeWrapper(this);
-    }
-
-    @Override
-    public MutableBlockVolume getBlockCopy(StorageType type) {
-        switch (type) {
-            case STANDARD:
-                return new ArrayMutableBlockBuffer(this.palette, this.data.copyOf(), this.start, this.size);
-            case THREAD_SAFE:
-            default:
-                throw new UnsupportedOperationException(type.name());
-        }
-    }
-
-    @Override
-    public ImmutableBlockVolume getImmutableBlockCopy() {
-        return new ArrayImmutableBlockBuffer(this.palette, this.data.copyOf(), this.start, this.size);
+    public int getHighestYAt(final int x, final int z) {
+        return 0;
     }
 
     private int area() {
@@ -185,7 +171,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o) {
             return true;
         }
@@ -195,7 +181,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         if (!super.equals(o)) {
             return false;
         }
-        ArrayMutableBlockBuffer that = (ArrayMutableBlockBuffer) o;
+        final ArrayMutableBlockBuffer that = (ArrayMutableBlockBuffer) o;
         return this.palette.equals(that.palette) &&
                this.data.equals(that.data);
     }
@@ -204,6 +190,39 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     public int hashCode() {
         return Objects.hash(super.hashCode(), this.palette, this.data);
     }
+
+    @Override
+    public VolumeStream<ArrayMutableBlockBuffer, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+        final Vector3i blockMin = this.getBlockMin();
+        final Vector3i blockMax = this.getBlockMax();
+        VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
+        final ArrayMutableBlockBuffer buffer;
+        if (options.carbonCopy()) {
+            buffer = new ArrayMutableBlockBuffer(this.palette, this.data.copyOf(), this.start, this.size);
+        } else {
+            buffer = this;
+        }
+        final Stream<VolumeElement<ArrayMutableBlockBuffer, BlockState>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
+            .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
+                .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
+                    .mapToObj(y -> VolumeElement.of(this, () -> buffer.getBlock(x, y, z), new Vector3i(x, y, z)))
+                ).flatMap(Function.identity())
+            ).flatMap(Function.identity());
+        return new SpongeVolumeStream<>(stateStream, () -> this);
+    }
+
+    public void setBlock(final BlockPos pos, final net.minecraft.block.BlockState blockState) {
+        this.setBlock(pos.getX(), pos.getY(), pos.getZ(), (BlockState) blockState);
+    }
+
+    public net.minecraft.block.BlockState getBlock(final BlockPos blockPos) {
+        return (net.minecraft.block.BlockState) this.getBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    }
+
+    public ArrayMutableBlockBuffer copy() {
+        return  new ArrayMutableBlockBuffer(this.palette, this.data.copyOf(), this.start, this.size);
+    }
+
 
     /**
      * Basically a fixed length list of non negative numbers/ids.
@@ -235,17 +254,17 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
 
         private final char[] data;
 
-        public CharBackingData(char[] data) {
+        public CharBackingData(final char[] data) {
             this.data = data;
         }
 
         @Override
-        public int get(int index) {
+        public int get(final int index) {
             return this.data[index];
         }
 
         @Override
-        public void set(int index, int val) {
+        public void set(final int index, final int val) {
             this.data[index] = (char) val;
         }
 
@@ -260,14 +279,14 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final @Nullable Object o) {
             if (this == o) {
                 return true;
             }
             if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
-            CharBackingData that = (CharBackingData) o;
+            final CharBackingData that = (CharBackingData) o;
             return Arrays.equals(this.data, that.data);
         }
 
@@ -280,7 +299,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     static class PackedBackingData implements BackingData {
 
         /** A long array used to store the packed values */
-        private long[] longArray;
+        private final long[] longArray;
         /** Number of bits a single entry takes up */
         private final int bits;
         /**
@@ -297,17 +316,20 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
          * @param size The number of elements
          * @param highestValue The highest value to prepare for
          */
-        public PackedBackingData(int size, int highestValue) {
+        public PackedBackingData(final int size, final int highestValue) {
             this.arraySize = size;
             int bits;
-            for (bits = 0; 1 << bits <= highestValue; bits++);
+            bits = 0;
+            while (1 << bits <= highestValue) {
+                bits++;
+            }
             this.bits = bits;
 
             this.maxValue = (1 << bits) - 1;
             this.longArray = new long[MathHelper.roundUp(size * bits, Long.SIZE) / Long.SIZE];
         }
 
-        private PackedBackingData(int size, int bits, long[] array) {
+        private PackedBackingData(final int size, final int bits, final long[] array) {
             this.arraySize = size;
             this.bits = bits;
             this.maxValue = (1 << bits) - 1;
@@ -315,32 +337,32 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         }
 
         @Override
-        public void set(int index, int value) {
-            int bitIndex = index * this.bits;
+        public void set(final int index, final int value) {
+            final int bitIndex = index * this.bits;
             int longIndex = bitIndex / Long.SIZE;
-            int bitOffset = bitIndex % Long.SIZE;
+            final int bitOffset = bitIndex % Long.SIZE;
 
             this.longArray[longIndex] = this.longArray[longIndex] & ~(this.maxValue << bitOffset) | (long) value << bitOffset;
 
             if (bitOffset + this.bits > Long.SIZE) {
                 // The entry is split between two longs (lets call them left long, and right long)
-                int bitsInLeft = Long.SIZE - bitOffset;
-                int bitsInRight = this.bits - bitsInLeft;
+                final int bitsInLeft = Long.SIZE - bitOffset;
+                final int bitsInRight = this.bits - bitsInLeft;
                 longIndex++;
                 this.longArray[longIndex] = this.longArray[longIndex] >>> bitsInRight << bitsInRight | (long) value >> bitsInLeft;
             }
         }
 
         @Override
-        public int get(int index) {
-            int bitIndex = index * this.bits;
-            int longIndex = bitIndex / Long.SIZE;
-            int rightLongIndex = (bitIndex + this.bits - 1) / 64;
-            int bitOffset = bitIndex % 64;
+        public int get(final int index) {
+            final int bitIndex = index * this.bits;
+            final int longIndex = bitIndex / Long.SIZE;
+            final int rightLongIndex = (bitIndex + this.bits - 1) / 64;
+            final int bitOffset = bitIndex % 64;
 
             if (bitOffset + this.bits > Long.SIZE) {
                 // The entry is split between two longs
-                int bitsInLeft = Long.SIZE - bitOffset;
+                final int bitsInLeft = Long.SIZE - bitOffset;
                 return (int) ((this.longArray[longIndex] >>> bitOffset | this.longArray[rightLongIndex] << bitsInLeft) & this.maxValue);
             }
             return (int) (this.longArray[longIndex] >>> bitOffset & this.maxValue);
@@ -357,14 +379,14 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final @Nullable Object o) {
             if (this == o) {
                 return true;
             }
             if (o == null || this.getClass() != o.getClass()) {
                 return false;
             }
-            PackedBackingData that = (PackedBackingData) o;
+            final PackedBackingData that = (PackedBackingData) o;
             return this.bits == that.bits &&
                    this.maxValue == that.maxValue &&
                    this.arraySize == that.arraySize &&

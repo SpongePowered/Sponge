@@ -22,24 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.rotation;
+package org.spongepowered.common.mixin.api.mcp.util;
 
+import net.minecraft.util.Mirror;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.util.rotation.Rotation;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.SpongeCommon;
 
-public class SpongeRotation extends SpongeCatalogType implements Rotation {
+import java.util.Locale;
 
-    private final int angle;
+@Mixin(Mirror.class)
+public abstract class MirrorMixin_API implements org.spongepowered.api.util.mirror.Mirror {
 
-
-    public SpongeRotation(final ResourceKey key, final int angle) {
-        super(key);
-        this.angle = angle;
-    }
+    private final ResourceKey api$key = ResourceKey.of(SpongeCommon.getActivePlugin(), ((Mirror) (Object) this).name().toLowerCase(Locale.ENGLISH));
 
     @Override
-    public int getAngle() {
-        return this.angle;
+    public ResourceKey getKey() {
+        return this.api$key;
     }
 }

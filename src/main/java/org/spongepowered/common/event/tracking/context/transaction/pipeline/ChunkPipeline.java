@@ -50,8 +50,6 @@ import java.util.function.Supplier;
 
 public final class ChunkPipeline implements BlockPipeline {
 
-    public static final ChunkPipeline NULL_RETURN = new ChunkPipeline();
-
     private final @Nullable Supplier<Chunk> chunkSupplier;
     private final @Nullable Supplier<ServerWorld> serverWorld;
     private final @Nullable Supplier<ChunkSection> sectionSupplier;
@@ -59,10 +57,16 @@ public final class ChunkPipeline implements BlockPipeline {
     private final List<ResultingTransactionBySideEffect> chunkEffects;
     final ChangeBlock transaction;
 
-    private ChunkPipeline() {
-        this.chunkSupplier = null;
-        this.serverWorld = null;
-        this.sectionSupplier = null;
+    public static ChunkPipeline nullReturn(final Chunk chunk, final ServerWorld world) {
+        return new ChunkPipeline(chunk, world);
+    }
+
+    private ChunkPipeline(final Chunk chunk, final ServerWorld world) {
+        final WeakReference<Chunk> chunkWeakReference = new WeakReference<>(chunk);
+        this.chunkSupplier = () -> chunkWeakReference.get();
+        final WeakReference<ServerWorld> serverWorldWeakReference = new WeakReference<>(world);
+        this.serverWorld = () -> serverWorldWeakReference.get();
+        this.sectionSupplier = () -> Chunk.EMPTY_SECTION;
         this.wasEmpty = true;
         this.chunkEffects = Collections.emptyList();
         this.transaction = null;

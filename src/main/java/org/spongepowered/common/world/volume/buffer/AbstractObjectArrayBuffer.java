@@ -22,22 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util.gen;
+package org.spongepowered.common.world.volume.buffer;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.volume.block.ReadableBlockVolume;
+import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
-import java.util.Objects;
 
-/**
- * Base class for block buffers.
- */
-public abstract class AbstractBlockBuffer implements ReadableBlockVolume {
+import java.util.Objects;
+import java.util.StringJoiner;
+
+public class AbstractObjectArrayBuffer implements Volume {
 
     protected final Vector3i start;
     protected final Vector3i size;
@@ -45,7 +41,7 @@ public abstract class AbstractBlockBuffer implements ReadableBlockVolume {
     private final int yLine;
     private final int yzSlice;
 
-    protected AbstractBlockBuffer(Vector3i start, Vector3i size) {
+    public AbstractObjectArrayBuffer(final Vector3i start, final Vector3i size) {
         this.start = start;
         this.size = size;
         this.end = this.start.add(this.size).sub(Vector3i.ONE);
@@ -54,17 +50,15 @@ public abstract class AbstractBlockBuffer implements ReadableBlockVolume {
         this.yzSlice = this.yLine * size.getZ();
     }
 
-    protected void checkRange(int x, int y, int z) {
+    protected void checkRange(final int x, final int y, final int z) {
         if (!VecHelper.inBounds(x, y, z, this.start, this.end)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.start, this.end);
         }
     }
 
-    protected int getIndex(int x, int y, int z) {
+    protected int getIndex(final int x, final int y, final int z) {
         return (x - this.start.getX()) * this.yzSlice + (z - this.start.getZ()) * this.yLine + (y - this.start.getY());
     }
-    
-    public abstract Palette<BlockState> getPalette();
 
     @Override
     public Vector3i getBlockMax() {
@@ -82,29 +76,29 @@ public abstract class AbstractBlockBuffer implements ReadableBlockVolume {
     }
 
     @Override
-    public boolean containsBlock(int x, int y, int z) {
+    public boolean containsBlock(final int x, final int y, final int z) {
         return VecHelper.inBounds(x, y, z, this.start, this.end);
     }
 
     @Override
-    public BlockType getBlockType(int x, int y, int z) {
-        return this.getBlock(x, y, z).getType();
+    public boolean isAreaAvailable(final int x, final int y, final int z) {
+        return VecHelper.inBounds(x, y, z, this.start, this.end);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o) {
             return true;
         }
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        AbstractBlockBuffer that = (AbstractBlockBuffer) o;
+        final AbstractObjectArrayBuffer that = (AbstractObjectArrayBuffer) o;
         return this.yLine == that.yLine &&
-               this.yzSlice == that.yzSlice &&
-               this.start.equals(that.start) &&
-               this.size.equals(that.size) &&
-               this.end.equals(that.end);
+            this.yzSlice == that.yzSlice &&
+            this.start.equals(that.start) &&
+            this.size.equals(that.size) &&
+            this.end.equals(that.end);
     }
 
     @Override
@@ -114,10 +108,9 @@ public abstract class AbstractBlockBuffer implements ReadableBlockVolume {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("min", this.getBlockMin())
-            .add("max", this.getBlockMax())
+        return new StringJoiner(", ", AbstractObjectArrayBuffer.class.getSimpleName() + "[", "]")
+            .add("start=" + this.start)
+            .add("end=" + this.end)
             .toString();
     }
-
 }

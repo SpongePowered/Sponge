@@ -22,39 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.plugin;
+package org.spongepowered.common.world.volume.buffer.biome;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.api.world.volume.biome.ReadableBiomeVolume;
+import org.spongepowered.common.world.volume.buffer.AbstractObjectArrayBuffer;
+import org.spongepowered.math.vector.Vector3i;
 
-public class BlockWorkerPhaseState extends BasicPluginState {
+/**
+ * Base class for biome areas. This class provides methods for retrieving the
+ * size and for range checking.
+ */
+public abstract class AbstractBiomeBuffer extends AbstractObjectArrayBuffer implements ReadableBiomeVolume {
 
-    BlockWorkerPhaseState() {
+    protected AbstractBiomeBuffer(final Vector3i start, final Vector3i size) {
+        super(start, size);
     }
 
-    @Override
-    public void unwind(final BasicPluginContext phaseContext) {
-        TrackingUtil.processBlockCaptures(phaseContext);
-    }
-
-    @Override
-    public boolean handlesOwnStateCompletion() {
-        return true;
-    }
-
-    @Nullable
-    public PhaseContext<@NonNull ?> switchIfNecessary(final PhaseTracker server) {
-
-        final PhaseTracker instance = PhaseTracker.getInstance();
-        if (!server.onSidedThread()) {
-            return null;
-        }
-        if (this == instance.getCurrentState()) {
-            return null;
-        }
-        return this.createPhaseContext(server);
-    }
 }

@@ -22,39 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.plugin;
+package org.spongepowered.common.orientation;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.util.orientation.Orientation;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class BlockWorkerPhaseState extends BasicPluginState {
+public class SpongeOrientation extends SpongeCatalogType implements Orientation {
 
-    BlockWorkerPhaseState() {
+    private final int angle;
+
+
+    public SpongeOrientation(final ResourceKey key, final int angle) {
+        super(key);
+        this.angle = angle;
     }
 
     @Override
-    public void unwind(final BasicPluginContext phaseContext) {
-        TrackingUtil.processBlockCaptures(phaseContext);
-    }
-
-    @Override
-    public boolean handlesOwnStateCompletion() {
-        return true;
-    }
-
-    @Nullable
-    public PhaseContext<@NonNull ?> switchIfNecessary(final PhaseTracker server) {
-
-        final PhaseTracker instance = PhaseTracker.getInstance();
-        if (!server.onSidedThread()) {
-            return null;
-        }
-        if (this == instance.getCurrentState()) {
-            return null;
-        }
-        return this.createPhaseContext(server);
+    public int getAngle() {
+        return this.angle;
     }
 }

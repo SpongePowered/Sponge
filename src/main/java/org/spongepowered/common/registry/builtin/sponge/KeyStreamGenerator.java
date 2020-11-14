@@ -311,6 +311,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("notifier"), TypeTokens.UUID_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("occupied_deceleration"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("on_ground"), TypeTokens.BOOLEAN_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("orientation"), TypeTokens.ORIENTATION_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("pages"), TypeTokens.LIST_COMPONENT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("parrot_type"), TypeTokens.PARROT_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("particle_effect"), TypeTokens.PARTICLE_EFFECT_VALUE_TOKEN));
@@ -352,7 +353,6 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("right_arm_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("right_leg_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("roaring_time"), TypeTokens.INTEGER_VALUE_TOKEN));
-        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("rotation"), TypeTokens.ROTATION_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("saturation"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("scale"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("scoreboard_tags"), TypeTokens.SET_STRING_VALUE_TOKEN));
