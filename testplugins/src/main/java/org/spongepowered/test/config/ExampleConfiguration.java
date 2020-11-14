@@ -22,38 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.volume.stream;
+package org.spongepowered.test.config;
 
-import org.spongepowered.api.world.volume.stream.StreamOptions;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.Objects;
+@ConfigSerializable
+public class ExampleConfiguration {
 
-public class SpongeStreamOptionsBuilder implements StreamOptions.Builder {
+    @Setting private Component motd = Component.text("Welcome to ").append(Component.text("Sponge", NamedTextColor.YELLOW));
 
-    boolean copies = false;
-    StreamOptions.LoadingStyle loadingStyle = StreamOptions.LoadingStyle.LAZILY_UNGENERATED;
-
-    @Override
-    public StreamOptions.Builder setCarbonCopy(final boolean copies) {
-        this.copies = copies;
-        return this;
+    public Component getMotd() {
+        return this.motd;
     }
 
-    @Override
-    public StreamOptions.Builder setLoadingStyle(final StreamOptions.LoadingStyle style) {
-        this.loadingStyle = Objects.requireNonNull(style, "LoadingStyle cannot be null!");
-        return this;
-    }
-
-    @Override
-    public StreamOptions.Builder reset() {
-        this.copies = false;
-        this.loadingStyle = StreamOptions.LoadingStyle.LAZILY_UNGENERATED;
-        return this;
-    }
-
-    @Override
-    public StreamOptions build() {
-        return new SpongeStreamOptions(this);
-    }
 }

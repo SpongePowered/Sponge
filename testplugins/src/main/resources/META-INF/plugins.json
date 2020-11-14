@@ -3,7 +3,7 @@
         {
             "loader": "java_plain",
             "id": "changeblocktest",
-            "name": "ChangeBlockTest",
+            "name": "Change Block Test",
             "version": "8.0.0",
             "main-class": "org.spongepowered.test.changeblock.ChangeBlockTest",
             "description": "Testing ChangeBlock rollbacks",
@@ -27,38 +27,10 @@
         },
         {
             "loader": "java_plain",
-            "id": "test",
-            "name": "Test Plugin",
-            "version": "8.0.0",
-            "main-class": "org.spongepowered.test.TestPlugin",
-            "description": "Just testing things...",
-            "links": {
-                "homepage": "https://www.spongepowered.org",
-                "source": "https://www.spongepowered.org/source",
-                "issues": "https://www.spongepowered.org/issues"
-            },
-            "contributors": [{
-                "name": "SpongePowered",
-                "description": "Lead Developer"
-            }],
-            "dependencies": [{
-                "id": "spongeapi",
-                "version": "8.0.0"
-            }],
-            "extra": {
-                "test": 1,
-                "test2": "Banana",
-                "test3": "banana123",
-                "test4": "apple_cider_mahogany_salmon",
-                "test5": 3
-            }
-        },
-        {
-            "loader": "java_plain",
             "id": "worldtest",
             "name": "World Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.worldtest.WorldTest",
+            "main-class": "org.spongepowered.test.world.WorldTest",
             "description": "Testing world changes",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -79,7 +51,7 @@
             "id": "commandtest",
             "name": "Command Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.commandtest.CommandTestPlugin",
+            "main-class": "org.spongepowered.test.command.CommandTest",
             "description": "Testing commands",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -100,7 +72,7 @@
             "id": "inventorytest",
             "name": "Inventory Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.inventorytest.InventoryTest",
+            "main-class": "org.spongepowered.test.inventory.InventoryTest",
             "description": "Testing inventory changes",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -121,7 +93,7 @@
             "id": "customdatatest",
             "name": "Custom Data Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.customdatatest.CustomDataTest",
+            "main-class": "org.spongepowered.test.customdata.CustomDataTest",
             "description": "Testing custom data",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -139,10 +111,10 @@
         },
         {
             "loader": "java_plain",
-            "id": "projectilelaunchtest",
-            "name": "Projectile Launch Test",
+            "id": "projectiletest",
+            "name": "Projectile Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.projectiletest.ProjectileLaunchTest",
+            "main-class": "org.spongepowered.test.projectile.ProjectileTest",
             "description": "Testing projectile launcher",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -163,7 +135,7 @@
             "id": "datatest",
             "name": "Data Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.datatest.DataTest",
+            "main-class": "org.spongepowered.test.data.DataTest",
             "description": "Testing data",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -184,7 +156,7 @@
             "id": "humantest",
             "name": "Human Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.humantest.HumanTest",
+            "main-class": "org.spongepowered.test.human.HumanTest",
             "description": "Testing human",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -205,7 +177,7 @@
             "id": "interacttest",
             "name": "Interact Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.interacttest.InteractTest",
+            "main-class": "org.spongepowered.test.interact.InteractTest",
             "description": "Testing InteractEvents",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -226,7 +198,7 @@
             "id": "recipetest",
             "name": "Recipe Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.recipetest.RecipeTest",
+            "main-class": "org.spongepowered.test.recipe.RecipeTest",
             "description": "Testing recipes",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -289,7 +261,7 @@
             "id": "configtest",
             "name": "Config Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.configtest.ConfigTest",
+            "main-class": "org.spongepowered.test.config.ConfigTest",
             "description": "Testing configurations",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -310,7 +282,7 @@
             "id": "archetypetest",
             "name": "Archetype Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.archetypetest.ArchetypeTest",
+            "main-class": "org.spongepowered.test.archetype.ArchetypeTest",
             "description": "Testing archetypes and Snapshots",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -331,7 +303,7 @@
             "id": "volumestreamtest",
             "name": "Volume Stream Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.stream.StreamTest",
+            "main-class": "org.spongepowered.test.volumestream.VolumeStreamTest",
             "description": "Testing VolumeStreams",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -352,7 +324,7 @@
             "id": "raytracetest",
             "name": "Ray Trace Test",
             "version": "8.0.0",
-            "main-class": "org.spongepowered.test.raytracetest.RayTraceTest",
+            "main-class": "org.spongepowered.test.raytrace.RayTraceTest",
             "description": "Testing ray traces",
             "links": {
                 "homepage": "https://www.spongepowered.org",

@@ -53,7 +53,7 @@ import org.spongepowered.plugin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 @Plugin("changeblocktest")
-public class ChangeBlockTest implements LoadableModule {
+public final class ChangeBlockTest implements LoadableModule {
 
     static final Marker marker = MarkerManager.getMarker("CHANGEBLOCK");
 

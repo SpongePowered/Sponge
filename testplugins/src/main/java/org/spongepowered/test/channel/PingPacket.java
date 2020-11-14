@@ -22,38 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.volume.stream;
+package org.spongepowered.test.channel;
 
-import org.spongepowered.api.world.volume.stream.StreamOptions;
+import com.google.common.base.MoreObjects;
+import org.spongepowered.api.network.channel.ChannelBuf;
+import org.spongepowered.api.network.channel.packet.RequestPacket;
 
-import java.util.Objects;
+public final class PingPacket implements RequestPacket<PongPacket> {
 
-public class SpongeStreamOptionsBuilder implements StreamOptions.Builder {
+    private int id;
 
-    boolean copies = false;
-    StreamOptions.LoadingStyle loadingStyle = StreamOptions.LoadingStyle.LAZILY_UNGENERATED;
+    public PingPacket(final int id) {
+        this.id = id;
+    }
 
-    @Override
-    public StreamOptions.Builder setCarbonCopy(final boolean copies) {
-        this.copies = copies;
-        return this;
+    private PingPacket() {
+    }
+
+    public int getId() {
+        return this.id;
     }
 
     @Override
-    public StreamOptions.Builder setLoadingStyle(final StreamOptions.LoadingStyle style) {
-        this.loadingStyle = Objects.requireNonNull(style, "LoadingStyle cannot be null!");
-        return this;
+    public void read(final ChannelBuf buf) {
+        this.id = buf.readVarInt();
     }
 
     @Override
-    public StreamOptions.Builder reset() {
-        this.copies = false;
-        this.loadingStyle = StreamOptions.LoadingStyle.LAZILY_UNGENERATED;
-        return this;
+    public void write(final ChannelBuf buf) {
+        buf.writeVarInt(this.id);
     }
 
     @Override
-    public StreamOptions build() {
-        return new SpongeStreamOptions(this);
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", this.id)
+                .toString();
     }
 }

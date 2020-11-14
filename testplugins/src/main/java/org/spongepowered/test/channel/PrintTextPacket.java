@@ -22,38 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.volume.stream;
+package org.spongepowered.test.channel;
 
-import org.spongepowered.api.world.volume.stream.StreamOptions;
+import com.google.common.base.MoreObjects;
+import org.spongepowered.api.network.channel.ChannelBuf;
+import org.spongepowered.api.network.channel.packet.Packet;
 
-import java.util.Objects;
+public final class PrintTextPacket implements Packet {
 
-public class SpongeStreamOptionsBuilder implements StreamOptions.Builder {
+    private String text;
 
-    boolean copies = false;
-    StreamOptions.LoadingStyle loadingStyle = StreamOptions.LoadingStyle.LAZILY_UNGENERATED;
+    public PrintTextPacket(final String text) {
+        this.text = text;
+    }
 
-    @Override
-    public StreamOptions.Builder setCarbonCopy(final boolean copies) {
-        this.copies = copies;
-        return this;
+    private PrintTextPacket() {
+    }
+
+    public String getText() {
+        return this.text;
     }
 
     @Override
-    public StreamOptions.Builder setLoadingStyle(final StreamOptions.LoadingStyle style) {
-        this.loadingStyle = Objects.requireNonNull(style, "LoadingStyle cannot be null!");
-        return this;
+    public void read(final ChannelBuf buf) {
+        this.text = buf.readString();
     }
 
     @Override
-    public StreamOptions.Builder reset() {
-        this.copies = false;
-        this.loadingStyle = StreamOptions.LoadingStyle.LAZILY_UNGENERATED;
-        return this;
+    public void write(final ChannelBuf buf) {
+        buf.writeString(this.text);
     }
 
     @Override
-    public StreamOptions build() {
-        return new SpongeStreamOptions(this);
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("text", this.text)
+                .toString();
     }
 }

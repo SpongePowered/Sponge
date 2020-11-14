@@ -47,7 +47,6 @@ import org.spongepowered.plugin.jvm.Plugin;
 @Plugin("particletest")
 public final class ParticleTest {
 
-
     private final PluginContainer plugin;
 
     @Inject
