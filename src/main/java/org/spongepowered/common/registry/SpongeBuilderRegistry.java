@@ -107,6 +107,7 @@ import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.schematic.PaletteType;
+import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
 import org.spongepowered.common.advancement.SpongeDisplayInfoBuilder;
 import org.spongepowered.common.advancement.SpongeFilteredTriggerBuilder;
@@ -185,6 +186,7 @@ import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.biome.SpongeVirtualBiomeTypeBuilder;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
+import org.spongepowered.common.world.volume.stream.SpongeStreamOptionsBuilder;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -307,6 +309,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(ImmutableDataProviderBuilder.class, DataProviderRegistrator.SpongeImmutableDataProviderBuilder::new)
             .register(Query.Builder.class, SpongeQueryBuilder::new)
             .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
+            .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
         ;
     }
 }
