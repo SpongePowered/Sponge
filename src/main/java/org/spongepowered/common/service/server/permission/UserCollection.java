@@ -97,7 +97,7 @@ public class UserCollection extends SpongeSubjectCollection {
                         @Nullable
                         @Override
                         public Subject apply(Object input) {
-                            GameProfile profile = ((GameProfile) ((UserListOpsEntry) input).value);
+                            GameProfile profile = (((UserListOpsEntry) input).value);
                             return get(profile);
                         }
                         // WARNING: This gives dupes

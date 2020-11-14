@@ -81,7 +81,7 @@ public abstract class SkullTileEntityMixin extends org.spongepowered.common.mixi
             } else {
                 Sponge.getServer().getGameProfileManager().get(profile.getName().get()).handle((newProfile, thrown) -> {
                     if (newProfile != null) {
-                        ((SkullTileEntityBridge) this).bridge$setPlayerProfile((GameProfile) newProfile, false);
+                        ((SkullTileEntityBridge) this).bridge$setPlayerProfile(newProfile, false);
                         ((TileEntityBridge) this).bridge$markDirty();
                     } else {
                         SpongeCommon.getLogger().warn("Could not update player GameProfile for Skull: ",

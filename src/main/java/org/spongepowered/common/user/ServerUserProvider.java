@@ -153,11 +153,12 @@ public final class ServerUserProvider {
         if (gameProfile == null) {
             return Optional.empty();
         }
-        return this.getUser((GameProfile) gameProfile);
+        return this.getUser(SpongeGameProfile.of(gameProfile));
     }
 
     Optional<User> getUser(final UUID uuid) {
-        return this.getUser((GameProfile) this.server.getPlayerProfileCache().getProfileByUUID(uuid));
+        final com.mojang.authlib.GameProfile gameProfile = this.server.getPlayerProfileCache().getProfileByUUID(uuid);
+        return this.getUser(gameProfile == null ? null : SpongeGameProfile.of(gameProfile));
     }
 
     Optional<User> getUser(@Nullable final GameProfile profile) {

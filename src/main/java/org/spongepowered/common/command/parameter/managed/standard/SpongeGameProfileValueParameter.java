@@ -40,6 +40,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.Collection;
 import java.util.List;
@@ -82,7 +83,7 @@ public final class SpongeGameProfileValueParameter extends CatalogedArgumentPars
             final Collection<com.mojang.authlib.GameProfile> profileCollection =
                     this.argument.parse((StringReader) reader).getNames((CommandSource) context.getCause());
             if (profileCollection.size() == 1) {
-                return Optional.of((GameProfile) profileCollection.iterator().next());
+                return Optional.of(SpongeGameProfile.of(profileCollection.iterator().next()));
             } else if (profileCollection.isEmpty()) {
                 throw reader.createException(Component.text("No game profiles were selected."));
             } else {

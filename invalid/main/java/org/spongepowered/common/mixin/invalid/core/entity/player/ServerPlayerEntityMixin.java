@@ -212,7 +212,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         if (this.impl$isFake) { // Fake players are recogizeable through the field set up with bridge$isFake.
             return service.getOrCreate(SpongeUserManager.FAKEPLAYER_PROFILE);
         }
-        return service.getOrCreate((GameProfile) this.shadow$getGameProfile());
+        return service.getOrCreate(this.shadow$getGameProfile());
     }
 
     private User impl$getUserObjectOnConstruction() {
@@ -221,7 +221,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             return bridge$getUserObject();
         }
         // Emnsure that the game profile is up to date.
-        return ((SpongeUserManager) service).forceRecreateUser((GameProfile) this.shadow$getGameProfile());
+        return ((SpongeUserManager) service).forceRecreateUser(this.shadow$getGameProfile());
     }
 
     @Override

@@ -120,7 +120,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
     @Override
     public Optional<GameProfile> getById(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
-        return Optional.ofNullable((GameProfile) this.shadow$getProfileByUUID(uniqueId));
+        return Optional.ofNullable(this.shadow$getProfileByUUID(uniqueId)).map(SpongeGameProfile::of);
     }
 
     @Override
@@ -128,7 +128,7 @@ public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
         Objects.requireNonNull(uniqueIds, "uniqueIds");
         final Map<UUID, Optional<GameProfile>> result = new HashMap<>();
         for (final UUID uniqueId : uniqueIds) {
-            result.put(uniqueId, Optional.ofNullable((GameProfile) this.shadow$getProfileByUUID(uniqueId)));
+            result.put(uniqueId, Optional.ofNullable(this.shadow$getProfileByUUID(uniqueId)).map(SpongeGameProfile::of));
         }
         return result.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(result);
     }

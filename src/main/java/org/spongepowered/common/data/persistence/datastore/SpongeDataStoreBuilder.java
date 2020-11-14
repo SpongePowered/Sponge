@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -113,6 +114,8 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
             } else if (((Class<?>) keyType).isEnum()) {
                 keyDeserializer = key -> Optional.ofNullable(Enum.valueOf(((Class<? extends Enum>) keyType), key.toString()));
             } else if (keyType == String.class) {
+                keyDeserializer = key -> Optional.of(key.toString());
+            } else if (keyType == UUID.class) {
                 keyDeserializer = key -> Optional.of(key.toString());
             } else {
                 throw new UnsupportedOperationException("Unsupported map-key type " + keyType);
