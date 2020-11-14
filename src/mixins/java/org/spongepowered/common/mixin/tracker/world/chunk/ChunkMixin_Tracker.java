@@ -129,7 +129,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         ChunkSection chunksection = this.sections[yPos >> 4];
         if (chunksection == ChunkMixin_Tracker.EMPTY_SECTION) {
             if (newState.isAir()) {
-                return ChunkPipeline.NULL_RETURN;
+                return ChunkPipeline.nullReturn((Chunk) (Object) this, (ServerWorld) this.world);
             }
 
             chunksection = new ChunkSection(yPos >> 4 << 4);
