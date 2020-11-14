@@ -60,8 +60,8 @@ import javax.annotation.Nullable;
 
 public class DataProviderRegistrator {
 
-    private static final TypeToken<DataContainerHolder.Mutable> MUTABLE = TypeToken.of(DataContainerHolder.Mutable.class);
-    private static final TypeToken<DataContainerHolder.Immutable> IMMUTABLE = TypeToken.of(DataContainerHolder.Immutable.class);
+    private static final Class<DataContainerHolder.Mutable> MUTABLE = DataContainerHolder.Mutable.class;
+    private static final Class<DataContainerHolder.Immutable> IMMUTABLE = DataContainerHolder.Immutable.class;
 
     SpongeDataRegistrationBuilder registrationBuilder;
     SpongeDataStoreBuilder dataStoreBuilder;
@@ -75,14 +75,13 @@ public class DataProviderRegistrator {
         this.registrationBuilder = registrationBuilder;
     }
 
-    public DataProviderRegistrator newDataStore(Class<? extends DataHolder>... dataHolders) {
+    @SafeVarargs
+    public final DataProviderRegistrator newDataStore(Class<? extends DataHolder>... dataHolders) {
         if (!this.dataStoreBuilder.isEmpty()) {
             this.registrationBuilder.store(this.dataStoreBuilder.buildVanillaDataStore());
         }
         this.dataStoreBuilder.reset();
-        for (Class<? extends DataHolder> dataholder : dataHolders) {
-            this.dataStoreBuilder.holder(TypeToken.of(dataholder));
-        }
+        this.dataStoreBuilder.holder(dataHolders);
         return this;
     }
 
@@ -93,10 +92,10 @@ public class DataProviderRegistrator {
         return this;
     }
 
-    public <H extends DataHolder, K, V extends Value<K>> void registerDataStoreDelegatingProvider(Supplier<Key<V>> key, TypeToken<H> typeToken) {
+    public <H extends DataHolder, K, V extends Value<K>> void registerDataStoreDelegatingProvider(final Supplier<Key<V>> key, final Type typeToken) {
         // Create dataprovider for mutable and immutable DataContainerHolders
-        if (DataProviderRegistrator.MUTABLE.isSupertypeOf(typeToken)) {
-            this.asMutable(typeToken.getRawType())
+        if (GenericTypeReflector.isSuperType(DataProviderRegistrator.MUTABLE, typeToken)) {
+            this.asMutable(GenericTypeReflector.erase(typeToken))
                     .create(key)
                     .get(holder -> {
                         final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
@@ -109,8 +108,8 @@ public class DataProviderRegistrator {
                         SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).serialize(manipulator, dataContainer);
                         ((DataContainerHolder.Mutable) holder).data$setDataContainer(dataContainer);
                     });
-        } else if (DataProviderRegistrator.IMMUTABLE.isSupertypeOf(typeToken)) {
-            this.asImmutable(typeToken.getRawType())
+        } else if (GenericTypeReflector.isSuperType(DataProviderRegistrator.IMMUTABLE, typeToken)) {
+            this.asImmutable((Class<? super H>) GenericTypeReflector.erase(typeToken))
                     .create(key)
                     .get(holder -> {
                         final DataContainer dataContainer = ((DataContainerHolder) holder).data$getDataContainer();
@@ -121,7 +120,7 @@ public class DataProviderRegistrator {
                         final DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
                         manipulator.set(key.get(), v);
                         SpongeDataManager.getDatastoreRegistry().getDataStore(key.get(), typeToken).serialize(manipulator, dataContainer);
-                        return (H)((DataContainerHolder.Immutable) holder).data$withDataContainer(dataContainer);
+                        return (H) ((DataContainerHolder.Immutable) holder).data$withDataContainer(dataContainer);
                     });
         }
     }

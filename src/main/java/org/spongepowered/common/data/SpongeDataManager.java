@@ -70,6 +70,7 @@ import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -322,10 +323,10 @@ public final class SpongeDataManager implements DataManager {
     private <V extends Value<E>, E> void registerCustomDataProviderForKey(final SpongeDataRegistration registration, final Key<V> key) {
         final Collection<DataProvider<V, E>> providers = registration.getProvidersFor(key);
 
-        final Set<TypeToken<? extends DataHolder>> dataStoreSupportedTokens = new HashSet<>();
-        this.dataStoreRegistry.getDataStores(key).stream().map(DataStore::getSupportedTokens).forEach(dataStoreSupportedTokens::addAll);
+        final Set<Type> dataStoreSupportedTokens = new HashSet<>();
+        this.dataStoreRegistry.getDataStores(key).stream().map(DataStore::getSupportedTypes).forEach(dataStoreSupportedTokens::addAll);
 
-        for (DataProvider<V, E> provider : providers) {
+        for (final DataProvider<V, E> provider : providers) {
             this.dataProviderRegistry.register(provider);
             dataStoreSupportedTokens.removeIf(provider::isSupported);
         }

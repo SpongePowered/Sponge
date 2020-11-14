@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.config.metrics;
 
+import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.applaunch.config.core.Config;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
-import org.spongepowered.configurate.transformation.NodePath;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collections;

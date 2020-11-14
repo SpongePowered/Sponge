@@ -47,8 +47,8 @@ import javax.inject.Inject;
 public final class DataSerializableTypeSerializer implements TypeSerializer<DataSerializable> {
     private static final Class<DataSerializable> TYPE = DataSerializable.class;
 
-    public static Predicate<Type> predicate() {
-        return x -> GenericTypeReflector.isSuperType(DataSerializableTypeSerializer.TYPE, x)
+    public static boolean accepts(final Type x) {
+        return GenericTypeReflector.isSuperType(DataSerializableTypeSerializer.TYPE, x)
                 && !GenericTypeReflector.isSuperType(CatalogTypeTypeSerializer.TYPE, x);
     }
 

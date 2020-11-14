@@ -164,7 +164,7 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
         return this.serializers.isEmpty();
     }
 
-    public List<TypeToken<? extends DataHolder>> getDataHolderTypes() {
+    public List<Type> getDataHolderTypes() {
         return this.dataHolderTypes;
     }
 

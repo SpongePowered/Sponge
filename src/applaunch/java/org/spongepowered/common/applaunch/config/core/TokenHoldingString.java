@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 /**
  * Holder for a string value that is parsed for environment variables.
  */
-public class TokenHoldingString {
+public final class TokenHoldingString {
 
     static final ScalarSerializer<TokenHoldingString> SERIALIZER = new Serializer();
 
@@ -124,7 +124,7 @@ public class TokenHoldingString {
         return this.parsedValue;
     }
 
-    static class Serializer extends ScalarSerializer<TokenHoldingString> {
+    static final class Serializer extends ScalarSerializer<TokenHoldingString> {
 
         Serializer() {
             super(TokenHoldingString.class);

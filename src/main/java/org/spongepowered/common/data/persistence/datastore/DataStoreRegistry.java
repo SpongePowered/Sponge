@@ -26,11 +26,13 @@ package org.spongepowered.common.data.persistence.datastore;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -54,13 +56,17 @@ public final class DataStoreRegistry {
         return this.dataStores.get(key);
     }
 
-    public DataStore getDataStore(Key<?> key, TypeToken<? extends DataHolder> typeToken) {
+    public DataStore getDataStore(final Key<?> key, final TypeToken<? extends DataHolder> typeToken) {
+        return this.getDataStore(key, typeToken.getType());
+    }
+
+    public DataStore getDataStore(final Key<?> key, final Type typeToken) {
         return this.dataStoreCache.computeIfAbsent(new LookupKey(typeToken, key), this::loadDataStore);
     }
 
-    private DataStore loadDataStore(LookupKey lookupKey) {
+    private DataStore loadDataStore(final LookupKey lookupKey) {
         final List<DataStore> dataStores = this.dataStores.get(lookupKey.key).stream()
-                .filter(ds -> ds.getSupportedTokens().stream().anyMatch(token -> token.isSupertypeOf(lookupKey.holderType)))
+                .filter(ds -> ds.getSupportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, lookupKey.holderType)))
                 .collect(Collectors.toList());
         if (dataStores.size() > 1) {
             throw new IllegalStateException("Multiple data-stores registered for the same key (" + lookupKey.key.getKey() + ") and data-holder " + lookupKey.holderType.toString());
@@ -73,10 +79,10 @@ public final class DataStoreRegistry {
 
     private static class LookupKey {
 
-        private final TypeToken<?> holderType;
+        private final Type holderType;
         private final Key<?> key;
 
-        public LookupKey(final TypeToken<?> holderType, final Key<?> key) {
+        public LookupKey(final Type holderType, final Key<?> key) {
             this.holderType = holderType;
             this.key = key;
         }

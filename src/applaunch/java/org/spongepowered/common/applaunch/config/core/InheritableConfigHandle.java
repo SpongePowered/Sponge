@@ -30,11 +30,10 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.applaunch.config.inheritable.BaseConfig;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<T> {
+public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<T> {
 
     /**
      * The parent configuration - values are inherited from this

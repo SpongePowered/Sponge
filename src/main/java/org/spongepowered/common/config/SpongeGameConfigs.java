@@ -54,7 +54,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * SpongeCommon configurations that need to interact with game state
  */
-public class SpongeGameConfigs {
+public final class SpongeGameConfigs {
 
     static final Logger LOGGER = LogManager.getLogger();
 
@@ -63,7 +63,7 @@ public class SpongeGameConfigs {
 
     public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(final Map<String, Tristate> entries) {
         return SpongeConfigs.getCommon().updateSetting("metrics.plugin-states", entries,
-                        new TypeToken<Map<String, Tristate>>() { private static final long serialVersionUID = -1L;});
+                        new TypeToken<Map<String, Tristate>>() {});
     }
 
     public static ConfigHandle<CustomDataConfig> getCustomData() {
@@ -102,7 +102,7 @@ public class SpongeGameConfigs {
                         Files.createDirectories(configPath.getParent());
                         Files.move(legacyPath, configPath);
                         final Path legacyParent = legacyPath.getParent();
-                        try (DirectoryStream<Path> str = Files.newDirectoryStream(legacyParent)) {
+                        try (final DirectoryStream<Path> str = Files.newDirectoryStream(legacyParent)) {
                             if (!str.iterator().hasNext()) {
                                 Files.delete(legacyParent);
                             }

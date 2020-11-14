@@ -32,6 +32,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.TypeTokenHelper;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -177,8 +178,8 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
-    public boolean isSupported(TypeToken<? extends DataHolder> dataHolder) {
-        return this.holderType.isAssignableFrom(dataHolder.getRawType());
+    public boolean isSupported(final Type dataHolder) {
+        return this.holderType.isAssignableFrom(GenericTypeReflector.erase(dataHolder));
     }
 
     @Override

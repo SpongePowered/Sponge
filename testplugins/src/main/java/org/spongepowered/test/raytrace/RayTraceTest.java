@@ -34,7 +34,6 @@ import org.spongepowered.api.command.parameter.managed.standard.CatalogedValuePa
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -51,11 +50,11 @@ public final class RayTraceTest {
 
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<ServerLocation> serverLocationParameter = Parameter.builder(TypeTokens.SERVER_LOCATION_TOKEN)
+        final Parameter.Value<ServerLocation> serverLocationParameter = Parameter.builder(ServerLocation.class)
                 .setKey("target_location")
                 .parser(CatalogedValueParameters.TARGET_BLOCK)
                 .build();
-        final Parameter.Value<Entity> entityParameter = Parameter.builder(TypeTokens.ENTITY_TOKEN)
+        final Parameter.Value<Entity> entityParameter = Parameter.builder(Entity.class)
                 .setKey("target_entity")
                 .parser(CatalogedValueParameters.TARGET_ENTITY)
                 .build();

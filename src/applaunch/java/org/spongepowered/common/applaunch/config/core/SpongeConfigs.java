@@ -40,13 +40,12 @@ import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 
 /**
  * Common utility methods for sponge configurations and necessary helpers for early init.
  */
-public class SpongeConfigs {
+public final class SpongeConfigs {
 
     public static final Blackboard.Key<Boolean> IS_VANILLA_PLATFORM = Blackboard.Key.of("is_vanilla", Boolean.class);
 
@@ -65,8 +64,6 @@ public class SpongeConfigs {
 
     static final ConfigurationOptions OPTIONS = ConfigurationOptions.defaults()
             .header(HEADER)
-            .shouldCopyDefaults(true)
-            .implicitInitialization(true)
             .serializers(collection -> collection.register(TokenHoldingString.SERIALIZER)
                     .registerAnnotatedObjects(OBJECT_MAPPERS));
 
@@ -176,6 +173,9 @@ public class SpongeConfigs {
 
     public static InheritableConfigHandle<WorldConfig> createDetached() {
         return new InheritableConfigHandle<>(new WorldConfig(), SpongeConfigs.getGlobalInheritable());
+    }
+
+    private SpongeConfigs() {
     }
 
 }

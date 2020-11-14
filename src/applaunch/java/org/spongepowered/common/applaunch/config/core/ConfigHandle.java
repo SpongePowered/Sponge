@@ -38,7 +38,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Callable;

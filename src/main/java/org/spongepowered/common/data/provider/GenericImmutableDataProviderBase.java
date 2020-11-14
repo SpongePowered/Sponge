@@ -30,6 +30,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.util.TypeTokenHelper;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
@@ -125,8 +126,8 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
     }
 
     @Override
-    public boolean isSupported(TypeToken<? extends DataHolder> dataHolder) {
-        return this.holderType.isAssignableFrom(dataHolder.getRawType());
+    public boolean isSupported(final Type dataHolder) {
+        return this.holderType.isAssignableFrom(GenericTypeReflector.erase(dataHolder));
     }
 
     @Override

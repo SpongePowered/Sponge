@@ -60,7 +60,7 @@ public final class PluginConfigManager implements ConfigManager {
                 .register(CatalogType.class, catalogSerializer)
                 // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
                 // See https://github.com/SpongePowered/SpongeCommon/issues/1348
-                .register(DataSerializableTypeSerializer.predicate(), dataSerializableSerializer)
+                .register(DataSerializableTypeSerializer::accepts, dataSerializableSerializer)
                 // TODO: register DataTranslators?
                 .registerAll(SpongeAdventure.CONFIGURATE.serializers())
                 .build();
@@ -90,8 +90,6 @@ public final class PluginConfigManager implements ConfigManager {
 
     public static ConfigurationOptions getOptions(final TypeSerializerCollection serializers) {
         return ConfigurationOptions.defaults()
-                .implicitInitialization(true)
-                .shouldCopyDefaults(true)
                 .serializers(serializers);
     }
 

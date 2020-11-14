@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * dimension-specific configurations, each which only need to contain values that are different to the ones in their parent. By visiting each
  * configuration before it's saved, any unnecessary values can be removed.
  */
-class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReference<ConfigurationNode>, Void> {
+final class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicReference<ConfigurationNode>, Void> {
     private static final DuplicateRemovalVisitor INSTANCE = new DuplicateRemovalVisitor();
 
     private DuplicateRemovalVisitor() {

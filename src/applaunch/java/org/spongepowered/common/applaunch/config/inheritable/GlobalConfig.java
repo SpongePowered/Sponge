@@ -25,11 +25,11 @@
 package org.spongepowered.common.applaunch.config.inheritable;
 
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.common.applaunch.config.core.FileMovingConfigurationTransformation;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
-import org.spongepowered.configurate.transformation.NodePath;
+import org.spongepowered.configurate.NodePath;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 import java.util.Set;
 

@@ -239,7 +239,7 @@ dependencies {
     applaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
     applaunchConfig("com.google.guava:guava:$guavaVersion")
-    applaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0-SNAPSHOT"))
+    applaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0"))
     applaunchConfig("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
@@ -560,8 +560,8 @@ project("SpongeVanilla") {
         add(vanillaLaunch.implementationConfigurationName, vanillaMinecraftConfig)
 
         vanillaInstallerConfig("com.google.code.gson:gson:2.8.0")
-        vanillaInstallerConfig("org.spongepowered:configurate-hocon:4.0.0-SNAPSHOT")
-        vanillaInstallerConfig("org.spongepowered:configurate-core:4.0.0-SNAPSHOT")
+        vanillaInstallerConfig("org.spongepowered:configurate-hocon:4.0.0")
+        vanillaInstallerConfig("org.spongepowered:configurate-core:4.0.0")
         vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.3")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-core:2.11.2")
@@ -581,7 +581,7 @@ project("SpongeVanilla") {
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
         vanillaAppLaunchConfig("com.zaxxer:HikariCP:2.6.3")
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
-        vanillaAppLaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0-SNAPSHOT"))
+        vanillaAppLaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0"))
         vanillaAppLaunchConfig("org.spongepowered:configurate-core") {
             exclude(group = "org.checkerframework", module = "checker-qual")
         }

@@ -27,17 +27,17 @@ package org.spongepowered.common.applaunch.config.core;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.configurate.transformation.NodePath;
 
 import java.util.Set;
 
 /**
  * A transformation that moves a set of entries from the loaded file into another file.
  */
-public class FileMovingConfigurationTransformation implements ConfigurationTransformation {
+public final class FileMovingConfigurationTransformation implements ConfigurationTransformation {
     private final Set<NodePath> paths;
     private final ConfigurationLoader<?> destinationLoader;
     private final boolean override;
