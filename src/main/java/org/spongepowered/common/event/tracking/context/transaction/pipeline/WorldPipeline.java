@@ -60,7 +60,8 @@ public final class WorldPipeline implements BlockPipeline {
         this.worldEffects = builder.effects;
         this.serverWorld = builder.serverWorld;
         this.sectionSupplier = builder.sectionSupplier;
-        this.wasEmpty = Objects.requireNonNull(builder.sectionSupplier).get().isEmpty();
+        final @Nullable ChunkSection chunkSection = Objects.requireNonNull(builder.sectionSupplier).get();
+        this.wasEmpty = chunkSection == null || chunkSection.isEmpty();
         this.chunkPipeline = builder.chunkPipeline;
     }
 
