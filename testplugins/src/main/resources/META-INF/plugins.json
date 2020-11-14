@@ -111,7 +111,7 @@
             "name": "Projectile Test",
             "version": "8.0.0",
             "main-class": "org.spongepowered.test.projectile.ProjectileTest",
-            "description": "Testing projectile launcher",
+            "description": "Testing projectile",
             "links": {
                 "homepage": "https://www.spongepowered.org",
                 "source": "https://www.spongepowered.org/source",
