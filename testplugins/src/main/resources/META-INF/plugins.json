@@ -12,18 +12,14 @@
                 "source": "https://www.spongepowered.org/source",
                 "issues": "https://www.spongepowered.org/issues"
             },
-            "contributors": [
-                {
-                    "name": "SpongePowered",
-                    "description": "Lead Developer"
-                }
-            ],
-            "dependencies": [
-                {
-                    "id": "spongeapi",
-                    "version": "8.0.0"
-                }
-            ]
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
         },
         {
             "loader": "java_plain",
