@@ -39,7 +39,6 @@ import org.spongepowered.common.advancement.SpongeAdvancementProvider;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogRegistryEventImpl;
@@ -107,7 +106,6 @@ public final class SpongeLifecycle {
         // After all plugins registered their recipes we serialize them
         SpongeRecipeProvider.registerRecipes(spongeCatalogRegistry.getRegistry(RecipeRegistration.class));
         SpongeAdvancementProvider.registerAdvancements(spongeCatalogRegistry.getRegistry(Advancement.class));
-
     }
 
     public void callRegisterChannelEvent() {

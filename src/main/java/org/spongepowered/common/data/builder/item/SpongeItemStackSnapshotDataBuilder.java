@@ -44,7 +44,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilder<ItemStackSnapshot> implements DataBuilder<ItemStackSnapshot> {
+public final class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilder<ItemStackSnapshot> implements DataBuilder<ItemStackSnapshot> {
 
     public SpongeItemStackSnapshotDataBuilder() {
         super(ItemStackSnapshot.class, Constants.Sponge.ItemStackSnapshot.CURRENT_VERSION);

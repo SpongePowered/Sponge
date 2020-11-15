@@ -28,6 +28,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SDisconnectPacket;
 import net.minecraft.network.play.server.SJoinGamePacket;
@@ -36,8 +37,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
@@ -64,6 +63,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
@@ -80,9 +80,9 @@ import javax.annotation.Nullable;
 public abstract class PlayerListMixin {
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final private MinecraftServer server;
 
-    @Shadow public abstract ITextComponent canPlayerLogin(SocketAddress socketAddress, com.mojang.authlib.GameProfile gameProfile);
+    @Shadow public abstract ITextComponent shadow$canPlayerLogin(SocketAddress socketAddress, com.mojang.authlib.GameProfile gameProfile);
+    @Shadow public abstract MinecraftServer shadow$getServer();
 
     private void disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
         final ITextComponent reason = SpongeAdventure.asVanilla(disconnectMessage);
@@ -103,7 +103,7 @@ public abstract class PlayerListMixin {
     private net.minecraft.world.server.ServerWorld impl$onInitPlayer_getWorld(
             final MinecraftServer server, final net.minecraft.world.dimension.DimensionType type,
             final NetworkManager networkManager, final ServerPlayerEntity mcPlayer) {
-        @Nullable final ITextComponent kickReason = this.canPlayerLogin(networkManager.getRemoteAddress(), mcPlayer.getGameProfile());
+        @Nullable final ITextComponent kickReason = this.shadow$canPlayerLogin(networkManager.getRemoteAddress(), mcPlayer.getGameProfile());
         final Component disconnectMessage;
         if (kickReason != null) {
             disconnectMessage = SpongeAdventure.asAdventure(kickReason);
@@ -237,5 +237,12 @@ public abstract class PlayerListMixin {
         }
 
         return SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler();
+    }
+
+    @Redirect(method = "readPlayerDataFromFile", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;read(Lnet/minecraft/nbt/CompoundNBT;)V"))
+    private void impl$setSpongePlayerDataForSinglePlayer(final ServerPlayerEntity entity, final CompoundNBT compound) {
+        entity.read(compound);
+
+        ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().readPlayerData(compound, null);
     }
 }

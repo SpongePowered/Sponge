@@ -54,7 +54,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnapshot> implements EntitySnapshot.Builder {
+public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnapshot> implements EntitySnapshot.Builder {
 
     ResourceKey worldKey;
     Vector3d position;
@@ -189,7 +189,6 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public EntitySnapshot build() {
         Objects.requireNonNull(this.worldKey);
         Objects.requireNonNull(this.position);

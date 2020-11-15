@@ -68,6 +68,8 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.registry.MappedRegistry;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.world.storage.SpongePlayerData;
+import org.spongepowered.common.world.storage.SpongePlayerDataBuilder;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.Type;
@@ -94,9 +96,7 @@ public final class SpongeDataManager implements DataManager {
     public static final DataFixer spongeDataFixer = addFixers(new DataFixerBuilder(Constants.Sponge.SPONGE_DATA_VERSION)).build(Util.getServerExecutor());
 
     static DataFixerBuilder addFixers(DataFixerBuilder builder) {
-    //        builder.addFixer(new SpongeLevelFixer(builder.addSchema(Constants.Legacy.World.WORLD_UUID_1_9_VERSION, Schema::new), true));
-    //        builder.addFixer(new EntityTrackedUser(builder.addSchema(Constants.Legacy.Entity.TRACKER_ID_VERSION, Schema::new), true));
-// TODO this fixer did nothing       builder.addFixer(new PlayerRespawnData(builder.addSchema( Constants.Sponge.PlayerData.RESPAWN_DATA_1_9_VERSION, Schema::new), true));
+        // TODO Minecraft 1.15 - Data Fixers
         return builder;
     }
 
@@ -127,6 +127,7 @@ public final class SpongeDataManager implements DataManager {
         this.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotDataBuilder());
         this.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
         this.registerBuilder(EntityArchetype.class, new SpongeEntityArchetypeBuilder());
+        this.registerBuilder(SpongePlayerData.class, new SpongePlayerDataBuilder());
     }
 
     @Override
