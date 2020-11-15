@@ -125,10 +125,12 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
 
         this.shadow$spawnShoulderEntities();
 
-        // if (!this.isSpectator()) { // Sponge - add the event keep inventory check
-        if (!event.getKeepInventory() && !this.shadow$isSpectator()) {
-            this.shadow$destroyVanishingCursedItems();
-            this.inventory.dropAllItems();
+        // Sponge - update the keep inventory flag for dropping inventory
+        // during the death update ticks
+        this.tracker$keepInventory = event.getKeepInventory();
+
+        if (!this.shadow$isSpectator()) {
+            this.shadow$spawnDrops(cause);
         }
         // Sponge Stop
 
@@ -148,10 +150,6 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
         this.shadow$extinguish();
         this.shadow$setFlag(0, false);
         this.shadow$getCombatTracker().reset();
-
-        // Sponge - update the keep inventory flag for dropping inventory
-        // during the death update ticks
-        this.tracker$keepInventory = event.getKeepInventory();
     }
 
     @Redirect(method = "copyFrom",

@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
+import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -64,6 +65,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
     @Shadow protected abstract int shadow$getExperiencePoints(PlayerEntity player);
     @Shadow protected abstract boolean shadow$canDropLoot();
     @Shadow protected abstract void shadow$dropLoot(DamageSource damageSourceIn, boolean p_213354_2_);
+    @Shadow protected abstract void shadow$dropInventory();
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
     @Shadow @Nullable public abstract LivingEntity shadow$getAttackingEntity();
     @Shadow public void shadow$onDeath(final DamageSource cause) {}
@@ -163,6 +165,18 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker impl
             this.shadow$onDeath(cause);
         }
         // Sponge End
+    }
+
+    @Redirect(method = "spawnDrops",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/entity/LivingEntity;dropInventory()V"
+            )
+    )
+    private void tracker$dropInventory(final LivingEntity thisEntity) {
+        if (thisEntity instanceof PlayerEntityBridge && ((PlayerEntityBridge) thisEntity).bridge$keepInventory()) {
+            return;
+        }
+        this.shadow$dropInventory();
     }
 
     /**
