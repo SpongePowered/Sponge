@@ -106,6 +106,10 @@ public interface ChunkBridge {
 
     boolean bridge$isQueuedForUnload();
 
+    long bridge$getLastSaveTime();
+
+    boolean bridge$isChunkDirty();
+
     void bridge$markChunkDirty();
 
     boolean bridge$isActive();
