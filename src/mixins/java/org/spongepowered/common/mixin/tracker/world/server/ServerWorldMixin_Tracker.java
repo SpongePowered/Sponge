@@ -50,7 +50,6 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -219,7 +218,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     @Redirect(method = "tickBlock",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;tick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
-    private void tracker$wrapBlockTick(BlockState blockState, ServerWorld worldIn, BlockPos posIn, Random randomIn) {
+    private void tracker$wrapBlockTick(final BlockState blockState, final ServerWorld worldIn, final BlockPos posIn, final Random randomIn) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState currentState = currentContext.state;
         if (currentState.alreadyCapturingBlockTicks(currentContext) || currentState.ignoresBlockUpdateTick(currentContext)) {
@@ -255,7 +254,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     @Redirect(method = "tickEnvironment",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/block/BlockState;randomTick(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
-    private void tracker$wrapBlockRandomTick(BlockState blockState, ServerWorld worldIn, BlockPos posIn, Random randomIn) {
+    private void tracker$wrapBlockRandomTick(final BlockState blockState, final ServerWorld worldIn, final BlockPos posIn, final Random randomIn) {
         try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
@@ -266,6 +265,60 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
                 TrackingUtil.randomTickBlock(this, blockState, posIn, this.rand);
             }
         }
+    }
+
+    @Override
+    public Optional<WorldPipeline.Builder> bridge$startBlockChange(final BlockPos pos, final BlockState newState, final int flags) {
+        if (World.isOutsideBuildHeight(pos)) {
+            return Optional.empty();
+        } else if (this.worldInfo.getGenerator() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
+            return Optional.empty();
+        }
+        // Sponge Start - Sanity check against the PhaseTracker for instances
+        if (this.bridge$isFake()) {
+            return Optional.empty();
+        }
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        if (instance.getSidedThread() != PhaseTracker.SERVER.getSidedThread() && instance != PhaseTracker.SERVER) {
+            throw new UnsupportedOperationException("Cannot perform a tracked Block Change on a ServerWorld while not on the main thread!");
+        }
+        final SpongeBlockChangeFlag spongeFlag = BlockChangeFlagManager.fromNativeInt(flags);
+
+        final Chunk chunk = this.shadow$getChunkAt(pos);
+        if (chunk.isEmpty()) {
+            return Optional.empty();
+        }
+        final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
+
+
+        return Optional.of(this.bridge$makePipeline(pos, currentState, newState, chunk, spongeFlag));
+    }
+
+    private WorldPipeline.Builder bridge$makePipeline(
+        final BlockPos pos,
+        final BlockState currentState,
+        final BlockState newState,
+        final Chunk chunk,
+        final SpongeBlockChangeFlag spongeFlag
+    ) {
+        final TrackedChunkBridge mixinChunk = (TrackedChunkBridge) chunk;
+
+        // Then build and use the BlockPipeline
+        final ChunkPipeline chunkPipeline = mixinChunk.bridge$createChunkPipeline(pos, newState, currentState, spongeFlag);
+        final WorldPipeline.Builder worldPipelineBuilder = WorldPipeline.builder(chunkPipeline);
+        worldPipelineBuilder.addEffect((pipeline, oldState, newState1, flag1) -> {
+            if (oldState == null) {
+                return EffectResult.NULL_RETURN;
+            }
+            return EffectResult.NULL_PASS;
+        })
+            .addEffect(new UpdateLightSideEffect())
+            .addEffect(CheckBlockPostPlacementIsSameEffect.getInstance())
+            .addEffect(new UpdateWorldRendererEffect())
+            .addEffect(new NotifyClientEffect())
+            .addEffect(new NotifyNeighborSideEffect())
+            .addEffect(new UpdateConnectingBlocksEffect());
+        return worldPipelineBuilder;
     }
 
     /**
@@ -296,28 +349,9 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         if (chunk.isEmpty()) {
             return false;
         }
-
         final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
-
-        final TrackedChunkBridge mixinChunk = (TrackedChunkBridge) chunk;
-
-        // Then build and use the BlockPipeline
-        final ChunkPipeline chunkPipeline = mixinChunk.bridge$createChunkPipeline(pos, newState, currentState, spongeFlag);
-        final WorldPipeline.Builder worldPipelineBuilder = WorldPipeline.builder(chunkPipeline);
-        worldPipelineBuilder.addEffect((pipeline, oldState, newState1, flag1) -> {
-            if (oldState == null) {
-                return EffectResult.NULL_RETURN;
-            }
-            return EffectResult.NULL_PASS;
-        })
-            .addEffect(new UpdateLightSideEffect())
-            .addEffect(CheckBlockPostPlacementIsSameEffect.getInstance())
-            .addEffect(new UpdateWorldRendererEffect())
-            .addEffect(new NotifyClientEffect())
-            .addEffect(new NotifyNeighborSideEffect())
-            .addEffect(new UpdateConnectingBlocksEffect())
-            .addEffect(new WorldBlockChangeCompleteEffect());
-        final WorldPipeline pipeline = worldPipelineBuilder
+        final WorldPipeline pipeline = this.bridge$makePipeline(pos, currentState, newState, chunk, spongeFlag)
+            .addEffect(new WorldBlockChangeCompleteEffect())
             .build();
 
         return pipeline.processEffects(instance.getPhaseContext(), currentState, newState, pos, spongeFlag);

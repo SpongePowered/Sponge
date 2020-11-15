@@ -37,6 +37,9 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
+
+import java.util.Optional;
 
 /**
  * A specialized {@link WorldBridge} or {@link ServerWorldBridge}
@@ -46,6 +49,8 @@ import org.spongepowered.common.event.tracking.context.transaction.Transactional
 public interface TrackedWorldBridge {
 
     boolean bridge$forceSpawnEntity(Entity entity);
+
+    Optional<WorldPipeline.Builder> bridge$startBlockChange(BlockPos pos, BlockState state, int rawFlags);
 
     /**
      * Delegates to the {@link ServerWorld} to perform the lookup for a {@link Chunk}
