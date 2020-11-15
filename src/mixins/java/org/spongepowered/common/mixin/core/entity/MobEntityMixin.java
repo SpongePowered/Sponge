@@ -260,7 +260,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
             }
 
             this.shadow$applyEnchantments((MobEntity) (Object) this, targetEntity);
-            this.setLastAttackedEntity(targetEntity);
+            this.shadow$setLastAttackedEntity(targetEntity);
         }
 
         return attackSucceeded;
