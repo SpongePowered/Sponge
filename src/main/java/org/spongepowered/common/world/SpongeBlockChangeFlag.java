@@ -56,8 +56,8 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         this.ignoreRender = (flag & Constants.BlockChangeFlags.IGNORE_RENDER) != 0;
         this.forceReRender = (flag & Constants.BlockChangeFlags.FORCE_RE_RENDER) != 0 && !this.ignoreRender;
         this.blockMoving = (flag & Constants.BlockChangeFlags.BLOCK_MOVING) != 0;
-        this.lighting = (flag & Constants.BlockChangeFlags.LIGHTING_UPDATES) != 0;
-        this.pathfinding = (flag & Constants.BlockChangeFlags.PATHFINDING_UPDATES) != 0;
+        this.lighting = (flag & Constants.BlockChangeFlags.LIGHTING_UPDATES) == 0;
+        this.pathfinding = (flag & Constants.BlockChangeFlags.PATHFINDING_UPDATES) == 0;
         this.rawFlag = flag;
         this.name = name;
     }
