@@ -101,6 +101,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public SpawnEntityEvent generateEvent(final PhaseContext<@NonNull ?> context,
+        final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause
     ) {
         final ImmutableList<Tuple<Entity, DummySnapshot>> collect = gameTransactions.stream()
@@ -111,7 +112,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
                     new DummySnapshot(spawnRequest.originalPosition, spawnRequest.entityTag, spawnRequest.worldSupplier)
                 );
             }).collect(ImmutableList.toImmutableList());
-        return ((IPhaseState) context.state).createSpawnEvent(context, collect, currentCause);
+        return ((IPhaseState) context.state).createSpawnEvent(context, parent, collect, currentCause);
     }
 
     @Override

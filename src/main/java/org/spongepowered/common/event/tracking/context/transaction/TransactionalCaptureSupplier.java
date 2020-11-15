@@ -451,7 +451,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 })
                 .orElse(null)
         ) {
-            final E event = pointer.generateEvent(context, transactions, instance.getCurrentCause());
+            final E event = pointer.generateEvent(context, parent, transactions, instance.getCurrentCause());
 
             final EventByTransaction<E> element = new EventByTransaction<>(event, transactions, parent, pointer);
             builder.add(element);

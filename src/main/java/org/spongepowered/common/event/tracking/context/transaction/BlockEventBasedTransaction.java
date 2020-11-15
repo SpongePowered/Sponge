@@ -65,6 +65,7 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public final ChangeBlockEvent generateEvent(final PhaseContext<@NonNull ?> context,
+        final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<ChangeBlockEvent>> transactions,
         final Cause currentCause
     ) {

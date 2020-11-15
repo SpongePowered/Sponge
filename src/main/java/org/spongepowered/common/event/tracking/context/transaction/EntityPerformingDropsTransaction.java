@@ -94,7 +94,8 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
 
     @Override
     public HarvestEntityEvent generateEvent(
-        final PhaseContext<@NonNull ?> context, final ImmutableList<GameTransaction<HarvestEntityEvent>> gameTransactions,
+        final PhaseContext<@NonNull ?> context, @Nullable GameTransaction<@NonNull ?> parent,
+        final ImmutableList<GameTransaction<HarvestEntityEvent>> gameTransactions,
         final Cause currentCause
     ) {
         return SpongeEventFactory.createHarvestEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) this.destroyingEntity);
