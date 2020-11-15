@@ -37,6 +37,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.loot.LootContext;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -584,5 +585,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default boolean recordsEntitySpawns(C context) {
         return true;
+    }
+
+    default void populateLootContext(C phaseContext, LootContext.Builder lootBuilder) {
+
     }
 }
