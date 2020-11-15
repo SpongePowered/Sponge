@@ -98,7 +98,9 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     }
 
     @Override
-    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
+        @Nullable GameTransaction<@NonNull ?> parent
+    ) {
         return Optional.of((context, frame) -> {
             frame.pushCause(this.locatableBlock.get());
         });

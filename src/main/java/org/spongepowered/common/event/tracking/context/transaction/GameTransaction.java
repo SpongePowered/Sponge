@@ -98,7 +98,9 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
         return false;
     }
 
-    public abstract Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator();
+    public abstract Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
+        @Nullable GameTransaction<@NonNull ?> parent
+    );
 
     public abstract void addToPrinter(PrettyPrinter printer);
 

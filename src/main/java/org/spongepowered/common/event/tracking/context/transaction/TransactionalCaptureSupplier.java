@@ -440,7 +440,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder,
         final ImmutableList<GameTransaction<E>> transactions
     ) {
-        final Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator();
+        final Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator(parent);
         final PhaseTracker instance = PhaseTracker.getInstance();
         try (
             final CauseStackManager.@Nullable StackFrame frame = frameMutator
