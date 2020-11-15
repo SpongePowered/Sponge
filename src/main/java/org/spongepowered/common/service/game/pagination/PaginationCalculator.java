@@ -30,17 +30,15 @@ import net.kyori.adventure.text.TextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.loader.HeaderMode;
+import org.apache.commons.lang3.ArrayUtils;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.math.GenericMath;
 
-import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.PrimitiveIterator;
 
 /**
@@ -67,26 +65,14 @@ final class PaginationCalculator {
 
     static {
         final ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
-                .setURL(PaginationCalculator.class.getResource("font-sizes.json"))
-                .setHeaderMode(HeaderMode.NONE)
+                .url(PaginationCalculator.class.getResource("font-sizes.json"))
                 .build();
         try {
-            final ConfigurationNode node = loader.load();
-            NON_UNICODE_CHARS = node.getNode("non-unicode").getString();
-            final List<? extends ConfigurationNode> charWidths = node.getNode("char-widths").getChildrenList();
-            final int[] nonUnicodeCharWidths = new int[charWidths.size()];
-            for (int i = 0; i < nonUnicodeCharWidths.length; ++i) {
-                nonUnicodeCharWidths[i] = charWidths.get(i).getInt();
-            }
-            NON_UNICODE_CHAR_WIDTHS = nonUnicodeCharWidths;
-
-            final List<? extends ConfigurationNode> glyphWidths = node.getNode("glyph-widths").getChildrenList();
-            final byte[] unicodeCharWidths = new byte[glyphWidths.size()];
-            for (int i = 0; i < unicodeCharWidths.length; ++i) {
-                unicodeCharWidths[i] = (byte) glyphWidths.get(i).getInt();
-            }
-            UNICODE_CHAR_WIDTHS = unicodeCharWidths;
-        } catch (final IOException e) {
+            final CommentedConfigurationNode node = loader.load();
+            NON_UNICODE_CHARS = node.node("non-unicode").getString();
+            NON_UNICODE_CHAR_WIDTHS = node.node("char-widths").get(int[].class, ArrayUtils.EMPTY_INT_ARRAY);
+            UNICODE_CHAR_WIDTHS = node.node("glyph-widths").get(byte[].class, ArrayUtils.EMPTY_BYTE_ARRAY);
+        } catch (final ConfigurateException e) {
             throw new ExceptionInInitializerError(e);
         }
     }

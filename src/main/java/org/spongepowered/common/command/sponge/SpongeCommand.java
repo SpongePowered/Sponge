@@ -76,9 +76,9 @@ public class SpongeCommand {
     protected static final Component LONG_INDENT_COMPONENT = Component.text(SpongeCommand.LONG_INDENT);
     protected static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
 
-    private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", TypeTokens.PLUGIN_CONTAINER_TOKEN);
-    private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", TypeTokens.COMMAND_MAPPING);
-    private final Parameter.Key<WorldProperties> worldPropertiesKey = Parameter.key("world", TypeTokens.WORLD_PROPERTIES_TOKEN);
+    private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", PluginContainer.class);
+    private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", CommandMapping.class);
+    private final Parameter.Key<WorldProperties> worldPropertiesKey = Parameter.key("world", WorldProperties.class);
 
     @Nullable private Component versionText = null;
 
@@ -244,7 +244,7 @@ public class SpongeCommand {
                     return CommandResult.success();
                 })
                 .build();
-        final Parameter.Key<Boolean> dumpAllKey = Parameter.key("dumpAll", TypeTokens.BOOLEAN_TOKEN);
+        final Parameter.Key<Boolean> dumpAllKey = Parameter.key("dumpAll", Boolean.class);
         final Command.Parameterized dumpCommand = Command.builder()
                 .parameter(Parameter.literal(Boolean.class, true, "all").optional().setKey(dumpAllKey).build())
                 .setExecutor(context -> {

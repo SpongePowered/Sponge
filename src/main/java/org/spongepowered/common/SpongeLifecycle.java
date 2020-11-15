@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -152,11 +152,13 @@ public final class SpongeLifecycle {
     }
 
     public void callStartingEngineEvent(final Engine engine) {
-        this.game.getEventManager().post(new StartingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), this.game, engine, (TypeToken<Engine>) TypeToken.of(engine.getClass())));
+        this.game.getEventManager().post(new StartingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), this.game, engine,
+                                                                       (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     public void callStartedEngineEvent(final Engine engine) {
-        this.game.getEventManager().post(new StartedEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), this.game, engine, (TypeToken<Engine>) TypeToken.of(engine.getClass())));
+        this.game.getEventManager().post(new StartedEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), this.game, engine,
+                                                                      (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     public void callLoadedGameEvent() {
@@ -164,7 +166,8 @@ public final class SpongeLifecycle {
     }
 
     public void callStoppingEngineEvent(final Engine engine) {
-        this.game.getEventManager().post(new StoppingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), this.game, engine, (TypeToken<Engine>) TypeToken.of(engine.getClass())));
+        this.game.getEventManager().post(new StoppingEngineEventImpl<>(PhaseTracker.getCauseStackManager().getCurrentCause(), this.game, engine,
+                                                                       (TypeToken<Engine>) TypeToken.get(engine.getClass())));
     }
 
     private Collection<PluginContainer> filterInternalPlugins(final Collection<PluginContainer> plugins) {

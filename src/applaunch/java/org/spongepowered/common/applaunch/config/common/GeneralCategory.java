@@ -24,31 +24,35 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.common.applaunch.config.core.TokenHoldingString;
 
 @ConfigSerializable
 public class GeneralCategory {
 
-    @Setting(value = "file-io-thread-sleep", comment = "If 'true', sleeping between chunk saves will be enabled, beware of memory issues.")
+    @Setting("file-io-thread-sleep")
+    @Comment("If 'true', sleeping between chunk saves will be enabled, beware of memory issues.")
     private boolean fileIOThreadSleep = false;
 
-    @Setting(value = "plugins-dir", comment = "Additional directory to search for plugins, relative to the \n"
-                                            + "execution root or specified as an absolute path. \n"
-                                            + "Note that the default: \"${CANONICAL_MODS_DIR}/plugins\" \n"
-                                            + "is going to search for a plugins folder in the mods directory. \n"
-                                            + "If you wish for the plugins folder to reside in the root game \n"
-                                            + "directory, change the value to \"${CANONICAL_GAME_DIR}/plugins\".")
+    @Setting("plugins-dir")
+    @Comment("Additional directory to search for plugins, relative to the \n"
+            + "execution root or specified as an absolute path. \n"
+            + "Note that the default: \"${CANONICAL_MODS_DIR}/plugins\" \n"
+            + "is going to search for a plugins folder in the mods directory. \n"
+            + "If you wish for the plugins folder to reside in the root game \n"
+            + "directory, change the value to \"${CANONICAL_GAME_DIR}/plugins\".")
     private TokenHoldingString pluginsDir = TokenHoldingString.of("${CANONICAL_MODS_DIR}/plugins");
-    @Setting(value = "config-dir", comment = "The directory for Sponge plugin configurations, relative to the  \n"
-                                           + "execution root or specified as an absolute path. \n"
-                                           + "Note that the default: \"${CANONICAL_GAME_DIR}/config\" \n"
-                                           + "is going to use the \"config\" directory in the root game directory. \n"
-                                           + "If you wish for plugin configs to reside within a child of the configuration \n"
-                                           + "directory, change the value to, for example, \"${CANONICAL_CONFIG_DIR}/sponge/plugins\". \n"
-                                           + "Note: It is not recommended to set this to \"${CANONICAL_CONFIG_DIR}/sponge\", as there is \n"
-                                           + "a possibility that plugin configurations can conflict the Sponge core configurations. \n")
+    @Setting("config-dir")
+    @Comment("The directory for Sponge plugin configurations, relative to the  \n"
+           + "execution root or specified as an absolute path. \n"
+           + "Note that the default: \"${CANONICAL_GAME_DIR}/config\" \n"
+           + "is going to use the \"config\" directory in the root game directory. \n"
+           + "If you wish for plugin configs to reside within a child of the configuration \n"
+           + "directory, change the value to, for example, \"${CANONICAL_CONFIG_DIR}/sponge/plugins\". \n"
+           + "Note: It is not recommended to set this to \"${CANONICAL_CONFIG_DIR}/sponge\", as there is \n"
+           + "a possibility that plugin configurations can conflict the Sponge core configurations. \n")
     private TokenHoldingString configDir = TokenHoldingString.of("${CANONICAL_GAME_DIR}/config");
 
     public boolean getFileIoThreadSleep() {

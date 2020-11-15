@@ -24,22 +24,23 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public class CommandsHiddenCategory {
 
-    @Setting(value = "hide-on-discovery-attempt",
-             comment = "If this is true, when a user tries to tab complete a command, or use \"/sponge which\" or \n"
-                     + "\"/sponge:help\" this prevents commands a user does not have permission for from being completed.\n\n"
-                     + "Note that some commands may not show up during tab complete if a user does not have permission\n"
-                     + "regardless of this setting.")
+    @Setting("hide-on-discovery-attempt")
+    @Comment("If this is true, when a user tries to tab complete a command, or use \"/sponge which\" or \n"
+            + "\"/sponge:help\" this prevents commands a user does not have permission for from being completed.\n\n"
+            + "Note that some commands may not show up during tab complete if a user does not have permission\n"
+            + "regardless of this setting.")
     private boolean hideDuringDiscovery = true;
 
-    @Setting(value = "hide-on-execution-attempt",
-             comment = "If this is true, when a user tries to use a command they don't have permission for, Sponge\n"
-                     + "will act as if the command doesn't exist, rather than showing a no permissions message.")
+    @Setting("hide-on-execution-attempt")
+    @Comment("If this is true, when a user tries to use a command they don't have permission for, Sponge\n"
+             + "will act as if the command doesn't exist, rather than showing a no permissions message.")
     private boolean hideDuringExecution = false;
 
     public boolean isHideDuringDiscovery() {

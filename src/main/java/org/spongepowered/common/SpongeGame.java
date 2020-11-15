@@ -45,6 +45,7 @@ import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
+import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.server.ServerConsoleSystemSubject;
 import org.spongepowered.common.util.LocaleCache;
@@ -61,7 +62,7 @@ public final class SpongeGame implements Game {
     private final PluginManager pluginManager;
     private final EventManager eventManager;
     private final AssetManager assetManager;
-    private final ConfigManager configManager;
+    private final PluginConfigManager configManager;
     private final ChannelRegistry channelRegistry;
     private final MetricsConfigManager metricsConfigManager;
     private final CommandManager commandManager;
@@ -76,9 +77,9 @@ public final class SpongeGame implements Game {
 
     @Inject
     public SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
-        final EventManager eventManager, final AssetManager assetManager, final ConfigManager configManager, final ChannelRegistry channelRegistry,
-        final MetricsConfigManager metricsConfigManager, final CommandManager commandManager, final SqlManager sqlManager,
-        final ServiceProvider.GameScoped serviceProvider) {
+        final EventManager eventManager, final AssetManager assetManager, final PluginConfigManager configManager,
+            final ChannelRegistry channelRegistry, final MetricsConfigManager metricsConfigManager, final CommandManager commandManager,
+            final SqlManager sqlManager, final ServiceProvider.GameScoped serviceProvider) {
 
         this.platform = platform;
         this.registry = registry;
@@ -138,7 +139,7 @@ public final class SpongeGame implements Game {
     }
 
     @Override
-    public ConfigManager getConfigManager() {
+    public PluginConfigManager getConfigManager() {
         return this.configManager;
     }
 

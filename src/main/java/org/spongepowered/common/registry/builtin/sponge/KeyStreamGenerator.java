@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;

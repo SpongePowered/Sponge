@@ -24,26 +24,26 @@
  */
 package org.spongepowered.common.event;
 
-import com.google.common.reflect.TypeToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Event;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
 
 public final class EventType<T extends Event> {
 
     private final Class<T> eventType;
-    @Nullable private final TypeToken<?> genericType;
+    private final @Nullable Type genericType;
 
     private int hashCode;
 
-    EventType(Class<T> eventType, @Nullable TypeToken<?> genericType) {
+    EventType(final Class<T> eventType, final @Nullable Type genericType) {
         this.genericType = genericType;
         this.eventType = eventType;
     }
 
-    public EventType(Class<T> eventType) {
+    public EventType(final Class<T> eventType) {
         this(eventType, null);
     }
 
@@ -51,8 +51,7 @@ public final class EventType<T extends Event> {
         return this.eventType;
     }
 
-    @Nullable
-    public TypeToken<?> getGenericType() {
+    public @Nullable Type getGenericType() {
         return this.genericType;
     }
 
@@ -67,7 +66,7 @@ public final class EventType<T extends Event> {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public boolean equals(@Nullable Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (!(o instanceof EventType)) {
             return false;
         }

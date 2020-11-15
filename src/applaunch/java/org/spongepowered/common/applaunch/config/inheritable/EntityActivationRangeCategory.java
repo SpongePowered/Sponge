@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.inheritable;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,11 +34,14 @@ import java.util.Map;
 @ConfigSerializable
 public final class EntityActivationRangeCategory {
 
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered entities will be added to this config with a default value.")
+    @Setting
+    @Comment("If 'true', newly discovered entities will be added to this config with a default value.")
     private boolean autoPopulate = false;
-    @Setting(value = "defaults", comment = "Default activation ranges used for all entities unless overridden.")
+    @Setting("defaults")
+    @Comment("Default activation ranges used for all entities unless overridden.")
     private Map<String, Integer> defaultRanges = new HashMap<>();
-    @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
+    @Setting("mods")
+    @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
     private Map<String, EntityActivationModCategory> modList = new HashMap<>();
 
     public EntityActivationRangeCategory() {

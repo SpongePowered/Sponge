@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.applaunch.config.inheritable.BaseConfig;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<T> {
+public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<T> {
 
     /**
      * The parent configuration - values are inherited from this
@@ -67,7 +66,7 @@ public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<
      * @param <V> value type
      * @return value or default
      */
-    public <V> V getOrCreateValue(final Function<T, V> getter, final Consumer<BaseConfig> setter, boolean populate) {
+    public <V> V getOrCreateValue(final Function<T, V> getter, final Consumer<BaseConfig> setter, final boolean populate) {
         V ret = getter.apply(this.get());
         if (ret == null && populate) {
             setter.accept(this.get());
@@ -79,7 +78,7 @@ public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<
         return ret;
     }
 
-    public void load() throws IOException, ObjectMappingException {
+    public void load() throws ConfigurateException {
         if (this.isAttached()) {
             // store "what's in the file" separately in memory
             this.node = this.loader.load();
@@ -94,11 +93,11 @@ public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<
 
         // merge with settings from parent
         if (this.parent != null) {
-            this.mergedNode.mergeValuesFrom(this.parent.mergedNode);
+            this.mergedNode.mergeFrom(this.parent.mergedNode);
         }
 
         // populate the config object
-        this.mapper.populate(this.mergedNode);
+        this.mapper.load(this.instance, this.mergedNode);
         this.doSave();
     }
 
@@ -109,7 +108,7 @@ public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<
 
         try {
             // save from the mapped object --> node
-            this.mapper.serialize(this.node);
+            this.mapper.save(this.instance, this.node);
 
             // before saving this config, remove any values already declared with the same value on the parent
             if (this.parent != null) {
@@ -129,7 +128,7 @@ public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<
             if (this.parent != null) {
                 this.parent.doSave();
             }
-        } catch (IOException | ObjectMappingException e) {
+        } catch (final ConfigurateException e) {
             SpongeConfigs.LOGGER.error("Failed to save configuration", e);
         }
     }
@@ -140,7 +139,7 @@ public class InheritableConfigHandle<T extends BaseConfig> extends ConfigHandle<
      *
      * @param root The node to process
      */
-    private void removeDuplicates(CommentedConfigurationNode root) {
+    private void removeDuplicates(final CommentedConfigurationNode root) {
         if (!this.isAttached()) {
             return;
         }

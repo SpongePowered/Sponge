@@ -212,7 +212,7 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:$asmVersion")
 
     // Implementation-only Adventure
-    implementation("net.kyori:adventure-serializer-configurate3:4.1.1")
+    implementation("net.kyori:adventure-serializer-configurate4:4.2.0-SNAPSHOT")
 
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
 
@@ -239,19 +239,16 @@ dependencies {
     applaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
     applaunchConfig("com.google.guava:guava:$guavaVersion")
-    applaunchConfig("org.spongepowered:configurate-core:3.7.1") {
-        exclude(group = "com.google.inject", module = "guice")
-        exclude(group = "com.google.guava", module = "guava")
+    applaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0"))
+    applaunchConfig("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
-    applaunchConfig("org.spongepowered:configurate-hocon:3.7.1") {
+    applaunchConfig("org.spongepowered:configurate-hocon") {
         exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "com.google.guava", module = "guava")
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
-    applaunchConfig("org.spongepowered:configurate-json:3.7.1") {
+    applaunchConfig("org.spongepowered:configurate-jackson") {
         exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "com.google.guava", module = "guava")
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
     applaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
@@ -563,6 +560,8 @@ project("SpongeVanilla") {
         add(vanillaLaunch.implementationConfigurationName, vanillaMinecraftConfig)
 
         vanillaInstallerConfig("com.google.code.gson:gson:2.8.0")
+        vanillaInstallerConfig("org.spongepowered:configurate-hocon:4.0.0")
+        vanillaInstallerConfig("org.spongepowered:configurate-core:4.0.0")
         vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.3")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-api:2.11.2")
         vanillaInstallerConfig("org.apache.logging.log4j:log4j-core:2.11.2")
@@ -571,7 +570,7 @@ project("SpongeVanilla") {
         vanillaInstallerImplementation(vanillaInstallerConfig)
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
-        vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate3:4.1.1")
+        vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate4:4.2.0-SNAPSHOT")
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
         vanillaAppLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
         vanillaAppLaunchConfig("org.ow2.asm:asm-tree:$asmVersion")
@@ -582,19 +581,16 @@ project("SpongeVanilla") {
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
         vanillaAppLaunchConfig("com.zaxxer:HikariCP:2.6.3")
         vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
-        vanillaAppLaunchConfig("org.spongepowered:configurate-core:3.7.1") {
-            exclude(group = "com.google.guava", module = "guava")
-            exclude(group = "com.google.inject", module = "guice")
+        vanillaAppLaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0"))
+        vanillaAppLaunchConfig("org.spongepowered:configurate-core") {
             exclude(group = "org.checkerframework", module = "checker-qual")
         }
-        vanillaAppLaunchConfig("org.spongepowered:configurate-hocon:3.7.1") {
+        vanillaAppLaunchConfig("org.spongepowered:configurate-hocon") {
             exclude(group = "org.spongepowered", module = "configurate-core")
-            exclude(group = "com.google.guava", module = "guava")
             exclude(group = "org.checkerframework", module = "checker-qual")
         }
-        vanillaAppLaunchConfig("org.spongepowered:configurate-json:3.7.1") {
+        vanillaAppLaunchConfig("org.spongepowered:configurate-jackson") {
             exclude(group = "org.spongepowered", module = "configurate-core")
-            exclude(group = "com.google.guava", module = "guava")
             exclude(group = "org.checkerframework", module = "checker-qual")
         }
 

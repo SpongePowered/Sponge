@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.config;
 
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import io.leangen.geantyref.TypeToken;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -42,6 +41,7 @@ import org.spongepowered.common.config.customdata.CustomDataConfig;
 import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.common.world.server.SpongeWorldManager;
+import org.spongepowered.configurate.ConfigurateException;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -54,7 +54,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * SpongeCommon configurations that need to interact with game state
  */
-public class SpongeGameConfigs {
+public final class SpongeGameConfigs {
 
     static final Logger LOGGER = LogManager.getLogger();
 
@@ -63,7 +63,7 @@ public class SpongeGameConfigs {
 
     public static CompletableFuture<CommentedConfigurationNode> savePluginsInMetricsConfig(final Map<String, Tristate> entries) {
         return SpongeConfigs.getCommon().updateSetting("metrics.plugin-states", entries,
-                        new TypeToken<Map<String, Tristate>>() { private static final long serialVersionUID = -1L;});
+                        new TypeToken<Map<String, Tristate>>() {});
     }
 
     public static ConfigHandle<CustomDataConfig> getCustomData() {
@@ -102,7 +102,7 @@ public class SpongeGameConfigs {
                         Files.createDirectories(configPath.getParent());
                         Files.move(legacyPath, configPath);
                         final Path legacyParent = legacyPath.getParent();
-                        try (DirectoryStream<Path> str = Files.newDirectoryStream(legacyParent)) {
+                        try (final DirectoryStream<Path> str = Files.newDirectoryStream(legacyParent)) {
                             if (!str.iterator().hasNext()) {
                                 Files.delete(legacyParent);
                             }
@@ -119,7 +119,7 @@ public class SpongeGameConfigs {
                     SpongeConfigs.getGlobalInheritable());
             config.load();
             return config;
-        } catch (final IOException | ObjectMappingException ex) {
+        } catch (final ConfigurateException ex) {
             LOGGER.error("Unable to load configuration for world {}. Sponge will use a "
                     + "fallback configuration with default values that will not save.", world, ex);
             return SpongeConfigs.createDetached();

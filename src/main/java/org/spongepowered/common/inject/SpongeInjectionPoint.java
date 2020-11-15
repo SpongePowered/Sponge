@@ -25,30 +25,30 @@
 package org.spongepowered.common.inject;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.reflect.TypeToken;
 
 import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 public final class SpongeInjectionPoint implements AnnotatedElement {
 
-    private final TypeToken<?> source;
-    private final TypeToken<?> type;
+    private final Type source;
+    private final Type type;
     private final Annotation[] annotations;
 
-    SpongeInjectionPoint(final TypeToken<?> source, final TypeToken<?> type, final Annotation[] annotations) {
+    SpongeInjectionPoint(final Type source, final Type type, final Annotation[] annotations) {
         this.annotations = annotations;
         this.source = source;
         this.type = type;
     }
 
-    public TypeToken<?> getSource() {
+    public Type getSource() {
         return this.source;
     }
 
-    public TypeToken<?> getType() {
+    public Type getType() {
         return this.type;
     }
 

@@ -24,32 +24,35 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public class ModuleCategory {
 
-    @Setting(value = "bungeecord")
+    @Setting("bungeecord")
     private boolean pluginBungeeCord = false;
 
-    @Setting(value = "entity-activation-range")
+    @Setting("entity-activation-range")
     private boolean pluginEntityActivation = true;
 
-    @Setting(value = "tileentity-activation", comment = "Controls block range and tick rate of tileentities. \n"
-                                                      + "Use with caution as this can break intended functionality.")
+    @Setting("tileentity-activation")
+    @Comment("Controls block range and tick rate of tileentities. \n"
+             + "Use with caution as this can break intended functionality.")
     private boolean pluginTileEntityActivation = false;
 
-    @Setting(value = "entity-collisions")
+    @Setting("entity-collisions")
     private boolean pluginEntityCollisions = true;
 
     @Setting("timings")
     private boolean pluginTimings = true;
 
-    @Setting(value = "exploits", comment = "Controls whether any exploit patches are applied.\n"
-                                           + "If there are issues with any specific exploits, please\n"
-                                           + "test in the exploit category first, before disabling all\n"
-                                           + "exploits with this toggle.")
+    @Setting("exploits")
+    @Comment("Controls whether any exploit patches are applied.\n"
+             + "If there are issues with any specific exploits, please\n"
+             + "test in the exploit category first, before disabling all\n"
+             + "exploits with this toggle.")
     private boolean enableExploitPatches = true;
 
     @Setting("optimizations")
@@ -58,13 +61,16 @@ public class ModuleCategory {
     @Setting("tracking")
     private boolean tracking = true;
 
-    @Setting(value = "realtime", comment = "Use real (wall) time instead of ticks as much as possible")
+    @Setting("realtime")
+    @Comment("Use real (wall) time instead of ticks as much as possible")
     private boolean pluginRealTime = false;
 
-    @Setting(value = "movement-checks", comment = "Allows configuring Vanilla movement and speed checks")
+    @Setting("movement-checks")
+    @Comment("Allows configuring Vanilla movement and speed checks")
     private boolean movementChecks = false;
 
-    @Setting(value = "broken-mod", comment = "Enables experimental fixes for broken mods")
+    @Setting("broken-mod")
+    @Comment("Enables experimental fixes for broken mods")
     private boolean brokenMods = false;
 
     public boolean useBrokenMods() {
@@ -75,7 +81,7 @@ public class ModuleCategory {
         return this.pluginBungeeCord;
     }
 
-    public void setPluginBungeeCord(boolean state) {
+    public void setPluginBungeeCord(final boolean state) {
         this.pluginBungeeCord = state;
     }
 
@@ -87,7 +93,7 @@ public class ModuleCategory {
         return this.pluginTileEntityActivation;
     }
 
-    public void setPluginEntityActivation(boolean state) {
+    public void setPluginEntityActivation(final boolean state) {
         this.pluginEntityActivation = state;
     }
 
@@ -95,7 +101,7 @@ public class ModuleCategory {
         return this.pluginEntityCollisions;
     }
 
-    public void setPluginEntityCollisions(boolean state) {
+    public void setPluginEntityCollisions(final boolean state) {
         this.pluginEntityCollisions = state;
     }
 
@@ -103,7 +109,7 @@ public class ModuleCategory {
         return this.pluginTimings;
     }
 
-    public void setPluginTimings(boolean state) {
+    public void setPluginTimings(final boolean state) {
         this.pluginTimings = state;
     }
 
@@ -111,7 +117,7 @@ public class ModuleCategory {
         return this.enableExploitPatches;
     }
 
-    public void setExploitPatches(boolean enableExploitPatches) {
+    public void setExploitPatches(final boolean enableExploitPatches) {
         this.enableExploitPatches = enableExploitPatches;
     }
 
@@ -123,7 +129,7 @@ public class ModuleCategory {
         return this.tracking;
     }
 
-    public void setTracking(boolean tracking) {
+    public void setTracking(final boolean tracking) {
         this.tracking = tracking;
     }
 
@@ -135,7 +141,7 @@ public class ModuleCategory {
         return this.pluginRealTime;
     }
 
-    public void setPluginRealTime(boolean state) {
+    public void setPluginRealTime(final boolean state) {
         this.pluginRealTime = state;
     }
 }

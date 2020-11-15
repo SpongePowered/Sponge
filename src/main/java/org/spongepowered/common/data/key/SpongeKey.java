@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.key;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
@@ -39,26 +38,27 @@ import org.spongepowered.common.data.value.ValueConstructor;
 import org.spongepowered.common.data.value.ValueConstructorFactory;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 public final class SpongeKey<V extends Value<E>, E> extends SpongeCatalogType implements Key<V> {
 
-    private final TypeToken<V> valueToken;
-    private final TypeToken<E> elementToken;
+    private final Type valueType;
+    private final Type elementType;
     private final Comparator<? super E> elementComparator;
     private final BiPredicate<? super E, ? super E> elementIncludesTester;
     private final ValueConstructor<V, E> valueConstructor;
     private final Supplier<E> defaultValueSupplier;
     private final EmptyDataProvider<V, E> emptyDataProvider;
 
-    public SpongeKey(final ResourceKey key, final TypeToken<V> valueToken, final TypeToken<E> elementToken,
+    public SpongeKey(final ResourceKey key, final Type valueType, final Type elementType,
             final Comparator<? super E> elementComparator,
             final BiPredicate<? super E, ? super E> elementIncludesTester, final Supplier<E> defaultValueSupplier) {
         super(key);
-        this.valueToken = valueToken;
-        this.elementToken = elementToken;
+        this.valueType = valueType;
+        this.elementType = elementType;
         this.elementComparator = elementComparator;
         this.elementIncludesTester = elementIncludesTester;
         this.defaultValueSupplier = defaultValueSupplier;
@@ -67,13 +67,13 @@ public final class SpongeKey<V extends Value<E>, E> extends SpongeCatalogType im
     }
 
     @Override
-    public TypeToken<V> getValueToken() {
-        return this.valueToken;
+    public Type getValueType() {
+        return this.valueType;
     }
 
     @Override
-    public TypeToken<E> getElementToken() {
-        return this.elementToken;
+    public Type getElementType() {
+        return this.elementType;
     }
 
     @Override
@@ -96,7 +96,7 @@ public final class SpongeKey<V extends Value<E>, E> extends SpongeCatalogType im
     protected MoreObjects.ToStringHelper toStringHelper() {
         return MoreObjects.toStringHelper(this)
                 .add("resourceKey", this.getKey())
-                .add("valueToken", this.valueToken);
+                .add("valueToken", this.valueType);
     }
 
     public ValueConstructor<V, E> getValueConstructor() {

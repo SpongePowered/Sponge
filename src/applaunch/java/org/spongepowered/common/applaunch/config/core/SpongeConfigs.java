@@ -24,27 +24,28 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
-import ninja.leaping.configurate.ConfigurationOptions;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.common.applaunch.config.inheritable.GlobalConfig;
 import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
+import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
 import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 
 /**
  * Common utility methods for sponge configurations and necessary helpers for early init.
  */
-public class SpongeConfigs {
+public final class SpongeConfigs {
 
     public static final Blackboard.Key<Boolean> IS_VANILLA_PLATFORM = Blackboard.Key.of("is_vanilla", Boolean.class);
 
@@ -57,10 +58,14 @@ public class SpongeConfigs {
             + "# Discord: https://discord.gg/sponge\n"
             + "# Forums: https://forums.spongepowered.org/\n";
 
+    static final ObjectMapper.Factory OBJECT_MAPPERS = ObjectMapper.factoryBuilder()
+            .addNodeResolver(NodeResolver.onlyWithSetting())
+            .build();
+
     static final ConfigurationOptions OPTIONS = ConfigurationOptions.defaults()
-            .withHeader(HEADER)
-            .withShouldCopyDefaults(true)
-            .withSerializers(collection -> collection.register(TokenHoldingString.SERIALIZER));
+            .header(HEADER)
+            .serializers(collection -> collection.register(TokenHoldingString.SERIALIZER)
+                    .registerAnnotatedObjects(OBJECT_MAPPERS));
 
     static final Logger LOGGER = LogManager.getLogger();
 
@@ -129,8 +134,8 @@ public class SpongeConfigs {
         }
 
         return HoconConfigurationLoader.builder()
-            .setPath(path)
-            .setDefaultOptions(OPTIONS)
+            .path(path)
+            .defaultOptions(OPTIONS)
             .build();
     }
 
@@ -140,7 +145,7 @@ public class SpongeConfigs {
             final ConfigHandle<T> handle = new ConfigHandle<>(instance, loader);
             handle.load();
             return handle;
-        } catch (final IOException | ObjectMappingException ex) {
+        } catch (final ConfigurateException ex) {
             LOGGER.error("Unable to load configuration {}. Sponge will operate in "
                             + "fallback mode, with default configuration options and will not write to the invalid file", fileName, ex);
             return new ConfigHandle<>(instance);
@@ -156,7 +161,7 @@ public class SpongeConfigs {
                         global = new InheritableConfigHandle<>(new GlobalConfig(),
                                 createLoader(getDirectory().resolve(GlobalConfig.FILE_NAME)), null);
                         global.load();
-                    } catch (IOException | ObjectMappingException e) {
+                    } catch (final ConfigurateException e) {
                         LOGGER.error("Unable to load global world configuration in {}. Sponge will run with default settings", GlobalConfig.FILE_NAME, e);
                         global = new InheritableConfigHandle<>(new GlobalConfig(), null);
                     }
@@ -168,6 +173,9 @@ public class SpongeConfigs {
 
     public static InheritableConfigHandle<WorldConfig> createDetached() {
         return new InheritableConfigHandle<>(new WorldConfig(), SpongeConfigs.getGlobalInheritable());
+    }
+
+    private SpongeConfigs() {
     }
 
 }

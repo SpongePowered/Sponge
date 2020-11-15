@@ -24,16 +24,15 @@
  */
 package org.spongepowered.vanilla.installer;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.stream.JsonReader;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
+import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -42,34 +41,35 @@ public final class Installer {
     private final Logger logger;
     private final Path directory;
     private final LibraryManager libraryManager;
-    private final Gson gson;
+    private final ConfigurationLoader<CommentedConfigurationNode> loader;
     private final LauncherConfig config;
 
-    public Installer(final Logger logger, final Path directory) throws IOException {
+    public Installer(final Logger logger, final Path directory) throws ConfigurateException {
         this.logger = logger;
         this.directory = directory;
         final Path launcherConfigFile = this.directory.resolve("launcher.conf");
-        this.gson = new GsonBuilder().setPrettyPrinting().create();
-        if (Files.notExists(launcherConfigFile)) {
-            this.config = new LauncherConfig();
-            this.saveConfig(launcherConfigFile);
-        } else {
-            this.config = this.loadConfig(launcherConfigFile);
-        }
+        this.loader = HoconConfigurationLoader.builder()
+                .path(launcherConfigFile)
+                .defaultOptions(options ->
+                    options.shouldCopyDefaults(true)
+                            .implicitInitialization(true)
+                            .serializers(builder -> builder.registerAnnotatedObjects(ObjectMapper.factoryBuilder()
+                                                         .addNodeResolver(NodeResolver.onlyWithSetting())
+                                                                                             .build()))
+                )
+                .build();
+        this.config = this.loadConfig();
         this.libraryManager = new LibraryManager(this, Paths.get(this.config.librariesDirectory.replace("${BASE_DIRECTORY}",
             directory.toAbsolutePath().toString())));
     }
 
-    private LauncherConfig loadConfig(final Path configFile) throws IOException {
-        try (final JsonReader reader = new JsonReader(new InputStreamReader(Files.newInputStream(configFile)))) {
-            return this.gson.fromJson(reader, LauncherConfig.class);
-        }
-    }
+    private LauncherConfig loadConfig() throws ConfigurateException {
+        final CommentedConfigurationNode node = this.loader.load();
+        final LauncherConfig ret = node.get(LauncherConfig.class);
 
-    private void saveConfig(final Path configFile) throws IOException {
-        try (final Writer writer = Files.newBufferedWriter(configFile, StandardCharsets.UTF_8)) {
-            this.gson.toJson(this.config, writer);
-        }
+        // Write back to apply any additions to the file
+        this.loader.save(node);
+        return ret;
     }
 
     public Logger getLogger() {

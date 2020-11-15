@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.data.persistence.datastore;
 
-import com.google.common.reflect.TypeToken;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -40,12 +43,12 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.configurate.util.Types;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,48 +69,47 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
         DataStore.Builder.EndStep {
 
     private final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> serializers = new IdentityHashMap<>();
-    private final List<TypeToken<? extends DataHolder>> dataHolderTypes = new ArrayList<>();
+    private final List<Type> dataHolderTypes = new ArrayList<>();
     @Nullable private ResourceKey key;
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> SpongeDataStoreBuilder key(Key<? extends Value<T>> key, DataQuery dataQuery) {
-        final TypeToken<?> elementToken = key.getElementToken();
-        final BiFunction<DataView, DataQuery, Optional<T>> deserializer = this.getDeserializer(elementToken);
+    public <T> SpongeDataStoreBuilder key(final Key<? extends Value<T>> key, final DataQuery dataQuery) {
+        final BiFunction<DataView, DataQuery, Optional<T>> deserializer = this.getDeserializer(key.getElementType());
         return this.key(key, (view, value) -> view.set(dataQuery, value), v -> deserializer.apply(v, dataQuery));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public <T> BiFunction<DataView, DataQuery, Optional<T>> getDeserializer(TypeToken<?> elementToken) {
-        Class<?> rawType = elementToken.getRawType();
+    public <T> BiFunction<DataView, DataQuery, Optional<T>> getDeserializer(final Type elementType) {
+        final Class<?> rawType = GenericTypeReflector.erase(elementType);
         final BiFunction<DataView, DataQuery, Optional<T>> deserializer;
-        if (elementToken.isSubtypeOf(DataView.class)) {
+        if (DataView.class.isAssignableFrom(rawType)) {
             deserializer = (view, dataQuery) -> (Optional<T>) view.getView(dataQuery);
-        } else if (elementToken.isSubtypeOf(DataSerializable.class)) {
+        } else if (DataSerializable.class.isAssignableFrom(rawType)) {
             deserializer = (view, dataQuery)  -> (Optional<T>) view.getSerializable(dataQuery, (Class<? extends DataSerializable>) rawType);
-        } else if (elementToken.isSubtypeOf(CatalogType.class)) {
+        } else if (CatalogType.class.isAssignableFrom(rawType)) {
             deserializer = (view, dataQuery)  -> (Optional<T>) view.getCatalogType(dataQuery, ((Class<? extends CatalogType>) rawType));
         } else if (SpongeDataManager.getInstance().getTranslator(rawType).isPresent()) {
             deserializer = (view, dataQuery)  -> (Optional<T>) view.getObject(dataQuery, rawType);
-        } else if (elementToken.isSubtypeOf(Set.class)) {
-            final Type listType = ((ParameterizedType) elementToken.getType()).getActualTypeArguments()[0];
+        } else if (Set.class.isAssignableFrom(rawType)) {
+            final Type listType = ((ParameterizedType) elementType).getActualTypeArguments()[0];
             deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) listType, view, dataQuery).map(list -> new HashSet(list));
-        } else if (elementToken.isSubtypeOf(List.class)) {
-            final Type listType = ((ParameterizedType) elementToken.getType()).getActualTypeArguments()[0];
+        } else if (List.class.isAssignableFrom(rawType)) {
+            final Type listType = ((ParameterizedType) elementType).getActualTypeArguments()[0];
             deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) listType, view, dataQuery);
-        } else if (elementToken.isSubtypeOf(Collection.class)) {
+        } else if (Collection.class.isAssignableFrom(rawType)) {
             throw new UnsupportedOperationException("Collection deserialization is not supported. Provide the deserializer for it.");
-        } else if (elementToken.isArray()) {
-            final Class arrayType = elementToken.getComponentType().getRawType();
+        } else if (Types.isArray(elementType)) {
+            final Class arrayType = GenericTypeReflector.erase(GenericTypeReflector.getArrayComponentType(elementType));
             deserializer = (view, dataQuery)  -> (Optional<T>) SpongeDataStoreBuilder.deserializeList((Class<?>) arrayType, view, dataQuery).map(list -> listToArray(arrayType, list));
-        } else if (elementToken.isSubtypeOf(Map.class)) {
-            final Type[] parameterTypes = ((ParameterizedType) elementToken.getType()).getActualTypeArguments();
+        } else if (Map.class.isAssignableFrom(rawType)) {
+            final Type[] parameterTypes = ((ParameterizedType) elementType).getActualTypeArguments();
             final Type keyType = parameterTypes[0];
             final Type valueType = parameterTypes[1];
             if (!(keyType instanceof Class)) {
                 throw new UnsupportedOperationException("Unsupported map-key type " + keyType);
             }
-            Function<DataQuery, Optional<?>> keyDeserializer;
+            final Function<DataQuery, Optional<?>> keyDeserializer;
             if (((Class<?>) keyType).isAssignableFrom(CatalogType.class)) {
                 keyDeserializer = key -> Sponge.getRegistry().getCatalogRegistry()
                         .get(((Class<? extends CatalogType>) keyType), ResourceKey.resolve(key.toString()));
@@ -120,12 +122,12 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
             } else {
                 throw new UnsupportedOperationException("Unsupported map-key type " + keyType);
             }
-            final TypeToken<?> valueTypeToken = TypeToken.of(valueType);
-            final BiFunction<DataView, DataQuery, Optional<Object>> valueDeserializer = this.getDeserializer(valueTypeToken);
+            final BiFunction<DataView, DataQuery, Optional<Object>> valueDeserializer = this.getDeserializer(valueType);
             deserializer = (view, dataQuery) -> (Optional<T>) view.getView(dataQuery).map(mapView -> {
                 final Map<Object, Object> resultMap = new HashMap<>();
-                for (DataQuery key : mapView.getKeys(false)) {
-                    Object mapKey = keyDeserializer.apply(key).orElseThrow(() -> new UnsupportedOperationException("Key not found " + key + " as " + keyType));
+                for (final DataQuery key : mapView.getKeys(false)) {
+                    final Object mapKey = keyDeserializer.apply(key)
+                                    .orElseThrow(() -> new UnsupportedOperationException("Key not found " + key + " as " + keyType));
                     final Optional<?> mapValue = valueDeserializer.apply(mapView, key);
                     resultMap.put(mapKey, mapValue.get());
                 }
@@ -162,7 +164,7 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
         return this.serializers.isEmpty();
     }
 
-    public List<TypeToken<? extends DataHolder>> getDataHolderTypes() {
+    public List<Type> getDataHolderTypes() {
         return this.dataHolderTypes;
     }
 
@@ -187,15 +189,17 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
     }
 
     @Override
-    public SpongeDataStoreBuilder holder(TypeToken<? extends DataHolder>... typeTokens) {
-        this.dataHolderTypes.addAll(Arrays.asList(typeTokens));
+    public SpongeDataStoreBuilder holder(final TypeToken<? extends DataHolder>... typeTokens) {
+        for (final TypeToken<? extends DataHolder> token : typeTokens) {
+            this.dataHolderTypes.add(token.getType());
+        }
         return this;
     }
 
     @Override
-    public SpongeDataStoreBuilder holder(Class<? extends DataHolder>... types) {
-        for (Class<? extends DataHolder> type : types) {
-            this.dataHolderTypes.add(TypeToken.of(type));
+    public SpongeDataStoreBuilder holder(final Class<? extends DataHolder>... classes) {
+        for (final Class<? extends DataHolder> clazz : classes) {
+            this.dataHolderTypes.add(Types.requireCompleteParameters(clazz));
         }
         return this;
     }
@@ -214,7 +218,7 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
 
     @Override
     public DataStore build() {
-        return new SpongeDataStore(Collections.unmodifiableMap(this.serializers), this.dataHolderTypes);
+        return new SpongeDataStore(ImmutableMap.copyOf(this.serializers), ImmutableList.copyOf(this.dataHolderTypes));
     }
 
     public DataStore buildVanillaDataStore() {

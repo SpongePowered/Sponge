@@ -24,21 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
-import ninja.leaping.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 public interface Config {
-
-    ConfigurationTransformation EMPTY_VERSIONED = ConfigurationTransformation.versionedBuilder().build();
-
-    /**
-     * Path array builder. Will be removed in configurate 4.0.
-     *
-     * @param path path
-     * @return path
-     */
-    static Object[] path(Object... path) {
-        return path;
-    }
 
     /**
      * Get a transformation that will be applied to this configuration on load.
@@ -53,6 +41,6 @@ public interface Config {
      * @return A transformation instance
      */
     default ConfigurationTransformation getTransformation() {
-        return EMPTY_VERSIONED;
+        return ConfigurationTransformation.empty();
     }
 }

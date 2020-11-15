@@ -26,17 +26,27 @@ package org.spongepowered.common.inject.provider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.ProvisionException;
+import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.config.DefaultConfig;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.config.ConfigRoot;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.common.config.PluginConfigManager;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
+import org.spongepowered.configurate.objectmapping.guice.GuiceObjectMapperProvider;
+import org.spongepowered.configurate.reference.ConfigurationReference;
+import org.spongepowered.configurate.serialize.TypeSerializerCollection;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.io.File;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -45,18 +55,74 @@ import java.nio.file.Path;
 public final class PluginConfigurationModule extends AbstractModule {
 
     private static final TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>> COMMENTED_CONFIGURATION_NODE_LOADER = new TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>>() {};
+    private static final TypeLiteral<ConfigurationReference<CommentedConfigurationNode>> COMMENTED_CONFIGURATION_NODE_REFERENCE = new TypeLiteral<ConfigurationReference<CommentedConfigurationNode>>() {};
 
     @Override
     protected void configure() {
-        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.NON_SHARED).toProvider(NonSharedDirAsPath.class);
+        this.bind(Path.class)
+                .annotatedWith(ConfigDirAnnotation.NON_SHARED)
+                .toProvider(NonSharedDirAsPath.class);
         // Plugin-private directory config file
-        this.bind(Path.class).annotatedWith(DefaultConfigAnnotation.NON_SHARED).toProvider(NonSharedPathAsPath.class);
+        this.bind(Path.class)
+                .annotatedWith(DefaultConfigAnnotation.NON_SHARED)
+                .toProvider(NonSharedPathAsPath.class);
         // Shared-directory config file
-        this.bind(Path.class).annotatedWith(DefaultConfigAnnotation.SHARED).toProvider(SharedDirAsPath.class);
+        this.bind(Path.class)
+                .annotatedWith(DefaultConfigAnnotation.SHARED)
+                .toProvider(SharedDirAsPath.class);
+
+        // Access plugin-specific type serializers
+        this.bind(TypeSerializerCollection.class)
+                .toProvider(TypeSerializers.class)
+                .in(Scopes.SINGLETON);
+
         // Loader for shared-directory config file
-        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER).annotatedWith(DefaultConfigAnnotation.SHARED).toProvider(SharedCommentedConfigurationNode.class);
+        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER)
+                .annotatedWith(DefaultConfigAnnotation.SHARED)
+                .toProvider(SharedCommentedConfigurationNode.class);
+
         // Loader for plugin-private directory config file
-        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER).annotatedWith(DefaultConfigAnnotation.NON_SHARED).toProvider(PrivateCommentedConfigurationNode.class);
+        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER)
+                .annotatedWith(DefaultConfigAnnotation.NON_SHARED)
+                .toProvider(PrivateCommentedConfigurationNode.class);
+
+        // Auto-reloading reference for shared-directory config files
+        this.bind(COMMENTED_CONFIGURATION_NODE_REFERENCE)
+                .annotatedWith(DefaultConfigAnnotation.SHARED)
+                .toProvider(SharedCommentedConfigurationNodeReference.class);
+
+        // Auto-reloading reference for plugin-private directory config files
+        this.bind(COMMENTED_CONFIGURATION_NODE_REFERENCE)
+                .annotatedWith(DefaultConfigAnnotation.NON_SHARED)
+                .toProvider(PrivateCommentedConfigurationNodeReference.class);
+
+        this.requestStaticInjection(IHateGuiceInjectorProvider.class);
+    }
+
+    /**
+     * So... we need a way to get the final Injector used to create the plugin
+     * instance, but Guice doesn't want to give us that in the provider for the
+     * TypeSerializerCollection.
+     *
+     * Instead, we request static injection of this class, which collects the
+     * necessary information right as the Injector is created, but before it
+     * has been passed to the plugin loader to create the plugin instance.
+     *
+     * Please, please try to find something nicer. I give up.
+     */
+    static final class IHateGuiceInjectorProvider {
+
+        private static final Map<PluginContainer, Injector> injectors = new ConcurrentHashMap<>();
+
+        @Inject
+        static void acceptRegistration(final PluginContainer container, final Injector injector) {
+            IHateGuiceInjectorProvider.injectors.put(container, injector);
+        }
+
+        public static @Nullable Injector get(final PluginContainer container) {
+            return IHateGuiceInjectorProvider.injectors.get(container);
+        }
+
     }
 
     /**
@@ -64,13 +130,20 @@ public final class PluginConfigurationModule extends AbstractModule {
      *
      * {@literal @}ConfigDir(sharedRoot = false) Path configDir;
      */
-    public static class NonSharedDirAsPath implements Provider<Path> {
+    static final class NonSharedDirAsPath implements Provider<Path> {
 
-        @Inject private PluginContainer container;
+        private final PluginContainer container;
+        private final PluginConfigManager mgr;
+
+        @Inject
+        NonSharedDirAsPath(final PluginContainer container, final PluginConfigManager mgr) {
+            this.container = container;
+            this.mgr = mgr;
+        }
 
         @Override
         public Path get() {
-            return PluginConfigManager.getPrivateRoot(this.container).getDirectory();
+            return this.mgr.getPluginConfig(this.container).getDirectory();
         }
 
     }
@@ -80,13 +153,20 @@ public final class PluginConfigurationModule extends AbstractModule {
      *
      * {@literal @}DefaultConfig(sharedRoot = false) Path configPath;
      */
-    public static class NonSharedPathAsPath implements Provider<Path> {
+    static final class NonSharedPathAsPath implements Provider<Path> {
 
-        @Inject private PluginContainer container;
+        private final PluginContainer container;
+        private final PluginConfigManager mgr;
+
+        @Inject
+        NonSharedPathAsPath(final PluginContainer container, final PluginConfigManager mgr) {
+            this.container = container;
+            this.mgr = mgr;
+        }
 
         @Override
         public Path get() {
-            return PluginConfigManager.getPrivateRoot(this.container).getConfigPath();
+            return this.mgr.getPluginConfig(this.container).getConfigPath();
         }
 
     }
@@ -96,40 +176,171 @@ public final class PluginConfigurationModule extends AbstractModule {
      *
      * {@literal @}DefaultConfig(sharedRoot = true) Path configFile;
      */
-    static class SharedDirAsPath implements Provider<Path> {
+    static final class SharedDirAsPath implements Provider<Path> {
 
-        @Inject private PluginContainer container;
+        private final PluginContainer container;
+        private final PluginConfigManager mgr;
+
+        @Inject
+        SharedDirAsPath(final PluginContainer container, final PluginConfigManager mgr) {
+            this.container = container;
+            this.mgr = mgr;
+        }
 
         @Override
         public Path get() {
-            return PluginConfigManager.getSharedRoot(this.container).getConfigPath();
+            return this.mgr.getSharedConfig(this.container).getConfigPath();
         }
 
     }
 
-    static abstract class CommentedConfigurationNodeProvider implements Provider<ConfigurationLoader<CommentedConfigurationNode>> {
+    abstract static class CommentedConfigurationNodeProvider implements Provider<ConfigurationLoader<CommentedConfigurationNode>> {
 
-        @Inject protected PluginContainer container;
+        protected final PluginContainer container;
+        protected final PluginConfigManager mgr;
+        protected final Provider<TypeSerializerCollection> serializers;
 
-        CommentedConfigurationNodeProvider() {
+        @Inject
+        CommentedConfigurationNodeProvider(final PluginContainer container, final PluginConfigManager mgr,
+                final Provider<TypeSerializerCollection> serializers) {
+            this.container = container;
+            this.mgr = mgr;
+            this.serializers = serializers;
         }
 
     }
 
-    static class SharedCommentedConfigurationNode extends CommentedConfigurationNodeProvider {
+    static final class SharedCommentedConfigurationNode extends CommentedConfigurationNodeProvider {
+
+        @Inject
+        SharedCommentedConfigurationNode(final PluginContainer container, final PluginConfigManager mgr,
+                final Provider<TypeSerializerCollection> serializers) {
+            super(container, mgr, serializers);
+        }
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return PluginConfigManager.getSharedRoot(this.container).getConfig();
+            return this.mgr.getSharedConfig(this.container).getConfig(PluginConfigManager.getOptions(this.serializers.get()));
         }
 
     }
 
-    static class PrivateCommentedConfigurationNode extends CommentedConfigurationNodeProvider {
+    static final class PrivateCommentedConfigurationNode extends CommentedConfigurationNodeProvider {
+
+        @Inject
+        PrivateCommentedConfigurationNode(final PluginContainer container, final PluginConfigManager mgr,
+                final Provider<TypeSerializerCollection> serializers) {
+            super(container, mgr, serializers);
+        }
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return PluginConfigManager.getPrivateRoot(this.container).getConfig();
+            return this.mgr.getPluginConfig(this.container).getConfig(PluginConfigManager.getOptions(this.serializers.get()));
+        }
+
+    }
+
+    abstract static class CommentedConfigurationNodeReferenceProvider implements Provider<ConfigurationReference<CommentedConfigurationNode>> {
+
+        protected final PluginContainer container;
+        protected final PluginConfigManager mgr;
+        protected final Provider<TypeSerializerCollection> serializers;
+
+        @Inject
+        CommentedConfigurationNodeReferenceProvider(final PluginContainer container, final PluginConfigManager mgr,
+                final Provider<TypeSerializerCollection> serializers) {
+            this.container = container;
+            this.mgr = mgr;
+            this.serializers = serializers;
+        }
+
+        /**
+         * Set up error logging for the created reference in the plugin's logger.
+         *
+         * @param file File loaded from
+         * @param reference Configuration reference to configure
+         * @param <N> node type
+         * @return input {@code reference}
+         */
+        protected <N extends ConfigurationNode> ConfigurationReference<N> configureLogging(final Path file,
+                final ConfigurationReference<N> reference) {
+            reference.errors().subscribe(error -> {
+                final ConfigurationReference.ErrorPhase phase = error.getKey();
+                final Throwable cause = error.getValue();
+                this.container.getLogger().error("Failed to perform a {} in the configuration for {} at {}:",
+                                  phase, this.container.getMetadata().getId(), file, cause);
+            });
+            return reference;
+        }
+
+    }
+
+    static final class SharedCommentedConfigurationNodeReference extends CommentedConfigurationNodeReferenceProvider {
+
+        @Inject
+        SharedCommentedConfigurationNodeReference(final PluginContainer container, final PluginConfigManager mgr,
+                final Provider<TypeSerializerCollection> serializers) {
+            super(container, mgr, serializers);
+        }
+
+        @Override
+        public ConfigurationReference<CommentedConfigurationNode> get() {
+            final ConfigRoot shared = this.mgr.getSharedConfig(this.container);
+            try {
+                return this.<CommentedConfigurationNode>configureLogging(shared.getConfigPath(), this.mgr.getWatchServiceListener()
+                         .listenToConfiguration(path -> shared.getConfig(PluginConfigManager.getOptions(this.serializers.get())), shared.getConfigPath()));
+            } catch (final ConfigurateException ex) {
+                throw new ProvisionException("Unable to load configuration reference", ex);
+            }
+        }
+
+    }
+
+    static final class PrivateCommentedConfigurationNodeReference extends CommentedConfigurationNodeReferenceProvider {
+
+        @Inject
+        PrivateCommentedConfigurationNodeReference(final PluginContainer container, final PluginConfigManager mgr,
+                final Provider<TypeSerializerCollection> serializers) {
+            super(container, mgr, serializers);
+        }
+
+        @Override
+        public ConfigurationReference<CommentedConfigurationNode> get() {
+            final ConfigRoot privateRoot = this.mgr.getPluginConfig(this.container);
+            try {
+                return this.<CommentedConfigurationNode>configureLogging(privateRoot.getConfigPath(), this.mgr.getWatchServiceListener()
+                        .listenToConfiguration(path -> privateRoot.getConfig(PluginConfigManager.getOptions(this.serializers.get())),
+                                               privateRoot.getConfigPath()));
+            } catch (final ConfigurateException ex) {
+                throw new ProvisionException("Unable to load configuration reference", ex);
+            }
+        }
+
+    }
+
+    static final class TypeSerializers implements Provider<TypeSerializerCollection> {
+
+        private final PluginContainer container;
+        private final PluginConfigManager mgr;
+
+        @Inject
+        TypeSerializers(final PluginContainer container, final PluginConfigManager mgr) {
+            this.container = container;
+            this.mgr = mgr;
+        }
+
+        @Override
+        public TypeSerializerCollection get() {
+            final @Nullable Injector injector = IHateGuiceInjectorProvider.get(this.container);
+            if (injector == null) {
+                return this.mgr.getSerializers();
+            } else {
+                return this.mgr.getSerializers().childBuilder()
+                        .registerAnnotatedObjects(ObjectMapper.factoryBuilder()
+                              .addDiscoverer(GuiceObjectMapperProvider.injectedObjectDiscoverer(injector))
+                              .build())
+                        .build();
+            }
         }
 
     }

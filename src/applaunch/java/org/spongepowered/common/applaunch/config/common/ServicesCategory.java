@@ -24,23 +24,26 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public final class ServicesCategory {
 
-    @Setting(value = "service-plugin",
-            comment = "Services specified here can be implemented by plugins. To ensure that a"
-                    + "specific plugin implements a given service, set the relevant option to its"
-                    + "plugin ID. If you wish to use Sponge's default for a given service, use"
-                    + "'sponge' as the ID.\n\n"
-                    + "If the plugin ID is unknown, or the option is set to '?', all plugins will"
-                    + "be given the opportunity to register their service. If multiple plugins"
-                    + "attempt to register, one will be picked in an implementation dependent way."
-                    + "If no plugins attempt to register a service, the Sponge default will be used"
-                    + "if one exists.\n\n"
-                    + "No Sponge default service exists for the Economy service.")
+    public static final String UNSPECIFIED = "?";
+
+    @Setting("service-plugin")
+    @Comment("Services specified here can be implemented by plugins. To ensure that a"
+             + "specific plugin implements a given service, set the relevant option to its"
+             + "plugin ID. If you wish to use Sponge's default for a given service, use"
+             + "'sponge' as the ID.\n\n"
+             + "If the plugin ID is unknown, or the option is set to '?', all plugins will"
+             + "be given the opportunity to register their service. If multiple plugins"
+             + "attempt to register, one will be picked in an implementation dependent way."
+             + "If no plugins attempt to register a service, the Sponge default will be used"
+             + "if one exists.\n\n"
+             + "No Sponge default service exists for the Economy service.")
     private ServicePluginSubCategory servicePlugin = new ServicePluginSubCategory();
 
     public ServicePluginSubCategory getServicePlugin() {
@@ -50,20 +53,25 @@ public final class ServicesCategory {
     @ConfigSerializable
     public static final class ServicePluginSubCategory {
 
-        @Setting(value = "ban-service", comment = "Specifies the plugin that will provide the ban service")
-        private String banService = "?";
+        @Setting("ban-service")
+        @Comment("Specifies the plugin that will provide the ban service")
+        private String banService = UNSPECIFIED;
 
-        @Setting(value = "economy-service", comment = "Specifies the plugin that will provide the economy service")
-        private String economyService = "?";
+        @Setting("economy-service")
+        @Comment("Specifies the plugin that will provide the economy service")
+        private String economyService = UNSPECIFIED;
 
-        @Setting(value = "pagination-service", comment = "Specifies the plugin that will provide the pagination service")
-        private String paginationService = "?";
+        @Setting("pagination-service")
+        @Comment("Specifies the plugin that will provide the pagination service")
+        private String paginationService = UNSPECIFIED;
 
-        @Setting(value = "permission-service", comment = "Specifies the plugin that will provide the permission service")
-        private String permissionService = "?";
+        @Setting("permission-service")
+        @Comment("Specifies the plugin that will provide the permission service")
+        private String permissionService = UNSPECIFIED;
 
-        @Setting(value = "whitelist-service", comment = "Specifies the plugin that will provide the whitelist service")
-        private String whitelistService = "?";
+        @Setting("whitelist-service")
+        @Comment("Specifies the plugin that will provide the whitelist service")
+        private String whitelistService = UNSPECIFIED;
 
         public String getBanService() {
             return this.banService;

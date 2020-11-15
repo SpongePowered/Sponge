@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public class BungeeCordCategory {
 
-    @Setting(value = "ip-forwarding", comment = "If 'true', allows BungeeCord to forward IP address, UUID, and Game Profile to this server.")
+    @Setting(value = "ip-forwarding")
+    @Comment("If 'true', allows BungeeCord to forward IP address, UUID, and Game Profile to this server.")
     private boolean ipForwarding = false;
 
     public boolean getIpForwarding() {

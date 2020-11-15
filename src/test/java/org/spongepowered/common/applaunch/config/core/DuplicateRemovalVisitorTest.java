@@ -32,185 +32,187 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.spongepowered.configurate.BasicConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.junit.jupiter.api.Test;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 public class DuplicateRemovalVisitorTest {
 
     @Test
     void testEmpty() {
-        final ConfigurationNode parent = ConfigurationNode.root();
-        final ConfigurationNode child = ConfigurationNode.root();
+        final ConfigurationNode parent = BasicConfigurationNode.root();
+        final ConfigurationNode child = BasicConfigurationNode.root();
         DuplicateRemovalVisitor.visit(child, parent);
     }
 
     @Test
     void testClearEqualValues() {
-        final ConfigurationNode parent = ConfigurationNode.root();
-        final ConfigurationNode child = ConfigurationNode.root();
-        parent.setValue("test");
-        child.setValue("test");
+        final ConfigurationNode parent = BasicConfigurationNode.root();
+        final ConfigurationNode child = BasicConfigurationNode.root();
+        parent.raw("test");
+        child.raw("test");
         DuplicateRemovalVisitor.visit(child, parent);
-        assertNull(child.getValue());
+        assertNull(child.raw());
     }
 
     @Test
     void testClearsEqualDoubles() {
-        final ConfigurationNode parent = ConfigurationNode.root();
-        final ConfigurationNode child = ConfigurationNode.root();
+        final ConfigurationNode parent = BasicConfigurationNode.root();
+        final ConfigurationNode child = BasicConfigurationNode.root();
 
-        parent.setValue(3d);
-        child.setValue(3d);
+        parent.raw(3d);
+        child.raw(3d);
         DuplicateRemovalVisitor.visit(child, parent);
-        assertEquals(3d, parent.getValue());
-        assertNull(child.getValue());
+        assertEquals(3d, parent.raw());
+        assertNull(child.raw());
 
-        child.setValue(3);
+        child.raw(3);
         DuplicateRemovalVisitor.visit(child, parent);
-        assertNull(child.getValue());
+        assertNull(child.raw());
     }
 
     @Test
     void testClearsEqualDoublesInChild() {
-        final ConfigurationNode parent = ConfigurationNode.root();
-        final ConfigurationNode child = ConfigurationNode.root();
+        final ConfigurationNode parent = BasicConfigurationNode.root();
+        final ConfigurationNode child = BasicConfigurationNode.root();
 
-        parent.getNode("test").setValue(42);
-        child.getNode("test").setValue(42d);
+        parent.node("test").raw(42);
+        child.node("test").raw(42d);
 
         DuplicateRemovalVisitor.visit(child, parent);
 
-        assertTrue(child.isEmpty());
-        assertNull(child.getNode("test").getValue());
+        assertTrue(child.empty());
+        assertNull(child.node("test").raw());
     }
 
     @Test
     void testClearsMapKeys() {
-        final ConfigurationNode parent = ConfigurationNode.root(n -> {
-            n.getNode("test1").setValue("yeet");
-            n.getNode("test2").setValue("yoink");
+        final ConfigurationNode parent = BasicConfigurationNode.root(n -> {
+            n.node("test1").raw("yeet");
+            n.node("test2").raw("yoink");
         });
-        final ConfigurationNode child = ConfigurationNode.root(n -> {
-            n.getNode("test1").setValue("yeet");
-            n.getNode("test2").setValue("yikes");
+        final ConfigurationNode child = BasicConfigurationNode.root(n -> {
+            n.node("test1").raw("yeet");
+            n.node("test2").raw("yikes");
         });
 
         DuplicateRemovalVisitor.visit(child, parent);
-        assertTrue(child.getNode("test1").isVirtual());
-        assertEquals("yikes", child.getNode("test2").getValue());
+        assertTrue(child.node("test1").virtual());
+        assertEquals("yikes", child.node("test2").raw());
     }
 
     @Test
-    void testPreservesListElements() {
-        final ConfigurationNode parent = ConfigurationNode.root(n -> {
-            n.appendListNode().setValue("one");
-            n.appendListNode().setValue("two");
-            n.appendListNode().setValue("red");
-            n.appendListNode().setValue("blue");
+    void testPreservesListElements() throws SerializationException {
+        final ConfigurationNode parent = BasicConfigurationNode.root(n -> {
+            n.appendListNode().raw("one");
+            n.appendListNode().raw("two");
+            n.appendListNode().raw("red");
+            n.appendListNode().raw("blue");
         });
-        final ConfigurationNode child = ConfigurationNode.root(n -> {
-            n.appendListNode().setValue("one");
-            n.appendListNode().setValue("two");
-            n.appendListNode().setValue("red");
-            n.appendListNode().setValue("green");
+        final ConfigurationNode child = BasicConfigurationNode.root(n -> {
+            n.appendListNode().raw("one");
+            n.appendListNode().raw("two");
+            n.appendListNode().raw("red");
+            n.appendListNode().raw("green");
         });
         DuplicateRemovalVisitor.visit(child, parent);
-        assertEquals(ImmutableList.of("one", "two", "red", "green"), child.getList(String::valueOf));
+        assertEquals(ImmutableList.of("one", "two", "red", "green"), child.getList(String.class));
     }
 
     @Test
     void testEqualListCleared() {
-        final ConfigurationNode parent = ConfigurationNode.root(n -> {
-            n.appendListNode().setValue("one");
-            n.appendListNode().setValue("two");
+        final ConfigurationNode parent = BasicConfigurationNode.root(n -> {
+            n.appendListNode().raw("one");
+            n.appendListNode().raw("two");
             n.appendListNode().act(c -> {
-                c.getNode("zombie").setValue(false);
-                c.getNode("villager").setValue(false);
-                c.getNode("cat").setValue(true);
-                c.getNode("ocelot").setValue(true);
+                c.node("zombie").raw(false);
+                c.node("villager").raw(false);
+                c.node("cat").raw(true);
+                c.node("ocelot").raw(true);
             });
-            n.appendListNode().setValue("blue");
+            n.appendListNode().raw("blue");
         });
-        final ConfigurationNode child = ConfigurationNode.root(n -> {
-            n.appendListNode().setValue("one");
-            n.appendListNode().setValue("two");
+        final ConfigurationNode child = BasicConfigurationNode.root(n -> {
+            n.appendListNode().raw("one");
+            n.appendListNode().raw("two");
             n.appendListNode().act(c -> {
-                c.getNode("zombie").setValue(false);
-                c.getNode("villager").setValue(false);
-                c.getNode("cat").setValue(true);
-                c.getNode("ocelot").setValue(true);
+                c.node("zombie").raw(false);
+                c.node("villager").raw(false);
+                c.node("cat").raw(true);
+                c.node("ocelot").raw(true);
             });
-            n.appendListNode().setValue("blue");
+            n.appendListNode().raw("blue");
         });
         DuplicateRemovalVisitor.visit(child, parent);
-        assertTrue(child.isEmpty());
-        assertNull(child.getValue());
+        assertTrue(child.empty());
+        assertNull(child.raw());
     }
 
     @Test
     void testMapKeysClearedInList() {
-        final ConfigurationNode parent = ConfigurationNode.root(n -> {
-            n.appendListNode().setValue("one");
-            n.appendListNode().setValue("two");
+        final ConfigurationNode parent = BasicConfigurationNode.root(n -> {
+            n.appendListNode().raw("one");
+            n.appendListNode().raw("two");
             n.appendListNode().act(c -> {
-                c.getNode("zombie").setValue(false);
-                c.getNode("villager").setValue(false);
-                c.getNode("cat").setValue(true);
-                c.getNode("ocelot").setValue(true);
+                c.node("zombie").raw(false);
+                c.node("villager").raw(false);
+                c.node("cat").raw(true);
+                c.node("ocelot").raw(true);
             });
-            n.appendListNode().setValue("blue");
+            n.appendListNode().raw("blue");
         });
-        final ConfigurationNode child = ConfigurationNode.root(n -> {
-            n.appendListNode().setValue("one");
-            n.appendListNode().setValue("two");
+        final ConfigurationNode child = BasicConfigurationNode.root(n -> {
+            n.appendListNode().raw("one");
+            n.appendListNode().raw("two");
             n.appendListNode().act(c -> {
-                c.getNode("zombie").setValue(false);
-                c.getNode("villager").setValue(false);
-                c.getNode("cat").setValue(true);
-                c.getNode("ocelot").setValue(false);
+                c.node("zombie").raw(false);
+                c.node("villager").raw(false);
+                c.node("cat").raw(true);
+                c.node("ocelot").raw(false);
             });
-            n.appendListNode().setValue("blue");
+            n.appendListNode().raw("blue");
         });
         DuplicateRemovalVisitor.visit(child, parent);
 
-        assertEquals(4, child.getChildrenList().size());
-        assertNull(child.getNode(2, "cat").getValue());
-        assertEquals(false, child.getNode(2, "ocelot").getValue());
+        assertEquals(4, child.childrenList().size());
+        assertNull(child.node(2, "cat").raw());
+        assertEquals(false, child.node(2, "ocelot").raw());
     }
 
     @Test
     void testEmptyMapsPreservedInList() {
-        final ConfigurationNode parent = ConfigurationNode.root(n -> {
-            n.appendListNode().setValue("one");
-            n.appendListNode().setValue("two");
+        final ConfigurationNode parent = BasicConfigurationNode.root(n -> {
+            n.appendListNode().raw("one");
+            n.appendListNode().raw("two");
             n.appendListNode().act(c -> {
-                c.getNode("zombie").setValue(false);
-                c.getNode("villager").setValue(false);
-                c.getNode("cat").setValue(true);
-                c.getNode("ocelot").setValue(true);
+                c.node("zombie").raw(false);
+                c.node("villager").raw(false);
+                c.node("cat").raw(true);
+                c.node("ocelot").raw(true);
             });
-            n.appendListNode().setValue("blue");
+            n.appendListNode().raw("blue");
         });
-        final ConfigurationNode child = ConfigurationNode.root(n -> {
-            n.appendListNode().setValue("one");
-            n.appendListNode().setValue("two");
+        final ConfigurationNode child = BasicConfigurationNode.root(n -> {
+            n.appendListNode().raw("one");
+            n.appendListNode().raw("two");
             n.appendListNode().act(c -> {
-                c.getNode("zombie").setValue(false);
-                c.getNode("villager").setValue(false);
-                c.getNode("cat").setValue(true);
-                c.getNode("ocelot").setValue(true);
+                c.node("zombie").raw(false);
+                c.node("villager").raw(false);
+                c.node("cat").raw(true);
+                c.node("ocelot").raw(true);
             });
-            n.appendListNode().setValue("green");
+            n.appendListNode().raw("green");
         });
 
         DuplicateRemovalVisitor.visit(child, parent);
 
-        final ConfigurationNode expected = ConfigurationNode.root(n -> {
-            n.appendListNode().setValue("one");
-            n.appendListNode().setValue("two");
-            n.appendListNode().setValue(ImmutableMap.of());
-            n.appendListNode().setValue("green");
+        final ConfigurationNode expected = BasicConfigurationNode.root(n -> {
+            n.appendListNode().raw("one");
+            n.appendListNode().raw("two");
+            n.appendListNode().raw(ImmutableMap.of());
+            n.appendListNode().raw("green");
         });
 
         assertEquals(expected, child);
@@ -219,23 +221,23 @@ public class DuplicateRemovalVisitorTest {
     @Test
     void testSpongeExample() {
         final ConfigurationNode parent = CommentedConfigurationNode.root(p -> {
-            p.getNode("sponge", "world-generation-modifiers").setValue(ImmutableList.of()).setComment("World Generation Modifiers to apply to the "
+            p.node("sponge", "world-generation-modifiers").raw(ImmutableList.of()).comment("World Generation Modifiers to apply to the "
                     + "world");
-            p.getNode("sponge", "player-block-tracker").act(pBT -> {
-                ((CommentedConfigurationNode) pBT.getNode("block-blacklist")).setValue(ImmutableList.of()).setComment("Block IDs that will be "
+            p.node("sponge", "player-block-tracker").act(pBT -> {
+                pBT.node("block-blacklist").raw(ImmutableList.of()).comment("Block IDs that will be "
                         + "blacklisted for player block placement tracking");
-                pBT.getNode("enabled").setValue(true);
+                pBT.node("enabled").raw(true);
             });
         });
         final ConfigurationNode child = parent.copy();
 
         DuplicateRemovalVisitor.visit(child, parent);
-        assertTrue(child.isEmpty());
+        assertTrue(child.empty());
     }
 
     @Test
     void testVisitWithNullParentFails() {
-        assertThrows(NullPointerException.class, () -> DuplicateRemovalVisitor.visit(ConfigurationNode.root(), null));
+        assertThrows(NullPointerException.class, () -> DuplicateRemovalVisitor.visit(BasicConfigurationNode.root(), null));
     }
 
 }

@@ -36,7 +36,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
@@ -236,11 +236,11 @@ class TimingsExport extends Thread {
         return timingsCost;
     }
 
-    private static JsonElement serializeConfigNode(ConfigurationNode node) {
+    private static JsonElement serializeConfigNode(final ConfigurationNode node) {
         if (node.isMap()) {
-            JsonObject object = new JsonObject();
-            for (Entry<Object, ? extends ConfigurationNode> entry : node.getChildrenMap().entrySet()) {
-                String fullPath = CONFIG_PATH_JOINER.join(entry.getValue().getPath());
+            final JsonObject object = new JsonObject();
+            for (final Entry<Object, ? extends ConfigurationNode> entry : node.childrenMap().entrySet()) {
+                final String fullPath = CONFIG_PATH_JOINER.join(entry.getValue().path());
                 if (fullPath.equals("sponge.sql") || TimingsManager.hiddenConfigs.contains(fullPath)) {
                     continue;
                 }
@@ -249,13 +249,13 @@ class TimingsExport extends Thread {
             return object;
         }
         if (node.isList()) {
-            JsonArray array = new JsonArray();
-            for (ConfigurationNode child : node.getChildrenList()) {
+            final JsonArray array = new JsonArray();
+            for (final ConfigurationNode child : node.childrenList()) {
                 array.add(serializeConfigNode(child));
             }
             return array;
         }
-        return JSONUtil.toJsonElement(node.getValue());
+        return JSONUtil.toJsonElement(node.raw());
     }
 
     @Override

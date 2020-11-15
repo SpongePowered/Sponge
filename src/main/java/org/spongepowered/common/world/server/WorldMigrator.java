@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.world.server;
 
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.apache.commons.io.FileUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -59,18 +60,18 @@ public final class WorldMigrator {
 
         if (Files.exists(bukkitYml)) {
             try {
-                final ConfigurationNode node = YAMLConfigurationLoader.builder().setPath(bukkitYml).build().load();
-                final String containerCandidate = node.getNode("settings", "world-container").getString("");
+                final ConfigurationNode node = YamlConfigurationLoader.builder().path(bukkitYml).build().load();
+                final String containerCandidate = node.node("settings", "world-container").getString("");
                 if (!containerCandidate.isEmpty()) {
                     try {
-                        worldContainer = Paths.get(worldContainer.toString()).resolve(containerCandidate);
-                    } catch (InvalidPathException ipe) {
+                        worldContainer = worldContainer.resolve(containerCandidate);
+                    } catch (final InvalidPathException ipe) {
                         SpongeCommon.getLogger().warn("Cannot use path [{}] specified under [world-container] in bukkit"
                                 + ".yml. Will use [{}] instead.", containerCandidate, worldContainer, ipe);
                     }
                 }
-            } catch (IOException ioe) {
-                SpongeCommon.getLogger().warn("Cannot load bukkit.yml. Will use [{}] instead.", worldContainer, ioe);
+            } catch (final ConfigurateException ex) {
+                SpongeCommon.getLogger().warn("Cannot load bukkit.yml. Will use [{}] instead.", worldContainer, ex);
             }
         }
 

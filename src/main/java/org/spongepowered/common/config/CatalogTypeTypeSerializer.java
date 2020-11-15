@@ -24,38 +24,49 @@
  */
 package org.spongepowered.common.config;
 
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import io.leangen.geantyref.GenericTypeReflector;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.registry.GameRegistry;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
-import org.spongepowered.common.SpongeCommon;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
+
+import javax.inject.Inject;
 
 /**
  * A {@link TypeSerializer} implementation that allows CatalogType values to be used in object-mapped classes.
  */
 public final class CatalogTypeTypeSerializer implements TypeSerializer<CatalogType> {
-    public static final TypeToken<CatalogType> TYPE = TypeToken.of(CatalogType.class);
-    public static final CatalogTypeTypeSerializer INSTANCE = new CatalogTypeTypeSerializer();
+    public static final Class<CatalogType> TYPE = CatalogType.class;
 
-    private CatalogTypeTypeSerializer() {
+    private final GameRegistry registry;
+
+    @Inject
+    CatalogTypeTypeSerializer(final GameRegistry registry) {
+        this.registry = registry;
     }
 
     @Override
-    public CatalogType deserialize(final TypeToken<?> type, final ConfigurationNode value) throws ObjectMappingException {
-        final Optional<? extends CatalogType> ret = SpongeCommon.getRegistry().getCatalogRegistry()
-                        .get(type.getRawType().asSubclass(CatalogType.class), ResourceKey.resolve(value.getString()));
+    public CatalogType deserialize(final Type type, final ConfigurationNode value) throws SerializationException {
+        final Optional<? extends CatalogType> ret = this.registry.getCatalogRegistry()
+                        .get(GenericTypeReflector.erase(type).asSubclass(CatalogType.class), ResourceKey.resolve(value.getString()));
         if (!ret.isPresent()) {
-            throw new ObjectMappingException("Input '" + value.getValue() + "' was not a valid value for type " + type);
+            throw new SerializationException("Input '" + value.raw() + "' was not a valid value for type " + type);
         }
         return ret.get();
     }
 
     @Override
-    public void serialize(final TypeToken<?> type, final CatalogType obj, final ConfigurationNode value) {
-        value.setValue(obj.getKey().getFormatted());
+    public void serialize(final Type type, final @Nullable CatalogType obj, final ConfigurationNode value) throws SerializationException {
+        if (obj == null) {
+            value.set(null);
+        } else {
+            value.set(obj.getKey().getFormatted());
+        }
     }
 }

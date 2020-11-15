@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.config.metrics;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import ninja.leaping.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.NodePath;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.applaunch.config.core.Config;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collections;
@@ -41,18 +42,18 @@ public class MetricsConfiguration implements Config {
 
     public static String FILE_NAME = SpongeConfigs.METRICS_NAME;
 
-    @Setting(value = "global-state", comment = "The global collection state that should be respected by all plugins that have no specified "
-      + "collection state. If undefined then it is treated as disabled.")
+    @Comment("The global collection state that should be respected by all plugins that have no specified "
+             + "collection state. If undefined then it is treated as disabled.")
     private Tristate globalState = Tristate.UNDEFINED;
 
-    @Setting(value = "plugin-states", comment = "Plugin-specific collection states that override the global collection state.")
+    @Comment("Plugin-specific collection states that override the global collection state.")
     private final Map<String, Tristate> pluginStates = new HashMap<>();
 
     public Tristate getGlobalCollectionState() {
         return this.globalState;
     }
 
-    public Tristate getCollectionState(PluginContainer container) {
+    public Tristate getCollectionState(final PluginContainer container) {
         final Tristate pluginState = this.pluginStates.get(container.getMetadata().getId());
         return pluginState == null ? Tristate.UNDEFINED : pluginState;
     }
@@ -64,9 +65,8 @@ public class MetricsConfiguration implements Config {
     @Override
     public ConfigurationTransformation getTransformation() {
         return ConfigurationTransformation.versionedBuilder()
-                .addVersion(1, ConfigurationTransformation.builder()
-                        .addAction(Config.path("metrics"), (path, value) -> new Object[0])
-                        .build())
+                .makeVersion(1, b ->
+                        b.addAction(NodePath.path("metrics"), (path, value) -> new Object[0]))
                 .build();
     }
 }

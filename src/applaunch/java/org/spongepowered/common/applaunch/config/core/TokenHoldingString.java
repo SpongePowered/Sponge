@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.ScalarSerializer;
+import org.spongepowered.configurate.serialize.ScalarSerializer;
 import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
+import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,7 +44,7 @@ import java.util.regex.Pattern;
 /**
  * Holder for a string value that is parsed for environment variables.
  */
-public class TokenHoldingString {
+public final class TokenHoldingString {
 
     static final ScalarSerializer<TokenHoldingString> SERIALIZER = new Serializer();
 
@@ -125,19 +124,19 @@ public class TokenHoldingString {
         return this.parsedValue;
     }
 
-    static class Serializer extends ScalarSerializer<TokenHoldingString> {
+    static final class Serializer extends ScalarSerializer<TokenHoldingString> {
 
         Serializer() {
             super(TokenHoldingString.class);
         }
 
         @Override
-        public TokenHoldingString deserialize(TypeToken<?> type, Object obj) throws ObjectMappingException {
+        public TokenHoldingString deserialize(final Type type, final Object obj) {
             return TokenHoldingString.of(obj.toString());
         }
 
         @Override
-        public Object serialize(TokenHoldingString item, Predicate<Class<?>> typeSupported) {
+        public Object serialize(final TokenHoldingString item, final Predicate<Class<?>> typeSupported) {
             return item.getPlain();
         }
 

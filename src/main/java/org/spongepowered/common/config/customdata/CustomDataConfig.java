@@ -24,21 +24,21 @@
  */
 package org.spongepowered.common.config.customdata;
 
-import ninja.leaping.configurate.objectmapping.Setting;
 import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 public final class CustomDataConfig implements Config {
 
     public static final String FILE_NAME = "custom_data.conf";
 
-    @Setting(value = "data-registration")
-    private CustomDataRegistrationCategory datalists = new CustomDataRegistrationCategory();
+    @Setting
+    private CustomDataRegistrationCategory dataRegistration = new CustomDataRegistrationCategory();
 
     public CustomDataConfig() {
     }
 
     public CustomDataRegistrationCategory getDataRegistrationConfig() {
-        return this.datalists;
+        return this.dataRegistration;
     }
 
 }

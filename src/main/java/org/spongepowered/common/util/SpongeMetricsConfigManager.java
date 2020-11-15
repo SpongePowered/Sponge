@@ -25,7 +25,7 @@
 package org.spongepowered.common.util;
 
 import com.google.inject.Singleton;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
@@ -33,14 +33,12 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.config.metrics.MetricsConfiguration;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.io.IOException;
-
 @Singleton
 public class SpongeMetricsConfigManager implements MetricsConfigManager {
 
     private final ConfigHandle<MetricsConfiguration> metrics;
 
-    public SpongeMetricsConfigManager() throws IOException, ObjectMappingException {
+    public SpongeMetricsConfigManager() throws ConfigurateException {
         // This needs to be loaded after the global-inheritable configuration
         // is loaded. That load is performed by the sponge non-inheritable
         // configuration which is loaded way earlier in the lifecycle since it

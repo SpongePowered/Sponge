@@ -27,11 +27,11 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Predicate;
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
+import java.lang.reflect.Type;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -129,17 +129,17 @@ public class IpSet implements Predicate<InetAddress> {
     public static final class IpSetSerializer implements TypeSerializer<IpSet> {
 
         @Override
-        public IpSet deserialize(final TypeToken<?> type, final ConfigurationNode value) throws ObjectMappingException {
+        public IpSet deserialize(final Type type, final ConfigurationNode value) throws SerializationException {
             try {
                 return IpSet.fromCidr(value.getString());
             } catch (final IllegalArgumentException e) {
-                throw new ObjectMappingException(e);
+                throw new SerializationException(e);
             }
         }
 
         @Override
-        public void serialize(final TypeToken<?> type, final IpSet obj, final ConfigurationNode value) throws ObjectMappingException {
-            value.setValue(obj.toString());
+        public void serialize(final Type type, final IpSet obj, final ConfigurationNode value) throws SerializationException {
+            value.set(obj == null ? null : obj.toString());
         }
     }
 }

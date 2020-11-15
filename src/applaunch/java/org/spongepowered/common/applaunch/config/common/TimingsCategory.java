@@ -25,8 +25,8 @@
 package org.spongepowered.common.applaunch.config.common;
 
 import com.google.common.collect.Lists;
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.List;
 
@@ -55,7 +55,7 @@ public final class TimingsCategory {
         return this.verbose;
     }
 
-    public void setVerbose(boolean verbose) {
+    public void setVerbose(final boolean verbose) {
         this.verbose = verbose;
     }
 
@@ -63,7 +63,7 @@ public final class TimingsCategory {
         return this.enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
     }
 
@@ -79,7 +79,7 @@ public final class TimingsCategory {
         return this.historyInterval;
     }
 
-    public void setHistoryInterval(int historyInterval) {
+    public void setHistoryInterval(final int historyInterval) {
         this.historyInterval = historyInterval;
     }
 
@@ -87,7 +87,7 @@ public final class TimingsCategory {
         return this.historyLength;
     }
 
-    public void setHistoryLength(int historyLength) {
+    public void setHistoryLength(final int historyLength) {
         this.historyLength = historyLength;
     }
 

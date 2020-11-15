@@ -41,7 +41,7 @@ import com.google.common.base.Preconditions;
 import org.spongepowered.api.Server;
 import org.spongepowered.common.SpongeCommon;
 import com.google.common.base.Charsets;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;

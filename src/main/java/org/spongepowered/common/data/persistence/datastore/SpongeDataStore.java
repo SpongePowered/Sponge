@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.persistence.datastore;
 
-import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
@@ -33,6 +32,7 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.util.Tuple;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -42,15 +42,16 @@ import java.util.function.Function;
 public final class SpongeDataStore implements DataStore {
 
     private Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>>  queriesByKey;
-    private Collection<TypeToken<? extends DataHolder>> tokens;
+    private Collection<Type> tokens;
 
-    public SpongeDataStore(Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> queriesByKey, Collection<TypeToken<? extends DataHolder>> token) {
+    public SpongeDataStore(final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> queriesByKey,
+            final Collection<Type> tokens) {
         this.queriesByKey = queriesByKey;
-        this.tokens = token;
+        this.tokens = tokens;
     }
 
     @Override
-    public Collection<TypeToken<? extends DataHolder>> getSupportedTokens() {
+    public Collection<Type> getSupportedTypes() {
         return this.tokens;
     }
 

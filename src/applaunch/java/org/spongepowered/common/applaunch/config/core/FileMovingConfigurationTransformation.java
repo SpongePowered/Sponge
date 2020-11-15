@@ -25,50 +25,47 @@
 package org.spongepowered.common.applaunch.config.core;
 
 import com.google.common.collect.ImmutableSet;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.NodePath;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.io.IOException;
 import java.util.Set;
 
 /**
  * A transformation that moves a set of entries from the loaded file into another file.
  */
-public class FileMovingConfigurationTransformation extends ConfigurationTransformation {
-    private final Set<Object[]> paths;
+public final class FileMovingConfigurationTransformation implements ConfigurationTransformation {
+    private final Set<NodePath> paths;
     private final ConfigurationLoader<?> destinationLoader;
     private final boolean override;
 
-    public FileMovingConfigurationTransformation(final Set<Object[]> paths, final ConfigurationLoader<?> destinationLoader, final boolean override) {
+    public FileMovingConfigurationTransformation(final Set<NodePath> paths, final ConfigurationLoader<?> destinationLoader, final boolean override) {
         this.paths = ImmutableSet.copyOf(paths);
         this.destinationLoader = destinationLoader;
         this.override = override;
     }
 
     @Override
-    public void apply(final @NonNull ConfigurationNode oldConfig) {
-        try {
-            final ConfigurationNode newConfig = this.destinationLoader.load();
-            boolean acted = false;
-            for (final Object[] path : this.paths) {
-                final ConfigurationNode source = oldConfig.getNode(path);
-                if (!source.isVirtual()) {
-                    acted = true;
-                    if (override) {
-                        newConfig.getNode(path).setValue(source);
-                    } else {
-                        newConfig.getNode(path).mergeValuesFrom(source);
-                    }
-                    source.setValue(null);
+    public void apply(final @NonNull ConfigurationNode oldConfig) throws ConfigurateException {
+        final ConfigurationNode newConfig = this.destinationLoader.load();
+        boolean acted = false;
+        for (final NodePath path : this.paths) {
+            final ConfigurationNode source = oldConfig.node(path);
+            if (!source.virtual()) {
+                acted = true;
+                if (this.override) {
+                    newConfig.node(path).from(source);
+                } else {
+                    newConfig.node(path).mergeFrom(source);
                 }
+                source.raw(null);
             }
-            if (acted) {
-                this.destinationLoader.save(newConfig);
-            }
-        } catch (final IOException ex) {
-            SpongeConfigs.LOGGER.error("Unable to save destination configuration while migrating {}", oldConfig, ex);
+        }
+        if (acted) {
+            this.destinationLoader.save(newConfig);
         }
     }
 }

@@ -154,10 +154,10 @@ public final class CustomDataTest {
     @Listener
     public void onRegisterData(final RegisterCatalogEvent<DataRegistration> event) {
         final ResourceKey key = ResourceKey.of(this.plugin, "mydata");
-        this.myDataKey = Key.builder().key(key).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
+        this.myDataKey = Key.builder().key(key).elementType(Integer.class).build();
 
         final DataProvider<Value<Integer>, Integer> blockDataProvider = DataProvider.mutableBuilder()
-                .key(this.myDataKey).dataHolder(TypeTokens.SERVER_LOCATION_TOKEN)
+                .key(this.myDataKey).dataHolder(ServerLocation.class)
                 .get(this::getData).set(this::setData).delete(this::removeData)
                 .build();
 

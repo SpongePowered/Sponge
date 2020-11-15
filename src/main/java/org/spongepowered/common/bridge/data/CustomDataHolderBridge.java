@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.data;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.ResourceKey;
@@ -44,6 +43,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +60,7 @@ public interface CustomDataHolderBridge {
 
         final DataManipulator.Mutable manipulator = ((CustomDataHolderBridge) object).bridge$getManipulator();
         final DataHolder dataHolder = (DataHolder) object;
-        final TypeToken<? extends DataHolder> dataHolderType = TypeToken.of(dataHolder.getClass());
+        final Type dataHolderType = dataHolder.getClass();
 
         final Set<DataStore> dataStores = manipulator.getKeys().stream()
                 .map(key -> SpongeDataManager.getDatastoreRegistry().getDataStore(key, dataHolderType))
@@ -109,7 +109,7 @@ public interface CustomDataHolderBridge {
                         .stream().map(CustomDataHolderBridge::updateDataViewForDataManipulator).collect(Collectors.toList());
         spongeData.set(Constants.Sponge.CUSTOM_MANIPULATOR_LIST, updatedDataViews);
 
-        final TypeToken<? extends DataHolder> typeToken = TypeToken.of((Class<? extends DataHolder>)object.getClass());
+        final Class<? extends DataHolder> typeToken = object.getClass().asSubclass(DataHolder.class);
         // Find DataStores
         final List<DataStore> dataStores = new ArrayList<>();
         final ImmutableList.Builder<DataView> failed = ImmutableList.builder();

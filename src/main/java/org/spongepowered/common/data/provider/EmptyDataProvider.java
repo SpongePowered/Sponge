@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.provider;
 
-import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 public final class EmptyDataProvider<V extends Value<E>, E> implements DataProvider<V, E> {
@@ -62,7 +62,7 @@ public final class EmptyDataProvider<V extends Value<E>, E> implements DataProvi
     }
 
     @Override
-    public boolean isSupported(TypeToken<? extends DataHolder> dataHolder) {
+    public boolean isSupported(final Type dataHolder) {
         return false;
     }
 

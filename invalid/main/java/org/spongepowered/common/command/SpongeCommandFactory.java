@@ -54,7 +54,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.Command;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.advancements;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.ICriterionInstance;
 import net.minecraft.advancements.ICriterionTrigger;
@@ -78,7 +78,7 @@ public abstract class ICriterionTrigger_ListenerMixin {
             if (filteredTrigger.getType() instanceof SpongeTrigger) {
                 final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
                 final ServerPlayer player = ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer();
-                final TypeToken<?> typeToken = TypeToken.of(filteredTrigger.getType().getConfigurationType());
+                final TypeToken<?> typeToken = TypeToken.get(filteredTrigger.getType().getConfigurationType());
                 final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause,
                         advancement, advancementCriterion, typeToken, player, filteredTrigger, true);
                 SpongeCommon.postEvent(event);

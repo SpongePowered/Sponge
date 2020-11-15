@@ -24,19 +24,23 @@
  */
 package org.spongepowered.common.applaunch.config.inheritable;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public class MovementChecksCategory {
 
-    @Setting(value = "player-moved-too-quickly", comment = "Controls whether the 'player moved too quickly!' check will be enforced")
+    @Setting("player-moved-too-quickly")
+    @Comment("Controls whether the 'player moved too quickly!' check will be enforced")
     private boolean playerMovedTooQuickly = true;
 
-    @Setting(value = "player-vehicle-moved-too-quickly", comment = "Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
+    @Setting("player-vehicle-moved-too-quickly")
+    @Comment("Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
     private boolean playerVehicleMovedTooQuickly = true;
 
-    @Setting(value = "moved-wrongly", comment = "Controls whether the 'player/entity moved wrongly!' check will be enforced")
+    @Setting("moved-wrongly")
+    @Comment("Controls whether the 'player/entity moved wrongly!' check will be enforced")
     private boolean movedWrongly = true;
 
     public boolean playerMovedTooQuickly() {

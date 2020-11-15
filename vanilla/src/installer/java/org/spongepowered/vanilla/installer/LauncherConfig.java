@@ -24,20 +24,23 @@
  */
 package org.spongepowered.vanilla.installer;
 
-import com.google.gson.annotations.SerializedName;
 
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+
+@ConfigSerializable
 public final class LauncherConfig {
 
-    @SerializedName("jvm-directory")
+    @Setting("jvm-directory")
     public String jvmDirectory = "${JAVA_HOME}";
-    @SerializedName("jvm-args")
+    @Setting("jvm-args")
     public String jvmArgs = "";
-    @SerializedName("args")
+    @Setting("args")
     public String args = "--nogui";
-    @SerializedName("libraries-directory")
+    @Setting("libraries-directory")
     public String librariesDirectory = "${BASE_DIRECTORY}/libraries";
-    @SerializedName("auto-download-libraries")
+    @Setting("auto-download-libraries")
     public boolean autoDownloadLibraries = true;
-    @SerializedName("check-library-hashes")
+    @Setting("check-library-hashes")
     public boolean checkLibraryHashes = true;
 }

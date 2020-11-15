@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.config.tracker;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,10 +35,12 @@ import java.util.Map;
 @ConfigSerializable
 public class BlockTrackerCategory {
 
-    @Setting(value = "auto-populate", comment = "If 'true', newly discovered blocks will be added to this config with default settings.")
+    @Setting
+    @Comment("If 'true', newly discovered blocks will be added to this config with default settings.")
     private boolean autoPopulate = false;
 
-    @Setting(value = "mods", comment = "Per-mod block id mappings for controlling tracking behavior")
+    @Setting(value = "mods")
+    @Comment("Per-mod block id mappings for controlling tracking behavior")
     private Map<String, BlockTrackerModCategory> modMapping = new HashMap<>();
 
     public BlockTrackerCategory() {

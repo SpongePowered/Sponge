@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider;
 
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.GenericTypeReflector;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -33,14 +33,15 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.Set;
 
 public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvider<V, E> {
 
-    private final Set<TypeToken<? extends DataHolder>> supportedTokens;
+    private final Set<Type> supportedTokens;
 
-    public CustomDataProvider(Key<V> key, Set<TypeToken<? extends DataHolder>> supportedTokens) {
+    public CustomDataProvider(final Key<V> key, final Set<Type> supportedTokens) {
         super(key);
         this.supportedTokens = supportedTokens;
     }
@@ -70,8 +71,8 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
             if (!((ServerLocation) dataHolder).hasBlockEntity()) {
                 return false;
             }
-            for (TypeToken<? extends DataHolder> token : this.supportedTokens) {
-                if (token.getRawType().isAssignableFrom(BlockEntity.class)) {
+            for (final Type type : this.supportedTokens) {
+                if (GenericTypeReflector.erase(type).isAssignableFrom(BlockEntity.class)) {
                     return true;
                 }
             }
@@ -80,8 +81,8 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
         if (!(dataHolder instanceof CustomDataHolderBridge)) {
             return false;
         }
-        for (TypeToken<? extends DataHolder> token : this.supportedTokens) {
-            if (token.getRawType().isAssignableFrom(dataHolder.getClass())) {
+        for (final Type type : this.supportedTokens) {
+            if (GenericTypeReflector.erase(type).isAssignableFrom(dataHolder.getClass())) {
                 return true;
             }
         }
@@ -89,12 +90,12 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     }
 
     @Override
-    public boolean isSupported(TypeToken<? extends DataHolder> dataHolder) {
-        if (!CustomDataHolderBridge.class.isAssignableFrom(dataHolder.getRawType())) {
+    public boolean isSupported(final Type dataHolder) {
+        if (!CustomDataHolderBridge.class.isAssignableFrom(GenericTypeReflector.erase(dataHolder))) {
             return true;
         }
-        for (TypeToken<? extends DataHolder> token : this.supportedTokens) {
-            if (token.isSupertypeOf(dataHolder)) {
+        for (final Type token : this.supportedTokens) {
+            if (GenericTypeReflector.isSuperType(token, dataHolder)) {
                 return true;
             }
         }

@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,28 +34,30 @@ import java.util.Map;
 @ConfigSerializable
 public class CommandsCategory {
 
-    @Setting(comment = "Command aliases will resolve conflicts when multiple plugins request a specific command, \n"
+    @Setting
+    @Comment("Command aliases will resolve conflicts when multiple plugins request a specific command, \n"
                      + "Correct syntax is <unqualified command>=<plugin name> e.g. \"sethome=homeplugin\"")
     private Map<String, String> aliases = new HashMap<>();
 
-    @Setting(value = "enforce-permission-checks-on-non-sponge-commands",
-            comment = "Some mods may not trigger a permission check when running their command. Setting this to\n"
-                    + "true will enforce a check of the Sponge provided permission (\"<modid>.command.<commandname>\").\n"
-                    + "Note that setting this to true may cause some commands that are generally accessible to all to\n"
-                    + "require a permission to run.\n\n"
-                    + "Setting this to true will enable greater control over whether a command will appear in\n"
-                    + "tab completion and Sponge's help command.\n\n"
-                    + "If you are not using a permissions plugin, it is highly recommended that this is set to false\n"
-                    + "(as it is by default).")
+    @Setting
+    @Comment("Some mods may not trigger a permission check when running their command. Setting this to\n"
+             + "true will enforce a check of the Sponge provided permission (\"<modid>.command.<commandname>\").\n"
+             + "Note that setting this to true may cause some commands that are generally accessible to all to\n"
+             + "require a permission to run.\n\n"
+             + "Setting this to true will enable greater control over whether a command will appear in\n"
+             + "tab completion and Sponge's help command.\n\n"
+             + "If you are not using a permissions plugin, it is highly recommended that this is set to false\n"
+             + "(as it is by default).")
     private boolean enforcePermissionChecksOnNonSpongeCommands = false;
 
-    @Setting(value = "multi-world-patches", comment = "Patches the specified commands to respect the world of the sender instead of applying the \n"
+    @Setting("multi-world-patches")
+    @Comment("Patches the specified commands to respect the world of the sender instead of applying the \n"
                                                     + "changes on the all worlds.")
     private Map<String, Boolean> multiWorldCommandPatches = new HashMap<>();
 
-    @Setting(value = "command-hiding",
-            comment = "Defines how Sponge should act when a user tries to access a command they do not have\n"
-                    + "permission for")
+    @Setting
+    @Comment("Defines how Sponge should act when a user tries to access a command they do not have\n"
+                     + "permission for")
     private CommandsHiddenCategory commandHiding = new CommandsHiddenCategory();
 
     public boolean isEnforcePermissionChecksOnNonSpongeCommands() {

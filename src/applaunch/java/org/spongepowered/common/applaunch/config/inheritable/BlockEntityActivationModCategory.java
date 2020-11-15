@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.applaunch.config.inheritable;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,21 +34,22 @@ import java.util.Map;
 @ConfigSerializable
 public final class BlockEntityActivationModCategory {
 
-    @Setting(value = "enabled", comment = "If 'false', tileentity activation rules for this mod will be ignored and always tick.")
-    private boolean isEnabled = true;
-    @Setting(value = "default-block-range")
+    @Setting
+    @Comment("If 'false', tileentity activation rules for this mod will be ignored and always tick.")
+    private boolean enabled = true;
+    @Setting
     private Integer defaultBlockRange;
-    @Setting(value = "default-tick-rate")
+    @Setting
     private Integer defaultTickRate;
-    @Setting(value = "block-range")
+    @Setting("block-range")
     private Map<String, Integer> tileEntityRangeList = new HashMap<>();
-    @Setting(value = "tick-rate")
+    @Setting("tick-rate")
     private Map<String, Integer> tileEntityTickRateList = new HashMap<>();
 
     public BlockEntityActivationModCategory() {
     }
 
-    public BlockEntityActivationModCategory(String modId) {
+    public BlockEntityActivationModCategory(final String modId) {
         if (modId.equalsIgnoreCase("computercraft")) {
             this.tileEntityRangeList.put("advanced_modem", 0);
             this.tileEntityRangeList.put("ccprinter", 0);
@@ -61,7 +63,7 @@ public final class BlockEntityActivationModCategory {
     }
 
     public boolean isEnabled() {
-        return this.isEnabled;
+        return this.enabled;
     }
 
     public Integer getDefaultBlockRange() {

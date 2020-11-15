@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import ninja.leaping.configurate.objectmapping.Setting;
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.common.applaunch.config.core.Config;
 
 import java.util.HashMap;
@@ -47,7 +48,8 @@ public class CommonConfig implements Config {
     @Setting
     private GeneralCategory general = new GeneralCategory();
 
-    @Setting(comment = "Configuration options related to the SQL manager, including connection aliases etc")
+    @Setting
+    @Comment("Configuration options related to the SQL manager, including connection aliases etc")
     private SqlCategory sql = new SqlCategory();
 
     @Setting
@@ -56,32 +58,34 @@ public class CommonConfig implements Config {
     @Setting
     private PermissionCategory permission = new PermissionCategory();
 
-    @Setting(value = "modules")
+    @Setting("modules")
     private ModuleCategory mixins = new ModuleCategory();
 
     @Setting("ip-sets")
     private Map<String, List<String>> ipSets = new HashMap<>();
 
-    @Setting(value = "bungeecord")
+    @Setting("bungeecord")
     private BungeeCordCategory bungeeCord = new BungeeCordCategory();
 
     @Setting
     private ExploitCategory exploits = new ExploitCategory();
 
-    @Setting(value = "optimizations")
+    @Setting("optimizations")
     private OptimizationCategory optimizations = new OptimizationCategory();
 
-    @Setting(value = "cause-tracker")
+    @Setting("cause-tracker")
     private PhaseTrackerCategory causeTracker = new PhaseTrackerCategory();
 
-    @Setting(value = "teleport-helper", comment = "Blocks to blacklist for safe teleportation.")
+    @Setting("teleport-helper")
+    @Comment("Blocks to blacklist for safe teleportation.")
     private TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
 
-    @Setting(value = "broken-mods", comment = "Stopgap measures for dealing with broken mods")
+    @Setting("broken-mods")
+    @Comment("Stopgap measures for dealing with broken mods")
     private BrokenModCategory brokenMods = new BrokenModCategory();
 
-    @Setting(value = "service-registration",
-            comment = "Enables server owners to require specific plugins to provide Sponge services")
+    @Setting("service-registration")
+    @Comment("Enables server owners to require specific plugins to provide Sponge services")
     private ServicesCategory servicesCategory = new ServicesCategory();
 
     @Setting

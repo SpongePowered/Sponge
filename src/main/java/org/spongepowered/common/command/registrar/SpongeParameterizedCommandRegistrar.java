@@ -26,7 +26,7 @@ package org.spongepowered.common.command.registrar;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.reflect.TypeToken;
+import io.leangen.geantyref.TypeToken;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
@@ -60,7 +60,7 @@ import java.util.stream.Collectors;
 public final class SpongeParameterizedCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<Command.Parameterized> {
 
     private final Map<CommandMapping, Command.Parameterized> commandMap = new HashMap<>();
-    private static final TypeToken<Command.Parameterized> COMMAND_TYPE = TypeToken.of(Command.Parameterized.class);
+    private static final TypeToken<Command.Parameterized> COMMAND_TYPE = TypeToken.get(Command.Parameterized.class);
     public static final ResourceKey CATALOG_KEY = ResourceKey.sponge("managed");
     public static final SpongeParameterizedCommandRegistrar INSTANCE = new SpongeParameterizedCommandRegistrar();
 

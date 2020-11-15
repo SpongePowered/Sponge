@@ -24,43 +24,53 @@
  */
 package org.spongepowered.common.config;
 
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.objectmapping.ObjectMapper;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
-import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
+import io.leangen.geantyref.GenericTypeReflector;
+import org.spongepowered.api.data.DataManager;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.objectmapping.ObjectMapper;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
-import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
+
+import java.lang.reflect.Type;
+import java.util.function.Predicate;
+
+import javax.inject.Inject;
 
 /**
  * An implementation of {@link TypeSerializer} so that DataSerializables can be
  * provided in {@link ObjectMapper}-using classes.
  */
 public final class DataSerializableTypeSerializer implements TypeSerializer<DataSerializable> {
-    public static final TypeToken<DataSerializable> TYPE = TypeToken.of(DataSerializable.class);
-    public static final DataSerializableTypeSerializer INSTANCE = new DataSerializableTypeSerializer();
+    private static final Class<DataSerializable> TYPE = DataSerializable.class;
 
-    private DataSerializableTypeSerializer() {
+    public static boolean accepts(final Type x) {
+        return GenericTypeReflector.isSuperType(DataSerializableTypeSerializer.TYPE, x)
+                && !GenericTypeReflector.isSuperType(CatalogTypeTypeSerializer.TYPE, x);
+    }
+
+    private final DataManager dataManager;
+
+    @Inject
+    DataSerializableTypeSerializer(final DataManager dataManager) {
+        this.dataManager = dataManager;
     }
 
     @Override
-    public DataSerializable deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-        if (type.getRawType().isAssignableFrom(CatalogType.class)) {
-            return (DataSerializable) CatalogTypeTypeSerializer.INSTANCE.deserialize(type, value);
-        }
-        Class<?> clazz = type.getRawType();
-        return Sponge.getDataManager()
+    public DataSerializable deserialize(final Type type, final ConfigurationNode value) throws SerializationException {
+        final Class<?> clazz = GenericTypeReflector.erase(type);
+        return this.dataManager
                 .deserialize(clazz.asSubclass(DataSerializable.class), ConfigurateTranslator.instance().translate(value))
-                .orElseThrow(() -> new ObjectMappingException("Could not translate DataSerializable of type: " + clazz.getName()));
+                .orElseThrow(() -> new SerializationException("Could not translate DataSerializable of type: " + clazz.getName()));
     }
 
     @Override
-    public void serialize(TypeToken<?> type, DataSerializable obj, ConfigurationNode value) throws ObjectMappingException {
-        if (obj instanceof CatalogType) {
-            CatalogTypeTypeSerializer.INSTANCE.serialize(type, (CatalogType) obj, value);
+    public void serialize(final Type type, final DataSerializable obj, final ConfigurationNode value) throws SerializationException {
+        if (obj == null) {
+            value.raw(null);
         } else {
             ConfigurateTranslator.instance().translateDataToNode(value, obj.toContainer());
         }

@@ -72,12 +72,16 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "org.spongepowered.plugin.",
             "org.spongepowered.common.applaunch.",
             "org.spongepowered.vanilla.applaunch.",
-            // configurate 3
-            "com.google.common.reflect.TypeToken",
-            "ninja.leaping.configurate.",
-            // configurate 4 (coming soon)
+            // configurate 4
             "io.leangen.geantyref.",
             "org.spongepowered.configurate."
+    );
+
+    /**
+     * Exceptions to the exclusions, because we've reached that point in life.
+     */
+    protected static final List<String> EXCLUDED_EXCEPTIONS = Arrays.asList(
+            "org.spongepowered.configurate.objectmapping.guice."
     );
 
     @Override
@@ -90,8 +94,15 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
         this.logger.info("Transitioning to Sponge launcher, please wait...");
 
         launchClassLoader.addTargetPackageFilter(klass -> {
-            for (final String pkg : EXCLUDED_PACKAGES) {
-                if (klass.startsWith(pkg)) return false;
+            exclusions: for (final String pkg : EXCLUDED_PACKAGES) {
+                if (klass.startsWith(pkg)) {
+                    for (final String bypass : EXCLUDED_EXCEPTIONS) {
+                        if (klass.startsWith(bypass)) {
+                            continue exclusions;
+                        }
+                    }
+                    return false;
+                }
             }
             return true;
         });
