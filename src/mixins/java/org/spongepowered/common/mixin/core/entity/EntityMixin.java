@@ -150,7 +150,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow @Nullable public abstract Entity shadow$getRidingEntity();
 
-    private boolean impl$isConstructing = true;
+    @Shadow protected boolean inLava;private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
     private boolean impl$isVanished = false;
     private boolean impl$pendingVisibilityUpdate = false;

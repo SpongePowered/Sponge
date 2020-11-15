@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.spawner;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.EntityPredicates;
-import net.minecraft.world.IEntityReader;
 import net.minecraft.world.World;
 import net.minecraft.world.spawner.AbstractSpawner;
 import org.spongepowered.asm.mixin.Mixin;

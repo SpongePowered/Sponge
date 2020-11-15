@@ -57,8 +57,8 @@ public abstract class TrackedEntityMixin {
     @Shadow @Final private Entity trackedEntity;
     @Shadow @Final @Mutable private Consumer<IPacket<?>> packetConsumer;
 
-    /**
-     * @author gabizou - January 10th, 2020 - Minecraft 1.14.3
+    /*
+     * @author gabizou
      * @reason Because the packets for *most* all entity updates are handled
      * through this consumer tick, basically all the players tracking the
      * {@link #trackedEntity} can be updated within the {@code net.minecraft.world.server.ChunkManager.EntityTracker}
@@ -91,21 +91,19 @@ public abstract class TrackedEntityMixin {
 
 
     /**
-     * @author gabizou - January 10th, 2020 - Minecraft 1.14.3
+     * @author gabizou
      * @reason Because the entity spawn packet is just a lone packet, we have to actually
      * do some hackery to create the player list packet first, then the spawn packet,
      * then perform the remove packet.
-     * @param consumer
-     * @param spawnPacket
      */
     @Redirect(method = "sendSpawnPackets",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V",
-                    ordinal = 0))
-    public void onSendSpawnPacket(Consumer<IPacket<?>> consumer, Object spawnPacket) {
+                    ordinal = 0)
+    )
+    public void impl$sendHumanSpawnPacket(final Consumer<IPacket<?>> consumer, final Object spawnPacket) {
         if (!(this.trackedEntity instanceof HumanEntity)) {
-            // This is the method call that was @Redirected
             consumer.accept((IPacket<?>) spawnPacket);
             return;
         }
@@ -125,11 +123,11 @@ public abstract class TrackedEntityMixin {
     }
 
     @Inject(method = "sendMetadata", at = @At("HEAD"))
-    public void impl$sendHumanMetadata(CallbackInfo ci) {
+    public void impl$sendHumanMetadata(final CallbackInfo ci) {
         if (!(this.trackedEntity instanceof HumanEntity)) {
             return;
         }
-        HumanEntity human = (HumanEntity) this.trackedEntity;
+        final HumanEntity human = (HumanEntity) this.trackedEntity;
         Stream<IPacket<?>> packets = human.popQueuedPackets(null);
         packets.forEach(this.packetConsumer);
         // Note that this will further call in ChunkManager_EntityTrackerMixin

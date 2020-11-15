@@ -420,7 +420,7 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
      *
      * @param player The player that has stopped tracking this human
      */
-    public void onRemovedFrom(final ServerPlayerEntity player) {
+    public void untrackFrom(final ServerPlayerEntity player) {
         this.playerPacketMap.remove(player.getUniqueID());
         player.connection.sendPacket(this.createPlayerListPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER));
     }

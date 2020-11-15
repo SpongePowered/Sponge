@@ -120,6 +120,9 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Shadow public abstract RaidManager shadow$getRaids();
     @Nullable @Shadow public abstract Raid shadow$findRaid(BlockPos p_217475_1_);
 
+    // TODO move to bridge?
+    private boolean impl$processingExplosion;
+
     // World
     @Override
     public boolean isLoaded() {
@@ -199,9 +202,6 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
         this.shadow$onChunkUnloading((Chunk) chunk);
         return true;
     }
-
-    // TODO move to bridge?
-    private boolean impl$processingExplosion;
 
     @Override
     public void triggerExplosion(org.spongepowered.api.world.explosion.Explosion explosion) {

@@ -37,6 +37,7 @@ import java.util.function.Predicate;
 
 @Mixin(IWorldGenerationBaseReader.class)
 public interface IWorldGenerationBaseReaderMixin_API extends ReadableGenerationVolume {
+
     @Shadow boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<net.minecraft.block.BlockState> p_217375_2_);
     @Shadow BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
 

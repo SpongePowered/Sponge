@@ -30,10 +30,23 @@ import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 
 @Mixin(ServerChunkProvider.class)
-public abstract class ServerChunkProviderMixin {
+public abstract class ServerChunkProviderMixin implements ServerChunkProviderBridge {
+
+    private boolean impl$forceChunkRequests = false;
+
+    @Override
+    public boolean bridge$getForceChunkRequests() {
+        return this.impl$forceChunkRequests;
+    }
+
+    @Override
+    public void bridge$setForceChunkRequests(final boolean flag) {
+        this.impl$forceChunkRequests = flag;
+    }
 
     @Redirect(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerChunkProvider;save(Z)V"))
     private void impl$dontCallSaveIFSerializationIsOff(ServerChunkProvider serverChunkProvider, boolean flush) {

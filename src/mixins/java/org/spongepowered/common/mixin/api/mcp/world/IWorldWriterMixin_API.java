@@ -37,6 +37,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(IWorldWriter.class)
 public interface IWorldWriterMixin_API extends MutableGameVolume {
+
     @Shadow boolean shadow$setBlockState(BlockPos p_180501_1_, BlockState p_180501_2_, int p_180501_3_);
     @Shadow boolean shadow$removeBlock(BlockPos p_217377_1_, boolean p_217377_2_);
     @Shadow boolean shadow$destroyBlock(BlockPos p_175655_1_, boolean p_175655_2_);

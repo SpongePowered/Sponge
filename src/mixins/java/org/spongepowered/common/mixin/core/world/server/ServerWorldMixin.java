@@ -101,7 +101,6 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         this.impl$rotationUpdates.put(entity, rotation);
     }
 
-    // TODO actually call this
     @Override
     public void bridge$updateRotation(final net.minecraft.entity.Entity entityIn) {
         final Vector3d rotationUpdate = this.impl$rotationUpdates.get(entityIn);

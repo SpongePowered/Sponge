@@ -37,10 +37,10 @@ import org.spongepowered.common.accessor.world.biome.BiomeContainerAccessor;
 public abstract class ChunkMixin_API implements Chunk {
 
     @Shadow private BiomeContainer blockBiomeArray;
+    @Shadow private long inhabitedTime;
 
     @Override
-    public boolean setBiome(int x, int y, int z, BiomeType biome) {
-
+    public boolean setBiome(final int x, final int y, final int z, final BiomeType biome) {
         final Biome[] biomes = ((BiomeContainerAccessor) this.blockBiomeArray).accessor$getBiomes();
 
         int maskedX = x & BiomeContainer.HORIZONTAL_MASK;
@@ -52,6 +52,11 @@ public abstract class ChunkMixin_API implements Chunk {
         biomes[posKey] = (Biome) biome;
 
         return true;
+    }
+
+    @Override
+    public long getInhabitedTime() {
+        return this.inhabitedTime;
     }
 
     // TODO implement the rest of it

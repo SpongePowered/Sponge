@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -50,7 +49,6 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
@@ -59,15 +57,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.adventure.AudienceFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
@@ -78,7 +78,6 @@ import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 // See also: SubjectMixin_API and SubjectMixin
 @Mixin(ServerPlayerEntity.class)
@@ -385,12 +384,20 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     @Override
-    public void bridge$setVelocityOverride(@Nullable Vector3d velocity) {
+    public void bridge$setVelocityOverride(@Nullable final Vector3d velocity) {
         this.impl$velocityOverride = velocity;
     }
 
     @Override
-    @Nullable public Vector3d bridge$getVelocityOverride() {
+    @Nullable
+    public Vector3d bridge$getVelocityOverride() {
         return this.impl$velocityOverride;
+    }
+
+    @Inject(method = "removeEntity", at = @At("RETURN"))
+    private void impl$removeHumanFromPlayerClient(final Entity entityIn, final CallbackInfo ci) {
+        if (entityIn instanceof HumanEntity) {
+            ((HumanEntity) entityIn).untrackFrom((ServerPlayerEntity) (Object) this);
+        }
     }
 }

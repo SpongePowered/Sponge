@@ -35,15 +35,16 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
 
 @Mixin(BossInfo.class)
-public class BossInfoMixin implements BossInfoBridge {
-    @Shadow protected ITextComponent name;
+public abstract class BossInfoMixin implements BossInfoBridge {
 
+    @Shadow protected ITextComponent name;
     @Shadow protected float percent;
     @Shadow protected BossInfo.Color color;
     @Shadow protected BossInfo.Overlay overlay;
     @Shadow protected boolean createFog;
     @Shadow protected boolean darkenSky;
     @Shadow protected boolean playEndBossMusic;
+
     protected BossBar impl$adventure;
 
     @Override
