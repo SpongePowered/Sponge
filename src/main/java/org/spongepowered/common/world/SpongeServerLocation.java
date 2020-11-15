@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world;
 
+import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.ResourceKey;
@@ -47,6 +48,8 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.ChunkLayout;
+import org.spongepowered.common.bridge.api.LocationBridge;
+import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -64,7 +67,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
-public final class SpongeServerLocation extends SpongeLocation<ServerWorld> implements ServerLocation {
+public final class SpongeServerLocation extends SpongeLocation<ServerWorld> implements ServerLocation, LocationBridge {
+
+    private final Supplier<BlockPos> posSupplier = MemoizedSupplier.memoize(() -> {
+        final Vector3i blockPosition = this.getBlockPosition();
+        return new BlockPos(blockPosition.getX(), blockPosition.getY(), blockPosition.getZ());
+    });
 
     SpongeServerLocation(final ServerWorld world, final ChunkLayout chunkLayout, final Vector3d position) {
         super(world, chunkLayout, position);
@@ -448,4 +456,8 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
                    .toString();
     }
 
+    @Override
+    public BlockPos bridge$getBlockPos() {
+        return this.posSupplier.get();
+    }
 }
