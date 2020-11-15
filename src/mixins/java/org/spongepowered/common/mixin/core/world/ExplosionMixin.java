@@ -159,14 +159,15 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                                 if (!blockstate.isAir() || !ifluidstate.isEmpty()) {
                                     float f2 = Math.max(blockstate.getBlock().getExplosionResistance(), ifluidstate.getExplosionResistance());
                                     if (this.exploder != null) {
-                                        f2 = this.exploder.getExplosionResistance(this, this.world, blockpos, blockstate, ifluidstate, f2);
+                                        f2 = this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this, this.world,
+                                                blockpos, blockstate, ifluidstate, f2);
                                     }
 
                                     f -= (f2 + 0.3F) * 0.3F;
                                 }
 
-                                if (f > 0.0F && (this.exploder == null || this.exploder
-                                        .canExplosionDestroyBlock(this, this.world, blockpos, blockstate, f))) {
+                                if (f > 0.0F && (this.exploder == null || this.exploder.canExplosionDestroyBlock((net.minecraft.world.Explosion)
+                                                (Object) this, this.world, blockpos, blockstate, f))) {
                                     set.add(blockpos);
                                 }
 

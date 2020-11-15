@@ -31,7 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.Explosion.Mode;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,7 +44,6 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -61,7 +59,6 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
     @Shadow public abstract void shadow$ignite();
     @Shadow public abstract int shadow$getCreeperState();
     @Shadow public abstract void shadow$setCreeperState(int state);
-    @Shadow private void shadow$explode() { } // explode
 
     private int impl$fuseDuration = Constants.Entity.Creeper.FUSE_DURATION;
     private boolean impl$interactPrimeCancelled;
@@ -179,9 +176,6 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
     private void impl$onDamageFlintAndSteel(ItemStack fas, int amount, LivingEntity player, Consumer<LivingEntity> onBroken) {
         if (!this.impl$interactPrimeCancelled) {
             fas.damageItem(amount, player, onBroken);
-            // TODO put this in the cause somehow?
-//            this.primeCause = Cause.of(NamedCause.of(NamedCause.IGNITER, player));
-//            this.detonationCause = this.primeCause;
         }
         this.impl$interactPrimeCancelled = false;
     }
