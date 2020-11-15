@@ -43,6 +43,7 @@ import org.spongepowered.common.accessor.entity.item.ItemFrameEntityAccessor;
 import org.spongepowered.common.accessor.util.CombatEntryAccessor;
 import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
 import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.entity.EntityTrackedBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -65,6 +66,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 context.getCreator().ifPresent(frame::pushCause);
             }
             frame.pushCause(tickingEntity);
+            ((EntityTrackedBridge) tickingEntity).populateFrameModifier(frame, context);
         });
 
     EntityTickPhaseState() {
