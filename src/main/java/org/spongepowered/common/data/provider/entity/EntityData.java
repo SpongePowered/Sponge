@@ -68,6 +68,10 @@ public final class EntityData {
                     .create(Keys.CUSTOM_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getCustomName()))
                         .set((h, v) -> h.setCustomName(SpongeAdventure.asVanilla(v)))
+                        .delete(h -> {
+                            h.setCustomName(null);
+                            h.setCustomNameVisible(false);
+                        })
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.EYE_HEIGHT)
