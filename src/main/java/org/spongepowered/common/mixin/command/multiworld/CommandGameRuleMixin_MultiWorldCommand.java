@@ -31,9 +31,15 @@ import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.ChangeWorldGameRuleEvent;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.GameRulesBridge;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
 
@@ -41,6 +47,7 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 public abstract class CommandGameRuleMixin_MultiWorldCommand {
 
     private static int currentDimension;
+    private boolean cancelled = false;
 
     private static GameRules multiWorldcommand$getGameRules(final ICommandSender sender) {
         currentDimension = ((WorldServerBridge) sender.getEntityWorld()).bridge$getDimensionId();
@@ -54,9 +61,31 @@ public abstract class CommandGameRuleMixin_MultiWorldCommand {
         return multiWorldcommand$getGameRules(sender);
     }
 
+    @Inject(method = "execute", cancellable = true,
+            at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/world/GameRules;setOrCreateGameRule(Ljava/lang/String;Ljava/lang/String;)V"))
+    private void multiWorldCommand$cancelAfterSetOrCreateGameRule(CallbackInfo ci) {
+        if (cancelled) {
+            ci.cancel();
+            cancelled = false;
+        }
+    }
+
     @Redirect(method = "execute",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;setOrCreateGameRule(Ljava/lang/String;Ljava/lang/String;)V"))
-    private void multiWorldCommand$callBridgeMethodToAdjustGameRule(GameRules gameRules, String key, String ruleValue) {
+    private void multiWorldCommand$callBridgeMethodToAdjustGameRule(GameRules gameRules, String key, String ruleValue, final MinecraftServer server, final ICommandSender sender) {
+        final ChangeWorldGameRuleEvent event = SpongeEventFactory.createChangeWorldGameRuleEvent(
+                Sponge.getCauseStackManager().getCurrentCause(),
+                gameRules.getString(key),
+                ruleValue,
+                key,
+                (World) sender.getEntityWorld()
+        );
+
+        if (Sponge.getEventManager().post(event)) {
+            cancelled = true;
+            return;
+        }
+
         ((GameRulesBridge) gameRules).bridge$setOrCreateGameRule(key, ruleValue);
     }
 
