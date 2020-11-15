@@ -278,7 +278,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
             if (!hasMovementContext) {
                 server.popCause();
-                // check
                 server.removeContext(EventContextKeys.MOVEMENT_TYPE);
             }
 
