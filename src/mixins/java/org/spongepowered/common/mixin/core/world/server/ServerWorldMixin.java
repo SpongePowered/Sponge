@@ -31,6 +31,7 @@ import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
@@ -45,13 +46,16 @@ import org.spongepowered.common.accessor.world.server.ServerChunkProviderAccesso
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 
@@ -99,6 +103,12 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Override
     public void bridge$addEntityRotationUpdate(final net.minecraft.entity.Entity entity, final Vector3d rotation) {
         this.impl$rotationUpdates.put(entity, rotation);
+    }
+
+    @Override
+    public Explosion bridge$triggerInternalExplosion(final org.spongepowered.api.world.explosion.Explosion explosion,
+            final Function<? super Explosion, ? extends PhaseContext<?>> contextCreator) {
+        throw new MissingImplementationException("ServerWorld", "triggerInternalExplosion");
     }
 
     @Override

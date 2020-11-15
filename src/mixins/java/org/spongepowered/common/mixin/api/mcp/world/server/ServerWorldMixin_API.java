@@ -205,7 +205,10 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
 
     @Override
     public void triggerExplosion(org.spongepowered.api.world.explosion.Explosion explosion) {
-        checkNotNull(explosion, "explosion");
+        if (explosion == null) {
+            throw new IllegalArgumentException("Attempted to trigger an explosion whose reference is null!");
+        }
+        
         // Sponge start
         this.impl$processingExplosion = true;
         // Set up the pre event
@@ -235,13 +238,13 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
                 .explosion((Explosion) explosion)
                 .source(explosion.getSourceExplosive().isPresent() ? explosion.getSourceExplosive() : this)) {
             ignored.buildAndSwitch();
-            final boolean damagesTerrain = explosion.shouldBreakBlocks();
+            final boolean shouldBreakBlocks = explosion.shouldBreakBlocks();
             // Sponge End
 
             mcExplosion.doExplosionA();
             mcExplosion.doExplosionB(false);
 
-            if (!damagesTerrain) {
+            if (!shouldBreakBlocks) {
                 mcExplosion.clearAffectedBlockPositions();
             }
 

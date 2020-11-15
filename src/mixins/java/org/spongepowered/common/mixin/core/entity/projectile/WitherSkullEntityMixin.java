@@ -103,11 +103,11 @@ public abstract class WitherSkullEntityMixin extends DamagingProjectileEntityMix
             target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFZLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"))
     public net.minecraft.world.Explosion impl$CreateAndProcessExplosionEvent(final net.minecraft.world.World worldObj, final Entity self,
             final double x, final double y, final double z, final float strength, final boolean flaming, final Mode mode) {
-        return this.bridge$CreateAndProcessExplosionEvent(worldObj, self, x, y, z, strength, flaming, mode);
+        return this.bridge$throwExplosionEventAndExplosde(worldObj, self, x, y, z, strength, flaming, mode);
     }
 
     @Override
-    public net.minecraft.world.Explosion bridge$CreateAndProcessExplosionEvent(
+    public net.minecraft.world.Explosion bridge$throwExplosionEventAndExplosde(
             final net.minecraft.world.World worldObj, final Entity self,
             final double x, final double y, final double z, final float strength, final boolean flaming, final net.minecraft.world.Explosion.Mode mode) {
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();

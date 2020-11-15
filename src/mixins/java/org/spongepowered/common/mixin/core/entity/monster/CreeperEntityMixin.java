@@ -142,7 +142,7 @@ public abstract class CreeperEntityMixin extends MonsterEntityMixin implements F
 
     @Redirect(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFLnet/minecraft/world/Explosion$Mode;)Lnet/minecraft/world/Explosion;"))
     @Nullable
-    private net.minecraft.world.Explosion onExplode(final net.minecraft.world.World world, final Entity self, final double x,
+    private net.minecraft.world.Explosion impl$useSpongeExplosion(final net.minecraft.world.World world, final Entity self, final double x,
         final double y, final double z, final float strength, final Mode mode) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(ServerLocation.of((ServerWorld) world, x, y, z))

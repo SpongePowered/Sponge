@@ -31,6 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface WitherSkullEntityBridge {
 
     @Nullable
-    Explosion bridge$CreateAndProcessExplosionEvent(net.minecraft.world.World worldObj, Entity self, double x,
+    Explosion bridge$throwExplosionEventAndExplosde(net.minecraft.world.World worldObj, Entity self, double x,
         double y, double z, float strength, boolean flaming, Explosion.Mode mode);
 }

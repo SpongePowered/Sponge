@@ -57,8 +57,8 @@ public interface ServerWorldBridge {
 
     long bridge$getChunkUnloadDelay();
 
-    net.minecraft.world.Explosion bridge$triggerInternalExplosion(Explosion explosion,
-        Function<? super net.minecraft.world.Explosion, ? extends PhaseContext<?>> contextCreator);
+    net.minecraft.world.Explosion bridge$triggerInternalExplosion(Explosion explosion, Function<? super net.minecraft.world.Explosion,
+            ? extends PhaseContext<?>> contextCreator);
 
     void bridge$doChunkGC();
 
