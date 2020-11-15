@@ -48,6 +48,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.DismountType;
 import org.spongepowered.api.event.cause.entity.DismountTypes;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
@@ -66,6 +67,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
@@ -83,6 +85,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
@@ -90,6 +93,7 @@ import org.spongepowered.common.world.DimensionChangeResult;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.List;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -112,12 +116,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public float prevRotationYaw;
     @Shadow protected int portalCounter;
     @Shadow public boolean collided;
+    @Shadow @Nullable private Entity ridingEntity;
+    @Shadow @Final private List<Entity> passengers;
 
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
     @Shadow public abstract double shadow$getPosX();
     @Shadow public abstract double shadow$getPosZ();
     @Shadow public abstract double shadow$getPosY();
-
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract void shadow$setCustomName(@Nullable ITextComponent name);
     @Shadow public abstract boolean shadow$attackEntityFrom(DamageSource source, float amount);
@@ -143,6 +148,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setWorld(World worldIn);
     @Shadow @Nullable public abstract ItemEntity shadow$entityDropItem(ItemStack stack, float offsetY);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow @Nullable public abstract Entity shadow$getRidingEntity();
 
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
@@ -156,6 +162,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$transient = false;
     protected boolean impl$hasCustomFireImmuneTicks = false;
     protected short impl$fireImmuneTicks = 0;
+
+    // When changing custom data it is serialized on to this.
+    // On writeInternal the SpongeData tag is added to the new CompoundNBT accordingly
+    // In a Forge environment the ForgeData tag is managed by forge
+    // Structure: tileNbt - ForgeData - SpongeData - customdata
+    private CompoundNBT impl$customDataCompound;
 
     // @formatter:on
 
@@ -304,8 +316,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     public void bridge$fireConstructors() {
         this.impl$isConstructing = false;
     }
-/*
-
 
     @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z",
         at = @At(
@@ -326,54 +336,52 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
-    */
-/**
+    /**
      * @author rexbut - December 16th, 2016
      * @reason - adjusted to support {@link DismountTypes}
-     *//*
-
+     */
     @Overwrite
     public void stopRiding() {
-        if (this.ridingEntity != null) {
-            if (this.getRidingEntity().removed) {
-                this.impl$dismountRidingEntity(DismountTypes.DEATH.get());
+        if (this.shadow$getRidingEntity() != null) {
+            if (this.shadow$getRidingEntity().removed) {
+                this.bridge$dismountRidingEntity(DismountTypes.DEATH.get());
             } else {
-                this.impl$dismountRidingEntity(DismountTypes.PLAYER.get());
+                this.bridge$dismountRidingEntity(DismountTypes.PLAYER.get());
             }
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
-    private boolean impl$dismountRidingEntity(final DismountType type) {
+    @Override
+    public boolean bridge$dismountRidingEntity(final DismountType type) {
         if (!this.world.isRemote && (ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT || ShouldFire.RIDE_ENTITY_EVENT)) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
                 if (SpongeCommon.postEvent(SpongeEventFactory.
-                    createRideEntityEventDismount(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this.getRidingEntity()))) {
+                    createRideEntityEventDismount(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this.shadow$getRidingEntity()))) {
                     return false;
                 }
             }
         }
 
-        if (this.ridingEntity != null) {
-            final EntityMixin entity = (EntityMixin) (Object) this.ridingEntity;
+        final Entity tempEntity = this.shadow$getRidingEntity();
+        if (tempEntity != null) {
             this.ridingEntity = null;
-            entity.shadow$removePassenger((Entity) (Object) this);
+            ((EntityAccessor) tempEntity).accessor$removePassenger((Entity) (Object) this);
         }
         return true;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public boolean bridge$removePassengers(final DismountType type) {
         boolean dismount = false;
         for (int i = this.passengers.size() - 1; i >= 0; --i) {
-            dismount = ((EntityMixin) (Object) this.passengers.get(i)).impl$dismountRidingEntity(type) || dismount;
+            dismount = ((EntityBridge) this.passengers.get(i)).bridge$dismountRidingEntity(type) || dismount;
         }
         return dismount;
     }
 
+/*
     @Inject(method = "move",
         at = @At("HEAD"),
         cancellable = true)
@@ -506,8 +514,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private void impl$spongeWriteToNBT(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
         this.impl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
     }
-
     */
+
     /**
      * Hooks into vanilla's readFromNBT to call {@link #impl$readFromSpongeCompound}.
      *
@@ -945,12 +953,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return this.shadow$getCommandSource();
     }
 
-    // When changing custom data it is serialized on to this.
-    // On writeInternal the SpongeData tag is added to the new CompoundNBT accordingly
-    // In a Forge environment the ForgeData tag is managed by forge
-    // Structure: tileNbt - ForgeData - SpongeData - customdata
-    private CompoundNBT impl$nbt;
-
     // TODO overrides for ForgeData
     // @Shadow private CompoundNBT customEntityData;
     // @Override CompoundNBT data$getForgeData()
@@ -960,12 +962,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public CompoundNBT data$getCompound() {
-        return this.impl$nbt;
+        return this.impl$customDataCompound;
     }
 
     @Override
     public void data$setCompound(CompoundNBT nbt) {
-        this.impl$nbt = nbt;
+        this.impl$customDataCompound = nbt;
     }
 
     @Override
@@ -1004,7 +1006,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
-    public void bridge$setLocationAndAngles(Transform transform) {
+    public void bridge$setLocationAndAngles(final Transform transform) {
         this.shadow$setPosition(transform.getPosition().getX(), transform.getPosition().getY(), transform.getPosition().getZ());
         this.shadow$setRotation((float) transform.getYaw(), (float) transform.getPitch());
     }

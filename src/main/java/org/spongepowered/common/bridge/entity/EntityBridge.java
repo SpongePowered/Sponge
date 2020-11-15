@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.entity;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.DismountType;
@@ -74,4 +73,6 @@ public interface EntityBridge {
     }
 
     void bridge$setTransient(boolean value);
+
+    boolean bridge$dismountRidingEntity(DismountType type);
 }
