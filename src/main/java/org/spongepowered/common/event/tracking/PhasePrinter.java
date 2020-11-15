@@ -32,12 +32,12 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
@@ -259,8 +259,7 @@ public final class PhasePrinter {
             .add("The PhaseState having an exception: %s", context.state)
             .add("The PhaseContext:")
             ;
-        printer
-            .add(context.printCustom(printer, 4));
+        context.printCustom(printer, 4);
         PhasePrinter.printPhaseStackWithException(stack, printer, e);
 
         printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
