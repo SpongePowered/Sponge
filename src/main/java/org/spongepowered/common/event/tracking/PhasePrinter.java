@@ -38,6 +38,7 @@ import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -75,6 +76,7 @@ public final class PhasePrinter {
 
     public static final BiConsumer<PrettyPrinter, PhaseContext<?>> CONTEXT_PRINTER = (printer, context) ->
         context.printCustom(printer, 4);
+
     static final BiConsumer<PrettyPrinter, PhaseContext<?>> PHASE_PRINTER = (printer, context) -> {
             printer.add("  - Phase: %s", context.state);
             printer.add("    Context:");
@@ -312,8 +314,8 @@ public final class PhasePrinter {
     }
 
     static void generateVersionInfo(final PrettyPrinter printer) {
-        for (final PluginContainer pluginContainer : SpongeCommon.getInternalPlugins()) {
-            printer.add("%s : %s", pluginContainer.getMetadata().getName(), pluginContainer.getMetadata().getVersion());
+        for (final PluginContainer pluginContainer : Launch.getInstance().getLauncherPlugins()) {
+            printer.add("%s : %s", pluginContainer.getMetadata().getName().get(), pluginContainer.getMetadata().getVersion());
         }
     }
 
