@@ -25,7 +25,11 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Collections;
+import java.util.List;
 
 public final class EffectResult {
 
@@ -33,10 +37,18 @@ public final class EffectResult {
     public static final EffectResult NULL_PASS = new EffectResult(null, false);
 
     public final @Nullable BlockState resultingState;
+    public final List<ItemStack> drops;
     public final boolean hasResult;
 
     public EffectResult(@Nullable final BlockState resultingState, final boolean hasResult) {
         this.resultingState = resultingState;
+        this.hasResult = hasResult;
+        this.drops = Collections.emptyList();
+    }
+
+    public EffectResult(@Nullable final BlockState resultingState, final List<ItemStack> drops, final boolean hasResult) {
+        this.resultingState = resultingState;
+        this.drops = drops;
         this.hasResult = hasResult;
     }
 }
