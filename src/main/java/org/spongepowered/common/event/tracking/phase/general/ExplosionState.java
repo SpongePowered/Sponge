@@ -56,7 +56,24 @@ import java.util.stream.Collectors;
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, ExplosionContext> EXPLOSION_MODIFIER =
-        super.getFrameModifier().andThen((frame, context) -> frame.pushCause(context.getExplosion()));
+        super.getFrameModifier().andThen((frame, context) -> {
+            final Explosion explosion = context.getExplosion();
+            final @Nullable LivingEntity placedBy = explosion.getExplosivePlacedBy();
+            if (placedBy != null) {
+                if (placedBy instanceof CreatorTrackedBridge) {
+                    ((CreatorTrackedBridge) placedBy).tracked$getCreatorReference()
+                        .ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
+                    ((CreatorTrackedBridge) placedBy).tracked$getNotifierReference()
+                        .ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+                }
+                frame.addContext(EventContextKeys.IGNITER, (Living) placedBy);
+            }
+            final @Nullable Entity exploder = ((ExplosionAccessor) explosion).accessor$getExploder();
+            if (exploder != null) {
+                frame.pushCause(exploder);
+            }
+            frame.pushCause(explosion);
+        });
 
     @Override
     public ExplosionContext createNewContext(final PhaseTracker tracker) {
