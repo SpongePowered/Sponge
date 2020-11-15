@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.entity.player;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -34,12 +33,6 @@ public interface PlayerEntityBridge {
     @Nullable BlockPos bridge$getBedLocation(DimensionType dimensionType);
 
     boolean bridge$isSpawnForced(DimensionType dimensionType);
-
-    /**
-     * {@link PlayerEntity#addExperienceLevel(int)} doesn't update the total
-     * experience. This recalculates it for plugins to properly make use of it.
-     */
-    void bridge$recalculateTotalExperience();
 
     boolean bridge$affectsSpawning();
 

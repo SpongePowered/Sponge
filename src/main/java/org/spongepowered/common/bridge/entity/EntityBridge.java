@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.entity;
 
-import net.kyori.adventure.text.Component;
 import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.DismountType;
@@ -42,10 +41,6 @@ public interface EntityBridge {
     boolean bridge$removePassengers(DismountType type);
 
     void bridge$setImplVelocity(Vector3d velocity);
-
-    @Nullable Component bridge$getDisplayNameText();
-
-    void bridge$setDisplayName(@Nullable Component displayName);
 
     @Nullable BlockPos bridge$getLastCollidedBlockPos();
 

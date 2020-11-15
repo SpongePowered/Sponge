@@ -33,7 +33,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.tags.NetworkTagManager;
 import net.minecraft.util.CachedBlockInfo;
@@ -47,6 +46,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
@@ -59,7 +59,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
@@ -84,12 +83,16 @@ import javax.annotation.Nullable;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerEntityBridge, LocationTargetingBridge, GameProfileHolderBridge {
 
+    // @formatter: off
+
     @Shadow public int experienceLevel;
     @Shadow public int experienceTotal;
     @Shadow public float experience;
-    @Shadow public PlayerAbilities abilities;
-    @Shadow public net.minecraft.entity.player.PlayerInventory inventory;
+    @Shadow @Final public PlayerAbilities abilities;
+    @Shadow @Final public net.minecraft.entity.player.PlayerInventory inventory;
     @Shadow public Container openContainer;
+    @Shadow @Final public PlayerContainer container;
+    @Shadow @Final private GameProfile gameProfile;
 
     @Shadow public abstract boolean shadow$isSpectator();
     @Shadow public abstract int shadow$xpBarCap();
@@ -103,14 +106,25 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     }
     @Shadow public abstract String shadow$getScoreboardName();
 
-    @Shadow @Final public PlayerContainer container;
+    // @formatter: on
 
-    @Shadow @Final private GameProfile gameProfile;
     private boolean impl$affectsSpawning = true;
     private Vector3d impl$targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
-    private boolean impl$dontRecalculateExperience;
     private boolean impl$shouldRestoreInventory = false;
     protected final boolean impl$isFake = SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this);
+
+    @Redirect(method = "getDisplayName", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent impl$useCustomNameIfSet(final PlayerEntity playerEntity) {
+        if (playerEntity instanceof ServerPlayerEntity) {
+            if (playerEntity.hasCustomName()) {
+                return playerEntity.getCustomName();
+            }
+
+            return playerEntity.getName();
+        }
+
+        return playerEntity.getName();
+    }
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void impl$getDisplayNameWithParsing(final CallbackInfoReturnable<ITextComponent> ci) {
@@ -127,37 +141,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + experience;
         this.experience = (float) experience / this.shadow$xpBarCap();
     }
-
-
-    @Override
-    public void bridge$recalculateTotalExperience() {
-        if (!this.impl$dontRecalculateExperience) {
-            boolean isInaccurate = ExperienceHolderUtils.getLevelForExp(this.experienceTotal) != this.experienceLevel;
-            if (!isInaccurate) {
-                final float experienceLess = (this.bridge$getExperienceSinceLevel() - 0.5f) / this.shadow$xpBarCap();
-                final float experienceMore = (this.bridge$getExperienceSinceLevel() + 0.5f) / this.shadow$xpBarCap();
-                isInaccurate = this.experience < experienceLess || this.experience > experienceMore;
-            }
-            if (isInaccurate) {
-                final int newExperienceInLevel = (int) (this.experience * this.shadow$xpBarCap());
-                this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + newExperienceInLevel;
-                this.experience = (float) newExperienceInLevel / this.shadow$xpBarCap();
-            }
-        }
-    }
-
-    @Inject(method = "onEnchant", at = @At("RETURN"))
-    private void onEnchantChangeExperienceLevels(final ItemStack item, final int levels, final CallbackInfo ci) {
-        this.bridge$recalculateTotalExperience();
-    }
-
-    @Inject(method = "readAdditional", at = @At("RETURN"))
-    private void recalculateXpOnLoad(final CompoundNBT compound, final CallbackInfo ci) {
-        // Fix the mistakes of /xp commands past.
-        this.bridge$recalculateTotalExperience();
-    }
-
-
 
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isSleeping()Z"))
     private boolean impl$postSleepingEvent(final PlayerEntity self) {

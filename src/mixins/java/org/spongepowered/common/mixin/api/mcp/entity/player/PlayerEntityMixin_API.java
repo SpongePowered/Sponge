@@ -32,7 +32,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -47,11 +47,11 @@ public abstract class PlayerEntityMixin_API extends LivingEntityMixin_API {
 
     @Shadow public Container openContainer;
     @Shadow public float experience;
-    @Shadow public PlayerAbilities abilities;
-    @Shadow public PlayerInventory inventory;
-    @Shadow protected EnderChestInventory enterChestInventory;
-    @Shadow public abstract ITextComponent shadow$getName();
+    @Shadow @Final public PlayerAbilities abilities;
+    @Shadow @Final public PlayerInventory inventory;
     @Shadow public abstract CooldownTracker shadow$getCooldownTracker();
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
+    @Shadow public abstract ITextComponent shadow$getName();
 
     final boolean impl$isFake = SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this);
 

@@ -156,8 +156,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$pendingVisibilityUpdate = false;
     private int impl$visibilityTicks = 0;
     private boolean impl$collision = true;
-    private Component impl$displayName;
-    private boolean impl$skipSettingCustomNameTag;
     private boolean impl$invulnerable = false;
     private boolean impl$transient = false;
     protected boolean impl$hasCustomFireImmuneTicks = false;
@@ -514,27 +512,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private void impl$spongeWriteToNBT(final CompoundNBT compound, final CallbackInfoReturnable<CompoundNBT> ci) {
         this.impl$writeToSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
     }
-    */
-
-    /**
-     * Hooks into vanilla's readFromNBT to call {@link #impl$readFromSpongeCompound}.
-     *
-     * <p> This makes it easier for other entity mixins to override readSpongeNBT
-     * without having to specify the <code>@Inject</code> annotation. </p>
-     *
-     * @param compound The compound vanilla reads from (unused because we read
-     *     from SpongeData)
-     * @param ci (Unused) callback info
-     *//*
-
-    @Inject(method = "read(Lnet/minecraft/nbt/CompoundNBT;)V",
-        at = @At("RETURN"))
-    private void impl$spongeReadFromNBT(final CompoundNBT compound, final CallbackInfo ci) {
-        if (this.impl$isConstructing) {
-            this.bridge$fireConstructors(); // Do this early as possible
-        }
-        this.impl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
-    }
 
     */
     /**
@@ -772,34 +749,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
     */
-
-    @Nullable
-    @Override
-    public Component bridge$getDisplayNameText() {
-        return this.impl$displayName;
-    }
-
-    @Override
-    public void bridge$setDisplayName(@Nullable final Component displayName) {
-        this.impl$displayName = displayName;
-
-        this.impl$skipSettingCustomNameTag = true;
-        if (this.impl$displayName == null) {
-            this.shadow$setCustomName(null);
-        } else {
-            this.shadow$setCustomName(SpongeAdventure.asVanilla(this.impl$displayName));
-        }
-
-        this.impl$skipSettingCustomNameTag = false;
-    }
-
-    @Inject(method = "setCustomName",
-        at = @At("RETURN"))
-    private void impl$UpdatedisplayNameText(final ITextComponent name, final CallbackInfo ci) {
-        if (!this.impl$skipSettingCustomNameTag) {
-            this.impl$displayName = SpongeAdventure.asAdventure(name);
-        }
-    }
 
     /**
      * @return

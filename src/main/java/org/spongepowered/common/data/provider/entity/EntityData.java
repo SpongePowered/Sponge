@@ -65,6 +65,11 @@ public final class EntityData {
                         .get(h -> (double) h.getWidth())
                     .create(Keys.BASE_VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getLowestRidingEntity())
+                    .create(Keys.CUSTOM_NAME)
+                        .get(h -> SpongeAdventure.asAdventure(h.getCustomName()))
+                        .set((h, v) -> h.setCustomName(SpongeAdventure.asVanilla(v)))
+                    .create(Keys.DISPLAY_NAME)
+                        .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.EYE_HEIGHT)
                         .get(h -> (double) h.getEyeHeight())
                     .create(Keys.EYE_POSITION)
@@ -175,11 +180,7 @@ public final class EntityData {
                         .get(m -> m.getMotion().length())
                         .set((m, v) -> m.setMotion(m.getMotion().normalize().scale(v)))
                         .supports(m -> m.getMotion().lengthSquared() > 0)
-                .asMutable(EntityBridge.class)
-                    .create(Keys.DISPLAY_NAME)
-                        .get(EntityBridge::bridge$getDisplayNameText)
-                        .set(EntityBridge::bridge$setDisplayName)
-                        .delete(h -> h.bridge$setDisplayName(null));
+                ;
 
         registrator.newDataStore(SpongeEntitySnapshot.class, SpongeEntityArchetype.class)
                 .dataStore(Keys.DISPLAY_NAME,

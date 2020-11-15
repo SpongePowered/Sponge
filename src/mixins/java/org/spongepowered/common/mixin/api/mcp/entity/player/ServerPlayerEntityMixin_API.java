@@ -32,7 +32,6 @@ import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.title.Title;
 import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -51,11 +50,9 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerBossInfo;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -71,10 +68,8 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -93,9 +88,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.play.server.SChangeBlockPacketAccessor;
 import org.spongepowered.common.accessor.world.border.WorldBorderAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.play.server.SSendResourcePackPacketBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
@@ -327,7 +320,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     public PlayerChatRouter getChatRouter() {
         if (this.api$chatRouter == null) {
             this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(player,
-                    Component.translatable("chat.type.text", ((EntityBridge) player).bridge$getDisplayNameText(), message));
+                    Component.translatable("chat.type.text", SpongeAdventure.asAdventure(this.shadow$getDisplayName()), message));
         }
         return this.api$chatRouter;
     }

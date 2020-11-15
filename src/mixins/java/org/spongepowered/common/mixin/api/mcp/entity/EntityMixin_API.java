@@ -33,6 +33,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.Keys;
@@ -102,6 +103,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
     @Shadow public abstract boolean shadow$writeUnlessRemoved(CompoundNBT compound);
+    @Shadow @Nullable public abstract ITextComponent shadow$getCustomName();
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
 
     // @formatter:on
 

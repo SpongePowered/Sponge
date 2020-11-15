@@ -88,16 +88,15 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow public ServerPlayNetHandler connection;
     @Shadow @Final public PlayerInteractionManager interactionManager;
     @Shadow @Final public MinecraftServer server;
+    @Shadow private int lastExperience;
 
     @Shadow public abstract net.minecraft.world.server.ServerWorld shadow$getServerWorld();
     @Shadow public abstract void shadow$setSpectatingEntity(Entity p_175399_1_);
     @Shadow public abstract void shadow$stopRiding();
-
     @Shadow public abstract void shadow$closeContainer();
 
     // @formatter:on
 
-    @Shadow private int lastExperience;
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private @Nullable ITextComponent impl$connectionMessage;
     @Nullable private Vector3d impl$velocityOverride = null;
@@ -378,7 +377,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             target = "Lnet/minecraft/entity/player/ServerPlayerEntity;closeScreen()V"
         )
     )
-
     private void impl$closePreviousContainer(final ServerPlayerEntity self) {
         this.shadow$closeContainer();
     }
