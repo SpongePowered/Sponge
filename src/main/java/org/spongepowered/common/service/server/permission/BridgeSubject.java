@@ -41,7 +41,7 @@ import java.util.Set;
 /**
  * Common Subject Implementation via SubjectBridge
  */
-public interface SpongeBridgeSubject extends Subject {
+public interface BridgeSubject extends Subject {
 
     @Override
     default SubjectReference asSubjectReference() {

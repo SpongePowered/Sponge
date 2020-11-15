@@ -73,7 +73,7 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
-import org.spongepowered.common.service.server.permission.SpongeBridgeSubject;
+import org.spongepowered.common.service.server.permission.BridgeSubject;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.Constants;
@@ -94,7 +94,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public final class SpongeUser implements User, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder, SpongeBridgeSubject, SubjectBridge,
+public final class SpongeUser implements User, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder, BridgeSubject, SubjectBridge,
         DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge, GameProfileHolderBridge {
 
     public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();

@@ -31,13 +31,13 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.service.server.permission.SpongeBridgeSubject;
+import org.spongepowered.common.service.server.permission.BridgeSubject;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public abstract class SpongeSystemSubject implements Subject, SystemSubject, SpongeBridgeSubject, SubjectBridge {
+public abstract class SpongeSystemSubject implements Subject, SystemSubject, BridgeSubject, SubjectBridge {
     private SubjectReference impl$subjectReference;
 
     @Override

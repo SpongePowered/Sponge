@@ -32,6 +32,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.server.management.PlayerProfileCache_ProfileEntryAccessor;
 import org.spongepowered.common.profile.SpongeGameProfile;
@@ -56,9 +57,9 @@ import javax.annotation.Nullable;
 @Mixin(PlayerProfileCache.class)
 public abstract class PlayerProfileCacheMixin_API implements GameProfileCache {
 
-    @Shadow @Final private final Map<String, PlayerProfileCache_ProfileEntryAccessor> usernameToProfileEntryMap = new ConcurrentHashMap<>();
-    @Shadow @Final private final Map<UUID, PlayerProfileCache_ProfileEntryAccessor> uuidToProfileEntryMap = new ConcurrentHashMap<>();
-    @Shadow @Final private final Deque<com.mojang.authlib.GameProfile> gameProfiles = new ConcurrentLinkedDeque<>();
+    @Shadow @Final @Mutable private final Map<String, PlayerProfileCache_ProfileEntryAccessor> usernameToProfileEntryMap = new ConcurrentHashMap<>();
+    @Shadow @Final @Mutable private final Map<UUID, PlayerProfileCache_ProfileEntryAccessor> uuidToProfileEntryMap = new ConcurrentHashMap<>();
+    @Shadow @Final @Mutable private final Deque<com.mojang.authlib.GameProfile> gameProfiles = new ConcurrentLinkedDeque<>();
 
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile shadow$getProfileByUUID(UUID uniqueId);
 
