@@ -136,7 +136,6 @@ public final class TrackingUtil {
             }
             context.buildAndSwitch();
             entityTiming.startTiming();
-            PhaseTracker.LOGGER.trace(TrackingUtil.ENTITY_TICK, "Wrapping Ticked Entity: " + entity.toString());
             consumer.accept(entity);
             SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
             SpongeCommonEventFactory.callNaturalRotateEntityEvent(entity);
@@ -166,7 +165,6 @@ public final class TrackingUtil {
             }
             context.buildAndSwitch();
             entityTiming.startTiming();
-            PhaseTracker.LOGGER.trace(TrackingUtil.ENTITY_TICK, "Wrapping Ticked Entity: " + entity.toString());
             consumer.accept(entity);
             SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
             SpongeCommonEventFactory.callNaturalRotateEntityEvent(entity);
@@ -234,7 +232,6 @@ public final class TrackingUtil {
             phaseContext.buildAndSwitch();
 
             try (final Timing timing = ((TimingBridge) tileEntity).bridge$getTimingsHandler().startTiming()) {
-                PhaseTracker.LOGGER.trace(TrackingUtil.TILE_ENTITY_TICK, "Wrapping Ticked Entity: " + tile.toString());
                 tile.tick();
             }
         } catch (Exception e) {
