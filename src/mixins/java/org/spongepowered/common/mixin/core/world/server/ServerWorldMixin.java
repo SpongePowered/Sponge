@@ -31,7 +31,6 @@ import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
@@ -39,6 +38,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
@@ -46,18 +46,14 @@ import org.spongepowered.common.accessor.world.server.ServerChunkProviderAccesso
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
-import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-
-import javax.annotation.Nonnull;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge {
@@ -65,6 +61,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
 
+    @Shadow @Final private List<ServerPlayerEntity> players;
     private CustomServerBossInfoManager impl$bossBarManager;
 
     @Override
@@ -105,11 +102,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         this.impl$rotationUpdates.put(entity, rotation);
     }
 
-    @Override
-    public Explosion bridge$triggerInternalExplosion(final org.spongepowered.api.world.explosion.Explosion explosion,
-            final Function<? super Explosion, ? extends PhaseContext<?>> contextCreator) {
-        throw new MissingImplementationException("ServerWorld", "triggerInternalExplosion");
-    }
+
 
     @Override
     public void bridge$updateRotation(final net.minecraft.entity.Entity entityIn) {

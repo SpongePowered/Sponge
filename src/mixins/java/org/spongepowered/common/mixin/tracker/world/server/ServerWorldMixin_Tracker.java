@@ -31,13 +31,17 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.play.server.SEntityVelocityPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
@@ -49,6 +53,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -107,11 +112,13 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Mixin(ServerWorld.class)
@@ -119,7 +126,9 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
 
     // @formatting:off
     @Shadow @Final private MinecraftServer server;
+    @Shadow @Final private List<ServerPlayerEntity> players;
     // @formatting:on
+
 
     @Inject(method = "onEntityAdded", at = @At("TAIL"))
     private void tracker$setEntityTrackedInWorld(final net.minecraft.entity.Entity entityIn, final CallbackInfo ci) {
@@ -265,6 +274,81 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
                 TrackingUtil.randomTickBlock(this, blockState, posIn, this.rand);
             }
         }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Explosion tracker$triggerInternalExplosion(org.spongepowered.api.world.explosion.Explosion explosion,
+        final Function<? super Explosion, ? extends PhaseContext<@NonNull ?>> contextCreator) {
+        // Sponge start
+        final Explosion originalExplosion = (Explosion) explosion;
+        // Set up the pre event
+        final ExplosionEvent.Pre
+            event =
+            SpongeEventFactory.createExplosionEventPre(
+                PhaseTracker.SERVER.getCurrentCause(),
+                explosion, ((org.spongepowered.api.world.server.ServerWorld) this));
+        if (SpongeCommon.postEvent(event)) {
+            return (Explosion) explosion;
+        }
+        explosion = event.getExplosion();
+        final Explosion mcExplosion;
+        try {
+            // Since we already have the API created implementation Explosion, let's use it.
+            mcExplosion = (Explosion) explosion;
+        } catch (final Exception e) {
+            new org.spongepowered.asm.util.PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
+                .add("An explosion that was expected to be used for this implementation does not")
+                .add("originate from this implementation.")
+                .add(e)
+                .trace();
+            return originalExplosion;
+        }
+
+        try (final PhaseContext<@NonNull ?> ignored = contextCreator.apply(mcExplosion)
+            .source(((Optional) explosion.getSourceExplosive()).orElse(this))) {
+            ignored.buildAndSwitch();
+            final boolean damagesTerrain = explosion.shouldBreakBlocks();
+            // Sponge End
+
+            mcExplosion.doExplosionA();
+            mcExplosion.doExplosionB(false);
+
+            if (!damagesTerrain) {
+                mcExplosion.clearAffectedBlockPositions();
+            }
+
+            // Sponge Start - Don't send explosion packets, they're spammy, we can replicate it on the server entirely
+            /*
+            for (EntityPlayer entityplayer : this.playerEntities) {
+                if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
+                    ((EntityPlayerMP) entityplayer).connection
+                        .sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
+                            mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
+                }
+            }
+
+             */
+            // Use the knockback map and set velocities, since the explosion packet isn't sent, we need to replicate
+            // the players being moved.
+            for (final ServerPlayerEntity playerEntity : this.players) {
+                final Vec3d knockback = mcExplosion.getPlayerKnockbackMap().get(playerEntity);
+                if (knockback != null) {
+                    // In Vanilla, doExplosionB always updates the 'motion[xyz]' fields for every entity in range.
+                    // However, this field is completely ignored for players (since 'velocityChanged') is never set, and
+                    // a completely different value is sent through 'SPacketExplosion'.
+
+                    // To replicate this behavior, we manually send a velocity packet. It's critical that we don't simply
+                    // add to the 'motion[xyz]' fields, as that will end up using the value set by 'doExplosionB', which must be
+                    // ignored.
+                    playerEntity.connection.sendPacket(new SEntityVelocityPacket(playerEntity.getEntityId(), new Vec3d(knockback.x, knockback.y, knockback.z)));
+                }
+            }
+            // Sponge End
+
+        }
+        // Sponge End
+        return mcExplosion;
     }
 
     @Override

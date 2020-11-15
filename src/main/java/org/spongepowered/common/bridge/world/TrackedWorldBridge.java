@@ -34,12 +34,15 @@ import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A specialized {@link WorldBridge} or {@link ServerWorldBridge}
@@ -49,6 +52,9 @@ import java.util.Optional;
 public interface TrackedWorldBridge {
 
     boolean bridge$forceSpawnEntity(Entity entity);
+
+    net.minecraft.world.Explosion tracker$triggerInternalExplosion(Explosion explosion, Function<? super net.minecraft.world.Explosion,
+        ? extends PhaseContext<?>> contextCreator);
 
     Optional<WorldPipeline.Builder> bridge$startBlockChange(BlockPos pos, BlockState state, int rawFlags);
 
