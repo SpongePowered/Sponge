@@ -135,6 +135,22 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
+    public SpawnEntityEvent createSpawnEvent(
+        final ExplosionContext context,
+        final GameTransaction<@NonNull ?> parent,
+        final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
+        final Cause currentCause
+    ) {
+        if (parent instanceof ChangeBlock) {
+            return SpongeEventFactory.createDropItemEventDestruct(currentCause,
+                collect.stream()
+                    .map(Tuple::getFirst)
+                    .collect(Collectors.toList()));
+        }
+        return super.createSpawnEvent(context, parent, collect, currentCause);
+    }
+
+    @Override
     public ChangeBlockEvent.Post createChangeBlockPostEvent(final ExplosionContext context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
         final Cause cause) {
         return SpongeEventFactory.createExplosionEventPost(cause, context.getSpongeExplosion(), transactions);

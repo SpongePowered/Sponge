@@ -61,6 +61,7 @@ import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -574,8 +575,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default SpawnEntityEvent createSpawnEvent(final C context,
+        final GameTransaction<@NonNull ?> parent,
         final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
-        final Cause currentCause) {
+        final Cause currentCause
+    ) {
         return SpongeEventFactory.createSpawnEntityEvent(currentCause,
             collect.stream()
                 .map(Tuple::getFirst)
