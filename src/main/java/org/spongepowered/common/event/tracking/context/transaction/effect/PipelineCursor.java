@@ -25,15 +25,21 @@
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.StringJoiner;
 
 public final class PipelineCursor {
     public final BlockState state;
     public final int opacity;
     public final BlockPos pos;
     public final @Nullable TileEntity tileEntity;
+    public final List<ItemStack> drops;
 
     public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
         @Nullable final TileEntity tileEntity
@@ -42,5 +48,32 @@ public final class PipelineCursor {
         this.opacity = opacity;
         this.pos = pos;
         this.tileEntity = tileEntity;
+        this.drops = Collections.emptyList();
+    }
+
+    public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
+        @Nullable final TileEntity tileEntity,
+        final List<ItemStack> drops
+    ) {
+        this.state = state;
+        this.opacity = opacity;
+        this.pos = pos;
+        this.tileEntity = tileEntity;
+        this.drops = drops;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(
+            ", ",
+            PipelineCursor.class.getSimpleName() + "[",
+            "]"
+        )
+            .add("state=" + this.state)
+            .add("opacity=" + this.opacity)
+            .add("pos=" + this.pos)
+            .add("tileEntity=" + this.tileEntity)
+            .add("drops=" + this.drops)
+            .toString();
     }
 }
