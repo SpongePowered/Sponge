@@ -104,11 +104,15 @@ public abstract class TeleportCommandMixin {
                 actualPitch = rotateEvent.isCancelled() ? entityIn.rotationPitch : rotateEvent.getToRotation().getX();
 
                 if (entityIn instanceof ServerPlayerEntity) {
+
+                    ChunkPos chunkpos = new ChunkPos(new BlockPos(actualX, actualY, actualZ));
+                    worldIn.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getEntityId());
+
+                    entityIn.stopRiding();
+
                     if (((ServerPlayerEntity)entityIn).isSleeping()) {
                         ((ServerPlayerEntity)entityIn).stopSleepInBed(true, true);
                     }
-
-                    entityIn.stopRiding();
 
                     ((ServerPlayerEntity)entityIn).connection.setPlayerLocation(actualX, actualY, actualZ, (float) actualYaw, (float) actualPitch,
                             relativeList);
@@ -117,9 +121,6 @@ public abstract class TeleportCommandMixin {
                 }
 
                 entityIn.setRotationYawHead((float) actualYaw);
-
-                ChunkPos chunkpos = new ChunkPos(new BlockPos(actualX, actualY, actualZ));
-                worldIn.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getEntityId());
             }
         } else {
             if (entityIn instanceof ServerPlayerEntity) {

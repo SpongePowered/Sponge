@@ -339,19 +339,19 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Override
-    public void bridge$setConfigAdapter(InheritableConfigHandle<WorldConfig> adapter) {
+    public void bridge$setConfigAdapter(final InheritableConfigHandle<WorldConfig> adapter) {
         this.impl$configAdapter = Objects.requireNonNull(adapter, "adapter");
     }
 
     @Override
-    public int bridge$getIndexForUniqueId(final UUID uuid) {
-        final Integer index = this.impl$playerUniqueIdMap.inverse().get(uuid);
+    public int bridge$getIndexForUniqueId(final UUID uniqueId) {
+        final Integer index = this.impl$playerUniqueIdMap.inverse().get(uniqueId);
         if (index != null) {
             return index;
         }
 
-        this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount, uuid);
-        this.impl$pendingUniqueIds.add(uuid);
+        this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount, uniqueId);
+        this.impl$pendingUniqueIds.add(uniqueId);
         return this.impl$trackedUniqueIdCount++;
     }
 
