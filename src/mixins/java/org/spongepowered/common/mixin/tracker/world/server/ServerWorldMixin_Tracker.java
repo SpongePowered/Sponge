@@ -312,7 +312,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             // Sponge End
 
             mcExplosion.doExplosionA();
-            mcExplosion.doExplosionB(false);
+            mcExplosion.doExplosionB(true);
 
             if (!damagesTerrain) {
                 mcExplosion.clearAffectedBlockPositions();
