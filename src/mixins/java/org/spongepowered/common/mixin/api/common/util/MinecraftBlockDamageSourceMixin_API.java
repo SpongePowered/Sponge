@@ -22,27 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.mixin.api.common.util;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.util.EntityDamageSource;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
+import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.mcp.util.DamageSourceMixin_API;
+import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
-import javax.annotation.Nullable;
+@Mixin(value = MinecraftBlockDamageSource.class, priority = 991)
+public abstract class MinecraftBlockDamageSourceMixin_API extends DamageSourceMixin_API implements BlockDamageSource {
 
-@Mixin(EntityDamageSource.class)
-public abstract class EntityDamageSourceMixin extends DamageSourceMixin {
+    @Shadow(remap = false) @Final
+    private BlockSnapshot blockSnapshot;
+    @Shadow(remap = false) @Final private ServerLocation location;
 
-    @Shadow @Final @Nullable protected net.minecraft.entity.Entity damageSourceEntity;
+    @Override
+    public ServerLocation getLocation() {
+        return this.location;
+    }
+
+    @Override
+    public BlockSnapshot getBlockSnapshot() {
+        return this.blockSnapshot;
+    }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper("EntityDamageSource")
-            .add("Name", this.damageType)
-            .add("Type", this.impl$damageType.get().getKey().toString())
-            .add("Source", this.damageSourceEntity)
+        return MoreObjects.toStringHelper("BlockDamageSource")
+            .add("Name", this.shadow$getDamageType())
+            .add("Key", this.getType().getKey())
+            .add("BlockSnapshot", this.getBlockSnapshot())
+            .add("Location", this.location)
             .toString();
     }
 }
+

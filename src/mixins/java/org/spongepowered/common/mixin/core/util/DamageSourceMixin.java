@@ -45,13 +45,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.accessor.world.ExplosionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.accessor.world.ExplosionAccessor;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
+import org.spongepowered.common.util.MemoizedSupplier;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 @Mixin(DamageSource.class)
 public abstract class DamageSourceMixin implements DamageSourceBridge {
@@ -71,7 +73,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Shadow @Nullable public abstract Entity shadow$getTrueSource();
     // @formatter:on
 
-    DamageType impl$damageType;
+    Supplier<DamageType> impl$damageType;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setDamageTypeOnConstruction(final String damageType, final CallbackInfo ci) {
@@ -112,63 +114,63 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
 
     @Override
     public DamageType bridge$getDamageType() {
-        return this.impl$damageType;
+        return this.impl$damageType.get();
     }
 
     @Override
     public void bridge$resetDamageType() {
         if (!this.damageType.contains(":")) {
-            this.impl$damageType = DamageSourceToTypeProvider.getInstance().getOrCustom(this.damageType).get();
+            this.impl$damageType = MemoizedSupplier.memoize(() -> DamageSourceToTypeProvider.getInstance().getOrCustom(this.damageType).get());
         } else {
-            this.impl$damageType = Sponge.getRegistry().getCatalogRegistry().get(DamageType.class, ResourceKey.resolve(this.damageType)).orElseGet(DamageTypes.CUSTOM);
+            this.impl$damageType = MemoizedSupplier.memoize(() -> Sponge.getRegistry().getCatalogRegistry().get(DamageType.class, ResourceKey.resolve(this.damageType)).orElseGet(DamageTypes.CUSTOM));
         }
     }
 
     @Override
     public void bridge$setLava() {
-        LAVA = (DamageSource) (Object) this;
+        DamageSourceMixin.LAVA = (DamageSource) (Object) this;
     }
 
     @Override
     public void bridge$setFireSource() {
-        IN_FIRE = (DamageSource) (Object) this;
+        DamageSourceMixin.IN_FIRE = (DamageSource) (Object) this;
     }
 
     @Override
     public void bridge$setLightningSource() {
-        LIGHTNING_BOLT = (DamageSource) (Object) this;
+        DamageSourceMixin.LIGHTNING_BOLT = (DamageSource) (Object) this;
     }
 
     @Override
     public void bridge$setHotFloorSource() {
-        HOT_FLOOR = (DamageSource) (Object) this;
+        DamageSourceMixin.HOT_FLOOR = (DamageSource) (Object) this;
     }
 
     @Override
     public void bridge$setFireworksSource() {
-        FIREWORKS = (DamageSource) (Object) this;
+        DamageSourceMixin.FIREWORKS = (DamageSource) (Object) this;
     }
 
     @Override
     public void bridge$setFallingBlockSource() {
-        FALLING_BLOCK = (DamageSource) (Object) this;
+        DamageSourceMixin.FALLING_BLOCK = (DamageSource) (Object) this;
     }
 
     @Override
     public void bridge$setAnvilSource() {
-        ANVIL = (DamageSource) (Object) this;
+        DamageSourceMixin.ANVIL = (DamageSource) (Object) this;
     }
 
     @Override
     public void bridge$setCactusSource() {
-        CACTUS = (DamageSource) (Object) this;
+        DamageSourceMixin.CACTUS = (DamageSource) (Object) this;
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper("DamageSource")
                 .add("Name", this.damageType)
-                .add("Key", this.impl$damageType.getKey().toString())
+                .add("Key", this.impl$damageType.get().getKey().toString())
                 .toString();
     }
 }
