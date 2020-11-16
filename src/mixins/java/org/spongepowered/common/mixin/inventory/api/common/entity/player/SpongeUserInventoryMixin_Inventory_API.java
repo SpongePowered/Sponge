@@ -43,7 +43,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("rawtypes")
 @Mixin(value = SpongeUserInventory.class, remap = false)
 public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInventory, InventoryAdapter {
 

@@ -50,6 +50,7 @@ import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -59,13 +60,11 @@ public final class InventoryUtil {
 
     private InventoryUtil() {}
 
-    @SuppressWarnings("rawtypes")
     public static CraftingGridInventory toSpongeInventory(CraftingInventory inv) {
         CraftingGridInventoryLens lens = new CraftingGridInventoryLens(0, inv.getWidth(), inv.getHeight(), BasicSlotLens::new);
 
         return new CraftingGridInventoryAdapter((Fabric) inv, lens);
     }
-
 
     @SuppressWarnings("unchecked")
     public static <C extends IInventory> C toNativeInventory(Inventory inv) {
@@ -132,7 +131,6 @@ public final class InventoryUtil {
         return SpongeImplHooks.findInventoryAdapter(inventory);
     }
 
-
     public static TrackedInventoryBridge forCapture(Object toCapture) {
         if (toCapture instanceof TrackedInventoryBridge) {
             return ((TrackedInventoryBridge) toCapture);
@@ -167,14 +165,14 @@ public final class InventoryUtil {
             final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
                 SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
-                return SpongeCommon.getMinecraftPlugin();
+                return Launch.getInstance().getMinecraftPlugin();
             });
         } else if (base instanceof SpongeUser) {
-            container = SpongeCommon.getMinecraftPlugin();
+            container = Launch.getInstance().getMinecraftPlugin();
         } else {
             container = Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(base.getClass())).orElseGet(() -> {
                 SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
-                return SpongeCommon.getMinecraftPlugin();
+                return Launch.getInstance().getMinecraftPlugin();
             });
         }
         return container;

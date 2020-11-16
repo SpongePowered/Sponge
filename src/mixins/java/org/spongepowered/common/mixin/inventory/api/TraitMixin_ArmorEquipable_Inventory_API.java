@@ -47,9 +47,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 // All living implementors of ArmorEquipable
-@Mixin({PlayerEntity.class,
-        ArmorStandEntity.class,
-        MobEntity.class})
+@Mixin({ArmorStandEntity.class, MobEntity.class, PlayerEntity.class})
 public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEquipable {
 
     // TODO can we implement canEquip?

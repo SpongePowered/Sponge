@@ -35,6 +35,7 @@ import java.util.Optional;
 
 @Mixin(net.minecraft.entity.player.PlayerInventory.class)
 public abstract class PlayerInventoryMixin_Carried_Inventory_API implements CarriedInventory<Player> {
+
     @Final @Shadow public PlayerEntity player;
 
     @Override

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.inventory.api;
 
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,8 +34,7 @@ import org.spongepowered.common.bridge.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 
-@Mixin({ArmorStandEntity.class,
-        MobEntity.class})
+@Mixin(value = {ArmorStandEntity.class, MobEntity.class})
 public abstract class TraitMixin_Equipable_Inventory_API implements Equipable {
 
     private EquipmentInventory impl$equipmentInventory = null;

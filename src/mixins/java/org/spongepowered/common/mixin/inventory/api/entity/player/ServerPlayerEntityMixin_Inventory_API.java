@@ -46,7 +46,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Optional;
 
@@ -63,7 +62,7 @@ public abstract class ServerPlayerEntityMixin_Inventory_API extends PlayerEntity
         return this.openInventory(inventory, null);
     }
 
-    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes", "deprecation"})
+    @SuppressWarnings({"unchecked", "ConstantConditions", "rawtypes"})
     @Override
     public Optional<Container> openInventory(final Inventory inventory, final Component displayName) {
         final ContainerBridge openContainer = (ContainerBridge) this.openContainer;

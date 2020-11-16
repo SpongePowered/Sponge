@@ -127,10 +127,10 @@ public final class DamageEventHandler {
             final EventContext.Builder contextBuilder = EventContext.builder();
             if (entityLivingBase instanceof ArmorEquipable) {
                 // TODO - Add the event context keys for these armor pieces
-                final ItemStackSnapshot helmet = ((ArmorEquipable) entityLivingBase).getHead().createSnapshot();
-                final ItemStackSnapshot chest = ((ArmorEquipable) entityLivingBase).getChest().createSnapshot();
-                final ItemStackSnapshot legs = ((ArmorEquipable) entityLivingBase).getLegs().createSnapshot();
-                final ItemStackSnapshot feet = ((ArmorEquipable) entityLivingBase).getFeet().createSnapshot();
+//                final ItemStackSnapshot helmet = ((ArmorEquipable) entityLivingBase).getHead().createSnapshot();
+//                final ItemStackSnapshot chest = ((ArmorEquipable) entityLivingBase).getChest().createSnapshot();
+//                final ItemStackSnapshot legs = ((ArmorEquipable) entityLivingBase).getLegs().createSnapshot();
+//                final ItemStackSnapshot feet = ((ArmorEquipable) entityLivingBase).getFeet().createSnapshot();
             }
             final DamageFunction armorModifier = DamageFunction.of(DamageModifier.builder()
                 .cause(Cause.of(EventContext.empty(), attribute, entityLivingBase))

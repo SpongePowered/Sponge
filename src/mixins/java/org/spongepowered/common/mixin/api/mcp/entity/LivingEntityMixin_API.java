@@ -31,8 +31,6 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -48,10 +46,9 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.Optional;
 import java.util.Set;
 
-@Mixin(value = LivingEntity.class, priority = 999)
+@Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_API extends EntityMixin_API implements Living {
 
-    @Shadow public abstract ItemStack shadow$getHeldItem(Hand hand);
     @Shadow public abstract float shadow$getHealth();
     @Shadow public abstract IAttributeInstance shadow$getAttribute(IAttribute attribute);
 
