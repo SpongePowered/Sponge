@@ -5,7 +5,7 @@
     "refmap": "spongecommon.mixins.refmap.json",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
-    "mixinPriority": 1100,
+    "mixinPriority": 1102,
     "mixins": [
         "CreatorTrackedMixin_Tracker",
         "TypedTrackerMixin",
