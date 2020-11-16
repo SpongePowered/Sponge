@@ -22,29 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world;
+package org.spongepowered.common.bridge.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
-@Mixin(Explosion.class)
-public interface ExplosionAccessor {
+public interface EntityTrackedBridge {
 
-    @Accessor("world") World accessor$getWorld();
-
-    @Accessor("x") double accessor$getX();
-
-    @Accessor("y") double accessor$getY();
-
-    @Accessor("z") double accessor$getZ();
-
-    @Accessor("exploder") Entity accessor$getExploder();
-
-    @Accessor("mode") Explosion.Mode accessor$getMode();
-
-    @Accessor("size") float accessor$getSize();
+    void populateFrameModifier(CauseStackManager.StackFrame frame, EntityTickContext context);
 
 }

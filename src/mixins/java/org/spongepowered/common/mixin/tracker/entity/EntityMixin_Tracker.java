@@ -38,6 +38,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,18 +49,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.entity.EntityTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin_Tracker implements TrackableBridge {
+public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrackedBridge {
 
     // @formatter:off
     @Shadow @Final private EntityType<?> type;
@@ -234,5 +237,10 @@ public abstract class EntityMixin_Tracker implements TrackableBridge {
     @Override
     public void bridge$refreshTrackerStates() {
         ((TrackableBridge) this.type).bridge$refreshTrackerStates();
+    }
+
+    @Override
+    public void populateFrameModifier(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
+
     }
 }

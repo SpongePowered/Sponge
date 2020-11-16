@@ -30,6 +30,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -98,7 +99,9 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     }
 
     @Override
-    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
+        @Nullable GameTransaction<@NonNull ?> parent
+    ) {
         return Optional.of((context, frame) -> {
             frame.pushCause(this.locatableBlock.get());
         });
@@ -113,6 +116,7 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
 
     @Override
     public NotifyNeighborBlockEvent generateEvent(final PhaseContext<@NonNull ?> context,
+        final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<NotifyNeighborBlockEvent>> transactions,
         final Cause currentCause
     ) {

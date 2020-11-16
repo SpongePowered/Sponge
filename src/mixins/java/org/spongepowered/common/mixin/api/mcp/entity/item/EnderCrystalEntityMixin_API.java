@@ -39,7 +39,7 @@ public abstract class EnderCrystalEntityMixin_API extends EntityMixin_API implem
     @Override
     public void detonate() {
         this.shadow$remove();
-        ((EnderCrystalEntityBridge) this).bridge$throwEventWithDetonation(this.shadow$getEntityWorld(), null, this.shadow$getPosX(),
+        ((EnderCrystalEntityBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getEntityWorld(), null, this.shadow$getPosX(),
                 this.shadow$getPosY(), this.shadow$getPosZ(), true, null);
     }
 

@@ -27,14 +27,12 @@ package org.spongepowered.common.mixin.core.entity.item.minecart;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.minecart.TNTMinecartEntity;
 import net.minecraft.util.DamageSource;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -147,7 +145,7 @@ public abstract class TNTMinecartEntityMixin extends AbstractMinecartEntityMixin
         )
     )
     @Nullable
-    private net.minecraft.world.Explosion onSpongeExplode(final net.minecraft.world.World world, final Entity entityIn,
+    private net.minecraft.world.Explosion impl$useSpongeExplosion(final net.minecraft.world.World world, final Entity entityIn,
         final double xIn, final double yIn, final double zIn, final float explosionRadius, final net.minecraft.world.Explosion.Mode modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(ServerLocation.of((ServerWorld) world, xIn, yIn, zIn))

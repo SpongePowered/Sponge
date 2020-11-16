@@ -125,7 +125,14 @@
         "world.storage.WorldInfoMixin",
         "scoreboard.ScoreMixin",
         "world.server.ChunkManagerMixin",
-        "world.server.ChunkManager_EntityTrackerMixin"
+        "world.server.ChunkManager_EntityTrackerMixin",
+        "entity.monster.CreeperEntityMixin",
+        "entity.item.EnderCrystalEntityMixin",
+        "entity.projectile.FireballEntityMixin",
+        "entity.projectile.WitherSkullEntityMixin",
+        "entity.item.minecart.TNTMinecartEntityMixin",
+        "world.ExplosionMixin",
+        "entity.monster.MonsterEntityMixin"
     ],
     "client": [
         "client.MinecraftMixin",

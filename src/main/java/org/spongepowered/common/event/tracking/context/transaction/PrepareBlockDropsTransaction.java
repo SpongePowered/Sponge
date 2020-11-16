@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
@@ -59,7 +60,9 @@ public final class PrepareBlockDropsTransaction extends BlockEventBasedTransacti
     }
 
     @Override
-    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
+        @Nullable GameTransaction<@NonNull ?> parent
+    ) {
         return Optional.empty();
     }
 

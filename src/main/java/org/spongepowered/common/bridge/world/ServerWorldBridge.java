@@ -29,15 +29,10 @@ import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.storage.SessionLockException;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
-
-import java.util.function.Function;
 
 public interface ServerWorldBridge {
 
@@ -57,8 +52,7 @@ public interface ServerWorldBridge {
 
     long bridge$getChunkUnloadDelay();
 
-    net.minecraft.world.Explosion bridge$triggerInternalExplosion(Explosion explosion,
-        Function<? super net.minecraft.world.Explosion, ? extends PhaseContext<?>> contextCreator);
+
 
     void bridge$doChunkGC();
 

@@ -31,6 +31,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -64,7 +65,9 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
+        @Nullable GameTransaction<@NonNull ?> parent
+    ) {
         return Optional.of((context, stackFrame) -> {
             stackFrame.pushCause(this.destroyingEntity);
             this.lastAttacker.get()
@@ -91,7 +94,8 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
 
     @Override
     public HarvestEntityEvent generateEvent(
-        final PhaseContext<@NonNull ?> context, final ImmutableList<GameTransaction<HarvestEntityEvent>> gameTransactions,
+        final PhaseContext<@NonNull ?> context, @Nullable GameTransaction<@NonNull ?> parent,
+        final ImmutableList<GameTransaction<HarvestEntityEvent>> gameTransactions,
         final Cause currentCause
     ) {
         return SpongeEventFactory.createHarvestEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) this.destroyingEntity);

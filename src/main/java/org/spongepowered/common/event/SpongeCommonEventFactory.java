@@ -122,6 +122,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -143,6 +144,7 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -152,8 +154,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public final class SpongeCommonEventFactory {
 
@@ -915,9 +915,11 @@ public final class SpongeCommonEventFactory {
         if (!Sponge.getEventManager().post(event)) {
             final Explosion explosion = event.getExplosionBuilder().build();
             if (explosion.getRadius() > 0) {
-                ((ServerWorldBridge) ((Explosive) explosiveBridge).getWorld())
-                    .bridge$triggerInternalExplosion(explosion,
-                        e -> GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER).explosion(e));
+                ((TrackedWorldBridge) ((Explosive) explosiveBridge).getWorld())
+                    .tracker$triggerInternalExplosion(
+                        explosion,
+                        e -> GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER).explosion(e)
+                    );
             }
             return Optional.of((net.minecraft.world.Explosion) explosion);
         }

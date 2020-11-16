@@ -24,56 +24,40 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.StringJoiner;
 
-public final class PipelineCursor {
-    public final BlockState state;
-    public final int opacity;
-    public final BlockPos pos;
-    public final @Nullable TileEntity tileEntity;
-    public final List<ItemStack> drops;
+public final class SpawnDestructBlocksEffect implements ProcessingSideEffect {
 
-    public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
-        @Nullable final TileEntity tileEntity
-    ) {
-        this.state = state;
-        this.opacity = opacity;
-        this.pos = pos;
-        this.tileEntity = tileEntity;
-        this.drops = Collections.emptyList();
+    private static final class Holder {
+        static final SpawnDestructBlocksEffect INSTANCE = new SpawnDestructBlocksEffect();
     }
 
-    public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
-        @Nullable final TileEntity tileEntity,
-        final List<ItemStack> drops
-    ) {
-        this.state = state;
-        this.opacity = opacity;
-        this.pos = pos;
-        this.tileEntity = tileEntity;
-        this.drops = drops;
+    public static SpawnDestructBlocksEffect getInstance() {
+        return Holder.INSTANCE;
     }
 
+    SpawnDestructBlocksEffect() {}
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public String toString() {
-        return new StringJoiner(
-            ", ",
-            PipelineCursor.class.getSimpleName() + "[",
-            "]"
-        )
-            .add("state=" + this.state)
-            .add("opacity=" + this.opacity)
-            .add("pos=" + this.pos)
-            .add("tileEntity=" + this.tileEntity)
-            .add("drops=" + this.drops)
-            .toString();
+    public EffectResult processSideEffect(
+        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag
+    ) {
+        final ServerWorld world = pipeline.getServerWorld();
+        final BlockPos pos = oldState.pos;
+
+        final List<ItemStack> drops = oldState.drops;
+
+        drops.forEach(drop -> Block.spawnAsEntity(world, pos, drop));
+
+        return EffectResult.NULL_PASS;
     }
 }

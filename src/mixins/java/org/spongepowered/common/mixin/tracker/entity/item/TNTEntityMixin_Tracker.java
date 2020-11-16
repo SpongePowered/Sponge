@@ -22,29 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world;
+package org.spongepowered.common.mixin.tracker.entity.item;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.TNTEntity;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.mixin.tracker.entity.EntityMixin_Tracker;
 
-@Mixin(Explosion.class)
-public interface ExplosionAccessor {
+import javax.annotation.Nullable;
 
-    @Accessor("world") World accessor$getWorld();
+@Mixin(TNTEntity.class)
+public abstract class TNTEntityMixin_Tracker extends EntityMixin_Tracker {
 
-    @Accessor("x") double accessor$getX();
+    @Shadow @Nullable private LivingEntity tntPlacedBy;
 
-    @Accessor("y") double accessor$getY();
-
-    @Accessor("z") double accessor$getZ();
-
-    @Accessor("exploder") Entity accessor$getExploder();
-
-    @Accessor("mode") Explosion.Mode accessor$getMode();
-
-    @Accessor("size") float accessor$getSize();
-
+    @Override
+    public void populateFrameModifier(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
+        if (this.tntPlacedBy != null) {
+            frame.addContext(EventContextKeys.IGNITER, (Living) this.tntPlacedBy);
+        }
+    }
 }

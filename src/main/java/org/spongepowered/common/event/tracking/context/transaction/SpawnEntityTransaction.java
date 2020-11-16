@@ -29,9 +29,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
@@ -79,7 +81,15 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     }
 
     @Override
-    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator() {
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
+        final @Nullable GameTransaction<@NonNull ?> parent
+    ) {
+        if (parent instanceof ChangeBlock) {
+            return Optional.of(((phaseContext, stackFrame) -> {
+                stackFrame.pushCause(((ChangeBlock) parent).original);
+                stackFrame.addContext(EventContextKeys.BLOCK_TARGET, ((ChangeBlock) parent).original);
+            }));
+        }
         return Optional.empty();
     }
 
@@ -91,6 +101,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public SpawnEntityEvent generateEvent(final PhaseContext<@NonNull ?> context,
+        final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause
     ) {
         final ImmutableList<Tuple<Entity, DummySnapshot>> collect = gameTransactions.stream()
@@ -101,7 +112,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
                     new DummySnapshot(spawnRequest.originalPosition, spawnRequest.entityTag, spawnRequest.worldSupplier)
                 );
             }).collect(ImmutableList.toImmutableList());
-        return ((IPhaseState) context.state).createSpawnEvent(context, collect, currentCause);
+        return ((IPhaseState) context.state).createSpawnEvent(context, parent, collect, currentCause);
     }
 
     @Override

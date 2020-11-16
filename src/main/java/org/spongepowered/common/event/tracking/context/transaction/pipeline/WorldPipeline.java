@@ -93,7 +93,7 @@ public final class WorldPipeline implements BlockPipeline {
         }
         final int oldOpacity = oldState.getOpacity(serverWorld, pos);
         final @Nullable TileEntity existing = this.chunkSupplier.get().getTileEntity(pos, Chunk.CreateEntityType.CHECK);
-        final PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing);
+        PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing);
 
         for (final ResultingTransactionBySideEffect effect : this.worldEffects) {
             try (final EffectTransactor ignored = context.getTransactor().pushEffect(effect)) {
@@ -105,6 +105,9 @@ public final class WorldPipeline implements BlockPipeline {
                 );
                 if (result.hasResult) {
                     return result.resultingState != null;
+                }
+                if (formerState.drops.isEmpty() && !result.drops.isEmpty()) {
+                    formerState = new PipelineCursor(oldState, oldOpacity, pos, existing, result.drops);
                 }
             }
         }

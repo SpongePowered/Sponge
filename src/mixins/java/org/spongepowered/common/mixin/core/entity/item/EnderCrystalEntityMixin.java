@@ -71,12 +71,12 @@ public abstract class EnderCrystalEntityMixin extends EntityMixin implements Exp
     private net.minecraft.world.Explosion impl$throwEventWithEntity(final net.minecraft.world.World world,
         final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
         final net.minecraft.world.Explosion.Mode modeIn, final DamageSource source, final float damage) {
-        return this.bridge$throwEventWithDetonation(world, entityIn, xIn, yIn, zIn, modeIn.compareTo(net.minecraft.world.Explosion.Mode.DESTROY) <= 0, source);
+        return this.bridge$throwExplosionEventAndExplode(world, entityIn, xIn, yIn, zIn, modeIn.compareTo(net.minecraft.world.Explosion.Mode.DESTROY) <= 0, source);
     }
 
     @Nullable
     @Override
-    public net.minecraft.world.Explosion bridge$throwEventWithDetonation(final net.minecraft.world.World world,
+    public net.minecraft.world.Explosion bridge$throwExplosionEventAndExplode(final net.minecraft.world.World world,
         @Nullable final Entity nil, final double x, final double y, final double z, final boolean smoking,
         @Nullable final DamageSource source) {
         final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
