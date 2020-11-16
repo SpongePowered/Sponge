@@ -25,9 +25,9 @@
 package org.spongepowered.common.registry;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Singleton;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
-import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.advancements.FrameType;
@@ -131,6 +131,7 @@ import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.cause.entity.DismountType;
 import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.item.FireworkShape;
@@ -183,6 +184,7 @@ import org.spongepowered.common.registry.builtin.sponge.ClientCompletionKeyStrea
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
+import org.spongepowered.common.registry.builtin.sponge.DamageModifierTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DimensionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DismountTypeStreamGenerator;
@@ -546,6 +548,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(CollisionRule.class, ResourceKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true, false)
             .generateRegistry(ComparatorMode.class, ResourceKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true, false)
             .registerRegistry(Currency.class, ResourceKey.sponge("currency"), true)
+            .generateRegistry(DamageModifierType.class, ResourceKey.sponge("damage_modifier_type"), DamageModifierTypeStreamGenerator.stream(), true, true)
             .generateRegistry(DamageType.class, ResourceKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true, true)
             .generateRegistry(Difficulty.class, ResourceKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true, false)
             .generateRegistry(DimensionType.class, ResourceKey.minecraft("dimension_type"), DimensionTypeStreamGenerator.stream(), true, true)
