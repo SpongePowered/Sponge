@@ -113,7 +113,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             frame.addContext(EventContextKeys.COMMAND, input.getString());
             return ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).process(sourceBridge.bridge$asCommandCause(), input.getRemaining()).getResult();
         } catch (final CommandException e) {
-            throw new net.minecraft.command.CommandException(SpongeAdventure.asVanilla(e.getText()));
+            throw new net.minecraft.command.CommandException(SpongeAdventure.asVanilla(e.componentMessage()));
         }
     }
 

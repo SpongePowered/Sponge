@@ -69,7 +69,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.command.ExecuteCommandEvent;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.util.TextMessageException;
+import org.spongepowered.api.util.ComponentMessageException;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
@@ -326,7 +326,7 @@ public final class SpongeCommandManager implements CommandManager {
             try {
                 result = mapping.getRegistrar().process(cause, mapping, command, args);
             } catch (final CommandException exception) {
-                final CommandResult errorResult = CommandResult.builder().setResult(0).error(exception.getText()).build();
+                final CommandResult errorResult = CommandResult.builder().setResult(0).error(exception.componentMessage()).build();
                 this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
                 if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
                     this.prettyPrintThrowableError(exception, command, args, cause);
@@ -354,8 +354,8 @@ public final class SpongeCommandManager implements CommandManager {
                 this.prettyPrintThrowableError(thr, command, args, cause);
 
                 Component excBuilder;
-                if (thr instanceof TextMessageException) {
-                    final Component text = ((TextMessageException) thr).getText();
+                if (thr instanceof ComponentMessageException) {
+                    final Component text = ((ComponentMessageException) thr).componentMessage();
                     excBuilder = text == null ? Component.text("null") : text;
                 } else {
                     excBuilder = Component.text(String.valueOf(thr.getMessage()));

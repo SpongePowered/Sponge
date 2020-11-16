@@ -140,7 +140,7 @@ public final class SpongePaginationList implements PaginationList {
         try {
             pagination.specificPage(page);
         } catch (final CommandException e) {
-            final Component text = e.getText();
+            final Component text = e.componentMessage();
             if (text != null) {
                 receiver.sendMessage(Identity.nil(), text.color(NamedTextColor.RED));
             }
