@@ -1,6 +1,4 @@
 import org.apache.commons.codec.digest.DigestUtils
-import java.io.FileInputStream
-import java.util.StringJoiner
 import java.util.Locale
 
 plugins {
@@ -215,6 +213,7 @@ dependencies {
     implementation("net.kyori:adventure-serializer-configurate4:4.2.0-SNAPSHOT")
 
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
+    annotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig(project(":SpongeAPI"))
