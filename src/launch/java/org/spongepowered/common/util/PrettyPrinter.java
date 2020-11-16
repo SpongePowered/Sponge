@@ -693,7 +693,7 @@ public class PrettyPrinter {
      */
     public PrettyPrinter add(Throwable th, int indent) {
         while (th != null) {
-            this.addWrapped("    %s: %s", th.getClass().getName(), th.getMessage());
+            this.add("    %s: %s", th.getClass().getName(), th.getMessage());
             this.add(th.getStackTrace(), indent);
             th = th.getCause();
         }
