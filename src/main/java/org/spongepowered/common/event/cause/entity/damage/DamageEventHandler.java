@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.cause.entity.damage;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.block.BlockState;
@@ -62,8 +61,6 @@ import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamage
 import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
@@ -139,48 +136,6 @@ public final class DamageEventHandler {
             return Optional.of(armorModifier);
         }
         return Optional.empty();
-    }
-
-    /**
-     * Only used in Vanilla. The Forge version is much different.
-     * Basically, this accepts the various "objects" needed to work for an armor piece to be "damaged".
-     * <p>
-     * This is also where we can likely throw a damage item event.
-     */
-    public static void acceptArmorModifier(final LivingEntity entity, final DamageSource damageSource, final DamageModifier modifier,
-        double damage
-    ) {
-        final Optional<DamageObject> property = modifier.getCause().first(DamageObject.class);
-        final Iterable<net.minecraft.item.ItemStack> inventory = entity.getArmorInventoryList();
-        if (property.isPresent()) {
-            damage = Math.abs(damage) * 25;
-            final net.minecraft.item.ItemStack stack = Iterables.get(inventory, property.get().slot);
-            if (stack.isEmpty()) {
-                throw new IllegalStateException("Invalid slot position " + property.get().slot);
-            }
-
-            final int itemDamage = (int) (damage / 25D < 1 ? 1 : damage / 25D);
-            stack.damageItem(
-                itemDamage,
-                entity,
-                (livingEntity) -> livingEntity.sendBreakAnimation(EquipmentSlotType.fromSlotTypeAndIndex(
-                    EquipmentSlotType.Group.ARMOR,
-                    property.get().slot
-                ))
-            );
-        }
-    }
-
-    public static EquipmentType resolveEquipment(final int slot) {
-        if (slot == 0) {
-            return EquipmentTypes.FEET.get();
-        } else if (slot == 1) {
-            return EquipmentTypes.LEGS.get();
-        } else if (slot == 2) {
-            return EquipmentTypes.CHEST.get();
-        } else {
-            return EquipmentTypes.HEAD.get();
-        }
     }
 
     public static Optional<DamageFunction> createResistanceModifier(final LivingEntity entityLivingBase, final DamageSource damageSource) {

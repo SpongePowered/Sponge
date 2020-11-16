@@ -51,7 +51,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -67,7 +66,6 @@ import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
 import org.spongepowered.common.bridge.entity.PlatformLivingEntityBridge;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
-import org.spongepowered.common.event.cause.entity.damage.DamageObject;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -136,7 +134,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract boolean shadow$isOnLadder();
     @Shadow public abstract void shadow$setSprinting(boolean sprinting);
     @Shadow public abstract void shadow$setLastAttackedEntity(Entity entityIn);
-
+    @Shadow protected abstract void shadow$damageArmor(float damage);
     // @formatter:on
 
     private int impl$maxAir = this.shadow$getMaxAir();
@@ -546,10 +544,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 }
 
                 // Armor
-                if (!damageSource.isUnblockable()) {
-                    for (final DamageFunction modifier : event.getModifiers()) {
-                        this.bridge$applyArmorDamage((LivingEntity) (Object) this, damageSource, event, modifier.getModifier());
-                    }
+                if (!damageSource.isUnblockable() && armorFunction.isPresent()) {
+                    this.shadow$damageArmor((float) event.getBaseDamage());
                 }
                 // Resistance modifier post calculation
                 if (resistanceFunction.isPresent()) {
@@ -599,15 +595,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Override
     public float bridge$applyModDamage(final LivingEntity entityLivingBase, final DamageSource source, final float damage) {
         return damage;
-    }
-
-    @Override
-    public void bridge$applyArmorDamage(
-        final LivingEntity entityLivingBase, final DamageSource source, final DamageEntityEvent entityEvent, final DamageModifier modifier) {
-        final Optional<DamageObject> optional = modifier.getCause().first(DamageObject.class);
-        if (optional.isPresent()) {
-            DamageEventHandler.acceptArmorModifier((LivingEntity) (Object) this, source, modifier, entityEvent.getDamage(modifier));
-        }
     }
 
     @Override

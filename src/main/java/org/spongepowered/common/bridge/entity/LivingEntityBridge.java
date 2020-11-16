@@ -26,8 +26,6 @@ package org.spongepowered.common.bridge.entity;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
-import org.spongepowered.api.event.entity.DamageEntityEvent;
 
 public interface LivingEntityBridge {
 
@@ -38,9 +36,6 @@ public interface LivingEntityBridge {
     void bridge$setMaxAir(int max);
 
     float bridge$applyModDamage(LivingEntity entityLivingBase, DamageSource source, float damage);
-
-    void bridge$applyArmorDamage(LivingEntity entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier);
-
 
     float bridge$applyModDamagePost(LivingEntity entityLivingBase, DamageSource source, float damage);
 
