@@ -134,7 +134,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected abstract void shadow$damageEntity(DamageSource damageSrc, float damageAmount);
     @Shadow public abstract boolean shadow$isOnLadder();
     @Shadow public abstract void shadow$setSprinting(boolean sprinting);
-    @Shadow public abstract void shadow$setLastAttackedEntity(Entity entityIn);
     @Shadow protected abstract void shadow$damageArmor(float damage);
     // @formatter:on
 
