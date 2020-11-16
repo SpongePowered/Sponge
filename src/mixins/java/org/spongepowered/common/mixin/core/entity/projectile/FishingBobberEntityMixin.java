@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -66,6 +68,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,6 +121,7 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
                 transactions = list.stream().map(ItemStackUtil::snapshotOf)
                         .map(snapshot -> new Transaction<>(snapshot, snapshot))
                         .collect(Collectors.toList());
+                CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayerEntity)this.angler, stack, (FishingBobberEntity) (Object) this, list);
             } else {
                 transactions = new ArrayList<>();
             }
@@ -125,11 +129,13 @@ public abstract class FishingBobberEntityMixin extends EntityMixin {
 
             if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStop(PhaseTracker.getCauseStackManager().getCurrentCause(), ((FishingBobber) this), transactions))) {
                 // Event is cancelled
-                return -1;
+                return 0;
             }
+            // Sponge end
 
             if (this.caughtEntity != null) {
                 this.bringInHookedEntity();
+                CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayerEntity)this.angler, stack, (FishingBobberEntity) (Object) this, Collections.emptyList());
                 this.world.setEntityState((net.minecraft.entity.Entity) (Object) this, (byte) 31);
                 i = this.caughtEntity instanceof ItemEntity ? 3 : 5;
             } // Sponge: Remove else

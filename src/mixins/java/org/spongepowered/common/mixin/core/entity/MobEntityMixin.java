@@ -165,12 +165,14 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
     @Nullable
     @Overwrite
     public LivingEntity getAttackTarget() {
+        // Sponge start
         if (this.attackTarget != null) {
             //noinspection ConstantConditions
             if (EntityUtil.isUntargetable((net.minecraft.entity.Entity) (Object) this, this.attackTarget)) {
                 this.attackTarget = null;
             }
         }
+        // Sponge end
         return this.attackTarget;
     }
 
@@ -258,6 +260,7 @@ public abstract class MobEntityMixin extends LivingEntityMixin {
             }
 
             this.shadow$applyEnchantments((MobEntity) (Object) this, targetEntity);
+            this.shadow$setLastAttackedEntity(targetEntity);
         }
 
         return attackSucceeded;
