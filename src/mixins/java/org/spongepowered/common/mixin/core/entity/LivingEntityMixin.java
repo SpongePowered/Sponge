@@ -119,7 +119,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected abstract void shadow$damageShield(float p_184590_1_);
     @Shadow protected abstract void shadow$playHurtSound(DamageSource p_184581_1_);
     @Shadow protected abstract void shadow$blockUsingShield(LivingEntity p_190629_1_);
-    @Shadow public abstract void shadow$setLastAttackedEntity(Entity entityIn);
     @Shadow protected abstract float shadow$getSoundVolume();
     @Shadow protected abstract float shadow$getSoundPitch();
     @Shadow protected abstract SoundEvent shadow$getDeathSound();
@@ -134,6 +133,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected abstract void shadow$damageEntity(DamageSource damageSrc, float damageAmount);
     @Shadow public abstract boolean shadow$isOnLadder();
     @Shadow public abstract void shadow$setSprinting(boolean sprinting);
+    @Shadow public abstract void shadow$setLastAttackedEntity(Entity entityIn);
     @Shadow protected abstract void shadow$damageArmor(float damage);
     // @formatter:on
 
