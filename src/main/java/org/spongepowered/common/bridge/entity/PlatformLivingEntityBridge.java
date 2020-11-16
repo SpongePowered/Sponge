@@ -24,25 +24,21 @@
  */
 package org.spongepowered.common.bridge.entity;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
-import org.spongepowered.api.event.entity.DamageEntityEvent;
 
-public interface LivingEntityBridge {
+/**
+ * Bridge methods designed as hooks for various methods called on an {@link Entity}
+ * where a platform would want to adjust logic
+ */
+public interface PlatformLivingEntityBridge {
 
-    boolean bridge$damageEntity(DamageSource damageSource, float damage);
+    /**
+     * Called when the {@link Entity} is to be not marked as removed.
+     */
+    default boolean bridge$onLivingAttack(LivingEntity entityLivingBase, DamageSource source, float amount) {
+        return true;
+    }
 
-    int bridge$getMaxAir();
-
-    void bridge$setMaxAir(int max);
-
-    float bridge$applyModDamage(LivingEntity entityLivingBase, DamageSource source, float damage);
-
-    void bridge$applyArmorDamage(LivingEntity entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier);
-
-
-    float bridge$applyModDamagePost(LivingEntity entityLivingBase, DamageSource source, float damage);
-
-    void bridge$resetDeathEventsPosted();
 }

@@ -25,7 +25,8 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import co.aikar.timings.Timing;
-import net.kyori.adventure.text.Component;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.material.Material;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -36,7 +37,9 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
@@ -68,7 +71,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
@@ -79,6 +81,7 @@ import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.util.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -86,17 +89,18 @@ import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionChangeResult;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
-
-import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, InvulnerableTrackedBridge,
@@ -107,6 +111,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public net.minecraft.world.World world;
     @Shadow public float rotationYaw;
     @Shadow public float rotationPitch;
+    @Shadow public int hurtResistantTime;
     @Shadow public boolean removed;
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
@@ -118,6 +123,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public boolean collided;
     @Shadow @Nullable private Entity ridingEntity;
     @Shadow @Final private List<Entity> passengers;
+    @Shadow protected boolean inLava;
+    @Shadow public boolean onGround;
+    @Shadow public float fallDistance;
 
     @Shadow public abstract void shadow$setPosition(double x, double y, double z);
     @Shadow public abstract double shadow$getPosX();
@@ -149,8 +157,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow @Nullable public abstract ItemEntity shadow$entityDropItem(ItemStack stack, float offsetY);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow @Nullable public abstract Entity shadow$getRidingEntity();
+    @Shadow public abstract boolean shadow$isInvulnerableTo(DamageSource source);
+    @Shadow public abstract AxisAlignedBB shadow$getBoundingBox();
+    @Shadow public abstract boolean shadow$isSprinting();
+    @Shadow public abstract boolean shadow$isOnSameTeam(Entity entityIn);
+    @Shadow public abstract double shadow$getDistanceSq(Entity entityIn);
+    @Shadow public abstract SoundCategory shadow$getSoundCategory();
 
-    @Shadow protected boolean inLava;private boolean impl$isConstructing = true;
+    private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
     private boolean impl$isVanished = false;
     private boolean impl$pendingVisibilityUpdate = false;
@@ -388,7 +402,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             ci.cancel();
         }
     }
-
+*/
     @Redirect(method = "setOnFireFromLava",
         at = @At(
             value = "INVOKE",
@@ -438,6 +452,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     }
 
+    /*
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "setPosition",
         at = @At("HEAD"))
