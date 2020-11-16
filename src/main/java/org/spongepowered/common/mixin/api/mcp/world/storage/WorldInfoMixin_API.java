@@ -44,7 +44,12 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ChangeWorldGameRuleEvent;
-import org.spongepowered.api.world.*;
+import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.SerializationBehaviors;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -391,7 +396,7 @@ public abstract class WorldInfoMixin_API implements WorldProperties {
         checkNotNull(gameRule, "The gamerule cannot be null!");
         checkNotNull(value, "The gamerule value cannot be null!");
 
-        Optional<World> optionalTargetWorld = Sponge.getServer().getWorld(getUniqueId());
+        final Optional<World> optionalTargetWorld = Sponge.getServer().getWorld(getUniqueId());
 
         if (optionalTargetWorld.isPresent()) {
             final ChangeWorldGameRuleEvent event = SpongeEventFactory.createChangeWorldGameRuleEvent(

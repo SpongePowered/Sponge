@@ -47,7 +47,7 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 public abstract class CommandGameRuleMixin_MultiWorldCommand {
 
     private static int currentDimension;
-    private boolean cancelled = false;
+    private final ThreadLocal<Boolean> modificationCancelled = ThreadLocal.withInitial(() -> false);
 
     private static GameRules multiWorldcommand$getGameRules(final ICommandSender sender) {
         currentDimension = ((WorldServerBridge) sender.getEntityWorld()).bridge$getDimensionId();
@@ -64,9 +64,9 @@ public abstract class CommandGameRuleMixin_MultiWorldCommand {
     @Inject(method = "execute", cancellable = true,
             at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Lnet/minecraft/world/GameRules;setOrCreateGameRule(Ljava/lang/String;Ljava/lang/String;)V"))
     private void multiWorldCommand$cancelAfterSetOrCreateGameRule(CallbackInfo ci) {
-        if (cancelled) {
+        if (modificationCancelled.get()) {
             ci.cancel();
-            cancelled = false;
+            modificationCancelled.set(false);
         }
     }
 
@@ -82,7 +82,7 @@ public abstract class CommandGameRuleMixin_MultiWorldCommand {
         );
 
         if (Sponge.getEventManager().post(event)) {
-            cancelled = true;
+            modificationCancelled.set(true);
             return;
         }
 
