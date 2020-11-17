@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.entity.player;
 
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -43,6 +45,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
+import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -84,14 +87,14 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
     public void onDeath(final DamageSource cause) {
         // Sponge start
         final boolean isServerThread = PhaseTracker.SERVER.onSidedThread();
-        final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((ServerPlayerEntity) (Object) this, cause, isServerThread);
+        final Optional<DestructEntityEvent.Death> optEvent = SpongeCommonEventFactory.callDestructEntityEventDeath((ServerPlayerEntity) (Object) this, cause, isServerThread, Audiences.server());
         if (optEvent.map(Cancellable::isCancelled).orElse(true)) {
             return;
         }
         final DestructEntityEvent.Death event = optEvent.get();
         // Sponge end
 
-        final boolean flag = this.world.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES);
+        final boolean flag = this.world.getGameRules().getBoolean(GameRules.SHOW_DEATH_MESSAGES) && !event.isMessageCancelled();
         if (flag) {
             final ITextComponent itextcomponent = this.shadow$getCombatTracker().getDeathMessage();
             this.connection.sendPacket(new SCombatPacket(this.shadow$getCombatTracker(), SCombatPacket.Event.ENTITY_DIED, itextcomponent), (p_212356_2_) -> {
@@ -116,7 +119,13 @@ public abstract class ServerPlayerEntityMixin_Tracker extends PlayerEntityMixin_
                         (ServerPlayerEntity) (Object) this, itextcomponent);
                 }
             } else {
-                this.server.getPlayerList().sendMessage(itextcomponent);
+                final Component message = event.getMessage();
+                // Sponge start - use the event audience
+                if (message != Component.empty()) {
+                    event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(Identity.nil(), message));
+                }
+                // Sponge end
+                // this.server.getPlayerList().sendMessage(itextcomponent);
             }
         } else {
             this.connection.sendPacket(

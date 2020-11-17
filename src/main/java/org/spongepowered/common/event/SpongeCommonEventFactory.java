@@ -708,18 +708,14 @@ public final class SpongeCommonEventFactory {
     }
 
     public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(final LivingEntity entity, @Nullable final DamageSource source, final boolean isMainThread) {
-        final Audience originalChannel;
-        final Audience channel;
+        return callDestructEntityEventDeath(entity, source, isMainThread, Audience.empty());
+    }
+
+    public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(final LivingEntity entity, @Nullable final DamageSource source, final boolean isMainThread, final Audience originalChannel) {
         final Component originalMessage;
         Optional<User> sourceCreator = Optional.empty();
         final boolean messageCancelled = false;
 
-        if (entity instanceof ServerPlayerEntity) {
-            originalChannel = channel = (Player) entity;
-        } else {
-            originalChannel = Audience.empty();
-            channel = Audience.empty();
-        }
         if (source instanceof EntityDamageSource) {
             final EntityDamageSource damageSource = (EntityDamageSource) source;
             if (damageSource.getImmediateSource() instanceof CreatorTrackedBridge) {
@@ -745,14 +741,9 @@ public final class SpongeCommonEventFactory {
 
             final Cause cause = isMainThread ? PhaseTracker.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source == null ? entity : source);
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
-                originalChannel, Optional.of(channel), originalMessage, originalMessage, (Living) entity,
+                originalChannel, Optional.of(originalChannel), originalMessage, originalMessage, (Living) entity,
                 entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY), messageCancelled);
             SpongeCommon.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
-            final Component message = event.getMessage();
-            // Check the event isn't cancelled either. If it is, then don't spawn the message.
-            if (!event.isCancelled() && !event.isMessageCancelled() && message != Component.empty()) {
-                event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(Identity.nil(), message));
-            }
             if (!event.isCancelled()) {
                 SpongeHooks.logEntityDeath(entity);
             }
