@@ -73,9 +73,16 @@ public abstract class ExplosionMixin_Tracker {
      */
     @Overwrite
     public void doExplosionB(final boolean spawnParticles) {
+        // Sponge Start - In Sponge, we no longer call doExplosionB client-side (kills client perf)
         if (this.world.isRemote) {
-            this.world.playSound(this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F, false);
+            return;
         }
+        // Sponge End
+
+        // Sponge Start - Send the sound packet down. We must do this as we do not call doExplosionB client-side
+        this.world.playSound(null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.BLOCKS, 4.0F,
+                (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
+        // Sponge End
 
         final boolean flag = this.mode != net.minecraft.world.Explosion.Mode.NONE;
         if (spawnParticles) {

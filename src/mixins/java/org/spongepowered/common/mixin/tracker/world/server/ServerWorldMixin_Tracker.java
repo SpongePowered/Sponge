@@ -125,7 +125,6 @@ import java.util.function.Supplier;
 public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implements TrackedWorldBridge {
 
     // @formatting:off
-    @Shadow @Final private MinecraftServer server;
     @Shadow @Final private List<ServerPlayerEntity> players;
     // @formatting:on
 
