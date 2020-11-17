@@ -27,9 +27,21 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 import net.minecraft.block.BlockState;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class NotifyNeighborSideEffect implements ProcessingSideEffect {
+
+    private static final class Holder {
+        static final NotifyNeighborSideEffect INSTANCE = new NotifyNeighborSideEffect();
+    }
+
+    public static NotifyNeighborSideEffect getInstance() {
+        return NotifyNeighborSideEffect.Holder.INSTANCE;
+    }
+
+    NotifyNeighborSideEffect() {}
+
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,

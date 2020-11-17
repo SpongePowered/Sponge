@@ -28,19 +28,32 @@ import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Iterator;
 
 public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect implements ProcessingSideEffect {
+
+    private static final class Holder {
+        static final RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect INSTANCE = new RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect();
+    }
+
+    public static RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect() {}
+
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag
     ) {
         final ServerWorld serverWorld = pipeline.getServerWorld();
-        final TileEntity tileEntity = oldState.tileEntity;
+        final @Nullable TileEntity tileEntity = oldState.tileEntity;
         final BlockPos pos = oldState.pos;
         if (tileEntity == null || tileEntity.isRemoved()) {
             return EffectResult.NULL_RETURN;

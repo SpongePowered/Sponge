@@ -29,9 +29,20 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ChunkHolder;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class NotifyClientEffect implements ProcessingSideEffect {
+
+    private static final class Holder {
+        static final NotifyClientEffect INSTANCE = new NotifyClientEffect();
+    }
+
+    public static NotifyClientEffect getInstance() {
+        return NotifyClientEffect.Holder.INSTANCE;
+    }
+
+    NotifyClientEffect() {}
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,

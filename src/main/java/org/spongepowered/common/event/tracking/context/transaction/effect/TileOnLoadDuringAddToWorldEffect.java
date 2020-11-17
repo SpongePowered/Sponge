@@ -26,17 +26,29 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class TileOnLoadDuringAddToWorldEffect implements ProcessingSideEffect {
+
+    private static final class Holder {
+        static final TileOnLoadDuringAddToWorldEffect INSTANCE = new TileOnLoadDuringAddToWorldEffect();
+    }
+
+    public static TileOnLoadDuringAddToWorldEffect getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    TileOnLoadDuringAddToWorldEffect() {}
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag
     ) {
-        final TileEntity tileEntity = oldState.tileEntity;
+        final @Nullable TileEntity tileEntity = oldState.tileEntity;
         if (tileEntity == null) {
             return EffectResult.NULL_RETURN;
         }

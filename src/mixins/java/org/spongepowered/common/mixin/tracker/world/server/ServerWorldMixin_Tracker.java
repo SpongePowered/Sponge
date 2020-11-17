@@ -35,7 +35,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SEntityVelocityPacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -92,7 +91,6 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.CheckB
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyClientEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyNeighborSideEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromChunkEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromWorldEffect;
@@ -103,6 +101,7 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Update
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateWorldRendererEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.WorldBlockChangeCompleteEffect;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
 import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
@@ -207,7 +206,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
 
     /**
      * For PhaseTracking, we need to wrap around the
-     * {@link BlockState#tick(World, BlockPos, Random)} method, and the ScheduledTickList uses a lambda method
+     * {@link BlockState#tick(ServerWorld, BlockPos, Random)} method, and the ScheduledTickList uses a lambda method
      * to {@code ServerWorld#tickBlock(NextTickListEntry)}, so it's either we customize the ScheduledTickList
      * or we wrap in this method here.
      *
@@ -247,7 +246,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
 
     /**
      * For PhaseTracking, we need to wrap around the
-     * {@link BlockState#tick(World, BlockPos, Random)} method, and the ScheduledTickList uses a lambda method
+     * {@link BlockState#tick(ServerWorld, BlockPos, Random)} method, and the ScheduledTickList uses a lambda method
      * to {@code ServerWorld#tickBlock(NextTickListEntry)}, so it's either we customize the ScheduledTickList
      * or we wrap in this method here.
      *
@@ -390,12 +389,12 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             }
             return EffectResult.NULL_PASS;
         })
-            .addEffect(new UpdateLightSideEffect())
+            .addEffect(UpdateLightSideEffect.getInstance())
             .addEffect(CheckBlockPostPlacementIsSameEffect.getInstance())
-            .addEffect(new UpdateWorldRendererEffect())
-            .addEffect(new NotifyClientEffect())
-            .addEffect(new NotifyNeighborSideEffect())
-            .addEffect(new UpdateConnectingBlocksEffect());
+            .addEffect(UpdateWorldRendererEffect.getInstance())
+            .addEffect(NotifyClientEffect.getInstance())
+            .addEffect(NotifyNeighborSideEffect.getInstance())
+            .addEffect(UpdateConnectingBlocksEffect.getInstance());
         return worldPipelineBuilder;
     }
 
@@ -429,7 +428,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         }
         final net.minecraft.block.BlockState currentState = chunk.getBlockState(pos);
         final WorldPipeline pipeline = this.bridge$makePipeline(pos, currentState, newState, chunk, spongeFlag)
-            .addEffect(new WorldBlockChangeCompleteEffect())
+            .addEffect(WorldBlockChangeCompleteEffect.getInstance())
             .build();
 
         return pipeline.processEffects(instance.getPhaseContext(), currentState, newState, pos, spongeFlag);
@@ -514,8 +513,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         final IPhaseState state = current.state;
         if (current.getTransactor().logTileRemoval(tileentity, () -> (ServerWorld) (Object) this)) {
             final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
-                .addEffect(new RemoveTileEntityFromWorldEffect())
-                .addEffect(new RemoveTileEntityFromChunkEffect())
+                .addEffect(RemoveTileEntityFromWorldEffect.getInstance())
+                .addEffect(RemoveTileEntityFromChunkEffect.getInstance())
                 .build();
             pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), 0,immutable, tileentity));
             return;
@@ -544,10 +543,10 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             final Chunk chunk = this.shadow$getChunkAt(immutable);
             if (current.getTransactor().logTileAddition(tileEntity, () -> (ServerWorld) (Object) this, chunk)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
-                    .addEffect(new AddTileEntityToWorldWhileProcessingEffect())
-                    .addEffect(new AddTileEntityToLoadedListInWorldEffect())
-                    .addEffect(new AddTileEntityToTickableListEffect())
-                    .addEffect(new TileOnLoadDuringAddToWorldEffect())
+                    .addEffect(AddTileEntityToWorldWhileProcessingEffect.getInstance())
+                    .addEffect(AddTileEntityToLoadedListInWorldEffect.getInstance())
+                    .addEffect(AddTileEntityToTickableListEffect.getInstance())
+                    .addEffect(TileOnLoadDuringAddToWorldEffect.getInstance())
                     .build();
                 return pipeline.processEffects(current, new PipelineCursor(tileEntity.getBlockState(), 0,immutable, tileEntity));
             }
@@ -582,8 +581,8 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             final @Nullable TileEntity existing = this.shadow$getChunkAt(immutable).getTileEntity(immutable);
             if (current.getTransactor().logTileReplacement(immutable, existing, proposed, () -> (ServerWorld) (Object) this)) {
                 final TileEntityPipeline pipeline = TileEntityPipeline.kickOff((ServerWorld) (Object) this, immutable)
-                    .addEffect(new RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect())
-                    .addEffect(new ReplaceTileEntityInWorldEffect())
+                    .addEffect(RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect.getInstance())
+                    .addEffect(ReplaceTileEntityInWorldEffect.getInstance())
                     .build();
                 pipeline.processEffects(current, new PipelineCursor(proposed.getBlockState(), 0,immutable, proposed));
                 return;

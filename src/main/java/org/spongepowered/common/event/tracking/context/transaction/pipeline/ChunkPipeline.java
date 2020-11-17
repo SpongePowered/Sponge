@@ -37,7 +37,6 @@ import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
-import org.spongepowered.common.event.tracking.context.transaction.effect.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 

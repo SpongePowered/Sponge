@@ -28,9 +28,21 @@ import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class AddTileEntityToLoadedListInWorldEffect implements ProcessingSideEffect {
+
+    private static final class Holder {
+        static final AddTileEntityToLoadedListInWorldEffect INSTANCE = new AddTileEntityToLoadedListInWorldEffect();
+    }
+
+    public static AddTileEntityToLoadedListInWorldEffect getInstance() {
+        return AddTileEntityToLoadedListInWorldEffect.Holder.INSTANCE;
+    }
+
+    AddTileEntityToLoadedListInWorldEffect() {}
+    
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag

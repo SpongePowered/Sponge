@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction.effect;
+package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;

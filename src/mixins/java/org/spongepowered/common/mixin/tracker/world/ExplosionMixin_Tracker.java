@@ -147,7 +147,7 @@ public abstract class ExplosionMixin_Tracker {
                                 .addEffect(AddBlockLootDropsEffect.getInstance())
                                 .addEffect(ExplodeBlockEffect.getInstance())
                                 .addEffect(SpawnDestructBlocksEffect.getInstance())
-                                .addEffect(new WorldBlockChangeCompleteEffect())
+                                .addEffect(WorldBlockChangeCompleteEffect.getInstance())
                                 .build();
                             build.processEffects(context, blockstate, Blocks.AIR.getDefaultState(), blockpos1, BlockChangeFlagManager.fromNativeInt(3));
                         });
