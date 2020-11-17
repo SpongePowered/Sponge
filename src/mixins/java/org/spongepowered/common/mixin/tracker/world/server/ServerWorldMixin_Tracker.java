@@ -147,10 +147,6 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
     /**
      * We want to redirect the consumer caller ("updateEntity") because we need to wrap around
      * global entities being ticked, and then entities themselves being ticked is a different area/section.
-     *
-     * @param serverWorld
-     * @param consumer
-     * @param entity
      */
     @Redirect(method = "tick",
         at = @At(value = "INVOKE",
@@ -171,7 +167,6 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
             return;
         }
         TrackingUtil.tickGlobalEntity(consumer, entity);
-        // TODO - determine if updating rotation is needed.
     }
 
     @Redirect(method = "tick",

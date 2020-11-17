@@ -902,15 +902,9 @@ public final class SpongeCommonEventFactory {
         return event;
     }
 
-    @SuppressWarnings("unused")
-    public static void callPostPlayerRespawnEvent(final ServerPlayerEntity playerMP, final boolean conqueredEnd) {
-        // We overwrite this method in SpongeForge, in order to fire
-        // Forge's PlayerRespawnEvent
-    }
-
     public static Optional<net.minecraft.world.Explosion> detonateExplosive(final ExplosiveBridge explosiveBridge, final Explosion.Builder builder) {
         final DetonateExplosiveEvent event = SpongeEventFactory.createDetonateExplosiveEvent(
-                PhaseTracker.getCauseStackManager().getCurrentCause(), builder, (FusedExplosive) explosiveBridge, builder.build()
+                PhaseTracker.getCauseStackManager().getCurrentCause(), builder, (Explosive) explosiveBridge, builder.build()
         );
         if (!Sponge.getEventManager().post(event)) {
             final Explosion explosion = event.getExplosionBuilder().build();

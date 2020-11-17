@@ -242,7 +242,7 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
             // Sponge End
 
             mcExplosion.doExplosionA();
-            mcExplosion.doExplosionB(false);
+            mcExplosion.doExplosionB(true);
 
             if (!shouldBreakBlocks) {
                 mcExplosion.clearAffectedBlockPositions();
