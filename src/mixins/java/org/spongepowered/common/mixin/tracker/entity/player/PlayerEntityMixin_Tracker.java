@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.entity.player;
 
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -223,8 +224,12 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
         return itemEntity;
     }
 
-    @Inject(method = "interactOn", cancellable = true, at = @At(value = "HEAD"))
-    public void onRightClickEntity(Entity entityToInteractOn, Hand hand, CallbackInfoReturnable<ActionResultType> cir) {
+    @Inject(method = "interactOn", at = @At(value = "HEAD"), cancellable = true)
+    public void onRightClickEntity(final Entity entityToInteractOn, final Hand hand, final CallbackInfoReturnable<ActionResultType> cir) {
+        if ((PlayerEntity) (Object) this instanceof ClientPlayerEntity) {
+            return;
+        }
+
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary((ServerPlayerEntity) (Object) this, this.getHeldItem(hand), entityToInteractOn, hand, null);
         if (event.isCancelled()) {
             cir.setReturnValue(ActionResultType.FAIL);

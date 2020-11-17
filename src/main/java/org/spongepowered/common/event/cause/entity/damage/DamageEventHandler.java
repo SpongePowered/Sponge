@@ -124,10 +124,10 @@ public final class DamageEventHandler {
             final EventContext.Builder contextBuilder = EventContext.builder();
             if (entityLivingBase instanceof ArmorEquipable) {
                 // TODO - Add the event context keys for these armor pieces
-//                final ItemStackSnapshot helmet = ((ArmorEquipable) entityLivingBase).getHead().createSnapshot();
-//                final ItemStackSnapshot chest = ((ArmorEquipable) entityLivingBase).getChest().createSnapshot();
-//                final ItemStackSnapshot legs = ((ArmorEquipable) entityLivingBase).getLegs().createSnapshot();
-//                final ItemStackSnapshot feet = ((ArmorEquipable) entityLivingBase).getFeet().createSnapshot();
+                final ItemStackSnapshot helmet = ((ArmorEquipable) entityLivingBase).getHead().createSnapshot();
+                final ItemStackSnapshot chest = ((ArmorEquipable) entityLivingBase).getChest().createSnapshot();
+                final ItemStackSnapshot legs = ((ArmorEquipable) entityLivingBase).getLegs().createSnapshot();
+                final ItemStackSnapshot feet = ((ArmorEquipable) entityLivingBase).getFeet().createSnapshot();
             }
             final DamageFunction armorModifier = DamageFunction.of(DamageModifier.builder()
                 .cause(Cause.of(EventContext.empty(), attribute, entityLivingBase))
@@ -364,7 +364,6 @@ public final class DamageEventHandler {
     }
 
     public static DamageFunction provideCriticalAttackTuple(final PlayerEntity player) {
-        // TODO: direct cause creation: bad bad bad
         final DamageModifier modifier = DamageModifier.builder()
             .cause(Cause.of(EventContext.empty(), player))
             .type(DamageModifierTypes.CRITICAL_HIT)
@@ -376,7 +375,6 @@ public final class DamageEventHandler {
     public static DamageFunction provideCooldownAttackStrengthFunction(final PlayerEntity player,
         final float attackStrength
     ) {
-        // TODO: direct cause creation: bad bad bad
         final DamageModifier modifier = DamageModifier.builder()
             .cause(Cause.of(EventContext.empty(), player))
             .type(DamageModifierTypes.ATTACK_COOLDOWN)
@@ -390,7 +388,6 @@ public final class DamageEventHandler {
     @SuppressWarnings("ConstantConditions")
     public static Optional<DamageFunction> createShieldFunction(final LivingEntity entity, final DamageSource source, final float amount) {
         if (entity.isActiveItemStackBlocking() && amount > 0.0 && ((LivingEntityAccessor) entity).accessor$canBlockDamageSource(source)) {
-            // TODO: direct cause creation: bad bad bad
             final DamageModifier modifier = DamageModifier.builder()
                 .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) (Object) entity.getActiveItemStack()).createSnapshot()))
                 .type(DamageModifierTypes.SHIELD)
