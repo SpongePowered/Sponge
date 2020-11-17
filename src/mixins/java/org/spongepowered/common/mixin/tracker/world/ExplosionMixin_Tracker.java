@@ -44,6 +44,7 @@ import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddBlockLootDropsEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.ExplodeBlockEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.SpawnDestructBlocksEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.WorldBlockChangeCompleteEffect;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
@@ -144,6 +145,7 @@ public abstract class ExplosionMixin_Tracker {
                         .ifPresent(builder -> {
                             final WorldPipeline build = builder
                                 .addEffect(AddBlockLootDropsEffect.getInstance())
+                                .addEffect(ExplodeBlockEffect.getInstance())
                                 .addEffect(SpawnDestructBlocksEffect.getInstance())
                                 .addEffect(new WorldBlockChangeCompleteEffect())
                                 .build();
