@@ -48,6 +48,11 @@ public abstract class SpongeBaseSubject implements Subject {
     }
 
     @Override
+    public Optional<?> getAssociatedObject() {
+        return Optional.empty();
+    }
+
+    @Override
     public SubjectReference asSubjectReference() {
         return this.getService().newSubjectReference(this.containingCollection().identifier(), this.identifier());
     }

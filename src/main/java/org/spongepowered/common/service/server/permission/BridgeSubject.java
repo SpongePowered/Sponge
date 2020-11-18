@@ -49,6 +49,12 @@ public interface BridgeSubject extends Subject {
     }
 
     @Override
+    default Optional<?> getAssociatedObject() {
+        return ((SubjectBridge) this).bridge$resolveOptional()
+                .flatMap(Subject::getAssociatedObject);
+    }
+
+    @Override
     default boolean isSubjectDataPersisted() {
         return ((SubjectBridge) this).bridge$resolveOptional()
                 .map(Subject::isSubjectDataPersisted)
