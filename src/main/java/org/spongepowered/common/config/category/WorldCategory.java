@@ -88,21 +88,11 @@ public class WorldCategory extends ConfigCategory {
 
     @Setting(value = "max-chunk-unloads-per-tick", comment = ""
             + "The maximum number of queued unloaded chunks that will be unloaded in a single tick.\n"
-            + "Note: this setting only controls the amount chunk gc is allowed to save\n"
-            + "(controlled by 'chunk-gc-tick-interval' and 'chunk-gc-load-threshold')\n"
+            + "Note: With the chunk gc enabled, this setting only applies to the ticks\n"
+            + "where the gc runs (controlled by 'chunk-gc-tick-interval')\n"
             + "Note: If the maximum unloads is too low, too many chunks may remain loaded on the world\n"
             + "and increases the chance for a drop in tps. (Default: 100)")
     private int maxChunkUnloads = 100;
-
-    @Setting(value = "max-chunk-lifetime", comment = ""
-            + "The number of ticks a chunk will stay in memory without saving.\n"
-            + "Note: this setting only applies to chunks gc forcibly saving chunks\n"
-            + "(controlled by 'chunk-gc-tick-interval' and 'chunk-gc-load-threshold')\n"
-            + "Note: Useless if 'auto-save-interval' is enabled and less than this value\n"
-            + "Note: 'auto-save-interval' becomes mostly useless if both are enabled and\n"
-            + "it is bigger than this value\n"
-            + "(Default: 0)")
-    private int maxChunkLifetime = 0;
 
     @Setting(value = "chunk-gc-load-threshold", comment = ""
             + "The number of newly loaded chunks before triggering a forced cleanup.\n"
@@ -236,10 +226,6 @@ public class WorldCategory extends ConfigCategory {
 
     public int getMaxChunkUnloads() {
         return this.maxChunkUnloads;
-    }
-
-    public int getMaxChunkLifetime() {
-        return this.maxChunkLifetime;
     }
 
     public double getItemMergeRadius() {
