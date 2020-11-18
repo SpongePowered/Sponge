@@ -64,6 +64,7 @@ import org.spongepowered.api.registry.RegistryModuleAlreadyRegisteredException;
 import org.spongepowered.api.registry.util.PluginProvidedRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.statistic.BlockStatistic;
 import org.spongepowered.api.statistic.EntityStatistic;
@@ -96,6 +97,7 @@ import org.spongepowered.common.item.recipe.crafting.SpongeCraftingRecipeRegistr
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
+import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
 import org.spongepowered.common.text.selector.SpongeSelectorFactory;
@@ -118,8 +120,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -517,6 +517,16 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public Optional<ResourcePack> getResourcePackById(String id) {
         throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public Optional<Criterion> getTeamKillCriterionForColor(TextColor color) {
+        return Optional.ofNullable(CriteriaRegistryModule.getInstance().teamKillMappings.get(color.getId()));
+    }
+
+    @Override
+    public Optional<Criterion> getKilledByTeamCriterionForColor(TextColor color) {
+        return Optional.ofNullable(CriteriaRegistryModule.getInstance().killedByTeamMappings.get(color.getId()));
     }
 
     @Override

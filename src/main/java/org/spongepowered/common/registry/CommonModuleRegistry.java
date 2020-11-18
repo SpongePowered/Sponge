@@ -363,7 +363,7 @@ public final class CommonModuleRegistry {
                 .registerModule(CoalType.class, new CoalTypeRegistryModule())
                 .registerModule(ComparatorType.class, new ComparatorTypeRegistryModule())
                 .registerModule(CookedFish.class, new CookedFishRegistryModule())
-                .registerModule(Criterion.class, new CriteriaRegistryModule())
+                .registerModule(Criterion.class, CriteriaRegistryModule.getInstance())
                 .registerModule(DamageModifierType.class, new DamageModifierTypeRegistryModule())
                 .registerModule(new DamageSourceRegistryModule())
                 .registerModule(DamageType.class, new DamageTypeRegistryModule())

@@ -24,17 +24,32 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
+import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
+import org.spongepowered.common.text.format.SpongeTextColor;
 
+import java.util.Map;
+
+@RegistrationDependency(TextColorRegistryModule.class)
 @RegisterCatalog(Criteria.class)
 public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Criterion> {
 
-    public CriteriaRegistryModule() {
-        super("minecraft", new String[] {"minecraft"}, id -> id.replace("_count", "s"));
+    public static CriteriaRegistryModule getInstance() {
+        return CriteriaRegistryModule.Holder.INSTANCE;
+    }
+
+    public final Map<String, Criterion> teamKillMappings = Maps.newLinkedHashMap();
+    public final Map<String, Criterion> killedByTeamMappings = Maps.newLinkedHashMap();
+
+    CriteriaRegistryModule() {
+        super("minecraft", new String[]{"minecraft"}, id -> id.replace("_count", "s"));
     }
 
     @Override
@@ -45,6 +60,33 @@ public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalog
         register((Criterion) IScoreCriteria.PLAYER_KILL_COUNT);
         register((Criterion) IScoreCriteria.TOTAL_KILL_COUNT);
         register((Criterion) IScoreCriteria.DEATH_COUNT);
+        register((Criterion) IScoreCriteria.FOOD);
+        register((Criterion) IScoreCriteria.AIR);
+        register((Criterion) IScoreCriteria.ARMOR);
+        register((Criterion) IScoreCriteria.XP);
+        register((Criterion) IScoreCriteria.LEVEL);
+
+        for (Map.Entry<TextFormatting, SpongeTextColor> entry : TextColorRegistryModule.enumChatColor.entrySet()) {
+            final int colorIndex = entry.getKey().getColorIndex();
+
+            if (colorIndex < 0) {
+                continue;
+            }
+
+            final String id = entry.getValue().getId();
+
+            final Criterion teamKillCriterion = (Criterion) IScoreCriteria.TEAM_KILL[colorIndex];
+            register(teamKillCriterion);
+            teamKillMappings.put(id, teamKillCriterion);
+
+            final Criterion killedByTeamCriterion = (Criterion) IScoreCriteria.KILLED_BY_TEAM[colorIndex];
+            register(killedByTeamCriterion);
+            killedByTeamMappings.put(id, killedByTeamCriterion);
+        }
+    }
+
+    private static final class Holder {
+        static final CriteriaRegistryModule INSTANCE = new CriteriaRegistryModule();
     }
 
 }
