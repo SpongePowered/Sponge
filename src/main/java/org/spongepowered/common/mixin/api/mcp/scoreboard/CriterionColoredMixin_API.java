@@ -25,23 +25,35 @@
 package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
 import com.google.common.base.CaseFormat;
-import net.minecraft.scoreboard.ScoreCriteria;
+import net.minecraft.scoreboard.ScoreCriteriaColored;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-@Mixin(ScoreCriteria.class)
+@Mixin(ScoreCriteriaColored.class)
 @Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
-public abstract class CriterionMixin_API implements Criterion {
+public abstract class CriterionColoredMixin_API implements Criterion {
 
     @Nullable
     private String api$spongeId;
+    @Nullable
+    private TextFormatting api$format;
+
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    private void api$onConstructed(final String name, final TextFormatting format, final CallbackInfo ci) {
+        this.api$format = format;
+    }
 
     @Intrinsic
     public String criterion$getName() {
@@ -56,6 +68,6 @@ public abstract class CriterionMixin_API implements Criterion {
     }
 
     public Optional<TextColor> criterion$getTeamColor() {
-        return Optional.empty();
+        return Optional.ofNullable(TextColorRegistryModule.enumChatColor.get(this.api$format));
     }
 }

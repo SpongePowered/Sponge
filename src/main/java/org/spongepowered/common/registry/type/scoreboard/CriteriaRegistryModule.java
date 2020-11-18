@@ -30,21 +30,47 @@ import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RegisterCatalog(Criteria.class)
 public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Criterion> {
 
-    public CriteriaRegistryModule() {
-        super("minecraft", new String[] {"minecraft"}, id -> id.replace("_count", "s"));
+    public static CriteriaRegistryModule getInstance() {
+        return CriteriaRegistryModule.Holder.INSTANCE;
+    }
+
+    private final Map<String, Criterion> teamKillMappings = new HashMap<>();
+    private final Map<String, Criterion> killedByTeamMappings = new HashMap<>();
+
+    CriteriaRegistryModule() {
+        super("minecraft", new String[]{"minecraft"}, id -> id.replace("_count", "s"));
     }
 
     @Override
     public void registerDefaults() {
-        register((Criterion) IScoreCriteria.DUMMY);
-        register((Criterion) IScoreCriteria.TRIGGER);
-        register((Criterion) IScoreCriteria.HEALTH);
-        register((Criterion) IScoreCriteria.PLAYER_KILL_COUNT);
-        register((Criterion) IScoreCriteria.TOTAL_KILL_COUNT);
-        register((Criterion) IScoreCriteria.DEATH_COUNT);
+        IScoreCriteria.INSTANCES.values().forEach(scoreCriterion -> {
+            final Criterion criterion = (Criterion) scoreCriterion;
+
+            this.register(criterion);
+
+            criterion.getTeamColor().ifPresent(color -> {
+                this.teamKillMappings.put(color.getId(), criterion);
+                this.killedByTeamMappings.put(color.getId(), criterion);
+            });
+        });
+    }
+
+    private static final class Holder {
+        static final CriteriaRegistryModule INSTANCE = new CriteriaRegistryModule();
+    }
+
+    public Map<String, Criterion> getTeamKillMappings() {
+        return this.teamKillMappings;
+    }
+
+    public Map<String, Criterion> getKilledByTeamMappings() {
+        return this.killedByTeamMappings;
     }
 
 }
