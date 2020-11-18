@@ -226,7 +226,7 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
 
     @Inject(method = "interactOn", at = @At(value = "HEAD"), cancellable = true)
     public void onRightClickEntity(final Entity entityToInteractOn, final Hand hand, final CallbackInfoReturnable<ActionResultType> cir) {
-        if ((PlayerEntity) (Object) this instanceof ClientPlayerEntity) {
+        if (!((PlayerEntity) (Object) this instanceof ServerPlayerEntity)) {
             return;
         }
 
