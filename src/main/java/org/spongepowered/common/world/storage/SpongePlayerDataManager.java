@@ -24,16 +24,14 @@
  */
 package org.spongepowered.common.world.storage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeWorldManager;
@@ -61,7 +59,7 @@ public final class SpongePlayerDataManager {
     private static final String SPONGE_DATA = "sponge";
     private final Server server;
     private final Map<UUID, SpongePlayerData> playerDataByUniqueId;
-    private Path playersDirectory;
+    @org.checkerframework.checker.nullness.qual.Nullable private Path playersDirectory = null;
 
     public SpongePlayerDataManager(final Server server) {
         this.server = server;
@@ -107,7 +105,7 @@ public final class SpongePlayerDataManager {
         }
     }
 
-    public void readPlayerData(final CompoundNBT compound, Instant creation) {
+    public void readPlayerData(final CompoundNBT compound, @org.checkerframework.checker.nullness.qual.Nullable Instant creation) {
         if (creation == null) {
             creation = Instant.now();
         }
@@ -142,7 +140,11 @@ public final class SpongePlayerDataManager {
     }
 
     public void savePlayer(final UUID uniqueId) {
-        @Nullable final SpongePlayerData data = this.playerDataByUniqueId.get(checkNotNull(uniqueId, "Player id cannot be null!"));
+        if (uniqueId == null) {
+            throw new IllegalArgumentException("Player unique id cannot be null!");
+        }
+
+        @Nullable final SpongePlayerData data = this.playerDataByUniqueId.get(uniqueId);
         if (data != null) {
             this.saveFile(uniqueId.toString(), this.createCompoundFor(data));
         } else {

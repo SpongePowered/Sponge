@@ -72,6 +72,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.net.SocketAddress;
+import java.time.Instant;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -84,20 +85,18 @@ public abstract class PlayerListMixin {
     @Shadow public abstract ITextComponent shadow$canPlayerLogin(SocketAddress socketAddress, com.mojang.authlib.GameProfile gameProfile);
     @Shadow public abstract MinecraftServer shadow$getServer();
 
-    private void disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
-        final ITextComponent reason = SpongeAdventure.asVanilla(disconnectMessage);
+    @Shadow @Nullable public abstract CompoundNBT readPlayerDataFromFile(ServerPlayerEntity playerIn);
 
-
-        try {
-            LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" :
-                    netManager.getRemoteAddress() + ": " + reason.getUnformattedComponentText()));
-            netManager.sendPacket(new SDisconnectPacket(reason));
-            netManager.closeChannel(reason);
-        } catch (final Exception exception) {
-            LOGGER.error("Error whilst disconnecting player", exception);
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;readPlayer"
+            + "DataFromFile(Lnet/minecraft/entity/player/ServerPlayerEntity;)Lnet/minecraft/nbt/CompoundNBT;"))
+    private CompoundNBT impl$setPlayerDataForNewPlayers(final PlayerList playerList, final ServerPlayerEntity playerIn) {
+        final CompoundNBT compound = this.readPlayerDataFromFile(playerIn);
+        if (compound == null) {
+            ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().setPlayerInfo(playerIn.getUniqueID(), Instant.now(), Instant.now());
         }
+        return compound;
     }
-
+    
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/server/MinecraftServer;getWorld(Lnet/minecraft/world/dimension/DimensionType;)Lnet/minecraft/world/server/ServerWorld;"))
     private net.minecraft.world.server.ServerWorld impl$onInitPlayer_getWorld(
@@ -244,5 +243,19 @@ public abstract class PlayerListMixin {
         entity.read(compound);
 
         ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().readPlayerData(compound, null);
+    }
+
+    private void disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
+        final ITextComponent reason = SpongeAdventure.asVanilla(disconnectMessage);
+
+
+        try {
+            LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" :
+                    netManager.getRemoteAddress() + ": " + reason.getUnformattedComponentText()));
+            netManager.sendPacket(new SDisconnectPacket(reason));
+            netManager.closeChannel(reason);
+        } catch (final Exception exception) {
+            LOGGER.error("Error whilst disconnecting player", exception);
+        }
     }
 }
