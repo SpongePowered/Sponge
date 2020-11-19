@@ -65,6 +65,8 @@
         "item.ChorusFruitItemMixin",
         "item.ItemMixin",
         "item.ItemStackMixin",
+        "map.MapIdTrackerMixin",
+        "map.MaterialColorMixin",
         "network.NetworkManagerMixin",
         "network.handshake.ServerHandshakeNetHandlerMixin",
         "network.login.ServerLoginNetHandler_1Mixin",
