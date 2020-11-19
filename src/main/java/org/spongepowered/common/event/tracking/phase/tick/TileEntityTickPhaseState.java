@@ -24,25 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import com.google.common.collect.ListMultimap;
-import net.minecraft.block.BlockEventData;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.hooks.SpongeImplHooks;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
-import java.util.List;
 import java.util.function.BiConsumer;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
@@ -92,33 +83,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.source(tickingTile);
-    }
-
-    @Override
-    public boolean getShouldCancelAllTransactions(
-        final TileEntityTickContext context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
-        if (!postEvent.getTransactions().isEmpty()) {
-            return postEvent.getTransactions().stream().anyMatch(transaction -> {
-                final BlockState state = transaction.getOriginal().getState();
-                final BlockType type = state.getType();
-                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) state);
-                final BlockPos pos = context.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos();
-                final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
-                if (pos.equals(blockPos) && !transaction.isValid()) {
-                    return true;
-                }
-                if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
-                    return transaction.getIntermediary().stream().anyMatch(inter -> {
-                        final BlockState iterState = inter.getState();
-                        final BlockType interType = state.getType();
-                        return SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) iterState);
-                    });
-                }
-                return hasTile;
-            });
-        }
-        return false;
     }
 
     @Override

@@ -24,28 +24,19 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEventData;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.IGrowable;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.List;
 import java.util.function.BiConsumer;
 
 class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
@@ -77,32 +68,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     @Override
     public boolean shouldProvideModifiers(final BlockTickContext phaseContext) {
         return phaseContext.providesModifier;
-    }
-
-    @Override
-    public boolean getShouldCancelAllTransactions(final BlockTickContext context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-                                                  final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
-        if (!postEvent.getTransactions().isEmpty()) {
-            return postEvent.getTransactions().stream().anyMatch(transaction -> {
-                final BlockState state = transaction.getOriginal().getState();
-                final BlockType type = state.getType();
-                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) state);
-                final BlockPos pos = VecHelper.toBlockPos(context.getSource(LocatableBlock.class).get().getBlockPosition());
-                final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
-                if (pos.equals(blockPos) && !transaction.isValid()) {
-                    return true;
-                }
-                if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
-                    return transaction.getIntermediary().stream().anyMatch(inter -> {
-                        final BlockState iterState = inter.getState();
-                        final BlockType interType = state.getType();
-                        return SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) iterState);
-                    });
-                }
-                return hasTile;
-            });
-        }
-        return false;
     }
 
     @Override

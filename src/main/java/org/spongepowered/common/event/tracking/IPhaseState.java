@@ -38,10 +38,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.loot.LootContext;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -486,11 +488,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default boolean getShouldCancelAllTransactions(final C context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
-        return false;
-    }
-
     /**
      * Specifically captures a block change by {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier#logBlockChange(SpongeBlockSnapshot, BlockState, BlockChangeFlag)}
      * such that the change of a {@link BlockState} will be appropriately logged, along with any changes of tile entities being removed
@@ -593,5 +590,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default void populateLootContext(C phaseContext, LootContext.Builder lootBuilder) {
 
+    }
+
+    default Operation getBlockOperation(SpongeBlockSnapshot original, BlockChange blockChange) {
+        return blockChange.toOperation();
     }
 }

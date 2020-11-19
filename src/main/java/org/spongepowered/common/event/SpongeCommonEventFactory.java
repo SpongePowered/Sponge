@@ -408,12 +408,12 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(
+    public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
         final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState targetState) {
         return callChangeBlockEventModifyLiquidBreak(worldIn, pos, worldIn.getBlockState(pos), targetState);
     }
 
-    public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(
+    public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
         final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState fromState, final net.minecraft.block.BlockState toState) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         Object source =context.getSource(LocatableBlock.class).orElse(null);
