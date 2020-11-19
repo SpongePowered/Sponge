@@ -270,12 +270,13 @@ public abstract class WorldEntitySpawnerMixin {
                                             }
 
                                             entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, world.rand.nextFloat() * 360.0F, 0.0F);
-                                            final boolean entityNotColliding = entityliving.isNotColliding();
+                                            boolean entityNotColliding = entityliving.isNotColliding();
 
                                             final SpawnerSpawnType type = SpongeImplHooks.canEntitySpawnHere(entityliving, entityNotColliding);
                                             if (type != SpawnerSpawnType.NONE) {
                                                 if (type == SpawnerSpawnType.NORMAL) {
                                                     ientitylivingdata = entityliving.onInitialSpawn(world.getDifficultyForLocation(new BlockPos(entityliving)), ientitylivingdata);
+                                                    entityNotColliding = entityliving.isNotColliding();
                                                 }
 
                                                 if (entityNotColliding) {
