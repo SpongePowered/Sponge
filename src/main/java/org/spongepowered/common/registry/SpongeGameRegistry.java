@@ -521,12 +521,12 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<Criterion> getTeamKillCriterionForColor(TextColor color) {
-        return Optional.ofNullable(CriteriaRegistryModule.getInstance().teamKillMappings.get(color.getId()));
+        return Optional.ofNullable(CriteriaRegistryModule.getInstance().getTeamKillMappings().get(color.getId()));
     }
 
     @Override
     public Optional<Criterion> getKilledByTeamCriterionForColor(TextColor color) {
-        return Optional.ofNullable(CriteriaRegistryModule.getInstance().killedByTeamMappings.get(color.getId()));
+        return Optional.ofNullable(CriteriaRegistryModule.getInstance().getKilledByTeamMappings().get(color.getId()));
     }
 
     @Override
