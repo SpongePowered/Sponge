@@ -61,7 +61,6 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
 
-    @Shadow @Final private List<ServerPlayerEntity> players;
     private CustomServerBossInfoManager impl$bossBarManager;
 
     @Override

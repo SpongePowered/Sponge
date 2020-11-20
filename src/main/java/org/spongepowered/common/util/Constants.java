@@ -290,7 +290,6 @@ public final class Constants {
             public static final String DIMENSION_ID = "dimensionId";
             public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
             public static final String PORTAL_AGENT_TYPE = "portalAgentType";
-            public static final String WORLD_SERIALIZATION_BEHAVIOR = "serializationBehavior";
             public static final String IS_MOD_CREATED = "isModCreated";
             public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
             public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
@@ -445,7 +444,6 @@ public final class Constants {
         public static final ResourceKey INVALID_WORLD_KEY = ResourceKey.sponge("invalid_world");
         public static final int DEFAULT_CHUNK_UNLOAD_DELAY = 15000;
         public static final int MAX_CHUNK_UNLOADS = 100;
-        public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
         public static final int CHUNK_UNLOAD_DELAY = 30000;
         public static final int END_DIMENSION_ID = 1;
 

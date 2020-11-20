@@ -47,6 +47,10 @@ public class WorldCategory {
     @Comment("If 'true', this world will be registered.")
     private boolean worldEnabled = true;
 
+    @Setting("serialization-behavior")
+    @Comment("Determines how the server should save data for this world, if at all. Valid options are [automatic, manual, metadata_only, none].")
+    private String serializationBehavior = "automatic";
+
     @Setting("load-on-startup")
     @Comment("If 'true', this world will load on startup.")
     private Boolean loadOnStartup = true;
@@ -112,6 +116,10 @@ public class WorldCategory {
     @Comment("If 'true', natural formation of ice and snow in supported biomes will be allowed.")
     private boolean weatherIceAndSnow = true;
 
+    @Setting("generate-bonus-chest")
+    @Comment("If 'true', the bonus chest will be generated near spawn")
+    private boolean generateBonusChest = true;
+
     public static final int USE_SERVER_VIEW_DISTANCE = -1;
     @Setting("view-distance")
     @Comment("Override world distance per world/dimension \n"
@@ -139,6 +147,14 @@ public class WorldCategory {
 
     public void setWorldEnabled(final boolean enabled) {
         this.worldEnabled = enabled;
+    }
+
+    public String getSerializationBehavior() {
+        return this.serializationBehavior;
+    }
+
+    public void setSerializationBehavior(final String serializationBehavior) {
+        this.serializationBehavior = serializationBehavior;
     }
 
     public long getChunkUnloadDelay() {
@@ -215,6 +231,14 @@ public class WorldCategory {
 
     public boolean getWeatherIceAndSnow() {
         return this.weatherIceAndSnow;
+    }
+
+    public boolean getGenerateBonusChest() {
+        return this.generateBonusChest;
+    }
+
+    public void setGenerateBonusChest(final boolean state) {
+        this.generateBonusChest = state;
     }
 
     public int getViewDistance() {

@@ -39,15 +39,11 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -256,8 +252,12 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
         }
 
         for (final ServerWorld world : this.shadow$getWorlds()) {
+
+            // TODO Minecraft 1.15 - zml, where is the best place to do the save?
+            ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
+
             final SerializationBehavior serializationBehavior = ((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior();
-            final boolean save = serializationBehavior != SerializationBehaviors.NONE.get();
+            final boolean save = serializationBehavior != SerializationBehavior.NONE;
             boolean log = !suppressLog;
 
             if (save) {
@@ -267,7 +267,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                     if (log) {
                         log = adapter.get().getLogging().logWorldAutomaticSaving();
                     }
-                    if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehaviors.AUTOMATIC.get()) {
+                    if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehavior.AUTOMATIC) {
                         if (log) {
                             LOGGER.warn("Auto-saving has been disabled for world '{}'. No chunk data will be auto-saved - to re-enable auto-saving "
                                             + "set 'auto-save-interval' to a value greater than"
@@ -294,7 +294,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     /**
-     * @author Zidane - Minecraft 1.14.4
+     * @author Zidane
      * @reason Set the difficulty without marking as custom
      */
     @Overwrite

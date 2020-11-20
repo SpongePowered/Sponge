@@ -229,6 +229,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
 
         final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(logicType, key);
+        ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
 
         final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
 
@@ -546,7 +547,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 } else {
                     Files.createDirectories(worldsDirectory);
                 }
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 throw new RuntimeException(ex);
             }
 
@@ -558,7 +559,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setUserMessage(new TranslationTextComponent("menu.loadingLevel"));
 
-        for (Map.Entry<ResourceKey, WorldRegistration> entry : this.pendingWorlds.entrySet()) {
+        for (final Map.Entry<ResourceKey, WorldRegistration> entry : this.pendingWorlds.entrySet()) {
             final ResourceKey key = entry.getKey();
             final WorldRegistration worldRegistration = entry.getValue();
 
@@ -788,7 +789,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     private boolean isVanillaSubLevel(final String directoryName) {
-        return "DIM-1".equals(directoryName) || "DIM1" .equals(directoryName);
+        return "DIM-1".equals(directoryName) || "DIM1".equals(directoryName);
     }
 
     private WorldSettings createDefaultSettings(@Nullable WorldSettings providedSettings, final boolean isDefaultWorld, final long seed,

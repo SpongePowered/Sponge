@@ -54,6 +54,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
@@ -542,7 +543,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * When false, prevents directories from being created during the creation
      * of an {@link net.minecraft.world.chunk.storage.AnvilSaveHandler}. Used
-     * for {@link org.spongepowered.api.world.SerializationBehaviors#NONE}.
+     * for {@link SerializationBehavior#NONE}.
      *
      * @param phaseContext The appropriate phase context
      * @return True if directories can be created; false otherwise

@@ -30,7 +30,6 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.dimension.DimensionTypes;
@@ -57,7 +56,7 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Nullable private ResourceKey impl$key;
     private SpongeDimensionType impl$logicType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
     private Difficulty impl$difficulty = Difficulties.NORMAL.get();
-    private SerializationBehavior impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
+    private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
     private DataContainer impl$generatorSettings = DataContainer.createNew();
     private boolean impl$isEnabled = true;
     private boolean impl$loadOnStartup = true;

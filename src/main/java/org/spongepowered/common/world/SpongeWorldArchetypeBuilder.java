@@ -32,7 +32,6 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
@@ -46,8 +45,6 @@ import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
-import javax.annotation.Nullable;
-
 import java.util.Objects;
 import java.util.Random;
 
@@ -60,7 +57,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     private GeneratorModifierType generatorModifier = GeneratorModifierTypes.NONE.get();
     private Difficulty difficulty = Difficulties.NORMAL.get();
     private GameMode gameMode = GameModes.SURVIVAL.get();
-    private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
+    private SerializationBehavior serializationBehavior = SerializationBehavior.AUTOMATIC;
     private DataContainer generatorSettings = DataContainer.createNew();
 
     private long seed;
@@ -252,7 +249,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.generatorModifier = GeneratorModifierTypes.NONE.get();
         this.gameMode = GameModes.SURVIVAL.get();
         this.difficulty = Difficulties.NORMAL.get();
-        this.serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
+        this.serializationBehavior = SerializationBehavior.AUTOMATIC;
         this.seed = SpongeWorldArchetypeBuilder.RANDOM.nextLong();
         this.randomizedSeed = true;
         this.structuresEnabled = true;

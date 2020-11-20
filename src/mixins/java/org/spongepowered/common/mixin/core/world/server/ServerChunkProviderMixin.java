@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.server;
 
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.world.SerializationBehaviors;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -51,7 +51,8 @@ public abstract class ServerChunkProviderMixin implements ServerChunkProviderBri
     @Redirect(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerChunkProvider;save(Z)V"))
     private void impl$dontCallSaveIFSerializationIsOff(ServerChunkProvider serverChunkProvider, boolean flush) {
         final ServerWorld world = (ServerWorld) serverChunkProvider.getWorld();
-        if (((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior() == SerializationBehaviors.NONE) {
+        final SerializationBehavior behavior = ((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior();
+        if (behavior == SerializationBehavior.NONE || behavior == SerializationBehavior.AUTOMATIC_METADATA_ONLY) {
             return;
         }
 

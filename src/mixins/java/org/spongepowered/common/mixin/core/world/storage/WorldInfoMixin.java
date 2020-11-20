@@ -44,7 +44,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -91,13 +90,11 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Nullable private ResourceKey impl$key;
     @Nullable private Integer impl$dimensionId;
+    @Nullable private UUID impl$uniqueId;
 
-    private UUID impl$uniqueId;
     private SpongeDimensionType impl$logicType;
-    private InheritableConfigHandle<WorldConfig> impl$configAdapter;
-    private boolean impl$generateBonusChest;
+    private InheritableConfigHandle<WorldConfig> impl$configAdapter = SpongeConfigs.createDetached();
     private boolean impl$modCreated;
-    @Nullable private SerializationBehavior impl$serializationBehavior;
 
     private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
     private final List<UUID> impl$pendingUniqueIds = new ArrayList<>();
@@ -268,12 +265,12 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public boolean bridge$doesGenerateBonusChest() {
-        return this.impl$generateBonusChest;
+        return this.impl$configAdapter.get().getWorld().getGenerateBonusChest();
     }
 
     @Override
     public void bridge$setGenerateBonusChest(final boolean state) {
-        this.impl$generateBonusChest = state;
+        this.impl$configAdapter.get().getWorld().setGenerateBonusChest(state);
     }
 
     @Override
@@ -308,12 +305,12 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public SerializationBehavior bridge$getSerializationBehavior() {
-        return this.impl$serializationBehavior;
+        return SerializationBehavior.valueOf(this.impl$configAdapter.get().getWorld().getSerializationBehavior().toUpperCase());
     }
 
     @Override
     public void bridge$setSerializationBehavior(final SerializationBehavior behavior) {
-        this.impl$serializationBehavior = behavior;
+        this.impl$configAdapter.get().getWorld().setSerializationBehavior(behavior.name().toLowerCase());
     }
 
     @Override
@@ -381,14 +378,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         }
         spongeDataCompound.putString(Constants.Sponge.World.DIMENSION_TYPE, this.impl$logicType.getKey().toString());
         spongeDataCompound.putUniqueId(Constants.Sponge.World.UNIQUE_ID, this.impl$uniqueId);
-        spongeDataCompound.putBoolean(Constants.World.GENERATE_BONUS_CHEST, this.impl$generateBonusChest);
-        short saveBehavior = 1;
-        if (this.impl$serializationBehavior == SerializationBehaviors.NONE.get()) {
-            saveBehavior = -1;
-        } else if (this.impl$serializationBehavior == SerializationBehaviors.MANUAL.get()) {
-            saveBehavior = 0;
-        }
-        spongeDataCompound.putShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
         spongeDataCompound.putBoolean(Constants.Sponge.World.IS_MOD_CREATED, this.impl$modCreated);
         spongeDataCompound.putBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY, this.impl$hasCustomDifficulty);
 
@@ -438,21 +427,8 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
                 return DimensionTypes.OVERWORLD.get();
         });
         this.impl$uniqueId = spongeDataCompound.getUniqueId(Constants.Sponge.World.UNIQUE_ID);
-        this.impl$generateBonusChest = spongeDataCompound.getBoolean(Constants.World.GENERATE_BONUS_CHEST);
         this.impl$hasCustomDifficulty = spongeDataCompound.getBoolean(Constants.Sponge.World.HAS_CUSTOM_DIFFICULTY);
         this.impl$modCreated = spongeDataCompound.getBoolean(Constants.Sponge.World.IS_MOD_CREATED);
-        this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
-        if (spongeDataCompound.contains(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR)) {
-            final short saveBehavior = spongeDataCompound.getShort(Constants.Sponge.World.WORLD_SERIALIZATION_BEHAVIOR);
-            if (saveBehavior == 0) {
-                this.impl$serializationBehavior = SerializationBehaviors.MANUAL.get();
-            } else if (saveBehavior == 1) {
-                this.impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
-            } else {
-                this.impl$serializationBehavior = SerializationBehaviors.NONE.get();
-            }
-        }
-
         this.impl$trackedUniqueIdCount = 0;
         if (spongeDataCompound.contains(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_LIST)) {
             final ListNBT playerIdList = spongeDataCompound.getList(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, Constants.NBT.TAG_COMPOUND);
