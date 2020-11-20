@@ -1304,7 +1304,7 @@ public final class Constants {
     }
 
     public static final class Map {
-        public static final String MAP_INFO_DATA_PROVIDER_NAME = "MapInfo";
+        public static final String MAP_INFO_DATA_PROVIDER_NAME = "map_info";
 
         public static final DataQuery MAP_ID = of("UnsafeMapId");
         public static final DataQuery MAP_DATA = of("MapData");

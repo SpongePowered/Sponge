@@ -101,7 +101,6 @@ public class MapTest implements LoadableModule {
     @Listener
     public void onGameInit(final RegisterCommandEvent<Command.Parameterized> event) {
         this.createDefaultCommand("getmapdata", (ctx -> {
-            Audience audience = ctx.getCause().getAudience();
             final Player player = this.requirePlayer(ctx);
             final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND);
             if (itemStack.getType() != ItemTypes.FILLED_MAP.get()) {
@@ -122,7 +121,7 @@ public class MapTest implements LoadableModule {
             if (map.getType() != ItemTypes.FILLED_MAP.get()) {
                 throw new CommandException(Component.text("You must hold a map in your hand"));
             }
-            final ResourceKey netherKey = ResourceKey.minecraft("DIM-1");
+            final ResourceKey netherKey = ResourceKey.minecraft("the_nether");
             Optional<ServerWorld> nether = Sponge.getServer().getWorldManager().getWorld(netherKey);
             if (!nether.isPresent()) {
                 final CompletableFuture<ServerWorld> loadedNether = Sponge.getServer().getWorldManager().loadWorld(netherKey);
@@ -132,7 +131,7 @@ public class MapTest implements LoadableModule {
                         logger.error("Error loading nether world!", e);
                     }
                     else {
-                        audience.sendMessage(Component.text("Loaded nether world (DIM-1)", NamedTextColor.GREEN));
+                        audience.sendMessage(Component.text("Loaded nether world (dim-1)", NamedTextColor.GREEN));
                     }
 
                 });
@@ -149,7 +148,7 @@ public class MapTest implements LoadableModule {
                 throw new CommandException(Component.text("You must hold a map in your hand"));
             }
             //map.offer(Keys.MAP_LOCATION, new Vector2i(10000,10000));
-            final MapColor color = MapColor.of(MapColorTypes.BLACK_STAINED_HARDENED_CLAY);
+            final MapColor color = MapColor.of(MapColorTypes.BLACK_TERRACOTTA);
             final MapInfo mapInfo = map.require(Keys.MAP_INFO);
             mapInfo.offer(Keys.MAP_LOCKED, true);
             mapInfo.offer(Keys.MAP_CANVAS, MapCanvas.builder().paintAll(color).build());
@@ -388,11 +387,13 @@ public class MapTest implements LoadableModule {
             return CommandResult.success();
         }, event);
 
+        final Parameter.Value<UUID> uuidParameter = Parameter.uuid().setKey("uuid").build();
+
         event.register(this.container, Command.builder()
-                .parameter(Parameter.uuid().build())
+                .parameter(Parameter.uuid().setKey("uuid").build())
                 .setExecutor(ctx -> {
                     final Player player = this.requirePlayer(ctx);
-                    final UUID uuid = ctx.getOne(Parameter.uuid().build()).get();
+                    final UUID uuid = ctx.getOne(uuidParameter).get();
                     final ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP, 1);
                     final MapInfo mapInfo = Sponge.getServer().getMapStorage().getMapInfo(uuid)
                             .orElseThrow(() -> new CommandException(Component.text("UUID " + uuid + " was not a valid map uuid!")));

@@ -215,8 +215,8 @@ public final class DataProviderRegistry {
                 new GenericDataProviders(),
                 new ItemStackDataProviders(),
                 new InventoryDataProviders(),
-                new EntityDataProviders()//,
-                //new MapInfoDataProviders()
+                new EntityDataProviders(),
+                new MapInfoDataProviders()
         );
     }
 
