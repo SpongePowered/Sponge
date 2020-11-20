@@ -53,14 +53,16 @@ import java.util.Random;
 
 public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
 
-    private static final Random RANDOM = new Random();
+    public static final Random RANDOM = new Random();
 
     private ResourceKey key;
-    private SpongeDimensionType dimensionType;
-    private GeneratorModifierType generatorModifier;
-    private Difficulty difficulty;
-    private GameMode gameMode;
-    private SerializationBehavior serializationBehavior;
+    private SpongeDimensionType dimensionType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
+    private GeneratorModifierType generatorModifier = GeneratorModifierTypes.NONE.get();
+    private Difficulty difficulty = Difficulties.NORMAL.get();
+    private GameMode gameMode = GameModes.SURVIVAL.get();
+    private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
+    private DataContainer generatorSettings = DataContainer.createNew();
+
     private long seed;
     private boolean structuresEnabled;
     private boolean hardcore;
@@ -71,7 +73,6 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     private boolean pvpEnabled;
     private boolean commandsEnabled;
     private boolean generateBonusChest;
-    @Nullable private DataContainer generatorSettings;
     private boolean randomizedSeed;
 
     public SpongeWorldArchetypeBuilder() {
@@ -79,13 +80,13 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     }
 
     @Override
-    public WorldArchetype.Builder key(ResourceKey key) {
+    public WorldArchetype.Builder key(final ResourceKey key) {
         this.key = Objects.requireNonNull(key);
         return this;
     }
 
     @Override
-    public SpongeWorldArchetypeBuilder seed(long seed) {
+    public SpongeWorldArchetypeBuilder seed(final long seed) {
         this.seed = seed;
         this.randomizedSeed = false;
         return this;
@@ -99,28 +100,28 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     }
 
     @Override
-    public SpongeWorldArchetypeBuilder gameMode(GameMode gameMode) {
+    public SpongeWorldArchetypeBuilder gameMode(final GameMode gameMode) {
         Objects.requireNonNull(gameMode);
         this.gameMode = gameMode;
         return this;
     }
 
     @Override
-    public SpongeWorldArchetypeBuilder generatorModifierType(GeneratorModifierType modifier) {
+    public SpongeWorldArchetypeBuilder generatorModifierType(final GeneratorModifierType modifier) {
         Objects.requireNonNull(modifier);
         this.generatorModifier = modifier;
         return this;
     }
 
     @Override
-    public SpongeWorldArchetypeBuilder dimensionType(DimensionType type) {
+    public SpongeWorldArchetypeBuilder dimensionType(final DimensionType type) {
         Objects.requireNonNull(type);
         this.dimensionType = (SpongeDimensionType) type;
         return this;
     }
 
     @Override
-    public WorldArchetype.Builder difficulty(Difficulty difficulty) {
+    public WorldArchetype.Builder difficulty(final Difficulty difficulty) {
         Objects.requireNonNull(difficulty);
         this.difficulty = difficulty;
         return this;
@@ -181,22 +182,24 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     }
 
     @Override
-    public SpongeWorldArchetypeBuilder serializationBehavior(SerializationBehavior behavior) {
+    public SpongeWorldArchetypeBuilder serializationBehavior(final SerializationBehavior behavior) {
         Objects.requireNonNull(behavior);
         this.serializationBehavior = behavior;
         return this;
     }
 
     @Override
-    public WorldArchetype.Builder generatorSettings(DataContainer generatorSettings) {
+    public WorldArchetype.Builder generatorSettings(final DataContainer generatorSettings) {
         Objects.requireNonNull(generatorSettings);
         this.generatorSettings = generatorSettings;
         return this;
     }
 
     @Override
-    public SpongeWorldArchetypeBuilder from(WorldArchetype value) {
+    public SpongeWorldArchetypeBuilder from(final WorldArchetype value) {
         Objects.requireNonNull(value);
+
+        this.key = null;
         this.dimensionType(value.getDimensionType());
         this.generatorModifierType(value.getGeneratorModifier());
         this.gameMode(value.getGameMode());
@@ -213,13 +216,15 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.generateSpawnOnLoad = value.doesGenerateSpawnOnLoad();
         this.commandsEnabled = value.areCommandsEnabled();
         this.generateBonusChest = value.doesGenerateBonusChest();
-        this.generatorSettings = value.getGeneratorSettings();
+        this.generatorSettings = value.getGeneratorSettings().copy();
         return this;
     }
 
     @Override
-    public SpongeWorldArchetypeBuilder from(WorldProperties value) {
+    public SpongeWorldArchetypeBuilder from(final WorldProperties value) {
         Objects.requireNonNull(value);
+
+        this.key = null;
         this.dimensionType(value.getDimensionType());
         this.generatorModifierType(value.getGeneratorModifierType());
         this.gameMode(value.getGameMode());
@@ -236,12 +241,13 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.generateSpawnOnLoad = value.doesGenerateSpawnOnLoad();
         this.commandsEnabled = value.areCommandsEnabled();
         this.generateBonusChest = value.doesGenerateBonusChest();
-        this.generatorSettings = value.getGeneratorSettings();
+        this.generatorSettings = value.getGeneratorSettings().copy();
         return this;
     }
 
     @Override
     public SpongeWorldArchetypeBuilder reset() {
+        this.key = null;
         this.dimensionType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
         this.generatorModifier = GeneratorModifierTypes.NONE.get();
         this.gameMode = GameModes.SURVIVAL.get();
@@ -259,7 +265,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         this.pvpEnabled = true;
         this.commandsEnabled = true;
         this.generateBonusChest = false;
-        this.generatorSettings = this.generatorModifier.getDefaultGeneratorSettings();
+        this.generatorSettings = this.generatorModifier.getDefaultGeneratorSettings().copy();
         return this;
     }
 

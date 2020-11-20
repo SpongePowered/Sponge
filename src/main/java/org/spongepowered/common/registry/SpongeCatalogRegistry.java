@@ -156,6 +156,7 @@ import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.dimension.DimensionType;
@@ -219,6 +220,7 @@ import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.TeleportHelperFilterStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WeatherStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WoodTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.WorldArchetypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.vanilla.BiomeSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.BlockSupplier;
 import org.spongepowered.common.registry.builtin.vanilla.ContainerTypeSupplier;
@@ -593,6 +595,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(ToolType.class, ResourceKey.minecraft("tool_type"), Arrays.stream(ItemTier.values()), true, false)
             .generateRegistry(TropicalFishShape.class, ResourceKey.minecraft("tropical_fish_shape"), Arrays.stream(TropicalFishEntity.Type.values()), true, false)
             .generateRegistry(Weather.class, ResourceKey.minecraft("weather"), WeatherStreamGenerator.stream(), true, false)
+            .generateRegistry(WorldArchetype.class, ResourceKey.sponge("world_archetype"), WorldArchetypeStreamGenerator.stream(), true, true)
             .generateRegistry(WireAttachmentType.class, ResourceKey.minecraft("wire_attachment_type"), Arrays.stream(RedstoneSide.values()), true, false)
             .generateRegistry(WoodType.class, ResourceKey.minecraft("wood_type"), WoodTypeStreamGenerator.stream(), true, false)
             .generateRegistry(Visibility.class, ResourceKey.minecraft("visibility"), Arrays.stream(Team.Visible.values()), true, false)

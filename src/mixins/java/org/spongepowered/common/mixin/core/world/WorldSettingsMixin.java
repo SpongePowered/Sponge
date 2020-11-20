@@ -30,7 +30,10 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.SerializationBehaviors;
+import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,18 +54,17 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Shadow private boolean commandsAllowed;
     @Shadow private boolean bonusChestEnabled;
 
-    @Nullable private ResourceKey key;
-    @Nullable private SpongeDimensionType impl$logicType;
-    @Nullable private Difficulty impl$difficulty;
-    @Nullable private SerializationBehavior impl$serializationBehavior;
-    @Nullable private DataContainer impl$generatorSettings;
-
+    @Nullable private ResourceKey impl$key;
+    private SpongeDimensionType impl$logicType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
+    private Difficulty impl$difficulty = Difficulties.NORMAL.get();
+    private SerializationBehavior impl$serializationBehavior = SerializationBehaviors.AUTOMATIC.get();
+    private DataContainer impl$generatorSettings = DataContainer.createNew();
     private boolean impl$isEnabled = true;
     private boolean impl$loadOnStartup = true;
     private boolean impl$keepSpawnLoaded = false;
     private boolean impl$generateSpawnOnLoad = false;
     private boolean impl$pvpEnabled = true;
-    private boolean seedRandomized = false;
+    private boolean impl$seedRandomized = false;
 
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
     private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
@@ -76,22 +78,22 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
 
     @Override
     public ResourceKey bridge$getKey() {
-        return this.key;
+        return this.impl$key;
     }
 
     @Override
-    public void bridge$setKey(ResourceKey key) {
-        this.key = key;
+    public void bridge$setKey(final ResourceKey key) {
+        this.impl$key = key;
     }
 
     @Override
     public boolean bridge$isSeedRandomized() {
-        return this.seedRandomized;
+        return this.impl$seedRandomized;
     }
 
     @Override
-    public void bridge$setRandomSeed(boolean state) {
-        this.seedRandomized = state;
+    public void bridge$setRandomSeed(final boolean state) {
+        this.impl$seedRandomized = state;
     }
 
     @Override
@@ -140,17 +142,17 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     }
 
     @Override
-    public void bridge$setLogicType(SpongeDimensionType dimensionType) {
+    public void bridge$setLogicType(final SpongeDimensionType dimensionType) {
         this.impl$logicType = dimensionType;
     }
 
     @Override
-    public void bridge$setDifficulty(Difficulty difficulty) {
+    public void bridge$setDifficulty(final Difficulty difficulty) {
         this.impl$difficulty = difficulty;
     }
 
     @Override
-    public void bridge$setSerializationBehavior(SerializationBehavior behavior) {
+    public void bridge$setSerializationBehavior(final SerializationBehavior behavior) {
         this.impl$serializationBehavior = behavior;
     }
 
