@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.builtin.sponge;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.arguments.*;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.StringTextComponent;
 import org.spongepowered.api.ResourceKey;
@@ -58,6 +59,7 @@ import org.spongepowered.math.vector.Vector2d;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -96,7 +98,7 @@ public final class CatalogedValueParameterStreamGenerator {
                 StandardCatalogedArgumentParser.createConverter("many_game_profiles", GameProfileArgument.gameProfile(),
                         (reader, cause, converter) -> converter.getNames(cause.getSource())),
                 StandardCatalogedArgumentParser.createConverter("many_players", EntityArgument.players(),
-                        (reader, cause, selector) -> (Player) selector.selectPlayers(cause.getSource())),
+                        (reader, cause, selector) -> selector.selectPlayers(cause.getSource())),
                 new SpongeNoneValueParameter(),
                 StandardCatalogedArgumentParser.createConverter("player", EntityArgument.player(),
                         (reader, cause, selector) -> (Player) selector.selectOnePlayer(cause.getSource())),
