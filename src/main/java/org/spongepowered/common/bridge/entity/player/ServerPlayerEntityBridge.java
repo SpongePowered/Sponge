@@ -119,8 +119,6 @@ public interface ServerPlayerEntityBridge {
     @Nullable
     User bridge$getUser();
 
-    boolean bridge$hasDelegate();
-
     @Nullable
     ServerPlayerEntity bridge$getDelegate();
 

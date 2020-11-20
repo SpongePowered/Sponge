@@ -100,6 +100,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private @Nullable ITextComponent impl$connectionMessage;
     @Nullable private Vector3d impl$velocityOverride = null;
+    @Nullable private ServerPlayerEntity impl$respawnDelegate = null;
 
     @Override
     public @Nullable ITextComponent bridge$getConnectionMessageToSend() {
@@ -135,6 +136,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public User bridge$getUser() {
         return this.impl$user;
+    }
+
+    @Override
+    public ServerPlayerEntity bridge$getDelegate() {
+        return this.impl$respawnDelegate;
     }
 
     // TODO: this, properly.

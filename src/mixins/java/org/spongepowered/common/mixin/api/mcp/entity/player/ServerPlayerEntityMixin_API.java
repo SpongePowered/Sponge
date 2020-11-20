@@ -224,7 +224,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public void setScoreboard(final Scoreboard scoreboard) {
-        if (((ServerPlayerEntityBridge) this).bridge$hasDelegate()) {
+        if (((ServerPlayerEntityBridge) this).bridge$getDelegate() != null) {
             ((ServerPlayer) ((ServerPlayerEntityBridge) this).bridge$getDelegate()).setScoreboard(scoreboard);
         }
         ((ServerScoreboardBridge) ((ServerPlayerEntityBridge) this).bridge$getScoreboard()).bridge$removePlayer((ServerPlayerEntity) (Object) this, true);
