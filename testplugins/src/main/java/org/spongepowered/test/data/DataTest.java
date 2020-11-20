@@ -954,13 +954,16 @@ public final class DataTest  {
 
         this.checkGetData(jungleAxe, Keys.MAX_DURABILITY, 59);
 
+        this.checkGetData(player, Keys.MAX_EXHAUSTION, 40.0);
+
         this.checkOfferData(fallingBlock, Keys.MAX_FALL_DAMAGE, 50.0);
 
+        this.checkGetData(player, Keys.MAX_FOOD_LEVEL, 20);
         this.checkOfferData(sheep, Keys.MAX_HEALTH, 100.0);
 
         // TODO Keys.MAX_NEARBY_ENTITIES
         // TODO Keys.MAX_SPAWN_DELAY
-
+        this.checkGetData(player, Keys.MAX_SATURATION, 40.0);
         this.checkOfferData(boat, Keys.MAX_SPEED, 1.0);
 
         // MAX_STACK_SIZE

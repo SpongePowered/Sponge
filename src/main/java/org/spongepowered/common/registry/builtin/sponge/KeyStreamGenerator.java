@@ -296,9 +296,12 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_burn_time"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_cook_time"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_durability"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_exhaustion"), TypeTokens.DOUBLE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_food_level"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_fall_damage"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_health"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_nearby_entities"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_saturation"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_spawn_delay"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_speed"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_stack_size"), TypeTokens.INTEGER_VALUE_TOKEN));

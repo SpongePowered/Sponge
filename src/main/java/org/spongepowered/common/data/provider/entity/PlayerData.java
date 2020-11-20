@@ -125,6 +125,12 @@ public final class PlayerData {
                         .get(PlayerEntity::isSleeping)
                     .create(Keys.IS_SLEEPING_IGNORED)
                         .get(PlayerEntity::isSleeping)
+                    .create(Keys.MAX_EXHAUSTION)
+                        .get(h -> PlayerData.EXHAUSTION_MAX)
+                    .create(Keys.MAX_FOOD_LEVEL)
+                        .get(h -> PlayerData.FOOD_LEVEL_MAX)
+                    .create(Keys.MAX_SATURATION)
+                        .get(h -> PlayerData.SATURATION_MAX)
                     .create(Keys.SATURATION)
                         .get(h -> (double) h.getFoodStats().getSaturationLevel())
                         .setAnd((h, v) -> {
