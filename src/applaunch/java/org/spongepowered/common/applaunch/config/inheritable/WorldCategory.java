@@ -118,7 +118,7 @@ public class WorldCategory {
 
     @Setting("generate-bonus-chest")
     @Comment("If 'true', the bonus chest will be generated near spawn")
-    private boolean generateBonusChest = true;
+    private boolean generateBonusChest = false;
 
     public static final int USE_SERVER_VIEW_DISTANCE = -1;
     @Setting("view-distance")
