@@ -228,6 +228,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
 
+        final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(logicType, key);
+
         final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
 
         world = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
@@ -310,6 +312,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         MinecraftServerAccessor_Vanilla.accessor$getLogger().info("Loading World '{}' ({}/{})", properties.getKey(), logicType.getKey().getFormatted(),
                 dimensionType.getId());
+
+        final InheritableConfigHandle<WorldConfig> adapter = SpongeGameConfigs.createWorld(logicType, properties.getKey());
+        ((WorldInfoBridge) properties).bridge$setConfigAdapter(adapter);
 
         final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
 
@@ -535,7 +540,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     if (Files.notExists(actualPathLink)) {
                         Files.createDirectories(actualPathLink);
                     } else if (!Files.isDirectory(actualPathLink)) {
-                        throw new IOException("Worlds directory '" + worldsDirectory + "' symlink to '" + actualPathLink + "' is not a directory!");
+                        throw new IOException(String.format("Worlds directory '%s' symlink to '%s' is not a directory!", worldsDirectory,
+                                actualPathLink));
                     }
                 } else {
                     Files.createDirectories(worldsDirectory);
@@ -676,7 +682,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             this.server.setDifficultyForAllWorlds(this.server.getDifficulty(), true);
         }
 
-        // TODO May not be the best spot for this...
         ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();
     }
 
@@ -819,7 +824,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$func_213204_a(serverWorld.getSavedData());
 
-        // TODO Dualspiral, look this over...Per world commands?
         if (isDefaultWorld) {
             ((MinecraftServerAccessor) this.server).accessor$setfield_229733_al(new CommandStorage(serverWorld.getSavedData()));
         }
