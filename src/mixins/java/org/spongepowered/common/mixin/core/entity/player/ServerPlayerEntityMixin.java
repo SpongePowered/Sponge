@@ -49,6 +49,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
+import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ServerLocation;
@@ -64,6 +65,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -101,6 +103,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     private @Nullable ITextComponent impl$connectionMessage;
     @Nullable private Vector3d impl$velocityOverride = null;
     @Nullable private ServerPlayerEntity impl$respawnDelegate = null;
+    private Scoreboard impl$spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
     @Override
     public @Nullable ITextComponent bridge$getConnectionMessageToSend() {
@@ -403,5 +406,35 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         if (entityIn instanceof HumanEntity) {
             ((HumanEntity) entityIn).untrackFrom((ServerPlayerEntity) (Object) this);
         }
+    }
+
+    @Override
+    public void bridge$initScoreboard() {
+        ((ServerScoreboardBridge) this.shadow$getWorldScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, true);
+    }
+
+    @Override
+    public void bridge$removeScoreboardOnRespawn() {
+        ((ServerScoreboardBridge) ((ServerPlayer) this).getScoreboard()).bridge$removePlayer((ServerPlayerEntity) (Object) this, false);
+    }
+
+    @Override
+    public void bridge$setScoreboardOnRespawn(Scoreboard scoreboard) {
+        this.impl$spongeScoreboard = scoreboard;
+        ((ServerScoreboardBridge) ((ServerPlayer) this).getScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, false);
+    }
+
+    @Override
+    public Scoreboard bridge$getScoreboard() {
+        return this.impl$spongeScoreboard;
+    }
+
+    @Override
+    public void bridge$replaceScoreboard(@org.checkerframework.checker.nullness.qual.Nullable Scoreboard scoreboard) {
+        if (scoreboard == null) {
+            scoreboard = Sponge.getGame().getServer().getServerScoreboard()
+                    .orElseThrow(() -> new IllegalStateException("Server does not have a valid scoreboard"));
+        }
+        this.impl$spongeScoreboard = scoreboard;
     }
 }

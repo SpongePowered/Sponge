@@ -153,7 +153,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     private ImmutableSet<SkinPart> impl$skinParts = ImmutableSet.of();
     private int impl$viewDistance;
     @Nullable private GameType impl$pendingGameType;
-    private Scoreboard impl$spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
     @Nullable private ServerPlayerEntity impl$delegate;
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     private float impl$cachedModifiedHealth = -1;
@@ -321,36 +320,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         if (slot != null) {
             this.connection.sendPacket(new SSetSlotPacket(this.openContainer.windowId, slot.slotNumber, this.impl$packetItem));
         }
-    }
-
-    @Override
-    public void bridge$initScoreboard() {
-        ((ServerScoreboardBridge) this.shadow$getWorldScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, true);
-    }
-
-    @Override
-    public Scoreboard bridge$getScoreboard() {
-        return this.impl$spongeScoreboard;
-    }
-
-    @Override
-    public void bridge$replaceScoreboard(@Nullable Scoreboard scoreboard) {
-        if (scoreboard == null) {
-            scoreboard = Sponge.getGame().getServer().getServerScoreboard()
-                .orElseThrow(() -> new IllegalStateException("Server does not have a valid scoreboard"));
-        }
-        this.impl$spongeScoreboard = scoreboard;
-    }
-
-    @Override
-    public void bridge$setScoreboardOnRespawn(final Scoreboard scoreboard) {
-        this.impl$spongeScoreboard = scoreboard;
-        ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, false);
-    }
-
-    @Override
-    public void bridge$removeScoreboardOnRespawn() {
-        ((ServerScoreboardBridge) ((Player) this).getScoreboard()).bridge$removePlayer((ServerPlayerEntity) (Object) this, false);
     }
 
     @Override
