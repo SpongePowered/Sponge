@@ -54,8 +54,8 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Shadow private boolean bonusChestEnabled;
 
     @Nullable private ResourceKey impl$key;
-    private SpongeDimensionType impl$logicType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
-    private Difficulty impl$difficulty = Difficulties.NORMAL.get();
+    private SpongeDimensionType impl$logicType;
+    private Difficulty impl$difficulty;
     private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
     private DataContainer impl$generatorSettings = DataContainer.createNew();
     private boolean impl$isEnabled = true;
