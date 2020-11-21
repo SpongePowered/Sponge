@@ -235,7 +235,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             this.shadow$getPlayerList().saveAllPlayerData();
         }
 
-        this.save(true, true, false);
+        this.save(true, false, false);
 
         // force check to fail as we handle everything above
         return this.tickCounter + 1;
