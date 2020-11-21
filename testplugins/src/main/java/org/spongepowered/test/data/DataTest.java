@@ -380,6 +380,13 @@ public final class DataTest  {
         this.checkGetData(illusioner, Keys.CURRENT_SPELL, SpellTypes.NONE.get());
         this.checkOfferData(illusioner, Keys.CURRENT_SPELL, SpellTypes.BLINDNESS.get());
 
+        final Entity shulkerBullet = world.createEntity(EntityTypes.SHULKER_BULLET.get(), position);
+        this.checkGetData(sheep, Keys.CUSTOM_NAME, null);
+        this.checkOfferData(sheep, Keys.CUSTOM_NAME, Component.text("A sheep"));
+        this.checkGetData(jungleAxe, Keys.CUSTOM_NAME, null);
+        this.checkOfferData(jungleAxe, Keys.CUSTOM_NAME, Component.text("Jungle Axe"));
+        this.checkOfferData(shulkerBullet, Keys.CUSTOM_NAME, Component.text("Angry Shulker Bullet"));
+
         // TODO Keys.CUSTOM_ATTACK_DAMAGE
 
         this.checkGetData(leatherBoots, Keys.DAMAGE_ABSORPTION, 1.0);
@@ -412,7 +419,6 @@ public final class DataTest  {
         this.checkGetData(shulkerEntity, Keys.DIRECTION, Direction.DOWN);
         this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.NORTH);
         this.checkOfferData(shulkerEntity, Keys.DIRECTION, Direction.UP);
-        final Entity shulkerBullet = world.createEntity(EntityTypes.SHULKER_BULLET.get(), position);
         this.checkGetData(shulkerBullet, Keys.DIRECTION, Direction.NONE);
         this.checkOfferData(shulkerBullet, Keys.DIRECTION, Direction.NORTH);
         this.checkOfferData(shulkerBullet, Keys.DIRECTION, Direction.UP);
@@ -421,11 +427,14 @@ public final class DataTest  {
         this.checkGetData(acaciaStairs, Keys.DIRECTION, Direction.NORTH);
         this.checkWithData(acaciaStairs, Keys.DIRECTION, Direction.WEST);
 
-        this.checkOfferData(jungleAxe, Keys.DISPLAY_NAME, Component.text("Jungle Axe"));
-        this.checkOfferData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet"));
-        this.checkOfferData(sheep, Keys.DISPLAY_NAME, Component.text("Special Sheep"));
+        this.checkGetData(jungleAxe, Keys.DISPLAY_NAME, Component.text("Jungle Axe"));
+        this.checkGetData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet")); // TODO entity DisplayName includes a hoverevent
+        this.checkGetData(sheep, Keys.DISPLAY_NAME, Component.text("A sheep")); // Set with CUSTOM_NAME
         world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
-        this.checkOfferData(location, Keys.DISPLAY_NAME, Component.text("Just a Chest"));
+        this.checkGetData(location, Keys.CUSTOM_NAME, null);
+        this.checkGetData(location, Keys.DISPLAY_NAME, Component.translatable("container.chest"));
+        this.checkOfferData(location, Keys.CUSTOM_NAME, Component.text("Just a Chest"));
+        this.checkGetData(location, Keys.DISPLAY_NAME, Component.text("Just a Chest"));
 
         player.get(Keys.DOMINANT_HAND).get();
 

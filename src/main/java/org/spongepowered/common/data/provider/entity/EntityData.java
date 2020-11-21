@@ -66,7 +66,7 @@ public final class EntityData {
                     .create(Keys.BASE_VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getLowestRidingEntity())
                     .create(Keys.CUSTOM_NAME)
-                        .get(h -> SpongeAdventure.asAdventure(h.getCustomName()))
+                        .get(h -> h.hasCustomName() ? SpongeAdventure.asAdventure(h.getCustomName()) : null)
                         .set((h, v) -> h.setCustomName(SpongeAdventure.asVanilla(v)))
                         .delete(h -> {
                             h.setCustomName(null);

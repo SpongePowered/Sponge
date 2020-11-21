@@ -113,20 +113,18 @@ public final class ItemStackData {
                             }
                             return SpongeAdventure.asAdventure(h.getDisplayName());
                         })
-                        .set((h, v) -> {
+                        .setAnd((h, v) -> {
                             if (h.getItem() == Items.WRITTEN_BOOK) {
                                 final String legacy = SpongeAdventure.legacySection(v);
                                 h.setTagInfo(Constants.Item.Book.ITEM_BOOK_TITLE, StringNBT.valueOf(legacy));
-                            } else {
-                                h.setDisplayName(SpongeAdventure.asVanilla(v));
+                                return true;
                             }
+                            return false;
                         })
-                        .delete(h -> {
-                            final CompoundNBT tag = h.getChildTag(Constants.Item.ITEM_DISPLAY);
-                            if (tag != null) {
-                                tag.remove(Constants.Item.ITEM_DISPLAY_NAME);
-                            }
-                        })
+                    .create(Keys.CUSTOM_NAME)
+                        .get(h -> h.hasDisplayName() ? SpongeAdventure.asAdventure(h.getDisplayName()) : null)
+                        .set((h, v) -> h.setDisplayName(SpongeAdventure.asVanilla(v)))
+                        .delete(ItemStack::clearCustomName)
                     .create(Keys.IS_UNBREAKABLE)
                         .get(h -> {
                             final CompoundNBT tag = h.getTag();
@@ -136,7 +134,7 @@ public final class ItemStackData {
                             return tag.getBoolean(Constants.Item.ITEM_UNBREAKABLE);
                         })
                         .set(ItemStackData::setIsUnbrekable)
-                        .delete(h -> setIsUnbrekable(h, false))
+                        .delete(h -> ItemStackData.setIsUnbrekable(h, false))
                     .create(Keys.LORE)
                         .get(h -> {
                             final CompoundNBT tag = h.getTag();
