@@ -49,6 +49,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -75,6 +76,7 @@ public final class CustomDataTest {
     private final PluginContainer plugin;
     private Key<Value<Integer>> myDataKey;
     private Key<Value<String>> mySimpleDataKey;
+    private Key<Value<ItemType>> myItemTypeKey;
 
     @Inject
     public CustomDataTest(final PluginContainer plugin) {
@@ -105,6 +107,7 @@ public final class CustomDataTest {
                             final ItemStack stack = ItemStack.of(ItemTypes.PAPER);
                             stack.offer(this.myDataKey, number);
                             stack.offer(this.mySimpleDataKey, "It works! " + number);
+                            stack.offer(this.myItemTypeKey, ItemTypes.PAPER.get());
                             player.getInventory().offer(stack);
                             final List<Slot> slots = player.getInventory().query(QueryTypes.ITEM_STACK_CUSTOM.get().of(s -> s.get(this.myDataKey).isPresent())).slots();
                             final int itemSum = slots.stream().map(Slot::peek).mapToInt(item -> item.get(this.myDataKey).get()).sum();
@@ -175,6 +178,9 @@ public final class CustomDataTest {
         // Or if it is super simple data
         this.mySimpleDataKey = Key.of(this.plugin, "mysimpledata", TypeTokens.STRING_VALUE_TOKEN);
         event.register(DataRegistration.of(this.mySimpleDataKey, ItemStack.class));
+
+        this.myItemTypeKey = Key.of(this.plugin, "myitemtypedata", TypeTokens.ITEM_TYPE_VALUE_TOKEN);
+        event.register(DataRegistration.of(this.myItemTypeKey, ItemStack.class));
     }
 
     // replace with mongoDB - for web-scale

@@ -266,7 +266,7 @@ public class MemoryDataView implements DataView {
             // see above for why this is copied
             this.copyDataView(path, valueContainer);
         } else if (value instanceof CatalogType) {
-            return set(path, ((CatalogType) value).getKey());
+            return set(path, ((CatalogType) value).getKey().getFormatted());
         } else if (manager != null && manager.getTranslator(value.getClass()).isPresent()) {
             final DataTranslator serializer = manager.getTranslator(value.getClass()).get();
             final DataContainer container = serializer.translate(value);
