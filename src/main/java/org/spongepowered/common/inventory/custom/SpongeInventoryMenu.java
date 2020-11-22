@@ -259,12 +259,12 @@ public class SpongeInventoryMenu implements InventoryMenu {
                         // * Throwing one item on the cursor by clicking outside the inventory window.
                         // */
                         //public static final org.spongepowered.api.item.inventory.menu.ClickType
-                        //        CLICK_THROW_ONE = Sponge.getRegistry().getCatalogRegistry().provideSupplier(org.spongepowered.api.item.inventory.menu.ClickType.class, "click_throw_one");
+                        //        CLICK_THROW_ONE = DummyObjectProvider.createFor(org.spongepowered.api.item.inventory.menu.ClickType.class, "click_throw_one");
                         ///**
                         // * Throwing all items on the cursor by clicking outside the inventory window.
                         // */
                         //public static final org.spongepowered.api.item.inventory.menu.ClickType
-                        //        CLICK_THROW_ALL = Sponge.getRegistry().getCatalogRegistry().provideSupplier(org.spongepowered.api.item.inventory.menu.ClickType.class, "click_throw_all");
+                        //        CLICK_THROW_ALL = DummyObjectProvider.createFor(org.spongepowered.api.item.inventory.menu.ClickType.class, "click_throw_all");
                     }        // else unknown slotId/drag-type
                     break;
             }
