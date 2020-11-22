@@ -69,7 +69,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     private boolean generateSpawnOnLoad;
     private boolean pvpEnabled;
     private boolean commandsEnabled;
-    private boolean generateBonusChest;
+    private boolean generateBonusChest = false;
     private boolean randomizedSeed;
 
     public SpongeWorldArchetypeBuilder() {
