@@ -34,21 +34,30 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.network.play.client.CAnimateHandPacket;
 import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.network.play.client.CTabCompletePacket;
+import net.minecraft.network.play.client.CUseEntityPacket;
 import net.minecraft.network.play.server.STabCompletePacket;
+import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
+import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
+import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -60,8 +69,8 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
@@ -70,9 +79,13 @@ import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.lang.ref.WeakReference;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -83,7 +96,10 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
     @Shadow @Final public NetworkManager netManager;
     @Shadow public ServerPlayerEntity player;
+
     @Nullable private Vector3d impl$lastMovePosition = null;
+    @Nullable private Entity impl$targetedEntity = null;
+
     private boolean impl$justTeleported = false;
 
     @Override
@@ -146,16 +162,6 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         return BrigadierCommandRegistrar.INSTANCE.getDispatcher().parse(command, (CommandSource) source, true);
     }
 
-    private String[] impl$extractCommandString(final String commandString) {
-        if (commandString.isEmpty()) {
-            return ServerPlayNetHandlerMixin.impl$emptyCommandArray;
-        }
-        if (commandString.startsWith("/")) {
-            return commandString.substring(1).split(" ", 2);
-        }
-        return commandString.split(" ", 2);
-    }
-
     /**
      * A workaround to resolve <a href="https://bugs.mojang.com/browse/MC-107103">MC-107103</a>
      * since the server will expect the client is trying to interact with the "eyes" of the entity.
@@ -183,7 +189,6 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         this.impl$targetedEntity = entityIn;
         return true;
     }
-    private @Nullable Entity impl$targetedEntity = null;
 
     /**
      * Specifically hooks the reach distance to use the forge hook.
@@ -195,7 +200,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     private double impl$getPlatformReach(final double thirtySix) {
         final Entity targeted = this.impl$targetedEntity;
         this.impl$targetedEntity = null;
-        return SpongeImplHooks.getEntityReachDistanceSq(this.player, targeted);
+        return PlatformHooks.getInstance().getGeneralHooks().getEntityReachDistanceSq(this.player, targeted);
     }
 
     @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;queuedEndExit:Z"))
@@ -300,4 +305,65 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         return false; // Continue with vanilla movement processing
     }
 
+    @Inject(method = "processUseEntity", cancellable = true,
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/entity/Entity;applyPlayerInteraction(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"),
+            locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    public void impl$onRightClickAtEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
+        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
+                .callInteractEntityEventSecondary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
+        if (event.isCancelled()) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "processUseEntity", cancellable = true,
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"),
+            locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    public void impl$onLeftClickEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
+        final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
+                this.player.getHeldItem(this.player.getActiveHand()), entity, this.player.getActiveHand(), null);
+        if (event.isCancelled()) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "handleAnimation",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;markPlayerActive()V"),
+            cancellable = true)
+    private void impl$throwAnimationEvent(final CAnimateHandPacket packetIn, final CallbackInfo ci) {
+        if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
+            return;
+        }
+        SpongeCommonEventFactory.lastAnimationPacketTick = SpongeCommon.getServer().getTickCounter();
+        SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
+        if (ShouldFire.ANIMATE_HAND_EVENT) {
+            final HandType handType = (HandType) (Object) packetIn.getHand();
+            final ItemStack heldItem = this.player.getHeldItem(packetIn.getHand());
+
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
+                frame.addContext(EventContextKeys.USED_HAND, handType);
+                final AnimateHandEvent event =
+                        SpongeEventFactory.createAnimateHandEvent(frame.getCurrentCause(), handType, (Humanoid) this.player);
+                if (SpongeCommon.postEvent(event)) {
+                    ci.cancel();
+                }
+            }
+        }
+    }
+
+    private String[] impl$extractCommandString(final String commandString) {
+        if (commandString.isEmpty()) {
+            return ServerPlayNetHandlerMixin.impl$emptyCommandArray;
+        }
+        if (commandString.startsWith("/")) {
+            return commandString.substring(1).split(" ", 2);
+        }
+        return commandString.split(" ", 2);
+    }
 }

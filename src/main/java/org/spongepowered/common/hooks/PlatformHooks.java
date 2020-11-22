@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.hooks;
 
+import org.spongepowered.common.SpongeImplHooks;
+
 import java.util.Objects;
 
 /**
@@ -47,8 +49,10 @@ import java.util.Objects;
 public final class PlatformHooks {
 
     private static final PlatformHooks instance = new PlatformHooks();
+
     private DimensionHooks dimensionHooks = new DimensionHooks() {};
     private EventHooks eventHooks = new EventHooks() {};
+    private GeneralHooks generalHooks = new GeneralHooks() {};
     private PacketHooks packetHooks = new PacketHooks() {};
 
     public static PlatformHooks getInstance() {
@@ -75,7 +79,15 @@ public final class PlatformHooks {
         return this.packetHooks;
     }
 
-    public void setPacketHooks(PacketHooks packetHooks) {
+    public void setPacketHooks(final PacketHooks packetHooks) {
         this.packetHooks = Objects.requireNonNull(packetHooks);
+    }
+
+    public GeneralHooks getGeneralHooks() {
+        return this.generalHooks;
+    }
+
+    public void setGeneralHooks(final GeneralHooks generalHooks) {
+        this.generalHooks = Objects.requireNonNull(generalHooks);
     }
 }

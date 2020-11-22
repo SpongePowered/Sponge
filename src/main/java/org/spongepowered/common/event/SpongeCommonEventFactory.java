@@ -510,6 +510,8 @@ public final class SpongeCommonEventFactory {
             if (!stack.isEmpty()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
             }
+            final HandType handType = (HandType) (Object) hand;
+            frame.addContext(EventContextKeys.USED_HAND, handType);
             final InteractEntityEvent.Secondary event = SpongeEventFactory.createInteractEntityEventSecondary(frame.getCurrentCause(),
                     (Entity) entity, Optional.ofNullable(hitVec));
             SpongeCommon.postEvent(event);

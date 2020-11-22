@@ -24,6 +24,7 @@
         "world.ExplosionMixin_Tracker",
         "world.WorldMixin_Tracker",
         "world.chunk.ChunkMixin_Tracker",
-        "world.server.ServerWorldMixin_Tracker"
+        "world.server.ServerWorldMixin_Tracker",
+        "network.play.ServerPlayNetHandlerMixin_Tracker"
     ]
 }

@@ -24,49 +24,27 @@
  */
 package org.spongepowered.common.mixin.tracker.network.play;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ExperienceOrbEntity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketThreadUtil;
-import net.minecraft.network.play.IServerPlayNetHandler;
 import net.minecraft.network.play.ServerPlayNetHandler;
-import net.minecraft.network.play.client.CAnimateHandPacket;
 import net.minecraft.network.play.client.CPlayerDiggingPacket;
-import net.minecraft.network.play.client.CUseEntityPacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.data.type.HandType;
-import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.entity.InteractEntityEvent;
-import org.spongepowered.api.event.entity.living.AnimateHandEvent;
-import org.spongepowered.api.event.item.inventory.InteractItemEvent;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
@@ -75,15 +53,10 @@ import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.lang.ref.WeakReference;
-
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin_Tracker {
 
-
     @Shadow public ServerPlayerEntity player;
-
-    @Shadow @Final private MinecraftServer server;
 
     @Shadow public abstract void disconnect(ITextComponent textComponent);
 
@@ -130,41 +103,12 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
         return actionResult;
     }
 
-
-    @Inject(method = "handleAnimation",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/player/ServerPlayerEntity;markPlayerActive()V"),
-            cancellable = true)
-    private void tracker$throwAnimationEvent(final CAnimateHandPacket packetIn, final CallbackInfo ci) {
-        if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
-            return;
-        }
-        SpongeCommonEventFactory.lastAnimationPacketTick = SpongeCommon.getServer().getTickCounter();
-        SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
-        if (ShouldFire.ANIMATE_HAND_EVENT) {
-            final HandType handType = (HandType) (Object) packetIn.getHand();
-            final ItemStack heldItem = this.player.getHeldItem(packetIn.getHand());
-            final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
-            causeStackManager.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
-            causeStackManager.addContext(EventContextKeys.USED_HAND, handType);
-            final AnimateHandEvent event =
-                    SpongeEventFactory.createAnimateHandEvent(causeStackManager.getCurrentCause(), handType, (Humanoid) this.player);
-            if (SpongeCommon.postEvent(event)) {
-                ci.cancel();
-            }
-        }
-    }
-
-
     /**
-     * @author gabizou - February 23rd, 2020 - Minecraft 1.14.3
+     * @author gabizou
      * @reason We need to track the last primary packet being processed, and usually
      * that's when the processPlayerDigging is called, so, we track that by means of
      * suggesting that when the packet is about to be actually processed (before
      * the switch statement), we keep track of the last primary packet ticking.
-     *
-     * @param packetIn The packet being processed
-     * @param ci The callback injection
      */
     @Inject(method = "processPlayerDigging",
         at = @At(value = "INVOKE",
@@ -174,29 +118,5 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
             return;
         }
         SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeCommon.getServer().getTickCounter();
-    }
-
-    @Inject(method = "processUseEntity", cancellable = true,
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/Entity;applyPlayerInteraction(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"),
-            locals = LocalCapture.CAPTURE_FAILHARD
-    )
-    public void onRightClickAtEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
-        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
-        if (event.isCancelled()) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "processUseEntity", cancellable = true,
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/ServerPlayerEntity;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"),
-            locals = LocalCapture.CAPTURE_FAILHARD
-    )
-    public void onLeftClickEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
-        final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
-        if (event.isCancelled()) {
-            ci.cancel();
-        }
     }
 }

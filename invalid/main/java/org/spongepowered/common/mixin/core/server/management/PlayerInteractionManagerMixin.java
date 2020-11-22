@@ -75,44 +75,6 @@ public abstract class PlayerInteractionManagerMixin implements PlayerInteraction
     @Shadow public abstract boolean isCreative();
     @Shadow public abstract boolean tryHarvestBlock(BlockPos pos);
 
-    private boolean impl$interactBlockLeftClickEventCancelled = false;
-    private boolean impl$interactBlockRightClickEventCancelled = false;
-    private boolean impl$lastInteractItemOnBlockCancelled = false;
-
-    @Override
-    public boolean bridge$isInteractBlockRightClickCancelled() {
-        return this.impl$interactBlockRightClickEventCancelled;
-    }
-
-    @Override
-    public void bridge$setInteractBlockRightClickCancelled(final boolean cancelled) {
-        this.impl$interactBlockRightClickEventCancelled = cancelled;
-    }
-
-    @Override
-    public boolean bridge$isLastInteractItemOnBlockCancelled() {
-        return this.impl$lastInteractItemOnBlockCancelled;
-    }
-
-    @Override
-    public void bridge$setLastInteractItemOnBlockCancelled(final boolean lastInteractItemOnBlockCancelled) {
-        this.impl$lastInteractItemOnBlockCancelled = lastInteractItemOnBlockCancelled;
-    }
-
-    /*
-                We have to check for cancelled left click events because they occur from different packets
-                or processing branches such that there's no clear "context" of where we can store these variables.
-                So, we store it to the interaction manager's fields, to avoid contaminating other interaction
-                manager's processes.
-                 */
-    @Inject(method = "blockRemoving", at = @At("HEAD"), cancellable = true)
-    private void onBlockRemovingSpongeCheckForCancelledBlockEvent(final BlockPos pos, final CallbackInfo ci) {
-        if (this.impl$interactBlockLeftClickEventCancelled) {
-            this.impl$interactBlockLeftClickEventCancelled = false;
-            ci.cancel();
-        }
-    }
-
     /**
      * @author morpheus - December 15th, 2018
      *

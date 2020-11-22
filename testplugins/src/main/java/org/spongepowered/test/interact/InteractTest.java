@@ -53,7 +53,6 @@ public final class InteractTest implements LoadableModule {
         Sponge.getEventManager().registerListeners(this.plugin, new InteractListener());
     }
 
-
     public static class InteractListener {
         @Listener
         public void onInteractBlock(final InteractBlockEvent event) {
