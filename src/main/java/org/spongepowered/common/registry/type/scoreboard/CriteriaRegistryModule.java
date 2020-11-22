@@ -30,14 +30,17 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.type.statistic.StatisticRegistryModule;
 import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-@RegistrationDependency(TextColorRegistryModule.class)
+@RegistrationDependency({TextColorRegistryModule.class, StatisticRegistryModule.class})
 @RegisterCatalog(Criteria.class)
 public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Criterion> {
 
@@ -83,6 +86,13 @@ public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalog
             this.register(killedByTeamCriterion);
             killedByTeamMappings.put(id, killedByTeamCriterion);
         }
+
+        StatisticRegistryModule.getInstance().getAll()
+                .stream()
+                .map(Statistic::getCriterion)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(this::register);
     }
 
     private static final class Holder {
