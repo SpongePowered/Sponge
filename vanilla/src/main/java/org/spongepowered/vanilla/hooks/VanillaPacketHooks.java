@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.hooks;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SJoinGamePacket;
+import net.minecraft.network.play.server.SRespawnPacket;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.dimension.DimensionType;
@@ -58,6 +59,27 @@ public final class VanillaPacketHooks implements PacketHooks {
 
             return new SJoinGamePacket(entity.getEntityId(), gameType, seed, hardcodeMode, clientType, maxPlayers, generatorType, viewDistance,
                     isReducedDebugMode, enableRespawnScreen);
+        }
+    }
+
+    @Override
+    public SRespawnPacket createSRespawnPacket(final ServerPlayerEntity entity, final DimensionType dimensionType, final long seed,
+            final WorldType worldType, final GameType gameType) {
+
+        if (((ServerPlayerEntityBridge) entity).bridge$getClientType() == ClientType.SPONGE_VANILLA) {
+            return new SRespawnPacket(dimensionType, seed, worldType, gameType);
+        } else {
+            DimensionType clientType;
+            final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
+            if (DimensionTypes.OVERWORLD.get() == logicType) {
+                clientType = DimensionType.OVERWORLD;
+            } else if (DimensionTypes.THE_NETHER.get() == logicType) {
+                clientType = DimensionType.THE_NETHER;
+            } else {
+                clientType = DimensionType.THE_END;
+            }
+
+            return new SRespawnPacket(clientType, seed, worldType, gameType);
         }
     }
 }

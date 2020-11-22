@@ -291,9 +291,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         this.impl$isBedSpawn = false;
         this.impl$originalDestination = null;
 
-        ((SRespawnPacketAccessor) packetIn).accessor$setGameType(player.interactionManager.getGameType());
+        // We may respawn into a custom dimension that the player has not encountered before. Let the platform handle it
+        ((ServerPlayerEntityBridge) player).bridge$sendDimensionData(serverPlayNetHandler.netManager, dimension);
 
-        serverPlayNetHandler.sendPacket(packetIn);
+        ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(
+                ((SRespawnPacketAccessor) packetIn).accessor$getDimensionType(),
+                ((SRespawnPacketAccessor) packetIn).accessor$getHashedSeed(), ((SRespawnPacketAccessor) packetIn).accessor$getWorldType(),
+                ((SRespawnPacketAccessor) packetIn).accessor$getGameType()
+        );
     }
 
     private void impl$disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
