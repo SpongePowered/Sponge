@@ -242,7 +242,7 @@ public abstract class PlayerListMixin {
     private void impl$setSpongePlayerDataForSinglePlayer(final ServerPlayerEntity entity, final CompoundNBT compound) {
         entity.read(compound);
 
-        ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().readPlayerData(compound, null);
+        ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().readPlayerData(compound, entity.getUniqueID(), null);
     }
 
     private void disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {

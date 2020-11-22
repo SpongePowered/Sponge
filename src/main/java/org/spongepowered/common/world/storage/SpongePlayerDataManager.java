@@ -105,7 +105,7 @@ public final class SpongePlayerDataManager {
         }
     }
 
-    public void readPlayerData(final CompoundNBT compound, @org.checkerframework.checker.nullness.qual.Nullable Instant creation) {
+    public void readPlayerData(final CompoundNBT compound, @Nullable UUID playerUniqueId, @Nullable Instant creation) {
         if (creation == null) {
             creation = Instant.now();
         }
@@ -122,9 +122,10 @@ public final class SpongePlayerDataManager {
             creation = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.FIRST_JOINED));
             lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.LAST_JOINED));
         }
-        @org.checkerframework.checker.nullness.qual.Nullable UUID playerUniqueId = null;
-        if (compound.hasUniqueId(Constants.UUID)) {
-            playerUniqueId = compound.getUniqueId(Constants.UUID);
+        if (playerUniqueId == null) {
+            if (compound.hasUniqueId(Constants.UUID)) {
+                playerUniqueId = compound.getUniqueId(Constants.UUID);
+            }
         }
         if (playerUniqueId != null) {
             final Optional<Instant> savedFirst = this.getFirstJoined(playerUniqueId);

@@ -206,7 +206,7 @@ public abstract class SaveHandlerMixin implements IPlayerFileData {
     @Redirect(method = "readPlayerData", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;read(Lnet/minecraft/nbt/CompoundNBT;)V"))
     private void impl$readSpongePlayerData(final PlayerEntity playerEntity, final CompoundNBT compound) throws IOException {
         playerEntity.read(compound);
-        ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().readPlayerData(compound, this.impl$file == null ? null :
+        ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().readPlayerData(compound, null, this.impl$file == null ? null :
                 Files.readAttributes(this.impl$file, BasicFileAttributes.class).creationTime().toInstant());
         this.impl$file = null;
     }
