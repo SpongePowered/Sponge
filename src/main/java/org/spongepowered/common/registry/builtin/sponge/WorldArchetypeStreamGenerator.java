@@ -31,6 +31,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.dimension.DimensionType;
 import org.spongepowered.api.world.dimension.DimensionTypes;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
@@ -58,6 +59,7 @@ public final class WorldArchetypeStreamGenerator {
                 WorldType.DEFAULT);
         ((ResourceKeyBridge) (Object) archetype).bridge$setKey(key);
         ((WorldSettingsBridge) (Object) archetype).bridge$setLogicType((SpongeDimensionType) dimensionType.get());
+        ((WorldSettingsBridge) (Object) archetype).bridge$setDifficulty(SpongeCommon.getServer().getDifficulty());
         return (WorldArchetype) (Object)  archetype;
     }
 }

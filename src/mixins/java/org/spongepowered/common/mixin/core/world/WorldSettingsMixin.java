@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world;
 import com.google.gson.JsonElement;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.WorldSettings;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -40,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
@@ -50,12 +48,16 @@ import javax.annotation.Nullable;
 @Mixin(WorldSettings.class)
 public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSettingsBridge {
 
+    // @formatter:off
     @Shadow private boolean commandsAllowed;
     @Shadow private boolean bonusChestEnabled;
+    // @formatter:on
 
-    @Nullable private ResourceKey impl$key;
-    private SpongeDimensionType impl$logicType = ((DimensionTypeBridge) DimensionType.OVERWORLD).bridge$getSpongeDimensionType();
-    private Difficulty impl$difficulty = Difficulty.NORMAL;
+    private ResourceKey impl$key;
+    // Sponge Start - Vanilla registry catalogs cannot be default set here, causes chain classloading
+    private SpongeDimensionType impl$logicType;
+    private Difficulty impl$difficulty;
+    // Sponge End
     private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
     private DataContainer impl$generatorSettings = DataContainer.createNew();
     private boolean impl$isEnabled = true;
@@ -64,16 +66,6 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     private boolean impl$generateSpawnOnLoad = false;
     private boolean impl$pvpEnabled = true;
     private boolean impl$seedRandomized = false;
-
-    @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
-    private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
-        this.impl$$populateArchetype(info);
-    }
-
-    @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
-    private void onSetGeneratorOptions(JsonElement element, CallbackInfoReturnable<WorldSettings> cir) {
-        // TODO 1.14 - JsonElement -> DataContainer
-    }
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -195,7 +187,8 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
         this.bonusChestEnabled = state;
     }
 
-    public void impl$$populateArchetype(final WorldInfo info) {
+    @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
+    private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
         if (!((WorldInfoBridge) info).bridge$isValid()) {
             return;
         }
@@ -207,11 +200,18 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
         this.impl$loadOnStartup = properties.doesLoadOnStartup();
         this.impl$generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
         this.impl$keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+        // Sponge Start - Bonus chest status is in the Vanilla world data but not read from the properties.
         this.bonusChestEnabled = properties.doesGenerateBonusChest();
+        // Sponge End
         this.impl$serializationBehavior = properties.getSerializationBehavior();
         this.impl$difficulty = (Difficulty) (Object) properties.getDifficulty();
         this.impl$pvpEnabled = properties.isPVPEnabled();
-        this.impl$generatorSettings = properties.getGeneratorSettings();
+        this.impl$generatorSettings = properties.getGeneratorSettings().copy();
+    }
+
+    @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
+    private void impl$onSetGeneratorOptions(JsonElement element, CallbackInfoReturnable<WorldSettings> cir) {
+        // TODO 1.14 - JsonElement -> DataContainer
     }
 
     @Override

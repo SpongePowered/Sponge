@@ -113,7 +113,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     }
 
     @Inject(method = "populateFromWorldSettings", at = @At("TAIL"))
-    private void impl$setArchetypeSettings(WorldSettings settings, CallbackInfo ci) {
+    private void impl$fillInfo(WorldSettings settings, CallbackInfo ci) {
         ((WorldSettingsBridge) (Object) settings).bridge$populateInfo((WorldInfo) (Object) this);
     }
 

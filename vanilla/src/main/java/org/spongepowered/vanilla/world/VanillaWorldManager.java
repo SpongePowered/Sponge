@@ -169,7 +169,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((ResourceKeyBridge) worldInfo).bridge$setKey(key);
         ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
         ((WorldInfoBridge) worldInfo).bridge$setModCreated(true);
-
         return CompletableFuture.completedFuture((WorldProperties) worldInfo);
     }
 
@@ -264,7 +263,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final Path worldDirectory =
                 ((SaveFormatAccessor_Vanilla) this.server.getActiveAnvilConverter()).accessor$getSavesDir().resolve(this.server.getFolderName())
                         .resolve(properties.getKey().getValue());
-        final boolean isOnDisk = Files.exists(worldDirectory);
+
+        // If there is a folder on disk but we have no properties, this is likely because creating a properties in Vanilla inherently
+        // writes the directory (such in the case of createProperties) but this properties has never been saved. It is dangerous to patch
+        // out the creation of that directory so this hackfix will work for now
+        final boolean isOnDisk = Files.exists(worldDirectory) && Files.exists(worldDirectory.resolve("level.dat"));
 
         final SaveFormat saveFormat = new SaveFormat(worldDirectory.getParent(), worldDirectory.getParent().getParent().resolve("backups"),
                 this.server.getDataFixer());
@@ -609,12 +612,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 } else {
                     if (defaultSettings == null) {
                         defaultSettings = this.createDefaultSettings(defaultSettings, isDefaultWorld, seed, type, generatorOptions);
-                        if (isDefaultWorld) {
-                            defaultSettings.setGeneratorOptions(generatorOptions);
-                            if (((MinecraftServerAccessor_Vanilla) this.server).accessor$getEnableBonusChest()) {
-                                defaultSettings.enableBonusChest();
-                            }
-                        }
                     }
 
                     worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? saveName : this.getDirectoryName(key));
@@ -797,7 +794,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         // Pure fresh Vanilla worlds situation (plugins registering worlds to load before now *must* give us an archetype)
         if (providedSettings == null) {
             if (this.server.isDemo()) {
-                return MinecraftServer.DEMO_WORLD_SETTINGS;
+                providedSettings = MinecraftServer.DEMO_WORLD_SETTINGS;
             } else {
                 providedSettings =
                         new WorldSettings(seed, this.server.getGameType(), this.server.canStructuresSpawn(), this.server.isHardcore(), worldType);
