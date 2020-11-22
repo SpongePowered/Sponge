@@ -96,17 +96,18 @@ public class MapInfoData {
 					.get(mapData -> {
 						final int id = ((MapDataBridge)mapData).bridge$getMapId();
 						if (mapData.dimension == null) {
-							LogManager.getLogger().error("Map with id: {}, uuid: {} has an null world. This will probably cause more errors later/on save", id, ((MapInfo)mapData).getUniqueId());
+							LogManager.getLogger().error("Map with id: {}, uuid: {}. This will probably cause more errors later/on save", id, ((MapInfo)mapData).getUniqueId());
 							return null;
 						}
-						return ((ResourceKeyBridge)mapData.dimension).bridge$getKey();
+						ResourceKey key = ((ResourceKeyBridge)mapData.dimension).bridge$getKey();
+						@Nullable World world = Sponge.getServer().getWorldManager().getWorld(key).orElse(null);
+						if (world == null) {
+							LogManager.getLogger().warn("Map with id: {}, uuid {}, has world: '" + key + "' but that world does not exist (anymore?)", id, ((MapInfo)mapData).getUniqueId());
+						}
+						return null;
 					})
-					.set((mapData, key) -> {
-						mapData.dimension = Sponge.getServer().getWorldManager().getWorld(key)
-								.map(world -> (ServerWorld)world)
-								.map(serverWorld -> serverWorld.getDimension().getType())
-								.orElseThrow(() -> new IllegalArgumentException("Invalid resource key specified - Did not correspond to a world!"));
-
+					.set((mapData, world) -> {
+						mapData.dimension = ((ServerWorld)world).getDimension().getType();
 						mapData.markDirty();
 					})
 				.build(MapData.class);
