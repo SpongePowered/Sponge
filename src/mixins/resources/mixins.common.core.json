@@ -136,7 +136,8 @@
         "world.spawner.AbstractSpawnerMixin",
         "world.storage.SaveHandlerMixin",
         "world.storage.WorldInfoMixin",
-        "server.management.PlayerInteractionManagerMixin"
+        "server.management.PlayerInteractionManagerMixin",
+        "scoreboard.ServerScoreboardMixin"
     ],
     "client": [
         "client.MinecraftMixin",

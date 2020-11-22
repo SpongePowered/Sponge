@@ -120,9 +120,6 @@ public interface ServerPlayerEntityBridge {
     User bridge$getUser();
 
     @Nullable
-    ServerPlayerEntity bridge$getDelegate();
-
-    @Nullable
     Vector3d bridge$getVelocityOverride();
 
     @Nullable ITextComponent bridge$getConnectionMessageToSend();
