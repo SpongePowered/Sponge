@@ -42,6 +42,7 @@ import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.network.play.client.CTabCompletePacket;
 import net.minecraft.network.play.client.CUseEntityPacket;
 import net.minecraft.network.play.server.STabCompletePacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -68,6 +69,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
@@ -97,6 +99,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     @Shadow @Final public NetworkManager netManager;
     @Shadow public ServerPlayerEntity player;
 
+    @Shadow @Final private MinecraftServer server;
     @Nullable private Vector3d impl$lastMovePosition = null;
     @Nullable private Entity impl$targetedEntity = null;
 
@@ -324,6 +327,19 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             locals = LocalCapture.CAPTURE_FAILHARD
     )
     public void impl$onLeftClickEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
+        final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
+                this.player.getHeldItem(this.player.getActiveHand()), entity, this.player.getActiveHand(), null);
+        if (event.isCancelled()) {
+            ci.cancel();
+        }
+    }
+
+    /**
+     * In production, the ServerWorld is lost.
+     */
+    @SuppressWarnings("Duplicates")
+    @Surrogate
+    public void impl$onLeftClickEntity(CUseEntityPacket packetIn, CallbackInfo ci, Entity entity) {
         final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
                 this.player.getHeldItem(this.player.getActiveHand()), entity, this.player.getActiveHand(), null);
         if (event.isCancelled()) {
