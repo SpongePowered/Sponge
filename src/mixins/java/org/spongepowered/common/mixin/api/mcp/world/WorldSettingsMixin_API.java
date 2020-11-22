@@ -107,7 +107,7 @@ public abstract class WorldSettingsMixin_API implements WorldArchetype {
 
     @Override
     public Difficulty getDifficulty() {
-        return ((WorldSettingsBridge) this).bridge$getDifficulty();
+        return (Difficulty) (Object) ((WorldSettingsBridge) this).bridge$getDifficulty();
     }
 
     @Override

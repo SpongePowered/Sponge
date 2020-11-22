@@ -275,7 +275,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         final WorldSettingsBridge settingsBridge = (WorldSettingsBridge) (Object) settings;
         ((ResourceKeyBridge) (Object) settings).bridge$setKey(this.key);
         settingsBridge.bridge$setLogicType(this.dimensionType);
-        settingsBridge.bridge$setDifficulty(this.difficulty);
+        settingsBridge.bridge$setDifficulty((net.minecraft.world.Difficulty) (Object) this.difficulty);
         settingsBridge.bridge$setSerializationBehavior(this.serializationBehavior);
         settingsBridge.bridge$setGeneratorSettings(this.generatorSettings);
         settingsBridge.bridge$setEnabled(this.enabled);

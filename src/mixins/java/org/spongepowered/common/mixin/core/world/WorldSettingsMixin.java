@@ -25,14 +25,13 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.google.gson.JsonElement;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.WorldSettings;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.difficulty.Difficulties;
-import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
+import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
@@ -54,8 +54,8 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Shadow private boolean bonusChestEnabled;
 
     @Nullable private ResourceKey impl$key;
-    private SpongeDimensionType impl$logicType;
-    private Difficulty impl$difficulty;
+    private SpongeDimensionType impl$logicType = ((DimensionTypeBridge) DimensionType.OVERWORLD).bridge$getSpongeDimensionType();
+    private Difficulty impl$difficulty = Difficulty.NORMAL;
     private SerializationBehavior impl$serializationBehavior = SerializationBehavior.AUTOMATIC;
     private DataContainer impl$generatorSettings = DataContainer.createNew();
     private boolean impl$isEnabled = true;
@@ -209,7 +209,7 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
         this.impl$keepSpawnLoaded = properties.doesKeepSpawnLoaded();
         this.bonusChestEnabled = properties.doesGenerateBonusChest();
         this.impl$serializationBehavior = properties.getSerializationBehavior();
-        this.impl$difficulty = properties.getDifficulty();
+        this.impl$difficulty = (Difficulty) (Object) properties.getDifficulty();
         this.impl$pvpEnabled = properties.isPVPEnabled();
         this.impl$generatorSettings = properties.getGeneratorSettings();
     }
