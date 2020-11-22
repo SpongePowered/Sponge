@@ -137,6 +137,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected abstract void shadow$damageArmor(float damage);
     // @formatter:on
 
+    @Shadow public abstract ItemStack shadow$getHeldItem(Hand hand);
+
     private int impl$maxAir = this.shadow$getMaxAir();
     @Nullable private ItemStack impl$activeItemStackCopy;
     @Nullable private Vector3d impl$preTeleportPosition;

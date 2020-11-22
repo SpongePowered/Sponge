@@ -223,17 +223,4 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
 
         return itemEntity;
     }
-
-    @Inject(method = "interactOn", at = @At(value = "HEAD"), cancellable = true)
-    public void onRightClickEntity(final Entity entityToInteractOn, final Hand hand, final CallbackInfoReturnable<ActionResultType> cir) {
-        if (!((PlayerEntity) (Object) this instanceof ServerPlayerEntity)) {
-            return;
-        }
-
-        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary((ServerPlayerEntity) (Object) this, this.getHeldItem(hand), entityToInteractOn, hand, null);
-        if (event.isCancelled()) {
-            cir.setReturnValue(ActionResultType.FAIL);
-        }
-    }
-
 }

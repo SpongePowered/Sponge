@@ -48,6 +48,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.NetworkTagManager;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.CachedBlockInfo;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
@@ -78,6 +79,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.ModifierFunction;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -147,26 +149,62 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Shadow public abstract void shadow$addStat(Stat<?> stat);
     @Shadow public abstract void shadow$addStat(ResourceLocation stat, int amount);
     @Shadow public abstract void shadow$addExhaustion(float exhaustion);
+    
     // @formatter: on
-
 
     private boolean impl$affectsSpawning = true;
     private Vector3d impl$targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
     private boolean impl$shouldRestoreInventory = false;
     protected final boolean impl$isFake = SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this);
 
-    @Redirect(method = "getDisplayName", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getName()Lnet/minecraft/util/text/ITextComponent;"))
-    private ITextComponent impl$useCustomNameIfSet(final PlayerEntity playerEntity) {
-        if (playerEntity instanceof ServerPlayerEntity) {
-            if (playerEntity.hasCustomName()) {
-                return playerEntity.getCustomName();
-            }
-
-            return playerEntity.getName();
-        }
-
-        return playerEntity.getName();
+    @Override
+    public boolean bridge$affectsSpawning() {
+        return this.impl$affectsSpawning && !this.shadow$isSpectator() && !this.bridge$isUntargetable();
     }
+
+    @Override
+    public void bridge$setAffectsSpawning(final boolean affectsSpawning) {
+        this.impl$affectsSpawning = affectsSpawning;
+    }
+
+    @Override
+    public Vector3d bridge$getTargetedLocation() {
+        return this.impl$targetedLocation;
+    }
+
+    @Override
+    public void bridge$setTargetedLocation(@Nullable final Vector3d vec) {
+        this.impl$targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.getSpawnPoint());
+        //noinspection ConstantConditions
+        if (!((PlayerEntity) (Object) this instanceof ServerPlayerEntity)) {
+            this.world.setSpawnPoint(VecHelper.toBlockPos(this.impl$targetedLocation));
+        }
+    }
+
+    @Override
+    public void bridge$shouldRestoreInventory(final boolean restore) {
+        this.impl$shouldRestoreInventory = restore;
+    }
+
+    @Override
+    public boolean bridge$shouldRestoreInventory() {
+        return this.impl$shouldRestoreInventory;
+    }
+
+    @Override
+    public GameProfile bridge$getGameProfile() {
+        return this.gameProfile;
+    }
+
+/*
+    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
+    private List<Entity> impl$ignoreOtherEntitiesWhenUncollideable(final World world, Entity entityIn, AxisAlignedBB bb) {
+        if (this.bridge$isUncollideable()) {
+            return Collections.emptyList();
+        }
+        return world.getEntitiesWithinAABBExcludingEntity(entityIn, bb);
+    }
+*/
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void impl$getDisplayNameWithParsing(final CallbackInfoReturnable<ITextComponent> ci) {
@@ -200,6 +238,19 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         return false;
     }
 
+    @Redirect(method = "getDisplayName", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getName()Lnet/minecraft/util/text/ITextComponent;"))
+    private ITextComponent impl$useCustomNameIfSet(final PlayerEntity playerEntity) {
+        if (playerEntity instanceof ServerPlayerEntity) {
+            if (playerEntity.hasCustomName()) {
+                return playerEntity.getCustomName();
+            }
+
+            return playerEntity.getName();
+        }
+
+        return playerEntity.getName();
+    }
+
     /**
      * @author gabizou - January 4th, 2016
      * @author i509VCB - January 17th, 2020 - 1.14.4
@@ -218,39 +269,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         return ((Subject) this).hasPermission(Constants.Permissions.COMMAND_BLOCK_PERMISSION) ? Constants.Permissions.COMMAND_BLOCK_LEVEL : 0;
     }
 
-    @Override
-    public boolean bridge$affectsSpawning() {
-        return this.impl$affectsSpawning && !this.shadow$isSpectator() && !this.bridge$isUntargetable();
-    }
-
-    @Override
-    public void bridge$setAffectsSpawning(final boolean affectsSpawning) {
-        this.impl$affectsSpawning = affectsSpawning;
-    }
-
-    @Override
-    public Vector3d bridge$getTargetedLocation() {
-        return this.impl$targetedLocation;
-    }
-
-    @Override
-    public void bridge$setTargetedLocation(@Nullable final Vector3d vec) {
-        this.impl$targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.getSpawnPoint());
-        //noinspection ConstantConditions
-        if (!((PlayerEntity) (Object) this instanceof ServerPlayerEntity)) {
-            this.world.setSpawnPoint(VecHelper.toBlockPos(this.impl$targetedLocation));
-        }
-    }
-
-/*
-    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
-    private List<Entity> impl$ignoreOtherEntitiesWhenUncollideable(final World world, Entity entityIn, AxisAlignedBB bb) {
-        if (this.bridge$isUncollideable()) {
-            return Collections.emptyList();
-        }
-        return world.getEntitiesWithinAABBExcludingEntity(entityIn, bb);
-    }
-*/
     /**
      * @author gabizou - September 4th, 2018
      * @author i509VCB - February 17th, 2020 - 1.14.4
@@ -260,13 +278,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      * changes are cancelled, but inventory is already modified. It would
      * be considered that during interaction packets, inventory is monitored,
      * however, sometimes that isn't enough.
-     *
-     * @param stack The item stack in use
-     * @param tagManager The tag manager
-     * @param cachedBlockInfo The cached block info.
-     * @param pos The target position
-     * @param facing The facing direction of the player
-     * @param sameStack The very same stack as the first parameter
      * @return Check if the player is a fake player, if it is, then just do
      *  the same return, otherwise, throw an event first and then return if the
      *  event is cancelled, or the stack.canPlaceOn
@@ -274,7 +285,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Redirect(method = "canPlayerEdit",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/item/ItemStack;canPlaceOn(Lnet/minecraft/tags/NetworkTagManager;Lnet/minecraft/util/CachedBlockInfo;)Z"))
-    private boolean impl$canEditSpongeThrowChangePreEvent(
+    private boolean impl$callChangeBlockPre(
         final ItemStack stack, final NetworkTagManager tagManager, final CachedBlockInfo cachedBlockInfo, final BlockPos pos, final Direction facing, final ItemStack sameStack) {
         // Lazy evaluation, if the stack isn't placeable anyways, might as well not
         // call the logic.
@@ -308,31 +319,11 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      * @reason Reverts the method to flow through our systems, Forge patches
      * this to throw an ItemTossEvent, but we'll be throwing it regardless in
      * SpongeForge's handling.
-     *
-     * @param itemStackIn
-     * @param unused
-     * @return
      */
     @Overwrite
     @Nullable
     public ItemEntity dropItem(final ItemStack itemStackIn, final boolean unused) {
         return this.shadow$dropItem(itemStackIn, false, false);
-    }
-
-
-    @Override
-    public void bridge$shouldRestoreInventory(final boolean restore) {
-        this.impl$shouldRestoreInventory = restore;
-    }
-
-    @Override
-    public boolean bridge$shouldRestoreInventory() {
-        return this.impl$shouldRestoreInventory;
-    }
-
-    @Override
-    public GameProfile bridge$getGameProfile() {
-        return this.gameProfile;
     }
 
     @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
@@ -342,10 +333,24 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         }
     }
 
+    @Inject(method = "interactOn", at = @At(value = "HEAD"), cancellable = true)
+    public void onRightClickEntity(final Entity entityToInteractOn, final Hand hand, final CallbackInfoReturnable<ActionResultType> cir) {
+        if (!((PlayerEntity) (Object) this instanceof ServerPlayerEntity)) {
+            return;
+        }
+
+        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary((ServerPlayerEntity) (Object) this,
+                this.shadow$getHeldItem(hand), entityToInteractOn, hand, null);
+        if (event.isCancelled()) {
+            cir.setReturnValue(ActionResultType.FAIL);
+        }
+    }
+
     /*    @Override
     public boolean impl$isImmuneToFireForIgniteEvent() {
         return this.shadow$isSpectator() || this.shadow$isCreative();
     }*/
+
     /**
      * @author gabizou - April 8th, 2016
      * @author gabizou - April 11th, 2016 - Update for 1.9 - This enitre method was rewritten
@@ -479,7 +484,9 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                     }
 
                     damage = (float) event.getFinalOutputDamage();
-                    // sponge - need final for later events
+                    // Sponge End
+
+                    // Sponge Start - need final for later events
                     final double attackDamage = damage;
                     knockbackModifier = (int) event.getKnockbackModifier();
                     enchantmentDamage = (float) enchantmentModifiers.stream()
@@ -634,5 +641,4 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
             }
         }
     }
-
 }
