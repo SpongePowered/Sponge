@@ -32,7 +32,6 @@ import org.spongepowered.api.util.Color;
 public class SpongeMapColorType implements MapColorType {
     private final ResourceKey resourceKey;
     private final int colorIndex;
-    private ResourceKey key;
 
 
     public SpongeMapColorType(ResourceKey resourceKey, int colorIndex) {
@@ -51,6 +50,6 @@ public class SpongeMapColorType implements MapColorType {
 
     @Override
     public ResourceKey getKey() {
-        return this.key;
+        return this.resourceKey;
     }
 }

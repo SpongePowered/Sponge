@@ -50,7 +50,8 @@ public class SpongeMapByteCanvas implements SpongeMapCanvas {
     }
 
     public void applyToMapData(MapData mapData) {
-        mapData.colors = canvas;
+        mapData.colors = canvas.clone();
+        mapData.markDirty();
     }
 
     @Override

@@ -26,7 +26,10 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.ServerWorld;
+import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.common.SpongeCommon;
@@ -34,6 +37,7 @@ import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class MapInfoItemStackData {
@@ -43,9 +47,16 @@ public class MapInfoItemStackData {
 				.asMutable(ItemStack.class)
 					.create(Keys.MAP_INFO)
 						.supports(item -> item.getItem() instanceof FilledMapItem)
-						.get(itemStack -> (MapInfo) SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD)
+						.get(itemStack -> itemStack.getTag() == null ? null : (MapInfo) SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD)
 								.getMapData(Constants.Map.MAP_PREFIX + itemStack.getTag().getInt("map"))) // Nullable
-						.set((itemStack, mapInfo) -> itemStack.getTag().putInt("map", ((MapDataBridge)mapInfo).bridge$getMapId()));
+						.set((itemStack, mapInfo) -> {
+							@Nullable CompoundNBT nbt = itemStack.getTag();
+							if (nbt == null) {
+								nbt = new CompoundNBT();
+							}
+							nbt.putInt("map", ((MapDataBridge)mapInfo).bridge$getMapId());
+							itemStack.setTag(nbt);
+						});
 	}
 	// @formatter:on
 }

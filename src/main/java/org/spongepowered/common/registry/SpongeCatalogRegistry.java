@@ -142,6 +142,10 @@ import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.query.QueryType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeType;
+import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.map.color.MapShade;
+import org.spongepowered.api.map.decoration.MapDecorationType;
+import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.registry.CatalogRegistry;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -197,6 +201,10 @@ import org.spongepowered.common.registry.builtin.sponge.HorseStyleStreamGenerato
 import org.spongepowered.common.registry.builtin.sponge.IAttributeTypeRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.KeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.LlamaTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.MapColorTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.MapDecorationOrientationStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.MapDecorationTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.MapShadeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MovementTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
@@ -593,10 +601,10 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(StringDataFormat.class, ResourceKey.sponge("string_data_format"), Stream.of(new JsonDataFormat(ResourceKey.sponge("json")), new HoconDataFormat(ResourceKey.sponge("hocon"))), true, false)
             .generateRegistry(DataFormat.class, ResourceKey.sponge("data_format"), Stream.of(new NbtDataFormat(ResourceKey.sponge("nbt"))), true, false)
             .generateRegistry(TeleportHelperFilter.class, ResourceKey.sponge("teleport_helper_filter"), TeleportHelperFilterStreamGenerator.stream(), true, false)
-            //.generateRegistry(MapColorType.class, ResourceKey.sponge("map_color_type"), MapColorTypeStreamGenerator.stream(), true, false)
-            //.generateRegistry(MapDecorationOrientation.class, ResourceKey.sponge("map_decoration_orientation"), MapDecorationOrientationStreamGenerator.stream(), true, false)
-            //.generateRegistry(MapDecorationType.class, ResourceKey.sponge("map_decoration_type"), MapDecorationTypeStreamGenerator.stream(), true, false)
-            //.generateRegistry(MapShade.class, ResourceKey.sponge("map_shade"), MapShadeStreamGenerator.stream(), true, false)
+            .generateRegistry(MapColorType.class, ResourceKey.sponge("map_color_type"), MapColorTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(MapDecorationOrientation.class, ResourceKey.sponge("map_decoration_orientation"), MapDecorationOrientationStreamGenerator.stream(), true, false)
+            .generateRegistry(MapDecorationType.class, ResourceKey.sponge("map_decoration_type"), MapDecorationTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(MapShade.class, ResourceKey.sponge("map_shade"), MapShadeStreamGenerator.stream(), true, false)
         ;
 
         this

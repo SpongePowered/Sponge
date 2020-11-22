@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
+import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.api.util.Tuple;
@@ -41,31 +42,31 @@ public class MapDecorationOrientationStreamGenerator {
 		return Optional.ofNullable(MapDecorationOrientationStreamGenerator.ORIENTATION_MAP.get(rot));
 	}
 
-	public static Stream<Tuple<MapDecorationOrientation, Integer>> stream() {
+	public static Stream<MapDecorationOrientation> stream() {
 		return Stream.of(
-				makeTupleAndRegister("south",				0),
-				makeTupleAndRegister("south_southwest",		1),
-				makeTupleAndRegister("southwest",			2),
-				makeTupleAndRegister("west_southwest",		3),
-				makeTupleAndRegister("west",				4),
-				makeTupleAndRegister("west_northwest",		5),
-				makeTupleAndRegister("northwest",			6),
-				makeTupleAndRegister("north_northwest",		7),
-				makeTupleAndRegister("north",				8),
-				makeTupleAndRegister("north_northeast",		9),
-				makeTupleAndRegister("northeast",			10),
-				makeTupleAndRegister("east_northeast",		11),
-				makeTupleAndRegister("east",				12),
-				makeTupleAndRegister("east_southeast",		13),
-				makeTupleAndRegister("southeast",			14),
-				makeTupleAndRegister("south_southeast",		15)
+				register("south",				0),
+				register("south_southwest",		1),
+				register("southwest",			2),
+				register("west_southwest",		3),
+				register("west",				4),
+				register("west_northwest",		5),
+				register("northwest",			6),
+				register("north_northwest",		7),
+				register("north",				8),
+				register("north_northeast",		9),
+				register("northeast",			10),
+				register("east_northeast",		11),
+				register("east",				12),
+				register("east_southeast",		13),
+				register("southeast",			14),
+				register("south_southeast",		15)
 		);
 	}
 
-	private static Tuple<MapDecorationOrientation, Integer> makeTupleAndRegister(final String id, final int orientationNumber) {
+	private static MapDecorationOrientation register(final String id, final int orientationNumber) {
 		MapDecorationOrientation orientation = new SpongeMapDecorationOrientation(ResourceKey.sponge(id), orientationNumber);
 		MapDecorationOrientationStreamGenerator.ORIENTATION_MAP.put(orientationNumber, orientation);
 
-		return Tuple.of(orientation, orientationNumber);
+		return orientation;
 	}
 }

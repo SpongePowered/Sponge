@@ -44,7 +44,6 @@ public class MapDecorationMixin implements MapDecorationBridge {
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void impl$setPersistenceOnInit(MapDecoration.Type typeIn, byte x, byte y, byte rot, ITextComponent name, CallbackInfo ci) {
-		if (true) return;
 		// All of the below types have no reason to be saved to disk
 		// This is because they can/should be calculated when needed
 		// Furthermore if a sponge plugin adds a MapDecoration, isPersistent

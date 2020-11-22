@@ -32,12 +32,17 @@ import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapIdTracker;
+import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.CreateMapEvent;
@@ -56,6 +61,7 @@ import org.spongepowered.common.registry.builtin.sponge.MapShadeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -68,17 +74,27 @@ public final class MapUtil {
      * @return MapInfo if event was not cancelled
      */
     public static Optional<MapInfo> fireCreateMapEvent(final Cause cause) {
+        return MapUtil.fireCreateMapEvent(cause, Collections.emptySet());
+    }
+
+    public static Optional<MapInfo> fireCreateMapEvent(final Cause cause, Set<Value<?>> values) {
+        LogManager.getLogger().info("in fireCreateMapEvent!");
         final ServerWorld defaultWorld = SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD);
         final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getSavedData().getOrCreate(MapIdTracker::new, "idcounts");
 
         final int id = mapIdTrackerBridge.bridge$getHighestMapId()
-                .map(i -> i++)
+                .map(i -> ++i)
                 .orElse(0);
 
         final String s = Constants.Map.MAP_PREFIX + id;
         final MapData mapData = new MapData(s);
+        mapData.dimension = DimensionType.OVERWORLD; // Set default to prevent NPEs
 
         final MapInfo mapInfo = (MapInfo) mapData;
+
+        for (Value<?> value : values) {
+            mapInfo.offer(value);
+        }
 
         final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
         SpongeCommon.postEvent(event);
@@ -86,14 +102,10 @@ public final class MapUtil {
             return Optional.empty();
         }
 
-        // Call getUniqueDataId to advance the map ids.
-
-
-
+        // Advance map id.
         final int mcId = defaultWorld.getNextMapId();
         if (id != mcId) {
             // TODO: REMOVE OR replace for Integer.MAX_VALUE
-            // Short has overflown.
             SpongeCommon.getLogger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! Expected next number was not equal to the true next number.");
             SpongeCommon.getLogger().warn("Expected: " + id + ". Got: " + mcId);
             SpongeCommon.getLogger().warn("Automatically cancelling map creation");

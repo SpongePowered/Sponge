@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.world.storage.MapDecoration;
+import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
@@ -46,50 +47,50 @@ public class MapDecorationTypeStreamGenerator {
 		return Optional.ofNullable(MapDecorationTypeStreamGenerator.MC_TYPE_MAPPER.get(type));
 	}
 
-	public static Stream<Tuple<MapDecorationType, MapDecoration.Type>> stream() {
+	public static Stream<MapDecorationType> stream() {
 		return Stream.of(
-				makeTupleAndAddToRegistry(MapDecoration.Type.PLAYER),
-				makeTupleAndAddToRegistry(MapDecoration.Type.FRAME),
-				makeTupleAndAddToRegistry(MapDecoration.Type.RED_MARKER),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BLUE_MARKER),
-				makeTupleAndAddToRegistry(MapDecoration.Type.TARGET_X),
-				makeTupleAndAddToRegistry(MapDecoration.Type.TARGET_POINT),
-				makeTupleAndAddToRegistry(MapDecoration.Type.PLAYER_OFF_MAP),
-				makeTupleAndAddToRegistry(MapDecoration.Type.PLAYER_OFF_LIMITS),
-				makeTupleAndAddToRegistry(MapDecoration.Type.MANSION),
-				makeTupleAndAddToRegistry(MapDecoration.Type.MONUMENT),
+				addToRegistry(MapDecoration.Type.PLAYER),
+				addToRegistry(MapDecoration.Type.FRAME),
+				addToRegistry(MapDecoration.Type.RED_MARKER),
+				addToRegistry(MapDecoration.Type.BLUE_MARKER),
+				addToRegistry(MapDecoration.Type.TARGET_X),
+				addToRegistry(MapDecoration.Type.TARGET_POINT),
+				addToRegistry(MapDecoration.Type.PLAYER_OFF_MAP),
+				addToRegistry(MapDecoration.Type.PLAYER_OFF_LIMITS),
+				addToRegistry(MapDecoration.Type.MANSION),
+				addToRegistry(MapDecoration.Type.MONUMENT),
 
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_WHITE, 		DyeColors.WHITE),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_ORANGE, 	DyeColors.ORANGE),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_MAGENTA, 	DyeColors.MAGENTA),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_LIGHT_BLUE, DyeColors.LIGHT_BLUE),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_YELLOW, 	DyeColors.YELLOW),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_LIME, 		DyeColors.LIME),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_PINK, 		DyeColors.PINK),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_GRAY, 		DyeColors.GRAY),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_LIGHT_GRAY, DyeColors.LIGHT_GRAY),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_CYAN, 		DyeColors.CYAN),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_PURPLE, 	DyeColors.PURPLE),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_BLUE, 		DyeColors.BLUE),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_BROWN, 		DyeColors.BROWN),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_GREEN, 		DyeColors.GREEN),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_RED, 		DyeColors.RED),
-				makeTupleAndAddToRegistry(MapDecoration.Type.BANNER_BLACK, 		DyeColors.BLACK),
+				addToRegistry(MapDecoration.Type.BANNER_WHITE, 		DyeColors.WHITE),
+				addToRegistry(MapDecoration.Type.BANNER_ORANGE, 	DyeColors.ORANGE),
+				addToRegistry(MapDecoration.Type.BANNER_MAGENTA, 	DyeColors.MAGENTA),
+				addToRegistry(MapDecoration.Type.BANNER_LIGHT_BLUE, DyeColors.LIGHT_BLUE),
+				addToRegistry(MapDecoration.Type.BANNER_YELLOW, 	DyeColors.YELLOW),
+				addToRegistry(MapDecoration.Type.BANNER_LIME, 		DyeColors.LIME),
+				addToRegistry(MapDecoration.Type.BANNER_PINK, 		DyeColors.PINK),
+				addToRegistry(MapDecoration.Type.BANNER_GRAY, 		DyeColors.GRAY),
+				addToRegistry(MapDecoration.Type.BANNER_LIGHT_GRAY, DyeColors.LIGHT_GRAY),
+				addToRegistry(MapDecoration.Type.BANNER_CYAN, 		DyeColors.CYAN),
+				addToRegistry(MapDecoration.Type.BANNER_PURPLE, 	DyeColors.PURPLE),
+				addToRegistry(MapDecoration.Type.BANNER_BLUE, 		DyeColors.BLUE),
+				addToRegistry(MapDecoration.Type.BANNER_BROWN, 		DyeColors.BROWN),
+				addToRegistry(MapDecoration.Type.BANNER_GREEN, 		DyeColors.GREEN),
+				addToRegistry(MapDecoration.Type.BANNER_RED, 		DyeColors.RED),
+				addToRegistry(MapDecoration.Type.BANNER_BLACK, 		DyeColors.BLACK),
 
-				makeTupleAndAddToRegistry(MapDecoration.Type.RED_X)
+				addToRegistry(MapDecoration.Type.RED_X)
 		);
 	}
 
-	private static Tuple<MapDecorationType, MapDecoration.Type> makeTupleAndAddToRegistry(final MapDecoration.Type type) {
+	private static MapDecorationType addToRegistry(final MapDecoration.Type type) {
 		SpongeMapDecorationType mapDecorationType = new SpongeMapDecorationType(ResourceKey.minecraft(type.name().toLowerCase()), type);
 		addToRegistry(mapDecorationType);
-		return Tuple.of(mapDecorationType, type);
+		return mapDecorationType;
 	}
 
-	private static Tuple<MapDecorationType, MapDecoration.Type> makeTupleAndAddToRegistry(final MapDecoration.Type type, final Supplier<DyeColor> dyeColor) {
+	private static MapDecorationType addToRegistry(final MapDecoration.Type type, final Supplier<DyeColor> dyeColor) {
 		SpongeMapDecorationType mapDecorationType = new SpongeMapDecorationBannerType(ResourceKey.minecraft(type.name().toLowerCase()), type, dyeColor);
 		addToRegistry(mapDecorationType);
-		return Tuple.of(mapDecorationType, type);
+		return mapDecorationType;
 	}
 
 	private static void addToRegistry(final SpongeMapDecorationType type) {
