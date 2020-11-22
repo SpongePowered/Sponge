@@ -34,7 +34,6 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.map.decoration.MapDecorationType;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
-import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.map.MapUtil;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.registry.builtin.sponge.MapDecorationOrientationStreamGenerator;
@@ -157,11 +156,9 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     public MapDecoration build() throws IllegalStateException {
         Preconditions.checkNotNull(this.type, "Type has not been set");
         Preconditions.checkNotNull(this.rot, "Rotation has not been set");
-        MapDecoration decoration = (MapDecoration) new net.minecraft.world.storage.MapDecoration(
+        return (MapDecoration) new net.minecraft.world.storage.MapDecoration(
                 ((SpongeMapDecorationType)type).getType(),
                 (byte)this.x, (byte)this.y, (byte) ((SpongeMapDecorationOrientation)this.rot).getOrientationNumber(),
                 (ITextComponent) this.customName);
-        ((MapDecorationBridge)decoration).bridge$setPersistent(true); // Anything that comes out of this builder should be persistent
-        return decoration;
     }
 }

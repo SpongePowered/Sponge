@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world.storage;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.world.storage.MapDecoration;
-import net.minecraft.world.storage.WorldSavedData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,7 +49,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Mixin(net.minecraft.world.storage.MapData.class)
-public abstract class MapDataMixin extends WorldSavedData implements MapDataBridge {
+public abstract class MapDataMixin implements MapDataBridge {
     /*
      * Lots of possible String formats:
      *  - Player name
@@ -71,10 +70,6 @@ public abstract class MapDataMixin extends WorldSavedData implements MapDataBrid
     private int impl$mapId = 0;
     private UUID impl$uuid = UUID.randomUUID();
 
-    public MapDataMixin(final String name) {
-        super(name);
-    }
-
     @Override
     public void bridge$updateWholeMap() {
         this.shadow$updateMapData(0,0);
@@ -87,7 +82,6 @@ public abstract class MapDataMixin extends WorldSavedData implements MapDataBrid
         newDecorations.stream()
                 .map(decoration -> (MapDecoration)decoration)
                 .forEach(this::impl$addDecorationToDecorationsMap);
-        this.markDirty();
     }
 
     @Override
@@ -143,7 +137,7 @@ public abstract class MapDataMixin extends WorldSavedData implements MapDataBrid
 
     @Inject(method = "read", at = @At("RETURN"))
     public void impl$readAdditionalNBT(final CompoundNBT nbt, final CallbackInfo ci) {
-        if (nbt.hasUniqueId(Constants.Map.SPONGE_UUID_KEY)) {
+        if (nbt.contains(Constants.Map.SPONGE_UUID_KEY)) {
             this.impl$uuid = nbt.getUniqueId(Constants.Map.SPONGE_UUID_KEY);
         }
         final ListNBT decorationsList = ((ListNBT)nbt.get(Constants.Map.DECORATIONS_KEY));
@@ -156,10 +150,7 @@ public abstract class MapDataMixin extends WorldSavedData implements MapDataBrid
     }
 
     public void impl$addDecorationToDecorationsMap(final MapDecoration mapDecoration) {
-        MapDecorationBridge bridge = (MapDecorationBridge)mapDecoration;
-        bridge.bridge$setPersistent(true); // Anything saved should be persistent so it can save next time too.
-        this.mapDecorations.put(bridge.bridge$getKey(), mapDecoration);
-        this.markDirty();
+        this.mapDecorations.put(((MapDecorationBridge)mapDecoration).bridge$getKey(), mapDecoration);
     }
 
     @Nullable

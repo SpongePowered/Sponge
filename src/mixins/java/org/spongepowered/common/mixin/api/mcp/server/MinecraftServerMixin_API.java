@@ -77,7 +77,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduler;
@@ -120,7 +119,6 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
     private SpongeUserManager api$userManager;
-    private MapStorage api$mapStorage;
 
     public MinecraftServerMixin_API(final String name) {
         super(name);
@@ -135,7 +133,6 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
         this.api$userManager = new SpongeUserManager(this);
-        this.api$mapStorage = new SpongeMapStorage();
     }
 
     @Override
@@ -348,6 +345,6 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public MapStorage getMapStorage() {
-        return this.api$mapStorage;
+        return null;
     }
 }

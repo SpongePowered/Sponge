@@ -25,12 +25,12 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.block.material.MaterialColor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.color.MapColorType;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.map.color.SpongeMapColorType;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -38,75 +38,67 @@ import java.util.stream.Stream;
 
 public class MapColorTypeStreamGenerator {
 	private static final Map<Integer, MapColorType> COLOR_INDEX_MAP = new HashMap<>();
-	private static final Logger logger = LogManager.getLogger(MapColorTypeStreamGenerator.class.getSimpleName());
 
-	public static Stream<MapColorType> stream() {
-		///////////////////////// ORDER MATTERS HERE ////////////////////
+	public static Stream<Tuple<MapColorType, MaterialColor>> stream() {
 		return Stream.of(
-				addToRegistry("air", 					MaterialColor.AIR),
-				addToRegistry("grass", 					MaterialColor.GRASS),
-				addToRegistry("sand", 					MaterialColor.SAND),
-				addToRegistry("wool", 					MaterialColor.WOOL),
-				addToRegistry("tnt", 					MaterialColor.TNT),
-				addToRegistry("ice", 					MaterialColor.ICE),
-				addToRegistry("iron", 					MaterialColor.IRON),
-				addToRegistry("foliage", 				MaterialColor.FOLIAGE),
-				addToRegistry("snow", 					MaterialColor.SNOW),
-				addToRegistry("clay", 					MaterialColor.CLAY),
-				addToRegistry("dirt",					MaterialColor.DIRT),
-				addToRegistry("stone", 					MaterialColor.STONE),
-				addToRegistry("water", 					MaterialColor.WATER),
-				addToRegistry("wood", 					MaterialColor.WOOD),
-				addToRegistry("quartz", 				MaterialColor.QUARTZ),
-				addToRegistry("adobe", 					MaterialColor.ADOBE),
-				addToRegistry("magenta", 				MaterialColor.MAGENTA),
-				addToRegistry("light_blue",				MaterialColor.LIGHT_BLUE),
-				addToRegistry("yellow", 				MaterialColor.YELLOW),
-				addToRegistry("lime", 					MaterialColor.LIME),
-				addToRegistry("pink",					MaterialColor.PINK),
-				addToRegistry("gray", 					MaterialColor.GRAY),
-				addToRegistry("light_gray",				MaterialColor.LIGHT_GRAY),
-				addToRegistry("cyan", 					MaterialColor.CYAN),
-				addToRegistry("purple", 				MaterialColor.PURPLE),
-				addToRegistry("blue",	 				MaterialColor.BLUE),
-				addToRegistry("brown", 					MaterialColor.BROWN),
-				addToRegistry("green", 					MaterialColor.GREEN),
-				addToRegistry("red", 					MaterialColor.RED),
-				addToRegistry("black", 					MaterialColor.BLACK),
-				addToRegistry("gold", 					MaterialColor.GOLD),
-				addToRegistry("diamond", 				MaterialColor.DIAMOND),
-				addToRegistry("lapis_lazuli", 			MaterialColor.LAPIS),
-				addToRegistry("emerald", 				MaterialColor.EMERALD),
-				addToRegistry("obsidian", 				MaterialColor.OBSIDIAN),
-				addToRegistry("netherrack", 			MaterialColor.NETHERRACK),
-				addToRegistry("white_terracotta", 		MaterialColor.WHITE_TERRACOTTA),
-				addToRegistry("orange_terracotta", 		MaterialColor.ORANGE_TERRACOTTA),
-				addToRegistry("magenta_terracotta", 	MaterialColor.MAGENTA_TERRACOTTA),
-				addToRegistry("light_blue_terracotta", 	MaterialColor.LIGHT_BLUE_TERRACOTTA),
-				addToRegistry("yellow_terracotta", 		MaterialColor.YELLOW_TERRACOTTA),
-				addToRegistry("lime_terracotta", 		MaterialColor.LIME_TERRACOTTA),
-				addToRegistry("pink_terracotta", 		MaterialColor.PINK_TERRACOTTA),
-				addToRegistry("gray_terracotta", 		MaterialColor.GRAY_TERRACOTTA),
-				addToRegistry("light_gray_terracotta", 	MaterialColor.LIGHT_GRAY_TERRACOTTA),
-				addToRegistry("cyan_terracotta", 		MaterialColor.CYAN_TERRACOTTA),
-				addToRegistry("purple_terracotta", 		MaterialColor.PURPLE_TERRACOTTA),
-				addToRegistry("blue_terracotta", 		MaterialColor.BLUE_TERRACOTTA),
-				addToRegistry("brown_terracotta", 		MaterialColor.BROWN_TERRACOTTA),
-				addToRegistry("green_terracotta", 		MaterialColor.GREEN_TERRACOTTA),
-				addToRegistry("red_terracotta", 		MaterialColor.RED_TERRACOTTA),
-				addToRegistry("black_terracotta", 		MaterialColor.BLACK_TERRACOTTA)
+				makeTupleAndAddToRegistry("air", 					MaterialColor.AIR),
+				makeTupleAndAddToRegistry("grass", 					MaterialColor.GRASS),
+				makeTupleAndAddToRegistry("sand", 					MaterialColor.SAND),
+				makeTupleAndAddToRegistry("wool", 					MaterialColor.WOOL),
+				makeTupleAndAddToRegistry("tnt", 					MaterialColor.TNT),
+				makeTupleAndAddToRegistry("ice", 					MaterialColor.ICE),
+				makeTupleAndAddToRegistry("iron", 					MaterialColor.IRON),
+				makeTupleAndAddToRegistry("foliage", 				MaterialColor.FOLIAGE),
+				makeTupleAndAddToRegistry("snow", 					MaterialColor.SNOW),
+				makeTupleAndAddToRegistry("clay", 					MaterialColor.CLAY),
+				makeTupleAndAddToRegistry("stone", 					MaterialColor.STONE),
+				makeTupleAndAddToRegistry("water", 					MaterialColor.WATER),
+				makeTupleAndAddToRegistry("wood", 					MaterialColor.WOOD),
+				makeTupleAndAddToRegistry("quartz", 				MaterialColor.QUARTZ),
+				makeTupleAndAddToRegistry("adobe", 					MaterialColor.ADOBE),
+				makeTupleAndAddToRegistry("magenta", 				MaterialColor.MAGENTA),
+				makeTupleAndAddToRegistry("light_blue",				MaterialColor.LIGHT_BLUE),
+				makeTupleAndAddToRegistry("yellow", 				MaterialColor.YELLOW),
+				makeTupleAndAddToRegistry("pink", 					MaterialColor.LIME),
+				makeTupleAndAddToRegistry("gray", 					MaterialColor.GRAY),
+				makeTupleAndAddToRegistry("light_gray",				MaterialColor.LIGHT_GRAY),
+				makeTupleAndAddToRegistry("cyan", 					MaterialColor.CYAN),
+				makeTupleAndAddToRegistry("purple", 				MaterialColor.PURPLE),
+				makeTupleAndAddToRegistry("blue",	 				MaterialColor.BLUE),
+				makeTupleAndAddToRegistry("brown", 					MaterialColor.BROWN),
+				makeTupleAndAddToRegistry("green", 					MaterialColor.GREEN),
+				makeTupleAndAddToRegistry("red", 					MaterialColor.RED),
+				makeTupleAndAddToRegistry("black", 					MaterialColor.BLACK),
+				makeTupleAndAddToRegistry("gold", 					MaterialColor.GOLD),
+				makeTupleAndAddToRegistry("diamond", 				MaterialColor.DIAMOND),
+				makeTupleAndAddToRegistry("lapis_lazuli", 			MaterialColor.LAPIS),
+				makeTupleAndAddToRegistry("emerald", 				MaterialColor.EMERALD),
+				makeTupleAndAddToRegistry("obsidian", 				MaterialColor.OBSIDIAN),
+				makeTupleAndAddToRegistry("netherrack", 			MaterialColor.NETHERRACK),
+				makeTupleAndAddToRegistry("white_terracotta", 		MaterialColor.WHITE_TERRACOTTA),
+				makeTupleAndAddToRegistry("orange_terracotta", 		MaterialColor.ORANGE_TERRACOTTA),
+				makeTupleAndAddToRegistry("magenta_terracotta", 	MaterialColor.MAGENTA_TERRACOTTA),
+				makeTupleAndAddToRegistry("light_blue_terracotta", 	MaterialColor.LIGHT_BLUE_TERRACOTTA),
+				makeTupleAndAddToRegistry("yellow_terracotta", 		MaterialColor.YELLOW_TERRACOTTA),
+				makeTupleAndAddToRegistry("lime_terracotta", 		MaterialColor.LIME_TERRACOTTA),
+				makeTupleAndAddToRegistry("pink_terracotta", 		MaterialColor.PINK_TERRACOTTA),
+				makeTupleAndAddToRegistry("gray_terracotta", 		MaterialColor.GRAY_TERRACOTTA),
+				makeTupleAndAddToRegistry("light_gray_terracotta", 	MaterialColor.LIGHT_GRAY_TERRACOTTA),
+				makeTupleAndAddToRegistry("cyan_terracotta", 		MaterialColor.CYAN_TERRACOTTA),
+				makeTupleAndAddToRegistry("purple_terracotta", 		MaterialColor.PURPLE_TERRACOTTA),
+				makeTupleAndAddToRegistry("blue_terracotta", 		MaterialColor.BLUE_TERRACOTTA),
+				makeTupleAndAddToRegistry("brown_terracotta", 		MaterialColor.BROWN_TERRACOTTA),
+				makeTupleAndAddToRegistry("green_terracotta", 		MaterialColor.GREEN_TERRACOTTA),
+				makeTupleAndAddToRegistry("red_terracotta", 		MaterialColor.RED_TERRACOTTA),
+				makeTupleAndAddToRegistry("black_terracotta", 		MaterialColor.BLACK_TERRACOTTA)
 		);
 	}
 
-	private static MapColorType addToRegistry(final String id, final MaterialColor color) {
+	private static Tuple<MapColorType, MaterialColor> makeTupleAndAddToRegistry(final String id, final MaterialColor color) {
 		final SpongeMapColorType mapColorType = new SpongeMapColorType(ResourceKey.minecraft(id), color.colorIndex);
 		MapColorTypeStreamGenerator.COLOR_INDEX_MAP.put(mapColorType.getColorIndex(), mapColorType);
 
-		if (color.colorIndex != COLOR_INDEX_MAP.size() - 1) {
-			logger.error("Missing an color registry, expected color index: {} next, but got {}. This is most likely a bug, but continuing to allow for further diagnosis", COLOR_INDEX_MAP.size() - 1, color.colorIndex);
-		}
-
-		return mapColorType;
+		return Tuple.of(mapColorType, color);
 	}
 
 	/**

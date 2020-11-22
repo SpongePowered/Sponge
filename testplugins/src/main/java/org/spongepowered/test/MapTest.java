@@ -95,7 +95,7 @@ public class MapTest implements LoadableModule {
     @Inject
     public MapTest(final Logger logger) {
         this.logger = logger;
-        this.listeners = new Listeners(logger);
+        this.listeners = new Listeners();
     }
 
     @Listener
@@ -269,17 +269,13 @@ public class MapTest implements LoadableModule {
             if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
                 throw new CommandException(Component.text("You must hold a map in your hand"));
             }
-            player.sendMessage(Component.text("Getting mapInfo"));
             final MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
             mapInfo.offer(Keys.MAP_TRACKS_PLAYERS, true);
             final Set<MapDecoration> decorations = new HashSet<>();
             int x = Byte.MIN_VALUE;
             int y = Byte.MIN_VALUE;
 
-            Collection<MapDecorationOrientation> orientations = Sponge.getRegistry().getCatalogRegistry().getAllOf(MapDecorationOrientation.class);
-            player.sendMessage(Component.text("Number of orientations: " + orientations.size()));
-            player.sendMessage(Component.text("EAST: " + MapDecorationOrientations.EAST.get().getKey().toString()));
-            for (final MapDecorationOrientation dir : orientations) {
+            for (final MapDecorationOrientation dir : Sponge.getRegistry().getCatalogRegistry().getAllOf(MapDecorationOrientation.class)) {
                 decorations.add(
                         MapDecoration.builder()
                                 .type(MapDecorationTypes.RED_MARKER)
@@ -501,18 +497,14 @@ public class MapTest implements LoadableModule {
 
     public static class Listeners {
 
-        private final Logger logger;
-
-        public Listeners(Logger logger) {
-            this.logger = logger;
-        }
-
         @Listener
         public void onMapCreate(final CreateMapEvent event) {
-            logger.info("ON MAP CREATE EVENT");
             final MapInfo mapInfo = event.getMapInfo();
             mapInfo.offer(Keys.MAP_CANVAS, MapCanvas.builder()
-                    .paintAll(MapColor.of(MapColorTypes.BLUE))
+                    .paint(0,0,127, 127,
+                            MapColor.builder()
+                                    .baseColor(MapColorTypes.BLUE.get())
+                                    .build())
                     .build());
         }
     }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.registry.builtin.sponge;
 
 import net.minecraft.world.storage.MapDecoration;
-import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.decoration.MapDecorationType;
@@ -40,7 +39,7 @@ import java.util.stream.Stream;
 public class MapShadeStreamGenerator {
 	private static final Map<Integer, MapShade> REGISTRY_MAP = new HashMap<>();
 
-	public static Stream<MapShade> stream() {
+	public static Stream<Tuple<SpongeMapShade, Integer>> stream() {
 		return Stream.of(
 				addToRegistry(new SpongeMapShade(ResourceKey.sponge("darker"), 	0, 180)),
 				addToRegistry(new SpongeMapShade(ResourceKey.sponge("dark"), 	1, 220)),
@@ -49,12 +48,12 @@ public class MapShadeStreamGenerator {
 		);
 	}
 
-	private static MapShade addToRegistry(SpongeMapShade shade) {
+	private static Tuple<SpongeMapShade, Integer> addToRegistry(SpongeMapShade shade) {
 		if (MapShadeStreamGenerator.REGISTRY_MAP.containsKey(shade.getShadeNum())) {
 			throw new IllegalArgumentException("Shade with shade num: " + shade.getShadeNum() + " already registered!");
 		}
 		MapShadeStreamGenerator.REGISTRY_MAP.put(shade.getShadeNum(), shade);
-		return shade;
+		return Tuple.of(shade, shade.getShadeNum());
 	}
 
 	/**
