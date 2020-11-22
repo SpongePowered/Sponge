@@ -137,7 +137,8 @@
         "world.storage.SaveHandlerMixin",
         "world.storage.WorldInfoMixin",
         "server.management.PlayerInteractionManagerMixin",
-        "scoreboard.ServerScoreboardMixin"
+        "scoreboard.ServerScoreboardMixin",
+        "adventure.KeyMixin"
     ],
     "client": [
         "client.MinecraftMixin",

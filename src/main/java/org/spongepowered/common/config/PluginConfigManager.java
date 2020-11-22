@@ -27,6 +27,7 @@ package org.spongepowered.common.config;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Singleton;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
@@ -61,7 +62,6 @@ public final class PluginConfigManager implements ConfigManager {
                 // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
                 // See https://github.com/SpongePowered/SpongeCommon/issues/1348
                 .register(DataSerializableTypeSerializer::accepts, dataSerializableSerializer)
-                // TODO: register DataTranslators?
                 .registerAll(SpongeAdventure.CONFIGURATE.serializers())
                 .build();
     }
