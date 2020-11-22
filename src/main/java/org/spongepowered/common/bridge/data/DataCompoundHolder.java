@@ -31,6 +31,7 @@ import org.spongepowered.common.util.Constants;
 public interface DataCompoundHolder {
 
     CompoundNBT data$getCompound();
+
     void data$setCompound(CompoundNBT nbt);
 
     default boolean data$hasForgeData() {
@@ -85,5 +86,5 @@ public interface DataCompoundHolder {
      *
      * @return The nbt data type
      */
-    NBTDataType data$getNbtDataType();
+    NBTDataType data$getNBTDataType();
 }

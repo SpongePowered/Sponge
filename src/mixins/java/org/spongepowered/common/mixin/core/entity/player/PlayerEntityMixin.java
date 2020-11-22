@@ -119,7 +119,6 @@ import java.util.stream.Collectors;
 public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerEntityBridge, LocationTargetingBridge, GameProfileHolderBridge {
 
     // @formatter: off
-
     @Shadow public int experienceLevel;
     @Shadow public int experienceTotal;
     @Shadow public float experience;
@@ -149,7 +148,9 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Shadow public abstract void shadow$addStat(Stat<?> stat);
     @Shadow public abstract void shadow$addStat(ResourceLocation stat, int amount);
     @Shadow public abstract void shadow$addExhaustion(float exhaustion);
-    
+    @Shadow public abstract ITextComponent shadow$getDisplayName();
+    @Shadow protected abstract void shadow$spawnShoulderEntities();
+    @Shadow public abstract void shadow$addStat(ResourceLocation stat);
     // @formatter: on
 
     private boolean impl$affectsSpawning = true;
@@ -196,7 +197,18 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         return this.gameProfile;
     }
 
-/*
+    @Override
+    public int bridge$getExperienceSinceLevel() {
+        return this.experienceTotal - ExperienceHolderUtils.xpAtLevel(this.experienceLevel);
+    }
+
+    @Override
+    public void bridge$setExperienceSinceLevel(final int experience) {
+        this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + experience;
+        this.experience = (float) experience / this.shadow$xpBarCap();
+    }
+
+    /*
     @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
     private List<Entity> impl$ignoreOtherEntitiesWhenUncollideable(final World world, Entity entityIn, AxisAlignedBB bb) {
         if (this.bridge$isUncollideable()) {
@@ -209,17 +221,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true)
     private void impl$getDisplayNameWithParsing(final CallbackInfoReturnable<ITextComponent> ci) {
         ci.setReturnValue(LegacyTexts.parseComponent((StringTextComponent) ci.getReturnValue(), LegacyComponentSerializer.SECTION_CHAR));
-    }
-
-    @Override
-    public int bridge$getExperienceSinceLevel() {
-        return this.experienceTotal - ExperienceHolderUtils.xpAtLevel(this.experienceLevel);
-    }
-
-    @Override
-    public void bridge$setExperienceSinceLevel(final int experience) {
-        this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + experience;
-        this.experience = (float) experience / this.shadow$xpBarCap();
     }
 
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isSleeping()Z"))
@@ -251,14 +252,9 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         return playerEntity.getName();
     }
 
-    /**
-     * @author gabizou - January 4th, 2016
-     * @author i509VCB - January 17th, 2020 - 1.14.4
-     *
-     * This prevents sounds from being sent to the server by players who are vanish.
-     */
     @Redirect(method = "playSound(Lnet/minecraft/util/SoundEvent;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"))
-    private void impl$vanishPlaySound(final World world, final PlayerEntity player, final double x, final double y, final double z, final SoundEvent sound, final SoundCategory category, final float volume, final float pitch) {
+    private void impl$playNoSoundToOthersIfVanished(final World world, final PlayerEntity player, final double x, final double y, final double z,
+            final SoundEvent sound, final SoundCategory category, final float volume, final float pitch) {
         if (!this.bridge$isVanished()) {
             this.world.playSound(player, x, y, z, sound, category, volume, pitch);
         }
@@ -316,6 +312,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
     /**
      * @author gabizou - June 13th, 2016
+     * @author zidane - November 21st, 2020
      * @reason Reverts the method to flow through our systems, Forge patches
      * this to throw an ItemTossEvent, but we'll be throwing it regardless in
      * SpongeForge's handling.
@@ -327,14 +324,14 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     }
 
     @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
+    private void impl$useCustomFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {
         if (this.impl$hasCustomFireImmuneTicks) {
             ci.setReturnValue((int) this.impl$fireImmuneTicks);
         }
     }
 
     @Inject(method = "interactOn", at = @At(value = "HEAD"), cancellable = true)
-    public void onRightClickEntity(final Entity entityToInteractOn, final Hand hand, final CallbackInfoReturnable<ActionResultType> cir) {
+    public void impl$onRightClickEntity(final Entity entityToInteractOn, final Hand hand, final CallbackInfoReturnable<ActionResultType> cir) {
         if (!((PlayerEntity) (Object) this instanceof ServerPlayerEntity)) {
             return;
         }
@@ -345,11 +342,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
             cir.setReturnValue(ActionResultType.FAIL);
         }
     }
-
-    /*    @Override
-    public boolean impl$isImmuneToFireForIgniteEvent() {
-        return this.shadow$isSpectator() || this.shadow$isCreative();
-    }*/
 
     /**
      * @author gabizou - April 8th, 2016
@@ -640,5 +632,10 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
                 }
             }
         }
+    }
+
+    @Override
+    public boolean impl$canCallIgniteEntityEvent() {
+        return !this.shadow$isSpectator() && !this.shadow$isCreative();
     }
 }

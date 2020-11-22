@@ -37,8 +37,15 @@ public interface PlatformLivingEntityBridge {
     /**
      * Called when the {@link Entity} is to be not marked as removed.
      */
-    default boolean bridge$onLivingAttack(LivingEntity entityLivingBase, DamageSource source, float amount) {
+    default boolean bridge$onLivingAttack(LivingEntity entity, DamageSource source, float amount) {
         return true;
     }
 
+    default float bridge$applyModDamage(LivingEntity entity, DamageSource source, float damage) {
+        return damage;
+    }
+
+    default float bridge$applyModDamageBeforeFunctions(LivingEntity entity, DamageSource source, float damage) {
+        return damage;
+    }
 }

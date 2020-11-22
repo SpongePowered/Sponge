@@ -98,7 +98,7 @@ public abstract class TileEntityMixin implements TileEntityBridge, DataCompoundH
     }
 
     @Override
-    public NBTDataType data$getNbtDataType() {
+    public NBTDataType data$getNBTDataType() {
         return NBTDataTypes.BLOCK_ENTITY;
     }
 

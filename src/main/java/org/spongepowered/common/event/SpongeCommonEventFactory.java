@@ -709,11 +709,13 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(final LivingEntity entity, @Nullable final DamageSource source, final boolean isMainThread) {
-        return callDestructEntityEventDeath(entity, source, isMainThread, Audience.empty());
+    public static DestructEntityEvent.Death callDestructEntityEventDeath(final LivingEntity entity, @Nullable final DamageSource source) {
+        return SpongeCommonEventFactory.callDestructEntityEventDeath(entity, source, Audience.empty());
     }
 
-    public static Optional<DestructEntityEvent.Death> callDestructEntityEventDeath(final LivingEntity entity, @Nullable final DamageSource source, final boolean isMainThread, final Audience originalChannel) {
+    public static DestructEntityEvent.Death callDestructEntityEventDeath(final LivingEntity entity, @Nullable final DamageSource source,
+            final Audience originalChannel) {
+
         final Component originalMessage;
         Optional<User> sourceCreator = Optional.empty();
         final boolean messageCancelled = false;
@@ -729,27 +731,22 @@ public final class SpongeCommonEventFactory {
         }
 
         originalMessage = SpongeAdventure.asAdventure(entity.getCombatTracker().getDeathMessage());
-        // Try-with-resources will not produce an NPE when trying to autoclose the frame if it is null. Client sided
-        // checks need to be made here since entities can die on the client world.
-        try (final CauseStackManager.StackFrame frame = isMainThread ? PhaseTracker.getCauseStackManager().pushCauseFrame() : null) {
-            if (isMainThread) {
-                if (source != null) {
-                    frame.pushCause(source);
-                }
-                if (sourceCreator.isPresent()) {
-                    frame.addContext(EventContextKeys.CREATOR, sourceCreator.get());
-                }
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            if (source != null) {
+                frame.pushCause(source);
             }
 
-            final Cause cause = isMainThread ? PhaseTracker.getCauseStackManager().getCurrentCause() : Cause.of(EventContext.empty(), source == null ? entity : source);
-            final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause,
-                originalChannel, Optional.of(originalChannel), originalMessage, originalMessage, (Living) entity,
-                entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY), messageCancelled);
-            SpongeCommon.postEvent(event, true); // Client code should be able to cancel the death event if server cancels it.
+            sourceCreator.ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
+
+            final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(frame.getCurrentCause(),
+                    originalChannel, Optional.of(originalChannel), originalMessage, originalMessage, (Living) entity,
+                    entity.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY), messageCancelled);
+            SpongeCommon.postEvent(event);
             if (!event.isCancelled()) {
                 SpongeHooks.logEntityDeath(entity);
             }
-            return Optional.of(event);
+
+            return event;
         }
     }
 

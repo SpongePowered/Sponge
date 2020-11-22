@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.entity;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.DamageSource;
@@ -79,4 +80,6 @@ public interface LivingEntityAccessor {
     @Accessor("activeItemStack") void accessor$setActiveItemStack(ItemStack stack);
 
     @Invoker("canBlockDamageSource")  boolean accessor$canBlockDamageSource(DamageSource damageSourceIn);
+
+    @Invoker("getExperiencePoints") int accessor$getExperiencePoints(PlayerEntity attackingPlayer);
 }

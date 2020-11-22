@@ -25,7 +25,9 @@
 package org.spongepowered.common.bridge.entity;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
+import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 
 public interface LivingEntityBridge {
 
@@ -35,9 +37,7 @@ public interface LivingEntityBridge {
 
     void bridge$setMaxAir(int max);
 
-    float bridge$applyModDamage(LivingEntity entityLivingBase, DamageSource source, float damage);
-
-    float bridge$applyModDamagePost(LivingEntity entityLivingBase, DamageSource source, float damage);
-
-    void bridge$resetDeathEventsPosted();
+    default int bridge$getExperiencePointsOnDeath(LivingEntity entity, PlayerEntity attackingPlayer) {
+        return ((LivingEntityAccessor) entity).accessor$getExperiencePoints(attackingPlayer);
+    }
 }

@@ -761,7 +761,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public NBTDataType data$getNbtDataType() {
+    public NBTDataType data$getNBTDataType() {
         return NBTDataTypes.PLAYER;
     }
 

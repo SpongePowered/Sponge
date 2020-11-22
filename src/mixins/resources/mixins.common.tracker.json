@@ -16,7 +16,6 @@
         "entity.item.TNTEntityMixin_Tracker",
         "entity.player.PlayerEntityMixin_Tracker",
         "entity.player.PlayerInventoryMixin_Tracker",
-        "entity.player.ServerPlayerEntityMixin_Tracker",
         "event.TraitMixin_Tracked_Inventory",
         "network.PacketThreadUtilMixin_Tracker",
         "server.management.PlayerInteractionManagerMixin_Tracker",

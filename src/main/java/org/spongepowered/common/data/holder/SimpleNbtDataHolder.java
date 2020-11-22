@@ -52,7 +52,7 @@ public class SimpleNbtDataHolder implements DataCompoundHolder, SpongeMutableDat
     }
 
     @Override 
-    public NBTDataType data$getNbtDataType() {
+    public NBTDataType data$getNBTDataType() {
         return this.dataType;
     }
 }

@@ -123,8 +123,6 @@ public final class LivingData {
                             h.setHealth(v.floatValue());
                             if (v == 0) {
                                 h.attackEntityFrom(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
-                            } else {
-                                ((LivingEntityBridge) h).bridge$resetDeathEventsPosted();
                             }
                             return true;
                         })

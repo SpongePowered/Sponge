@@ -24,30 +24,20 @@
  */
 package org.spongepowered.common.mixin.tracker.entity.player;
 
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CUseEntityPacket;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.stats.Stat;
-import net.minecraft.stats.Stats;
-import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,8 +46,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -68,7 +56,6 @@ import org.spongepowered.common.mixin.tracker.entity.LivingEntityMixin_Tracker;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 @Mixin(PlayerEntity.class)
@@ -86,47 +73,19 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
     @Shadow public abstract Scoreboard shadow$getWorldScoreboard();
     @Shadow public abstract boolean shadow$isSpectator();
     @Shadow public abstract void shadow$takeStat(Stat<?> stat);
+    @Shadow public abstract void shadow$addStat(Stat<?> stat, int amount);
     //@formatter:on
 
-    @Shadow public abstract void shadow$addStat(Stat<?> stat, int amount);
-
-    /**
-     * @author blood - May 12th, 2016
-     * @author i509VCB - February 17th, 2020 - Update to 1.14.4
-     *
-     * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
-     */
-    @Overwrite
-    @Override
-    public void onDeath(final DamageSource cause) {
-        // Sponge start - Fire DestructEntityEvent.Death
-        final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
-        final Optional<DestructEntityEvent.Death>
-                event = SpongeCommonEventFactory.callDestructEntityEventDeath((PlayerEntity) (Object) this, cause, isMainThread);
-        if (event.map(Cancellable::isCancelled).orElse(true)) {
-            return;
+    @Inject(method = "onDeath", at = @At("HEAD"), cancellable = true)
+    public void impl$callDestructEntityDeath(DamageSource cause, CallbackInfo ci) {
+        if (this.shadow$isServerWorld()) {
+            // Sponge start - Fire DestructEntityEvent.Death
+            final DestructEntityEvent.Death event = SpongeCommonEventFactory.callDestructEntityEventDeath((PlayerEntity) (Object) this, cause);
+            if (event.isCancelled()) {
+                ci.cancel();
+            }
         }
-        // Sponge end
-        super.onDeath(cause);
-        this.shadow$recenterBoundingBox();
-
-        if (!this.shadow$isSpectator()) {
-            this.shadow$spawnDrops(cause);
-        }
-
-        if (cause != null) {
-            this.shadow$setMotion((-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * ((float)Math.PI / 180F)) * 0.1F), 0.1F, (-MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * ((float) Math.PI / 180F)) * 0.1F));
-        } else {
-            this.shadow$setMotion(0.0D, 0.1D, 0.0D);
-        }
-
-        this.shadow$addStat(Stats.DEATHS);
-        this.shadow$takeStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
-        this.shadow$takeStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
-        this.shadow$extinguish();
-        this.shadow$setFlag(0, false);
     }
-
 
     /**
      * @author gabizou - June 4th, 2016
@@ -134,11 +93,6 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
      *
      * @reason When a player drops an item, all methods flow through here instead of {@link Entity#entityDropItem(IItemProvider, int)}
      * because of the idea of {@code dropAround} and {@code traceItem}.
-     *
-     * @param droppedItem The item to drop
-     * @param dropAround If true, the item is dropped around the player, otherwise thrown in front of the player
-     * @param traceItem If true, the item is thrown as the player
-     * @return The entity, if spawned correctly and not captured in any way
      */
     @Nullable
     @Overwrite
@@ -167,7 +121,6 @@ public abstract class PlayerEntityMixin_Tracker extends LivingEntityMixin_Tracke
                 if (item == null || item.isEmpty()) {
                     return null;
                 }
-
 
                 // Here is where we would potentially perform item pre-merging (merge the item stacks with previously captured item stacks
                 // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
