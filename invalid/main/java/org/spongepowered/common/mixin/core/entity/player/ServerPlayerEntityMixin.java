@@ -184,21 +184,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         }
     }
 
-
-    @Inject(method = "copyFrom", at = @At("HEAD"))
-    private void impl$copySpongeDataOnRespawn(final ServerPlayerEntity oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
-        // Copy over sponge data from the old player.
-        // Allows plugins to specify data that persists after players respawn.
-        if (!(oldPlayer instanceof DataCompoundHolder)) {
-            return;
-        }
-        final DataCompoundHolder oldEntity = (DataCompoundHolder) oldPlayer;
-        if (oldEntity.data$hasSpongeDataCompound()) {
-            ((DataCompoundHolder) this).data$getSpongeCompound().put(Constants.Sponge.SPONGE_DATA, oldEntity.data$getSpongeDataCompound());
-            this.impl$readFromSpongeCompound(((DataCompoundHolder) this).data$getSpongeDataCompound());
-        }
-    }
-
     @Override
     public Optional<User> bridge$getBackingUser() {
         // may be null during initialization, mainly used to avoid potential stack overflow with #bridge$getUserObject

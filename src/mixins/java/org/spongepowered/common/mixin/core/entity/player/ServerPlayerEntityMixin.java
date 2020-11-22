@@ -31,6 +31,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SCombatPacket;
 import net.minecraft.scoreboard.Score;
@@ -79,6 +80,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
@@ -570,4 +572,16 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         // Ensure that the game profile is up to date.
         return ((SpongeUserManager) SpongeCommon.getGame().getServer().getUserManager()).forceRecreateUser(SpongeGameProfile.of(this.shadow$getGameProfile()));
     }
+
+    @Inject(method = "copyFrom", at = @At("HEAD"))
+    private void impl$copySpongeDataOnRespawn(final ServerPlayerEntity oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
+        if (oldPlayer instanceof DataCompoundHolder) {
+            final DataCompoundHolder oldEntity = (DataCompoundHolder) oldPlayer;
+            if (oldEntity.data$hasSpongeData()) {
+                final CompoundNBT compound = oldEntity.data$getCompound();
+                ((DataCompoundHolder) this).data$setCompound(compound);
+            }
+        }
+    }
+
 }
