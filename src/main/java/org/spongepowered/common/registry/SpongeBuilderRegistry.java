@@ -89,6 +89,9 @@ import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
+import org.spongepowered.api.map.MapCanvas;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.placeholder.PlaceholderComponent;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
@@ -115,6 +118,7 @@ import org.spongepowered.common.advancement.SpongeTriggerBuilder;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
+import org.spongepowered.common.bridge.map.MapColorTypeBridge;
 import org.spongepowered.common.command.SpongeParameterizedCommandBuilder;
 import org.spongepowered.common.command.parameter.SpongeParameterKeyBuilder;
 import org.spongepowered.common.command.parameter.flag.SpongeFlagBuilder;
@@ -171,6 +175,9 @@ import org.spongepowered.common.item.recipe.crafting.shapeless.SpongeShapelessCr
 import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.stonecutting.SpongeStoneCutterRecipeBuilder;
 import org.spongepowered.common.item.recipe.cooking.SpongeCookingRecipeBuilder;
+import org.spongepowered.common.map.canvas.SpongeMapCanvasBuilder;
+import org.spongepowered.common.map.color.SpongeMapColorBuilder;
+import org.spongepowered.common.map.decoration.SpongeMapDecorationBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderComponentBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderContextBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
@@ -304,6 +311,9 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(MutableDataProviderBuilder.class, DataProviderRegistrator.SpongeMutableDataProviderBuilder::new)
             .register(ImmutableDataProviderBuilder.class, DataProviderRegistrator.SpongeImmutableDataProviderBuilder::new)
             .register(Query.Builder.class, SpongeQueryBuilder::new)
+            .register(MapColor.Builder.class, SpongeMapColorBuilder::new)
+            .register(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)
+            .register(MapDecoration.Builder.class, SpongeMapDecorationBuilder::new)
         ;
     }
 }

@@ -53,5 +53,6 @@ public final class ItemStackDataProviders extends DataProviderRegistratorBuilder
         TieredItemStackData.register(this.registrator);
         ToolItemStackData.register(this.registrator);
         WoolItemStackData.register(this.registrator);
+        MapInfoItemStackData.register(this.registrator);
     }
 }
