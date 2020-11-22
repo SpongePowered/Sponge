@@ -44,17 +44,18 @@ public final class DamageTypeStreamGenerator {
                 new SpongeDamageType(ResourceKey.minecraft("contact")),
                 new SpongeDamageType(ResourceKey.minecraft("custom")),
                 new SpongeDamageType(ResourceKey.minecraft("drown")),
+                new SpongeDamageType(ResourceKey.minecraft("dryout")),
                 new SpongeDamageType(ResourceKey.minecraft("explosive")),
                 new SpongeDamageType(ResourceKey.minecraft("fall")),
                 new SpongeDamageType(ResourceKey.minecraft("fire")),
                 new SpongeDamageType(ResourceKey.minecraft("generic")),
                 new SpongeDamageType(ResourceKey.minecraft("hunger")),
                 new SpongeDamageType(ResourceKey.minecraft("magic")),
+                new SpongeDamageType(ResourceKey.minecraft("magma")),
                 new SpongeDamageType(ResourceKey.minecraft("projectile")),
                 new SpongeDamageType(ResourceKey.minecraft("suffocate")),
-                new SpongeDamageType(ResourceKey.minecraft("void")),
                 new SpongeDamageType(ResourceKey.minecraft("sweeping_attack")),
-                new SpongeDamageType(ResourceKey.minecraft("magma"))
+                new SpongeDamageType(ResourceKey.minecraft("void"))
         );
     }
 }
