@@ -29,7 +29,9 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SDisconnectPacket;
 import net.minecraft.network.play.server.SJoinGamePacket;
 import net.minecraft.server.CustomServerBossInfoManager;
@@ -50,6 +52,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -64,11 +67,15 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.network.play.server.SRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.net.SocketAddress;
@@ -78,19 +85,29 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(PlayerList.class)
-public abstract class PlayerListMixin {
+public abstract class PlayerListMixin implements PlayerListBridge {
 
+    // @formatter:off
     @Shadow @Final private static Logger LOGGER;
+    @Shadow @Final private MinecraftServer server;
 
     @Shadow public abstract ITextComponent shadow$canPlayerLogin(SocketAddress socketAddress, com.mojang.authlib.GameProfile gameProfile);
     @Shadow public abstract MinecraftServer shadow$getServer();
+    @Shadow @Nullable public abstract CompoundNBT shadow$readPlayerDataFromFile(ServerPlayerEntity playerIn);
+    // @formatter:on
 
-    @Shadow @Nullable public abstract CompoundNBT readPlayerDataFromFile(ServerPlayerEntity playerIn);
+    private boolean impl$isBedSpawn = false;
+    private DimensionType impl$originalDestination = null;
+
+    @Override
+    public void bridge$setOriginalDestinationDimensionForRespawn(DimensionType dimensionType) {
+        this.impl$originalDestination = dimensionType;
+    }
 
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;readPlayer"
             + "DataFromFile(Lnet/minecraft/entity/player/ServerPlayerEntity;)Lnet/minecraft/nbt/CompoundNBT;"))
     private CompoundNBT impl$setPlayerDataForNewPlayers(final PlayerList playerList, final ServerPlayerEntity playerIn) {
-        final CompoundNBT compound = this.readPlayerDataFromFile(playerIn);
+        final CompoundNBT compound = this.shadow$readPlayerDataFromFile(playerIn);
         if (compound == null) {
             ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().setPlayerInfo(playerIn.getUniqueID(), Instant.now(), Instant.now());
         }
@@ -140,7 +157,7 @@ public abstract class PlayerListMixin {
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
             final Component message = event.getMessage();
-            this.disconnectClient(networkManager, message, player.getProfile());
+            this.impl$disconnectClient(networkManager, message, player.getProfile());
             return null;
         }
 
@@ -245,9 +262,42 @@ public abstract class PlayerListMixin {
         ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().readPlayerData(compound, entity.getUniqueID(), null);
     }
 
-    private void disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
-        final ITextComponent reason = SpongeAdventure.asVanilla(disconnectMessage);
+    @Redirect(method = "recreatePlayerEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;setRespawnPosition(Lnet/minecraft/util/math/BlockPos;ZZ)V"))
+    private void impl$flagIfRespawnLocationIsBed(ServerPlayerEntity serverPlayerEntity, BlockPos p_226560_1_, boolean p_226560_2_,
+            boolean p_226560_3_) {
+        this.impl$isBedSpawn = true;
+        serverPlayerEntity.setRespawnPosition(p_226560_1_, p_226560_2_, p_226560_3_);
+    }
 
+    @Redirect(method = "recreatePlayerEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;sendPacket"
+            + "(Lnet/minecraft/network/IPacket;)V", ordinal = 1))
+    private void impl$callRespawnPlayerRecreateEvent(ServerPlayNetHandler serverPlayNetHandler, IPacket<?> packetIn, ServerPlayerEntity playerIn,
+            DimensionType dimension, boolean conqueredEnd) {
+        final ServerPlayerEntity player = serverPlayNetHandler.player;
+
+        final Vector3d originalPosition = VecHelper.toVector3d(playerIn.getPosition());
+        final Vector3d destinationPosition = VecHelper.toVector3d(player.getPositionVec());
+        final org.spongepowered.api.world.server.ServerWorld originalWorld = (org.spongepowered.api.world.server.ServerWorld) playerIn.world;
+        final org.spongepowered.api.world.server.ServerWorld originalDestinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server
+                .getWorld(this.impl$originalDestination == null ? DimensionType.OVERWORLD : this.impl$originalDestination);
+        final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) player.world;
+
+        final RespawnPlayerEvent.Recreate event =
+                SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().getCurrentCause(), destinationPosition,
+                        originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) playerIn,
+                        (ServerPlayer) player, this.impl$isBedSpawn, !conqueredEnd);
+        SpongeCommon.postEvent(event);
+        player.setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(), event.getDestinationPosition().getZ());
+        this.impl$isBedSpawn = false;
+        this.impl$originalDestination = null;
+
+        ((SRespawnPacketAccessor) packetIn).accessor$setGameType(player.interactionManager.getGameType());
+
+        serverPlayNetHandler.sendPacket(packetIn);
+    }
+
+    private void impl$disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
+        final ITextComponent reason = SpongeAdventure.asVanilla(disconnectMessage);
 
         try {
             LOGGER.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" :

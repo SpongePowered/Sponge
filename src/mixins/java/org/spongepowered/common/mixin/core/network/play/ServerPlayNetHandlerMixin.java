@@ -43,6 +43,8 @@ import net.minecraft.network.play.client.CTabCompletePacket;
 import net.minecraft.network.play.client.CUseEntityPacket;
 import net.minecraft.network.play.server.STabCompletePacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -59,6 +61,7 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
+import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -66,6 +69,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
@@ -77,6 +81,7 @@ import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccess
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
+import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
@@ -371,6 +376,37 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
                 }
             }
         }
+    }
+
+    @ModifyArg(method = "processClientStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;"
+            + "recreatePlayerEntity(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/minecraft/world/dimension/DimensionType;Z)"
+            + "Lnet/minecraft/entity/player/ServerPlayerEntity;", ordinal = 1))
+    private DimensionType impl$usePlayerDimensionForRespawn(final ServerPlayerEntity entity, final DimensionType dimensionType,
+            boolean conqueredEnd) {
+        // A few changes to Vanilla logic here that, by default, still preserve game mechanics:
+        // - If we have conquered The End then keep the dimension type we're headed to (which is Overworld as of 1.15)
+        // - Otherwise, check the platform hooks for which dimension to respawn to. In Sponge, this is the Player's dimension they
+        //   are already in if we can respawn there which is only true for Overworld dimensions
+        if (conqueredEnd) {
+            return dimensionType;
+        }
+
+        final DimensionType respawnDimension = PlatformHooks.getInstance().getDimensionHooks().getRespawnDimension(entity, dimensionType, false);
+        final ServerWorld destinationWorld = this.server.getWorld(respawnDimension);
+        final RespawnPlayerEvent.SelectWorld event =
+                SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                        (org.spongepowered.api.world.server.ServerWorld) (Object) destinationWorld,
+                        (org.spongepowered.api.world.server.ServerWorld) (Object) this.server.getWorld(entity.dimension),
+                        (org.spongepowered.api.world.server.ServerWorld) (Object) this.server.getWorld(DimensionType.OVERWORLD),
+                        (ServerPlayer) entity);
+        SpongeCommon.postEvent(event);
+        return ((ServerWorld) event.getDestinationWorld()).getDimension().getType();
+    }
+
+    @Redirect(method = "processClientStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;recreatePlayerEntity(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/minecraft/world/dimension/DimensionType;Z)Lnet/minecraft/entity/player/ServerPlayerEntity;"))
+    private ServerPlayerEntity impl$setOriginalDestinationRef(PlayerList playerList, ServerPlayerEntity playerIn, DimensionType dimension, boolean conqueredEnd) {
+        ((PlayerListBridge) playerList).bridge$setOriginalDestinationDimensionForRespawn(dimension);
+        return playerList.recreatePlayerEntity(playerIn, dimension, conqueredEnd);
     }
 
     private String[] impl$extractCommandString(final String commandString) {

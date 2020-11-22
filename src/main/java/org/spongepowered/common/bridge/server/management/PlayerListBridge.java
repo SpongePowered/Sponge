@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.bridge.server.management;
 
+import net.minecraft.world.dimension.DimensionType;
+
 public interface PlayerListBridge {
 
     void bridge$reloadAdvancementProgress();
+
+    void bridge$setOriginalDestinationDimensionForRespawn(DimensionType dimensionType);
 }

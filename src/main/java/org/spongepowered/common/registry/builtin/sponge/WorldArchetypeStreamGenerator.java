@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.builtin.sponge;
 
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
@@ -59,7 +60,7 @@ public final class WorldArchetypeStreamGenerator {
                 WorldType.DEFAULT);
         ((ResourceKeyBridge) (Object) archetype).bridge$setKey(key);
         ((WorldSettingsBridge) (Object) archetype).bridge$setLogicType((SpongeDimensionType) dimensionType.get());
-        ((WorldSettingsBridge) (Object) archetype).bridge$setDifficulty(SpongeCommon.getServer().getDifficulty());
+        ((WorldSettingsBridge) (Object) archetype).bridge$setDifficulty(Difficulty.NORMAL);
         return (WorldArchetype) (Object)  archetype;
     }
 }

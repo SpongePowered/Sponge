@@ -181,7 +181,8 @@
         "world.storage.SaveHandlerAccessor",
         "entity.item.BoatEntityAccessor",
         "entity.EntityTypeAccessor",
-        "entity.passive.fish.TropicalFishEntityAccessor"
+        "entity.passive.fish.TropicalFishEntityAccessor",
+        "network.play.server.SRespawnPacketAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",

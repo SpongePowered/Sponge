@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.hooks;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
@@ -46,7 +48,17 @@ public interface DimensionHooks {
      * @param dimensionType The type
      * @return True to generate spawn on load as a default
      */
-    default boolean doesGenerateSpawnOnLoad(SpongeDimensionType dimensionType) {
+    default boolean doesGenerateSpawnOnLoad(final SpongeDimensionType dimensionType) {
         return DimensionTypes.OVERWORLD.get() == dimensionType;
+    }
+
+    default DimensionType getRespawnDimension(final ServerPlayerEntity entity, final DimensionType dimensionType, final boolean conqueredEnd) {
+        final ServerWorld world = entity.getServer().getWorld(entity.dimension);
+        if (world == null) {
+            // Should be impossible but be defensive
+            return dimensionType;
+        }
+
+        return world.getDimension().canRespawnHere() ? entity.dimension : dimensionType;
     }
 }
