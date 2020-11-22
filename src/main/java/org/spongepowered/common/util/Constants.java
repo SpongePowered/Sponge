@@ -27,7 +27,9 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.persistence.DataQuery.of;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -1311,6 +1313,87 @@ public final class Constants {
         public static final String ATTRIBUTE_MODIFIERS = "AttributeModifiers";
         public static final String ATTRIBUTE_NAME = "AttributeName";
         public static final String ATTRIBUTE_SLOT = "Slot";
+    }
+
+    public static final class Map {
+        public static final String MAP_INFO_DATA_PROVIDER_NAME = "map_info";
+
+        public static final DataQuery MAP_ID = of("UnsafeMapId");
+        public static final DataQuery MAP_DATA = of("MapData");
+        public static final DataQuery SHADE_NUM = of("shade");
+        public static final DataQuery COLOR_INDEX = of("colorIndex");
+
+
+        // @formatter:off
+        public static final DataQuery MAP_LOCATION =            of("MapLocation");
+        public static final DataQuery MAP_WORLD =               of("MapWorld");
+        public static final DataQuery MAP_TRACKS_PLAYERS =      of("TracksPlayers");
+        public static final DataQuery MAP_UNLIMITED_TRACKING =  of("MapUnlimitedTracking");
+        public static final DataQuery MAP_SCALE =               of("MapScale");
+        public static final DataQuery MAP_CANVAS =              of("MapCanvas");
+        public static final DataQuery MAP_LOCKED =              of("MapLocked");
+        public static final DataQuery MAP_DECORATIONS =         of("MapDecorations");
+        // @formatter:on
+
+        // This need to be what they are to be easily convertable to MC NBT
+        public static final DataQuery DECORATION_TYPE = of("type");
+        public static final DataQuery DECORATION_ID = of("id");
+        public static final DataQuery DECORATION_X = of("x");
+        public static final DataQuery DECORATION_Y = of("z"); // This isn't a mistake
+        public static final DataQuery DECORATION_ROTATION = of("rot");
+
+        // This needs to be "locked" for improved 1.14 compatibility,
+        // where it becomes a vanilla feature
+        public static final String LOCKED_KEY = "locked"; // TODO: REVIEW MIGHT NOT BE NEEDED
+        // Sponge's way to save decorations, to ensure persistence
+        public static final String DECORATIONS_KEY = "Decorations";
+        // Key in the map for getting the highest map number
+        public static final String ID_COUNTS_KEY = "map";
+        // Used to add a UUID to maps. Prefixed with sponge- to show it is added by sponge
+        public static final String SPONGE_UUID_KEY = "sponge-uuid";
+
+        // Doesn't particulary matter what this is, just something that identifies it
+        public static final String DECORATION_KEY_PREFIX = "sponge-";
+
+        // Filled maps
+        public static final int DEFAULT_MAP_SCALE = 0;
+        public static final int MIN_MAP_SCALE = 0;
+        public static final int MAX_MAP_SCALE = Byte.MAX_VALUE;
+        public static final boolean DEFAULT_TRACKS_PLAYERS = true;
+        public static final boolean DEFAULT_UNLIMITED_TRACKING = false;
+        public static final boolean DEFAULT_MAP_LOCKED = false;
+        public static final String MAP_PREFIX = "map_";
+        public static final int MAP_SIZE = 16384;
+        public static final int MAP_MAX_INDEX = 127;
+        public static final int MAP_PIXELS = 128;
+        public static final int MAP_SHADES = 4;
+
+        // Colors are multiplied by something then divided by 255 to make the true RGB displayed
+        public static final int SHADE_DIVIDER = 255;
+
+        // Converts directions into a byte from 0-15 relating to the
+        // BiMap - Allows Direction -> Byte and Byte -> Direction easily.
+        public static final BiMap<Direction, Byte> DIRECTION_CONVERSION_MAP = HashBiMap.create(16);
+
+        static {
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTH,             (byte) 0);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTH_SOUTHWEST,   (byte) 1);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTHWEST,         (byte) 2);
+            DIRECTION_CONVERSION_MAP.put(Direction.WEST_SOUTHWEST,    (byte) 3);
+            DIRECTION_CONVERSION_MAP.put(Direction.WEST,              (byte) 4);
+            DIRECTION_CONVERSION_MAP.put(Direction.WEST_NORTHWEST,    (byte) 5);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTHWEST,         (byte) 6);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTH_NORTHWEST,   (byte) 7);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTH,             (byte) 8);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTH_NORTHEAST,   (byte) 9);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTHEAST,         (byte) 10);
+            DIRECTION_CONVERSION_MAP.put(Direction.EAST_NORTHEAST,    (byte) 11);
+            DIRECTION_CONVERSION_MAP.put(Direction.EAST,              (byte) 12);
+            DIRECTION_CONVERSION_MAP.put(Direction.EAST_SOUTHEAST,    (byte) 13);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTHEAST,         (byte) 14);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTH_SOUTHEAST,   (byte) 15);
+            // This should always be 16 long, unless minecraft changes the supported amount of directions for maps.
+        }
     }
 
     public static final class Particles {

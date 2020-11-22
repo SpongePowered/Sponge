@@ -90,6 +90,9 @@ import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
+import org.spongepowered.api.map.MapCanvas;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.placeholder.PlaceholderComponent;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
@@ -118,6 +121,7 @@ import org.spongepowered.common.advancement.criterion.SpongeScoreCriterionBuilde
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
+import org.spongepowered.common.bridge.map.MapColorTypeBridge;
 import org.spongepowered.common.command.SpongeParameterizedCommandBuilder;
 import org.spongepowered.common.command.parameter.SpongeParameterKeyBuilder;
 import org.spongepowered.common.command.parameter.flag.SpongeFlagBuilder;
@@ -175,6 +179,9 @@ import org.spongepowered.common.item.recipe.crafting.shaped.SpongeShapedCrafting
 import org.spongepowered.common.item.recipe.crafting.shapeless.SpongeShapelessCraftingRecipeBuilder;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredientBuilder;
 import org.spongepowered.common.item.recipe.stonecutting.SpongeStoneCutterRecipeBuilder;
+import org.spongepowered.common.map.canvas.SpongeMapCanvasBuilder;
+import org.spongepowered.common.map.color.SpongeMapColorBuilder;
+import org.spongepowered.common.map.decoration.SpongeMapDecorationBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderComponentBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderContextBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
@@ -313,6 +320,9 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
             .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
             .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
+            .register(MapColor.Builder.class, SpongeMapColorBuilder::new)
+            .register(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)
+            .register(MapDecoration.Builder.class, SpongeMapDecorationBuilder::new)
         ;
     }
 }

@@ -291,6 +291,15 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("llama_type"), TypeTokens.LLAMA_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("lock_token"), TypeTokens.STRING_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("lore"), TypeTokens.LIST_COMPONENT_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("map_canvas"), TypeTokens.MAP_CANVAS_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("map_decorations"), TypeTokens.MAP_DECORATIONS_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("map_info"), TypeTokens.MAP_INFO_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("map_location"), TypeTokens.VECTOR_2I_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("map_locked"), TypeTokens.BOOLEAN_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("map_scale"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("map_tracks_players"), TypeTokens.BOOLEAN_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("map_unlimited_tracking"), TypeTokens.BOOLEAN_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("map_world"), TypeTokens.WORLD_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("matter_state"), TypeTokens.MATTER_STATE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_air"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_burn_time"), TypeTokens.INTEGER_VALUE_TOKEN));

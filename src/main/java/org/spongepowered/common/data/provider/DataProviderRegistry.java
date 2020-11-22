@@ -38,6 +38,7 @@ import org.spongepowered.common.data.provider.generic.GenericDataProviders;
 import org.spongepowered.common.data.provider.inventory.InventoryDataProviders;
 import org.spongepowered.common.data.provider.item.ItemDataProviders;
 import org.spongepowered.common.data.provider.item.stack.ItemStackDataProviders;
+import org.spongepowered.common.data.provider.map.MapInfoDataProviders;
 import org.spongepowered.common.data.provider.nbt.NBTDataProviders;
 
 import java.util.Collection;
@@ -214,7 +215,8 @@ public final class DataProviderRegistry {
                 new GenericDataProviders(),
                 new ItemStackDataProviders(),
                 new InventoryDataProviders(),
-                new EntityDataProviders()
+                new EntityDataProviders(),
+                new MapInfoDataProviders()
         );
     }
 
