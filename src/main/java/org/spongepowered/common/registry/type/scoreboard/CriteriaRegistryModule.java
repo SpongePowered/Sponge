@@ -25,22 +25,14 @@
 package org.spongepowered.common.registry.type.scoreboard;
 
 import net.minecraft.scoreboard.IScoreCriteria;
-import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
-import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-import org.spongepowered.common.registry.type.statistic.StatisticRegistryModule;
-import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
-import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-@RegistrationDependency({TextColorRegistryModule.class, StatisticRegistryModule.class})
 @RegisterCatalog(Criteria.class)
 public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Criterion> {
 
@@ -57,42 +49,16 @@ public final class CriteriaRegistryModule extends AbstractPrefixAlternateCatalog
 
     @Override
     public void registerDefaults() {
-        this.register((Criterion) IScoreCriteria.DUMMY);
-        this.register((Criterion) IScoreCriteria.TRIGGER);
-        this.register((Criterion) IScoreCriteria.HEALTH);
-        this.register((Criterion) IScoreCriteria.PLAYER_KILL_COUNT);
-        this.register((Criterion) IScoreCriteria.TOTAL_KILL_COUNT);
-        this.register((Criterion) IScoreCriteria.DEATH_COUNT);
-        this.register((Criterion) IScoreCriteria.FOOD);
-        this.register((Criterion) IScoreCriteria.AIR);
-        this.register((Criterion) IScoreCriteria.ARMOR);
-        this.register((Criterion) IScoreCriteria.XP);
-        this.register((Criterion) IScoreCriteria.LEVEL);
+        IScoreCriteria.INSTANCES.values().forEach(scoreCriterion -> {
+            final Criterion criterion = (Criterion) scoreCriterion;
 
-        for (Map.Entry<TextFormatting, SpongeTextColor> entry : TextColorRegistryModule.enumChatColor.entrySet()) {
-            final int colorIndex = entry.getKey().getColorIndex();
+            this.register(criterion);
 
-            if (colorIndex < 0) {
-                continue;
-            }
-
-            final String id = entry.getValue().getId();
-
-            final Criterion teamKillCriterion = (Criterion) IScoreCriteria.TEAM_KILL[colorIndex];
-            this.register(teamKillCriterion);
-            teamKillMappings.put(id, teamKillCriterion);
-
-            final Criterion killedByTeamCriterion = (Criterion) IScoreCriteria.KILLED_BY_TEAM[colorIndex];
-            this.register(killedByTeamCriterion);
-            killedByTeamMappings.put(id, killedByTeamCriterion);
-        }
-
-        StatisticRegistryModule.getInstance().getAll()
-                .stream()
-                .map(Statistic::getCriterion)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(this::register);
+            criterion.getTeamColor().ifPresent(color -> {
+                teamKillMappings.put(color.getId(), criterion);
+                killedByTeamMappings.put(color.getId(), criterion);
+            });
+        });
     }
 
     private static final class Holder {

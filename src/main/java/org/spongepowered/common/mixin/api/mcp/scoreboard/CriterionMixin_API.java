@@ -28,19 +28,40 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreCriteriaColored;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(value = {ScoreCriteriaColored.class, ScoreCriteria.class})
 @Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
 public abstract class CriterionMixin_API implements IScoreCriteria { // Trick to allow avoid shadowing, since multiple targets are used
 
-    @Nullable private String spongeId;
+    @Nullable
+    private String spongeId;
+    @Nullable
+    private TextFormatting format;
+
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    @SuppressWarnings("InvalidInjectorMethodSignature")
+    private void onConstructed(String name, CallbackInfo ci) {
+    }
+
+    @Surrogate
+    private void onConstructed(String name, TextFormatting format, CallbackInfo ci) {
+        this.format = format;
+    }
 
     @Intrinsic
     public String criterion$getName() {
@@ -52,5 +73,9 @@ public abstract class CriterionMixin_API implements IScoreCriteria { // Trick to
             this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s"));
         }
         return this.spongeId;
+    }
+
+    public Optional<TextColor> getTeamColor() {
+        return Optional.ofNullable(TextColorRegistryModule.enumChatColor.get(this.format));
     }
 }
