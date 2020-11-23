@@ -54,12 +54,14 @@ import java.util.stream.Collectors;
 @Mixin(ScorePlayerTeam.class)
 public abstract class ScorePlayerTeamMixin implements ScorePlayerTeamBridge {
 
+    // @formatter:off
     @Shadow @Final @Mutable @Nullable private Scoreboard scoreboard;
     @Shadow private ITextComponent displayName;
     @Shadow private TextFormatting color;
     @Shadow private ITextComponent prefix;
     @Shadow private ITextComponent suffix;
     @Shadow public abstract Collection<String> getMembershipCollection();
+    // @formatter:on
 
     @SuppressWarnings("NullableProblems") @MonotonicNonNull private Component bridge$displayName;
     @SuppressWarnings("NullableProblems") @MonotonicNonNull private Component bridge$Prefix;

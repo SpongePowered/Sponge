@@ -216,10 +216,8 @@ public final class SpongeAdventure {
             return NamedTextColor.LIGHT_PURPLE;
         } else if (color == TextFormatting.YELLOW) {
             return NamedTextColor.YELLOW;
-        } else if (color == TextFormatting.WHITE) {
-            return NamedTextColor.WHITE;
         }
-        throw new IllegalArgumentException();
+        return NamedTextColor.WHITE;
     }
 
     public static Boolean asVanilla(final TextDecoration.State state) {
