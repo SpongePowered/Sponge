@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.inheritable;
+package org.spongepowered.common.config.inheritable;
 
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -32,50 +32,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public final class CollisionModCategory {
+public final class EntityActivationModCategory {
 
     @Setting("enabled")
-    @Comment("If 'false', entity collision rules for this mod will be ignored.")
-    private boolean enabled = true;
+    @Comment("If 'false', entity activation rules for this mod will be ignored and always tick.")
+    private boolean isEnabled = true;
     @Setting("defaults")
-    @Comment("Default maximum collisions used for all entities/blocks unless overridden.")
-    private Map<String, Integer> defaultMaxCollisions = new HashMap<>();
-    @Setting("blocks")
-    private Map<String, Integer> blockList = new HashMap<>();
+    private Map<String, Integer> defaultRanges = new HashMap<>();
     @Setting("entities")
     private Map<String, Integer> entityList = new HashMap<>();
 
-    public CollisionModCategory() {
-        this.defaultMaxCollisions.put("blocks", 8);
-        this.defaultMaxCollisions.put("entities", 8);
-    }
-
-    public CollisionModCategory(final String modId) {
-        if (modId.equals("minecraft")) {
-            this.blockList.put("detector_rail", 1);
-            this.blockList.put("heavy_weighted_pressure_plate", 150);
-            this.blockList.put("light_weighted_pressure_plate", 15);
-            this.blockList.put("mob_spawner", -1);
-            this.blockList.put("stone_pressure_plate", 1);
-            this.blockList.put("wooden_button", 1);
-            this.blockList.put("wooden_pressure_plate", 1);
-            this.entityList.put("thrownpotion", -1);
-        } else if (modId.equals("botania")) {
-            this.entityList.put("spark", -1);
-            this.entityList.put("corporeaspark", -1);
-        }
-    }
-
     public boolean isEnabled() {
-        return this.enabled;
+        return this.isEnabled;
     }
 
-    public Map<String, Integer> getDefaultMaxCollisions() {
-        return this.defaultMaxCollisions;
-    }
-
-    public Map<String, Integer> getBlockList() {
-        return this.blockList;
+    public Map<String, Integer> getDefaultRanges() {
+        return this.defaultRanges;
     }
 
     public Map<String, Integer> getEntityList() {

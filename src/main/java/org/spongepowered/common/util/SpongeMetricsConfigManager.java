@@ -25,7 +25,8 @@
 package org.spongepowered.common.util;
 
 import com.google.inject.Singleton;
-import org.spongepowered.configurate.ConfigurateException;
+import io.leangen.geantyref.TypeToken;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
@@ -33,17 +34,24 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.config.metrics.MetricsConfiguration;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 @Singleton
 public class SpongeMetricsConfigManager implements MetricsConfigManager {
 
     private final ConfigHandle<MetricsConfiguration> metrics;
 
-    public SpongeMetricsConfigManager() throws ConfigurateException {
+    public SpongeMetricsConfigManager() {
         // This needs to be loaded after the global-inheritable configuration
         // is loaded. That load is performed by the sponge non-inheritable
         // configuration which is loaded way earlier in the lifecycle since it
         // is used to configure mixin plugins.
-        metrics = SpongeConfigs.create(new MetricsConfiguration(), MetricsConfiguration.FILE_NAME);
+        this.metrics = SpongeConfigs.create(new MetricsConfiguration(), MetricsConfiguration.FILE_NAME);
+    }
+
+    public CompletableFuture<CommentedConfigurationNode> savePluginsInConfig(final Map<String, Tristate> entries) {
+        return this.metrics.updateSetting("plugin-states", entries, new TypeToken<Map<String, Tristate>>() {});
     }
 
     @Override
@@ -53,6 +61,6 @@ public class SpongeMetricsConfigManager implements MetricsConfigManager {
 
     @Override
     public Tristate getCollectionState(final PluginContainer container) {
-        return this.metrics.get().getGlobalCollectionState();
+        return this.metrics.get().getCollectionState(container);
     }
 }

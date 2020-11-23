@@ -30,6 +30,7 @@ import io.leangen.geantyref.TypeToken;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
@@ -56,7 +57,7 @@ public class ConfigHandle<T extends Config> {
     /**
      * Location where current version is stored
      */
-    public static final Object[] VERSION_PATH = new Object[] {"version"};
+    public static final NodePath VERSION_PATH = NodePath.path("version");
     private static final String VERSION_COMMENT = "Active configuration version\n"
             + "This has no relation to the current Sponge version, and will be updated automatically\n"
             + "Manual changes may cause unpredictable results.";
@@ -107,13 +108,13 @@ public class ConfigHandle<T extends Config> {
     protected final T instance;
     protected @MonotonicNonNull CommentedConfigurationNode node;
 
-    ConfigHandle(final T instance) {
+    protected ConfigHandle(final T instance) {
         this.mapper = mutableMapper(instance);
         this.instance = instance;
         this.loader = null;
     }
 
-    ConfigHandle(final T instance, final @Nullable ConfigurationLoader<? extends CommentedConfigurationNode> loader) {
+    protected ConfigHandle(final T instance, final @Nullable ConfigurationLoader<? extends CommentedConfigurationNode> loader) {
         this.mapper = mutableMapper(instance);
         this.instance = instance;
         this.loader = loader;

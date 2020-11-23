@@ -22,13 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.core;
+package org.spongepowered.common.config.inheritable;
 
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.applaunch.config.inheritable.BaseConfig;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -101,35 +103,31 @@ public final class InheritableConfigHandle<T extends BaseConfig> extends ConfigH
         this.doSave();
     }
 
-    public void doSave() {
+    public void doSave() throws ConfigurateException {
         if (!this.isAttached()) {
             return;
         }
 
-        try {
-            // save from the mapped object --> node
-            this.mapper.save(this.instance, this.node);
+        // save from the mapped object --> node
+        this.mapper.save(this.instance, this.node);
 
-            // before saving this config, remove any values already declared with the same value on the parent
-            if (this.parent != null) {
-                this.removeDuplicates(this.node);
-            }
+        // before saving this config, remove any values already declared with the same value on the parent
+        if (this.parent != null) {
+            this.removeDuplicates(this.node);
+        }
 
-            // save the data to disk
-            this.loader.save(this.node);
+        // save the data to disk
+        this.loader.save(this.node);
 
-            // In order for the removeDuplicates method to function properly, it is extremely
-            // important to avoid running save on parent BEFORE children save. Doing so will
-            // cause duplicate nodes to not be removed as parent would have cleaned up
-            // all duplicates prior.
-            // While this issue would only occur when there are multiple levels of inheritance,
-            // which we don't currently have, there's no harm in supporting it anyways.
-            // To handle the above issue, we save AFTER saving child config.
-            if (this.parent != null) {
-                this.parent.doSave();
-            }
-        } catch (final ConfigurateException e) {
-            SpongeConfigs.LOGGER.error("Failed to save configuration", e);
+        // In order for the removeDuplicates method to function properly, it is extremely
+        // important to avoid running save on parent BEFORE children save. Doing so will
+        // cause duplicate nodes to not be removed as parent would have cleaned up
+        // all duplicates prior.
+        // While this issue would only occur when there are multiple levels of inheritance,
+        // which we don't currently have, there's no harm in supporting it anyways.
+        // To handle the above issue, we save AFTER saving child config.
+        if (this.parent != null) {
+            this.parent.doSave();
         }
     }
 

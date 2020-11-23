@@ -24,33 +24,43 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
+import com.google.common.collect.ImmutableSet;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
+import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
-import org.spongepowered.common.applaunch.config.inheritable.GlobalConfig;
-import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
 import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 
 /**
  * Common utility methods for sponge configurations and necessary helpers for early init.
  */
 public final class SpongeConfigs {
 
+
     public static final Blackboard.Key<Boolean> IS_VANILLA_PLATFORM = Blackboard.Key.of("is_vanilla", Boolean.class);
 
+    public static final String GLOBAL_NAME = "global.conf";
     public static final String METRICS_NAME = "metrics.conf";
 
     static final String HEADER = "\n"
@@ -60,23 +70,22 @@ public final class SpongeConfigs {
             + "# Discord: https://discord.gg/sponge\n"
             + "# Forums: https://forums.spongepowered.org/\n";
 
-    static final ObjectMapper.Factory OBJECT_MAPPERS = ObjectMapper.factoryBuilder()
+    public static final ObjectMapper.Factory OBJECT_MAPPERS = ObjectMapper.factoryBuilder()
             .addNodeResolver(NodeResolver.onlyWithSetting())
             .build();
 
-    static final ConfigurationOptions OPTIONS = ConfigurationOptions.defaults()
+    public static final ConfigurationOptions OPTIONS = ConfigurationOptions.defaults()
             .header(HEADER)
             .serializers(collection -> collection.register(TokenHoldingString.SERIALIZER)
                     .registerAnnotatedObjects(OBJECT_MAPPERS));
 
     static final Logger LOGGER = LogManager.getLogger();
 
-    private static final Object initLock = new Object();
+    private static final Lock initLock = new ReentrantLock();
     private static @MonotonicNonNull PluginEnvironment environment;
     private static Path configDir;
 
     private static ConfigHandle<CommonConfig> sponge;
-    private static InheritableConfigHandle<GlobalConfig> global;
 
     public static void initialize(final PluginEnvironment environment) {
         if (SpongeConfigs.environment != null) {
@@ -110,13 +119,16 @@ public final class SpongeConfigs {
      */
     public static ConfigHandle<CommonConfig> getCommon() {
         if (SpongeConfigs.sponge == null) {
-            synchronized (SpongeConfigs.initLock) {
+            SpongeConfigs.initLock.lock();
+            try {
                 if (SpongeConfigs.sponge == null) {
                     // Load global config first so we can migrate over old settings
-                    SpongeConfigs.getGlobalInheritable();
+                    SpongeConfigs.splitFiles();
                     // Then load the actual configuration based on the new file
                     SpongeConfigs.sponge = create(new CommonConfig(), CommonConfig.FILE_NAME);
                 }
+            } finally {
+                SpongeConfigs.initLock.unlock();
             }
         }
         return sponge;
@@ -125,9 +137,12 @@ public final class SpongeConfigs {
 
     // Config-internal
     // everything below here should (mostly) not be directly accessed
-    // unless performing specialized initialization (mostly world loads)
 
     public static HoconConfigurationLoader createLoader(final Path path) {
+        return SpongeConfigs.createLoader(path, SpongeConfigs.OPTIONS);
+    }
+
+    public static HoconConfigurationLoader createLoader(final Path path, final ConfigurationOptions options) {
         // use File for slightly better performance on directory creation
         // Files.exists uses an exception for this :(
         final File parentFile = path.getParent().toFile();
@@ -138,7 +153,7 @@ public final class SpongeConfigs {
         return HoconConfigurationLoader.builder()
             .source(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
             .sink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
-            .defaultOptions(OPTIONS)
+            .defaultOptions(options)
             .build();
     }
 
@@ -149,33 +164,78 @@ public final class SpongeConfigs {
             handle.load();
             return handle;
         } catch (final ConfigurateException ex) {
-            LOGGER.error("Unable to load configuration {}. Sponge will operate in "
+            SpongeConfigs.LOGGER.error("Unable to load configuration {}. Sponge will operate in "
                             + "fallback mode, with default configuration options and will not write to the invalid file", fileName, ex);
             return new ConfigHandle<>(instance);
         }
     }
 
-    @Deprecated // Only world-specific configurations should be accessed, see SpongeGameConfigs
-    public static InheritableConfigHandle<GlobalConfig> getGlobalInheritable() {
-        if (global == null) {
-            synchronized (initLock) {
-                if (global == null) {
-                    try {
-                        global = new InheritableConfigHandle<>(new GlobalConfig(),
-                                createLoader(getDirectory().resolve(GlobalConfig.FILE_NAME)), null);
-                        global.load();
-                    } catch (final ConfigurateException e) {
-                        LOGGER.error("Unable to load global world configuration in {}. Sponge will run with default settings", GlobalConfig.FILE_NAME, e);
-                        global = new InheritableConfigHandle<>(new GlobalConfig(), null);
-                    }
-                }
-            }
-        }
-        return global;
+    // Do the migration to split configuration files into separate files
+
+    private static final NodePath PATH_PREFIX = NodePath.path("sponge");
+
+    // Paths moved to sponge.conf
+    private static final Set<NodePath> MIGRATE_SPONGE_PATHS = Stream.of(
+            NodePath.path("world", "auto-player-save-interval"),
+            NodePath.path("world", "leaf-decay"),
+            NodePath.path("world", "game-profile-query-task-interval"),
+            NodePath.path("world", "invalid-lookup-uuids"),
+            NodePath.path("general"),
+            NodePath.path("sql"),
+            NodePath.path("commands"),
+            NodePath.path("permission"),
+            NodePath.path("modules"),
+            NodePath.path("ip-sets"),
+            NodePath.path("bungeecord"),
+            NodePath.path("exploits"),
+            NodePath.path("optimizations"),
+            NodePath.path("cause-tracker"),
+            NodePath.path("teleport-helper"),
+            NodePath.path("broken-mods"),
+            NodePath.path("service-registration"),
+            NodePath.path("debug"),
+            NodePath.path("timings"))
+        .map(SpongeConfigs::applySpongePrefix)
+        .collect(ImmutableSet.toImmutableSet());
+
+    // Paths moved to metrics.conf
+    private static final Set<NodePath> MIGRATE_METRICS_PATHS = ImmutableSet.of(
+            NodePath.path("sponge", "metrics"));
+
+    // TODO(zml): Replace with NodePath.plus when updating to Configurate 4.1.0
+    private static NodePath applySpongePrefix(final NodePath input) {
+        final Object[] src = input.array();
+        final Object[] target = new Object[input.size() + 1];
+        target[0] = "sponge";
+        System.arraycopy(src, 0, target, 1, src.length);
+        return NodePath.of(target);
     }
 
-    public static InheritableConfigHandle<WorldConfig> createDetached() {
-        return new InheritableConfigHandle<>(new WorldConfig(), SpongeConfigs.getGlobalInheritable());
+    private static void splitFiles() {
+        final Path commonFile = SpongeConfigs.getDirectory().resolve(CommonConfig.FILE_NAME);
+        final Path metricsFile = SpongeConfigs.getDirectory().resolve(SpongeConfigs.METRICS_NAME);
+        final Path oldGlobalFile = SpongeConfigs.getDirectory().resolve(SpongeConfigs.GLOBAL_NAME);
+
+        // Is this migration unnecessary?
+        if (!Files.exists(oldGlobalFile) || Files.exists(commonFile) || Files.exists(metricsFile)) {
+            return;
+        }
+
+        final ConfigurationTransformation xform = ConfigurationTransformation.chain(
+                new FileMovingConfigurationTransformation(MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile), true),
+                new FileMovingConfigurationTransformation(MIGRATE_METRICS_PATHS, SpongeConfigs.createLoader(metricsFile), true));
+        final ConfigurationLoader<CommentedConfigurationNode> globalLoader = createLoader(oldGlobalFile);
+
+        try {
+            Files.copy(oldGlobalFile, oldGlobalFile.resolveSibling(SpongeConfigs.GLOBAL_NAME + ".old-backup"));
+            final CommentedConfigurationNode source = globalLoader.load();
+            xform.apply(source);
+            globalLoader.save(source);
+            SpongeConfigs.LOGGER.info("Migrated Sponge configuration to 1.15+ split-file layout");
+        } catch (final IOException ex) {
+            SpongeConfigs.LOGGER.error("An error occurred while trying to migrate to a split-file configuration layout", ex);
+        }
+
     }
 
     private SpongeConfigs() {

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.inheritable;
+package org.spongepowered.common.config.inheritable;
 
 
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;

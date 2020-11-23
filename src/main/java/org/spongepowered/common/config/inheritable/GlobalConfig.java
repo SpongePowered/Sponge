@@ -22,36 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.inheritable;
+package org.spongepowered.common.config.inheritable;
 
-import org.spongepowered.configurate.objectmapping.meta.Comment;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
-import java.util.ArrayList;
-import java.util.List;
+public final class GlobalConfig extends BaseConfig {
 
-@ConfigSerializable
-public final class PlayerBlockTracker {
+    public static final String FILE_NAME = SpongeConfigs.GLOBAL_NAME;
 
-    @Setting("enabled")
-    @Comment("If 'true', adds player tracking support for block positions. \n"
-             + "Note: This should only be disabled if you do not care who caused a block to change.")
-    private boolean enabled = true;
-
-    @Setting("block-blacklist")
-    @Comment("Block IDs that will be blacklisted for player block placement tracking.")
-    private List<String> blockBlacklist = new ArrayList<>();
-
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
-    public void setEnabled(final boolean flag) {
-        this.enabled = flag;
-    }
-
-    public List<String> getBlockBlacklist() {
-        return this.blockBlacklist;
-    }
 }

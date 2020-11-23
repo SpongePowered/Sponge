@@ -22,37 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.inheritable;
+package org.spongepowered.common.config.inheritable;
 
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ConfigSerializable
-public class MovementChecksCategory {
+public final class PlayerBlockTracker {
 
-    @Setting("player-moved-too-quickly")
-    @Comment("Controls whether the 'player moved too quickly!' check will be enforced")
-    private boolean playerMovedTooQuickly = true;
+    @Setting("enabled")
+    @Comment("If 'true', adds player tracking support for block positions. \n"
+             + "Note: This should only be disabled if you do not care who caused a block to change.")
+    private boolean enabled = true;
 
-    @Setting("player-vehicle-moved-too-quickly")
-    @Comment("Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
-    private boolean playerVehicleMovedTooQuickly = true;
+    @Setting("block-blacklist")
+    @Comment("Block IDs that will be blacklisted for player block placement tracking.")
+    private List<String> blockBlacklist = new ArrayList<>();
 
-    @Setting("moved-wrongly")
-    @Comment("Controls whether the 'player/entity moved wrongly!' check will be enforced")
-    private boolean movedWrongly = true;
-
-    public boolean playerMovedTooQuickly() {
-        return this.playerMovedTooQuickly;
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
-    public boolean playerVehicleMovedTooQuickly() {
-        return this.playerVehicleMovedTooQuickly;
+    public void setEnabled(final boolean flag) {
+        this.enabled = flag;
     }
 
-    public boolean movedWrongly() {
-        return this.movedWrongly;
+    public List<String> getBlockBlacklist() {
+        return this.blockBlacklist;
     }
-
 }

@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.inheritable;
+package org.spongepowered.common.config.inheritable;
 
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.configurate.transformation.TransformAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,10 +111,7 @@ public abstract class BaseConfig implements Config {
 
     protected ConfigurationTransformation buildOneToTwo() {
         return ConfigurationTransformation.builder()
-                .addAction(NodePath.path("world", "portal-agents"), (path, value) -> {
-                    value.set(null);
-                    return null;
-                })
+                .addAction(NodePath.path("world", "portal-agents"), TransformAction.remove())
                 .build();
     }
 

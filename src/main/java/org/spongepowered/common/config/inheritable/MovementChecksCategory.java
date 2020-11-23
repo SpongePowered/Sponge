@@ -22,7 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.inheritable;
+package org.spongepowered.common.config.inheritable;
 
-public final class WorldConfig extends BaseConfig {
+import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+
+@ConfigSerializable
+public class MovementChecksCategory {
+
+    @Setting("player-moved-too-quickly")
+    @Comment("Controls whether the 'player moved too quickly!' check will be enforced")
+    private boolean playerMovedTooQuickly = true;
+
+    @Setting("player-vehicle-moved-too-quickly")
+    @Comment("Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
+    private boolean playerVehicleMovedTooQuickly = true;
+
+    @Setting("moved-wrongly")
+    @Comment("Controls whether the 'player/entity moved wrongly!' check will be enforced")
+    private boolean movedWrongly = true;
+
+    public boolean playerMovedTooQuickly() {
+        return this.playerMovedTooQuickly;
+    }
+
+    public boolean playerVehicleMovedTooQuickly() {
+        return this.playerVehicleMovedTooQuickly;
+    }
+
+    public boolean movedWrongly() {
+        return this.movedWrongly;
+    }
+
 }

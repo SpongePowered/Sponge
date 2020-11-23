@@ -59,10 +59,9 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.applaunch.config.core.InheritableConfigHandle;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.applaunch.config.inheritable.WorldConfig;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
@@ -93,7 +92,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     @Nullable private UUID impl$uniqueId;
 
     private SpongeDimensionType impl$logicType;
-    private InheritableConfigHandle<WorldConfig> impl$configAdapter = SpongeConfigs.createDetached();
+    private InheritableConfigHandle<WorldConfig> impl$configAdapter = SpongeGameConfigs.createDetached();
     private boolean impl$modCreated;
 
     private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
@@ -329,7 +328,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
             if (this.bridge$isValid()) {
                 return SpongeGameConfigs.createWorld(this.bridge$getLogicType(), this.bridge$getKey());
             } else {
-                return SpongeConfigs.createDetached();
+                return SpongeGameConfigs.createDetached();
             }
         }
         return this.impl$configAdapter;

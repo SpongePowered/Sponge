@@ -22,35 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.config.inheritable;
+package org.spongepowered.common.config.inheritable;
 
-import org.spongepowered.configurate.objectmapping.meta.Comment;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-
-import java.util.HashMap;
-import java.util.Map;
-
-@ConfigSerializable
-public final class EntityActivationModCategory {
-
-    @Setting("enabled")
-    @Comment("If 'false', entity activation rules for this mod will be ignored and always tick.")
-    private boolean isEnabled = true;
-    @Setting("defaults")
-    private Map<String, Integer> defaultRanges = new HashMap<>();
-    @Setting("entities")
-    private Map<String, Integer> entityList = new HashMap<>();
-
-    public boolean isEnabled() {
-        return this.isEnabled;
-    }
-
-    public Map<String, Integer> getDefaultRanges() {
-        return this.defaultRanges;
-    }
-
-    public Map<String, Integer> getEntityList() {
-        return this.entityList;
-    }
+public final class WorldConfig extends BaseConfig {
 }
