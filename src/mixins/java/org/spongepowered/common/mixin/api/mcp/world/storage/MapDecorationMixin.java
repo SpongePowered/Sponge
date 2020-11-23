@@ -25,7 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.world.storage;
 
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapDecoration;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,6 +35,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.util.Constants;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Mixin(MapDecoration.class)
@@ -41,6 +45,7 @@ public class MapDecorationMixin implements MapDecorationBridge {
 	// If should save to disk
 	private boolean impl$isPersistent;
 	private String impl$key = Constants.Map.DECORATION_KEY_PREFIX + UUID.randomUUID().toString();
+	private Set<MapData> impl$attachedMapDatas = new HashSet<>();
 
 	@Inject(method = "<init>", at = @At("RETURN"))
 	public void impl$setPersistenceOnInit(MapDecoration.Type typeIn, byte x, byte y, byte rot, ITextComponent name, CallbackInfo ci) {
@@ -82,5 +87,25 @@ public class MapDecorationMixin implements MapDecorationBridge {
 	@Override
 	public String bridge$getKey() {
 		return this.impl$key;
+	}
+
+	@Override
+	public void notifyAddedToMap(MapInfo mapInfo) {
+		this.impl$attachedMapDatas.add((MapData) mapInfo);
+	}
+
+	@Override
+	public void notifyRemovedFromMap(MapInfo mapInfo) {
+		this.impl$attachedMapDatas.remove((MapData) mapInfo);
+	}
+
+	@Override
+	public void bridge$markAllDirty() {
+		if (!this.impl$isPersistent) {
+			return;
+		}
+		for (MapData mapData : this.impl$attachedMapDatas) {
+			mapData.markDirty();
+		}
 	}
 }
