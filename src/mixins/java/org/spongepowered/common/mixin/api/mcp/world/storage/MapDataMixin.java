@@ -28,6 +28,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.world.storage.MapDecoration;
 import net.minecraft.world.storage.WorldSavedData;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -81,13 +82,20 @@ public abstract class MapDataMixin extends WorldSavedData implements MapDataBrid
         this.shadow$updateMapData(Constants.Map.MAP_MAX_INDEX, Constants.Map.MAP_MAX_INDEX);
     }
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Override
     public void bridge$setDecorations(final Set<org.spongepowered.api.map.decoration.MapDecoration> newDecorations) {
         this.mapDecorations.clear();
-        newDecorations.stream()
-                .map(decoration -> (MapDecoration)decoration)
-                .forEach(this::impl$addDecorationToDecorationsMap);
-        this.markDirty();
+        for (org.spongepowered.api.map.decoration.MapDecoration decoration : newDecorations) {
+            this.impl$addDecorationToDecorationsMapIfNotExists((MapDecoration) decoration);
+        }
+        for (MapDecoration existingDecoration : this.mapDecorations.values()) {
+            if (!newDecorations.contains(existingDecoration)) {
+                // Removed.
+                ((MapDecorationBridge)existingDecoration).notifyRemovedFromMap((MapInfo) this);
+                this.markDirty();
+            }
+        }
     }
 
     @Override
@@ -150,14 +158,18 @@ public abstract class MapDataMixin extends WorldSavedData implements MapDataBrid
         if (decorationsList != null) {
             for (int i = 0; i < decorationsList.size(); i++) {
                 final CompoundNBT decorationNbt = (CompoundNBT) decorationsList.get(i);
-                this.impl$addDecorationToDecorationsMap(MapUtil.mapDecorationFromNBT(decorationNbt));
+                this.impl$addDecorationToDecorationsMapIfNotExists(MapUtil.mapDecorationFromNBT(decorationNbt));
             }
         }
     }
 
-    public void impl$addDecorationToDecorationsMap(final MapDecoration mapDecoration) {
+    public void impl$addDecorationToDecorationsMapIfNotExists(final MapDecoration mapDecoration) {
         MapDecorationBridge bridge = (MapDecorationBridge)mapDecoration;
         bridge.bridge$setPersistent(true); // Anything saved should be persistent so it can save next time too.
+        if (this.mapDecorations.containsKey(bridge.bridge$getKey())) {
+            return;
+        }
+        ((MapDecorationBridge)mapDecoration).notifyAddedToMap((MapInfo) this);
         this.mapDecorations.put(bridge.bridge$getKey(), mapDecoration);
         this.markDirty();
     }

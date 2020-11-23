@@ -65,11 +65,13 @@ public class MapDecorationMixin_API implements org.spongepowered.api.map.decorat
         Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.getY()), "y position out of bounds");
         this.x = (byte) position.getX();
         this.y = (byte) position.getY();
+        ((MapDecorationBridge)this).bridge$markAllDirty();
     }
 
     @Override
     public void setRotation(MapDecorationOrientation dir) {
         this.rotation = (byte) ((SpongeMapDecorationOrientation)dir).getOrientationNumber();
+        ((MapDecorationBridge)this).bridge$markAllDirty();
     }
 
     @Override

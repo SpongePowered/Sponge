@@ -24,13 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.mcp.map;
 
+import com.google.common.base.Preconditions;
+import net.minecraft.block.BannerBlock;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.storage.MapBanner;
 import net.minecraft.world.storage.MapData;
 import net.minecraft.world.storage.MapDecoration;
+import net.minecraft.world.storage.WorldSavedData;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,18 +47,38 @@ import org.spongepowered.common.bridge.world.storage.MapDataBridge;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.Constants;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @Mixin(MapData.class)
-public class MapInfoMixin_API implements MapInfo, SpongeMutableDataHolder {
+public abstract class MapInfoMixin_API extends WorldSavedData implements MapInfo, SpongeMutableDataHolder {
+
+    @Shadow @Final private Map<String, MapBanner> banners;
+
+    public MapInfoMixin_API(String name) {
+        super(name);
+    }
+
+    @Shadow protected abstract void updateDecorations(MapDecoration.Type type, @Nullable IWorld worldIn, String decorationName, double worldX, double worldZ, double rotationIn, @Nullable ITextComponent p_191095_10_);
 
     @Override
     public boolean isLinked(final ItemStack itemStack) {
         return itemStack.getType() == ItemTypes.FILLED_MAP.get()
                 && itemStack.get(Keys.MAP_INFO).isPresent() && itemStack.get(Keys.MAP_INFO).get() == this;
+    }
+
+    @Override
+    public void addBannerDecoration(final Location<?> bannerLocation) throws IllegalArgumentException {
+        final BlockState blockState = bannerLocation.getBlock();
+        Preconditions.checkArgument(blockState instanceof BannerBlock, "Location must have a banner!");
+        final BannerBlock bannerBlock = (BannerBlock) blockState;
+        final MapBanner mapBanner = new MapBanner((BlockPos) bannerLocation, bannerBlock.getColor(), bannerBlock.getNameTextComponent());
+        this.banners.put(mapBanner.getMapDecorationId(), mapBanner);
+        this.updateDecorations(mapBanner.getDecorationType(), (IWorld)null, mapBanner.getMapDecorationId(), (double)mapBanner.getPos().getX(), (double)mapBanner.getPos().getZ(), 180.0D, mapBanner.getName());
+        this.markDirty();
     }
 
     @Override

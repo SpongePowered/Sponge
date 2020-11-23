@@ -24,6 +24,7 @@
  */
 package org.spongepowered.test;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -435,6 +436,38 @@ public class MapTest implements LoadableModule {
                 throw new CommandException(Component.text("You must hold a map in your hand"));
             }
             heldMap.require(Keys.MAP_INFO).offer(Keys.MAP_UNLIMITED_TRACKING, true);
+            return CommandResult.success();
+        }, event);
+
+        this.createDefaultCommand("addnameddecoration", ctx -> {
+            final Player player = this.requirePlayer(ctx);
+            final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
+            if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+                throw new CommandException(Component.text("You must hold a map in your hand"));
+            }
+            MapDecoration decoration = MapDecoration.builder()
+                    .type(MapDecorationTypes.BLUE_MARKER)
+                    .customName(Component.text("I AM A BLOO MARKER"))
+                    .rotation(MapDecorationOrientations.NORTH)
+                    .build();
+            heldMap.require(Keys.MAP_INFO).offer(Keys.MAP_DECORATIONS, Sets.newHashSet(decoration));
+            return CommandResult.success();
+        }, event);
+
+        this.createDefaultCommand("addworldbanner", ctx -> {
+            final Player player = this.requirePlayer(ctx);
+            final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
+            if (heldMap.getType() == ItemTypes.FILLED_MAP.get()) {
+                throw new CommandException(Component.text("You must hold a map in your hand"));
+            }
+            MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
+            try {
+                mapInfo.addBannerDecoration(player.getLocation());
+            } catch (IllegalArgumentException e) {
+                throw new CommandException(Component.text(e.getMessage()));
+            }
+
+
             return CommandResult.success();
         }, event);
     }
