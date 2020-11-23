@@ -101,6 +101,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("creator"), TypeTokens.UUID_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("current_spell"), TypeTokens.SPELL_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("custom_attack_damage"), TypeTokens.MAP_ENTITY_TYPE_DOUBLE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("custom_model_data"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("custom_name"), TypeTokens.COMPONENT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("damage_absorption"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("damage_per_block"), TypeTokens.DOUBLE_VALUE_TOKEN));

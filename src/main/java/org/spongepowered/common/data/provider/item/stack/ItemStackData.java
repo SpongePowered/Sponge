@@ -121,6 +121,24 @@ public final class ItemStackData {
                             }
                             return false;
                         })
+                    .create(Keys.CUSTOM_MODEL_DATA)
+                        .get(h -> {
+                            final CompoundNBT tag = h.getTag();
+                            if (tag == null || !tag.contains(Constants.Item.CUSTOM_MODEL_DATA, Constants.NBT.TAG_INT)) {
+                                return null;
+                            }
+                            return tag.getInt(Constants.Item.CUSTOM_MODEL_DATA);
+                        })
+                        .set((h, v) -> {
+                            final CompoundNBT tag = h.getOrCreateTag();
+                            tag.putInt(Constants.Item.CUSTOM_MODEL_DATA, v);
+                        })
+                        .delete(h -> {
+                            final CompoundNBT tag = h.getTag();
+                            if (tag != null) {
+                                tag.remove(Constants.Item.CUSTOM_MODEL_DATA);
+                            }
+                        })
                     .create(Keys.CUSTOM_NAME)
                         .get(h -> h.hasDisplayName() ? SpongeAdventure.asAdventure(h.getDisplayName()) : null)
                         .set((h, v) -> h.setDisplayName(SpongeAdventure.asVanilla(v)))
