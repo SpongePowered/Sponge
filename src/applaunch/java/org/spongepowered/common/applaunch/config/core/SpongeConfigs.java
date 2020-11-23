@@ -40,6 +40,8 @@ import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -134,7 +136,8 @@ public final class SpongeConfigs {
         }
 
         return HoconConfigurationLoader.builder()
-            .path(path)
+            .source(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
+            .sink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
             .defaultOptions(OPTIONS)
             .build();
     }
