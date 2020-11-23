@@ -182,6 +182,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
             ServerWorld destinationWorld = (net.minecraft.world.server.ServerWorld) location.getWorld();
 
+            Vector3d toPosition;
+
             if (this.shadow$getServerWorld() != destinationWorld) {
                 final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
                         (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getServerWorld(),
@@ -202,8 +204,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
                 destinationWorld = (net.minecraft.world.server.ServerWorld) event.getDestinationWorld();
 
-                this.shadow$setPosition(repositionEvent.getDestinationPosition().getX(), repositionEvent.getDestinationPosition().getY(),
-                        repositionEvent.getDestinationPosition().getZ());
+                toPosition = repositionEvent.getDestinationPosition();
             } else {
                 final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
                         (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$getPositionVector()),
@@ -212,27 +213,26 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                     return false;
                 }
 
-                this.shadow$setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(), event.getDestinationPosition().getZ());
+                toPosition = event.getDestinationPosition();
             }
 
             ((ServerPlayerEntity) (Object) this).stopRiding();
-            ((ServerPlayerEntity) (Object) this).setSpectatingEntity((Entity) (Object) this);
 
             if (((ServerPlayerEntity) (Object) this).isSleeping()) {
                 ((ServerPlayerEntity) (Object) this).stopSleepInBed(true, true);
             }
 
-            final ChunkPos chunkPos = new ChunkPos((int) this.shadow$getPosX() >> 4, (int) this.shadow$getPosZ() >> 4);
+            final ChunkPos chunkPos = new ChunkPos((int) toPosition.getX() >> 4, (int) toPosition.getZ() >> 4);
             destinationWorld.getChunkProvider().registerTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((ServerPlayerEntity) (Object) this).getEntityId());
-            ((ServerPlayerEntity) (Object) this).stopRiding();
 
             if (this.shadow$getServerWorld() != destinationWorld) {
+                this.shadow$setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw, this.rotationPitch);
+
                 EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) (Object) this, this.shadow$getServerWorld(),
                         (net.minecraft.world.server.ServerWorld) location.getWorld(), destinationWorld, false);
             } else {
-                this.connection.setPlayerLocation(this.shadow$getPosX(), this.shadow$getPosY(), this.shadow$getPosZ(), this.rotationYaw,
+                this.connection.setPlayerLocation(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw,
                         this.rotationPitch);
-                this.connection.captureCurrentPosition();
             }
         }
 

@@ -167,6 +167,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract void shadow$setFlag(int flag, boolean set);
     // @formatter:on
 
+    @Shadow public abstract void shadow$setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
+
     private boolean impl$isConstructing = true;
     private boolean impl$untargetable = false;
     private boolean impl$isVanished = false;

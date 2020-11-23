@@ -153,6 +153,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Shadow public abstract void shadow$addStat(ResourceLocation stat);
     // @formatter: on
 
+    @Shadow public float prevCameraYaw;
     private boolean impl$affectsSpawning = true;
     private Vector3d impl$targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
     private boolean impl$shouldRestoreInventory = false;
