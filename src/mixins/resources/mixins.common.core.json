@@ -17,6 +17,7 @@
         "advancements.FunctionManagerMixin",
         "advancements.ICriterionTrigger_ListenerMixin",
         "advancements.PlayerAdvancementsMixin",
+        "adventure.KeyMixin",
         "adventure.bossbar.BossBarImplMixin",
         "adventure.text.AbstractComponentMixin",
         "adventure.text.format.StyleImplMixin",
@@ -86,9 +87,13 @@
         "network.rcon.RConConsoleSourceMixin",
         "particles.ParticleTypeMixin",
         "particles.ParticleTypesMixin",
+        "scoreboard.ScoreboardMixin",
+        "scoreboard.ScoreCriteriaMixin",
         "scoreboard.ScoreMixin",
+        "scoreboard.ServerScoreboardMixin",
         "server.CustomServerBossInfoMixin",
         "server.MinecraftServerMixin",
+        "server.management.PlayerInteractionManagerMixin",
         "server.management.PlayerListMixin",
         "server.management.PlayerProfileCache_ProfileEntryMixin",
         "server.management.PlayerProfileCacheMixin",
@@ -135,10 +140,7 @@
         "world.server.ServerWorldMixin",
         "world.spawner.AbstractSpawnerMixin",
         "world.storage.SaveHandlerMixin",
-        "world.storage.WorldInfoMixin",
-        "server.management.PlayerInteractionManagerMixin",
-        "scoreboard.ServerScoreboardMixin",
-        "adventure.KeyMixin"
+        "world.storage.WorldInfoMixin"
     ],
     "client": [
         "client.MinecraftMixin",

@@ -22,35 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.scoreboard;
+package org.spongepowered.common.mixin.core.scoreboard;
 
-import com.google.common.base.CaseFormat;
 import net.minecraft.scoreboard.ScoreCriteria;
-import net.minecraft.scoreboard.ScoreCriteriaColored;
-import net.minecraft.scoreboard.ScoreCriteria_Old;
-import org.spongepowered.api.scoreboard.criteria.Criterion;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 
-import javax.annotation.Nullable;
+@Mixin(ScoreCriteria.class)
+public abstract class ScoreCriteriaMixin implements ResourceKeyBridge {
 
-@Mixin(value = {ScoreCriteriaColored.class, ScoreCriteria_Old.class})
-@Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
-public abstract class CriterionMixin_API implements ScoreCriteria { // Trick to allow avoid shadowing, since multiple targets are used
+    private ResourceKey impl$key;
 
-    @Nullable private String spongeId;
-
-    @Intrinsic
-    public String criterion$getName() {
-        return this.getName();
+    @Override
+    public ResourceKey bridge$getKey() {
+        return this.impl$key;
     }
 
-    public String criterion$getId() {
-        if (this.spongeId == null) {
-            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s"));
-        }
-        return this.spongeId;
+    @Override
+    public void bridge$setKey(final ResourceKey key) {
+        this.impl$key = key;
     }
 }

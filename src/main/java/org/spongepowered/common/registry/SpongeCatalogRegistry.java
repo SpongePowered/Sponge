@@ -40,6 +40,7 @@ import net.minecraft.entity.passive.PandaEntity;
 import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemTier;
+import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.state.properties.ChestType;
 import net.minecraft.state.properties.DoorHingeSide;
@@ -150,17 +151,17 @@ import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
@@ -184,6 +185,7 @@ import org.spongepowered.common.registry.builtin.sponge.ClickTypeStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionKeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.CriterionStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.DamageModifierTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
@@ -565,6 +567,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(ClientCompletionType.class, ResourceKey.sponge("client_completion_type"), ClientCompletionTypeStreamGenerator.stream(), true, false)
             .generateRegistry(CollisionRule.class, ResourceKey.minecraft("collision_rule"), Arrays.stream(Team.CollisionRule.values()), true, false)
             .generateRegistry(ComparatorMode.class, ResourceKey.minecraft("comparator_mode"), Arrays.stream(net.minecraft.state.properties.ComparatorMode.values()), true, false)
+            .generateRegistry(Criterion.class, ResourceKey.sponge("criterion"), CriterionStreamGenerator.stream(), true, false)
             .registerRegistry(Currency.class, ResourceKey.sponge("currency"), true)
             .generateRegistry(DamageModifierType.class, ResourceKey.sponge("damage_modifier_type"), DamageModifierTypeStreamGenerator.stream(), true, true)
             .generateRegistry(DamageType.class, ResourceKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true, true)
@@ -597,6 +600,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(MooshroomType.class, ResourceKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true, false)
             .generateRegistry(MovementType.class, ResourceKey.sponge("movement_type"), MovementTypeStreamGenerator.stream(), true, true)
             .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true, false)
+            .generateRegistry(ObjectiveDisplayMode.class, ResourceKey.sponge("objective_display_mode"), Arrays.stream(ScoreCriteria.RenderType.values()),true, false)
             .generateRegistry(PaletteType.class, ResourceKey.sponge("palette"), PaletteTypeStreamGenerator.stream(), true, true)
             .generateRegistry(PandaGene.class, ResourceKey.minecraft("panda_gene"), Arrays.stream(PandaEntity.Type.values()), true, false)
             .generateRegistry(ParticleOption.class, ResourceKey.sponge("particle_option"), ParticleOptionStreamGenerator.stream(), true, false)
@@ -640,7 +644,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateMappedRegistry(ParrotType.class, ResourceKey.minecraft("parrot_type"), ParrotTypeStreamGenerator.stream(), true, false)
             .generateMappedRegistry(RabbitType.class, ResourceKey.minecraft("rabbit_type"), RabbitTypeStreamGenerator.stream(), true, false)
             .generateMappedRegistry(DataTranslator.class, ResourceKey.sponge("data_translator"), DataSerializers.stream(), true, false)
-            .generateMappedRegistry(DisplaySlot.class, ResourceKey.minecraft("display_slot"), DisplaySlotStreamGenerator.stream(), true, false)
+            .generateMappedRegistry(DisplaySlot.class, ResourceKey.sponge("display_slot"), DisplaySlotStreamGenerator.stream(), true, false)
         ;
 
         this.registerRegistry(SpongeDataRegistration.class, ResourceKey.sponge("data_registration"), (Registry) this.getRegistry(DataRegistration.class));

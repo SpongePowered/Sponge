@@ -182,9 +182,8 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
     }
 
     @Override
-    public Entity createEntity(final EntityType<?> type) {
+    public <E extends Entity> E createEntity(final EntityType<E> type) {
         return this.getWorld().createEntity(type, this.getPosition());
-
     }
 
     @Override
@@ -195,7 +194,6 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
     @Override
     public Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
         return this.getWorld().spawnEntities(entities);
-
     }
 
     @Override
@@ -206,7 +204,6 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
     @Override
     public BlockSnapshot createSnapshot() {
         return this.getWorld().createSnapshot(this.getBlockPosition());
-
     }
 
     @Override
@@ -220,9 +217,7 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
     }
 
     @Override
-    public ScheduledUpdate<BlockType> scheduleBlockUpdate(final int delay, final TemporalUnit temporalUnit,
-        final TaskPriority priority
-    ) {
+    public ScheduledUpdate<BlockType> scheduleBlockUpdate(final int delay, final TemporalUnit temporalUnit, final TaskPriority priority) {
         throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
     }
 

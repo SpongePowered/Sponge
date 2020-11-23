@@ -22,24 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.adventure;
+package org.spongepowered.common.mixin.api.mcp.scoreboard;
 
-import net.kyori.adventure.key.Key;
-import net.minecraft.util.ResourceLocation;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.minecraft.scoreboard.ScoreCriteria;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
+import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 
-@Mixin(value = Key.class, remap = false)
-public interface KeyMixin {
+@Mixin(ScoreCriteria.class)
+public abstract class ScoreCriteriaMixin_API implements Criterion {
 
-    /**
-     * @author zidane - November 22nd, 2020 - Minecraft 1.15
-     * @reason Make Kyori key instances be Minecraft resource locations
-     */
-    @Overwrite
-    static @NonNull Key key(final @NonNull String namespace, final @NonNull String value) {
-        return (ResourceKey) (Object) new ResourceLocation(namespace, value);
+    // @formatter:off
+    @Shadow public abstract ScoreCriteria.RenderType shadow$getRenderType();
+    // @formatter:on
+
+    @Override
+    public ResourceKey getKey() {
+        return ((ResourceKeyBridge) this).bridge$getKey();
+    }
+
+    @Override
+    public ObjectiveDisplayMode getDisplayMode() {
+        return (ObjectiveDisplayMode) (Object) this.shadow$getRenderType();
     }
 }
