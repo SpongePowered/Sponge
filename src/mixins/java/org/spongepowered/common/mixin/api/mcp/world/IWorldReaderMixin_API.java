@@ -79,6 +79,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 @Mixin(IWorldReader.class)
 @Implements(@Interface(iface = ReadableRegion.class, prefix = "readable$"))
@@ -232,7 +233,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         } else {
             backingVolume = null;
         }
-        return VolumeStreamUtils.<R, BiomeType, Biome, Chunk, BlockPos>generateStream(
+        return VolumeStreamUtils.<R, BiomeType, Biome, IChunk, BlockPos>generateStream(
             min,
             max,
             options,
@@ -273,7 +274,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         } else {
             backingVolume = null;
         }
-        return VolumeStreamUtils.<R, BlockState, net.minecraft.block.BlockState, Chunk, BlockPos>generateStream(
+        return VolumeStreamUtils.<R, BlockState, net.minecraft.block.BlockState, IChunk, BlockPos>generateStream(
             min,
             max,
             options,
@@ -313,7 +314,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         } else {
             backingVolume = null;
         }
-        return VolumeStreamUtils.<R, BlockEntity, TileEntity, Chunk, BlockPos>generateStream(
+        return VolumeStreamUtils.<R, BlockEntity, TileEntity, IChunk, BlockPos>generateStream(
             min,
             max,
             options,
@@ -334,7 +335,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
             // TileEntity by block pos
             (key, tileEntity) -> key,
             // TileEntity Accessor
-            (chunk) -> chunk.getTileEntityMap().entrySet().stream(),
+            (chunk) -> chunk instanceof Chunk ? ((Chunk) chunk).getTileEntityMap().entrySet().stream() : Stream.empty(),
             // Filtered Position TileEntity Accessor
             (blockPos, world) -> {
                 final @Nullable TileEntity tileEntity = shouldCarbonCopy
@@ -358,7 +359,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         } else {
             backingVolume = null;
         }
-        return VolumeStreamUtils.<R, Entity, net.minecraft.entity.Entity, Chunk, UUID>generateStream(
+        return VolumeStreamUtils.<R, Entity, net.minecraft.entity.Entity, IChunk, UUID>generateStream(
             min,
             max,
             options,
@@ -380,7 +381,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
             // Entity -> UniqueID
             (key, entity) -> entity.getUniqueID(),
             // Entity Accessor
-            (chunk) -> Arrays.stream(chunk.getEntityLists())
+            (chunk) -> chunk instanceof Chunk ? Stream.empty() : Arrays.stream(((Chunk) chunk).getEntityLists())
                     .flatMap(Collection::stream)
                     .map(entity -> new AbstractMap.SimpleEntry<>(entity.getPosition(), entity))
             ,

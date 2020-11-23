@@ -44,6 +44,8 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -533,12 +535,16 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         // Otherwise, let's go on and check if we're recording transactions,
         // and if so, log the tile entity removal (may associate with an existing transaction,
         // or create a new transaction.
-        final PhaseContext<?> current = PhaseTracker.SERVER.getPhaseContext();
+        final PhaseContext<@NonNull ?> current = PhaseTracker.SERVER.getPhaseContext();
         final IPhaseState state = current.state;
         if (state.doesBlockEventTracking(current)) {
             final BlockPos immutable = tileEntity.getPos().toImmutable();
             if (tileEntity.getWorld() != (ServerWorld) (Object) this) {
                 tileEntity.setWorldAndPos((ServerWorld) (Object) this, immutable);
+            }
+            final IChunk iChunk = this.shadow$getChunk(immutable.getX() >> 4, immutable.getZ() >> 4, ChunkStatus.FULL, false);
+            if (!(iChunk instanceof Chunk)) {
+                return super.shadow$addTileEntity(tileEntity);
             }
             final Chunk chunk = this.shadow$getChunkAt(immutable);
             if (current.getTransactor().logTileAddition(tileEntity, () -> (ServerWorld) (Object) this, chunk)) {

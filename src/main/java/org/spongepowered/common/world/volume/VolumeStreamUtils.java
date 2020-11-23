@@ -30,6 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -80,7 +81,7 @@ public final class VolumeStreamUtils {
         };
     }
 
-    public static <R extends ReadableRegion<R>> BiFunction<R, ChunkPos, @Nullable Chunk> getChunkAccessorByStatus(
+    public static <R extends ReadableRegion<R>> BiFunction<R, ChunkPos, @Nullable IChunk> getChunkAccessorByStatus(
         final IWorldReader worldReader,
         final boolean shouldGenerate
     ) {
@@ -92,7 +93,7 @@ public final class VolumeStreamUtils {
             if (shouldGenerate) {
                 Objects.requireNonNull(ichunk, "Chunk was expected to load fully and generate, but somehow got a null chunk!");
             }
-            return (Chunk) ichunk;
+            return (IChunk) ichunk;
         };
     }
 
@@ -102,13 +103,13 @@ public final class VolumeStreamUtils {
      * @param min
      * @param max
      */
-    public static Function<Chunk, Stream<Map.Entry<BlockPos, Biome>>> getBiomesForChunkByPos(final Vector3i min,
+    public static Function<IChunk, Stream<Map.Entry<BlockPos, Biome>>> getBiomesForChunkByPos(final Vector3i min,
         final Vector3i max
     ) {
         return VolumeStreamUtils.getElementByPosition(VolumeStreamUtils.chunkSectionBiomeGetter(), min, max);
     }
 
-    public static Function<Chunk, Stream<Map.Entry<BlockPos, BlockState>>> getBlockStatesForSections(
+    public static Function<IChunk, Stream<Map.Entry<BlockPos, BlockState>>> getBlockStatesForSections(
         final Vector3i min,
         final Vector3i max
     ) {
@@ -144,21 +145,29 @@ public final class VolumeStreamUtils {
         Out apply(A a, B b, C c);
     }
 
-    private static TriFunction<Chunk, ChunkSection, BlockPos, Biome> chunkSectionBiomeGetter() {
-        return ((chunk, chunkSection, pos) -> chunk.getBiomes() == null
-            ? chunk.getWorld().getNoiseBiomeRaw(pos.getX(), pos.getY(), pos.getZ())
-            : chunk.getBiomes().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ()));
+    private static TriFunction<IChunk, ChunkSection, BlockPos, Biome> chunkSectionBiomeGetter() {
+        return ((chunk, chunkSection, pos) -> {
+            if (chunk.getBiomes() == null) {
+                if (chunk instanceof Chunk) {
+                    return ((Chunk) chunk).getWorld().getNoiseBiomeRaw(pos.getX(), pos.getY(), pos.getZ());
+                } else {
+                    return Biomes.OCEAN;
+                }
+            }
+            return chunk.getBiomes().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
+        }
+        );
     }
 
-    private static TriFunction<Chunk, ChunkSection, BlockPos, BlockState> chunkSectionBlockStateGetter() {
+    private static TriFunction<IChunk, ChunkSection, BlockPos, BlockState> chunkSectionBlockStateGetter() {
         return ((chunk, chunkSection, pos) -> chunkSection.getBlockState(
             pos.getX() - (chunk.getPos().x << 4),
             pos.getY() & 15,
             pos.getZ() - (chunk.getPos().z << 4)));
     }
 
-    private static <T> Function<Chunk, Stream<Map.Entry<BlockPos, T>>> getElementByPosition(
-        final TriFunction<Chunk, ChunkSection, BlockPos, T> elementAccessor, final Vector3i min,
+    private static <T> Function<IChunk, Stream<Map.Entry<BlockPos, T>>> getElementByPosition(
+        final TriFunction<IChunk, ChunkSection, BlockPos, T> elementAccessor, final Vector3i min,
         final Vector3i max
     ) {
         // Get the mins
