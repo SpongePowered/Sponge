@@ -37,10 +37,12 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * A {@link TypeSerializer} implementation that allows CatalogType values to be used in object-mapped classes.
  */
+@Singleton
 public final class CatalogTypeTypeSerializer implements TypeSerializer<CatalogType> {
     public static final Class<CatalogType> TYPE = CatalogType.class;
 

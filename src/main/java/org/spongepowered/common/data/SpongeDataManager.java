@@ -30,7 +30,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixerBuilder;
-import io.leangen.geantyref.TypeToken;
 import net.minecraft.util.Util;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.ResourceKey;

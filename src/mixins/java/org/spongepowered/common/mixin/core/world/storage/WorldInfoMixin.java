@@ -304,12 +304,12 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public SerializationBehavior bridge$getSerializationBehavior() {
-        return SerializationBehavior.valueOf(this.impl$configAdapter.get().getWorld().getSerializationBehavior().toUpperCase());
+        return this.impl$configAdapter.get().getWorld().getSerializationBehavior();
     }
 
     @Override
     public void bridge$setSerializationBehavior(final SerializationBehavior behavior) {
-        this.impl$configAdapter.get().getWorld().setSerializationBehavior(behavior.name().toLowerCase());
+        this.impl$configAdapter.get().getWorld().setSerializationBehavior(behavior);
     }
 
     @Override
@@ -326,9 +326,9 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     public InheritableConfigHandle<WorldConfig> bridge$getConfigAdapter() {
         if (this.impl$configAdapter == null) {
             if (this.bridge$isValid()) {
-                return SpongeGameConfigs.createWorld(this.bridge$getLogicType(), this.bridge$getKey());
+                this.impl$configAdapter = SpongeGameConfigs.createWorld(this.bridge$getLogicType(), this.bridge$getKey());
             } else {
-                return SpongeGameConfigs.createDetached();
+                this.impl$configAdapter = SpongeGameConfigs.createDetached();
             }
         }
         return this.impl$configAdapter;

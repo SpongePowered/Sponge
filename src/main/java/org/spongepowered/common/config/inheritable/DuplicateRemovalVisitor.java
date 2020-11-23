@@ -90,6 +90,11 @@ final class DuplicateRemovalVisitor implements ConfigurationVisitor.Safe<AtomicR
             return;
         }
 
+        // ignore the version key that's a child of the root node
+        if (Objects.equals(node.key(), "version") && node.parent().parent() == null) {
+            return;
+        }
+
         // if the node already exists in the parent config, remove it
         if (Objects.equals(node.raw(), parentNode.raw())) {
             node.raw(null);

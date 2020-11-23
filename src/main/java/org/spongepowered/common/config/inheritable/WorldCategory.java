@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
@@ -49,7 +50,7 @@ public class WorldCategory {
 
     @Setting("serialization-behavior")
     @Comment("Determines how the server should save data for this world, if at all. Valid options are [automatic, manual, metadata_only, none].")
-    private String serializationBehavior = "automatic";
+    private SerializationBehavior serializationBehavior = SerializationBehavior.AUTOMATIC;
 
     @Setting("load-on-startup")
     @Comment("If 'true', this world will load on startup.")
@@ -149,11 +150,11 @@ public class WorldCategory {
         this.worldEnabled = enabled;
     }
 
-    public String getSerializationBehavior() {
+    public SerializationBehavior getSerializationBehavior() {
         return this.serializationBehavior;
     }
 
-    public void setSerializationBehavior(final String serializationBehavior) {
+    public void setSerializationBehavior(final SerializationBehavior serializationBehavior) {
         this.serializationBehavior = serializationBehavior;
     }
 
