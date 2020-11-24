@@ -34,6 +34,8 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.vanilla.bridge.util.registry.SimpleRegistryBridge;
 
+import java.util.Collection;
+
 @Mixin(SimpleRegistry.class)
 public abstract class SimpleRegistryMixin_Vanilla implements SimpleRegistryBridge {
 
@@ -46,10 +48,10 @@ public abstract class SimpleRegistryMixin_Vanilla implements SimpleRegistryBridg
     @Shadow private int nextFreeId;
 
     @Override
-    public <V> void bridge$remove(final V value) {
+    public <V> void bridge$removeAll(final Collection<V> values) {
         final IntIdentityHashBiMap<Object> map = new IntIdentityHashBiMap<>(this.underlyingIntegerMap.size() - 1);
         for (Object next : this.underlyingIntegerMap) {
-            if (next == value) {
+            if (values.contains(next)) {
                 continue;
             }
 
@@ -57,7 +59,8 @@ public abstract class SimpleRegistryMixin_Vanilla implements SimpleRegistryBridg
         }
 
         this.underlyingIntegerMap = map;
-        this.registryObjects.inverse().remove(value);
+        final BiMap<?, ResourceLocation> inverse = this.registryObjects.inverse();
+        values.forEach(inverse::remove);
 
         this.values = null;
         this.nextFreeId = this.underlyingIntegerMap.size();

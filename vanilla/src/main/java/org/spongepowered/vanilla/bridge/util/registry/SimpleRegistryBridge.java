@@ -24,7 +24,9 @@
  */
 package org.spongepowered.vanilla.bridge.util.registry;
 
+import java.util.Collection;
+
 public interface SimpleRegistryBridge {
 
-    <V> void bridge$remove(V value);
+    <V> void bridge$removeAll(Collection<V> values);
 }

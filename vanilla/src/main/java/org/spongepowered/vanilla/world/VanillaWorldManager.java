@@ -695,9 +695,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             }
         }
 
-        for (final DimensionType dimensionType : customDimensions) {
-            ((SimpleRegistryBridge) Registry.DIMENSION_TYPE).bridge$remove(dimensionType);
-        }
+        ((SimpleRegistryBridge) Registry.DIMENSION_TYPE).bridge$removeAll(customDimensions);
     }
 
     private void loadSpawnChunks(final ServerWorld serverWorld, final IChunkStatusListener chunkStatusListener) {
