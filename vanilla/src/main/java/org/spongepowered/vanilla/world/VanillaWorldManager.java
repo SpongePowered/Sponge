@@ -834,10 +834,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             serverWorld.getWorldInfo().setGameType(this.server.getGameType());
         }
 
-        // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
-        ((MinecraftServerAccessor_Vanilla) this.server).accessor$func_213204_a(serverWorld.getSavedData());
-
         if (isDefaultWorld) {
+            // Initialize scoreboard data. This will hook to the ServerScoreboard, needs to be made multi-world aware
+            ((MinecraftServerAccessor_Vanilla) this.server).accessor$func_213204_a(serverWorld.getSavedData());
+
             ((MinecraftServerAccessor) this.server).accessor$setfield_229733_al(new CommandStorage(serverWorld.getSavedData()));
         }
 

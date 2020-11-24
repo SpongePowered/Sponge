@@ -38,6 +38,7 @@ import org.spongepowered.common.accessor.scoreboard.ScoreAccessor;
 import org.spongepowered.common.accessor.scoreboard.ScoreObjectiveAccessor;
 import org.spongepowered.common.accessor.scoreboard.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -224,6 +225,7 @@ public final class SpongeObjective implements Objective {
         }
         final ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (ScoreCriteria) this.criterion,
             SpongeAdventure.asVanilla(this.displayName), (ScoreCriteria.RenderType) (Object) this.displayMode);
+        ((ScoreObjectiveBridge) objective).bridge$setSpongeObjective(this);
         this.objectives.put(scoreboard, objective);
         return objective;
     }

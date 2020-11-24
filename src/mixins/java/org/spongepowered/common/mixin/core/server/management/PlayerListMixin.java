@@ -34,6 +34,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.server.SDisconnectPacket;
 import net.minecraft.network.play.server.SJoinGamePacket;
+import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -244,6 +245,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Redirect(method = "playerLoggedOut", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/CustomServerBossInfoManager;"))
     private CustomServerBossInfoManager impl$getPerWorldBossBarManager(final MinecraftServer minecraftServer, final ServerPlayerEntity playerIn) {
         return ((ServerWorldBridge) playerIn.getServerWorld()).bridge$getBossBarManager();
+    }
+
+    @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendScoreboard(Lnet/minecraft/scoreboard/ServerScoreboard;Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
+    private void impl$sendScoreboard(final PlayerList playerList, final ServerScoreboard scoreboardIn, final ServerPlayerEntity playerIn) {
+        ((ServerPlayerEntityBridge)playerIn).bridge$initScoreboard();
     }
 
     @Redirect(method = "func_212504_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSaveHandler()Lnet/minecraft/world/storage/SaveHandler;"))

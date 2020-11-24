@@ -90,6 +90,7 @@
         "scoreboard.ScoreboardMixin",
         "scoreboard.ScoreCriteriaMixin",
         "scoreboard.ScoreMixin",
+        "scoreboard.ScoreObjectiveMixin",
         "scoreboard.ServerScoreboardMixin",
         "server.CustomServerBossInfoMixin",
         "server.MinecraftServerMixin",
