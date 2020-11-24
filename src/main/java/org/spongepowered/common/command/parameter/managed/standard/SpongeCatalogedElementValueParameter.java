@@ -48,9 +48,6 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
     private final List<String> prefixes;
     private final Class<T> catalogType;
 
-    // As CatalogTypes are baked in at startup, we can calculate and cache them.
-    @Nullable private List<String> completions = null;
-
     public SpongeCatalogedElementValueParameter(final List<String> prefixes, final Class<T> catalogType) {
         this.prefixes = prefixes;
         this.catalogType = catalogType;
@@ -90,14 +87,10 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
     @NonNull
     @Override
     public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
-        if (this.completions == null) {
-            this.completions = SpongeCommon.getRegistry().getCatalogRegistry().getAllOf(this.catalogType)
-                    .stream()
-                    .map(x -> x.getKey().toString())
-                    .filter(x -> x.contains(currentInput.toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-        return this.completions;
+        return SpongeCommon.getRegistry().getCatalogRegistry().streamAllOf(this.catalogType)
+                .map(x -> x.getKey().toString())
+                .filter(x -> x.contains(currentInput.toLowerCase()))
+                .collect(Collectors.toList());
     }
 
     @Override
