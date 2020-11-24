@@ -138,13 +138,13 @@ public final class SpongeScheduledTask implements ScheduledTask {
          */
         SWITCHING(true),
         /**
-         * Has ran, and will continue to unless removed from the task map.
-         */
-        RUNNING(true),
-        /**
          * Is being executed.
          */
         EXECUTING(true),
+        /**
+         * Has ran, and will continue to unless removed from the task map.
+         */
+        RUNNING(true),
         /**
          * Task cancelled, scheduled to be removed from the task map.
          */

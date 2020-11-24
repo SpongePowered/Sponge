@@ -141,7 +141,8 @@
         "world.spawner.AbstractSpawnerMixin",
         "world.storage.SaveHandlerMixin",
         "world.storage.WorldInfoMixin",
-        "scoreboard.ScorePlayerTeamMixin"
+        "scoreboard.ScorePlayerTeamMixin",
+        "util.ClassInheritanceMultiMapMixin"
     ],
     "client": [
         "client.MinecraftMixin",

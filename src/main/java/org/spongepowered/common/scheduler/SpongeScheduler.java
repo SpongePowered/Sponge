@@ -264,8 +264,10 @@ public abstract class SpongeScheduler implements Scheduler {
                             task.getName(), task.getOwner().getMetadata().getId(), t);
                 }
             } finally {
+                if (!task.isCancelled()) {
+                    task.setState(SpongeScheduledTask.ScheduledTaskState.RUNNING);
+                }
                 SpongeCommon.setActivePlugin(null);
-                task.setState(SpongeScheduledTask.ScheduledTaskState.RUNNING);
                 this.onTaskCompletion(task);
             }
         });

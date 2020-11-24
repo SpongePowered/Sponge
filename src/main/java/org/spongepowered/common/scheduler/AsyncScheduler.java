@@ -151,7 +151,7 @@ public final class AsyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    protected void onTaskCompletion(SpongeScheduledTask task) {
+    protected void onTaskCompletion(final SpongeScheduledTask task) {
         if (task.getState() == SpongeScheduledTask.ScheduledTaskState.RUNNING) {
             this.lock.lock();
             try {
