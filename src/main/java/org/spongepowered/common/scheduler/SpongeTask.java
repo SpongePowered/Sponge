@@ -61,7 +61,7 @@ public final class SpongeTask implements Task {
                 .add("name", this.name)
                 .add("delay", this.delay)
                 .add("interval", this.interval)
-                .add("owner", this.owner)
+                .add("owner", this.owner.getMetadata().getId())
                 .toString();
     }
 

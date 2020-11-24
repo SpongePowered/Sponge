@@ -70,8 +70,8 @@ public final class SpongeScheduledTask implements ScheduledTask {
     @Override
     public boolean cancel() {
         boolean success = false;
-        if (this.getState() != ScheduledTaskState.RUNNING
-                && this.getState() != ScheduledTaskState.EXECUTING) {
+        if (this.getState() == ScheduledTaskState.RUNNING
+                || this.getState() == ScheduledTaskState.EXECUTING) {
             success = true;
         }
         this.state = ScheduledTaskState.CANCELED;
