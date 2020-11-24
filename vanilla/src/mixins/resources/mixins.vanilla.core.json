@@ -25,7 +25,8 @@
         "network.play.ServerPlayNetHandlerMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
         "util.registry.BootstrapMixin_Vanilla",
-        "world.server.ServerChunkProviderMixin_Vanilla"
+        "world.server.ServerChunkProviderMixin_Vanilla",
+        "util.registry.SimpleRegistryMixin_Vanilla"
     ],
     "injectors": {
         "defaultRequire": 1

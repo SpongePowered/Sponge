@@ -160,7 +160,7 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
 
     @Override
     public void bridge$setDimensionId(final DimensionType type) {
-        this.impl$dimensionId = type.getId();
+        this.impl$dimensionId = type.getId() + 1;
     }
 
     @Override

@@ -85,6 +85,7 @@ import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.server.WorldRegistration;
 import org.spongepowered.vanilla.accessor.world.storage.SaveFormatAccessor_Vanilla;
 import org.spongepowered.vanilla.accessor.server.MinecraftServerAccessor_Vanilla;
+import org.spongepowered.vanilla.bridge.util.registry.SimpleRegistryBridge;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -94,6 +95,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,6 +125,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         this.infoByType = new IdentityHashMap<>();
         this.pendingWorlds = new LinkedHashMap<>();
         this.allInfos = new LinkedHashMap<>();
+
+        this.clearCustomWorldDimensions();
 
         this.registerPendingWorld(SpongeWorldManager.VANILLA_OVERWORLD, null);
         this.registerPendingWorld(SpongeWorldManager.VANILLA_THE_NETHER, null);
@@ -216,7 +220,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final SpongeDimensionType logicType = ((WorldInfoBridge) worldInfo).bridge$getLogicType();
 
         final DimensionType dimensionType = Registry.DIMENSION_TYPE.getValue((ResourceLocation) (Object) key).orElseGet(() -> this.
-                createDimensionType(key, logicType, worldDirectory.getFileName().toString(), dimensionId + 1));
+                createDimensionType(key, logicType, worldDirectory.getFileName().toString(), dimensionId));
 
         if (dimensionType.getId() != dimensionId) {
             return FutureUtil.completedWithException(new IOException(String.format("World '%s' specifies internal id '%s' which was already "
@@ -683,6 +687,19 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();
     }
 
+    private void clearCustomWorldDimensions() {
+        final List<DimensionType> customDimensions = new ArrayList<>();
+        for (DimensionType next : Registry.DIMENSION_TYPE) {
+            if ((next.getId() + 1) > 2) {
+                customDimensions.add(next);
+            }
+        }
+
+        for (final DimensionType dimensionType : customDimensions) {
+            ((SimpleRegistryBridge) Registry.DIMENSION_TYPE).bridge$remove(dimensionType);
+        }
+    }
+
     private void loadSpawnChunks(final ServerWorld serverWorld, final IChunkStatusListener chunkStatusListener) {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setUserMessage(new TranslationTextComponent("menu.generatingTerrain"));
         final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) serverWorld;
@@ -762,7 +779,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             }
 
             final int dimensionId = spongeDataCompound.getInt(Constants.Sponge.World.DIMENSION_ID);
-            DimensionType registeredType = DimensionType.getById(dimensionId + 1);
+            DimensionType registeredType = Registry.DIMENSION_TYPE.getByValue(dimensionId);
             if (registeredType != null) {
                 SpongeCommon.getLogger().error("Duplicate id '{}' is being loaded by '{}' but was "
                         + "previously loaded by '{}'. Skipping...", dimensionId, worldDirectory, DimensionType.getKey(registeredType).getPath());
@@ -780,7 +797,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 logicType = (SpongeDimensionType) DimensionTypes.OVERWORLD.get();
             }
 
-            registeredType = this.createDimensionType(key, logicType, worldDirectory, dimensionId + 1);
+            registeredType = this.createDimensionType(key, logicType, worldDirectory, dimensionId);
             this.pendingWorlds.put(key, new WorldRegistration(key, registeredType, null));
         }
     }
