@@ -33,10 +33,12 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.SuggestionProviders;
 import net.minecraft.command.impl.AdvancementCommand;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -52,6 +54,7 @@ import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDi
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeNodePermissionCache;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeNode;
+import org.spongepowered.common.command.brigadier.tree.SuggestionArgumentNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
@@ -286,6 +289,16 @@ public abstract class CommandsMixin {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Redirect(method = "commandSourceNodesToSuggestionNodes",
+            at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/builder/ArgumentBuilder;build()Lcom/mojang/brigadier/tree/CommandNode;", remap = false))
+    private CommandNode<ISuggestionProvider> impl$createSpongeArgumentNode(final ArgumentBuilder<ISuggestionProvider, ?> argumentBuilder) {
+        if (argumentBuilder instanceof RequiredArgumentBuilder) {
+            return new SuggestionArgumentNode<>((RequiredArgumentBuilder<ISuggestionProvider, ?>) argumentBuilder);
+        }
+        return argumentBuilder.build();
+    }
+
     private Collection<CommandNode<CommandSource>> impl$getChildrenFromNode(final CommandNode<CommandSource> parentNode) {
         if (parentNode instanceof SpongeNode) {
             return ((SpongeNode) parentNode).getChildrenForSuggestions();
@@ -299,7 +312,7 @@ public abstract class CommandsMixin {
         for (final CommandNode<ISuggestionProvider> node : toClone.getChildren()) {
             builder.then(node);
         }
-        return builder.build();
+        return new SuggestionArgumentNode<>(builder);
     }
 
     private boolean impl$alreadyHasCustomSuggestionsOnNode(final CommandNode<ISuggestionProvider> rootSuggestion) {

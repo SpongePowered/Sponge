@@ -261,4 +261,27 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         this.nodeHolder.add(node);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.key, this.parser, this.usage, this.isComplexSuggestions, this.getCustomSuggestions());
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final SpongeArgumentCommandNode<?> that = (SpongeArgumentCommandNode<?>) o;
+        return this.isComplexSuggestions == that.isComplexSuggestions &&
+                this.key.equals(that.key) &&
+                this.parser.equals(that.parser) &&
+                Objects.equals(this.usage, that.usage) &&
+                Objects.equals(this.getCustomSuggestions(), that.getCustomSuggestions());
+    }
 }
