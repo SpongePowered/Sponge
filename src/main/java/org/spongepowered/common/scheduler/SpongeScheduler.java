@@ -86,7 +86,7 @@ public abstract class SpongeScheduler implements Scheduler {
      *
      * @param task The task to add
      */
-    protected void addTask(SpongeScheduledTask task) {
+    protected void addTask(final SpongeScheduledTask task) {
         task.setTimestamp(getTimestamp(task));
         this.taskMap.put(task.getUniqueId(), task);
     }

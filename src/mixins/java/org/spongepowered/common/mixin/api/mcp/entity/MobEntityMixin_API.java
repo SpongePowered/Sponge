@@ -47,9 +47,9 @@ public abstract class MobEntityMixin_API extends LivingEntityMixin_API implement
 
     @Override
     public <T extends Agent> Optional<GoalExecutor<T>> getGoal(GoalExecutorType type) {
-        if (GoalExecutorTypes.NORMAL.equals(type)) {
+        if (GoalExecutorTypes.NORMAL.get().equals(type)) {
             return Optional.of((GoalExecutor<T>) this.goalSelector);
-        } else if (GoalExecutorTypes.TARGET.equals(type)) {
+        } else if (GoalExecutorTypes.TARGET.get().equals(type)) {
             return Optional.of((GoalExecutor<T>) this.targetSelector);
         }
         return Optional.empty();
