@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracker.world.server;
 
-import com.mojang.datafixers.util.Either;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunk;
@@ -42,13 +41,11 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-
-import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkManager.class)
 public abstract class ChunkManagerMixin_Tracker {
@@ -66,8 +63,14 @@ public abstract class ChunkManagerMixin_Tracker {
         return exception;
     }
 
-    @Redirect(method = "func_219200_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setLoaded(Z)V"))
-    private void trackertracker$startLoad(Chunk chunk, boolean loaded) {
+    @Redirect(method = "*",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setLoaded(Z)V"),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/longs/LongSet;add(J)Z", remap = false),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;addTileEntities(Ljava/util/Collection;)V")
+        )
+    )
+    private void tracker$startLoad(final Chunk chunk, final boolean loaded) {
         try {
             final boolean isFake = ((WorldBridge) chunk.getWorld()).bridge$isFake();
             if (isFake) {
@@ -99,9 +102,15 @@ public abstract class ChunkManagerMixin_Tracker {
         }
     }
 
-    @Inject(method = "func_219200_b", at = @At(value = "RETURN", ordinal = 0),
-            slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V")))
-    private void trackertracker$endLoad(ChunkHolder chunkHolder, final CallbackInfoReturnable<CompletableFuture<Either<IChunk, ChunkHolder.IChunkLoadingError>>> cir) {
+    @Inject(method = "*",
+        at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V", shift = At.Shift.BY, by = 2),
+        slice = @Slice(
+            from = @At(value = "INVOKE",  target = "Lnet/minecraft/world/chunk/Chunk;postLoad()V")
+        ),
+        expect = 1,
+        require = 1
+    )
+    private void tracker$endLoad(final ChunkHolder chunkHolder, final IChunk chunk, final CallbackInfoReturnable<IChunk> cir) {
         if (!((WorldBridge) this.world).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;

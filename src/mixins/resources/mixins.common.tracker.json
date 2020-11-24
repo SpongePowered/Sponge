@@ -18,12 +18,13 @@
         "entity.player.PlayerInventoryMixin_Tracker",
         "event.TraitMixin_Tracked_Inventory",
         "network.PacketThreadUtilMixin_Tracker",
+        "network.play.ServerPlayNetHandlerMixin_Tracker",
         "server.management.PlayerInteractionManagerMixin_Tracker",
         "tileentity.TileEntityMixin_Tracker",
         "world.ExplosionMixin_Tracker",
         "world.WorldMixin_Tracker",
         "world.chunk.ChunkMixin_Tracker",
-        "world.server.ServerWorldMixin_Tracker",
-        "network.play.ServerPlayNetHandlerMixin_Tracker"
+        "world.server.ChunkManagerMixin_Tracker",
+        "world.server.ServerWorldMixin_Tracker"
     ]
 }
