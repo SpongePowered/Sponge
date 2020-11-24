@@ -27,12 +27,14 @@ package org.spongepowered.common.mixin.core.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.command.arguments.SuggestionProviders;
 import net.minecraft.command.impl.AdvancementCommand;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.Sponge;
@@ -156,7 +158,7 @@ public abstract class CommandsMixin {
             // If the current root suggestion has already got a custom suggestion and this node has a custom suggestion,
             // we need to swap it out.
             if (value instanceof ArgumentCommandNode && this.impl$alreadyHasCustomSuggestionsOnNode(rootSuggestion)) {
-                rootSuggestion.addChild(this.impl$cloneArgumentCommandNode((ArgumentCommandNode<ISuggestionProvider, ?>) value));
+                rootSuggestion.addChild(this.impl$cloneArgumentCommandNodeWithoutSuggestions((ArgumentCommandNode<ISuggestionProvider, ?>) value));
             } else {
                 rootSuggestion.addChild((CommandNode<ISuggestionProvider>) value);
             }
@@ -221,7 +223,7 @@ public abstract class CommandsMixin {
                             final ArgumentCommandNode<ISuggestionProvider, ?> argNode = (ArgumentCommandNode<ISuggestionProvider, ?>) node;
                             if (argNode.getCustomSuggestions() != null) {
                                 // Rebuild the node without the custom suggestions.
-                                rootSuggestion.addChild(this.impl$cloneArgumentCommandNode(argNode));
+                                rootSuggestion.addChild(this.impl$cloneArgumentCommandNodeWithoutSuggestions(argNode));
                                 continue;
                             }
                         } else if (node instanceof ArgumentCommandNode && ((ArgumentCommandNode<?, ?>) node).getCustomSuggestions() != null) {
@@ -234,6 +236,33 @@ public abstract class CommandsMixin {
             return shouldContinue;
         }
         return false;
+    }
+
+    @Redirect(method = "commandSourceNodesToSuggestionNodes", at = @At(value = "INVOKE",
+            target = "Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;"
+                    + "suggests(Lcom/mojang/brigadier/suggestion/SuggestionProvider;)"
+                    + "Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;"), remap = false)
+    private RequiredArgumentBuilder<ISuggestionProvider, ?> impl$dontAskServerIfSiblingAlreadyDoes(
+            final RequiredArgumentBuilder<ISuggestionProvider, ?> requiredArgumentBuilder,
+            final SuggestionProvider<ISuggestionProvider> provider,
+            final CommandNode<CommandSource> rootCommandNode,
+            final CommandNode<ISuggestionProvider> rootSuggestion,
+            final CommandSource sourceButTyped,
+            final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode
+    ) {
+        // From above.
+        //
+        // If we have custom suggestions, we need to limit it to one node, otherwise we trigger a bug
+        // in the client where it'll send more than one custom suggestion request - which is fine, except
+        // the client will then ignore all but one of them. This is a problem because we then end up with
+        // no suggestions - CompletableFuture.allOf(...) will contain an exception if a future is cancelled,
+        // meaning thenRun(...) does not run, which is how displaying the suggestions works...
+        //
+        // Because we don't control the client, we have to work around it here.
+        if (provider != SuggestionProviders.ASK_SERVER || !this.impl$alreadyHasCustomSuggestionsOnNode(rootSuggestion)) {
+            requiredArgumentBuilder.suggests(provider);
+        }
+        return requiredArgumentBuilder;
     }
 
     @Redirect(method = "send", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/Commands;commandSourceNodesToSuggestionNodes"
@@ -264,7 +293,7 @@ public abstract class CommandsMixin {
         return parentNode.getChildren();
     }
 
-    private ArgumentCommandNode<ISuggestionProvider, ?> impl$cloneArgumentCommandNode(final ArgumentCommandNode<ISuggestionProvider, ?> toClone) {
+    private ArgumentCommandNode<ISuggestionProvider, ?> impl$cloneArgumentCommandNodeWithoutSuggestions(final ArgumentCommandNode<ISuggestionProvider, ?> toClone) {
         final RequiredArgumentBuilder<ISuggestionProvider, ?> builder = toClone.createBuilder();
         builder.suggests(null);
         for (final CommandNode<ISuggestionProvider> node : toClone.getChildren()) {

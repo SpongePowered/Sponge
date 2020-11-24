@@ -115,9 +115,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         return this.netManager;
     }
 
-    @Inject(method = "processTabComplete", at = @At(value = "INVOKE", target =
-            "Lnet/minecraft/network/PacketThreadUtil;"
-                    + "checkThreadAndEnqueue(Lnet/minecraft/network/IPacket;Lnet/minecraft/network/INetHandler;Lnet/minecraft/world/server/ServerWorld;)V"),
+    @Inject(method = "processTabComplete", at = @At(value = "NEW", target = "com/mojang/brigadier/StringReader", remap = false),
             cancellable = true)
     private void impl$getSuggestionsFromNonBrigCommand(final CTabCompletePacket p_195518_1_, final CallbackInfo ci) {
         final String rawCommand = p_195518_1_.getCommand();
