@@ -222,7 +222,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final DimensionType dimensionType = Registry.DIMENSION_TYPE.getValue((ResourceLocation) (Object) key).orElseGet(() -> this.
                 createDimensionType(key, logicType, worldDirectory.getFileName().toString(), dimensionId));
 
-        if (dimensionType.getId() != dimensionId) {
+        if ((dimensionType.getId() + 1) != dimensionId) {
             return FutureUtil.completedWithException(new IOException(String.format("World '%s' specifies internal id '%s' which was already "
                             + "registered.", key, dimensionId)));
         }
@@ -402,7 +402,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     public Optional<WorldProperties> getProperties(final ResourceKey key) {
         Objects.requireNonNull(key);
 
-        return (Optional<WorldProperties>) (Object) Optional.ofNullable(this.loadedWorldInfos.get(key));
+        return (Optional<WorldProperties>) (Object) Optional.ofNullable(this.allInfos.get(key));
     }
 
     @Override
