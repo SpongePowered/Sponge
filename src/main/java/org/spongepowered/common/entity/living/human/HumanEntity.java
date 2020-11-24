@@ -206,6 +206,11 @@ public final class HumanEntity extends CreatureEntity implements TeamMember, IRa
     }
 
     @Override
+    public void setAggroed(boolean hasAggro) {
+        // NOOP, we handle the arm swing manually...
+    }
+
+    @Override
     public int getMaxInPortalTime() {
         return 1;
     }
