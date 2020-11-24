@@ -108,8 +108,6 @@ public interface ServerPlayerEntityBridge {
 
     void bridge$setContainerDisplay(Component displayName);
 
-    void bridge$setDelegateAfterRespawn(ServerPlayerEntity delegate);
-
     Scoreboard bridge$getScoreboard();
 
     void bridge$replaceScoreboard(@Nullable Scoreboard scoreboard);

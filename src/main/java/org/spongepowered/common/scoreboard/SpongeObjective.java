@@ -46,21 +46,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class SpongeObjective implements Objective {
+@SuppressWarnings({"ConstantConditions", "unchecked"})
+public final class SpongeObjective implements Objective {
 
-    private Map<net.minecraft.scoreboard.Scoreboard, ScoreObjective> objectives = new HashMap<>();
+    private final String name;
+    private final Criterion criterion;
+    private final Map<Component, Score> scores = new HashMap<>();
+    private final Map<net.minecraft.scoreboard.Scoreboard, ScoreObjective> objectives;
 
-    private String name;
     private Component displayName;
-    private Criterion criterion;
     private ObjectiveDisplayMode displayMode;
-    private Map<Component, Score> scores = new HashMap<>();
 
     public SpongeObjective(final String name, final Criterion criterion) {
         this.name = name;
         this.displayName = SpongeAdventure.legacySection(name);
         this.displayMode = ObjectiveDisplayModes.INTEGER.get();
         this.criterion = criterion;
+
+        this.objectives = new HashMap<>();
     }
 
     @Override
@@ -79,12 +82,6 @@ public class SpongeObjective implements Objective {
         this.updateDisplayName();
     }
 
-    private void updateDisplayName() {
-        for (final ScoreObjective objective: this.objectives.values()) {
-            objective.setDisplayName(SpongeAdventure.asVanilla(this.displayName));
-        }
-    }
-
     @Override
     public Criterion getCriterion() {
         return this.criterion;
@@ -100,13 +97,6 @@ public class SpongeObjective implements Objective {
         this.displayMode = displayMode;
         this.updateDisplayMode();
 
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    private void updateDisplayMode() {
-        for (final ScoreObjective objective: this.objectives.values()) {
-            objective.setRenderType((ScoreCriteria.RenderType) (Object) this.displayMode);
-        }
     }
 
     @Override
@@ -131,27 +121,6 @@ public class SpongeObjective implements Objective {
         for (final ScoreObjective objective: this.objectives.values()) {
             this.addScoreToScoreboard(((ScoreObjectiveAccessor) objective).accessor$getScoreboard(), spongeScore.getScoreFor(objective));
         }
-    }
-
-    public void updateScores(final net.minecraft.scoreboard.Scoreboard scoreboard) {
-        final ScoreObjective objective = this.getObjectiveFor(scoreboard);
-
-        for (final Score score: this.getScores().values()) {
-            final SpongeScore spongeScore = (SpongeScore) score;
-            this.addScoreToScoreboard(scoreboard, spongeScore.getScoreFor(objective));
-        }
-    }
-
-    private void addScoreToScoreboard(final net.minecraft.scoreboard.Scoreboard scoreboard, final net.minecraft.scoreboard.Score score) {
-        final String name = score.getPlayerName();
-        final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectives()
-            .computeIfAbsent(name, k -> Maps.newHashMap());
-
-        scoreMap.put(((ScoreAccessor) score).accessor$getObjective(), score);
-
-        // Trigger refresh
-        ((ScoreAccessor) score).accessor$setForceUpdate(true);
-        score.setScorePoints(((ScoreAccessor) score).accessor$getScorePoints());
     }
 
     @Override
@@ -211,7 +180,44 @@ public class SpongeObjective implements Objective {
         return score.filter(this::removeScore).isPresent();
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @Override
+    public Set<Scoreboard> getScoreboards() {
+        return (Set<Scoreboard>) (Set<?>) new HashSet<>(this.objectives.keySet());
+    }
+
+    private void updateDisplayMode() {
+        for (final ScoreObjective objective: this.objectives.values()) {
+            objective.setRenderType((ScoreCriteria.RenderType) (Object) this.displayMode);
+        }
+    }
+
+    private void updateDisplayName() {
+        for (final ScoreObjective objective: this.objectives.values()) {
+            objective.setDisplayName(SpongeAdventure.asVanilla(this.displayName));
+        }
+    }
+
+    public void updateScores(final net.minecraft.scoreboard.Scoreboard scoreboard) {
+        final ScoreObjective objective = this.getObjectiveFor(scoreboard);
+
+        for (final Score score: this.getScores().values()) {
+            final SpongeScore spongeScore = (SpongeScore) score;
+            this.addScoreToScoreboard(scoreboard, spongeScore.getScoreFor(objective));
+        }
+    }
+
+    private void addScoreToScoreboard(final net.minecraft.scoreboard.Scoreboard scoreboard, final net.minecraft.scoreboard.Score score) {
+        final String name = score.getPlayerName();
+        final Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = ((ScoreboardAccessor) scoreboard).accessor$getEntitiesScoreObjectives()
+            .computeIfAbsent(name, k -> Maps.newHashMap());
+
+        scoreMap.put(((ScoreAccessor) score).accessor$getObjective(), score);
+
+        // Trigger refresh
+        ((ScoreAccessor) score).accessor$setForceUpdate(true);
+        score.setScorePoints(((ScoreAccessor) score).accessor$getScorePoints());
+    }
+
     public ScoreObjective getObjectiveFor(final net.minecraft.scoreboard.Scoreboard scoreboard) {
         if (this.objectives.containsKey(scoreboard)) {
             return this.objectives.get(scoreboard);
@@ -226,12 +232,6 @@ public class SpongeObjective implements Objective {
         if (this.objectives.remove(scoreboard) == null) {
             throw new IllegalStateException("Attempting to remove an objective without an entry!");
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Set<Scoreboard> getScoreboards() {
-        return (Set<Scoreboard>) (Set<?>) new HashSet<>(this.objectives.keySet());
     }
 
     public Collection<ScoreObjective> getObjectives() {

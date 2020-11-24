@@ -26,5 +26,9 @@
         "world.chunk.ChunkMixin_Tracker",
         "world.server.ChunkManagerMixin_Tracker",
         "world.server.ServerWorldMixin_Tracker"
-    ]
+    ],
+    "injectors": {
+        "defaultRequire": 1,
+        "maxShiftBy": 3
+    }
 }
