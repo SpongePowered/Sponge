@@ -87,8 +87,8 @@ public final class VolumeStreamUtils {
     ) {
         return (world, chunkPos) -> {
             final ChunkStatus chunkStatus = shouldGenerate
-                ? ChunkStatus.EMPTY
-                : ChunkStatus.FULL;
+                ? ChunkStatus.FULL
+                : ChunkStatus.EMPTY;
             final @Nullable IChunk ichunk = worldReader.getChunk(chunkPos.x, chunkPos.z, chunkStatus, shouldGenerate);
             if (shouldGenerate) {
                 Objects.requireNonNull(ichunk, "Chunk was expected to load fully and generate, but somehow got a null chunk!");
