@@ -33,6 +33,8 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 
+import java.util.Objects;
+
 public final class SpongeCommandExecutorWrapper implements Command<CommandSource> {
 
     private final CommandExecutor executor;
@@ -45,7 +47,8 @@ public final class SpongeCommandExecutorWrapper implements Command<CommandSource
     public int run(final CommandContext<CommandSource> context) throws CommandSyntaxException {
         final SpongeCommandContext spongeCommandContext = (SpongeCommandContext) context;
         try {
-            return this.executor.execute(spongeCommandContext).getResult();
+            return Objects.requireNonNull(this.executor.execute(spongeCommandContext),
+                    "A CommandResult was expected, but the command returned null instead. Report this to the plugin author!").getResult();
         } catch (final CommandException e) {
             throw new SpongeCommandSyntaxException(e, spongeCommandContext);
         }

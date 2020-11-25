@@ -72,6 +72,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.util.ComponentMessageException;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
 import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNode;
@@ -340,17 +341,6 @@ public final class SpongeCommandManager implements CommandManager {
                 }
                 throw ex;
             } catch (final Throwable thr) {
-                // this is valid for now.
-                if (thr instanceof RuntimeException && thr.getCause() != null && thr.getCause() instanceof CommandSyntaxException) {
-                    final CommandResult errorResult =
-                            CommandResult.builder().setResult(0)
-                                    .error(this.asTextComponent(((CommandSyntaxException) thr.getCause()).getRawMessage())).build();
-                    this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
-                    if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
-                        this.prettyPrintThrowableError(thr, command, args, cause);
-                    }
-                    throw (CommandSyntaxException) thr.getCause();
-                }
                 this.prettyPrintThrowableError(thr, command, args, cause);
 
                 Component excBuilder;
@@ -432,7 +422,7 @@ public final class SpongeCommandManager implements CommandManager {
             commandString = commandNoArgs;
         }
         final SpongeCommandMapping mapping = this.commandMappings.get(commandNoArgs.toLowerCase());
-        new PrettyPrinter(100)
+        final PrettyPrinter prettyPrinter = new PrettyPrinter(100)
                 .add("Unexpected error occurred while executing command '%s'", commandString).centre()
                 .hr()
                 .addWrapped("While trying to run '%s', an error occurred that the command processor was not expecting. "
@@ -444,9 +434,13 @@ public final class SpongeCommandManager implements CommandManager {
                 .add("Owning Plugin: %s", mapping.getPlugin().getMetadata().getId())
                 .add("Owning Registrar: %s", mapping.getRegistrar().getClass().getName())
                 .add()
-                .add("Exception Details: ")
-                .add(thr)
-                .add()
+                .add("Exception Details: ");
+        if (thr instanceof SpongeCommandSyntaxException) { // we know the inner exception was wrapped by us.
+            prettyPrinter.add(thr.getCause());
+        } else {
+            prettyPrinter.add(thr);
+        }
+                prettyPrinter.add()
                 .add("CommandCause details: ")
                 .addWrapped(cause.getCause().toString())
                 .log(SpongeCommon.getLogger(), Level.ERROR);
