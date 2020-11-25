@@ -143,7 +143,8 @@
         "world.storage.SaveHandlerMixin",
         "world.storage.WorldInfoMixin",
         "scoreboard.ScorePlayerTeamMixin",
-        "util.ClassInheritanceMultiMapMixin"
+        "util.ClassInheritanceMultiMapMixin",
+        "command.impl.SaveAllCommandMixin"
     ],
     "client": [
         "client.MinecraftMixin",

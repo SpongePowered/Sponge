@@ -285,7 +285,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                     LOGGER.info("Saving chunks for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
                 }
 
-                ((ServerWorldBridge) world).bridge$setIsAutomaticSave(!isForced);
                 world.save(null, false, world.disableLevelSaving && !isForced);
             }
         }

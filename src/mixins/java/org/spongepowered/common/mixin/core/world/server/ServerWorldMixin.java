@@ -81,7 +81,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     // @formatter:on
 
     private CustomServerBossInfoManager impl$bossBarManager;
-    private boolean impl$isAutomaticSave = false;
+    private boolean impl$isManualSave = false;
 
     @Override
     public boolean bridge$isLoaded() {
@@ -227,8 +227,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
-    public void bridge$setIsAutomaticSave(boolean state) {
-        this.impl$isAutomaticSave = state;
+    public void bridge$setManualSave(boolean state) {
+        this.impl$isManualSave = state;
     }
 
     /**
@@ -240,6 +240,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         final ServerWorld this$ = (ServerWorld) (Object) this;
 
         ServerChunkProvider serverchunkprovider = this$.getChunkProvider();
+
         if (!skipSave) {
             final SerializationBehavior behavior = ((WorldInfoBridge) this$.getWorldInfo()).bridge$getSerializationBehavior();
 
@@ -247,7 +248,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 progress.displaySavingString(new TranslationTextComponent("menu.savingLevel"));
             }
 
-            if ((this.impl$isAutomaticSave && (behavior == SerializationBehavior.AUTOMATIC || behavior == SerializationBehavior
+            if ((!this.impl$isManualSave && (behavior == SerializationBehavior.AUTOMATIC || behavior == SerializationBehavior
                     .AUTOMATIC_METADATA_ONLY)) || behavior == SerializationBehavior.MANUAL || behavior == SerializationBehavior
                     .MANUAL_METADATA_ONLY) {
 
@@ -268,12 +269,12 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 progress.displayLoadingString(new TranslationTextComponent("menu.savingChunks"));
             }
 
-            if ((this.impl$isAutomaticSave && behavior == SerializationBehavior.AUTOMATIC) || behavior == SerializationBehavior.MANUAL) {
+            if ((!this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC) || behavior == SerializationBehavior.MANUAL) {
                 serverchunkprovider.save(flush);
             }
         }
 
-        this.impl$isAutomaticSave = false;
+        this.impl$isManualSave = false;
     }
 
     @Override

@@ -177,7 +177,8 @@ public abstract class ServerWorldMixin_API extends WorldMixin_API<org.spongepowe
     @Override
     public boolean save() throws IOException {
         try {
-            this.shadow$save((IProgressUpdate) null, false, false);
+            ((ServerWorldBridge) this).bridge$setManualSave(true);
+            this.shadow$save((IProgressUpdate) null, false, true);
         } catch (final SessionLockException e) {
             throw new IOException(e);
         }

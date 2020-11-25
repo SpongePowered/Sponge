@@ -66,5 +66,5 @@ public interface ServerWorldBridge {
 
     void bridge$triggerExplosion(Explosion explosion);
 
-    void bridge$setIsAutomaticSave(boolean state);
+    void bridge$setManualSave(boolean state);
 }
