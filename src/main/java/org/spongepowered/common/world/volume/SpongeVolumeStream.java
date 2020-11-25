@@ -30,6 +30,7 @@ import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.api.world.volume.stream.VolumeCollector;
 import org.spongepowered.api.world.volume.stream.VolumeConsumer;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
+import org.spongepowered.api.world.volume.stream.VolumeFlatMapper;
 import org.spongepowered.api.world.volume.stream.VolumeMapper;
 import org.spongepowered.api.world.volume.stream.VolumePredicate;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -92,6 +93,26 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
                 element.getPosition().getZ()
             ), element.getPosition())
         ), this.volumeSupplier);
+    }
+
+    @Override
+    public VolumeStream<V, Optional<? extends T>> flatMap(final VolumeFlatMapper<V, T> mapper) {
+        return new SpongeVolumeStream<>(
+            this.stream.map(element ->
+                VolumeElement.of(
+                    this.volumeSupplier.get(),
+                    mapper.map(
+                        this.volumeSupplier.get(),
+                        element::getType,
+                        element.getPosition().getX(),
+                        element.getPosition().getY(),
+                        element.getPosition().getZ()
+                    ),
+                    element.getPosition()
+                )
+            ),
+            this.volumeSupplier
+        );
     }
 
     @Override
