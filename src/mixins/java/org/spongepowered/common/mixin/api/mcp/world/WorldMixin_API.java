@@ -123,6 +123,8 @@ public abstract class WorldMixin_API<W extends World<W>> implements World<W>, Au
     @Shadow public abstract Random shadow$getRandom();
     @Shadow public abstract boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<BlockState> p_217375_2_);
 
+    @Shadow public abstract void removeTileEntity(BlockPos pos);
+
     private Context impl$context;
 
     // World

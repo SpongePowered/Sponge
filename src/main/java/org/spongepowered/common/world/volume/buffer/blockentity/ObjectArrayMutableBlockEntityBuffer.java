@@ -66,8 +66,7 @@ public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEnt
 
     @Override
     public VolumeStream<ObjectArrayMutableBlockEntityBuffer, BlockEntity> getBlockEntityStream(final Vector3i min, final Vector3i max,
-        final StreamOptions options
-    ) {
+            final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(min, max, this.getBlockMin(), this.getBlockMax(), options);
 
         final Stream<VolumeElement<ObjectArrayMutableBlockEntityBuffer, BlockEntity>> blockEntityStream = this.blockEntities.stream()

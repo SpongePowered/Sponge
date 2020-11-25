@@ -29,15 +29,14 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,6 +45,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -58,18 +58,41 @@ public abstract class TileEntityMixin_API implements BlockEntity {
     //@formatter:off
     @Shadow @Final private TileEntityType<?> type;
     @Shadow protected net.minecraft.world.World world;
-    @Shadow protected BlockPos pos;
 
     @Shadow public abstract BlockPos shadow$getPos();
     @Shadow public abstract void shadow$markDirty();
     @Shadow public abstract CompoundNBT shadow$write(CompoundNBT compound);
     @Shadow protected boolean removed;
     //@formatter:on
+
     @Nullable private LocatableBlock api$LocatableBlock;
 
     @Override
     public ServerLocation getLocation() {
         return ServerLocation.of((ServerWorld) this.world, VecHelper.toVector3i(this.shadow$getPos()));
+    }
+
+    @Override
+    public ServerLocation getServerLocation() {
+        if (this.world == null) {
+            throw new RuntimeException("The TileEntity has not been spawned in a world yet!");
+        }
+
+        if (this.world.isRemote) {
+            throw new RuntimeException("You should not attempt to make a server-side location on the client!");
+        }
+
+        return ServerLocation.of((ServerWorld) this.world, VecHelper.toVector3d(this.shadow$getPos()));
+    }
+
+    @Override
+    public World<?> getWorld() {
+        return (World<?>) this.world;
+    }
+
+    @Override
+    public Vector3i getBlockPosition() {
+        return VecHelper.toVector3i(this.shadow$getPos());
     }
 
     @Override
@@ -133,7 +156,7 @@ public abstract class TileEntityMixin_API implements BlockEntity {
             final BlockState blockState = this.getBlock();
             this.api$LocatableBlock = new SpongeLocatableBlockBuilder()
                 .world((ServerWorld) this.world)
-                .position(this.pos.getX(), this.pos.getY(), this.pos.getZ())
+                .position(this.shadow$getPos().getX(), this.shadow$getPos().getY(), this.shadow$getPos().getZ())
                 .state(blockState)
                 .build();
         }

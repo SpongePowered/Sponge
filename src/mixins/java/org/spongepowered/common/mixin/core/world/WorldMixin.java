@@ -53,6 +53,11 @@ public abstract class WorldMixin implements WorldBridge, IWorld {
     @Shadow public abstract Dimension shadow$getDimension();
     @Shadow public abstract WorldInfo shadow$getWorldInfo();
     @Shadow public abstract void shadow$calculateInitialSkylight();
+
+    @Shadow public abstract boolean shadow$isThundering();
+
+    @Shadow public abstract boolean shadow$isRaining();
+
     // @formatter on
     private boolean impl$isDefinitelyFake = false;
     private boolean impl$hasChecked = false;

@@ -28,9 +28,11 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public final class SpongeServerLocationFactory implements ServerLocation.Factory {
@@ -40,17 +42,28 @@ public final class SpongeServerLocationFactory implements ServerLocation.Factory
     private SpongeServerLocationFactory() {}
 
     @Override
-    public ServerLocation create(ServerWorld world, Vector3d position) {
+    public ServerLocation create(final ServerWorld world, final Vector3d position) {
+        Objects.requireNonNull(world);
+        Objects.requireNonNull(position);
+
         return new SpongeServerLocation(world, world.getEngine().getChunkLayout(), position);
     }
 
     @Override
-    public ServerLocation create(ServerWorld world, Vector3i blockPosition) {
-        return new SpongeServerLocation(world, world.getEngine().getChunkLayout(), blockPosition.toDouble());
+    public ServerLocation create(final ServerWorld world, final Vector3i blockPosition) {
+        Objects.requireNonNull(world);
+        Objects.requireNonNull(blockPosition);
+
+        final ChunkLayout chunkLayout = world.getEngine().getChunkLayout();
+        final Vector3d position = blockPosition.toDouble();
+        return new SpongeServerLocation(world, chunkLayout, position);
     }
 
     @Override
-    public ServerLocation create(ResourceKey worldKey, Vector3d position) {
+    public ServerLocation create(final ResourceKey worldKey, final Vector3d position) {
+        Objects.requireNonNull(worldKey);
+        Objects.requireNonNull(position);
+
         final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(worldKey);
         if (!world.isPresent()) {
             throw new IllegalStateException("Unknown world for key: " + worldKey.toString());
@@ -59,7 +72,10 @@ public final class SpongeServerLocationFactory implements ServerLocation.Factory
     }
 
     @Override
-    public ServerLocation create(ResourceKey worldKey, Vector3i blockPosition) {
+    public ServerLocation create(final ResourceKey worldKey, final Vector3i blockPosition) {
+        Objects.requireNonNull(worldKey);
+        Objects.requireNonNull(blockPosition);
+
         final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(worldKey);
         if (!world.isPresent()) {
             throw new IllegalStateException("Unknown world for key: " + worldKey.toString());

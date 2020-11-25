@@ -30,11 +30,14 @@ import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
 
 public interface ServerWorldBridge {
+
+    boolean bridge$isLoaded();
 
     CustomServerBossInfoManager bridge$getBossBarManager();
 
@@ -44,17 +47,9 @@ public interface ServerWorldBridge {
 
     void bridge$addEntityRotationUpdate(Entity entity, Vector3d rotation);
 
-    boolean bridge$isLightLevel(Chunk chunk, BlockPos pos, int level);
-
     WorldTimingsHandler bridge$getTimingsHandler();
 
-    int bridge$getChunkGCTickInterval();
-
     long bridge$getChunkUnloadDelay();
-
-
-
-    void bridge$doChunkGC();
 
     void bridge$incrementChunkLoadCount();
 
@@ -65,4 +60,10 @@ public interface ServerWorldBridge {
     void bridge$setWeatherStartTime(long start);
 
     void bridge$save(@Nullable IProgressUpdate update, boolean flush, boolean saveChunks);
+
+    void bridge$setWeather(Weather weather, long ticks);
+
+    long bridge$getDurationInTicks();
+
+    void bridge$triggerExplosion(Explosion explosion);
 }

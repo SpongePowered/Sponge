@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.server;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.CustomServerBossInfoManager;
@@ -38,30 +37,59 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.Server;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 import org.spongepowered.common.accessor.world.server.ServerChunkProviderAccessor;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.WorldMixin;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin extends WorldMixin implements ServerWorldBridge, PlatformServerWorldBridge {
 
+    // @formatter:off
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
+    // @formatter:on
 
     private CustomServerBossInfoManager impl$bossBarManager;
+
+    @Override
+    public boolean bridge$isLoaded() {
+        if (((WorldBridge) this).bridge$isFake()) {
+            return false;
+        }
+
+        final ServerWorld world = ((SpongeWorldManager) ((Server) this.shadow$getServer()).getWorldManager()).getWorld(this.shadow$getDimension().getType());
+        if (world == null) {
+            return false;
+        }
+
+        return world == (Object) this;
+    }
 
     @Override
     public void bridge$adjustDimensionLogic(final SpongeDimensionType dimensionType) {
@@ -101,8 +129,6 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         this.impl$rotationUpdates.put(entity, rotation);
     }
 
-
-
     @Override
     public void bridge$updateRotation(final net.minecraft.entity.Entity entityIn) {
         final Vector3d rotationUpdate = this.impl$rotationUpdates.get(entityIn);
@@ -131,10 +157,91 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     }
 
     @Override
+    public void bridge$setWeather(Weather weather, long ticks) {
+        if (weather == Weathers.CLEAR.get()) {
+            this.worldInfo.setClearWeatherTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.worldInfo.setRainTime(0);
+            this.worldInfo.setThunderTime(0);
+            this.worldInfo.setRaining(false);
+            this.worldInfo.setThundering(false);
+        } else if (weather == Weathers.RAIN.get()) {
+            this.worldInfo.setClearWeatherTime(0);
+            this.worldInfo.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.worldInfo.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.worldInfo.setRaining(true);
+            this.worldInfo.setThundering(false);
+        } else if (weather == Weathers.THUNDER.get()) {
+            this.worldInfo.setClearWeatherTime(0);
+            this.worldInfo.setRainTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.worldInfo.setThunderTime((int) Math.max(Integer.MAX_VALUE, ticks));
+            this.worldInfo.setRaining(true);
+            this.worldInfo.setThundering(true);
+        }
+    }
+
+    @Override
+    public long bridge$getDurationInTicks() {
+        if (this.shadow$isThundering()) {
+            return this.worldInfo.getThunderTime();
+        }
+        if (this.shadow$isRaining()) {
+            return this.worldInfo.getRainTime();
+        }
+        if (this.worldInfo.getClearWeatherTime() > 0) {
+            return this.worldInfo.getClearWeatherTime();
+        }
+        return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
+    }
+
+    @Override
+    public void bridge$triggerExplosion(Explosion explosion) {
+        // Sponge start
+        // Set up the pre event
+        final ExplosionEvent.Pre
+                event =
+                SpongeEventFactory.createExplosionEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                        explosion, (org.spongepowered.api.world.server.ServerWorld) this);
+        if (SpongeCommon.postEvent(event)) {
+            return;
+        }
+        explosion = event.getExplosion();
+        final net.minecraft.world.Explosion mcExplosion;
+        try {
+            // Since we already have the API created implementation Explosion, let's use it.
+            mcExplosion = (net.minecraft.world.Explosion) explosion;
+        } catch (final Exception e) {
+            new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
+                    .add("An explosion that was expected to be used for this implementation does not")
+                    .add("originate from this implementation.")
+                    .add(e)
+                    .trace();
+            return;
+        }
+
+        try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER)
+                .explosion((net.minecraft.world.Explosion) explosion)
+                .source(explosion.getSourceExplosive().isPresent() ? explosion.getSourceExplosive() : this)) {
+            ignored.buildAndSwitch();
+            final boolean shouldBreakBlocks = explosion.shouldBreakBlocks();
+            // Sponge End
+
+            mcExplosion.doExplosionA();
+            mcExplosion.doExplosionB(true);
+
+            if (!shouldBreakBlocks) {
+                mcExplosion.clearAffectedBlockPositions();
+            }
+
+            // Sponge Start - end processing
+        }
+        // Sponge End
+    }
+
+    @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("Key", ((org.spongepowered.api.world.server.ServerWorld) this).getKey())
-                .add("DimensionType", Registry.DIMENSION_TYPE.getKey(this.shadow$getDimension().getType()))
+        return new StringJoiner(",", ServerWorld.class.getSimpleName() + "[", "]")
+                .add("key=" + ((org.spongepowered.api.world.server.ServerWorld) this).getKey())
+                .add("dimensionType=" + Registry.DIMENSION_TYPE.getKey(this.shadow$getDimension().getType()))
                 .toString();
     }
 }
