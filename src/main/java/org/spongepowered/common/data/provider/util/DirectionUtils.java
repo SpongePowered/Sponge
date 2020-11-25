@@ -29,10 +29,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.state.DirectionProperty;
 import org.spongepowered.api.util.Direction;
 
+import java.util.Objects;
+
 public final class DirectionUtils {
 
     public static net.minecraft.util.Direction getFor(final Direction direction) {
-        checkNotNull(direction);
+        Objects.requireNonNull(direction);
         switch (direction) {
             case UP:
                 return net.minecraft.util.Direction.UP;
@@ -71,9 +73,8 @@ public final class DirectionUtils {
         }
     }
 
-    public static net.minecraft.block.BlockState set(final net.minecraft.block.BlockState holder, final Direction value,
-            final DirectionProperty property) {
-        final net.minecraft.util.Direction direction = getFor(value);
+    public static net.minecraft.block.BlockState set(final net.minecraft.block.BlockState holder, final Direction value, final DirectionProperty property) {
+        final net.minecraft.util.Direction direction = DirectionUtils.getFor(value);
         if (direction == null || !property.getAllowedValues().contains(direction)) {
             return holder;
         }

@@ -25,11 +25,15 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.block.StandingSignBlock;
+import net.minecraft.block.WallSignBlock;
 import net.minecraft.tileentity.SignTileEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.data.provider.util.RotationUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,13 +52,33 @@ public final class SignData {
                         .get(SignData::getSignLines)
                         .set(SignData::setSignLines)
                         .delete(h -> SignData.setSignLines(h, Collections.emptyList()))
+                    .create(Keys.DIRECTION)
+                        .get(h -> {
+                            if (h.getBlockState().getBlock() instanceof StandingSignBlock) {
+                                return RotationUtils.getFor(h.getBlockState().get(StandingSignBlock.ROTATION));
+                            } else if (h.getBlockState().getBlock() instanceof WallSignBlock) {
+                                return DirectionUtils.getFor(h.getBlockState().get(WallSignBlock.FACING));
+                            }
+                            return null;
+                        })
+                        .setAnd((h, v) -> {
+                            if (h.getBlockState().getBlock() instanceof StandingSignBlock) {
+                                h.getWorld().setBlockState(h.getPos(), RotationUtils.set(h.getBlockState(), v, StandingSignBlock.ROTATION));
+                                return true;
+                            } else if (h.getBlockState().getBlock() instanceof WallSignBlock) {
+                                h.getWorld().setBlockState(h.getPos(), DirectionUtils.set(h.getBlockState(), v, WallSignBlock.FACING));
+                                return true;
+                            }
+
+                            return false;
+                        })
+                        .supports(h -> h.getWorld() != null)
                 .asMutable(ServerLocation.class)
                     .create(Keys.SIGN_LINES)
                         .get(SignData::getSignLines)
                         .set(SignData::setSignLines)
                         .delete(h -> SignData.setSignLines(h, Collections.emptyList()))
-                        .supports(loc -> loc.getBlockEntity().map(b -> b instanceof SignTileEntity).orElse(false))
-        ;
+                        .supports(loc -> loc.getBlockEntity().map(b -> b instanceof SignTileEntity).orElse(false));
     }
     // @formatter:on
 
