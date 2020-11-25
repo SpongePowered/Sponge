@@ -55,7 +55,8 @@ public final class SpongeSequenceParameter extends SpongeMultiParameter {
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
             final boolean isTermination,
             final boolean previousWasOptional,
-            @Nullable final String suffix) {
+            @Nullable final String suffix,
+            final boolean isContainerAtEnd) {
 
         final boolean isTerminal = SpongeParameterTranslator.createNode(
                 this.getParameterCandidates().listIterator(),
@@ -65,7 +66,8 @@ public final class SpongeSequenceParameter extends SpongeMultiParameter {
                 potentialOptionalRedirects,
                 isTermination || this.isTerminal(),
                 previousWasOptional,
-                suffix);
+                suffix,
+                isContainerAtEnd);
         return this.isOptional() || isTerminal;
     }
 

@@ -79,7 +79,7 @@ public final class SpongeParameterTranslator {
 
         // If we have no parameters, or they are all optional, all literals will get an executor.
         final boolean isTerminal = SpongeParameterTranslator.createNode(
-                parameterListIterator, executorWrapper, rootNode::then, null, new ArrayList<>(), true, false);
+                parameterListIterator, executorWrapper, rootNode::then, null, new ArrayList<>(), true, false, true);
         if (isTerminal && executorWrapper != null) {
             rootNode.executes(executorWrapper);
         }
@@ -122,6 +122,7 @@ public final class SpongeParameterTranslator {
                         },
                         new ArrayList<>(),
                         wrapper != null,
+                        false,
                         false
                 );
                 if (isTerminal) {
@@ -157,9 +158,10 @@ public final class SpongeParameterTranslator {
             @Nullable final Consumer<ArgumentBuilder<CommandSource, ?>> lastNodeCallback,
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
             final boolean canBeTerminal,
-            final boolean previousWasOptional) {
+            final boolean previousWasOptional,
+            final boolean isContainerAtEnd) {
         return SpongeParameterTranslator.createNode(parameters, executorWrapper, builtNodeConsumer, lastNodeCallback, potentialOptionalRedirects,
-                canBeTerminal, previousWasOptional, null);
+                canBeTerminal, previousWasOptional, null, isContainerAtEnd);
     }
 
     public static boolean createNode(
@@ -170,7 +172,12 @@ public final class SpongeParameterTranslator {
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
             final boolean canBeTerminal,
             final boolean previousWasOptional,
-            @Nullable final String suffix) {
+            @Nullable final String suffix,
+            final boolean isContainerAtEnd) {
+
+        // isContainerAtEnd indicates that at the end of this chain, we'll be at the end of the node list. Always true for the base
+        // node chain, if we then place a firstOf or a seq chain in, this will be false if there is not the end of a chain after
+        // (it basically tells us if parameters.hasNext() is true or false)
 
         if (!parameters.hasNext()) {
             return canBeTerminal;
@@ -187,6 +194,7 @@ public final class SpongeParameterTranslator {
             SpongeParameterTranslator.createSubcommand((Parameter.Subcommand) currentParameter, builtNodeConsumer);
             return false; // this is NOT a termination - the subcommand holds that.
         } else if (currentParameter instanceof SpongeMultiParameter) {
+            final boolean isMultiParameterContainerAtEnd = isContainerAtEnd && !hasNext;
             final Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback =
                     isInferredTermination ? lastNodeCallback :
                             arg -> SpongeParameterTranslator.createNode(
@@ -196,7 +204,8 @@ public final class SpongeParameterTranslator {
                                     lastNodeCallback,
                                     potentialOptionalRedirects,
                                     canBeTerminal,
-                                    currentParameter.isOptional());
+                                    currentParameter.isOptional(),
+                                    isMultiParameterContainerAtEnd);
 
             isInferredTermination = ((SpongeMultiParameter) currentParameter).createNode(
                     executorWrapper,
@@ -205,7 +214,8 @@ public final class SpongeParameterTranslator {
                     potentialOptionalRedirects,
                     isInferredTermination,
                     previousWasOptional,
-                    suffix
+                    suffix,
+                    isMultiParameterContainerAtEnd
             ) || isInferredTermination;
         } else if (currentParameter instanceof Parameter.Value<?>) {
 
@@ -214,7 +224,7 @@ public final class SpongeParameterTranslator {
             final boolean isConsumeAll = valueParameter.willConsumeAllRemaining();
             isInferredTermination |= (valueParameter.isTerminal() || isConsumeAll);
 
-            if (isConsumeAll && parameters.hasNext()) {
+            if (isConsumeAll && hasNext) {
                 // this should not happen.
                 throw new IllegalStateException("A parameter that consumes all must be at the end of a parameter chain.");
             }
@@ -231,7 +241,8 @@ public final class SpongeParameterTranslator {
                         lastNodeCallback,
                         potentialOptionalRedirects,
                         canBeTerminal,
-                        currentParameter.isOptional()
+                        currentParameter.isOptional(),
+                        isContainerAtEnd
                         ) && canBeTerminal) || isInferredTermination;
             }
 
@@ -255,12 +266,25 @@ public final class SpongeParameterTranslator {
             final ArrayList<CommandNode<CommandSource>> newOptionals = new ArrayList<>();
             for (int i = 1; i < currentNodes.size(); ++i) {
                 final SpongeArgumentCommandNodeBuilder<?> secondaryBuilder = currentNodes.get(i);
-                if (potentialOptionalRedirects.isEmpty()) {
+                if (isContainerAtEnd && !hasNext) {
+                    // If we know we're at the end of a chain, the secondary builder just has an executor - no need to redirect.
+                    secondaryBuilder.executes(executorWrapper);
+                } else if (potentialOptionalRedirects.isEmpty()) {
                     // If the next node is not optional/defaulted we can redirect to the primary current node
                     secondaryBuilder.redirect(builtNode);
                 } else {
                     // If instead the next node is optional/defaulted we must attach them to the secondary current nodes as well
-                    potentialOptionalRedirects.forEach(secondaryBuilder::then);
+                    if (secondaryBuilder.getRedirect() == null) {
+                        potentialOptionalRedirects.forEach(secondaryBuilder::then);
+                    } else {
+                        // If the node we're trying to add to is a redirect, we need to go back to the
+                        // parent itself.
+                        CommandNode<CommandSource> nodeToAppendTo = secondaryBuilder.getRedirect();
+                        while (nodeToAppendTo.getRedirect() != null) {
+                            nodeToAppendTo = nodeToAppendTo.getRedirect();
+                        }
+                        potentialOptionalRedirects.forEach(nodeToAppendTo::addChild);
+                    }
                 }
                 final CommandNode<CommandSource> secondaryNode = secondaryBuilder.build();
                 newOptionals.add(secondaryNode); // pass all optional/default nodes up

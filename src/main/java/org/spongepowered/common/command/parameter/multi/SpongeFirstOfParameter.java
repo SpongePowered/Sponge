@@ -51,7 +51,8 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
             final List<CommandNode<CommandSource>> potentialOptionalRedirects,
             final boolean isTermination,
             final boolean previousWasOptional,
-            @Nullable final String suffix) {
+            @Nullable final String suffix,
+            final boolean isContainerAtEnd) {
         final boolean hasExecutor = isTermination || this.isTerminal();
 
         // If we have a termination, this is easy!
@@ -85,7 +86,8 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
                         potentialOptionalRedirects,
                         hasExecutor,
                         previousWasOptional,
-                        suffix);
+                        suffix,
+                        isContainerAtEnd);
             } else {
                 final List<Parameter> parameters = new ArrayList<>();
                 parameters.add(parameter);
@@ -100,7 +102,8 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
                     first ? potentialOptionalRedirects : new ArrayList<>(potentialOptionalRedirects),
                     hasExecutor,
                     previousWasOptional,
-                    original == 0 ? null : String.valueOf(original));
+                    original == 0 ? null : String.valueOf(original),
+                    isContainerAtEnd);
             }
 
             if (first && grabber.isValid()) {

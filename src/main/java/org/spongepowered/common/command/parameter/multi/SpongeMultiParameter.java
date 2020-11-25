@@ -78,5 +78,6 @@ public abstract class SpongeMultiParameter implements Parameter {
             List<CommandNode<CommandSource>> potentialOptionalRedirects,
             boolean isTermination,
             boolean previousWasOptional,
-            String suffix);
+            String suffix,
+            boolean isContainerAtEnd);
 }
