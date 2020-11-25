@@ -436,7 +436,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             newLines.add(SpongeAdventure.legacySection(line));
         }
 
-        final ListValue.Mutable<Component> newLinesValue = new MutableSpongeListValue<>(Keys.SIGN_LINES.get(), newLines);
+        final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES.get(), newLines);
         final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
                 originalLinesValue.asImmutable(), newLinesValue,
                 (Sign) sign);
