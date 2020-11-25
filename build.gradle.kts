@@ -210,7 +210,8 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:$asmVersion")
 
     // Implementation-only Adventure
-    implementation("net.kyori:adventure-serializer-configurate4:4.2.0-SNAPSHOT")
+    implementation(platform("net.kyori:adventure-bom:4.2.0"))
+    implementation("net.kyori:adventure-serializer-configurate4")
 
     annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
     annotationProcessor("org.apache.logging.log4j:log4j-core:2.11.2")
@@ -569,7 +570,8 @@ project("SpongeVanilla") {
         vanillaInstallerImplementation(vanillaInstallerConfig)
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
-        vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate4:4.2.0-SNAPSHOT")
+        vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.2.0"))
+        vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate4")
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
         vanillaAppLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
         vanillaAppLaunchConfig("org.ow2.asm:asm-tree:$asmVersion")
