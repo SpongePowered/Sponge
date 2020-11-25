@@ -33,6 +33,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ICollisionReader;
 import net.minecraft.world.ILightReader;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -62,6 +63,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.tileentity.TileEntityAccessor;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
@@ -314,6 +316,7 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         } else {
             backingVolume = null;
         }
+
         return VolumeStreamUtils.<R, BlockEntity, TileEntity, IChunk, BlockPos>generateStream(
             min,
             max,
@@ -328,6 +331,9 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
                     cloned,
                     () -> String.format("TileEntityType[%s] creates a null TileEntity!", TileEntityType.getId(tile.getType()))
                 ).read(nbt);
+                if (this instanceof World) {
+                    ((TileEntityAccessor) cloned).accessor$setWorld((World) this);
+                }
                 backingVolume.addBlockEntity(pos.getX(), pos.getY(), pos.getZ(), (BlockEntity) cloned);
             } : (pos, tile) -> {},
             // ChunkAccessor

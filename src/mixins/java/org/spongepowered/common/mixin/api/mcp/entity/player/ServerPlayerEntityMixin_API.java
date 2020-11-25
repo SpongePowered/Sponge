@@ -158,6 +158,11 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
+    public boolean isOnline() {
+        return this.server.getPlayerList().getPlayerByUUID(this.entityUniqueID) != (ServerPlayerEntity) (Object) this;
+    }
+
+    @Override
     public GameProfile getProfile() {
         return ((ServerPlayerEntityBridge) this).bridge$getUser().getProfile();
     }
@@ -305,7 +310,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public boolean respawnPlayer() {
+    public boolean respawn() {
         if (this.shadow$getHealth() > 0.0F) {
             return false;
         }

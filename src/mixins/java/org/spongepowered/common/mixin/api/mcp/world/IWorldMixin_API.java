@@ -77,6 +77,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -268,8 +269,9 @@ public interface IWorldMixin_API<T extends ProtoWorld<T>> extends ProtoWorld<T> 
 
     @Override
     default boolean spawnEntity(final Entity entity) {
-        Preconditions.checkNotNull(entity, "The entity cannot be null!");
-            return ((IWorld) this).addEntity((net.minecraft.entity.Entity) entity);
+        Objects.requireNonNull(entity);
+
+        return ((IWorld) this).addEntity((net.minecraft.entity.Entity) entity);
     }
 
     // MutableBlockVolume

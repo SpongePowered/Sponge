@@ -182,7 +182,8 @@
         "entity.item.BoatEntityAccessor",
         "entity.EntityTypeAccessor",
         "entity.passive.fish.TropicalFishEntityAccessor",
-        "network.play.server.SRespawnPacketAccessor"
+        "network.play.server.SRespawnPacketAccessor",
+        "tileentity.TileEntityAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor",
