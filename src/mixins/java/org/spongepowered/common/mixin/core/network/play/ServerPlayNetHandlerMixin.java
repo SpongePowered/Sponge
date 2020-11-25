@@ -40,23 +40,34 @@ import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CAnimateHandPacket;
 import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.network.play.client.CTabCompletePacket;
+import net.minecraft.network.play.client.CUpdateSignPacket;
 import net.minecraft.network.play.client.CUseEntityPacket;
 import net.minecraft.network.play.server.STabCompletePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.tileentity.SignTileEntity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.entity.ChangeSignEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
@@ -78,6 +89,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.EntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
@@ -85,6 +97,8 @@ import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
+import org.spongepowered.common.data.value.ImmutableSpongeListValue;
+import org.spongepowered.common.data.value.MutableSpongeListValue;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -93,13 +107,16 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
 @Mixin(ServerPlayNetHandler.class)
 public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderBridge {
 
-    private static final String[] impl$emptyCommandArray = new String[] { "" };
+    private static final String[] IMPL$ZERO_LENGTH_STRING_ARRAY = new String[0];
+    private static final String[] IMPL$EMPTY_COMMAND_ARRAY = new String[] { "" };
 
     @Shadow @Final public NetworkManager netManager;
     @Shadow public ServerPlayerEntity player;
@@ -407,9 +424,31 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         return playerList.recreatePlayerEntity(playerIn, dimension, conqueredEnd);
     }
 
+    @Redirect(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CUpdateSignPacket;getLines()[Ljava/lang/String;"))
+    private String[] impl$callChangeSignEvent(CUpdateSignPacket packet) {
+        final ServerWorld world = this.server.getWorld(this.player.dimension);
+        final BlockPos position = packet.getPosition();
+        final SignTileEntity sign = (SignTileEntity) world.getTileEntity(position);
+
+        final ListValue<Component> originalLinesValue = ((Sign) sign).getValue(Keys.SIGN_LINES).orElse(null);
+        final List<Component> newLines = new ArrayList<>();
+        for (final String line : packet.getLines()) {
+            newLines.add(SpongeAdventure.legacySection(line));
+        }
+
+        final ListValue.Mutable<Component> newLinesValue = new MutableSpongeListValue<>(Keys.SIGN_LINES.get(), newLines);
+        final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                originalLinesValue.asImmutable(), newLinesValue,
+                (Sign) sign);
+        final ListValue<Component> toApply = SpongeCommon.postEvent(event) ? originalLinesValue : newLinesValue;
+        ((Sign) sign).offer(toApply);
+
+        return ServerPlayNetHandlerMixin.IMPL$ZERO_LENGTH_STRING_ARRAY;
+    }
+
     private String[] impl$extractCommandString(final String commandString) {
         if (commandString.isEmpty()) {
-            return ServerPlayNetHandlerMixin.impl$emptyCommandArray;
+            return ServerPlayNetHandlerMixin.IMPL$EMPTY_COMMAND_ARRAY;
         }
         if (commandString.startsWith("/")) {
             return commandString.substring(1).split(" ", 2);

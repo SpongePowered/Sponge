@@ -289,7 +289,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                         + "this server instance before. Aborting...", properties.getKey())));
             }
 
-            if (((WorldInfoBridge) properties).bridge$getDimensionId() != null && dimensionType.getId() != (((WorldInfoBridge) properties).bridge$getDimensionId())) {
+            if (((WorldInfoBridge) properties).bridge$getDimensionId() != null && (dimensionType.getId() + 1) != (((WorldInfoBridge) properties).bridge$getDimensionId())) {
                 return FutureUtil.completedWithException(new IOException(String.format("World '%s' was registered with a different internal id on "
                                 + "this server instance before. Aborting...", properties.getKey())));
             }
