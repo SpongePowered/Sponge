@@ -33,6 +33,7 @@ import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.SessionLockException;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
@@ -222,7 +223,7 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 //    }
 
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000, ordinal = 0))
-    private int getSaveTickInterval(final int tickInterval) {
+    private int getSaveTickInterval(final int tickInterval) throws SessionLockException {
         if (!this.shadow$isDedicatedServer()) {
             return tickInterval;
         } else if (!this.shadow$isServerRunning()) {
@@ -242,26 +243,24 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     }
 
     /**
-     * @author Zidane - Minecraft 1.14.4
+     * @author Zidane - November, 24th 2020 - Minecraft 1.15
      * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
      */
     @Overwrite
-    public boolean save(final boolean suppressLog, final boolean flush, final boolean forced) {
+    public boolean save(final boolean suppressLog, final boolean flush, final boolean isForced) throws SessionLockException {
         if (!this.impl$enableSaving) {
             return false;
         }
 
         for (final ServerWorld world : this.shadow$getWorlds()) {
-
-            // TODO Minecraft 1.15 - zml, where is the best place to do the save?
             ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
 
             final SerializationBehavior serializationBehavior = ((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior();
-            final boolean save = serializationBehavior != SerializationBehavior.NONE;
             boolean log = !suppressLog;
 
-            if (save) {
-                if (this.shadow$isDedicatedServer() && this.shadow$isServerRunning()) {
+            if (serializationBehavior != SerializationBehavior.NONE) {
+                // Only run auto-save checks if we're doing an auto save. If someone tells us to save (isForced), assume manual
+                if (!isForced && this.shadow$isDedicatedServer() && this.shadow$isServerRunning()) {
                     final InheritableConfigHandle<WorldConfig> adapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
                     final int autoSaveInterval = adapter.get().getWorld().getAutoSaveInterval();
                     if (log) {
@@ -286,7 +285,8 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
                     LOGGER.info("Saving chunks for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
                 }
 
-                ((ServerWorldBridge) world).bridge$save(null, flush, world.disableLevelSaving && !forced);
+                ((ServerWorldBridge) world).bridge$setIsAutomaticSave(!isForced);
+                world.save(null, false, world.disableLevelSaving && !isForced);
             }
         }
 

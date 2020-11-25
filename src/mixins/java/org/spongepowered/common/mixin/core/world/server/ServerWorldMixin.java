@@ -30,20 +30,21 @@ import net.minecraft.server.CustomServerBossInfoManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SessionLockException;
-import org.apache.logging.log4j.LogManager;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
@@ -53,6 +54,7 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -62,6 +64,8 @@ import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,9 +77,11 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
     // @formatter:off
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract List<ServerPlayerEntity> shadow$getPlayers();
+    @Shadow protected abstract void shadow$saveLevel() throws SessionLockException;
     // @formatter:on
 
     private CustomServerBossInfoManager impl$bossBarManager;
+    private boolean impl$isAutomaticSave = false;
 
     @Override
     public boolean bridge$isLoaded() {
@@ -137,23 +143,6 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             entityIn.rotationYaw = (float) rotationUpdate.getY();
         }
         this.impl$rotationUpdates.remove(entityIn);
-    }
-
-    @Override
-    public void bridge$save(@Nullable IProgressUpdate update, boolean flush, boolean forced) {
-        final ServerWorld world = (ServerWorld) (Object) this;
-
-        try {
-            world.save(null, flush, world.disableLevelSaving && !forced);
-        } catch (SessionLockException sessionlockexception) {
-            LogManager.getLogger().warn(sessionlockexception.getMessage());
-        }
-
-        world.getWorldBorder().copyTo(world.getWorldInfo());
-
-        world.getWorldInfo().setCustomBossEvents(((ServerWorldBridge) world).bridge$getBossBarManager().write());
-
-        world.getSaveHandler().saveWorldInfoWithPlayer(world.getWorldInfo(), this.shadow$getServer().getPlayerList().getHostPlayerData());
     }
 
     @Override
@@ -235,6 +224,56 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
             // Sponge Start - end processing
         }
         // Sponge End
+    }
+
+    @Override
+    public void bridge$setIsAutomaticSave(boolean state) {
+        this.impl$isAutomaticSave = state;
+    }
+
+    /**
+     * @author zidane - November 24th, 2020 - Minecraft 1.15.2
+     * @reason Honor our serialization behavior in performing saves
+     */
+    @Overwrite
+    public void save(@Nullable IProgressUpdate progress, boolean flush, boolean skipSave) throws SessionLockException {
+        final ServerWorld this$ = (ServerWorld) (Object) this;
+
+        ServerChunkProvider serverchunkprovider = this$.getChunkProvider();
+        if (!skipSave) {
+            final SerializationBehavior behavior = ((WorldInfoBridge) this$.getWorldInfo()).bridge$getSerializationBehavior();
+
+            if (progress != null) {
+                progress.displaySavingString(new TranslationTextComponent("menu.savingLevel"));
+            }
+
+            if ((this.impl$isAutomaticSave && (behavior == SerializationBehavior.AUTOMATIC || behavior == SerializationBehavior
+                    .AUTOMATIC_METADATA_ONLY)) || behavior == SerializationBehavior.MANUAL || behavior == SerializationBehavior
+                    .MANUAL_METADATA_ONLY) {
+
+                this.shadow$saveLevel();
+
+                // Sponge Start - We do per-world WorldInfo/WorldBorders/BossBars
+
+                this.getWorldBorder().copyTo(this$.getWorldInfo());
+
+                this$.getWorldInfo().setCustomBossEvents(((ServerWorldBridge) this$).bridge$getBossBarManager().write());
+
+                this$.getSaveHandler().saveWorldInfoWithPlayer(this$.getWorldInfo(), this.shadow$getDimension().getType() == DimensionType.OVERWORLD
+                        ? this.shadow$getServer().getPlayerList().getHostPlayerData() : null);
+
+                // Sponge End
+            }
+            if (progress != null) {
+                progress.displayLoadingString(new TranslationTextComponent("menu.savingChunks"));
+            }
+
+            if ((this.impl$isAutomaticSave && behavior == SerializationBehavior.AUTOMATIC) || behavior == SerializationBehavior.MANUAL) {
+                serverchunkprovider.save(flush);
+            }
+        }
+
+        this.impl$isAutomaticSave = false;
     }
 
     @Override

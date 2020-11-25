@@ -30,6 +30,7 @@ import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
@@ -59,11 +60,11 @@ public interface ServerWorldBridge {
 
     void bridge$setWeatherStartTime(long start);
 
-    void bridge$save(@Nullable IProgressUpdate update, boolean flush, boolean saveChunks);
-
     void bridge$setWeather(Weather weather, long ticks);
 
     long bridge$getDurationInTicks();
 
     void bridge$triggerExplosion(Explosion explosion);
+
+    void bridge$setIsAutomaticSave(boolean state);
 }
