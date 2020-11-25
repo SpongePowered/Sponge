@@ -440,7 +440,7 @@ public final class SpongeCommandManager implements CommandManager {
         } else {
             prettyPrinter.add(thr);
         }
-                prettyPrinter.add()
+        prettyPrinter.add()
                 .add("CommandCause details: ")
                 .addWrapped(cause.getCause().toString())
                 .log(SpongeCommon.getLogger(), Level.ERROR);
