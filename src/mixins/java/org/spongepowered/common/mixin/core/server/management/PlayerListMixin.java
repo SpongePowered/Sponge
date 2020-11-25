@@ -71,6 +71,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.play.server.SRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -250,6 +251,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Redirect(method = "initializeConnectionToPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendScoreboard(Lnet/minecraft/scoreboard/ServerScoreboard;Lnet/minecraft/entity/player/ServerPlayerEntity;)V"))
     private void impl$sendScoreboard(final PlayerList playerList, final ServerScoreboard scoreboardIn, final ServerPlayerEntity playerIn) {
         ((ServerPlayerEntityBridge)playerIn).bridge$initScoreboard();
+    }
+
+    @Inject(method = "playerLoggedOut", at = @At("HEAD"))
+    private void impl$RemovePlayerReferenceFromScoreboard(ServerPlayerEntity player, CallbackInfo ci) {
+        ((ServerScoreboardBridge) ((ServerPlayer) player).getScoreboard()).bridge$removePlayer(player, false);
     }
 
     @Redirect(method = "func_212504_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSaveHandler()Lnet/minecraft/world/storage/SaveHandler;"))

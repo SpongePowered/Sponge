@@ -336,11 +336,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         handler.sendPacket(packet);
     }
 
-    @Inject(method = "playerLoggedOut", at = @At("HEAD"))
-    private void impl$RemovePlayerReferenceFromScoreboard(ServerPlayerEntity player, CallbackInfo ci) {
-        ((ServerScoreboardBridge) ((Player) player).getScoreboard()).bridge$removePlayer(player, false);
-    }
-
     @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))
     private void impl$saveAllSpongeUsers(CallbackInfo ci) {
         for (final SpongeUser user : SpongeUser.dirtyUsers) {

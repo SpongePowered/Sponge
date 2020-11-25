@@ -216,15 +216,17 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
             for (final ScoreObjective objective: this.getScoreObjectives()) {
                 player.connection.sendPacket(new SScoreboardObjectivePacket(objective, 0));
+                for (int i = 0; i < 19; ++i) {
+                    if (this.getObjectiveInDisplaySlot(i) == objective) {
+                        player.connection.sendPacket(new SDisplayObjectivePacket(i, objective));
+                    }
+                }
                 for (final Score score: this.getSortedScores(objective)) {
                     final SUpdateScorePacket packetIn = new SUpdateScorePacket(Action.CHANGE, score.getObjective().getName(), score.getPlayerName(), score.getScorePoints());
                     player.connection.sendPacket(packetIn);
                 }
             }
 
-            for (int i = 0; i < 19; ++i) {
-                player.connection.sendPacket(new SDisplayObjectivePacket(i, this.getObjectiveInDisplaySlot(i)));
-            }
         }
     }
 
