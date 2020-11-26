@@ -42,6 +42,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.border.IBorderListener;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SaveHandler;
@@ -76,6 +78,7 @@ import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.server.PerWorldBorderListener;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -265,6 +268,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         }
 
         return SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD).getSaveHandler();
+    }
+
+    @Redirect(method = "func_212504_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;addListener(Lnet/minecraft/world/border/IBorderListener;)V"))
+    private void impl$usePerWorldBorderListener(final WorldBorder worldBorder, final IBorderListener listener, final ServerWorld serverWorld) {
+        worldBorder.addListener(new PerWorldBorderListener(serverWorld));
     }
 
     @Redirect(method = "readPlayerDataFromFile", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;read(Lnet/minecraft/nbt/CompoundNBT;)V"))
