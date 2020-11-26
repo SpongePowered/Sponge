@@ -54,6 +54,7 @@ public final class PlatformHooks {
     private EventHooks eventHooks = new EventHooks() {};
     private GeneralHooks generalHooks = new GeneralHooks() {};
     private PacketHooks packetHooks = new PacketHooks() {};
+    private WorldGenerationHooks worldGenerationHooks = new WorldGenerationHooks() {};
 
     public static PlatformHooks getInstance() {
         return PlatformHooks.instance;
@@ -89,5 +90,13 @@ public final class PlatformHooks {
 
     public void setGeneralHooks(final GeneralHooks generalHooks) {
         this.generalHooks = Objects.requireNonNull(generalHooks);
+    }
+
+    public WorldGenerationHooks getWorldGenerationHooks() {
+        return this.worldGenerationHooks;
+    }
+
+    public void setWorldGenerationHooks(final WorldGenerationHooks worldGenerationHooks) {
+        this.worldGenerationHooks = Objects.requireNonNull(worldGenerationHooks);
     }
 }

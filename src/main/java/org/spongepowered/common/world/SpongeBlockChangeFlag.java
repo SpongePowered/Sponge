@@ -37,14 +37,14 @@ import org.spongepowered.common.util.Constants;
 public final class SpongeBlockChangeFlag implements BlockChangeFlag {
 
     private final boolean updateNeighbors;
+    private final boolean notifyClients;
     private final boolean performBlockPhysics;
     private final boolean notifyObservers;
-    private final boolean notifyClients;
     private final boolean ignoreRender;
     private final boolean forceReRender;
     private final boolean blockMoving;
     private final boolean lighting;
-    private final boolean pathfinding;
+    private final boolean pathfindingUpdates;
     private final boolean neighborDrops;
     private final int rawFlag;
     private final String name;
@@ -59,7 +59,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         this.blockMoving = (flag & Constants.BlockChangeFlags.BLOCK_MOVING) != 0; // 64
         this.performBlockPhysics = (flag & Constants.BlockChangeFlags.PHYSICS_MASK) == 0; // sponge
         this.lighting = (flag & Constants.BlockChangeFlags.LIGHTING_UPDATES) == 0; // sponge
-        this.pathfinding = (flag & Constants.BlockChangeFlags.PATHFINDING_UPDATES) == 0; // sponge
+        this.pathfindingUpdates = (flag & Constants.BlockChangeFlags.PATHFINDING_UPDATES) == 0; // sponge
         this.rawFlag = flag;
         this.name = name;
     }
@@ -67,6 +67,11 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     @Override
     public boolean updateNeighbors() {
         return this.updateNeighbors;
+    }
+
+    @Override
+    public boolean notifyClients() {
+        return this.notifyClients;
     }
 
     @Override
@@ -79,14 +84,15 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         return this.notifyObservers;
     }
 
+    @Override
     public boolean updateLighting() {
         return this.lighting;
     }
 
+    @Override
     public boolean notifyPathfinding() {
-        return this.pathfinding;
+        return this.pathfindingUpdates;
     }
-
 
     @Override
     public SpongeBlockChangeFlag withUpdateNeighbors(final boolean updateNeighbors) {
@@ -103,7 +109,26 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                 | (this.blockMoving ? Constants.BlockChangeFlags.BLOCK_MOVING : 0)
                 | (this.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
                 | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
-                | (this.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
+                | (this.pathfindingUpdates ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
+        return BlockChangeFlagManager.fromNativeInt(maskedFlag);
+    }
+
+    @Override
+    public BlockChangeFlag withNotifyClients(final boolean notifyClients) {
+        if (this.notifyClients == notifyClients) {
+            return this;
+        }
+        final int maskedFlag =
+                (this.updateNeighbors ? Constants.BlockChangeFlags.NEIGHBOR_MASK : 0)
+                        | (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
+                        | (this.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
+                        | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
+                        | (this.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
+                        | (this.neighborDrops ? Constants.BlockChangeFlags.NEIGHBOR_DROPS : 0)
+                        | (this.blockMoving ? Constants.BlockChangeFlags.BLOCK_MOVING : 0)
+                        | (performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
+                        | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
+                        | (this.pathfindingUpdates ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
@@ -122,7 +147,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                 | (this.blockMoving ? Constants.BlockChangeFlags.BLOCK_MOVING : 0)
                 | (performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
                 | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
-                | (this.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
+                | (this.pathfindingUpdates ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
@@ -141,7 +166,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                 | (this.blockMoving ? Constants.BlockChangeFlags.BLOCK_MOVING : 0)
                 | (this.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
                 | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
-                | (this.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
+                | (this.pathfindingUpdates ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
 
     }
@@ -161,13 +186,13 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                 | (this.blockMoving ? Constants.BlockChangeFlags.BLOCK_MOVING : 0)
                 | (this.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
                 | (lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
-                | (this.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
+                | (this.pathfindingUpdates ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
     @Override
     public BlockChangeFlag withPathfindingUpdates(final boolean pathfindingUpdates) {
-        if (this.pathfinding == pathfindingUpdates) {
+        if (this.pathfindingUpdates == pathfindingUpdates) {
             return this;
         }
         final int maskedFlag =
@@ -184,24 +209,6 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
-    public BlockChangeFlag withNeighborDrops(final boolean notifyObservers) {
-        if (this.notifyObservers == notifyObservers) {
-            return this;
-        }
-        final int maskedFlag =
-            (this.updateNeighbors ? Constants.BlockChangeFlags.NEIGHBOR_MASK : 0)
-                | (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
-                | (this.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
-                | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
-                | (notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
-                | (this.neighborDrops ? Constants.BlockChangeFlags.NEIGHBOR_DROPS : 0)
-                | (this.blockMoving ? Constants.BlockChangeFlags.BLOCK_MOVING : 0)
-                | (this.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
-                | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
-                | (this.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
-        return BlockChangeFlagManager.fromNativeInt(maskedFlag);
-    }
-
     @Override
     public BlockChangeFlag inverse() {
         final int maskedFlag =
@@ -214,7 +221,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                 | (this.blockMoving ? 0 : Constants.BlockChangeFlags.BLOCK_MOVING)
                 | (this.performBlockPhysics ? Constants.BlockChangeFlags.PHYSICS_MASK : 0)
                 | (this.lighting ? Constants.BlockChangeFlags.LIGHTING_UPDATES : 0)
-                | (this.pathfinding ? Constants.BlockChangeFlags.PATHFINDING_UPDATES : 0);
+                | (this.pathfindingUpdates ? Constants.BlockChangeFlags.PATHFINDING_UPDATES : 0);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
@@ -231,7 +238,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                 | (this.blockMoving || o.blockMoving ? Constants.BlockChangeFlags.BLOCK_MOVING : 0)
                 | (this.performBlockPhysics || o.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
                 | (this.lighting || o.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
-                | (this.pathfinding || o.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
+                | (this.pathfindingUpdates || o.pathfindingUpdates ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
     }
 
@@ -248,12 +255,8 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
                 | (this.blockMoving && !o.blockMoving ? Constants.BlockChangeFlags.BLOCK_MOVING : 0)
                 | (this.performBlockPhysics && !o.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
                 | (this.lighting && !o.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
-                | (this.pathfinding && !o.pathfinding ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
+                | (this.pathfindingUpdates && !o.pathfindingUpdates ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
-    }
-
-    public boolean notifyClients() {
-        return this.notifyClients;
     }
 
     public boolean isIgnoreRender() {
@@ -285,20 +288,11 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         return MoreObjects.toStringHelper(this)
             .add("rawFlag", this.rawFlag)
             .add("notifyNeighbors", this.updateNeighbors)
+            .add("notifyClients", this.notifyClients)
             .add("performBlockPhysics", this.performBlockPhysics)
             .add("notifyObservers", this.notifyObservers)
-            .add("notifyClients", this.notifyClients)
             .add("ignoreRender", this.ignoreRender)
             .add("forceReRender", this.forceReRender)
             .toString();
-    }
-
-    private static class Builder {
-
-        Builder(final SpongeBlockChangeFlag flag) {
-
-        }
-
-
     }
 }

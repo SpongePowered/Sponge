@@ -144,7 +144,9 @@
         "world.storage.WorldInfoMixin",
         "scoreboard.ScorePlayerTeamMixin",
         "util.ClassInheritanceMultiMapMixin",
-        "command.impl.SaveAllCommandMixin"
+        "command.impl.SaveAllCommandMixin",
+        "util.EntityPredicatesMixin",
+        "world.gen.feature.structure.LegacyStructureDataUtilMixin"
     ],
     "client": [
         "client.MinecraftMixin",

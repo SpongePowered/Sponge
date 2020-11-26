@@ -104,6 +104,8 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     // ReadableRegion
 
+    @Shadow boolean isRemote();
+
     @Override
     default DimensionType getDimensionType() {
         return ((DimensionTypeBridge) this.shadow$getDimension().getType()).bridge$getSpongeDimensionType();
@@ -229,9 +231,10 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         VolumeStreamUtils.validateStreamArgs(min, max, options);
 
         final boolean shouldCarbonCopy = options.carbonCopy();
+        final Vector3i size = max.min(min);
         final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
         if (shouldCarbonCopy) {
-            backingVolume = new ObjectArrayMutableBiomeBuffer(min, max);
+            backingVolume = new ObjectArrayMutableBiomeBuffer(min, size);
         } else {
             backingVolume = null;
         }
@@ -270,9 +273,10 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         VolumeStreamUtils.validateStreamArgs(min, max, options);
 
         final boolean shouldCarbonCopy = options.carbonCopy();
+        final Vector3i size = max.min(min);
         final @MonotonicNonNull ArrayMutableBlockBuffer backingVolume;
         if (shouldCarbonCopy) {
-            backingVolume = new ArrayMutableBlockBuffer(min, max);
+            backingVolume = new ArrayMutableBlockBuffer(min, size);
         } else {
             backingVolume = null;
         }
@@ -310,9 +314,10 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         VolumeStreamUtils.validateStreamArgs(min, max, options);
 
         final boolean shouldCarbonCopy = options.carbonCopy();
+        final Vector3i size = max.min(min);
         final @MonotonicNonNull ObjectArrayMutableBlockEntityBuffer backingVolume;
         if (shouldCarbonCopy) {
-            backingVolume = new ObjectArrayMutableBlockEntityBuffer(min, max);
+            backingVolume = new ObjectArrayMutableBlockEntityBuffer(min, size);
         } else {
             backingVolume = null;
         }

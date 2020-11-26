@@ -326,16 +326,17 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final IChunkStatusListener chunkStatusListener = ((MinecraftServerAccessor_Vanilla) this.server).accessor$getChunkStatusListenerFactory().create(11);
 
-        final ServerWorld serverWorld = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
+        world = new ServerWorld(this.server, this.server.getBackgroundExecutor(), saveHandler, worldInfo,
                 dimensionType, this.server.getProfiler(), chunkStatusListener);
 
         this.loadedWorldInfos.put(properties.getKey(), worldInfo);
         this.infoByType.put(dimensionType, worldInfo);
         this.allInfos.put(properties.getKey(), worldInfo);
-        this.worlds.put(properties.getKey(), serverWorld);
-        this.worldsByType.put(dimensionType, serverWorld);
+        this.worlds.put(properties.getKey(), world);
+        this.worldsByType.put(dimensionType, world);
 
-        this.performPostLoadWorldLogic(serverWorld, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo.getGenerator(), null), worldDirectory, chunkStatusListener);
+        this.performPostLoadWorldLogic(world, this.createDefaultSettings(null, false, worldInfo.getSeed(), worldInfo.getGenerator(), null),
+                worldDirectory, chunkStatusListener);
 
         return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
     }
@@ -379,6 +380,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     ((org.spongepowered.api.world.server.ServerWorld) closingWorld).getDimensionType().getKey(),
                     closingWorld.dimension.getType().getId());
             try {
+                ((ServerWorldBridge) world).bridge$setManualSave(true);
                 closingWorld.save(null, true, true);
             } catch (final SessionLockException e) {
                 return FutureUtil.completedWithException(new IOException(e));
@@ -393,7 +395,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     (org.spongepowered.api.world.server.ServerWorld) closingWorld));
 
             return CompletableFuture.completedFuture(true);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             return FutureUtil.completedWithException(ex);
         }
     }
@@ -513,6 +515,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         if (world.getWorldInfo().isDifficultyLocked() && !forceDifficulty) {
             return;
         }
+
         if (forceDifficulty) {
             // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
             if (!((WorldInfoBridge) world.getWorldInfo()).bridge$hasCustomDifficulty()) {

@@ -56,10 +56,7 @@ public abstract class EntityPredicatesMixin {
             // Sponge: Take into account untargetability from vanishing
             return false;
         }
-        if (entity instanceof PlayerEntity && (entity.isSpectator() || ((PlayerEntity) entity).isCreative())) {
-            return false;
-        }
-        return true;
+        return !(entity instanceof PlayerEntity) || (!entity.isSpectator() && !((PlayerEntity) entity).isCreative());
     };
 
 
