@@ -291,33 +291,33 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "recreatePlayerEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/ServerPlayNetHandler;sendPacket"
             + "(Lnet/minecraft/network/IPacket;)V", ordinal = 1))
-    private void impl$callRespawnPlayerRecreateEvent(ServerPlayNetHandler serverPlayNetHandler, IPacket<?> packetIn, ServerPlayerEntity playerIn,
+    private void impl$callRespawnPlayerRecreateEvent(ServerPlayNetHandler serverPlayNetHandler, IPacket<?> packetIn, ServerPlayerEntity originalPlayer,
             DimensionType dimension, boolean conqueredEnd) {
-        final ServerPlayerEntity player = serverPlayNetHandler.player;
+        final ServerPlayerEntity recreatedPlayer = serverPlayNetHandler.player;
 
-        final Vector3d originalPosition = VecHelper.toVector3d(playerIn.getPosition());
-        final Vector3d destinationPosition = VecHelper.toVector3d(player.getPositionVec());
-        final org.spongepowered.api.world.server.ServerWorld originalWorld = (org.spongepowered.api.world.server.ServerWorld) playerIn.world;
+        final Vector3d originalPosition = VecHelper.toVector3d(originalPlayer.getPosition());
+        final Vector3d destinationPosition = VecHelper.toVector3d(recreatedPlayer.getPositionVec());
+        final org.spongepowered.api.world.server.ServerWorld originalWorld = (org.spongepowered.api.world.server.ServerWorld) originalPlayer.world;
         final org.spongepowered.api.world.server.ServerWorld originalDestinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server
                 .getWorld(this.impl$originalDestination == null ? DimensionType.OVERWORLD : this.impl$originalDestination);
-        final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) player.world;
+        final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) recreatedPlayer.world;
 
         final RespawnPlayerEvent.Recreate event =
                 SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().getCurrentCause(), destinationPosition,
-                        originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) playerIn,
-                        (ServerPlayer) player, this.impl$isBedSpawn, !conqueredEnd);
+                        originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) originalPlayer,
+                        (ServerPlayer) recreatedPlayer, this.impl$isBedSpawn, !conqueredEnd);
         SpongeCommon.postEvent(event);
-        player.setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(), event.getDestinationPosition().getZ());
+        recreatedPlayer.setPosition(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(), event.getDestinationPosition().getZ());
         this.impl$isBedSpawn = false;
         this.impl$originalDestination = null;
 
         // We may respawn into a custom dimension that the player has not encountered before. Let the platform handle it
-        ((ServerPlayerEntityBridge) player).bridge$sendDimensionData(serverPlayNetHandler.netManager, dimension);
+        ((ServerPlayerEntityBridge) recreatedPlayer).bridge$sendDimensionData(serverPlayNetHandler.netManager, dimension);
 
-        ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(
+        ((ServerPlayerEntityBridge) recreatedPlayer).bridge$sendChangeDimension(
                 ((SRespawnPacketAccessor) packetIn).accessor$getDimensionType(),
                 ((SRespawnPacketAccessor) packetIn).accessor$getHashedSeed(), ((SRespawnPacketAccessor) packetIn).accessor$getWorldType(),
-                ((SRespawnPacketAccessor) packetIn).accessor$getGameType()
+                recreatedPlayer.interactionManager.getGameType()
         );
     }
 

@@ -174,7 +174,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     @Override
     public boolean bridge$setLocation(final ServerLocation location) {
-        if (this.removed || ((WorldBridge) location.getWorld()).bridge$isFake()) {
+        if (this.removed) {
             return false;
         }
 
