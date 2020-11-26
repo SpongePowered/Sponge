@@ -97,12 +97,6 @@ public final class VolumeStreamUtils {
         };
     }
 
-    /**
-     *
-     * @return
-     * @param min
-     * @param max
-     */
     public static Function<IChunk, Stream<Map.Entry<BlockPos, Biome>>> getBiomesForChunkByPos(final Vector3i min,
         final Vector3i max
     ) {
@@ -120,6 +114,7 @@ public final class VolumeStreamUtils {
         Objects.requireNonNull(min, "Minimum coordinates cannot be null");
         Objects.requireNonNull(max, "Maximum coordinates cannot be null");
         Objects.requireNonNull(options, "StreamOptions cannot be null!");
+
         if (min.getX() > max.getX()) {
             throw new IllegalArgumentException("Min(x) must be greater than max(x)!");
         }

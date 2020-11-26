@@ -411,7 +411,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         final RespawnPlayerEvent.SelectWorld event =
                 SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().getCurrentCause(),
                         (org.spongepowered.api.world.server.ServerWorld) (Object) destinationWorld,
-                        (org.spongepowered.api.world.server.ServerWorld) (Object) this.server.getWorld(entity.dimension),
+                        (org.spongepowered.api.world.server.ServerWorld) (Object) entity.getServerWorld(),
                         (org.spongepowered.api.world.server.ServerWorld) (Object) this.server.getWorld(DimensionType.OVERWORLD),
                         (ServerPlayer) entity);
         SpongeCommon.postEvent(event);

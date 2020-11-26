@@ -83,12 +83,12 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+@SuppressWarnings({"RedundantTypeArguments", "unchecked", "RedundantCast"})
 @Mixin(IWorldReader.class)
 @Implements(@Interface(iface = ReadableRegion.class, prefix = "readable$"))
 public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends ReadableRegion<R> {
 
-    //@formatter:off
-
+    // @formatter:off
     @Nullable @Shadow IChunk shadow$getChunk(int p_217353_1_, int p_217353_2_, ChunkStatus p_217353_3_, boolean p_217353_4_);
     @Deprecated @Shadow boolean shadow$chunkExists(int p_217354_1_, int p_217354_2_);
     @Shadow int shadow$getHeight(Heightmap.Type p_201676_1_, int p_201676_2_, int p_201676_3_);
@@ -99,12 +99,9 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
     @Shadow net.minecraft.world.dimension.Dimension shadow$getDimension();
     @Shadow boolean shadow$containsAnyLiquid(AxisAlignedBB bb);
     @Shadow Biome shadow$getBiome(BlockPos p_226691_1_);
-
-    //@formatter:on
+    // @formatter:on
 
     // ReadableRegion
-
-    @Shadow boolean isRemote();
 
     @Override
     default DimensionType getDimensionType() {
@@ -171,21 +168,18 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     @Override
     default Optional<Entity> getEntity(final UUID uuid) {
-        throw new UnsupportedOperationException(
-            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override
     default Collection<? extends Player> getPlayers() {
-        throw new UnsupportedOperationException(
-            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     @Override
     default <T extends Entity> Collection<? extends T> getEntities(final Class<? extends T> entityClass, final AABB box,
         @Nullable final Predicate<? super T> predicate) {
-        throw new UnsupportedOperationException(
-            "Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
+        throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorldReaderBase that isn't part of Sponge API");
     }
 
     // ChunkVolume
@@ -214,7 +208,6 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
 
     // HeightAwareVolume
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     default int getHeight(final HeightType type, final int x, final int z) {
         return this.shadow$getHeight((Heightmap.Type) (Object) type, x, z);
@@ -225,7 +218,6 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         return (BiomeType) this.shadow$getBiome(new BlockPos(x, y, z));
     }
 
-    @SuppressWarnings({"RedundantCast", "RedundantTypeArguments", "unchecked"})
     @Override
     default VolumeStream<R, BiomeType> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
@@ -267,7 +259,6 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         );
     }
 
-    @SuppressWarnings({"RedundantTypeArguments", "unchecked", "RedundantCast"})
     @Override
     default VolumeStream<R, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
@@ -308,7 +299,6 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         );
     }
 
-    @SuppressWarnings({"unchecked", "RedundantTypeArguments", "RedundantCast"})
     @Override
     default VolumeStream<R, BlockEntity> getBlockEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
@@ -357,7 +347,6 @@ public interface IWorldReaderMixin_API<R extends ReadableRegion<R>> extends Read
         );
     }
 
-    @SuppressWarnings({"ConstantConditions", "RedundantCast", "rawtypes", "RedundantTypeArguments", "unchecked"})
     @Override
     default VolumeStream<R, Entity> getEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
