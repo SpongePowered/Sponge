@@ -52,8 +52,8 @@ import java.util.Optional;
 /**
  * The default implementation of {@link BanService}.
  *
- * <p>Many of the methods here are copied from {@link UserListBans}
- * or {@link UserListIPBans}, while the original methods have been changed
+ * <p>Many of the methods here are copied from {@link BanList}
+ * or {@link IPBanList}, while the original methods have been changed
  * to delegate to the registered {@link BanService}. This allows bans to
  * function normally when the default {@link BanService} has not been replaced,
  * while allowing plugin-provided {@link BanService}s to be used for all aspects
@@ -102,7 +102,7 @@ public final class SpongeBanService implements BanService {
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
 
         accessor.invoker$removeExpired();
-        return Optional.ofNullable((Ban.Ip) accessor.accessor$map().get(accessor.invoker$getKeyForUser(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0)))));
+        return Optional.ofNullable((Ban.Ip) accessor.accessor$map().get(accessor.invoker$getKeyForUser(((IPBanList) accessor).getIpFromAddress(new InetSocketAddress(address, 0)))));
     }
 
     @SuppressWarnings("unchecked")
@@ -121,7 +121,7 @@ public final class SpongeBanService implements BanService {
         final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
 
         accessor.invoker$removeExpired();
-        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0))));
+        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(((IPBanList) accessor).getIpFromAddress(new InetSocketAddress(address, 0))));
     }
 
     @SuppressWarnings("unchecked")
@@ -158,7 +158,7 @@ public final class SpongeBanService implements BanService {
             Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
 
             final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.Ip) ban).getAddress(), 0);
-            UserListUtil.removeEntry(this.getIPBanList(), this.getIPBanList().addressToString(inetSocketAddress));
+            UserListUtil.removeEntry(this.getIPBanList(), this.getIPBanList().getIpFromAddress(inetSocketAddress));
             return true;
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
@@ -198,11 +198,11 @@ public final class SpongeBanService implements BanService {
     }
 
     private BanList getUserBanList() {
-        return SpongeCommon.getServer().getPlayerList().getBannedPlayers();
+        return SpongeCommon.getServer().getPlayerList().getBans();
     }
 
     private IPBanList getIPBanList() {
-        return SpongeCommon.getServer().getPlayerList().getBannedIPs();
+        return SpongeCommon.getServer().getPlayerList().getIpBans();
     }
 
 }

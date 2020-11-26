@@ -84,7 +84,7 @@ public final class SpongePlayerDataManager {
 
                     try (final InputStream stream = Files.newInputStream(playerFile)) {
                         compound = CompressedStreamTools.readCompressed(stream);
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         throw new RuntimeException("Failed to decompress playerdata for playerfile " + playerFile, e);
                     }
 
@@ -122,8 +122,8 @@ public final class SpongePlayerDataManager {
             lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.LAST_JOINED));
         }
         if (playerUniqueId == null) {
-            if (compound.hasUniqueId(Constants.UUID)) {
-                playerUniqueId = compound.getUniqueId(Constants.UUID);
+            if (compound.hasUUID(Constants.UUID)) {
+                playerUniqueId = compound.getUUID(Constants.UUID);
             }
         }
         if (playerUniqueId != null) {

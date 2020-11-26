@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.fluid;
 
-import static net.minecraft.command.arguments.BlockStateParser.STATE_INVALID_PROPERTY_VALUE;
+import static net.minecraft.command.arguments.BlockStateParser.ERROR_INVALID_VALUE;
 import static org.spongepowered.common.util.DataUtil.checkDataExists;
 
 import com.mojang.brigadier.StringReader;
@@ -115,7 +115,7 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
             if (reader.canRead() && reader.peek() == '[') {
                 state = this.readProperties(reader, fluid);
             } else {
-                state = fluid.getDefaultState();
+                state = fluid.defaultFluidState();
             }
             return (org.spongepowered.api.fluid.FluidState) (Object) state;
         } catch (final CommandSyntaxException e) {
@@ -128,7 +128,7 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
         final ResourceLocation fluidKey = ResourceLocation.read(reader);
         return Registry.FLUID.getOptional(fluidKey).orElseThrow(() -> {
             reader.setCursor(cursor);
-            return BlockStateParser.STATE_BAD_ID.createWithContext(reader, fluidKey.toString());
+            return BlockStateParser.ERROR_UNKNOWN_BLOCK.createWithContext(reader, fluidKey.toString());
         });
     }
 
@@ -136,8 +136,8 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
         reader.skip();
         reader.skipWhitespace();
 
-        FluidState state = fluid.getDefaultState();
-        final StateContainer<?, ?> stateContainer = fluid.getStateContainer();
+        FluidState state = fluid.defaultFluidState();
+        final StateContainer<?, ?> stateContainer = fluid.getStateDefinition();
         while(reader.canRead() && reader.peek() != ']') {
             reader.skipWhitespace();
             final int cursor = reader.getCursor();
@@ -145,7 +145,7 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
             final Property<?> property = stateContainer.getProperty(propertyKey);
             if (property == null) {
                 reader.setCursor(cursor);
-                throw BlockStateParser.STATE_UNKNOWN_PROPERTY.createWithContext(reader, fluid.toString(), propertyKey);
+                throw BlockStateParser.ERROR_UNKNOWN_PROPERTY.createWithContext(reader, fluid.toString(), propertyKey);
             }
 
             reader.skipWhitespace();
@@ -165,18 +165,18 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
                 }
 
                 if (reader.peek() != ']') {
-                    throw BlockStateParser.STATE_UNCLOSED.createWithContext(reader);
+                    throw BlockStateParser.ERROR_EXPECTED_END_OF_PROPERTIES.createWithContext(reader);
                 }
                 break;
             }
 
-            throw BlockStateParser.STATE_NO_VALUE.createWithContext(reader, fluid.toString(), propertyKey);
+            throw BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, fluid.toString(), propertyKey);
         }
 
         if (reader.canRead()) {
             reader.skip();
         } else {
-            throw BlockStateParser.STATE_UNCLOSED.createWithContext(reader);
+            throw BlockStateParser.ERROR_EXPECTED_END_OF_PROPERTIES.createWithContext(reader);
         }
 
         return (net.minecraft.fluid.FluidState) state;
@@ -184,12 +184,12 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
 
     private <T extends Comparable<T>> FluidState parseValue(
             final FluidState state, final StringReader reader, final Property<T> property, final int cursor) throws CommandSyntaxException {
-        final Optional<T> propertyValue = property.parseValue(reader.readString());
+        final Optional<T> propertyValue = property.getValue(reader.readString());
         if (propertyValue.isPresent()) {
-            return state.with(property, propertyValue.get());
+            return state.setValue(property, propertyValue.get());
         } else {
             reader.setCursor(cursor);
-            throw STATE_INVALID_PROPERTY_VALUE.createWithContext(reader, state.getFluid().toString(), property.getName(), cursor);
+            throw ERROR_INVALID_VALUE.createWithContext(reader, state.getType().toString(), property.getName(), cursor);
         }
     }
 

@@ -40,7 +40,7 @@ import java.util.UUID;
  */
 public class UserCollection extends SpongeSubjectCollection {
 
-    public UserCollection(SpongePermissionService service) {
+    public UserCollection(final SpongePermissionService service) {
         super(PermissionService.SUBJECTS_USER, service);
     }
 
@@ -76,7 +76,7 @@ public class UserCollection extends SpongeSubjectCollection {
         }
         // Name doesn't matter when getting entries
         final GameProfile profile = new GameProfile(uuid, null);
-        return SpongePermissionService.getOps().getEntry(profile) != null;
+        return SpongePermissionService.getOps().get(profile) != null;
     }
 
     private UUID identityToUuid(final String identifier) {

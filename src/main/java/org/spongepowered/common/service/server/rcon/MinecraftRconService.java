@@ -31,7 +31,7 @@ import org.spongepowered.common.accessor.server.dedicated.DedicatedServerAccesso
 public class MinecraftRconService implements RconService {
     private final DedicatedServer server;
 
-    public MinecraftRconService(DedicatedServer server) {
+    public MinecraftRconService(final DedicatedServer server) {
         this.server = server;
     }
 
@@ -42,6 +42,6 @@ public class MinecraftRconService implements RconService {
 
     @Override
     public String getRconPassword() {
-        return this.server.getServerProperties().rconPassword;
+        return this.server.getProperties().rconPassword;
     }
 }

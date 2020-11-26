@@ -173,7 +173,7 @@ public class SpongeImplHooks {
         BlockPos ret = world.getSpawnPoint();
 
         final boolean isAdventure = world.getWorldInfo().getGameType() == GameType.ADVENTURE;
-        int spawnFuzz = Math.max(0, world.getServer().getSpawnProtectionSize());
+        int spawnFuzz = Math.max(0, world.getServer().getSpawnProtectionRadius());
         final int border = MathHelper.floor(world.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
         if (border < spawnFuzz) {
             spawnFuzz = border;
@@ -195,7 +195,7 @@ public class SpongeImplHooks {
     // Item stack merging
 
     public static int getMaxSpawnPackSize(final MobEntity mob) {
-        return mob.getMaxSpawnedInChunk();
+        return mob.getMaxSpawnClusterSize();
     }
 
 
@@ -208,8 +208,8 @@ public class SpongeImplHooks {
     }
 
     public static void blockExploded(final Block block, final World world, final BlockPos blockpos, final Explosion explosion) {
-        world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 3);
-        block.onExplosionDestroy(world, blockpos, explosion);
+        world.setBlock(blockpos, Blocks.AIR.defaultBlockState(), 3);
+        block.wasExploded(world, blockpos, explosion);
     }
 
     /**
@@ -230,7 +230,7 @@ public class SpongeImplHooks {
     }
 
     public static boolean canConnectRedstone(final Block block, final BlockState state, final IWorldReader world, final BlockPos pos, @Nullable final Direction side) {
-        return state.canProvidePower() && side != null;
+        return state.isSignalSource() && side != null;
     }
 
     // Borrowed from Forge, with adjustments by us
@@ -273,7 +273,7 @@ public class SpongeImplHooks {
      * Gets the enchantment modifier for looting on the entity living base from the damage source, but in forge cases, we need to use their hooks.
      */
     public static int getLootingEnchantmentModifier(final LivingEntity target, final LivingEntity entity, final DamageSource cause) {
-        return EnchantmentHelper.getLootingModifier(entity);
+        return EnchantmentHelper.getMobLooting(entity);
     }
 
     public static double getWorldMaxEntityRadius(final ServerWorld world) {
@@ -453,7 +453,7 @@ public class SpongeImplHooks {
     }
 
     public static boolean canEnchantmentBeAppliedToItem(final Enchantment enchantment, final ItemStack stack) {
-        return enchantment.canApply(stack);
+        return enchantment.canEnchant(stack);
     }
 
     public static void setCapabilitiesFromSpongeBuilder(final ItemStack stack, final CompoundNBT compound) {
@@ -474,7 +474,7 @@ public class SpongeImplHooks {
                 // Sponge - Instead of creating the tile entity, just check if it's there. If the
                 // tile entity doesn't exist, don't create it since we're about to just wholesale remove it...
                 // tileentity2 = this.shadow$getChunk(pos).getTileEntity(pos, Chunk.EnumCreateEntityType.IMMEDIATE);
-                tileentity2 = world.getChunkAt(pos).getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+                tileentity2 = world.getChunkAt(pos).getBlockEntity(pos, Chunk.CreateEntityType.CHECK);
             }
 
             if (tileentity2 == null) {
@@ -496,7 +496,7 @@ public class SpongeImplHooks {
     }
 
     public static TileEntity createTileEntity(final BlockState newState, final World world) {
-        return ((ITileEntityProvider) newState.getBlock()).createNewTileEntity(world);
+        return ((ITileEntityProvider) newState.getBlock()).newBlockEntity(world);
     }
 
     /**

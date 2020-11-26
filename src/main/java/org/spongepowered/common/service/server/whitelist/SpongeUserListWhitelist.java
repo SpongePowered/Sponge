@@ -48,12 +48,12 @@ public class SpongeUserListWhitelist extends WhiteList {
     }
 
     @Override
-    protected boolean hasEntry(final com.mojang.authlib.GameProfile entry) {
+    protected boolean contains(final com.mojang.authlib.GameProfile entry) {
         return Sponge.getServer().getServiceProvider().whitelistService().isWhitelisted(SpongeGameProfile.of(entry));
     }
 
     @Override
-    public String[] getKeys() {
+    public String[] getUserList() {
         final List<String> names = new ArrayList<>();
         for (final GameProfile profile : Sponge.getServer().getServiceProvider().whitelistService().getWhitelistedProfiles()) {
             profile.getName().ifPresent(names::add);
@@ -63,12 +63,12 @@ public class SpongeUserListWhitelist extends WhiteList {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void addEntry(final WhitelistEntry entry) {
+    public void add(final WhitelistEntry entry) {
         Sponge.getServer().getServiceProvider().whitelistService().addProfile(((UserListEntryAccessor<GameProfile>) entry).accessor$user());
     }
 
     @Override
-    public void removeEntry(final com.mojang.authlib.GameProfile entry) {
+    public void remove(final com.mojang.authlib.GameProfile entry) {
         Sponge.getServer().getServiceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry));
     }
 
