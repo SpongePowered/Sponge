@@ -168,7 +168,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("has_pores_west"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("has_viewed_credits"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("head_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
-        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("healing_crystal"), TypeTokens.ENDER_CRYSTAL_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("healing_crystal"), TypeTokens.END_CRYSTAL_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("health"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("health_scale"), TypeTokens.DOUBLE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("height"), TypeTokens.DOUBLE_VALUE_TOKEN));

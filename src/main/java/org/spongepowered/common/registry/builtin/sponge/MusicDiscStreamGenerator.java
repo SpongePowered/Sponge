@@ -42,13 +42,13 @@ public final class MusicDiscStreamGenerator {
             new SpongeRecordType(ResourceKey.minecraft("blocks"), (MusicDiscItem) Items.MUSIC_DISC_BLOCKS),
             new SpongeRecordType(ResourceKey.minecraft("cat"), (MusicDiscItem) Items.MUSIC_DISC_CAT),
             new SpongeRecordType(ResourceKey.minecraft("chirp"), (MusicDiscItem) Items.MUSIC_DISC_CHIRP),
-            new SpongeRecordType(ResourceKey.minecraft("eleven"), (MusicDiscItem) Items.MUSIC_DISC_11),
+            new SpongeRecordType(ResourceKey.minecraft("11"), (MusicDiscItem) Items.MUSIC_DISC_11),
             new SpongeRecordType(ResourceKey.minecraft("far"), (MusicDiscItem) Items.MUSIC_DISC_FAR),
             new SpongeRecordType(ResourceKey.minecraft("mall"), (MusicDiscItem) Items.MUSIC_DISC_MALL),
             new SpongeRecordType(ResourceKey.minecraft("mellohi"), (MusicDiscItem) Items.MUSIC_DISC_MELLOHI),
             new SpongeRecordType(ResourceKey.minecraft("stal"), (MusicDiscItem) Items.MUSIC_DISC_STAL),
             new SpongeRecordType(ResourceKey.minecraft("strad"), (MusicDiscItem) Items.MUSIC_DISC_STRAD),
-            new SpongeRecordType(ResourceKey.minecraft("thirteen"), (MusicDiscItem) Items.MUSIC_DISC_13),
+            new SpongeRecordType(ResourceKey.minecraft("13"), (MusicDiscItem) Items.MUSIC_DISC_13),
             new SpongeRecordType(ResourceKey.minecraft("wait"), (MusicDiscItem) Items.MUSIC_DISC_WAIT),
             new SpongeRecordType(ResourceKey.minecraft("ward"), (MusicDiscItem) Items.MUSIC_DISC_WARD)
         );

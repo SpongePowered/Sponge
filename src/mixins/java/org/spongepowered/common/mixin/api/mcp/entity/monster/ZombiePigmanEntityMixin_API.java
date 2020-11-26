@@ -26,13 +26,13 @@ package org.spongepowered.common.mixin.api.mcp.entity.monster;
 
 import net.minecraft.entity.monster.ZombiePigmanEntity;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.monster.zombie.ZombiePigman;
+import org.spongepowered.api.entity.living.monster.zombie.ZombifiedPiglin;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
 
 @Mixin(ZombiePigmanEntity.class)
-public abstract class ZombiePigmanEntityMixin_API extends ZombieEntityMixin_API implements ZombiePigman {
+public abstract class ZombiePigmanEntityMixin_API extends ZombieEntityMixin_API implements ZombifiedPiglin {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

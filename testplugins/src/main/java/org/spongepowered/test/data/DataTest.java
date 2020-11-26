@@ -181,9 +181,9 @@ public final class DataTest  {
         final Entity minecartEntity = world.createEntity(EntityTypes.MINECART.get(), position);
         this.checkOfferData(minecartEntity, Keys.AIRBORNE_VELOCITY_MODIFIER, new Vector3d(2, 0.5, 2)); // falls at ~50% flies at -200%
 
-        final Entity zombiePigman = world.createEntity(EntityTypes.ZOMBIE_PIGMAN.get(), position);
-        this.checkGetData(zombiePigman, Keys.ANGER_LEVEL, 0);
-        this.checkOfferData(zombiePigman, Keys.ANGER_LEVEL, 10);
+        final Entity zombifiedPiglin = world.createEntity(EntityTypes.ZOMBIFIED_PIGLIN.get(), position);
+        this.checkGetData(zombifiedPiglin, Keys.ANGER_LEVEL, 0);
+        this.checkOfferData(zombifiedPiglin, Keys.ANGER_LEVEL, 10);
 
         final ItemStack goldenApple = ItemStack.of(ItemTypes.ENCHANTED_GOLDEN_APPLE);
         final List<PotionEffect> notchAppleEffects = Arrays.asList(
@@ -1197,7 +1197,7 @@ public final class DataTest  {
         this.checkOfferData(parrot, Keys.TAMER, player.getUniqueId());
         this.checkOfferData(parrot, Keys.TAMER, null);
 
-        this.checkOfferData(zombiePigman, Keys.TARGET_ENTITY, player);
+        this.checkOfferData(zombifiedPiglin, Keys.TARGET_ENTITY, player);
         this.checkOfferData(shulkerBullet, Keys.TARGET_ENTITY, sheep);
         // FishingBobber
 

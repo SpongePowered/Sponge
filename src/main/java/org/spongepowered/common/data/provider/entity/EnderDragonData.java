@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.item.EnderCrystalEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.explosive.EnderCrystal;
+import org.spongepowered.api.entity.explosive.EndCrystal;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class EnderDragonData {
@@ -40,7 +40,7 @@ public final class EnderDragonData {
         registrator
                 .asMutable(EnderDragonEntity.class)
                     .create(Keys.HEALING_CRYSTAL)
-                        .get(h -> (EnderCrystal) h.closestEnderCrystal)
+                        .get(h -> (EndCrystal) h.closestEnderCrystal)
                         .set((h, v) -> h.closestEnderCrystal = (EnderCrystalEntity) v);
     }
     // @formatter:on
