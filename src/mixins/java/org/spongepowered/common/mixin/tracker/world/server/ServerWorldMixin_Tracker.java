@@ -463,7 +463,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
                 // Some mods like OpenComputers assert if attempting to save robot while moving
                 try {
                     tileEntity.write(nbt);
-                    builder.unsafeNbt(nbt);
+                    builder.addUnsafeCompound(nbt);
                 } catch (final Throwable t) {
                     // ignore
                 }

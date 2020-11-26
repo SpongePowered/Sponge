@@ -324,7 +324,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
             builder.world(this.worldKey);
         }
         if (this.compound != null) {
-            builder.unsafeNbt(this.compound);
+            builder.addUnsafeCompound(this.compound);
         }
         return builder;
     }

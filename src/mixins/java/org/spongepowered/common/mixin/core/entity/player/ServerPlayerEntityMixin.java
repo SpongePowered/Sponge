@@ -99,6 +99,8 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.HashSet;
+
 import javax.annotation.Nullable;
 
 // See also: SubjectMixin_API and SubjectMixin
@@ -188,7 +190,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
                         (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getServerWorld(),
                         location.getWorld(), location.getWorld());
-                if (SpongeCommon.postEvent(event) && ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
+                if (SpongeCommon.postEvent(event)) {
                     return false;
                 }
 
@@ -231,8 +233,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 EntityUtil.performPostChangePlayerWorldLogic((ServerPlayerEntity) (Object) this, this.shadow$getServerWorld(),
                         (net.minecraft.world.server.ServerWorld) location.getWorld(), destinationWorld, false);
             } else {
-                this.connection.setPlayerLocation(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw,
-                        this.rotationPitch);
+                this.connection.setPlayerLocation(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.rotationYaw, this.rotationPitch,
+                        new HashSet<>());
             }
         }
 

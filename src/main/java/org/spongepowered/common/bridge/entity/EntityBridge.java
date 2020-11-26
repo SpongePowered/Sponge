@@ -44,7 +44,7 @@ public interface EntityBridge {
 
     @Nullable BlockPos bridge$getLastCollidedBlockPos();
 
-    void bridge$setLocationAndAngles(Transform transform);
+    void bridge$setTransform(Transform transform);
 
     void bridge$setFireImmuneTicks(int ticks);
 

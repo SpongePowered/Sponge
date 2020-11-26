@@ -473,7 +473,7 @@ public final class TrackingUtil {
         // Some mods like OpenComputers assert if attempting to save robot while moving
         try {
             existing.write(nbt);
-            builder.unsafeNbt(nbt);
+            builder.addUnsafeCompound(nbt);
         }
         catch(Throwable t) {
             // ignore

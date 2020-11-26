@@ -123,7 +123,6 @@ public final class Constants {
     private Constants() {
     }
 
-    @SuppressWarnings("DeprecatedIsStillUsed")
     public static final class Sponge {
 
         public static final int SPONGE_DATA_VERSION = 1;
@@ -148,8 +147,8 @@ public final class Constants {
         public static final DataQuery DATA_MANIPULATORS = of("Data");
         @Deprecated public static final DataQuery DATA_CLASS = DataQuery.of(Constants.Sponge.CUSTOM_DATA_CLASS);
         public static final DataQuery DATA_ID = DataQuery.of(Constants.Sponge.MANIPULATOR_ID);
-        public static final DataQuery FAILED_SERIALIZED_DATA = of("DataUnableToDeserialize");
-        public static final DataQuery INTERNAL_DATA = DataQuery.of(Constants.Sponge.CUSTOM_DATA);
+        public static final DataQuery DATA_UNABLE_TO_DESERIALIZE = of("DataUnableToDeserialize");
+        public static final DataQuery MANIPULATOR_DATA = DataQuery.of(Constants.Sponge.CUSTOM_DATA);
         // Snapshots
         public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
         public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
@@ -194,27 +193,6 @@ public final class Constants {
 
             public static final DataQuery PLAYER_DATA_JOIN = of("FirstJoin");
             public static final DataQuery PLAYER_DATA_LAST = of("LastPlayed");
-            public static final int RESPAWN_DATA_1_9_VERSION = 0;
-        }
-
-        public static final class InvisibilityData {
-
-            public static final int INVISIBILITY_DATA_PRE_1_9 = 1;
-            public static final int INVISIBILITY_DATA_WITH_VANISH = 2;
-        }
-
-        public static final class VelocityData {
-
-            public static final DataQuery VELOCITY_X = of("X");
-            public static final DataQuery VELOCITY_Y = of("Y");
-            public static final DataQuery VELOCITY_Z = of("Z");
-        }
-
-        public static final class AccelerationData {
-
-            public static final DataQuery ACCELERATION_X = of("X");
-            public static final DataQuery ACCELERATION_Y = of("Y");
-            public static final DataQuery ACCELERATION_Z = of("Z");
         }
 
         public static final class EntityArchetype {
@@ -289,7 +267,6 @@ public final class Constants {
             public static final String DIMENSION_TYPE = "dimensionType";
             public static final String DIMENSION_ID = "dimensionId";
             public static final String HAS_CUSTOM_DIFFICULTY = "HasCustomDifficulty";
-            public static final String PORTAL_AGENT_TYPE = "portalAgentType";
             public static final String IS_MOD_CREATED = "isModCreated";
             public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
             public static final String LEVEL_SPONGE_DAT = "level_sponge.dat";
@@ -333,8 +310,6 @@ public final class Constants {
 
             /**
              * The NBT structure of the legacy Schematic format used by MCEdit and WorldEdit etc.
-             *
-             * It's no longer updated due to the
              */
             public static final class Legacy {
 
@@ -420,7 +395,6 @@ public final class Constants {
 
     public static final class World {
 
-
         public static final int CHUNK_GC_TICK_INTERVAL = 600;
 
         public static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
@@ -429,15 +403,6 @@ public final class Constants {
         public static final Vector3i BLOCK_SIZE = Constants.World.BLOCK_MAX.sub(Constants.World.BLOCK_MIN).add(Vector3i.ONE);
         public static final Vector3i BIOME_MAX = new Vector3i(Constants.World.BLOCK_MAX.getX(), 256, Constants.World.BLOCK_MAX.getZ());
         public static final Vector3i BIOME_SIZE = Constants.World.BIOME_MAX.sub(Constants.World.BIOME_MIN).add(Vector3i.ONE);
-        /**
-         * Specifically ordered for the order of notifications being sent out for
-         * when sending a request through {@code net.minecraft.world.World#notifyNeighborsOfStateChange(BlockPos, Block, boolean)}
-         * using
-         *  IBlockState#neighborChanged(net.minecraft.world.World, BlockPos, Block, BlockPos)
-         */
-        public static final net.minecraft.util.Direction[] NOTIFY_DIRECTIONS =
-            {net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN, net.minecraft.util.Direction.UP,
-                net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH};
         public static final EnumSet<net.minecraft.util.Direction> NOTIFY_DIRECTION_SET = EnumSet
             .of(net.minecraft.util.Direction.WEST, net.minecraft.util.Direction.EAST, net.minecraft.util.Direction.DOWN,
                 net.minecraft.util.Direction.UP, net.minecraft.util.Direction.NORTH, net.minecraft.util.Direction.SOUTH);
@@ -445,14 +410,6 @@ public final class Constants {
         public static final int DEFAULT_CHUNK_UNLOAD_DELAY = 15000;
         public static final int MAX_CHUNK_UNLOADS = 100;
         public static final int CHUNK_UNLOAD_DELAY = 30000;
-        public static final int END_DIMENSION_ID = 1;
-
-        public static final class Teleporter {
-
-            public static final int DEFAULT_SEARCH_RADIUS = 128;
-
-            public static final int DEFAULT_CREATION_RADIUS = 16;
-        }
     }
 
     public static final class Chunk {
@@ -522,12 +479,6 @@ public final class Constants {
         public static final int PACKET_BUTTON_SECONDARY_ID = 0;
         public static final int PACKET_BUTTON_MIDDLE_ID = 0;
         public static final InetSocketAddress LOCALHOST = InetSocketAddress.createUnresolved("127.0.0.1", 0);
-
-        public static final class Packets {
-
-            public static final int CHANGED_SECTION_FILTER_ALL = 65535;
-
-        }
     }
 
     public static final class Item {

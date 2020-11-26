@@ -268,7 +268,7 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
 
             manipulatorContainer.set(Queries.CONTENT_VERSION, Constants.Sponge.CURRENT_CUSTOM_DATA)
                     .set(Constants.Sponge.DATA_ID, this.key)
-                    .set(Constants.Sponge.INTERNAL_DATA, internalData);
+                    .set(Constants.Sponge.MANIPULATOR_DATA, internalData);
 
             spongeData.set(Constants.Sponge.CUSTOM_MANIPULATOR_LIST, viewList);
         }
@@ -292,7 +292,7 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
                     .flatMap(manipulators -> manipulators.stream().filter(v -> v.getString(Constants.Sponge.DATA_ID)
                             .map(id -> id.equals(this.key.toString())).orElse(false))
                             .findFirst()
-                            .map(v -> v.getView(Constants.Sponge.INTERNAL_DATA).orElse(DataContainer.createNew()))
+                            .map(v -> v.getView(Constants.Sponge.MANIPULATOR_DATA).orElse(DataContainer.createNew()))
                             .flatMap(deserializer));
         }
     }

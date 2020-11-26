@@ -100,7 +100,7 @@ public abstract class BlockStateMixin_API extends StateHolderMixin_API<BlockStat
             builder.add(((CustomDataHolderBridge) tileEntity).bridge$getManipulator());
             final CompoundNBT compound = new CompoundNBT();
             ((net.minecraft.tileentity.TileEntity) tileEntity).write(compound);
-            builder.unsafeNbt(compound);
+            builder.addUnsafeCompound(compound);
         }
         return builder.build();
     }

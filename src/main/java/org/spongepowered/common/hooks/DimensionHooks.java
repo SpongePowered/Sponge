@@ -59,6 +59,6 @@ public interface DimensionHooks {
             return dimensionType;
         }
 
-        return world.getDimension().canRespawnHere() ? entity.dimension : dimensionType;
+        return (conqueredEnd || !world.getDimension().canRespawnHere()) ? dimensionType : entity.dimension;
     }
 }

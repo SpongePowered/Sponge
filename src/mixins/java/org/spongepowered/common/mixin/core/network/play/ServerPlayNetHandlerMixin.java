@@ -46,10 +46,7 @@ import net.minecraft.network.play.server.STabCompletePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.SignTileEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -61,7 +58,6 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.ListValue;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
@@ -97,8 +93,6 @@ import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
-import org.spongepowered.common.data.value.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.MutableSpongeListValue;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -118,10 +112,12 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     private static final String[] IMPL$ZERO_LENGTH_STRING_ARRAY = new String[0];
     private static final String[] IMPL$EMPTY_COMMAND_ARRAY = new String[] { "" };
 
+    // @formatter:off
     @Shadow @Final public NetworkManager netManager;
     @Shadow public ServerPlayerEntity player;
-
     @Shadow @Final private MinecraftServer server;
+    // @formatter:on
+
     @Nullable private Vector3d impl$lastMovePosition = null;
     @Nullable private Entity impl$targetedEntity = null;
 
@@ -281,7 +277,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
         // These magic numbers are sad but help prevent excessive lag from this event.
         // eventually it would be nice to not have them
-        final boolean significantMovement = !zeroMovement && toPosition.distanceSquared(fromPosition)  > ((1f / 16) * (1f / 16));
+        final boolean significantMovement = !zeroMovement && toPosition.distanceSquared(fromPosition) > ((1f / 16) * (1f / 16));
         final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
 
         final Transform originalToTransform = Transform.of(toPosition, toRotation);
@@ -311,7 +307,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         // Handle event results
         if (!toTransform.equals(originalToTransform)) {
             // event changed position or rotation (includes cancel)
-            ((EntityBridge) mixinPlayer).bridge$setLocationAndAngles(toTransform);
+            ((EntityBridge) mixinPlayer).bridge$setTransform(toTransform);
             this.impl$lastMovePosition = toPosition;
             mixinPlayer.bridge$setVelocityOverride(null);
             return true;
@@ -402,17 +398,13 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         // - If we have conquered The End then keep the dimension type we're headed to (which is Overworld as of 1.15)
         // - Otherwise, check the platform hooks for which dimension to respawn to. In Sponge, this is the Player's dimension they
         //   are already in if we can respawn there which is only true for Overworld dimensions
-        if (conqueredEnd) {
-            return dimensionType;
-        }
-
-        final DimensionType respawnDimension = PlatformHooks.getInstance().getDimensionHooks().getRespawnDimension(entity, dimensionType, false);
+        final DimensionType respawnDimension = PlatformHooks.getInstance().getDimensionHooks().getRespawnDimension(entity, dimensionType, conqueredEnd);
         final ServerWorld destinationWorld = this.server.getWorld(respawnDimension);
         final RespawnPlayerEvent.SelectWorld event =
                 SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                        (org.spongepowered.api.world.server.ServerWorld) (Object) destinationWorld,
-                        (org.spongepowered.api.world.server.ServerWorld) (Object) entity.getServerWorld(),
-                        (org.spongepowered.api.world.server.ServerWorld) (Object) this.server.getWorld(DimensionType.OVERWORLD),
+                        (org.spongepowered.api.world.server.ServerWorld) destinationWorld,
+                        (org.spongepowered.api.world.server.ServerWorld) entity.getServerWorld(),
+                        (org.spongepowered.api.world.server.ServerWorld) this.server.getWorld(DimensionType.OVERWORLD),
                         (ServerPlayer) entity);
         SpongeCommon.postEvent(event);
         return ((ServerWorld) event.getDestinationWorld()).getDimension().getType();

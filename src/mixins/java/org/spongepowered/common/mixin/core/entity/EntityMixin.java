@@ -391,7 +391,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
-    public void bridge$setLocationAndAngles(final Transform transform) {
+    public void bridge$setTransform(final Transform transform) {
         this.shadow$setPosition(transform.getPosition().getX(), transform.getPosition().getY(), transform.getPosition().getZ());
         this.shadow$setRotation((float) transform.getYaw(), (float) transform.getPitch());
     }
