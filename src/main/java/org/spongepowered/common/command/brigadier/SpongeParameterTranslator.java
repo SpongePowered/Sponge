@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.brigadier;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
@@ -38,6 +37,7 @@ import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.CustomArgumentParser;
+import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNodeBuilder;
 import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
 import org.spongepowered.common.command.brigadier.tree.SpongeFlagLiteralCommandNode;
@@ -49,7 +49,9 @@ import org.spongepowered.common.command.parameter.multi.SpongeMultiParameter;
 import org.spongepowered.common.command.parameter.multi.SpongeSequenceParameter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -58,7 +60,7 @@ import java.util.function.Predicate;
 
 public final class SpongeParameterTranslator {
 
-    private static final ValueCompleter EMPTY_COMPLETER = (context, currentInput) -> ImmutableList.of();
+    private static final ValueCompleter EMPTY_COMPLETER = (context, currentInput) -> Collections.emptyList();
 
     public static CommandNode<CommandSource> createCommandTreeWithSubcommandsOnly(
             @NonNull final ArgumentBuilder<CommandSource, ?> rootNode,
@@ -107,7 +109,7 @@ public final class SpongeParameterTranslator {
                 if (parameter instanceof SpongeSequenceParameter) {
                     parameters = ((SpongeSequenceParameter) parameter).getParameterCandidates();
                 } else {
-                    parameters = ImmutableList.of(parameter);
+                    parameters = Collections.singletonList(parameter);
                 }
                 final boolean isTerminal = SpongeParameterTranslator.createNode(
                         parameters.listIterator(),
@@ -230,7 +232,9 @@ public final class SpongeParameterTranslator {
             }
 
             // Process the next element if it exists
-            final List<? extends SpongeArgumentCommandNodeBuilder<?>> currentNodes = SpongeParameterTranslator.createNode(valueParameter, suffix);
+            final boolean isParameterAtEnd = isContainerAtEnd && !hasNext;
+            final List<? extends SpongeArgumentCommandNodeBuilder<?>> currentNodes = SpongeParameterTranslator
+                    .createNode(valueParameter, suffix, isParameterAtEnd);
             final SpongeArgumentCommandNodeBuilder<?> currentNode = currentNodes.get(0);
             if (parameters.hasNext()) {
                 // We still need to execute createNode, so this order matters.
@@ -247,6 +251,9 @@ public final class SpongeParameterTranslator {
             }
 
             if (isInferredTermination || valueParameter.isTerminal()) {
+                if (isParameterAtEnd) {
+                    currentNodes.removeIf(SpongeArgumentCommandNodeBuilder::isEmptyOptional);
+                }
                 currentNodes.forEach(x -> x.executes(executorWrapper));
             }
 
@@ -266,7 +273,7 @@ public final class SpongeParameterTranslator {
             final ArrayList<CommandNode<CommandSource>> newOptionals = new ArrayList<>();
             for (int i = 1; i < currentNodes.size(); ++i) {
                 final SpongeArgumentCommandNodeBuilder<?> secondaryBuilder = currentNodes.get(i);
-                if (isContainerAtEnd && !hasNext) {
+                if (isParameterAtEnd) {
                     // If we know we're at the end of a chain, the secondary builder just has an executor - no need to redirect.
                     secondaryBuilder.executes(executorWrapper);
                 } else if (potentialOptionalRedirects.isEmpty()) {
@@ -321,10 +328,11 @@ public final class SpongeParameterTranslator {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @NonNull
     private static <T> List<SpongeArgumentCommandNodeBuilder<? extends T>> createNode(final Parameter.@NonNull Value<T> parameter,
-            @Nullable final String suffix) {
+            @Nullable final String suffix, final boolean isEndOfContainer) {
 
         ArgumentParser<? extends T> type = null;
         if (parameter instanceof SpongeParameterValue<?>) {
+            // If we've got an optional node at the end with no default, don't bother generating it.
             type = ((SpongeParameterValue<T>) parameter).getArgumentTypeIfStandard();
         }
 
@@ -337,37 +345,49 @@ public final class SpongeParameterTranslator {
                         type,
                         parameter.getCompleter(),
                         parameter.getValueUsage().orElse(null),
-                        suffix);
+                        suffix,
+                        false);
         // CommandCause is mixed into CommandSource, so this is okay.
         argumentBuilder.requires((Predicate) parameter.getRequirement());
 
+        final ArrayList<SpongeArgumentCommandNodeBuilder<? extends T>> nodes = new ArrayList<>();
+        nodes.add(argumentBuilder);
         if (parameter instanceof SpongeParameterValue) {
             if (parameter.isOptional()) {
                 final SpongeDefaultValueParser<? extends T> defaultValueParser = ((SpongeParameterValue<T>) parameter).getDefaultParser();
                 final CustomArgumentParser<? extends T> optionalParser;
                 final String suffixSuffix;
-                if (defaultValueParser == null) {
+                final boolean isEmptyOptional;
+                if (defaultValueParser != null) {
+                    // Default parser returns the default value
+                    optionalParser =
+                            new CustomArgumentParser<>(Collections.singletonList(defaultValueParser), SpongeParameterTranslator.EMPTY_COMPLETER,
+                                    true);
+                    suffixSuffix = suffix + "_default";
+                    isEmptyOptional = false;
+                } else if (isEndOfContainer) {
+                    // don't do any fancy optional stuff, terminations have already been set.
+                    return nodes;
+                } else {
                     // Optional parser just returns null but still needs to be processed as a node
                     // to allow commands optional parameters in front
-                    optionalParser = new CustomArgumentParser<>(ImmutableList.of(), SpongeParameterTranslator.EMPTY_COMPLETER, true);;
+                    optionalParser = new CustomArgumentParser<>(Collections.emptyList(), SpongeParameterTranslator.EMPTY_COMPLETER, true);;
                     suffixSuffix = suffix + "_optional";
-                } else {
-                    // Default parser returns the default value
-                    optionalParser = new CustomArgumentParser<>(ImmutableList.of(defaultValueParser), SpongeParameterTranslator.EMPTY_COMPLETER, true);
-                    suffixSuffix = suffix + "_default";
+                    isEmptyOptional = true;
                 }
                 final SpongeArgumentCommandNodeBuilder<T> optionalBuilder = new SpongeArgumentCommandNodeBuilder<>(
                         SpongeParameterKey.getSpongeKey(parameter.getKey()),
                         optionalParser,
                         SpongeParameterTranslator.EMPTY_COMPLETER,
                         parameter.getValueUsage().orElse(null),
-                        suffixSuffix);
+                        suffixSuffix,
+                        isEmptyOptional);
 
-                return ImmutableList.of(argumentBuilder, optionalBuilder);
+                nodes.add(optionalBuilder);
             }
         }
 
-        return ImmutableList.of(argumentBuilder);
+        return nodes;
     }
 
 }

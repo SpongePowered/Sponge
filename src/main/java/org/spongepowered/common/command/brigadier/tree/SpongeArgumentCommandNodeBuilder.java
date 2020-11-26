@@ -42,13 +42,15 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
     @Nullable private final ValueCompleter completer;
     @Nullable private final String suffix;
     @Nullable private final ValueUsage usage;
+    private final boolean isEmptyOptional;
 
     public SpongeArgumentCommandNodeBuilder(
             final SpongeParameterKey<? super T> key,
             final ArgumentParser<? extends T> type,
             final ValueCompleter completer,
-            @Nullable final ValueUsage usage) {
-        this(key, type, completer, usage, null);
+            @Nullable final ValueUsage usage,
+            final boolean isEmptyOptional) {
+        this(key, type, completer, usage, null, isEmptyOptional);
     }
 
     public SpongeArgumentCommandNodeBuilder(
@@ -56,17 +58,23 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
             final ArgumentParser<? extends T> type,
             final ValueCompleter completer,
             @Nullable final ValueUsage usage,
-            @Nullable final String suffix) {
+            @Nullable final String suffix,
+            final boolean isEmptyOptional) {
         this.key = key;
         this.type = type;
         this.completer = type == completer && type instanceof StandardCatalogedArgumentParser ? null : completer;
         this.usage = usage;
         this.suffix = suffix;
+        this.isEmptyOptional = isEmptyOptional;
     }
 
     @Override
     protected SpongeArgumentCommandNodeBuilder<T> getThis() {
         return this;
+    }
+
+    public boolean isEmptyOptional() {
+        return this.isEmptyOptional;
     }
 
     @Override
