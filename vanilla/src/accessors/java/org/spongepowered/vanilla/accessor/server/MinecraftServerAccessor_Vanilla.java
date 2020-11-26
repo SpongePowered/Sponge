@@ -43,10 +43,6 @@ import java.util.Map;
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor_Vanilla {
 
-    @Accessor("LOGGER") static Logger accessor$getLogger() {
-        throw new RuntimeException("Accessor was not mixed!");
-    }
-
     @Accessor("anvilFile") File accessor$getAnvilFile();
 
     @Accessor("chunkStatusListenerFactory") IChunkStatusListenerFactory accessor$getChunkStatusListenerFactory();

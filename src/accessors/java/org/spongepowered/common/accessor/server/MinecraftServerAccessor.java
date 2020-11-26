@@ -31,6 +31,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
 import net.minecraft.world.storage.CommandStorage;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -38,6 +39,10 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
+
+    @Accessor("LOGGER") static Logger accessor$getLogger() {
+        throw new RuntimeException("Accessor was not mixed!");
+    }
 
     @Accessor("field_229733_al_") void accessor$setfield_229733_al(CommandStorage storage);
 
@@ -50,8 +55,6 @@ public interface MinecraftServerAccessor {
     @Mutable @Accessor("profileCache") void accessor$setProfileCache(PlayerProfileCache profileCache);
 
     @Accessor("dataFixer") DataFixer accessor$getDataFixer();
-
-    @Accessor("chunkStatusListenerFactory") IChunkStatusListenerFactory accessor$getChunkStatusListenerFactory();
 
     @Invoker("allowSpawnMonsters") boolean accessor$allowSpawnMonsters();
 }

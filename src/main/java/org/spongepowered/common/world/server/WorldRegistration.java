@@ -31,15 +31,17 @@ import net.minecraft.world.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 
+import java.util.Objects;
+
 public final class WorldRegistration {
 
     private final ResourceKey key;
-    private final DimensionType dimensionType;
-    private WorldSettings defaultSettings;
+    @Nullable private DimensionType dimensionType;
+    @Nullable private WorldSettings defaultSettings;
 
-    public WorldRegistration(final ResourceKey key, final DimensionType dimensionType, @Nullable final WorldSettings defaultSettings) {
-        this.key = Preconditions.checkNotNull(key);
-        this.dimensionType = Preconditions.checkNotNull(dimensionType);
+    public WorldRegistration(final ResourceKey key, @Nullable final DimensionType dimensionType, @Nullable final WorldSettings defaultSettings) {
+        this.key = Objects.requireNonNull(key);
+        this.dimensionType = dimensionType;
         this.defaultSettings = defaultSettings;
     }
 
@@ -47,24 +49,30 @@ public final class WorldRegistration {
         return this.key;
     }
 
+    @Nullable
     public DimensionType getDimensionType() {
         return this.dimensionType;
     }
 
+    @Nullable
     public WorldSettings getDefaultSettings() {
         return this.defaultSettings;
     }
 
-    public void setDefaultSettings(@Nullable WorldSettings defaultSettings) {
+    public void setDimensionType(@Nullable final DimensionType dimensionType) {
+        this.dimensionType = dimensionType;
+    }
+
+    public void setDimensionType(@Nullable final WorldSettings defaultSettings) {
         this.defaultSettings = defaultSettings;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (this.getClass() != o.getClass()) {
             return false;
         }
         final WorldRegistration that = (WorldRegistration) o;
