@@ -68,6 +68,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
@@ -130,8 +131,6 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         this.registerPendingWorld(SpongeWorldManager.VANILLA_OVERWORLD, null);
         this.registerPendingWorld(SpongeWorldManager.VANILLA_THE_NETHER, null);
         this.registerPendingWorld(SpongeWorldManager.VANILLA_THE_END, null);
-
-        SpongeCommon.postEvent(new RegisterWorldEventImpl(PhaseTracker.getCauseStackManager().getCurrentCause(), SpongeCommon.getGame(), this));
     }
 
     @Override
@@ -174,6 +173,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((ResourceKeyBridge) worldInfo).bridge$setKey(key);
         ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
         ((WorldInfoBridge) worldInfo).bridge$setModCreated(true);
+
+        SpongeCommon.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(
+                PhaseTracker.getCauseStackManager().getCurrentCause(),
+                archetype, (WorldProperties) worldInfo));
+
         return CompletableFuture.completedFuture((WorldProperties) worldInfo);
     }
 
@@ -524,6 +528,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$convertMapIfNeeded(saveName);
 
+        SpongeCommon.postEvent(new RegisterWorldEventImpl(PhaseTracker.getCauseStackManager().getCurrentCause(), SpongeCommon.getGame(), this));
+
         try {
             this.loadExistingWorldRegistrations();
         } catch (final IOException e) {
@@ -583,6 +589,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             MinecraftServerAccessor.accessor$getLogger().info("Loading World '{}' ({}/{})", key, logicType.getKey().getFormatted(), dimensionType.getId());
 
+            final boolean configExists = SpongeGameConfigs.doesWorldConfigExist(key);
+
             final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(logicType, key);
             if (!isDefaultWorld) {
                 if (!configAdapter.get().getWorld().isWorldEnabled()) {
@@ -605,24 +613,41 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             }
 
             WorldInfo worldInfo = saveHandler.loadWorldInfo();
-            if (defaultSettings == null) {
-                defaultSettings = worldRegistration.getDefaultSettings();
-            }
 
             if (worldInfo == null) {
+
+                if (worldRegistration.getDefaultSettings() != null) {
+                    defaultSettings = worldRegistration.getDefaultSettings();
+                }
+
                 // Demo code does not run on SinglePlayer
+
+                // The pass off of the config adapter here is done because creation of a WorldInfo that isn't from disk will use the
+                // WorldSettings in the constructor to set the values. Which will then trigger the creation of the config handle
+                // which will be a different handle than the above adapter. Easiest is to store the reference on the settings and set it
+                // during population of the WorldInfo from the WorldSettings
+
+                // Additionally, if we have no WorldInfo but we do have a config file, it is likely the admin decided to regenerate their
+                // world. We want to respect that file. Setting this flag will cause WorldSettings to skip populating the WorldInfo with
+                // these Sponge-specific default settings
+
                 if (isSinglePlayer) {
-                    worldInfo = new WorldInfo(defaultSettings, levelName);
+                    ((WorldSettingsBridge) (Object) defaultSettings).bridge$setInfoConfigAdapter(configAdapter);
+                    ((WorldSettingsBridge) (Object) defaultSettings).bridge$setConfigExists(configExists);
+                    worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? levelName : this.getDirectoryName(key));
                 } else {
                     if (defaultSettings == null) {
                         defaultSettings = this.createDefaultSettings(defaultSettings, isDefaultWorld, seed, type, generatorOptions);
                     }
 
-                    worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? saveName : this.getDirectoryName(key));
+                    ((WorldSettingsBridge) (Object) defaultSettings).bridge$setInfoConfigAdapter(configAdapter);
+                    ((WorldSettingsBridge) (Object) defaultSettings).bridge$setConfigExists(configExists);
+                    worldInfo = new WorldInfo(defaultSettings, isDefaultWorld ? levelName : this.getDirectoryName(key));
                 }
+                ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
+
                 ((WorldInfoBridge) worldInfo).bridge$setConfigAdapter(configAdapter);
 
-                ((ResourceKeyBridge) worldInfo).bridge$setKey(worldRegistration.getKey());
                 ((WorldInfoBridge) worldInfo).bridge$setDimensionId(dimensionType);
                 ((WorldInfoBridge) worldInfo).bridge$setUniqueId(UUID.randomUUID());
 

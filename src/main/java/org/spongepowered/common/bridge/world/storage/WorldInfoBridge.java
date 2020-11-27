@@ -46,6 +46,8 @@ public interface WorldInfoBridge {
     @Nullable
     Integer bridge$getDimensionId();
 
+    boolean bridge$isSinglePlayerProperties();
+
     void bridge$setDimensionId(DimensionType type);
 
     SpongeDimensionType bridge$getLogicType();

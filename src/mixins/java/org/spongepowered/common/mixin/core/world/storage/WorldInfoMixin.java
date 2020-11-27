@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.minecraft.nbt.CompoundNBT;
@@ -70,6 +69,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 @Mixin(WorldInfo.class)
@@ -99,22 +99,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     private final List<UUID> impl$pendingUniqueIds = new ArrayList<>();
     private int impl$trackedUniqueIdCount = 0;
     private boolean impl$hasCustomDifficulty = false;
-
-    @Redirect(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/storage/WorldInfo;populateFromWorldSettings(Lnet/minecraft/world/WorldSettings;)V"
-        )
-    )
-    private void impl$setupBeforeSettingsPopulation(final WorldInfo info, final WorldSettings settings,
-        final WorldSettings settingsB, final String levelName) {
-        this.levelName = levelName;
-        this.shadow$populateFromWorldSettings(settings);
-    }
-
-    @Inject(method = "populateFromWorldSettings", at = @At("TAIL"))
-    private void impl$fillInfo(WorldSettings settings, CallbackInfo ci) {
-        ((WorldSettingsBridge) (Object) settings).bridge$populateInfo((WorldInfo) (Object) this);
-    }
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -154,8 +138,12 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     public boolean bridge$isValid() {
         final String levelName = this.shadow$getWorldName();
 
-        return this.impl$key != null && !(levelName == null || levelName.equals("") || levelName.equals("MpServer") || levelName.equals(
-                "sponge$dummy_world"));
+        return this.impl$key != null && !(levelName == null || levelName.equals("") || levelName.equals("MpServer"));
+    }
+
+    @Override
+    public boolean bridge$isSinglePlayerProperties() {
+        return this.levelName != null && this.levelName.equals("MpServer");
     }
 
     @Override
@@ -191,22 +179,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         this.impl$uniqueId = uniqueId;
     }
 
-    /**
-     * @author Zidane
-     * @reason Flag using setDifficulty as an explicit set and mark it as custom
-     */
-    @Overwrite
-    public void setDifficulty(Difficulty newDifficulty) {
-        if ((Object) this instanceof DerivedWorldInfo) {
-            return;
-        }
-
-        this.impl$hasCustomDifficulty = true;
-        this.difficulty = newDifficulty;
-
-        this.impl$updateWorldForDifficultyChange();
-    }
-
     @Override
     public boolean bridge$hasCustomDifficulty() {
         return this.impl$hasCustomDifficulty;
@@ -217,29 +189,6 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         this.difficulty = difficulty;
 
         this.impl$updateWorldForDifficultyChange();
-    }
-
-    public void impl$updateWorldForDifficultyChange() {
-        final ServerWorld serverWorld = this.bridge$getWorld();
-
-        if (serverWorld == null) {
-            return;
-        }
-
-        final MinecraftServer server = serverWorld.getServer();
-
-        if (this.difficulty == Difficulty.HARD) {
-            serverWorld.setAllowedSpawnTypes(true, true);
-        } else if (server.isSinglePlayer()) {
-            serverWorld.setAllowedSpawnTypes(this.difficulty != Difficulty.PEACEFUL, true);
-        } else {
-            serverWorld.setAllowedSpawnTypes(((MinecraftServerAccessor) server).accessor$allowSpawnMonsters(), server.getCanSpawnAnimals());
-        }
-
-        serverWorld
-            .getPlayers()
-            .forEach(player -> player.connection.sendPacket(new SServerDifficultyPacket(this.difficulty, ((WorldInfo) (Object) this)
-                    .isDifficultyLocked())));
     }
 
     @Override
@@ -395,21 +344,21 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
     @Override
     public void bridge$readSpongeLevelData(final CompoundNBT compound) {
         if (!compound.contains(Constants.Sponge.SPONGE_DATA)) {
-            // TODO 1.14 - Bad Sponge level data...warn/crash?
+            // TODO Minecraft 1.15 - Bad Sponge level data...warn/crash?
             return;
         }
 
-        // TODO 1.14 - Run DataFixer on the SpongeData compound
+        // TODO TODO Minecraft 1.15 - Run DataFixer on the SpongeData compound
 
         final CompoundNBT spongeDataCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
 
         if (!spongeDataCompound.contains(Constants.Sponge.World.KEY)) {
-            // TODO 1.14 - Bad Sponge level data...warn/crash?
+            // TODO TODO Minecraft 1.15 - Bad Sponge level data...warn/crash?
             return;
         }
 
         if (!spongeDataCompound.hasUniqueId(Constants.Sponge.World.UNIQUE_ID)) {
-            // TODO 1.14 - Bad Sponge level data...warn/crash?
+            // TODO TODO Minecraft 1.15 - Bad Sponge level data...warn/crash?
             return;
         }
 
@@ -445,19 +394,74 @@ public abstract class WorldInfoMixin implements ResourceKeyBridge, WorldInfoBrid
         }
     }
 
+    @Redirect(method = "<init>(Lnet/minecraft/world/WorldSettings;Ljava/lang/String;)V",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/world/storage/WorldInfo;populateFromWorldSettings(Lnet/minecraft/world/WorldSettings;)V"
+            )
+    )
+    private void impl$setupBeforeSettingsPopulation(final WorldInfo info, final WorldSettings settings,
+            final WorldSettings settingsB, final String levelName) {
+        this.levelName = levelName;
+        this.shadow$populateFromWorldSettings(settingsB);
+    }
+
+    @Inject(method = "populateFromWorldSettings", at = @At("TAIL"))
+    private void impl$fillInfo(final WorldSettings settings, final CallbackInfo ci) {
+        ((WorldSettingsBridge) (Object) settings).bridge$populateInfo((WorldInfo) (Object) this);
+    }
+
+    /**
+     * @author zidane - November 27th, 2020 - Minecraft 1.15.2
+     * @reason Flag using setDifficulty as an explicit set and mark it as custom
+     */
+    @Overwrite
+    public void setDifficulty(Difficulty newDifficulty) {
+        if ((Object) this instanceof DerivedWorldInfo) {
+            return;
+        }
+
+        this.impl$hasCustomDifficulty = true;
+        this.difficulty = newDifficulty;
+
+        this.impl$updateWorldForDifficultyChange();
+    }
+
+    public void impl$updateWorldForDifficultyChange() {
+        final ServerWorld serverWorld = this.bridge$getWorld();
+
+        if (serverWorld == null) {
+            return;
+        }
+
+        final MinecraftServer server = serverWorld.getServer();
+
+        if (this.difficulty == Difficulty.HARD) {
+            serverWorld.setAllowedSpawnTypes(true, true);
+        } else if (server.isSinglePlayer()) {
+            serverWorld.setAllowedSpawnTypes(this.difficulty != Difficulty.PEACEFUL, true);
+        } else {
+            serverWorld.setAllowedSpawnTypes(((MinecraftServerAccessor) server).accessor$allowSpawnMonsters(), server.getCanSpawnAnimals());
+        }
+
+        serverWorld
+                .getPlayers()
+                .forEach(player -> player.connection.sendPacket(new SServerDifficultyPacket(this.difficulty, ((WorldInfo) (Object) this)
+                        .isDifficultyLocked())));
+    }
+
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("key", this.impl$key)
-            .add("dimensionType", this.impl$logicType)
-            .add("generator", this.shadow$getGenerator())
-            .add("modCreated", this.impl$modCreated)
-            .add("spawnX", this.shadow$getSpawnX())
-            .add("spawnY", this.shadow$getSpawnY())
-            .add("spawnZ", this.shadow$getSpawnZ())
-            .add("gameType", this.shadow$getGameType())
-            .add("hardcore", this.shadow$isHardcore())
-            .add("difficulty", this.shadow$getDifficulty())
-            .toString();
+        return new StringJoiner(", ", WorldInfo.class.getSimpleName() + "[", "]")
+                .add("key=" + this.impl$key)
+                .add("dimensionType=" + this.impl$logicType)
+                .add("generator=" + this.shadow$getGenerator())
+                .add("modCreated=" + this.impl$modCreated)
+                .add("spawnX=" + this.shadow$getSpawnX())
+                .add("spawnY=" + this.shadow$getSpawnY())
+                .add("spawnZ=" + this.shadow$getSpawnZ())
+                .add("gameType=" + this.shadow$getGameType())
+                .add("hardcore=" + this.shadow$isHardcore())
+                .add("difficulty=" + this.shadow$getDifficulty())
+                .toString();
     }
 }

@@ -98,29 +98,25 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     @Override
     public SpongeWorldArchetypeBuilder gameMode(final GameMode gameMode) {
-        Objects.requireNonNull(gameMode);
-        this.gameMode = gameMode;
+        this.gameMode = Objects.requireNonNull(gameMode);
         return this;
     }
 
     @Override
     public SpongeWorldArchetypeBuilder generatorModifierType(final GeneratorModifierType modifier) {
-        Objects.requireNonNull(modifier);
-        this.generatorModifier = modifier;
+        this.generatorModifier = Objects.requireNonNull(modifier);
         return this;
     }
 
     @Override
     public SpongeWorldArchetypeBuilder dimensionType(final DimensionType type) {
-        Objects.requireNonNull(type);
-        this.dimensionType = (SpongeDimensionType) type;
+        this.dimensionType = (SpongeDimensionType) Objects.requireNonNull(type);
         return this;
     }
 
     @Override
     public WorldArchetype.Builder difficulty(final Difficulty difficulty) {
-        Objects.requireNonNull(difficulty);
-        this.difficulty = difficulty;
+        this.difficulty = Objects.requireNonNull(difficulty);
         return this;
     }
 
@@ -180,8 +176,7 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
 
     @Override
     public SpongeWorldArchetypeBuilder serializationBehavior(final SerializationBehavior behavior) {
-        Objects.requireNonNull(behavior);
-        this.serializationBehavior = behavior;
+        this.serializationBehavior = Objects.requireNonNull(behavior);
         return this;
     }
 
@@ -197,11 +192,11 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
         Objects.requireNonNull(value);
 
         this.key = null;
-        this.dimensionType(value.getDimensionType());
-        this.generatorModifierType(value.getGeneratorModifier());
-        this.gameMode(value.getGameMode());
-        this.difficulty(value.getDifficulty());
-        this.serializationBehavior(value.getSerializationBehavior());
+        this.dimensionType = (SpongeDimensionType) value.getDimensionType();
+        this.generatorModifier = value.getGeneratorModifier();
+        this.gameMode = value.getGameMode();
+        this.difficulty = value.getDifficulty();
+        this.serializationBehavior = value.getSerializationBehavior();
         this.seed = value.getSeed();
         this.randomizedSeed = value.isSeedRandomized();
         this.structuresEnabled = value.areStructuresEnabled();

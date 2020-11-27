@@ -85,8 +85,6 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer imple
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.callStartedEngineEvent(this);
 
-        // TODO Minecraft 1.14 - For now, fire LoadedGameEvent right away but this may not be the best place..
-
         lifecycle.callLoadedGameEvent();
     }
 

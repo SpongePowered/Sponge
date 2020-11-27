@@ -41,6 +41,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import javax.annotation.Nullable;
@@ -66,6 +68,8 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     private boolean impl$generateSpawnOnLoad = false;
     private boolean impl$pvpEnabled = true;
     private boolean impl$seedRandomized = false;
+    private InheritableConfigHandle<WorldConfig> impl$configAdapter;
+    private boolean impl$configExists = false;
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -187,8 +191,47 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
         this.bonusChestEnabled = state;
     }
 
+    @Override
+    public void bridge$setInfoConfigAdapter(final InheritableConfigHandle<WorldConfig> configAdapter) {
+        this.impl$configAdapter = configAdapter;
+    }
+
+    @Override
+    public void bridge$setConfigExists(boolean configExists) {
+        this.impl$configExists = configExists;
+    }
+
+    @Override
+    public void bridge$populateInfo(final WorldInfo info) {
+        final WorldInfoBridge infoBridge = (WorldInfoBridge) info;
+
+        if (infoBridge.bridge$isSinglePlayerProperties()) {
+            return;
+        }
+
+        if (this.impl$configAdapter != null) {
+            infoBridge.bridge$setConfigAdapter(this.impl$configAdapter);
+            this.impl$configAdapter = null;
+        }
+
+        if (this.impl$configExists) {
+            this.impl$configExists = false;
+            return;
+        }
+
+        infoBridge.bridge$setEnabled(this.impl$isEnabled);
+        infoBridge.bridge$setLogicType(this.impl$logicType, false);
+        infoBridge.bridge$setLoadOnStartup(this.impl$loadOnStartup);
+        infoBridge.bridge$setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
+        infoBridge.bridge$setKeepSpawnLoaded(this.impl$keepSpawnLoaded);
+        infoBridge.bridge$setGenerateBonusChest(this.bonusChestEnabled);
+        infoBridge.bridge$setSerializationBehavior(this.impl$serializationBehavior);
+        infoBridge.bridge$forceSetDifficulty((net.minecraft.world.Difficulty) (Object) this.impl$difficulty);
+        infoBridge.bridge$setPVPEnabled(this.impl$pvpEnabled);
+    }
+
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
-    private void impl$reAssignValuesFromIncomingInfo(WorldInfo info, CallbackInfo ci) {
+    private void impl$populateSettings(WorldInfo info, CallbackInfo ci) {
         if (!((WorldInfoBridge) info).bridge$isValid()) {
             return;
         }
@@ -212,20 +255,5 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
     private void impl$onSetGeneratorOptions(JsonElement element, CallbackInfoReturnable<WorldSettings> cir) {
         // TODO 1.14 - JsonElement -> DataContainer
-    }
-
-    @Override
-    public void bridge$populateInfo(final WorldInfo info) {
-        final WorldInfoBridge infoBridge = (WorldInfoBridge) info;
-
-        infoBridge.bridge$setEnabled(this.impl$isEnabled);
-        infoBridge.bridge$setLogicType(this.impl$logicType, false);
-        infoBridge.bridge$setLoadOnStartup(this.impl$loadOnStartup);
-        infoBridge.bridge$setGenerateSpawnOnLoad(this.impl$generateSpawnOnLoad);
-        infoBridge.bridge$setKeepSpawnLoaded(this.impl$keepSpawnLoaded);
-        infoBridge.bridge$setGenerateBonusChest(this.bonusChestEnabled);
-        infoBridge.bridge$setSerializationBehavior(this.impl$serializationBehavior);
-        infoBridge.bridge$forceSetDifficulty((net.minecraft.world.Difficulty) (Object) this.impl$difficulty);
-        infoBridge.bridge$setPVPEnabled(this.impl$pvpEnabled);
     }
 }

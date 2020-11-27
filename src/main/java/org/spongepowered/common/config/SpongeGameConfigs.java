@@ -86,6 +86,11 @@ public final class SpongeGameConfigs {
         return ((WorldInfoBridge) mcWorld.getWorldInfo()).bridge$getConfigAdapter();
     }
 
+    public static boolean doesWorldConfigExist(final ResourceKey world) {
+        final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.getNamespace(), world.getValue() + ".conf"));
+        return Files.exists(configPath);
+    }
+
     public static InheritableConfigHandle<WorldConfig> createWorld(final @Nullable DimensionType legacyType, final ResourceKey world) {
         // Path format: config/sponge/worlds/<world-namespace>/<world-value>.conf
         final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.getNamespace(), world.getValue() + ".conf"));
@@ -106,7 +111,7 @@ public final class SpongeGameConfigs {
                             }
                         }
                     } catch (final IOException ex) {
-                        LOGGER.error("Unable to migrate config for world {} from legacy location {}", world, legacyPath, ex);
+                        SpongeGameConfigs.LOGGER.error("Unable to migrate config for world {} from legacy location {}", world, legacyPath, ex);
                     }
                 }
             }
@@ -117,7 +122,7 @@ public final class SpongeGameConfigs {
             config.load();
             return config;
         } catch (final ConfigurateException ex) {
-            LOGGER.error("Unable to load configuration for world {}. Sponge will use a "
+            SpongeGameConfigs.LOGGER.error("Unable to load configuration for world {}. Sponge will use a "
                     + "fallback configuration with default values that will not save.", world, ex);
             return SpongeGameConfigs.createDetached();
         }
