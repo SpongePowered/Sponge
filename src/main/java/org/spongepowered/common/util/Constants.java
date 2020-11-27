@@ -479,6 +479,7 @@ public final class Constants {
         public static final int PACKET_BUTTON_SECONDARY_ID = 0;
         public static final int PACKET_BUTTON_MIDDLE_ID = 0;
         public static final InetSocketAddress LOCALHOST = InetSocketAddress.createUnresolved("127.0.0.1", 0);
+        public static final int MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF = 21;
     }
 
     public static final class Item {

@@ -84,4 +84,6 @@ public interface EntityAccessor {
     @Invoker("getEntityString") String accessor$getEntityString();
 
     @Invoker("removePassenger") void accessor$removePassenger(Entity entity);
+
+    @Invoker("setRotation") void accessor$setRotation(float yaw, float pitch);
 }

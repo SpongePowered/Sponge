@@ -47,9 +47,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.api.command.CommandCause;
@@ -84,6 +86,7 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.network.play.client.CPlayerPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.EntityBridge;
@@ -98,6 +101,8 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.lang.ref.WeakReference;
@@ -116,9 +121,18 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     @Shadow @Final public NetworkManager netManager;
     @Shadow public ServerPlayerEntity player;
     @Shadow @Final private MinecraftServer server;
+    @Shadow private Vec3d targetPos;
+    @Shadow private double firstGoodX;
+    @Shadow private double firstGoodY;
+    @Shadow private double firstGoodZ;
+    @Shadow private int movePacketCounter;
+    @Shadow private int lastMovePacketCounter;
+    @Shadow private int networkTickCount;
+    @Shadow private int lastPositionUpdate;
+
+    @Shadow protected abstract boolean shadow$isServerOwner();
     // @formatter:on
 
-    @Nullable private Vector3d impl$lastMovePosition = null;
     @Nullable private Entity impl$targetedEntity = null;
 
     private boolean impl$justTeleported = false;
@@ -222,11 +236,32 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         return PlatformHooks.getInstance().getGeneralHooks().getEntityReachDistanceSq(this.player, targeted);
     }
 
-    @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ServerPlayerEntity;queuedEndExit:Z"))
-    private boolean impl$callMoveEvents(final ServerPlayerEntity playerMP, final CPlayerPacket packetIn) {
-        if (playerMP.queuedEndExit) {
-            return true;
-        }
+    /**
+     * Effectively, hooking into the following code block:
+     * <pre>
+     *       if (isMovePlayerPacketInvalid(packetIn)) {
+     *          this.disconnect(new TranslationTextComponent("multiplayer.disconnect.invalid_player_movement"));
+     *       } else {
+     *          ServerWorld serverworld = this.server.getWorld(this.player.dimension);
+     *          if (!this.player.queuedEndExit) { // <---- Here is where we're injecting
+     *             if (this.networkTickCount == 0) {
+     *                this.captureCurrentPosition();
+     *             }
+     * </pre>
+     * we can effectively short circuit the method to handle movement code where
+     * returning {@code true} will escape the packet being processed further entirely and
+     * {@code false} will allow the remaining processing of the method run.
+     *
+     * @param packetIn The movement packet
+     */
+    @Inject(method = "processPlayer",
+        at = @At(
+            value = "FIELD",
+            opcode = Opcodes.GETFIELD,
+            target = "Lnet/minecraft/network/play/ServerPlayNetHandler;targetPos:Lnet/minecraft/util/math/Vec3d;"
+        )
+    )
+    private void impl$callMoveEvents(final CPlayerPacket packetIn, final CallbackInfo ci) {
 
         // If the movement is modified we pretend that the player has queuedEndExit = true
         // so that vanilla wont process that packet further
@@ -235,60 +270,34 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
         // We don't fire an event to avoid confusing plugins.
         if (!packetInAccessor.accessor$getMoving() && !packetInAccessor.accessor$getRotating()) {
-            return false;
+            return;
         }
 
+        final boolean goodMovementPacket = this.movePacketCounter - this.lastMovePacketCounter <= 5;
+        final boolean fireMoveEvent = goodMovementPacket && packetInAccessor.accessor$getMoving() && ShouldFire.MOVE_ENTITY_EVENT;
+
+        final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$getRotating() && ShouldFire.ROTATE_ENTITY_EVENT;
+
         final ServerPlayer player = (ServerPlayer) this.player;
-        final ServerPlayerEntityBridge mixinPlayer = (ServerPlayerEntityBridge) this.player;
         final Vector3d fromRotation = player.getRotation();
         // Use the position of the last movement with an event or the current player position if never called
         // We need this because we ignore very small position changes as to not spam as many move events.
-        final Vector3d fromPosition = this.impl$lastMovePosition != null ? this.impl$lastMovePosition : player.getPosition();
+        final Vector3d fromPosition = player.getPosition();
 
-        Vector3d toPosition = new Vector3d(packetInAccessor.accessor$getX(), packetInAccessor.accessor$getY(), packetInAccessor.accessor$getZ());
-        Vector3d toRotation = new Vector3d(packetInAccessor.accessor$getPitch(), packetInAccessor.accessor$getYaw(), 0);
+        Vector3d toPosition = new Vector3d(packetIn.getX(this.player.getPosX()), packetIn.getY(this.player.getPosY()), packetIn.getZ(this.player.getPosZ()));
+        Vector3d toRotation = new Vector3d(packetIn.getYaw(this.player.rotationYaw), packetIn.getPitch(this.player.rotationPitch), 0);
 
-        // If we have zero movement, we have rotation only, we might as well note that now.
-        final boolean zeroMovement = !packetInAccessor.accessor$getMoving() || toPosition.equals(fromPosition);
-
-        // Minecraft does the same with rotation when it's only a positional update
-        // Branch executed for CPacketPlayer.Position
-        boolean fireMoveEvent = packetInAccessor.accessor$getMoving() && !packetInAccessor.accessor$getRotating();
-        if (fireMoveEvent) {
-            // Correct the new rotation to match the old rotation
-            toRotation = fromRotation;
-            fireMoveEvent = !zeroMovement && ShouldFire.MOVE_ENTITY_EVENT;
-        }
-
-        // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
-        // Branch executed for CPacketPlayer.Rotation
-        boolean fireRotationEvent = !packetInAccessor.accessor$getMoving() && packetInAccessor.accessor$getRotating();
-        if (fireRotationEvent) {
-            toPosition = fromPosition; // Rotation only update
-            fireRotationEvent = ShouldFire.ROTATE_ENTITY_EVENT;
-        }
-
-        // Branch executed for CPacketPlayer.PositionRotation
-        if (packetInAccessor.accessor$getMoving() && packetInAccessor.accessor$getRotating()) {
-            fireMoveEvent = !zeroMovement && ShouldFire.MOVE_ENTITY_EVENT;
-            fireRotationEvent = ShouldFire.ROTATE_ENTITY_EVENT;
-        }
-
-        mixinPlayer.bridge$setVelocityOverride(toPosition.sub(fromPosition));
-
-        // These magic numbers are sad but help prevent excessive lag from this event.
-        // eventually it would be nice to not have them
-        final boolean significantMovement = !zeroMovement && toPosition.distanceSquared(fromPosition) > ((1f / 16) * (1f / 16));
         final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
 
-        final Transform originalToTransform = Transform.of(toPosition, toRotation);
-
+        final Vector3d originalToPositon = toPosition;
+        boolean cancelled = false;
         // Call move & rotate event as needed...
-        if (significantMovement && fireMoveEvent) {
+        if (fireMoveEvent) {
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.SERVER.getCurrentCause(), player, fromPosition, toPosition, toPosition);
             if (SpongeCommon.postEvent(event)) {
-                this.impl$lastMovePosition = event.getOriginalPosition();
-                toPosition = fromPosition;
+                this.targetPos = this.player.getPositionVec();
+                this.lastPositionUpdate = this.networkTickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
+                cancelled = true;
             } else {
                 toPosition = event.getDestinationPosition();
             }
@@ -297,32 +306,46 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         if (significantRotation && fireRotationEvent) {
             final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.SERVER.getCurrentCause(), player, fromRotation, toRotation);
             if (SpongeCommon.postEvent(event)) {
-                toRotation = fromRotation;
+                cancelled = true;
+                // We don't need to reset the player yaw and pitch because it'll be re-forced on confirm teleport
+                this.targetPos = this.player.getPositionVec();
+                this.lastPositionUpdate = this.networkTickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
             } else {
                 toRotation = event.getToRotation();
             }
         }
 
-        final Transform toTransform = Transform.of(toPosition, toRotation);
+        // At this point, we cancel out and let the "confirmed teleport" code run through to update the
+        // player position and update the player's relation in the chunk manager.
+        if (cancelled) {
+            return;
+        }
 
         // Handle event results
-        if (!toTransform.equals(originalToTransform)) {
-            // event changed position or rotation (includes cancel)
-            ((EntityBridge) mixinPlayer).bridge$setTransform(toTransform);
-            this.impl$lastMovePosition = toPosition;
-            mixinPlayer.bridge$setVelocityOverride(null);
-            return true;
-        } else if (!fromPosition.equals(player.getPosition()) && this.impl$justTeleported) {
-            // Teleport during move event - prevent vanilla from causing odd behaviors after this
-            this.impl$justTeleported = false;
-            this.impl$lastMovePosition = player.getLocation().getPosition();
-            mixinPlayer.bridge$setVelocityOverride(null);
-            return true;
-        } else { // Normal movement - Just update lastMovePosition
-            this.impl$lastMovePosition = toPosition;
+        if (!toPosition.equals(originalToPositon)) {
+            // Check if we have to say it's a "teleport" vs a standard move
+            final double d4 = packetIn.getX(this.player.getPosX());
+            final double d5 = packetIn.getY(this.player.getPosY());
+            final double d6 = packetIn.getZ(this.player.getPosZ());
+            final double d7 = d4 - this.firstGoodX;
+            final double d8 = d5 - this.firstGoodY;
+            final double d9 = d6 - this.firstGoodZ;
+            final double d10 = this.player.getMotion().lengthSquared();
+            final double d11 = d7 * d7 + d8 * d8 + d9 * d9;
+            final float f2 = this.player.isElytraFlying() ? 300.0F : 100.0F;
+            final int i = this.movePacketCounter - this.lastMovePacketCounter;
+            if (d11 - d10 > (double)(f2 * (float)i) && !this.shadow$isServerOwner()) {
+                // At this point, we need to set the target position so the teleport code forces it
+                this.targetPos = VecHelper.toVec3d(toPosition);
+                ((EntityAccessor) this.player).accessor$setRotation((float) toRotation.getX(), (float) toRotation.getY());
+            } else {
+                // otherwise, set the data back onto the packet
+                packetInAccessor.accessor$setMoving(true);
+                packetInAccessor.accessor$setX(toPosition.getX());
+                packetInAccessor.accessor$setY(toPosition.getY());
+                packetInAccessor.accessor$setZ(toPosition.getZ());
+            }
         }
-        // TODO ??? this.bridge$resendLatestResourcePackRequest();
-        return false; // Continue with vanilla movement processing
     }
 
     @Inject(method = "processUseEntity", cancellable = true,
@@ -330,7 +353,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
                     target = "Lnet/minecraft/entity/Entity;applyPlayerInteraction(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResultType;"),
             locals = LocalCapture.CAPTURE_FAILHARD
     )
-    public void impl$onRightClickAtEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
+    public void impl$onRightClickAtEntity(
+        final CUseEntityPacket packetIn, final CallbackInfo ci, final ServerWorld serverworld, final Entity entity) {
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
                 .callInteractEntityEventSecondary(this.player, this.player.getHeldItem(packetIn.getHand()), entity, packetIn.getHand(), null);
         if (event.isCancelled()) {
@@ -343,7 +367,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
                     target = "Lnet/minecraft/entity/player/ServerPlayerEntity;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"),
             locals = LocalCapture.CAPTURE_FAILHARD
     )
-    public void impl$onLeftClickEntity(CUseEntityPacket packetIn, CallbackInfo ci, ServerWorld serverworld, Entity entity) {
+    public void impl$onLeftClickEntity(final CUseEntityPacket packetIn, final CallbackInfo ci, final ServerWorld serverworld, final Entity entity) {
         final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
                 this.player.getHeldItem(this.player.getActiveHand()), entity, this.player.getActiveHand(), null);
         if (event.isCancelled()) {
@@ -356,7 +380,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
      */
     @SuppressWarnings("Duplicates")
     @Surrogate
-    public void impl$onLeftClickEntity(CUseEntityPacket packetIn, CallbackInfo ci, Entity entity) {
+    public void impl$onLeftClickEntity(final CUseEntityPacket packetIn, final CallbackInfo ci, final Entity entity) {
         final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
                 this.player.getHeldItem(this.player.getActiveHand()), entity, this.player.getActiveHand(), null);
         if (event.isCancelled()) {
@@ -394,7 +418,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             + "recreatePlayerEntity(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/minecraft/world/dimension/DimensionType;Z)"
             + "Lnet/minecraft/entity/player/ServerPlayerEntity;", ordinal = 1))
     private DimensionType impl$usePlayerDimensionForRespawn(final ServerPlayerEntity entity, final DimensionType dimensionType,
-            boolean conqueredEnd) {
+            final boolean conqueredEnd) {
         // A few changes to Vanilla logic here that, by default, still preserve game mechanics:
         // - If we have conquered The End then keep the dimension type we're headed to (which is Overworld as of 1.15)
         // - Otherwise, check the platform hooks for which dimension to respawn to. In Sponge, this is the Player's dimension they
@@ -412,13 +436,14 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     }
 
     @Redirect(method = "processClientStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;recreatePlayerEntity(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/minecraft/world/dimension/DimensionType;Z)Lnet/minecraft/entity/player/ServerPlayerEntity;"))
-    private ServerPlayerEntity impl$setOriginalDestinationRef(PlayerList playerList, ServerPlayerEntity playerIn, DimensionType dimension, boolean conqueredEnd) {
+    private ServerPlayerEntity impl$setOriginalDestinationRef(
+        final PlayerList playerList, final ServerPlayerEntity playerIn, final DimensionType dimension, final boolean conqueredEnd) {
         ((PlayerListBridge) playerList).bridge$setOriginalDestinationDimensionForRespawn(dimension);
         return playerList.recreatePlayerEntity(playerIn, dimension, conqueredEnd);
     }
 
     @Redirect(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CUpdateSignPacket;getLines()[Ljava/lang/String;"))
-    private String[] impl$callChangeSignEvent(CUpdateSignPacket packet) {
+    private String[] impl$callChangeSignEvent(final CUpdateSignPacket packet) {
         final ServerWorld world = this.server.getWorld(this.player.dimension);
         final BlockPos position = packet.getPosition();
         final SignTileEntity sign = (SignTileEntity) world.getTileEntity(position);

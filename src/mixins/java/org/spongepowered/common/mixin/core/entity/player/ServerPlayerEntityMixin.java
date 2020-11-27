@@ -86,7 +86,6 @@ import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.ShouldFire;
@@ -122,7 +121,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
     private @Nullable ITextComponent impl$connectionMessage;
-    @Nullable private Vector3d impl$velocityOverride = null;
     private Scoreboard impl$scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
@@ -265,17 +263,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         final ITextComponent component = SpongeAdventure.asVanilla(messageToSend);
         this.connection.disconnect(component);
         return true;
-    }
-
-    @Override
-    public void bridge$setVelocityOverride(@Nullable final Vector3d velocity) {
-        this.impl$velocityOverride = velocity;
-    }
-
-    @Override
-    @Nullable
-    public Vector3d bridge$getVelocityOverride() {
-        return this.impl$velocityOverride;
     }
 
     @Override

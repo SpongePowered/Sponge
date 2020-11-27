@@ -74,8 +74,6 @@ public interface ServerPlayerEntityBridge {
     @Nullable
     User bridge$getUserObject();
 
-    void bridge$setVelocityOverride(@Nullable Vector3d velocity);
-
     void bridge$sendBlockChange(BlockPos pos, BlockState state);
 
     void bridge$initScoreboard();
@@ -116,9 +114,6 @@ public interface ServerPlayerEntityBridge {
 
     @Nullable
     User bridge$getUser();
-
-    @Nullable
-    Vector3d bridge$getVelocityOverride();
 
     @Nullable ITextComponent bridge$getConnectionMessageToSend();
 
