@@ -404,6 +404,7 @@ public final class CommonModuleRegistry {
                 .registerModule(PlantType.class, new PlantTypeModuleRegistry())
                 .registerModule(PopulatorObject.class, new PopulatorObjectRegistryModule())
                 .registerModule(PopulatorType.class, PopulatorTypeRegistryModule.getInstance())
+                .registerModule(PortalType.class, new PortalTypeRegistryModule())
                 .registerModule(PortionType.class, new PortionTypeRegistryModule())
                 .registerModule(PotionType.class, PotionTypeRegistryModule.getInstance())
                 .registerModule(PotionEffectType.class, PotionEffectTypeRegistryModule.getInstance())

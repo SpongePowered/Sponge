@@ -27,6 +27,7 @@ package org.spongepowered.common.config.category;
 import net.minecraft.launchwrapper.Launch;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.api.Sponge;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -206,6 +207,15 @@ public class WorldCategory extends ConfigCategory {
 
     public Map<String, String> getPortalAgents() {
         return this.portalAgents;
+    }
+
+    public String getPortalDestination(String dimensionName) {
+        // TODO I would like to know how to retrieve the default world name from here, in a better way than below
+        return this.portalAgents.getOrDefault(dimensionName, Sponge.getServer().getDefaultWorldName());
+    }
+
+    public void setPortalDestination(String dimensionName, String destinationWorldName) {
+        this.portalAgents.put(dimensionName, destinationWorldName);
     }
 
     public boolean getDenyChunkRequests() {
