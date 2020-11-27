@@ -295,9 +295,14 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         if (fireMoveEvent) {
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.SERVER.getCurrentCause(), player, fromPosition, toPosition, toPosition);
             if (SpongeCommon.postEvent(event)) {
-                this.targetPos = this.player.getPositionVec();
-                this.lastPositionUpdate = this.networkTickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
                 cancelled = true;
+                // We don't need to reset the player yaw and pitch because it'll be re-forced on confirm teleport
+                this.targetPos = this.player.getPositionVec();
+                // We reset the "lastPositionUpdate" to be differenced so that it forces a set position
+                this.lastPositionUpdate = this.networkTickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
+                // If the move wil be cancelled, the player is force reset to the other position, but, we need to possibly accept
+                // the rotation of the event, unless that is cancelled in the next code block.
+                ((EntityAccessor) this.player).accessor$setRotation((float) toRotation.getX(), (float) toRotation.getY());
             } else {
                 toPosition = event.getDestinationPosition();
             }
@@ -307,9 +312,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.SERVER.getCurrentCause(), player, fromRotation, toRotation);
             if (SpongeCommon.postEvent(event)) {
                 cancelled = true;
-                // We don't need to reset the player yaw and pitch because it'll be re-forced on confirm teleport
-                this.targetPos = this.player.getPositionVec();
-                this.lastPositionUpdate = this.networkTickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
+                // Rest the rotation here
+                ((EntityAccessor) this.player).accessor$setRotation((float) fromRotation.getX(), (float) fromRotation.getY());
             } else {
                 toRotation = event.getToRotation();
             }
@@ -318,6 +322,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         // At this point, we cancel out and let the "confirmed teleport" code run through to update the
         // player position and update the player's relation in the chunk manager.
         if (cancelled) {
+            // And finally, we can reset the rotation
             return;
         }
 
