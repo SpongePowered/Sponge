@@ -343,6 +343,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
                 // At this point, we need to set the target position so the teleport code forces it
                 this.targetPos = VecHelper.toVec3d(toPosition);
                 ((EntityAccessor) this.player).accessor$setRotation((float) toRotation.getX(), (float) toRotation.getY());
+                // And reset the position update so the force set is done.
+                this.lastPositionUpdate = this.networkTickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
             } else {
                 // otherwise, set the data back onto the packet
                 packetInAccessor.accessor$setMoving(true);
