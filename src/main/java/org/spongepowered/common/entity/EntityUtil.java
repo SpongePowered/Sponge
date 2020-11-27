@@ -238,6 +238,10 @@ public final class EntityUtil {
             player.connection.captureCurrentPosition();
         }
 
+        if (player.openContainer != player.container) {
+            player.closeContainer();
+        }
+
         // Sponge Start - Call platform event hook after changing dimensions
         PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(player, fromWorld, originalToWorld);
         // Sponge End
