@@ -40,7 +40,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;

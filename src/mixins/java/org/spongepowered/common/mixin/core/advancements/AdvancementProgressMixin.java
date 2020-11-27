@@ -49,7 +49,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterionProgress;
@@ -65,7 +65,6 @@ import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;

@@ -37,7 +37,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
@@ -52,7 +52,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.SpongeHooks;
+import org.spongepowered.common.hooks.SpongeHooks;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

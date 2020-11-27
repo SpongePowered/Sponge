@@ -25,10 +25,18 @@
 package org.spongepowered.common.resourcepack;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.common.SpongeCommon;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,13 +44,13 @@ import javax.annotation.Nullable;
 
 public abstract class SpongeResourcePack implements ResourcePack {
 
-    private final Optional<String> hash;
+    private final String hash;
     private final String id = UUID.randomUUID().toString();
 
     public static final int HASH_SIZE = 40;
 
     public SpongeResourcePack(@Nullable String hash) {
-        this.hash = Optional.ofNullable(hash);
+        this.hash = hash;
     }
 
     public abstract String getUrlString();
@@ -54,7 +62,7 @@ public abstract class SpongeResourcePack implements ResourcePack {
 
     @Override
     public Optional<String> getHash() {
-        return this.hash;
+        return Optional.of(this.hash);
     }
 
     @Override
@@ -79,4 +87,41 @@ public abstract class SpongeResourcePack implements ResourcePack {
         return new SpongeURIResourcePack(uri, hash);
     }
 
+    public static final class Factory implements ResourcePack.Factory {
+        @Override
+        public ResourcePack fromUri(final URI uri) throws FileNotFoundException {
+            Objects.requireNonNull(uri);
+            try {
+                Hasher hasher = Hashing.sha1().newHasher();
+                try (InputStream in = openStream(uri)) {
+                    byte[] buf = new byte[256];
+                    while (true) {
+                        int read = in.read(buf);
+                        if (read <= 0) {
+                            break;
+                        }
+                        hasher.putBytes(buf, 0, read);
+                    }
+                }
+                return SpongeResourcePack.create(uri, hasher.hash().toString());
+            } catch (final IOException e) {
+                FileNotFoundException ex = new FileNotFoundException(e.toString());
+                ex.initCause(e);
+                throw ex;
+            }
+        }
+
+        private static InputStream openStream(final URI uri) throws IOException {
+            if (uri.toString().startsWith(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL)) {
+                return Files.newInputStream(SpongeCommon.getGameDirectory().resolve(uri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length
+                        ())));
+            }
+            return uri.toURL().openStream();
+        }
+
+        @Override
+        public ResourcePack fromUriUnchecked(final URI uri) {
+            return SpongeResourcePack.create(Objects.requireNonNull(uri), null);
+        }
+    }
 }

@@ -44,8 +44,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings({"ConstantConditions", "unchecked"})
 public final class SpongeObjective implements Objective {
@@ -238,5 +241,87 @@ public final class SpongeObjective implements Objective {
 
     public Collection<ScoreObjective> getObjectives() {
         return this.objectives.values();
+    }
+
+    public static final class Builder implements Objective.Builder {
+
+        private static final int MAX_NAME_LENGTH = 16;
+        @Nullable private String name;
+        @Nullable private Component displayName;
+        @Nullable private Criterion criterion;
+        @Nullable private ObjectiveDisplayMode objectiveDisplayMode;
+
+        @Override
+        public Objective.Builder name(final String name) {
+            Objects.requireNonNull(name);
+            if (Builder.MAX_NAME_LENGTH < name.length()) {
+                throw new IllegalStateException(String.format("name '%s' is too long: %s characters over limit of %s",
+                        name, Builder.MAX_NAME_LENGTH - name.length(), Builder.MAX_NAME_LENGTH));
+            }
+            this.name = name;
+            return this;
+        }
+
+        @Override
+        public Objective.Builder displayName(final Component displayName) {
+            this.displayName = Objects.requireNonNull(displayName);
+            return this;
+        }
+
+        @Override
+        public Objective.Builder criterion(final Criterion criterion) {
+            this.criterion = Objects.requireNonNull(criterion);
+            return this;
+        }
+
+        @Override
+        public Objective.Builder objectiveDisplayMode(final ObjectiveDisplayMode objectiveDisplayMode) {
+            this.objectiveDisplayMode = Objects.requireNonNull(objectiveDisplayMode);
+            return this;
+        }
+
+        @Override
+        public Objective.Builder from(final Objective value) {
+            Objects.requireNonNull(value);
+
+            this.name = value.getName();
+            this.displayName = value.getDisplayName();
+            this.criterion = value.getCriterion();
+            this.objectiveDisplayMode = value.getDisplayMode();
+            return this;
+        }
+
+        @Override
+        public Builder reset() {
+            this.name = null;
+            this.displayName = null;
+            this.criterion = null;
+            this.objectiveDisplayMode = null;
+            return this;
+        }
+
+        @Override
+        public Objective build() {
+            if (this.name == null) {
+                throw new IllegalStateException("Name cannot be null!");
+            }
+            if (this.criterion == null) {
+                throw new IllegalStateException("Criterion cannot be null!");
+            }
+
+            final SpongeObjective objective = new SpongeObjective(this.name, this.criterion);
+
+            if (this.displayName != null) {
+                objective.setDisplayName(this.displayName);
+            }
+
+            if (this.objectiveDisplayMode != null) {
+                objective.setDisplayMode(this.objectiveDisplayMode);
+            } else if (this.criterion instanceof ScoreCriteria) {
+                objective.setDisplayMode((ObjectiveDisplayMode) (Object) ((ScoreCriteria) this.criterion).getRenderType());
+            }
+
+            return objective;
+        }
     }
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.service.server.permission;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.SystemSubject;

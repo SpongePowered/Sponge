@@ -35,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;

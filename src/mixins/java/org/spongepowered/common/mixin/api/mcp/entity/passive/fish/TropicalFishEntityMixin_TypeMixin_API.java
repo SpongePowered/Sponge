@@ -34,8 +34,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(TropicalFishEntity.Type.class)
 public abstract class TropicalFishEntityMixin_TypeMixin_API implements TropicalFishShape {

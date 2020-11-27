@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import co.aikar.timings.TimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -76,7 +74,7 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
-import org.spongepowered.common.resourcepack.SpongeResourcePackFactory;
+import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeRange;
@@ -127,7 +125,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
             .registerFactory(CommandTreeNode.NodeFactory.class, new SpongeCommandTreeBuilderFactory())
             .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
             .registerFactory(Parameter.Value.Factory.class, new SpongeParameterFactory())
-            .registerFactory(ResourcePack.Factory.class, new SpongeResourcePackFactory())
+            .registerFactory(ResourcePack.Factory.class, new SpongeResourcePack.Factory())
             .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
             .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
             .registerFactory(TimingsFactory.class, new SpongeTimingsFactory())

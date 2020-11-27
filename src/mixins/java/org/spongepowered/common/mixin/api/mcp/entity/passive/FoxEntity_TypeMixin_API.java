@@ -33,8 +33,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(FoxEntity.Type.class)
 public abstract class FoxEntity_TypeMixin_API implements FoxType {

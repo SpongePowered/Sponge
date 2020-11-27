@@ -179,7 +179,7 @@ import org.spongepowered.common.placeholder.SpongePlaceholderComponentBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderContextBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scheduler.SpongeTaskBuilder;
-import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
+import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
@@ -234,7 +234,7 @@ public final class SpongeBuilderRegistry implements BuilderRegistry {
             .register(TradeOffer.Builder.class, SpongeTradeOfferBuilder::new)
             .register(FireworkEffect.Builder.class, SpongeFireworkEffectBuilder::new)
             .register(PotionEffect.Builder.class, SpongePotionBuilder::new)
-            .register(Objective.Builder.class, SpongeObjectiveBuilder::new)
+            .register(Objective.Builder.class, SpongeObjective.Builder::new)
             .register(Team.Builder.class, SpongeTeamBuilder::new)
             .register(Scoreboard.Builder.class, SpongeScoreboardBuilder::new)
             .register(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)

@@ -51,7 +51,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.util.Constants;

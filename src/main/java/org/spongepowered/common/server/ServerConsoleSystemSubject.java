@@ -29,23 +29,20 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ICommandSource;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.dimension.DimensionType;
-import org.apache.logging.log4j.LogManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeSystemSubject;
+import org.spongepowered.common.service.server.permission.SpongeSystemSubject;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 
 public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, ICommandSource {
+
     @Override
     public String getIdentifier() {
         return "console";

@@ -22,8 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.scoreboard;
+package org.spongepowered.common.util;
 
-public class SpongeScoreboardConstants {
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.util.orientation.Orientation;
+import org.spongepowered.common.SpongeCatalogType;
 
+public final class SpongeOrientation extends SpongeCatalogType implements Orientation {
+
+    private final int angle;
+
+    public SpongeOrientation(final ResourceKey key, final int angle) {
+        super(key);
+        this.angle = angle;
+    }
+
+    @Override
+    public int getAngle() {
+        return this.angle;
+    }
 }

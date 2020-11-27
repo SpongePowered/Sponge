@@ -35,7 +35,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;

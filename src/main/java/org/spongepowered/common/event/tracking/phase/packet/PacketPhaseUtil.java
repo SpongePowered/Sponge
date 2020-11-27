@@ -55,7 +55,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
 import org.spongepowered.common.accessor.entity.passive.PigEntityAccessor;

@@ -51,7 +51,7 @@ import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
-import org.spongepowered.common.SpongeHooks;
+import org.spongepowered.common.hooks.SpongeHooks;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginContributor;
 import org.spongepowered.plugin.metadata.PluginMetadata;

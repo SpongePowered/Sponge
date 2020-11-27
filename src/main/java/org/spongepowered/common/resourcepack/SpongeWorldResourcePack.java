@@ -31,13 +31,13 @@ import java.net.URLEncoder;
 
 import javax.annotation.Nullable;
 
-public class SpongeWorldResourcePack extends SpongeResourcePack {
+public final class SpongeWorldResourcePack extends SpongeResourcePack {
 
     private final String path;
     private final URI uri;
     public static final String LEVEL_PACK_PROTOCOL = "level://";
 
-    public SpongeWorldResourcePack(String levelUri, @Nullable String hash) {
+    public SpongeWorldResourcePack(final String levelUri, @Nullable final String hash) {
         super(hash);
         this.path = levelUri.substring(LEVEL_PACK_PROTOCOL.length());
         try {
@@ -47,7 +47,7 @@ public class SpongeWorldResourcePack extends SpongeResourcePack {
         }
     }
 
-    public SpongeWorldResourcePack(URI levelUri, @Nullable String hash) {
+    public SpongeWorldResourcePack(final URI levelUri, @Nullable final String hash) {
         super(hash);
         String path = levelUri.toString().substring(LEVEL_PACK_PROTOCOL.length());
         try {

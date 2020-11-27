@@ -39,7 +39,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.BlockEventDataBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;

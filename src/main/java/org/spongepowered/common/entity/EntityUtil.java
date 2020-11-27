@@ -48,7 +48,7 @@ import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;

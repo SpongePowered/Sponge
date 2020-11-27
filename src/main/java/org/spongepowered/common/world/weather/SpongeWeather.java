@@ -22,5 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
-package org.spongepowered.common.scoreboard;
+package org.spongepowered.common.world.weather;
+
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.common.SpongeCatalogType;
+
+public final class SpongeWeather extends SpongeCatalogType implements Weather {
+
+    public SpongeWeather(final ResourceKey key) {
+        super(key);
+    }
+
+}

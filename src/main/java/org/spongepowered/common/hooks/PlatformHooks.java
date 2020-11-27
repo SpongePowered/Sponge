@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.hooks;
 
-import org.spongepowered.common.SpongeImplHooks;
-
 import java.util.Objects;
 
 /**

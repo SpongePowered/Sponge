@@ -26,7 +26,7 @@ package org.spongepowered.common.registry.builtin.sponge;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.common.weather.SpongeWeather;
+import org.spongepowered.common.world.weather.SpongeWeather;
 
 import java.util.stream.Stream;
 

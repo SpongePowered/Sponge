@@ -28,7 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.SpongeHooks;
+import org.spongepowered.common.hooks.SpongeHooks;
 
 import java.util.HashMap;
 import java.util.Map;

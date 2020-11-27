@@ -43,7 +43,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
-public class SpongeTeamBuilder implements Team.Builder {
+public final class SpongeTeamBuilder implements Team.Builder {
 
     @Nullable private String name;
     @Nullable private Component displayName;

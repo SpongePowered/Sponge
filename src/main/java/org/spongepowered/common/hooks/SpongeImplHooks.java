@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.hooks;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -70,6 +70,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.WorldAccessor;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;

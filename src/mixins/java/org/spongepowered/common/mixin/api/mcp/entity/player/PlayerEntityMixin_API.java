@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.entity.player;
 import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.EnderChestInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.text.ITextComponent;
@@ -38,7 +37,7 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.mixin.api.mcp.entity.LivingEntityMixin_API;
 
 @Mixin(PlayerEntity.class)

@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;

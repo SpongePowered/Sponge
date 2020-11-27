@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
@@ -59,7 +59,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.SpongeHooks;
+import org.spongepowered.common.hooks.SpongeHooks;
 
 import java.util.HashMap;
 import java.util.Map;
