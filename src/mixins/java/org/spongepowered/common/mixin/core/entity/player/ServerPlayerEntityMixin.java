@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
+import io.netty.channel.Channel;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.entity.Entity;
@@ -33,7 +34,9 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.ServerPlayNetHandler;
+import net.minecraft.network.play.client.CClientSettingsPacket;
 import net.minecraft.network.play.server.SCombatPacket;
+import net.minecraft.network.play.server.SUpdateBossInfoPacket;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.Team;
@@ -53,6 +56,7 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.TicketType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.User;
@@ -69,6 +73,7 @@ import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -79,12 +84,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.network.NetworkManagerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.world.BossInfoBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.HumanEntity;
@@ -99,8 +106,7 @@ import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashSet;
-
-import javax.annotation.Nullable;
+import java.util.Locale;
 
 // See also: SubjectMixin_API and SubjectMixin
 @Mixin(ServerPlayerEntity.class)
@@ -557,7 +563,8 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     @Inject(method = "copyFrom", at = @At("HEAD"))
-    private void impl$copySpongeDataOnRespawn(final ServerPlayerEntity oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
+    private void impl$copyDataOnRespawn(final ServerPlayerEntity oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
+        // Copy Sponge data
         if (oldPlayer instanceof DataCompoundHolder) {
             final DataCompoundHolder oldEntity = (DataCompoundHolder) oldPlayer;
             if (oldEntity.data$hasSpongeData()) {
@@ -565,6 +572,17 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
                 ((DataCompoundHolder) this).data$setCompound(compound);
             }
         }
+
+        // Update boss bars
+        SpongeAdventure.forEachBossBar(bar -> ((BossInfoBridge) bar).bridge$replacePlayer(oldPlayer, (ServerPlayerEntity) (Object) this));
     }
 
+    @Inject(method = "handleClientSettings", at = @At("HEAD"))
+    private void impl$handleClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
+        final Locale newLocale = Locales.of(packet.getLang());
+        // Update locale on Channel, used for sending localized messages
+        final Channel channel = ((NetworkManagerAccessor) this.connection.netManager).accessor$getChannel();
+        channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(newLocale);
+        SpongeAdventure.forEachBossBar(bar -> this.connection.sendPacket(new SUpdateBossInfoPacket(SUpdateBossInfoPacket.Operation.UPDATE_NAME, bar)));
+    }
 }

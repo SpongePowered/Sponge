@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.kyori.adventure.bossbar.BossBar;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.BossInfo;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,6 +74,11 @@ public abstract class BossInfoMixin implements BossInfoBridge {
     @Override
     public void bridge$setAdventure(final BossBar adventure) {
         this.impl$adventure = adventure;
+    }
+
+    @Override
+    public void bridge$replacePlayer(final ServerPlayerEntity oldPlayer, final ServerPlayerEntity newPlayer) {
+        // no-op
     }
 
     // Redirect setters

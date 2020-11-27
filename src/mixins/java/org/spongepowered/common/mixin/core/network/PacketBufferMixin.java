@@ -22,13 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.util.text;
+package org.spongepowered.common.mixin.core.network;
 
-import net.kyori.adventure.text.Component;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.ITextComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.common.adventure.NativeComponentRenderer;
+import org.spongepowered.common.bridge.network.PacketBufferBridge;
 
-public interface TextComponentBridge {
-    Component bridge$asAdventureComponent();
+import java.util.Locale;
 
-    @Nullable Component bridge$adventureComponentIfPresent();
+@Mixin(PacketBuffer.class)
+public abstract class PacketBufferMixin implements PacketBufferBridge {
+
+    private @Nullable Locale impl$locale;
+
+    @ModifyVariable(method = "writeTextComponent", at = @At("HEAD"), argsOnly = true)
+    private ITextComponent localizeComponent(final ITextComponent input) {
+        if(this.impl$locale != null) {
+            return NativeComponentRenderer.get().render(input.deepCopy(), this.impl$locale);
+        }
+        return input;
+    }
+
+    @Override public void bridge$setLocale(final Locale locale) {
+        this.impl$locale = locale;
+    }
 }

@@ -31,6 +31,7 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.concurrent.RecursiveEventLoop;
 import net.minecraft.util.concurrent.TickDelayedTask;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.SessionLockException;
@@ -53,11 +54,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.advancement.SpongeAdvancementProvider;
+import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
@@ -76,6 +79,7 @@ import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 import java.net.URISyntaxException;
+import java.util.Locale;
 import java.util.function.BooleanSupplier;
 
 import javax.annotation.Nullable;
@@ -309,6 +313,17 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
             this.impl$serviceProvider = new SpongeServerScopedServiceProvider(this, game, injector);
             this.impl$serviceProvider.init();
         }
+    }
+
+    /**
+     * Render localized chat components
+     *
+     * @param input original component
+     * @return converted message
+     */
+    @ModifyVariable(method = "sendMessage", at = @At("HEAD"), argsOnly = true)
+    private ITextComponent impl$applyTranslation(final ITextComponent input) {
+        return NativeComponentRenderer.get().render(input.deepCopy(), Locale.getDefault());
     }
 
     @Override

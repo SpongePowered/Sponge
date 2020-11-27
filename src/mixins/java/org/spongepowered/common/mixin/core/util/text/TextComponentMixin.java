@@ -35,6 +35,7 @@ import net.minecraft.util.text.SelectorTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.util.text.StyleBridge;
@@ -89,6 +90,11 @@ public class TextComponentMixin implements TextComponentBridge {
             builder.style(((StyleBridge) ((ITextComponent) this).getStyle()).bridge$asAdventure());
             this.bridge$adventureComponent = builder.build();
         }
+        return this.bridge$adventureComponent;
+    }
+
+    @Override
+    public @Nullable Component bridge$adventureComponentIfPresent() {
         return this.bridge$adventureComponent;
     }
 }

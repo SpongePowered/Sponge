@@ -28,6 +28,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+
+import io.netty.util.AttributeKey;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
@@ -43,6 +45,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.util.Codec;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
@@ -67,12 +70,15 @@ import org.spongepowered.common.bridge.world.BossInfoBridge;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public final class SpongeAdventure {
+    public static final AttributeKey<Locale> CHANNEL_LOCALE = AttributeKey.newInstance("sponge:locale");
     public static final SpongeCallback CALLBACK_COMMAND = new SpongeCallback();
     public static final GsonComponentSerializer GSON = GsonComponentSerializer.builder()
         .legacyHoverEventSerializer(NbtLegacyHoverEventSerializer.INSTANCE)
@@ -98,6 +104,8 @@ public final class SpongeAdventure {
     public static final ConfigurateComponentSerializer CONFIGURATE = ConfigurateComponentSerializer.builder()
             .scalarSerializer(GSON)
             .build();
+
+    private static final Set<ServerBossInfo> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
 
     public static Component legacy(final char character, final String string) {
         return LegacyComponentSerializer.legacy(character).deserialize(string);
@@ -485,5 +493,20 @@ public final class SpongeAdventure {
             final UUID key = SpongeAdventure.CALLBACK_COMMAND.registerCallback(callback);
             return ClickEvent.runCommand("/sponge:callback " + key.toString());
         }
+    }
+
+    // Boss bar tracking
+    // So we can update viewed bars for players when their locales change
+
+    public static void registerBossBar(final ServerBossInfo mcBar) {
+        ACTIVE_BOSS_BARS.add(mcBar);
+    }
+
+    public static void unregisterBossBar(final ServerBossInfo mcBar) {
+        ACTIVE_BOSS_BARS.remove(mcBar);
+    }
+
+    public static void forEachBossBar(final Consumer<ServerBossInfo> info) {
+        ACTIVE_BOSS_BARS.forEach(info);
     }
 }
