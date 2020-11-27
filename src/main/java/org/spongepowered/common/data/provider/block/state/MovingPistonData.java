@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.MovingPistonBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class MovingPistonData {
 
@@ -40,8 +40,8 @@ public final class MovingPistonData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(MovingPistonBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, MovingPistonBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(MovingPistonBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, MovingPistonBlock.FACING))
                         .supports(h -> h.getBlock() instanceof MovingPistonBlock);
     }
     // @formatter:on

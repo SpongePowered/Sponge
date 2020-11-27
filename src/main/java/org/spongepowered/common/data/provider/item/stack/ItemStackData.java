@@ -48,7 +48,7 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.accessor.item.ToolItemAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
+import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -161,7 +161,7 @@ public final class ItemStackData {
                             }
 
                             final ListNBT list = tag.getList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
-                            return list.isEmpty() ? null : SpongeAdventure.json(list.stream().collect(NbtCollectors.toStringList()));
+                            return list.isEmpty() ? null : SpongeAdventure.json(list.stream().collect(NBTCollectors.toStringList()));
                         })
                         .set((h, v) -> {
                             if (v.isEmpty()) {

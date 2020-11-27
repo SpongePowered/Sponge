@@ -65,7 +65,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Builder.HolderStep, DataStore.Builder.SerializersStep,
+public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Builder.HolderStep, DataStore.Builder.SerializersStep,
         DataStore.Builder.EndStep {
 
     private final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> serializers = new IdentityHashMap<>();
@@ -89,7 +89,7 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
             deserializer = (view, dataQuery)  -> (Optional<T>) view.getSerializable(dataQuery, (Class<? extends DataSerializable>) rawType);
         } else if (CatalogType.class.isAssignableFrom(rawType)) {
             deserializer = (view, dataQuery)  -> (Optional<T>) view.getCatalogType(dataQuery, ((Class<? extends CatalogType>) rawType));
-        } else if (SpongeDataManager.getInstance().getTranslator(rawType).isPresent()) {
+        } else if (Sponge.getGame().getDataManager().getTranslator(rawType).isPresent()) {
             deserializer = (view, dataQuery)  -> (Optional<T>) view.getObject(dataQuery, rawType);
         } else if (Set.class.isAssignableFrom(rawType)) {
             final Type listType = ((ParameterizedType) elementType).getActualTypeArguments()[0];
@@ -150,7 +150,7 @@ public class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Buil
         if (CatalogType.class.isAssignableFrom(listType)) {
             return (Optional) view.getCatalogTypeList(dataQuery, (Class<? extends CatalogType>) listType);
         }
-        if (SpongeDataManager.getInstance().getTranslator(listType).isPresent()) {
+        if (Sponge.getGame().getDataManager().getTranslator(listType).isPresent()) {
             return view.getObjectList(dataQuery, listType);
         }
         return (Optional) view.getList(dataQuery);

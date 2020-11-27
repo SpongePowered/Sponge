@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class HorizontalData {
 
@@ -40,8 +40,8 @@ public final class HorizontalData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(HorizontalBlock.HORIZONTAL_FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, HorizontalBlock.HORIZONTAL_FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(HorizontalBlock.HORIZONTAL_FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, HorizontalBlock.HORIZONTAL_FACING))
                         .supports(h -> h.getBlock() instanceof HorizontalBlock);
     }
     // @formatter:on

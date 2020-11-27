@@ -63,6 +63,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.block.BlockType;
@@ -548,8 +549,10 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
 
         this.registerVanillaRegistries();
 
-        // TODO 1.14 - We'll take on a case by case basis if any mods are extending/replacing Enum values and therefore breaks this. Otherwise it will
-        // TODO 1.14 - get to the point of insanity if literally every enum in the game becomes hardcoded lines that we have to map out...
+        // TODO Minecraft 1.15.2 - We'll take on a case by case basis if any mods are extending/replacing Enum values and therefore breaks this.
+        //  Otherwise it will
+
+        // TODO Minecraft 1.15.2 - get to the point of insanity if literally every enum in the game becomes hardcoded lines that we have to map out...
 
         // ORDER MATTERS
         this
@@ -572,7 +575,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(DamageModifierType.class, ResourceKey.sponge("damage_modifier_type"), DamageModifierTypeStreamGenerator.stream(), true, true)
             .generateRegistry(DamageType.class, ResourceKey.sponge("damage_type"), DamageTypeStreamGenerator.stream(), true, true)
             .generateCallbackRegistry(DataRegistration.class, ResourceKey.sponge("data_registration"), Stream.empty(),
-                    (key, value) -> SpongeDataManager.getInstance().registerCustomDataRegistration((SpongeDataRegistration) value), false, true)
+                    (key, value) -> ((SpongeDataManager) Sponge.getGame().getDataManager()).registerCustomDataRegistration((SpongeDataRegistration) value), false, true)
             .generateRegistry(Difficulty.class, ResourceKey.minecraft("difficulty"), Arrays.stream(net.minecraft.world.Difficulty.values()), true, false)
             .generateCallbackRegistry(DimensionType.class, ResourceKey.minecraft("dimension_type"), DimensionTypeStreamGenerator.stream(), (k, v) -> {
                         // Sync the API dimension type onto actual Mojang dimension registrations. Only works as our keys match
@@ -691,7 +694,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
      */
     public void registerDefaultSuppliers() {
 
-        // TODO 1.14 - Stats are stupid, need to handle them manually
+        // TODO Minecraft 1.15.2 - Stats are stupid, need to handle them manually
 
         // Class based/Likely for mods to override
         BiomeSupplier.registerSuppliers(this);

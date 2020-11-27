@@ -30,7 +30,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.accessor.block.BedBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.PortionTypeUtils;
+import org.spongepowered.common.util.PortionTypeUtil;
 
 public final class BedData {
 
@@ -49,8 +49,8 @@ public final class BedData {
                         .set((h, v) -> h.with(BedBlock.OCCUPIED, v))
                         .supports(h -> h.getBlock() instanceof BedBlock)
                     .create(Keys.PORTION_TYPE)
-                        .get(h -> PortionTypeUtils.getFromBedBlock(h, BedBlock.PART))
-                        .set((h, v) -> PortionTypeUtils.setForBedBlock(h, v, BedBlock.PART))
+                        .get(h -> PortionTypeUtil.getFromBedBlock(h, BedBlock.PART))
+                        .set((h, v) -> PortionTypeUtil.setForBedBlock(h, v, BedBlock.PART))
                         .supports(h -> h.getBlock() instanceof BedBlock);
     }
     // @formatter:on

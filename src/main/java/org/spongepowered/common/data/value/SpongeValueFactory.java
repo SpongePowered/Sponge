@@ -28,18 +28,14 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.key.SpongeKey;
 
-public class SpongeValueFactory implements Value.Factory {
-
-    public static final SpongeValueFactory INSTANCE = new SpongeValueFactory();
+public final class SpongeValueFactory implements Value.Factory {
 
     @Override
-    @SuppressWarnings("unchecked")
     public <V extends Value<E>, E> V mutableOf(Key<V> key, E element) {
         return ((SpongeKey<V, E>) key).getValueConstructor().getMutable(element);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <V extends Value<E>, E> V immutableOf(Key<V> key, E element) {
         return ((SpongeKey<V, E>) key).getValueConstructor().getImmutable(element);
     }

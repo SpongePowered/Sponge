@@ -33,8 +33,8 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
-import org.spongepowered.common.data.util.NbtStreams;
+import org.spongepowered.common.util.NBTCollectors;
+import org.spongepowered.common.util.NBTStreams;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
@@ -68,7 +68,7 @@ public final class BlockTypeItemStackData {
         if (list.isEmpty()) {
             return null;
         }
-        return NbtStreams.toStrings(list)
+        return NBTStreams.toStrings(list)
                 .map(ResourceLocation::tryCreate)
                 .filter(Objects::nonNull)
                 .map(key -> (BlockType) Registry.BLOCK.getValue(key).orElse(null))
@@ -92,7 +92,7 @@ public final class BlockTypeItemStackData {
                         return key.getFormatted();
                     }
                 })
-                .collect(NbtCollectors.toStringTagList());
+                .collect(NBTCollectors.toStringTagList());
         tag.put(nbtKey, list);
         return true;
     }

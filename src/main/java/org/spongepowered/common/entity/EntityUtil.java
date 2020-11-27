@@ -218,7 +218,7 @@ public final class EntityUtil {
         playerlist.sendWorldInfo(player, toWorld);
         playerlist.sendInventory(player);
 
-        for (EffectInstance effectinstance : player.getActivePotionEffects()) {
+        for (final EffectInstance effectinstance : player.getActivePotionEffects()) {
             player.connection.sendPacket(new SPlayEntityEffectPacket(player.getEntityId(), effectinstance));
         }
 

@@ -36,7 +36,7 @@ import org.spongepowered.common.accessor.entity.EntityAccessor;
 import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.entity.LivingEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.PotionEffectHelper;
+import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
@@ -148,12 +148,12 @@ public final class LivingData {
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final Collection<EffectInstance> effects = h.getActivePotionEffects();
-                            return effects.isEmpty() ? null : PotionEffectHelper.copyAsPotionEffects(effects);
+                            return effects.isEmpty() ? null : PotionEffectUtil.copyAsPotionEffects(effects);
                         })
                         .set((h, v) -> {
                             h.clearActivePotions();
                             for (final PotionEffect effect : v) {
-                                h.addPotionEffect(PotionEffectHelper.copyAsEffectInstance(effect));
+                                h.addPotionEffect(PotionEffectUtil.copyAsEffectInstance(effect));
                             }
                         })
                         .delete(LivingEntity::clearActivePotions)

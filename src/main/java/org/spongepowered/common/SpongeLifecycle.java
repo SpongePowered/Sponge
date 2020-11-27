@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common;
 
+import co.aikar.timings.TimingsFactory;
 import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -78,6 +80,7 @@ public final class SpongeLifecycle {
 
     public void establishBuilders() {
         ((SpongeBuilderRegistry) this.game.getRegistry().getBuilderRegistry()).registerDefaultBuilders();
+        ((SpongeDataManager) this.game.getDataManager()).registerDefaultBuilders();
     }
 
     public void callRegisterFactoryEvent() {
@@ -113,10 +116,10 @@ public final class SpongeLifecycle {
     }
 
     public void initTimings() {
-        SpongeTimingsFactory.INSTANCE.init();
+        ((SpongeTimingsFactory) Sponge.getRegistry().getFactoryRegistry().provideFactory(TimingsFactory.class)).init();
     }
 
-    public void establishGlobalServices() {
+    public void establishGameServices() {
         ((SpongeServiceProvider) this.game.getServiceProvider()).init();
     }
 
@@ -125,7 +128,6 @@ public final class SpongeLifecycle {
     }
 
     public void establishServerFeatures() {
-        //Sponge.getSystemSubject().getContainingCollection();
         // Yes this looks odd but prevents having to do sided lifecycle solely to always point at the Server
         ((SpongeServer) this.game.getServer()).getUsernameCache().load();
     }
@@ -176,6 +178,10 @@ public final class SpongeLifecycle {
     }
 
     public void establishDataProviders() {
-        SpongeDataManager.getInstance().registerDefaultProviders();
+        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerDefaultProviders();
+    }
+
+    public void establishDataKeyListeners() {
+        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerKeyListeners();
     }
 }

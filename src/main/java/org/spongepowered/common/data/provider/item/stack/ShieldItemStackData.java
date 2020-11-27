@@ -37,7 +37,7 @@ import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
+import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
@@ -91,7 +91,7 @@ public final class ShieldItemStackData {
                             final ListNBT layersTag = v.stream()
                                     .filter(layer -> layer.getShape() != BannerPatternShapes.BASE.get())
                                     .map(ShieldItemStackData::layerToNbt)
-                                    .collect(NbtCollectors.toTagList());
+                                    .collect(NBTCollectors.toTagList());
                             final CompoundNBT blockEntity = h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
                             blockEntity.put(Constants.TileEntity.Banner.BANNER_PATTERNS, layersTag);
                             if (h.getItem() instanceof ShieldItem) {

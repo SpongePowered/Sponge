@@ -36,7 +36,7 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.advancement.criterion.SpongeCriterionHelper;
+import org.spongepowered.common.util.SpongeCriterionUtil;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -89,7 +89,7 @@ public final class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advance
 
     @Override
     protected Advancement build(ResourceKey key) {
-        final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionHelper.toVanillaCriteriaData(this.criterion);
+        final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionUtil.toVanillaCriteriaData(this.criterion);
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
         final ResourceLocation resourceLocation = (ResourceLocation) (Object) key;
 

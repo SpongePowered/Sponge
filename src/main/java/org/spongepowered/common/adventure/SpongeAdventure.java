@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.adventure;
 
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+
+import java.util.ArrayList;
 import java.util.EnumSet;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
@@ -66,6 +67,7 @@ import org.spongepowered.common.bridge.world.BossInfoBridge;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -295,7 +297,7 @@ public final class SpongeAdventure {
     // Horrible-ness
 
     public static List<Component> json(final List<String> strings) {
-        final List<Component> components = Lists.newArrayList();
+        final List<Component> components = new ArrayList<>();
         for (final String string : strings) {
             components.add(json(string));
         }
@@ -475,8 +477,11 @@ public final class SpongeAdventure {
     }
 
     public static class Factory implements SpongeComponents.Factory {
+
         @Override
         public @NonNull ClickEvent callbackClickEvent(final @NonNull Consumer<CommandCause> callback) {
+            Objects.requireNonNull(callback);
+
             final UUID key = SpongeAdventure.CALLBACK_COMMAND.registerCallback(callback);
             return ClickEvent.runCommand("/sponge:callback " + key.toString());
         }

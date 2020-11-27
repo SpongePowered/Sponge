@@ -28,7 +28,6 @@ import net.minecraft.block.Block;
 import net.minecraft.state.IStateHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.KeyValueMatcher;
-import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.state.StateProperty;
@@ -38,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class SpongeFluidStateMatcher extends AbstractStateMatcher<FluidState, FluidType> {
+public final class SpongeFluidStateMatcher extends AbstractSpongeStateMatcher<FluidState, FluidType> {
 
     public SpongeFluidStateMatcher(final FluidType type,
             final Collection<StateProperty<@NonNull ?>> requiredProperties,

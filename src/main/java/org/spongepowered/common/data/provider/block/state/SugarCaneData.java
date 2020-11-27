@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.SugarCaneBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class SugarCaneData {
 
@@ -40,9 +40,9 @@ public final class SugarCaneData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, SugarCaneBlock.AGE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, SugarCaneBlock.AGE))
                         .get(h -> h.get(SugarCaneBlock.AGE))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, SugarCaneBlock.AGE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, SugarCaneBlock.AGE))
                         .supports(h -> h.getBlock() instanceof SugarCaneBlock);
     }
     // @formatter:on

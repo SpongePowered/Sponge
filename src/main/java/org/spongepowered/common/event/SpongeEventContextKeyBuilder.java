@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.common.util.TypeTokenHelper;
+import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
 
@@ -54,7 +54,7 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
     @Override
     public <N> SpongeEventContextKeyBuilder<N> type(final Class<N> aClass) {
         checkArgument(aClass != null, "Class cannot be null!");
-        this.typeClass = TypeTokenHelper.requireCompleteGenerics(aClass);
+        this.typeClass = TypeTokenUtil.requireCompleteGenerics(aClass);
         return (SpongeEventContextKeyBuilder<N>) this;
     }
 

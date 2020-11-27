@@ -60,4 +60,7 @@ public final class ParticleOptionUtil {
 
         return ImmutableMap.copyOf(options);
     }
+
+    private ParticleOptionUtil() {
+    }
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.base.Preconditions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.util.Ticks;
@@ -35,8 +34,6 @@ import java.time.temporal.TemporalUnit;
 import java.util.Objects;
 
 public final class SpongeTicks implements Ticks {
-
-    public static final Factory FACTORY_INSTANCE = new Factory();
 
     private final long ticks;
     private final Duration effectiveMinimumDuration;
@@ -93,22 +90,36 @@ public final class SpongeTicks implements Ticks {
 
     public static final class Factory implements Ticks.Factory {
 
-        private final Ticks zero = new SpongeTicks(0);
-        private final Ticks single = new SpongeTicks(1);
-        private final Ticks minecraftHour = new SpongeTicks(Constants.TickConversions.MINECRAFT_HOUR_TICKS);
-        private final Ticks minecraftDay = new SpongeTicks(Constants.TickConversions.MINECRAFT_DAY_TICKS);
+        private final Ticks zero;
+        private final Ticks single;
+        private final Ticks minecraftHour;
+        private final Ticks minecraftDay;
+
+        public Factory() {
+            this.zero = new SpongeTicks(0);
+            this.single = new SpongeTicks(1);
+            this.minecraftHour = new SpongeTicks(Constants.TickConversions.MINECRAFT_HOUR_TICKS);
+            this.minecraftDay = new SpongeTicks(Constants.TickConversions.MINECRAFT_DAY_TICKS);
+        }
 
         @Override
         @NonNull
         public Ticks of(final long ticks) {
-            Preconditions.checkArgument(ticks >= 0, "tick parameter must be non-negative");
+            if (ticks < 0) {
+                throw new IllegalArgumentException("Tick must be greater than 0!");
+            }
             return new SpongeTicks(ticks);
         }
 
         @Override
         @NonNull
         public Ticks ofWallClockTime(@NonNull final Engine engine, final long time, @NonNull final TemporalUnit temporalUnit) {
-            Preconditions.checkArgument(time >= 0, "time parameter must be non-negative");
+            Objects.requireNonNull(engine);
+            if (time < 0) {
+                throw new IllegalArgumentException("Time must be greater than 0!");
+            }
+            Objects.requireNonNull(temporalUnit);
+
             final long target = temporalUnit.getDuration().multipliedBy(time).toMillis();
             return this.of((long) Math.ceil(target / (double) Constants.TickConversions.TICK_DURATION_MS));
         }
@@ -116,14 +127,20 @@ public final class SpongeTicks implements Ticks {
         @Override
         @NonNull
         public Ticks ofMinecraftSeconds(@NonNull final Engine engine, final long seconds) {
-            Preconditions.checkArgument(seconds >= 0, "time parameter must be non-negative");
+            Objects.requireNonNull(engine);
+            if (seconds < 0) {
+                throw new IllegalArgumentException("Seconds must be greater than 0!");
+            }
             return this.of((long) Math.ceil(seconds * Constants.TickConversions.MINECRAFT_SECOND_TICKS));
         }
 
         @Override
         @NonNull
         public Ticks ofMinecraftHours(@NonNull final Engine engine, final long hours) {
-            Preconditions.checkArgument(hours >= 0, "time parameter must be non-negative");
+            Objects.requireNonNull(engine);
+            if (hours < 0) {
+                throw new IllegalArgumentException("Hours must be greater than 0!");
+            }
             return this.of(hours * Constants.TickConversions.MINECRAFT_HOUR_TICKS);
         }
 

@@ -32,8 +32,8 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
-import org.spongepowered.common.data.provider.util.RotationUtils;
+import org.spongepowered.common.util.DirectionUtil;
+import org.spongepowered.common.util.RotationUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +57,7 @@ public final class SignData {
                             if (h.getBlockState().getBlock() instanceof StandingSignBlock) {
                                 return RotationUtils.getFor(h.getBlockState().get(StandingSignBlock.ROTATION));
                             } else if (h.getBlockState().getBlock() instanceof WallSignBlock) {
-                                return DirectionUtils.getFor(h.getBlockState().get(WallSignBlock.FACING));
+                                return DirectionUtil.getFor(h.getBlockState().get(WallSignBlock.FACING));
                             }
                             return null;
                         })
@@ -66,7 +66,7 @@ public final class SignData {
                                 h.getWorld().setBlockState(h.getPos(), RotationUtils.set(h.getBlockState(), v, StandingSignBlock.ROTATION));
                                 return true;
                             } else if (h.getBlockState().getBlock() instanceof WallSignBlock) {
-                                h.getWorld().setBlockState(h.getPos(), DirectionUtils.set(h.getBlockState(), v, WallSignBlock.FACING));
+                                h.getWorld().setBlockState(h.getPos(), DirectionUtil.set(h.getBlockState(), v, WallSignBlock.FACING));
                                 return true;
                             }
 

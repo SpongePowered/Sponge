@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataProvider;
@@ -46,7 +47,7 @@ import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.copy.CopyHelper;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
-import org.spongepowered.common.util.TypeTokenHelper;
+import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
 import java.util.Optional;
@@ -145,7 +146,7 @@ public class DataProviderRegistrator {
         if (!this.dataStoreBuilder.isEmpty()) {
             this.registrationBuilder.store(this.dataStoreBuilder.buildVanillaDataStore());
         }
-        SpongeDataManager.getInstance().registerDataRegistration((SpongeDataRegistration) this.registrationBuilder.build());
+        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerDataRegistration((SpongeDataRegistration) this.registrationBuilder.build());
     }
 
     public static final class MutableRegistrator<T> extends DataProviderRegistrator {
@@ -546,7 +547,7 @@ public class DataProviderRegistrator {
 
         @Override
         public <NH extends H> ImmutableDataProviderBuilder<NH, V, E> dataHolder(final Class<NH> holder) {
-            this.holder = TypeTokenHelper.requireCompleteGenerics(holder);
+            this.holder = TypeTokenUtil.requireCompleteGenerics(holder);
             return (SpongeImmutableDataProviderBuilder) this;
         }
 
@@ -599,7 +600,7 @@ public class DataProviderRegistrator {
 
         @Override
         public <NH extends H> MutableDataProviderBuilder<NH, V, E> dataHolder(final Class<NH> holder) {
-            this.holder = TypeTokenHelper.requireCompleteGenerics(holder);
+            this.holder = TypeTokenUtil.requireCompleteGenerics(holder);
             return (SpongeMutableDataProviderBuilder) this;
         }
 

@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.TrapDoorBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.PortionTypeUtils;
+import org.spongepowered.common.util.PortionTypeUtil;
 
 public final class TrapDoorData {
 
@@ -40,8 +40,8 @@ public final class TrapDoorData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.PORTION_TYPE)
-                        .get(h -> PortionTypeUtils.getFromHalfBlock(h, TrapDoorBlock.HALF))
-                        .set((h, v) -> PortionTypeUtils.setForHalfBlock(h, v, TrapDoorBlock.HALF))
+                        .get(h -> PortionTypeUtil.getFromHalfBlock(h, TrapDoorBlock.HALF))
+                        .set((h, v) -> PortionTypeUtil.setForHalfBlock(h, v, TrapDoorBlock.HALF))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock)
                     .create(Keys.IS_OPEN)
                         .get(h -> h.get(TrapDoorBlock.OPEN))

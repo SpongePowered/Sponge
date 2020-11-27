@@ -32,6 +32,7 @@ import org.spongepowered.api.util.Tristate;
 public final class TristateUtil {
 
     private static final EnumBiMap<ActionResultType, Tristate> map = EnumBiMap.create(ActionResultType.class, Tristate.class);
+
     static {
         TristateUtil.map.put(ActionResultType.FAIL, Tristate.FALSE);
         TristateUtil.map.put(ActionResultType.PASS, Tristate.UNDEFINED);
@@ -46,5 +47,6 @@ public final class TristateUtil {
         return TristateUtil.map.inverse().get(tristate);
     }
 
-
+    private TristateUtil() {
+    }
 }

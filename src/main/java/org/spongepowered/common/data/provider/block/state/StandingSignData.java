@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.StandingSignBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.RotationUtils;
+import org.spongepowered.common.util.RotationUtils;
 
 public final class StandingSignData {
 

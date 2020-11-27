@@ -30,8 +30,8 @@ import net.minecraft.state.properties.DoorHingeSide;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DoorHinges;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
-import org.spongepowered.common.data.provider.util.PortionTypeUtils;
+import org.spongepowered.common.util.DirectionUtil;
+import org.spongepowered.common.util.PortionTypeUtil;
 
 public final class DoorData {
 
@@ -50,8 +50,8 @@ public final class DoorData {
                         })
                         .supports(h -> h.getBlock() instanceof DoorBlock)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(DoorBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, DoorBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(DoorBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, DoorBlock.FACING))
                         .supports(h -> h.getBlock() instanceof DoorBlock)
                     .create(Keys.IS_OPEN)
                         .get(h -> h.get(DoorBlock.OPEN))
@@ -62,8 +62,8 @@ public final class DoorData {
                         .set((h, v) -> h.with(DoorBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof DoorBlock)
                     .create(Keys.PORTION_TYPE)
-                        .get(h -> PortionTypeUtils.getFromDoubleBlock(h, DoorBlock.HALF))
-                        .set((h, v) -> PortionTypeUtils.setForDoubleBlock(h, v, DoorBlock.HALF))
+                        .get(h -> PortionTypeUtil.getFromDoubleBlock(h, DoorBlock.HALF))
+                        .set((h, v) -> PortionTypeUtil.setForDoubleBlock(h, v, DoorBlock.HALF))
                         .supports(h -> h.getBlock() instanceof DoorBlock);
     }
     // @formatter:on

@@ -59,7 +59,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.SpongeHooks;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -227,6 +227,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         if (playerMP.queuedEndExit) {
             return true;
         }
+
         // If the movement is modified we pretend that the player has queuedEndExit = true
         // so that vanilla wont process that packet further
 

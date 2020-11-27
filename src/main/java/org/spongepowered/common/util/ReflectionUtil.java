@@ -47,8 +47,6 @@ import java.util.List;
  */
 public final class ReflectionUtil {
 
-    private ReflectionUtil() {}
-
     public static <T> T createUnsafeInstance(final Class<T> objectClass, Object... args)
             throws IllegalAccessException, InvocationTargetException, InstantiationException {
         if (args == null) {
@@ -129,4 +127,5 @@ public final class ReflectionUtil {
         return list;
     }
 
+    private ReflectionUtil() {}
 }

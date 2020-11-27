@@ -29,6 +29,8 @@ import net.minecraft.util.DamageSource;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.ServerLocation;
 
+import java.util.Objects;
+
 public final class MinecraftBlockDamageSource extends DamageSource {
 
     private final ServerLocation location;
@@ -36,7 +38,7 @@ public final class MinecraftBlockDamageSource extends DamageSource {
 
     public MinecraftBlockDamageSource(final String damageTypeIn, final ServerLocation location) {
         super(damageTypeIn);
-        this.location = location;
+        this.location = Objects.requireNonNull(location);
         this.blockSnapshot = location.createSnapshot();
     }
 

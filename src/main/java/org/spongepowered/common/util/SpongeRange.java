@@ -30,8 +30,6 @@ import org.spongepowered.api.util.Range;
 
 public final class SpongeRange<T extends Number> implements Range<T> {
 
-    public static final RangeFactory FACTORY_INSTANCE = new RangeFactory();
-
     @Nullable private final T min;
     @Nullable private final T max;
 
@@ -55,7 +53,7 @@ public final class SpongeRange<T extends Number> implements Range<T> {
         return this.max;
     }
 
-    public final static class RangeFactory implements Factory {
+    public final static class Factory implements Range.Factory {
 
         @Override
         @NonNull

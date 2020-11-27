@@ -29,7 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.entity.AreaEffectCloudEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.PotionEffectHelper;
+import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -79,8 +79,8 @@ public final class AreaEffectCloudData {
                         .get(h -> new SpongeTicks(h.accessor$getDurationOnUse()))
                         .set((h, v) -> h.accessor$setDurationOnUse((int) v.getTicks()))
                     .create(Keys.POTION_EFFECTS)
-                        .get(h -> PotionEffectHelper.copyAsPotionEffects(h.accessor$getEffects()))
-                        .set((h, v) -> h.accessor$setEffects(PotionEffectHelper.copyAsEffectInstances(v)))
+                        .get(h -> PotionEffectUtil.copyAsPotionEffects(h.accessor$getEffects()))
+                        .set((h, v) -> h.accessor$setEffects(PotionEffectUtil.copyAsEffectInstances(v)))
                     .create(Keys.REAPPLICATION_DELAY)
                         .get(h -> new SpongeTicks(h.accessor$getReapplicationDelay()))
                         .set((h, v) -> h.accessor$setReapplicationDelay((int) v.getTicks()));

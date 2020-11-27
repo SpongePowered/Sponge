@@ -29,15 +29,13 @@ import org.spongepowered.api.advancement.criteria.OrCriterion;
 
 import java.util.Set;
 
-public class SpongeOrCriterion extends SpongeOperatorCriterion implements OrCriterion {
-
-    public static final OrCriterion.Factory FACTORY_INSTANCE = new SpongeOrCriterionFactory();
+public final class SpongeOrCriterion extends SpongeOperatorCriterion implements OrCriterion {
 
     SpongeOrCriterion(final Set<AdvancementCriterion> criteria) {
         super("or", criteria);
     }
 
-    private static class SpongeOrCriterionFactory implements OrCriterion.Factory {
+    public static class Factory implements OrCriterion.Factory {
 
         @Override
         public AdvancementCriterion of(AdvancementCriterion... criteria) {

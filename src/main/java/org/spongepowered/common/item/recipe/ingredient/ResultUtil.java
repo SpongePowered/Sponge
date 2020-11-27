@@ -35,7 +35,7 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.SpongeHooks;
 
 import java.io.IOException;
 import java.util.HashMap;

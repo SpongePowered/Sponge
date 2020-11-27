@@ -184,7 +184,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
                 progressMap.put(internalCriterion.getName(), (ImplementationBackedCriterionProgress) progress);
             }
             progressMap.put(scoreCriterion.getName(), new SpongeScoreCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, scoreCriterion));
-        } else if (criterion != SpongeEmptyCriterion.INSTANCE) {
+        } else if (!(criterion instanceof SpongeEmptyCriterion)) {
             final CriterionProgressBridge progress = (CriterionProgressBridge) this.criteria.get(criterion.getName());
             progress.bridge$setCriterion(criterion);
             progress.bridge$setAdvancementProgress((org.spongepowered.api.advancement.AdvancementProgress) this);

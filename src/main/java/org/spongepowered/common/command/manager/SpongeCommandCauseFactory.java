@@ -52,10 +52,6 @@ import org.spongepowered.common.util.VecHelper;
 
 public final class SpongeCommandCauseFactory implements CommandCause.Factory {
 
-    public static final SpongeCommandCauseFactory INSTANCE = new SpongeCommandCauseFactory();
-
-    private SpongeCommandCauseFactory() { }
-
     @Override
     @NonNull
     public CommandCause create() {

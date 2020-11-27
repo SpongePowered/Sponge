@@ -38,7 +38,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Engine;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
@@ -59,7 +58,7 @@ import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseCo
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.common.util.EngineUtil;
-import org.spongepowered.common.util.TypeTokenHelper;
+import org.spongepowered.common.util.TypeTokenUtil;
 import org.spongepowered.configurate.util.Types;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -74,7 +73,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -156,7 +154,7 @@ public final class SpongeEventManager implements EventManager {
                     final Type genericType = Objects.requireNonNull(eventType.getGenericType());
                     for (final RegisteredListener<?> listener : listeners) {
                         final Type genericType1 = Objects.requireNonNull(listener.getEventType().getGenericType());
-                        if (TypeTokenHelper.isAssignable(genericType, genericType1)) {
+                        if (TypeTokenUtil.isAssignable(genericType, genericType1)) {
                             handlers.add(listener);
                         }
                     }
@@ -300,7 +298,7 @@ public final class SpongeEventManager implements EventManager {
         Type genericType = null;
         final Class<?> erased = GenericTypeReflector.erase(eventType);
         if (GenericEvent.class.isAssignableFrom(erased)) {
-            genericType = TypeTokenHelper.typeArgumentFromSupertype(eventType, GenericEvent.class, 0);
+            genericType = TypeTokenUtil.typeArgumentFromSupertype(eventType, GenericEvent.class, 0);
         }
         return new RegisteredListener(plugin, new EventType(erased, genericType), order, handler, beforeModifications);
     }

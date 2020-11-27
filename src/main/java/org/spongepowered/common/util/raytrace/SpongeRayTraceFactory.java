@@ -35,14 +35,18 @@ import java.util.function.Predicate;
 
 public final class SpongeRayTraceFactory implements RayTrace.Factory {
 
-    private final Predicate<LocatableBlock> onlyAir = locatableBlock -> {
-        final BlockType type = locatableBlock.getBlockState().getType();
-        return type == BlockTypes.AIR.get() ||
-               type == BlockTypes.CAVE_AIR.get() ||
-               type == BlockTypes.VOID_AIR.get();
-    };
+    private final Predicate<LocatableBlock> onlyAir, notAir;
 
-    private final Predicate<LocatableBlock> notAir = this.onlyAir.negate();
+    public SpongeRayTraceFactory() {
+        this.onlyAir = locatableBlock -> {
+            final BlockType type = locatableBlock.getBlockState().getType();
+            return type == BlockTypes.AIR.get() ||
+                    type == BlockTypes.CAVE_AIR.get() ||
+                    type == BlockTypes.VOID_AIR.get();
+        };
+
+        this.notAir = this.onlyAir.negate();
+    }
 
     @Override
     @NonNull

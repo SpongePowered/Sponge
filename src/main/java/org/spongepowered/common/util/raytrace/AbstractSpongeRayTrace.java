@@ -77,13 +77,6 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     @Override
     @NonNull
-    public final RayTrace<@NonNull T> sourcePosition(@NonNull final Vector3d sourcePosition) {
-        this.start = sourcePosition;
-        return this;
-    }
-
-    @Override
-    @NonNull
     public RayTrace<@NonNull T> sourceEyePosition(@NonNull final Living entity) {
         this.sourcePosition(entity.get(Keys.EYE_POSITION)
                 .orElseThrow(() -> new IllegalArgumentException("Entity does not have an eye position key")));
@@ -92,34 +85,8 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     @Override
     @NonNull
-    public RayTrace<@NonNull T> continueWhileBlock(@NonNull final Predicate<LocatableBlock> continueWhileBlock) {
-        if (this.continueWhileBlock == null) {
-            this.continueWhileBlock = continueWhileBlock;
-        } else {
-            this.continueWhileBlock = this.continueWhileBlock.and(continueWhileBlock);
-        }
-        return this;
-    }
-
-    @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileEntity(@NonNull final Predicate<Entity> continueWhileEntity) {
-        if (this.continueWhileEntity == null) {
-            this.continueWhileEntity = continueWhileEntity;
-        } else {
-            this.continueWhileEntity = this.continueWhileEntity.and(continueWhileEntity);
-        }
-        return this;
-    }
-
-    @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileLocation(@NonNull final Predicate<ServerLocation> continueWhileLocation) {
-        if (this.continueWhileLocation == null) {
-            this.continueWhileLocation = continueWhileLocation;
-        } else {
-            this.continueWhileLocation = this.continueWhileLocation.and(continueWhileLocation);
-        }
+    public final RayTrace<@NonNull T> sourcePosition(@NonNull final Vector3d sourcePosition) {
+        this.start = sourcePosition;
         return this;
     }
 
@@ -149,41 +116,45 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     @Override
     @NonNull
+    public RayTrace<@NonNull T> continueWhileLocation(@NonNull final Predicate<ServerLocation> continueWhileLocation) {
+        if (this.continueWhileLocation == null) {
+            this.continueWhileLocation = continueWhileLocation;
+        } else {
+            this.continueWhileLocation = this.continueWhileLocation.and(continueWhileLocation);
+        }
+        return this;
+    }
+
+    @Override
+    @NonNull
+    public RayTrace<@NonNull T> continueWhileBlock(@NonNull final Predicate<LocatableBlock> continueWhileBlock) {
+        if (this.continueWhileBlock == null) {
+            this.continueWhileBlock = continueWhileBlock;
+        } else {
+            this.continueWhileBlock = this.continueWhileBlock.and(continueWhileBlock);
+        }
+        return this;
+    }
+
+    @Override
+    @NonNull
+    public RayTrace<@NonNull T> continueWhileEntity(@NonNull final Predicate<Entity> continueWhileEntity) {
+        if (this.continueWhileEntity == null) {
+            this.continueWhileEntity = continueWhileEntity;
+        } else {
+            this.continueWhileEntity = this.continueWhileEntity.and(continueWhileEntity);
+        }
+        return this;
+    }
+
+    @Override
+    @NonNull
     public final RayTrace<@NonNull T> select(@NonNull final Predicate<T> filter) {
         if (this.select == null) {
             this.select = filter;
         } else {
             this.select = this.select.or(filter);
         }
-        return this;
-    }
-
-    final Vector3i getNextBlock(final Vector3i current, final TData data, final Vector3i steps) {
-        return current.add(
-                data.nextStepWillAdvanceX() ? steps.getX() : 0,
-                data.nextStepWillAdvanceY() ? steps.getY() : 0,
-                data.nextStepWillAdvanceZ() ? steps.getX() : 0
-        );
-    }
-
-    final Vector3i createSteps(final Vector3d direction) {
-        return new Vector3i(
-                Math.signum(direction.getX()),
-                Math.signum(direction.getY()),
-                Math.signum(direction.getZ())
-        );
-    }
-
-    @Override
-    @NonNull
-    public RayTrace<@NonNull T> reset() {
-        this.select = this.defaultFilter;
-        this.world = null;
-        this.start = null;
-        this.end = null;
-        this.continueWhileBlock = null;
-        this.continueWhileEntity = null;
-        this.continueWhileLocation = null;
         return this;
     }
 
@@ -285,6 +256,35 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
         return Optional.empty();
     }
 
+    @Override
+    @NonNull
+    public RayTrace<@NonNull T> reset() {
+        this.select = this.defaultFilter;
+        this.world = null;
+        this.start = null;
+        this.end = null;
+        this.continueWhileBlock = null;
+        this.continueWhileEntity = null;
+        this.continueWhileLocation = null;
+        return this;
+    }
+
+    final Vector3i getNextBlock(final Vector3i current, final TData data, final Vector3i steps) {
+        return current.add(
+                data.nextStepWillAdvanceX() ? steps.getX() : 0,
+                data.nextStepWillAdvanceY() ? steps.getY() : 0,
+                data.nextStepWillAdvanceZ() ? steps.getX() : 0
+        );
+    }
+
+    final Vector3i createSteps(final Vector3d direction) {
+        return new Vector3i(
+                Math.signum(direction.getX()),
+                Math.signum(direction.getY()),
+                Math.signum(direction.getZ())
+        );
+    }
+
     final AxisAlignedBB getBlockAABB(final Vector3i currentBlock) {
         return new AxisAlignedBB(currentBlock.getX(),
                 currentBlock.getY(), currentBlock.getZ(), currentBlock.getX() + 1, currentBlock.getY() + 1, currentBlock.getZ() + 1);
@@ -358,10 +358,10 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     final TData createInitialTData(final Vector3d direction) {
         return new TData(
-            0,
-            this.getT(this.start.getX(), direction.getX(), this.end.getX()),
-            this.getT(this.start.getY(), direction.getY(), this.end.getY()),
-            this.getT(this.start.getZ(), direction.getZ(), this.end.getZ())
+                0,
+                this.getT(this.start.getX(), direction.getX(), this.end.getX()),
+                this.getT(this.start.getY(), direction.getY(), this.end.getY()),
+                this.getT(this.start.getZ(), direction.getZ(), this.end.getZ())
         );
     }
 

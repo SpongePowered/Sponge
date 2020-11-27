@@ -34,8 +34,6 @@ import java.util.Objects;
 
 public final class SpongeMinecraftDayTime implements MinecraftDayTime {
 
-    public static final MinecraftDayTime.Factory FACTORY_INSTANCE = new Factory();
-
     static long getTicksFor(final long days, final long hours, final long minutes) {
         return (long) (days * Constants.TickConversions.MINECRAFT_DAY_TICKS +
                         hours * Constants.TickConversions.MINECRAFT_HOUR_TICKS +
@@ -46,7 +44,9 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
     private final long internalTimeWithOffset;
 
     public SpongeMinecraftDayTime(final long internalTime) {
-        Preconditions.checkArgument(internalTime >= 0, "internalTime cannot be negative");
+        if (internalTime < 0) {
+            throw new IllegalArgumentException("Internal time cannot be negative!");
+        }
         this.internalTime = internalTime;
         this.internalTimeWithOffset = internalTime + Constants.TickConversions.MINECRAFT_EPOCH_OFFSET;
     }
@@ -68,14 +68,22 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
 
     @Override
     public MinecraftDayTime add(final Ticks ticks) {
+        Objects.requireNonNull(ticks);
+
         return new SpongeMinecraftDayTime(this.internalTime + ticks.getTicks());
     }
 
     @Override
     public MinecraftDayTime add(final int days, final int hours, final int minutes) {
-        Preconditions.checkArgument(days >= 0, "days is negative");
-        Preconditions.checkArgument(hours >= 0 && hours <= 23, "hours is not between 0 and 23");
-        Preconditions.checkArgument(minutes >= 0 && minutes <= 59, "minutes is not between 0 and 59");
+        if (days < 0) {
+            throw new IllegalArgumentException("Days cannot be negative!");
+        }
+        if (hours < 0 || hours > 23) {
+            throw new IllegalArgumentException("Hours is not between 0 and 23!");
+        }
+        if (minutes < 0 || minutes > 59) {
+            throw new IllegalArgumentException("Minutes is not between 0 and 59!");
+        }
         return new SpongeMinecraftDayTime(this.internalTime + SpongeMinecraftDayTime.getTicksFor(days, hours, minutes));
     }
 
@@ -129,7 +137,11 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
 
     public static final class Factory implements MinecraftDayTime.Factory {
 
-        private final MinecraftDayTime epoch = new SpongeMinecraftDayTime(0);
+        private final MinecraftDayTime epoch;
+
+        public Factory() {
+            this.epoch = new SpongeMinecraftDayTime(0);
+        }
 
         @Override
         public MinecraftDayTime epoch() {
@@ -138,23 +150,35 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
 
         @Override
         public MinecraftDayTime of(final Engine engine, final Duration duration) {
-            Preconditions.checkArgument(!duration.isNegative(), "duration is negative");
+            Objects.requireNonNull(engine);
+            Objects.requireNonNull(duration);
+
+            if (!duration.isNegative()) {
+                throw new IllegalArgumentException("Duration is negative!");
+            }
             return new SpongeMinecraftDayTime((long) (duration.toMinutes() * Constants.TickConversions.MINECRAFT_MINUTE_TICKS));
         }
 
         @Override
         public MinecraftDayTime of(final int days, final int hours, final int minutes) {
-            Preconditions.checkArgument(days >= 1, "days is not positive");
-            Preconditions.checkArgument(hours >= 0 && hours <= 23 && (days > 1 || hours >= 6),
-                    "hours is not between 0 and 23 (or 6 and 23 for day 1)");
-            Preconditions.checkArgument(minutes >= 0 && minutes <= 59, "minutes is not between 0 and 59");
+            if (days < 1) {
+                throw new IllegalArgumentException("Days must be greater than 0!");
+            }
+            if (hours < 0 || hours > 23 || (days == 1 && hours < 6)) {
+                throw new IllegalArgumentException("Hours is not between 0 and 23 (or 6 and 23 for day 1)!");
+            }
+            if (minutes < 0 || minutes > 59) {
+                throw new IllegalArgumentException("Minutes is not between 0 and 59!");
+            }
             return new SpongeMinecraftDayTime(SpongeMinecraftDayTime.getTicksFor(days, hours, minutes) - Constants.TickConversions.MINECRAFT_EPOCH_OFFSET);
         }
 
         @Override
         public MinecraftDayTime of(final Engine engine, final Ticks ticks) {
+            Objects.requireNonNull(engine);
+            Objects.requireNonNull(ticks);
+
             return new SpongeMinecraftDayTime(ticks.getTicks());
         }
     }
-
 }

@@ -31,6 +31,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.BannerTileEntity;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
@@ -44,7 +45,6 @@ import org.spongepowered.common.accessor.tileentity.BannerTileEntityAccessor;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
 import org.spongepowered.common.data.provider.item.stack.ShieldItemStackData;
-import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +86,7 @@ public abstract class BannerTileEntityMixin extends TileEntityMixin implements B
 
     @Override
     public void bridge$setLayers(final List<BannerPatternLayer> layers) {
-        this.impl$patternLayers = new NonNullArrayList<>();
+        this.impl$patternLayers = NonNullList.create();
         this.impl$patternLayers.addAll(layers);
         this.patterns = new ListNBT();
         for (final BannerPatternLayer layer : this.impl$patternLayers) {

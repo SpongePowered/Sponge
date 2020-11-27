@@ -29,15 +29,10 @@ import net.minecraft.command.arguments.EntitySelectorParser;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.selector.Selector;
 
-public class SpongeSelectorFactory implements Selector.Factory {
-
-    public static final SpongeSelectorFactory INSTANCE = new SpongeSelectorFactory();
+public final class SpongeSelectorFactory implements Selector.Factory {
 
     public static Selector.Builder createBuilder() {
         return (Selector.Builder) new EntitySelectorParser(new StringReader(""));
-    }
-
-    private SpongeSelectorFactory() {
     }
 
     @Override
@@ -49,5 +44,4 @@ public class SpongeSelectorFactory implements Selector.Factory {
             throw new IllegalArgumentException(ex.getMessage(), ex);
         }
     }
-
 }

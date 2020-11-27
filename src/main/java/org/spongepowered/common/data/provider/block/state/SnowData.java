@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.SnowBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class SnowData {
 
@@ -40,9 +40,9 @@ public final class SnowData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.LAYER)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.LAYER, SnowBlock.LAYERS))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.LAYER, SnowBlock.LAYERS))
                         .get(h -> h.get(SnowBlock.LAYERS))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, SnowBlock.LAYERS))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, SnowBlock.LAYERS))
                         .supports(h -> h.getBlock() instanceof SnowBlock);
     }
     // @formatter:on

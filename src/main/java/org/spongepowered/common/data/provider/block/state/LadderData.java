@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.LadderBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class LadderData {
 
@@ -40,8 +40,8 @@ public final class LadderData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(LadderBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, LadderBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(LadderBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, LadderBlock.FACING))
                         .supports(h -> h.getBlock() instanceof LadderBlock)
                     .create(Keys.IS_WATERLOGGED)
                         .get(h -> h.get(LadderBlock.WATERLOGGED))

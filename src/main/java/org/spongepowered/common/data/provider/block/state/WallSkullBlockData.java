@@ -33,7 +33,7 @@ import net.minecraft.util.registry.Registry;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.block.AbstractSkullBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.StateHelper;
+import org.spongepowered.common.util.StateUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
@@ -82,7 +82,7 @@ public final class WallSkullBlockData {
                                 return h;
                             }
                             final Block newType = v ? pair.wallBlock : pair.groundBlock;
-                            return StateHelper.copyStatesFrom(newType.getDefaultState(), h);
+                            return StateUtil.copyStatesFrom(newType.getDefaultState(), h);
                         })
                         .supports(h -> h.getBlock() instanceof WallSkullBlock);
     }

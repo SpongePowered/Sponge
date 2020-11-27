@@ -26,6 +26,7 @@ package org.spongepowered.common.data.key;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
@@ -89,7 +90,7 @@ public final class SpongeKey<V extends Value<E>, E> extends SpongeCatalogType im
     @Override
     public <H extends DataHolder> void registerEvent(final PluginContainer plugin, final Class<H> holderFilter,
             final EventListener<ChangeDataHolderEvent.ValueChange> listener) {
-        SpongeDataManager.getInstance().registerKeyListener(new KeyBasedDataListener<>(plugin, holderFilter, this, listener));
+        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerKeyListener(new KeyBasedDataListener<>(plugin, holderFilter, this, listener));
     }
 
     @Override

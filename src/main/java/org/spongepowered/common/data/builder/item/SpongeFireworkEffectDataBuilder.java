@@ -33,7 +33,6 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;

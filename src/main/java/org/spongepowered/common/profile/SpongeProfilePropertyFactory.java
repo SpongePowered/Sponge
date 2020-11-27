@@ -28,10 +28,15 @@ import com.mojang.authlib.properties.Property;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.profile.property.ProfileProperty;
 
+import java.util.Objects;
+
 public final class SpongeProfilePropertyFactory implements ProfileProperty.Factory {
 
     @Override
     public ProfileProperty of(final String name, final String value, final @Nullable String signature) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(value);
+
         return (ProfileProperty) new Property(name, value, signature);
     }
 }

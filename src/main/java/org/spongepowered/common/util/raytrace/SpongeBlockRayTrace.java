@@ -26,14 +26,11 @@ package org.spongepowered.common.util.raytrace;
 
 import net.minecraft.util.math.Vec3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.math.vector.Vector3d;
-import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -49,8 +46,7 @@ public final class SpongeBlockRayTrace extends AbstractSpongeRayTrace<@NonNull L
         super(SpongeBlockRayTrace.DEFAULT_FILTER);
     }
 
-    @Override
-    final Optional<RayTraceResult<@NonNull LocatableBlock>> testSelectLocation(final ServerWorld serverWorld,
+    @Override final Optional<RayTraceResult<@NonNull LocatableBlock>> testSelectLocation(final ServerWorld serverWorld,
             final Vec3d location,
             final Vec3d exitLocation) {
 
@@ -60,5 +56,4 @@ public final class SpongeBlockRayTrace extends AbstractSpongeRayTrace<@NonNull L
         }
         return Optional.empty();
     }
-
 }

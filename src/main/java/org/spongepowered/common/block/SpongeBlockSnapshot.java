@@ -56,7 +56,6 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-import org.spongepowered.common.world.SpongeServerLocationFactory;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
@@ -119,7 +118,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public Optional<ServerLocation> getLocation() {
         return this.getServerWorld()
-                .map(world -> SpongeServerLocationFactory.INSTANCE.create((org.spongepowered.api.world.server.ServerWorld) world, this.pos));
+                .map(world -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, this.pos));
     }
 
     @Override

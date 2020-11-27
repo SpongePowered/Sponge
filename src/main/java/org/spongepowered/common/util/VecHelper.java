@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.util;
 
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -206,5 +207,20 @@ public final class VecHelper {
             new Vector3d(box.minX, box.minY, box.minZ),
             new Vector3d(box.maxX, box.maxY, box.maxZ)
         );
+    }
+
+    public static CompoundNBT toCompound(Vector3d vector) {
+        CompoundNBT compound = new CompoundNBT();
+        compound.putDouble("x", vector.getX());
+        compound.putDouble("y", vector.getY());
+        compound.putDouble("z", vector.getZ());
+        return compound;
+    }
+
+    public static Vector3d fromCompound(CompoundNBT compound) {
+        return new Vector3d(compound.getDouble("x"), compound.getDouble("y"), compound.getDouble("z"));
+    }
+
+    private VecHelper() {
     }
 }

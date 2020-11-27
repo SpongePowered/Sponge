@@ -28,6 +28,7 @@ import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -454,5 +455,50 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld> impl
     @Override
     public BlockPos bridge$getBlockPos() {
         return this.posSupplier.get();
+    }
+
+    public static final class Factory implements ServerLocation.Factory {
+
+        @Override
+        public ServerLocation create(final ServerWorld world, final Vector3d position) {
+            Objects.requireNonNull(world);
+            Objects.requireNonNull(position);
+
+            return new SpongeServerLocation(world, world.getEngine().getChunkLayout(), position);
+        }
+
+        @Override
+        public ServerLocation create(final ServerWorld world, final Vector3i blockPosition) {
+            Objects.requireNonNull(world);
+            Objects.requireNonNull(blockPosition);
+
+            final ChunkLayout chunkLayout = world.getEngine().getChunkLayout();
+            final Vector3d position = blockPosition.toDouble();
+            return new SpongeServerLocation(world, chunkLayout, position);
+        }
+
+        @Override
+        public ServerLocation create(final ResourceKey worldKey, final Vector3d position) {
+            Objects.requireNonNull(worldKey);
+            Objects.requireNonNull(position);
+
+            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(worldKey);
+            if (!world.isPresent()) {
+                throw new IllegalStateException("Unknown world for key: " + worldKey.toString());
+            }
+            return new SpongeServerLocation(world.get(), world.get().getEngine().getChunkLayout(), position);
+        }
+
+        @Override
+        public ServerLocation create(final ResourceKey worldKey, final Vector3i blockPosition) {
+            Objects.requireNonNull(worldKey);
+            Objects.requireNonNull(blockPosition);
+
+            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(worldKey);
+            if (!world.isPresent()) {
+                throw new IllegalStateException("Unknown world for key: " + worldKey.toString());
+            }
+            return new SpongeServerLocation(world.get(), world.get().getEngine().getChunkLayout(), blockPosition.toDouble());
+        }
     }
 }

@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.copy.CopyHelper;
-import org.spongepowered.common.data.util.MergeHelper;
+import org.spongepowered.common.util.DataUtil;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,7 +85,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
                         // Prefer the original
                         continue;
                     }
-                    final Object merged = MergeHelper.merge(overlap, (Key) entry.getKey(), original, entry.getValue());
+                    final Object merged = DataUtil.merge(overlap, (Key) entry.getKey(), original, entry.getValue());
                     this.values.put(entry.getKey(), CopyHelper.copy(merged));
                 }
             }
@@ -102,7 +102,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
                         // Prefer the original
                         continue;
                     }
-                    final Object merged = MergeHelper.merge(overlap, (Key) key, original,
+                    final Object merged = DataUtil.merge(overlap, (Key) key, original,
                         valueContainer.require((Key) key));
                     this.values.put(key, CopyHelper.copy(merged));
                 }
@@ -159,7 +159,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
                     // Prefer the original
                     continue;
                 }
-                final Object merged = MergeHelper.merge(overlap, (Key) key, original, replacement);
+                final Object merged = DataUtil.merge(overlap, (Key) key, original, replacement);
                 values.put(key, CopyHelper.copy(merged));
             }
         }

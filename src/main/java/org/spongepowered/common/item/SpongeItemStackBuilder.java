@@ -65,7 +65,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-public class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
+public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
     @Nullable private Set<Mutable<?, ?>> itemDataSet;
     private ItemType type;
     private int quantity;

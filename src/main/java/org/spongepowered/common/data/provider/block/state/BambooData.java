@@ -28,7 +28,7 @@ import net.minecraft.block.BambooBlock;
 import net.minecraft.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class BambooData {
 
@@ -40,9 +40,9 @@ public final class BambooData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, BambooBlock.PROPERTY_AGE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, BambooBlock.PROPERTY_AGE))
                         .get(h -> h.get(BambooBlock.PROPERTY_STAGE))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, BambooBlock.PROPERTY_STAGE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, BambooBlock.PROPERTY_STAGE))
                         .supports(h -> h.getBlock() instanceof BambooBlock);
     }
     // @formatter:on

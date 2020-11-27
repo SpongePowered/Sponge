@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.relocate.co.aikar.timings;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
@@ -40,8 +38,6 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
 public final class SpongeTimingsFactory implements TimingsFactory {
-
-    public static final SpongeTimingsFactory INSTANCE = new SpongeTimingsFactory();
 
     private final int MAX_HISTORY_FRAMES = 12;
     public final Timing NULL_HANDLER = new NullTimingHandler();

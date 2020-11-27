@@ -25,7 +25,7 @@
 package org.spongepowered.common.fluid;
 
 import static net.minecraft.command.arguments.BlockStateParser.STATE_INVALID_PROPERTY_VALUE;
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
+import static org.spongepowered.common.util.DataUtil.checkDataExists;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;

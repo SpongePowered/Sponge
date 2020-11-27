@@ -35,7 +35,7 @@ import net.minecraft.nbt.StringNBT;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
+import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -105,7 +105,7 @@ public final class BookItemStackData {
     private static <V> boolean set(final ItemStack holder, final List<V> value, final Function<V, String> predicate) {
         final ListNBT list = value.stream()
                 .map(predicate)
-                .collect(NbtCollectors.toStringTagList());
+                .collect(NBTCollectors.toStringTagList());
 
         holder.setTagInfo(Constants.Item.Book.ITEM_BOOK_PAGES, list);
         final CompoundNBT compound = holder.getOrCreateTag();

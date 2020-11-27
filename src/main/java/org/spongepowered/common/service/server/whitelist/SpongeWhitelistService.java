@@ -31,7 +31,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
 import org.spongepowered.common.accessor.server.management.UserListAccessor;
 import org.spongepowered.common.profile.SpongeGameProfile;
-import org.spongepowered.common.util.UserListUtils;
+import org.spongepowered.common.util.UserListUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,14 +67,14 @@ public final class SpongeWhitelistService implements WhitelistService {
     @Override
     public boolean addProfile(final GameProfile profile) {
         final boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtils.addEntry(getWhitelist(), new WhitelistEntry((com.mojang.authlib.GameProfile) profile));
+        UserListUtil.addEntry(getWhitelist(), new WhitelistEntry((com.mojang.authlib.GameProfile) profile));
         return wasWhitelisted;
     }
 
     @Override
     public boolean removeProfile(final GameProfile profile) {
         final boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtils.removeEntry(getWhitelist(), profile);
+        UserListUtil.removeEntry(getWhitelist(), profile);
         return wasWhitelisted;
     }
 

@@ -31,7 +31,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collections;
@@ -58,8 +58,8 @@ public final class ChestData {
                         })
                         .supports(h -> h.getBlock() instanceof ChestBlock)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(ChestBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, ChestBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(ChestBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, ChestBlock.FACING))
                         .supports(h -> h.getBlock() instanceof ChestBlock)
                     .create(Keys.IS_CONNECTED_EAST)
                         .get(h -> {

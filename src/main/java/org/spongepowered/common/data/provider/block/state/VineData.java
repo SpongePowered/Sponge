@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.VineBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class VineData {
 
@@ -40,9 +40,9 @@ public final class VineData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtils.getHorizontalUpFrom(h, VineBlock.EAST, VineBlock.WEST, VineBlock.NORTH, VineBlock.SOUTH,
+                        .get(h -> DirectionalUtil.getHorizontalUpFrom(h, VineBlock.EAST, VineBlock.WEST, VineBlock.NORTH, VineBlock.SOUTH,
                                 VineBlock.UP))
-                        .set((h, v) -> DirectionalUtils.setHorizontalUpFor(h, v, VineBlock.EAST, VineBlock.WEST, VineBlock.NORTH, VineBlock.SOUTH,
+                        .set((h, v) -> DirectionalUtil.setHorizontalUpFor(h, v, VineBlock.EAST, VineBlock.WEST, VineBlock.NORTH, VineBlock.SOUTH,
                                 VineBlock.UP))
                         .supports(h -> h.getBlock() instanceof VineBlock)
                     .create(Keys.IS_CONNECTED_EAST)

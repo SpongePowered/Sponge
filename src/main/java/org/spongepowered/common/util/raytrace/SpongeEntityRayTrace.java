@@ -25,17 +25,14 @@
 package org.spongepowered.common.util.raytrace;
 
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +44,11 @@ public final class SpongeEntityRayTrace extends AbstractSpongeRayTrace<@NonNull 
 
     public SpongeEntityRayTrace() {
         super(SpongeEntityRayTrace.DEFAULT_FILTER);
+    }
+
+    @Override
+    boolean requiresEntityTracking() {
+        return true;
     }
 
     @Override
@@ -73,13 +75,7 @@ public final class SpongeEntityRayTrace extends AbstractSpongeRayTrace<@NonNull 
         return Optional.ofNullable(returnedEntity);
     }
 
-    @Override
-    boolean requiresEntityTracking() {
-        return true;
-    }
-
-    @Override
-    final boolean shouldCheckFailures() {
+    @Override final boolean shouldCheckFailures() {
         return true;
     }
 

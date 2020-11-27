@@ -33,7 +33,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,9 +90,9 @@ public final class RedstoneWireData {
                         .set((h, v) -> setConnected(h, v, RedstoneWireBlock.WEST))
                         .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
                     .create(Keys.POWER)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.POWER, RedstoneWireBlock.POWER))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.POWER, RedstoneWireBlock.POWER))
                         .get(h -> h.get(RedstoneWireBlock.POWER))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, RedstoneWireBlock.POWER))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, RedstoneWireBlock.POWER))
                         .supports(h -> h.getBlock() instanceof RedstoneWireBlock)
                     .create(Keys.WIRE_ATTACHMENT_EAST)
                         .get(h -> (WireAttachmentType) (Object) h.get(RedstoneWireBlock.EAST))

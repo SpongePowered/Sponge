@@ -59,11 +59,11 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
-import org.spongepowered.common.adventure.AudienceFactory;
+import org.spongepowered.common.adventure.AudiencesFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
-import org.spongepowered.common.command.parameter.SpongeParameterValueFactory;
-import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParameterBuilderFactory;
+import org.spongepowered.common.command.parameter.SpongeParameterFactory;
+import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParametersFactory;
 import org.spongepowered.common.command.registrar.tree.builder.SpongeCommandTreeBuilderFactory;
 import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory;
@@ -71,8 +71,8 @@ import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
-import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlers;
-import org.spongepowered.common.profile.SpongeGameProfileFactory;
+import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFactory;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
 import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
@@ -81,11 +81,12 @@ import org.spongepowered.common.state.SpongeStateMatcherFactory;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
-import org.spongepowered.common.util.SpongeTransformFactory;
+import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
-import org.spongepowered.common.world.SpongeServerLocationFactory;
+import org.spongepowered.common.world.SpongeServerLocation;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Singleton
 @SuppressWarnings("unchecked")
@@ -98,9 +99,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
     }
 
     @Override
-    public <T> T provideFactory(Class<T> clazz) throws UnknownTypeException {
-        checkNotNull(clazz);
-
+    public <T> T provideFactory(final Class<T> clazz) throws UnknownTypeException {
         final Object duck = this.factories.get(clazz);
         if (duck == null) {
             throw new UnknownTypeException(String.format("Type '%s' has no factory registered!", clazz));
@@ -110,8 +109,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
     }
 
     public <T> SpongeFactoryRegistry registerFactory(Class<T> factoryClass, T factory) {
-        checkNotNull(factoryClass);
-        checkNotNull(factory);
+        Objects.requireNonNull(factory);
 
         if (this.factories.containsKey(factoryClass)) {
             throw new DuplicateRegistrationException(String.format("Type '%s' has already been registered as a factory!", factoryClass));
@@ -123,30 +121,30 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
 
     public void registerDefaultFactories() {
         this
-            .registerFactory(Audiences.Factory.class, new AudienceFactory())
-            .registerFactory(AdvancementCriterion.Factory.class, SpongeAdvancementCriterionFactory.INSTANCE)
-            .registerFactory(CommandCause.Factory.class, SpongeCommandCauseFactory.INSTANCE)
-            .registerFactory(CommandTreeNode.NodeFactory.class, SpongeCommandTreeBuilderFactory.INSTANCE)
+            .registerFactory(Audiences.Factory.class, new AudiencesFactory())
+            .registerFactory(AdvancementCriterion.Factory.class, new SpongeAdvancementCriterionFactory())
+            .registerFactory(CommandCause.Factory.class, new SpongeCommandCauseFactory())
+            .registerFactory(CommandTreeNode.NodeFactory.class, new SpongeCommandTreeBuilderFactory())
             .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
-            .registerFactory(Parameter.Value.Factory.class, SpongeParameterValueFactory.INSTANCE)
-            .registerFactory(ResourcePack.Factory.class, SpongeResourcePackFactory.INSTANCE)
-            .registerFactory(ServerLocation.Factory.class, SpongeServerLocationFactory.INSTANCE)
+            .registerFactory(Parameter.Value.Factory.class, new SpongeParameterFactory())
+            .registerFactory(ResourcePack.Factory.class, new SpongeResourcePackFactory())
+            .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
             .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
-            .registerFactory(TimingsFactory.class, SpongeTimingsFactory.INSTANCE)
-            .registerFactory(Transform.Factory.class, SpongeTransformFactory.INSTANCE)
-            .registerFactory(VariableValueParameters.Factory.class, SpongeVariableValueParameterBuilderFactory.INSTANCE)
-            .registerFactory(ChannelExceptionHandler.Factory.class, SpongeChannelExceptionHandlers.INSTANCE)
-            .registerFactory(Selector.Factory.class, SpongeSelectorFactory.INSTANCE)
-            .registerFactory(Range.Factory.class, SpongeRange.FACTORY_INSTANCE)
-            .registerFactory(Value.Factory.class, SpongeValueFactory.INSTANCE)
-            .registerFactory(DataManipulator.Mutable.Factory.class, MutableDataManipulatorFactory.INSTANCE)
-            .registerFactory(DataManipulator.Immutable.Factory.class, ImmutableDataManipulatorFactory.INSTANCE)
-            .registerFactory(BlockChangeFlag.Factory.class, BlockChangeFlagManager.getInstance().getFactory())
-            .registerFactory(OrCriterion.Factory.class, SpongeOrCriterion.FACTORY_INSTANCE)
-            .registerFactory(AndCriterion.Factory.class, SpongeAndCriterion.FACTORY_INSTANCE)
-            .registerFactory(Ticks.Factory.class, SpongeTicks.FACTORY_INSTANCE)
-            .registerFactory(MinecraftDayTime.Factory.class, SpongeMinecraftDayTime.FACTORY_INSTANCE)
-            .registerFactory(GameProfile.Factory.class, new SpongeGameProfileFactory())
+            .registerFactory(TimingsFactory.class, new SpongeTimingsFactory())
+            .registerFactory(Transform.Factory.class, new SpongeTransform.Factory())
+            .registerFactory(VariableValueParameters.Factory.class, new SpongeVariableValueParametersFactory())
+            .registerFactory(ChannelExceptionHandler.Factory.class, new SpongeChannelExceptionHandlerFactory())
+            .registerFactory(Selector.Factory.class, new SpongeSelectorFactory())
+            .registerFactory(Range.Factory.class, new SpongeRange.Factory())
+            .registerFactory(Value.Factory.class, new SpongeValueFactory())
+            .registerFactory(DataManipulator.Mutable.Factory.class, new MutableDataManipulatorFactory())
+            .registerFactory(DataManipulator.Immutable.Factory.class, new ImmutableDataManipulatorFactory())
+            .registerFactory(BlockChangeFlag.Factory.class, new BlockChangeFlagManager.Factory())
+            .registerFactory(OrCriterion.Factory.class, new SpongeOrCriterion.Factory())
+            .registerFactory(AndCriterion.Factory.class, new SpongeAndCriterion.Factory())
+            .registerFactory(Ticks.Factory.class, new SpongeTicks.Factory())
+            .registerFactory(MinecraftDayTime.Factory.class, new SpongeMinecraftDayTime.Factory())
+            .registerFactory(GameProfile.Factory.class, new SpongeGameProfile.Factory())
             .registerFactory(ProfileProperty.Factory.class, new SpongeProfilePropertyFactory())
             .registerFactory(RayTrace.Factory.class, new SpongeRayTraceFactory())
             .registerFactory(StateMatcher.Factory.class, new SpongeStateMatcherFactory())

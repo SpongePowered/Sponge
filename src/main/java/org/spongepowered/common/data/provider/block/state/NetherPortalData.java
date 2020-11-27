@@ -30,7 +30,7 @@ import net.minecraft.state.EnumProperty;
 import net.minecraft.util.Direction;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.AxisUtils;
+import org.spongepowered.common.util.AxisUtil;
 
 public class NetherPortalData {
 
@@ -42,9 +42,9 @@ public class NetherPortalData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.AXIS)
-                        .get(h -> AxisUtils.getFor(h.get(NetherPortalBlock.AXIS)))
+                        .get(h -> AxisUtil.getFor(h.get(NetherPortalBlock.AXIS)))
                         .set((h, v) -> {
-                            final Direction.Axis axis = AxisUtils.getFor(v);
+                            final Direction.Axis axis = AxisUtil.getFor(v);
                             final EnumProperty<Direction.Axis> property = NetherPortalBlock.AXIS;
                             if (property.getAllowedValues().size() < 3 && !property.getAllowedValues().contains(axis)) {
                                 return h;

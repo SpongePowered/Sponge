@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.WallBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class WallData {
 
@@ -40,9 +40,9 @@ public final class WallData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtils.getHorizontalUpFrom(h, WallBlock.EAST, WallBlock.WEST, WallBlock.NORTH, WallBlock.SOUTH,
+                        .get(h -> DirectionalUtil.getHorizontalUpFrom(h, WallBlock.EAST, WallBlock.WEST, WallBlock.NORTH, WallBlock.SOUTH,
                                 WallBlock.UP))
-                        .set((h, v) -> DirectionalUtils.setHorizontalUpFor(h, v, WallBlock.EAST, WallBlock.WEST, WallBlock.NORTH, WallBlock.SOUTH,
+                        .set((h, v) -> DirectionalUtil.setHorizontalUpFor(h, v, WallBlock.EAST, WallBlock.WEST, WallBlock.NORTH, WallBlock.SOUTH,
                                 WallBlock.UP))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_EAST)

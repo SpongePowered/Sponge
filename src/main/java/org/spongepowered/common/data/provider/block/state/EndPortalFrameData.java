@@ -28,7 +28,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.EndPortalFrameBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class EndPortalFrameData {
 
@@ -40,8 +40,8 @@ public final class EndPortalFrameData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(EndPortalFrameBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, EndPortalFrameBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.get(EndPortalFrameBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, EndPortalFrameBlock.FACING))
                         .supports(h -> h.getBlock() instanceof EndPortalFrameBlock)
                     .create(Keys.IS_FILLED)
                         .get(h -> h.get(EndPortalFrameBlock.EYE))

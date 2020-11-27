@@ -61,9 +61,6 @@ public final class LocaleCache {
         }
     };
 
-    private LocaleCache() {
-    }
-
     /**
      * Gets a locale from the cache.
      *
@@ -85,4 +82,6 @@ public final class LocaleCache {
         LOCALE_CACHE.put(tag.toLowerCase(), locale);
     }
 
+    private LocaleCache() {
+    }
 }

@@ -28,8 +28,6 @@ import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.Vec3d;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -46,7 +44,7 @@ import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.VectorSerializer;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.ArrayList;
@@ -139,10 +137,10 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
             this.impl$slowWhenEmpty = compound.getBoolean(Constants.Entity.Minecart.SLOW_WHEN_EMPTY);
         }
         if (compound.contains(Constants.Entity.Minecart.AIRBORNE_MODIFIER)) {
-            this.impl$airborneMod = VectorSerializer.fromNbt(compound.getCompound(Constants.Entity.Minecart.AIRBORNE_MODIFIER));
+            this.impl$airborneMod = VecHelper.fromCompound(compound.getCompound(Constants.Entity.Minecart.AIRBORNE_MODIFIER));
         }
         if (compound.contains(Constants.Entity.Minecart.DERAILED_MODIFIER)) {
-            this.impl$derailedMod = VectorSerializer.fromNbt(compound.getCompound(Constants.Entity.Minecart.DERAILED_MODIFIER));
+            this.impl$derailedMod = VecHelper.fromCompound(compound.getCompound(Constants.Entity.Minecart.DERAILED_MODIFIER));
         }
     }
 
@@ -151,8 +149,8 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
         super.impl$writeToSpongeCompound(compound);
         compound.putDouble(Constants.Entity.Minecart.MAX_SPEED, this.impl$maxSpeed);
         compound.putBoolean(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, this.impl$slowWhenEmpty);
-        compound.put(Constants.Entity.Minecart.AIRBORNE_MODIFIER, VectorSerializer.toNbt(this.impl$airborneMod));
-        compound.put(Constants.Entity.Minecart.DERAILED_MODIFIER, VectorSerializer.toNbt(this.impl$derailedMod));
+        compound.put(Constants.Entity.Minecart.AIRBORNE_MODIFIER, VecHelper.toCompound(this.impl$airborneMod));
+        compound.put(Constants.Entity.Minecart.DERAILED_MODIFIER, VecHelper.toCompound(this.impl$derailedMod));
     }
 
     @Override
@@ -164,26 +162,32 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
     public void bridge$setMaxSpeed(double impl$maxSpeed) {
         this.impl$maxSpeed = impl$maxSpeed;
     }
+
     @Override
     public boolean bridge$getSlowWhenEmpty() {
         return impl$slowWhenEmpty;
     }
+
     @Override
     public void bridge$setSlowWhenEmpty(boolean impl$slowWhenEmpty) {
         this.impl$slowWhenEmpty = impl$slowWhenEmpty;
     }
+
     @Override
     public Vector3d bridge$getAirborneMod() {
         return impl$airborneMod;
     }
+
     @Override
     public void bridge$setAirborneMod(Vector3d impl$airborneMod) {
         this.impl$airborneMod = impl$airborneMod;
     }
+
     @Override
     public Vector3d bridge$getDerailedMod() {
         return impl$derailedMod;
     }
+    
     @Override
     public void bridge$setDerailedMod(Vector3d impl$derailedMod) {
         this.impl$derailedMod = impl$derailedMod;

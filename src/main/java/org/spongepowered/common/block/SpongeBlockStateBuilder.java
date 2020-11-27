@@ -33,7 +33,7 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;

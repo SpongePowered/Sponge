@@ -98,7 +98,7 @@ import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.data.provider.util.ExperienceHolderUtils;
+import org.spongepowered.common.util.ExperienceHolderUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
@@ -200,12 +200,12 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 
     @Override
     public int bridge$getExperienceSinceLevel() {
-        return this.experienceTotal - ExperienceHolderUtils.xpAtLevel(this.experienceLevel);
+        return this.experienceTotal - ExperienceHolderUtil.xpAtLevel(this.experienceLevel);
     }
 
     @Override
     public void bridge$setExperienceSinceLevel(final int experience) {
-        this.experienceTotal = ExperienceHolderUtils.xpAtLevel(this.experienceLevel) + experience;
+        this.experienceTotal = ExperienceHolderUtil.xpAtLevel(this.experienceLevel) + experience;
         this.experience = (float) experience / this.shadow$xpBarCap();
     }
 

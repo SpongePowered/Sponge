@@ -252,4 +252,13 @@ public final class SpongeGameProfile implements GameProfile {
                 .add("properties=" + this.properties)
                 .toString();
     }
+
+    public static final class Factory implements GameProfile.Factory {
+        @Override
+        public GameProfile of(final UUID uniqueId, final @Nullable String name) {
+            Objects.requireNonNull(uniqueId);
+
+            return new SpongeGameProfile(uniqueId, name);
+        }
+    }
 }

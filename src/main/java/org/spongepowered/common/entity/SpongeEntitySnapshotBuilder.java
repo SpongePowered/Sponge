@@ -43,7 +43,7 @@ import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
 import org.spongepowered.common.data.holder.SimpleNbtDataHolder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
-import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -72,13 +72,13 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder world(WorldProperties worldProperties) {
+    public SpongeEntitySnapshotBuilder world(final WorldProperties worldProperties) {
         this.worldKey = Objects.requireNonNull(worldProperties).getKey();
         return this;
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder type(EntityType<?> entityType) {
+    public SpongeEntitySnapshotBuilder type(final EntityType<?> entityType) {
         this.entityType = Objects.requireNonNull(entityType);
         this.manipulator = null;
         this.compound = null;
@@ -87,28 +87,28 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder position(Vector3d position) {
+    public SpongeEntitySnapshotBuilder position(final Vector3d position) {
         this.position = Objects.requireNonNull(position);
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder rotation(Vector3d rotation) {
+    public SpongeEntitySnapshotBuilder rotation(final Vector3d rotation) {
         this.rotation = Objects.requireNonNull(rotation);
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder scale(Vector3d scale) {
+    public SpongeEntitySnapshotBuilder scale(final Vector3d scale) {
         this.scale = Objects.requireNonNull(scale);
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder id(UUID entityId) {
+    public SpongeEntitySnapshotBuilder id(final UUID entityId) {
         this.entityId = Objects.requireNonNull(entityId);
         return this;
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder from(Entity entity) {
+    public SpongeEntitySnapshotBuilder from(final Entity entity) {
         this.reset();
         this.entityReference = new WeakReference<>(entity);
         this.worldKey = entity.getServerLocation().getWorldKey();
@@ -124,9 +124,10 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     }
 
     @Override
-    public <V> EntitySnapshot.Builder add(Key<? extends Value<V>> key, V value) {
-        Objects.requireNonNull(key, "key");
-        Objects.requireNonNull(this.entityType, "Must have a valid entity type before applying data!");
+    public <V> EntitySnapshot.Builder add(final Key<? extends Value<V>> key, final V value) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(this.entityType);
+
         if (this.manipulator == null) {
             this.manipulator = DataManipulator.mutableOf();
         }
@@ -135,7 +136,8 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder from(EntitySnapshot holder) {
+    public SpongeEntitySnapshotBuilder from(final EntitySnapshot holder) {
+        this.reset();
         this.entityType = holder.getType();
         this.worldKey = holder.getWorld();
         if (holder.getUniqueId().isPresent()) {
@@ -155,7 +157,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder from(net.minecraft.entity.Entity minecraftEntity) {
+    public SpongeEntitySnapshotBuilder from(final net.minecraft.entity.Entity minecraftEntity) {
         this.entityType = ((Entity) minecraftEntity).getType();
         this.worldKey = ((Entity) minecraftEntity).getServerLocation().getWorldKey();
         this.entityId = minecraftEntity.getUniqueID();
@@ -169,7 +171,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder unsafeCompound(CompoundNBT compound) {
+    public SpongeEntitySnapshotBuilder unsafeCompound(final CompoundNBT compound) {
         this.compound = Objects.requireNonNull(compound).copy();
         return this;
     }
@@ -196,7 +198,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         Objects.requireNonNull(this.scale);
         Objects.requireNonNull(this.entityType);
 
-        EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
+        final EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
 
         // Write the the manipulator values to NBT
         if (this.manipulator != null && !this.manipulator.getKeys().isEmpty()) {
@@ -218,7 +220,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     }
 
     @Override
-    protected Optional<EntitySnapshot> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<EntitySnapshot> buildContent(final DataView container) throws InvalidDataException {
         if (!container.contains(Queries.WORLD_KEY, Constants.Entity.TYPE, Constants.Entity.ROTATION, Constants.Entity.SCALE, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
             return Optional.empty();
         }

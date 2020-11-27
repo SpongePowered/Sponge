@@ -71,7 +71,6 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer impl
         lifecycle.establishServerFeatures();
         lifecycle.establishCommands();
 
-        // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
         lifecycle.callStartingEngineEvent(this);
         super.run();
     }

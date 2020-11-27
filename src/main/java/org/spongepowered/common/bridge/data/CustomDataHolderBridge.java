@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -115,7 +116,7 @@ public interface CustomDataHolderBridge {
         final ImmutableList.Builder<DataView> failed = ImmutableList.builder();
         for (DataView dataView : updatedDataViews) {
             final Optional<DataStore> dataStore = dataView.getString(Constants.Sponge.DATA_ID)
-                    .flatMap(id -> SpongeDataManager.getInstance().getRegistration(ResourceKey.resolve(id)))
+                    .flatMap(id -> ((SpongeDataManager) Sponge.getGame().getDataManager()).getRegistration(ResourceKey.resolve(id)))
                     .flatMap(r -> r.getDataStore(typeToken));
             if (dataStore.isPresent()) {
                 dataStores.add(dataStore.get());
@@ -169,7 +170,7 @@ public interface CustomDataHolderBridge {
     static DataView updateDataViewForDataManipulator(final DataView dataView) {
         final int version = dataView.getInt(Queries.CONTENT_VERSION).orElse(1);
         if (version != Constants.Sponge.CURRENT_CUSTOM_DATA) {
-            final DataContentUpdater contentUpdater = SpongeDataManager.getInstance().getWrappedCustomContentUpdater(DataManipulator.Mutable.class, version, Constants.Sponge.CURRENT_CUSTOM_DATA)
+            final DataContentUpdater contentUpdater = ((SpongeDataManager) Sponge.getGame().getDataManager()).getWrappedCustomContentUpdater(DataManipulator.Mutable.class, version, Constants.Sponge.CURRENT_CUSTOM_DATA)
                     .orElseThrow(() -> new IllegalArgumentException("Could not find a content updater for DataManipulator information with version: " + version));
             return contentUpdater.update(dataView);
         }

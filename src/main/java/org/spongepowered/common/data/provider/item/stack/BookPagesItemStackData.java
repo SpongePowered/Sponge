@@ -34,8 +34,8 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
-import org.spongepowered.common.data.util.NbtStreams;
+import org.spongepowered.common.util.NBTCollectors;
+import org.spongepowered.common.util.NBTStreams;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.Predicates;
@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,7 +78,7 @@ public final class BookPagesItemStackData {
             return new ArrayList<>();
         }
         final ListNBT list = tag.getList(nbtKey, Constants.NBT.TAG_COMPOUND);
-        return NbtStreams.toCompounds(list)
+        return NBTStreams.toCompounds(list)
                 .map(BookPagesItemStackData::enchantmentFromNbt)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -93,7 +92,7 @@ public final class BookPagesItemStackData {
         final CompoundNBT tag = holder.getOrCreateTag();
         final ListNBT list = filter.apply(value)
                 .map(BookPagesItemStackData::enchantmentToNbt)
-                .collect(NbtCollectors.toTagList());
+                .collect(NBTCollectors.toTagList());
         tag.put(nbtKey, list);
         return true;
     }

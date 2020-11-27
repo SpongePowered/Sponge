@@ -67,7 +67,8 @@ public final class SpongeBootstrap {
         SpongeBootstrap.lifecycle.callRegisterFactoryEvent();
         SpongeBootstrap.lifecycle.callRegisterBuilderEvent();
         SpongeBootstrap.lifecycle.callRegisterChannelEvent();
-        SpongeBootstrap.lifecycle.establishGlobalServices();
+        SpongeBootstrap.lifecycle.establishGameServices();
+        SpongeBootstrap.lifecycle.establishDataKeyListeners();
 
         SpongePacketHandler.init((SpongeChannelRegistry) Sponge.getChannelRegistry());
 
