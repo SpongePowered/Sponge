@@ -159,10 +159,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         if (kickReason != null) {
             event.setCancelled(true);
         }
-        SpongeCommon.postEvent(event);
-        if (event.isCancelled()) {
-            final Component message = event.getMessage();
-            this.impl$disconnectClient(networkManager, message, player.getProfile());
+        if (SpongeCommon.postEvent(event)) {
+            this.impl$disconnectClient(networkManager, event.getMessage(), player.getProfile());
             return null;
         }
 
@@ -173,9 +171,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         return (net.minecraft.world.server.ServerWorld) toLocation.getWorld();
     }
 
-    @Inject(method = "initializeConnectionToPlayer", cancellable = true, at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-            target = "Lnet/minecraft/server/MinecraftServer;getWorld(Lnet/minecraft/world/dimension/DimensionType;)Lnet/minecraft/world/server/ServerWorld;"))
-    private void impl$onInitPlayer_afterGetWorld(final NetworkManager networkManager, final ServerPlayerEntity mcPlayer, final CallbackInfo ci) {
+    @Inject(method = "initializeConnectionToPlayer", cancellable = true, at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player"
+            + "/ServerPlayerEntity;setWorld(Lnet/minecraft/world/World;)V", shift = At.Shift.AFTER))
+    private void impl$onInitPlayer_BeforeSetWorld(final NetworkManager networkManager, final ServerPlayerEntity mcPlayer, final CallbackInfo ci) {
         if (mcPlayer.world == null) {
             ci.cancel();
         }
@@ -319,6 +317,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 ((SRespawnPacketAccessor) packetIn).accessor$getHashedSeed(), ((SRespawnPacketAccessor) packetIn).accessor$getWorldType(),
                 recreatedPlayer.interactionManager.getGameType()
         );
+    }
+
+    @Redirect(method = "sendWorldInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorld(Lnet/minecraft/world/dimension/DimensionType;)Lnet/minecraft/world/server/ServerWorld;"))
+    private ServerWorld impl$usePerWorldWorldBorder(final MinecraftServer minecraftServer, final DimensionType dimension, final ServerPlayerEntity playerIn,
+            final ServerWorld worldIn) {
+        return worldIn;
     }
 
     private void impl$disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {

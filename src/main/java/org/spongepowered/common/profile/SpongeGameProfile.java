@@ -248,8 +248,7 @@ public final class SpongeGameProfile implements GameProfile {
     public String toString() {
         return new StringJoiner(", ", SpongeGameProfile.class.getSimpleName() + "[", "]")
                 .add("uniqueId=" + this.uniqueId)
-                .add("name='" + this.name + "'")
-                .add("properties=" + this.properties)
+                .add("name=" + this.name)
                 .toString();
     }
 
