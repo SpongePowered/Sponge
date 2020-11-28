@@ -131,6 +131,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
     @Shadow private int lastPositionUpdate;
 
     @Shadow protected abstract boolean shadow$isServerOwner();
+    @Shadow public abstract void shadow$setPlayerLocation(double x, double y, double z, float yaw, float pitch);
     // @formatter:on
 
     @Nullable private Entity impl$targetedEntity = null;
@@ -259,7 +260,19 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             value = "FIELD",
             opcode = Opcodes.GETFIELD,
             target = "Lnet/minecraft/network/play/ServerPlayNetHandler;targetPos:Lnet/minecraft/util/math/Vec3d;"
-        )
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/entity/player/ServerPlayerEntity;queuedEndExit:Z"
+            ),
+            to = @At(
+                value = "FIELD",
+                target = "Lnet/minecraft/network/play/ServerPlayNetHandler;networkTickCount:I",
+                ordinal = 1
+            )
+        ),
+        cancellable = true
     )
     private void impl$callMoveEntityEvent(final CPlayerPacket packetIn, final CallbackInfo ci) {
 
@@ -291,20 +304,14 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
 
         final Vector3d originalToPosition = toPosition;
-        boolean cancelled = false;
+        boolean cancelMovement = false;
+        boolean cancelRotation = false;
         // Call move & rotate event as needed...
         if (fireMoveEvent) {
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (ServerPlayer) this.player, fromPosition,
                     toPosition, toPosition);
             if (SpongeCommon.postEvent(event)) {
-                cancelled = true;
-                // We don't need to reset the player yaw and pitch because it'll be re-forced on confirm teleport
-                this.targetPos = this.player.getPositionVec();
-                // We reset the "lastPositionUpdate" to be differenced so that it forces a set position
-                this.lastPositionUpdate = this.networkTickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
-                // If the move wil be cancelled, the player is force reset to the other position, but, we need to possibly accept
-                // the rotation of the event, unless that is cancelled in the next code block.
-                ((EntityAccessor) this.player).accessor$setRotation((float) toRotation.getX(), (float) toRotation.getY());
+                cancelMovement = true;
             } else {
                 toPosition = event.getDestinationPosition();
             }
@@ -314,9 +321,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (ServerPlayer) this.player, fromRotation,
                     toRotation);
             if (SpongeCommon.postEvent(event)) {
-                cancelled = true;
-                // Rest the rotation here
-                ((EntityAccessor) this.player).accessor$setRotation((float) fromRotation.getX(), (float) fromRotation.getY());
+                cancelRotation = true;
             } else {
                 toRotation = event.getToRotation();
             }
@@ -324,8 +329,17 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
         // At this point, we cancel out and let the "confirmed teleport" code run through to update the
         // player position and update the player's relation in the chunk manager.
-        if (cancelled) {
-            // And finally, we can reset the rotation
+        if (cancelMovement) {
+            if (packetInAccessor.accessor$getRotating() && !cancelRotation) {
+                // Rest the rotation here
+                ((EntityAccessor) this.player).accessor$setRotation((float) toRotation.getX(), (float) toRotation.getY());
+            }
+            final float yaw = packetInAccessor.accessor$getRotating() && !cancelRotation ? (float) toRotation.getX() : this.player.rotationYaw;
+            final float pitch = packetInAccessor.accessor$getRotating() && !cancelRotation ? (float) toRotation.getY() : this.player.rotationPitch;
+            this.lastPositionUpdate = this.networkTickCount;
+            // Then, we set the location, as if the player was teleporting
+            this.shadow$setPlayerLocation(fromPosition.getX(), fromPosition.getY(), fromPosition.getZ(), yaw, pitch);
+            ci.cancel();
             return;
         }
 
