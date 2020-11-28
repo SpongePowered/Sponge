@@ -139,7 +139,6 @@
         "world.server.ChunkManager_EntityTrackerMixin",
         "world.server.ChunkManagerMixin",
         "world.server.ServerBossInfoMixin",
-        "world.server.ServerChunkProviderMixin",
         "world.server.ServerWorldMixin",
         "world.spawner.AbstractSpawnerMixin",
         "world.storage.SaveHandlerMixin",
@@ -149,7 +148,8 @@
         "command.impl.SaveAllCommandMixin",
         "util.EntityPredicatesMixin",
         "world.gen.feature.structure.LegacyStructureDataUtilMixin",
-        "block.CarvedPumpkinBlockMixin"
+        "block.CarvedPumpkinBlockMixin",
+        "world.server.ServerChunkProviderMixin"
     ],
     "client": [
         "client.MinecraftMixin",

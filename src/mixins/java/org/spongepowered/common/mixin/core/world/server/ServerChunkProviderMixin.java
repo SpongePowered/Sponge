@@ -24,38 +24,32 @@
  */
 package org.spongepowered.common.mixin.core.world.server;
 
+import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.accessor.world.server.ChunkManagerAccessor;
 
 @Mixin(ServerChunkProvider.class)
-public abstract class ServerChunkProviderMixin implements ServerChunkProviderBridge {
+public abstract class ServerChunkProviderMixin {
 
-    private boolean impl$forceChunkRequests = false;
-
-    @Override
-    public boolean bridge$getForceChunkRequests() {
-        return this.impl$forceChunkRequests;
-    }
-
-    @Override
-    public void bridge$setForceChunkRequests(final boolean flag) {
-        this.impl$forceChunkRequests = flag;
-    }
-
-    @Redirect(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerChunkProvider;save(Z)V"))
-    private void impl$dontCallSaveIFSerializationIsOff(ServerChunkProvider serverChunkProvider, boolean flush) {
-        final ServerWorld world = (ServerWorld) serverChunkProvider.getWorld();
-        final SerializationBehavior behavior = ((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior();
-        if (behavior == SerializationBehavior.NONE || behavior == SerializationBehavior.AUTOMATIC_METADATA_ONLY) {
-            return;
+    // @formatter:off
+    @Shadow @Final private ServerWorld world;
+    @Shadow @Final public ChunkManager chunkManager;
+    // @formatter:on
+    
+    @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ChunkManager;save(Z)V"))
+    private void impl$useSerializationBehaviorWhenSaving(final ChunkManager chunkManager, final boolean flush) {
+        final ServerWorld world = this.world;
+        final SerializationBehavior serializationBehavior = ((WorldProperties) world.getWorldInfo()).getSerializationBehavior();
+        if (serializationBehavior == SerializationBehavior.AUTOMATIC || serializationBehavior == SerializationBehavior.MANUAL) {
+            ((ChunkManagerAccessor) chunkManager).accessor$save(flush);
         }
-
-        serverChunkProvider.save(flush);
     }
 }

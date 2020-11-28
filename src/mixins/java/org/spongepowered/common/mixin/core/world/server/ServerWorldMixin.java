@@ -249,9 +249,8 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 progress.displaySavingString(new TranslationTextComponent("menu.savingLevel"));
             }
 
-            if ((!this.impl$isManualSave && (behavior == SerializationBehavior.AUTOMATIC || behavior == SerializationBehavior
-                    .AUTOMATIC_METADATA_ONLY)) || behavior == SerializationBehavior.MANUAL || behavior == SerializationBehavior
-                    .MANUAL_METADATA_ONLY) {
+            // We always save the metadata unless it is NONE
+            if (behavior != SerializationBehavior.NONE) {
 
                 this.shadow$saveLevel();
 
@@ -270,7 +269,10 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
                 progress.displayLoadingString(new TranslationTextComponent("menu.savingChunks"));
             }
 
-            if ((!this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC) || behavior == SerializationBehavior.MANUAL) {
+            final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;
+            final boolean canManuallySave = this.impl$isManualSave && behavior == SerializationBehavior.MANUAL;
+
+            if (canAutomaticallySave || canManuallySave) {
                 serverchunkprovider.save(flush);
             }
         }

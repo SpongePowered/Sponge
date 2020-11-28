@@ -381,28 +381,24 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     world.getKey())));
         }
 
-        try (final ServerWorld closingWorld = (ServerWorld) world) {
-            SpongeCommon.getLogger().info("Unloading World '{}' ({}/{})", ((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey(),
-                    ((org.spongepowered.api.world.server.ServerWorld) closingWorld).getDimensionType().getKey(),
-                    closingWorld.dimension.getType().getId());
-            try {
-                ((ServerWorldBridge) world).bridge$setManualSave(true);
-                closingWorld.save(null, true, true);
-            } catch (final SessionLockException e) {
-                return FutureUtil.completedWithException(new IOException(e));
-            }
+        try (final ServerWorld mWorld = (ServerWorld) world) {
+            SpongeCommon.getLogger().info("Unloading World '{}' ({}/{})", world.getKey(), world.getDimensionType().getKey(), mWorld.dimension
+                    .getType().getId());
+            ((WorldInfoBridge) mWorld.getWorldInfo()).bridge$getConfigAdapter().save();
+            ((ServerWorldBridge) world).bridge$setManualSave(true);
+            mWorld.save(null, true, mWorld.disableLevelSaving);
 
-            this.loadedWorldInfos.remove(((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey());
-            this.infoByType.remove(closingWorld.dimension.getType());
-            this.worlds.remove(((org.spongepowered.api.world.server.ServerWorld) closingWorld).getKey());
-            this.worldsByType.remove(closingWorld.dimension.getType());
 
-            SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                    (org.spongepowered.api.world.server.ServerWorld) closingWorld));
+            this.loadedWorldInfos.remove(world.getKey());
+            this.infoByType.remove(mWorld.dimension.getType());
+            this.worlds.remove(world.getKey());
+            this.worldsByType.remove(mWorld.dimension.getType());
+
+            SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), world));
 
             return CompletableFuture.completedFuture(true);
-        } catch (final IOException ex) {
-            return FutureUtil.completedWithException(ex);
+        } catch (final Exception e) {
+            return FutureUtil.completedWithException(e instanceof IOException ? e : new IOException(e));
         }
     }
 
