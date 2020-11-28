@@ -90,6 +90,8 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("can_place_as_block"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("casting_time"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("cat_type"), TypeTokens.CAT_TYPE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("chat_colors_enabled"), TypeTokens.BOOLEAN_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("chat_visibility"), TypeTokens.CHAT_VISIBILITY_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("chest_attachment_type"), TypeTokens.CHEST_ATTACHMENT_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("chest_rotation"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("color"), TypeTokens.COLOR_VALUE_TOKEN));
@@ -290,6 +292,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("life_ticks"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("light_emission"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("llama_type"), TypeTokens.LLAMA_TYPE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("locale"), TypeTokens.LOCALE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("lock_token"), TypeTokens.STRING_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("lore"), TypeTokens.LIST_COMPONENT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("matter_state"), TypeTokens.MATTER_STATE_VALUE_TOKEN));
@@ -367,6 +370,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("show_bottom"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("sign_lines"), TypeTokens.LIST_COMPONENT_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("size"), TypeTokens.INTEGER_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("skin_parts"), TypeTokens.SET_SKIN_PARTS_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("skin_profile_property"), TypeTokens.PROFILE_PROPERTY_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("skin_moisture"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("sky_light"), TypeTokens.INTEGER_VALUE_TOKEN));
@@ -419,6 +423,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("vanish_ignores_collision"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("vanish_prevents_targeting"), TypeTokens.BOOLEAN_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("vehicle"), TypeTokens.ENTITY_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("view_distance"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("velocity"), TypeTokens.VECTOR_3D_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("villager_type"), TypeTokens.VILLAGER_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("wait_time"), TypeTokens.INTEGER_VALUE_TOKEN));

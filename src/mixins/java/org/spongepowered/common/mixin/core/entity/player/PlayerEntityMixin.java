@@ -41,6 +41,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.play.server.SEntityVelocityPacket;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effects;
@@ -119,6 +120,7 @@ import java.util.stream.Collectors;
 public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerEntityBridge, LocationTargetingBridge, GameProfileHolderBridge {
 
     // @formatter: off
+    @Shadow @Final protected static DataParameter<Byte> PLAYER_MODEL_FLAG;
     @Shadow public int experienceLevel;
     @Shadow public int experienceTotal;
     @Shadow public float experience;
