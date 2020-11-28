@@ -99,7 +99,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Shadow public abstract boolean shadow$isServerRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
 
-    @Shadow private boolean worldIconSet;
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;
 
