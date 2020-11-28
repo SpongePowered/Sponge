@@ -28,6 +28,7 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
 import org.spongepowered.common.accessor.server.management.UserListAccessor;
 import org.spongepowered.common.profile.SpongeGameProfile;
@@ -61,13 +62,13 @@ public final class SpongeWhitelistService implements WhitelistService {
         final UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry> whitelist = (UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry>) getWhitelist();
 
         whitelist.accessor$removeExpired();
-        return whitelist.accessor$getValues().containsKey(whitelist.accessor$getObjectKey((com.mojang.authlib.GameProfile) profile));
+        return whitelist.accessor$getValues().containsKey(whitelist.accessor$getObjectKey(SpongeGameProfile.toMcProfile(profile)));
     }
 
     @Override
     public boolean addProfile(final GameProfile profile) {
         final boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtil.addEntry(getWhitelist(), new WhitelistEntry((com.mojang.authlib.GameProfile) profile));
+        UserListUtil.addEntry(getWhitelist(), new WhitelistEntry(SpongeGameProfile.toMcProfile(profile)));
         return wasWhitelisted;
     }
 

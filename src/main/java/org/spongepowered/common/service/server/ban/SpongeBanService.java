@@ -40,6 +40,7 @@ import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.management.UserListAccessor;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.UserListUtil;
 
 import java.net.InetAddress;
@@ -92,7 +93,7 @@ public final class SpongeBanService implements BanService {
         final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
             (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
         accessor.accessor$removeExpired();
-        return Optional.ofNullable((Ban.Profile) accessor.accessor$getValues().get(accessor.accessor$getObjectKey((com.mojang.authlib.GameProfile) profile)));
+        return Optional.ofNullable((Ban.Profile) accessor.accessor$getValues().get(accessor.accessor$getObjectKey(SpongeGameProfile.toMcProfile(profile))));
     }
 
     @SuppressWarnings("unchecked")
@@ -111,7 +112,7 @@ public final class SpongeBanService implements BanService {
             (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
 
         accessor.accessor$removeExpired();
-        return accessor.accessor$getValues().containsKey(accessor.accessor$getObjectKey((com.mojang.authlib.GameProfile) profile));
+        return accessor.accessor$getValues().containsKey(accessor.accessor$getObjectKey(SpongeGameProfile.toMcProfile(profile)));
     }
 
     @SuppressWarnings("unchecked")
