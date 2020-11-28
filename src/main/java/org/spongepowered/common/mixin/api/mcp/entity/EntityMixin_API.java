@@ -106,6 +106,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -141,6 +142,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected EntityDataManager dataManager;
     @Shadow public int dimension;
     @Shadow protected UUID entityUniqueID;
+    @Shadow public Set<String> tags;
 
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
@@ -680,6 +682,34 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         this.get(TargetedLocationData.class).ifPresent(manipulators::add);
         this.get(VehicleData.class).ifPresent(manipulators::add);
         this.get(VelocityData.class).ifPresent(manipulators::add);
+    }
+
+    @Override
+    public Set<String> getTags() {
+        return Collections.unmodifiableSet(this.tags);
+    }
+
+    @Override
+    public boolean addTag(final String tag) {
+        checkNotNull(tag);
+
+        if (this.tags.size() >= 1024) {
+            return false;
+        }
+
+        return this.tags.add(tag);
+    }
+
+    @Override
+    public boolean removeTag(final String tag) {
+        checkNotNull(tag);
+        return this.tags.remove(tag);
+    }
+
+    @Override
+    public boolean hasTag(final String tag) {
+        checkNotNull(tag);
+        return this.tags.contains(tag);
     }
 
 }
