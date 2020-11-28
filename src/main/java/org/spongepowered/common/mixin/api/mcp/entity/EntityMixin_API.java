@@ -106,8 +106,10 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -141,6 +143,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected EntityDataManager dataManager;
     @Shadow public int dimension;
     @Shadow protected UUID entityUniqueID;
+    @Shadow public Set<String> tags;
 
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
@@ -161,6 +164,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow public abstract boolean hasNoGravity();
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow public abstract boolean shadow$addTag(String tag);
+    @Shadow public abstract boolean shadow$removeTag(String tag);
 
     // @formatter:on
 
@@ -680,6 +685,27 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         this.get(TargetedLocationData.class).ifPresent(manipulators::add);
         this.get(VehicleData.class).ifPresent(manipulators::add);
         this.get(VelocityData.class).ifPresent(manipulators::add);
+    }
+
+    @Override
+    public Collection<String> getTags() {
+        return Collections.unmodifiableSet(this.tags);
+    }
+
+    @Intrinsic
+    public boolean entity$addTag(final String tag) {
+        return this.shadow$addTag(tag);
+    }
+
+    @Intrinsic
+    public boolean entity$removeTag(final String tag) {
+        return this.shadow$removeTag(tag);
+    }
+
+    @Override
+    public boolean hasTag(final String tag) {
+        Objects.requireNonNull(tag);
+        return this.tags.contains(tag);
     }
 
 }
