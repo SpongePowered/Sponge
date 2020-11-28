@@ -292,7 +292,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$getRotating() && ShouldFire.ROTATE_ENTITY_EVENT;
 
         final ServerPlayer player = (ServerPlayer) this.player;
-        final Vector3d fromRotation = player.getRotation();
+        final Vector3d fromRotation = new Vector3d(packetIn.getYaw(this.player.rotationYaw), packetIn.getPitch(this.player.rotationPitch), 0);
 
         // Use the position of the last movement with an event or the current player position if never called
         // We need this because we ignore very small position changes as to not spam as many move events.
