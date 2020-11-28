@@ -124,13 +124,17 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
             if (!transactionArrays[blockChange.ordinal()].isEmpty()) {
                 final ChangeBlockEvent event = blockChange.createEvent(currentCause, transactionArrays[blockChange.ordinal()]);
                 mainEvents[blockChange.ordinal()] = event;
-                Sponge.getEventManager().post(event);
+                if (Sponge.getEventManager().post(event)) {
+                    event.getTransactions().forEach(t -> t.setValid(false));
+                }
             }
         }
         if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) { // Needs to be placed into iterateChangeBlockEvents
             final ChangeBlockEvent event = BlockChange.DECAY.createEvent(currentCause, transactionArrays[BlockChange.DECAY.ordinal()]);
             mainEvents[BlockChange.DECAY.ordinal()] = event;
-            Sponge.getEventManager().post(event);
+            if (Sponge.getEventManager().post(event)) {
+                event.getTransactions().forEach(t -> t.setValid(false));
+            }
         }
         final Cause causeToUse;
         if (((IPhaseState) context.state).shouldProvideModifiers(context)) {
