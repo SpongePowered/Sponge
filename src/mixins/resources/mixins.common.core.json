@@ -149,7 +149,8 @@
         "util.EntityPredicatesMixin",
         "world.gen.feature.structure.LegacyStructureDataUtilMixin",
         "block.CarvedPumpkinBlockMixin",
-        "world.server.ServerChunkProviderMixin"
+        "world.server.ServerChunkProviderMixin",
+        "command.impl.GameRuleCommandMixin"
     ],
     "client": [
         "client.MinecraftMixin",

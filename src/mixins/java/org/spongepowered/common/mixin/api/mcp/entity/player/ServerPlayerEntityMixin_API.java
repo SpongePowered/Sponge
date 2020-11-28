@@ -159,7 +159,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Override
     public boolean isOnline() {
-        return this.server.getPlayerList().getPlayerByUUID(this.entityUniqueID) != (ServerPlayerEntity) (Object) this;
+        return this.server.getPlayerList().getPlayerByUUID(this.entityUniqueID) == (ServerPlayerEntity) (Object) this;
     }
 
     @Override
