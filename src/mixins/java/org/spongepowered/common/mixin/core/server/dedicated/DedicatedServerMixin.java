@@ -67,4 +67,8 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         ((PlayerProfileCacheBridge) cache).bridge$setCanSave(false);
     }
 
+    @Override
+    public boolean bridge$performAutosaveChecks() {
+        return this.shadow$isServerRunning();
+    }
 }

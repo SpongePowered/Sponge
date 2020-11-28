@@ -148,7 +148,8 @@
         "util.ClassInheritanceMultiMapMixin",
         "command.impl.SaveAllCommandMixin",
         "util.EntityPredicatesMixin",
-        "world.gen.feature.structure.LegacyStructureDataUtilMixin"
+        "world.gen.feature.structure.LegacyStructureDataUtilMixin",
+        "block.CarvedPumpkinBlockMixin"
     ],
     "client": [
         "client.MinecraftMixin",

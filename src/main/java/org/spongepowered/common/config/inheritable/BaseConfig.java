@@ -31,9 +31,6 @@ import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.common.applaunch.config.core.Config;
 import org.spongepowered.configurate.transformation.TransformAction;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class BaseConfig implements Config {
 
     @Setting
@@ -54,9 +51,6 @@ public abstract class BaseConfig implements Config {
     private SpawnerCategory spawner = new SpawnerCategory();
     @Setting("tileentity-activation")
     private BlockEntityActivationCategory blockEntityActivationCategory = new BlockEntityActivationCategory();
-    @Setting("world-generation-modifiers")
-    @Comment("World Generation Modifiers to apply to the world")
-    private final List<String> worldModifiers = new ArrayList<>();
     @Setting("movement-checks")
     private MovementChecksCategory movementChecks = new MovementChecksCategory();
 
@@ -90,10 +84,6 @@ public abstract class BaseConfig implements Config {
 
     public BlockEntityActivationCategory getTileEntityActivationRange() {
         return this.blockEntityActivationCategory;
-    }
-
-    public List<String> getWorldGenModifiers() {
-        return this.worldModifiers;
     }
 
     public MovementChecksCategory getMovementChecks() {

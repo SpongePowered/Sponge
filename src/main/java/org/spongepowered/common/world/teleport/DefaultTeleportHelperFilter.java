@@ -71,7 +71,7 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
         Material material = state.getMaterial();
 
         // Deny blocks that suffocate
-        if (state.causesSuffocation(EmptyBlockReader.INSTANCE, BlockPos.ZERO)) {
+        if (state.isSuffocating(EmptyBlockReader.INSTANCE, BlockPos.ZERO)) {
             return false;
         }
         // Deny dangerous lava

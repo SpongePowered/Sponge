@@ -101,7 +101,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
 
     @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
     @Nullable private ResourcePack impl$resourcePack;
-    private boolean impl$enableSaving = true;
 
     public MinecraftServerMixin(final String name) {
         super(name);
@@ -137,11 +136,6 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
     @Override
     public ResourcePack bridge$getResourcePack() {
         return this.impl$resourcePack;
-    }
-
-    @Override
-    public void bridge$setSaveEnabled(final boolean enabled) {
-        this.impl$enableSaving = enabled;
     }
 
     @Override
@@ -252,44 +246,66 @@ public abstract class MinecraftServerMixin extends RecursiveEventLoop<TickDelaye
      */
     @Overwrite
     public boolean save(final boolean suppressLog, final boolean flush, final boolean isForced) throws SessionLockException {
-        if (!this.impl$enableSaving) {
-            return false;
-        }
-
         for (final ServerWorld world : this.shadow$getWorlds()) {
-            ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
-
             final SerializationBehavior serializationBehavior = ((WorldInfoBridge) world.getWorldInfo()).bridge$getSerializationBehavior();
             boolean log = !suppressLog;
 
-            if (serializationBehavior != SerializationBehavior.NONE) {
-                // Only run auto-save checks if we're doing an auto save. If someone tells us to save (isForced), assume manual
-                if (!isForced && this.shadow$isDedicatedServer() && this.shadow$isServerRunning()) {
-                    final InheritableConfigHandle<WorldConfig> adapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
-                    final int autoSaveInterval = adapter.get().getWorld().getAutoSaveInterval();
-                    if (log) {
+            // Not forced happens during ticks and when shutting down
+            if (!isForced) {
+                final InheritableConfigHandle<WorldConfig> adapter = ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter();
+                final int autoSaveInterval = adapter.get().getWorld().getAutoSaveInterval();
+                if (log) {
+                    if (this.bridge$performAutosaveChecks()) {
                         log = adapter.get().getLogging().logWorldAutomaticSaving();
                     }
+                }
+
+                // Not forced means this is an auto-save or a shut down, handle accordingly
+
+                // If the server isn't running or we hit Vanilla's save interval, save our configs
+                if (!this.shadow$isServerRunning() || this.tickCounter % 6000 == 0) {
+                    ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
+                }
+
+                final boolean canSaveAtAll = serializationBehavior != SerializationBehavior.NONE;
+
+                // This world is set to not save of any time, no reason to check the auto-save/etc, skip it
+                if (!canSaveAtAll) {
+                    continue;
+                }
+
+                // Only run auto-save skipping if the server is still running
+                if (this.bridge$performAutosaveChecks()) {
+
+                    // Do not process properties or chunks if the world is not set to do so unless the server is shutting down
                     if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehavior.AUTOMATIC) {
-                        if (log) {
-                            LOGGER.warn("Auto-saving has been disabled for world '{}'. No chunk data will be auto-saved - to re-enable auto-saving "
-                                            + "set 'auto-save-interval' to a value greater than"
-                                            + " zero in the corresponding serverWorld config.",
-                                    ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
-                        }
                         continue;
                     }
+
+                    // Now check the interval vs the tick counter and skip it
                     if (this.tickCounter % autoSaveInterval != 0) {
                         continue;
                     }
-                    if (log) {
-                        LOGGER.info("Auto-saving chunks for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
-                    }
-                } else if (log) {
-                    LOGGER.info("Saving chunks for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
                 }
 
-                world.save(null, false, world.disableLevelSaving && !isForced);
+                world.save(null, false, world.disableLevelSaving);
+
+                if (log) {
+                    if (this.bridge$performAutosaveChecks()) {
+                        LOGGER.info("Auto-saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+                    } else {
+                        LOGGER.info("Saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+                    }
+                }
+            // Forced happens during command
+            } else {
+                if (log) {
+                    LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+                }
+
+                ((WorldInfoBridge) world.getWorldInfo()).bridge$getConfigAdapter().save();
+
+                world.save(null, false, false);
             }
         }
 

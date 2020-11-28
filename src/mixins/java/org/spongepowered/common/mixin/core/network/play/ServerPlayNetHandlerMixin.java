@@ -261,12 +261,13 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
             target = "Lnet/minecraft/network/play/ServerPlayNetHandler;targetPos:Lnet/minecraft/util/math/Vec3d;"
         )
     )
-    private void impl$callMoveEvents(final CPlayerPacket packetIn, final CallbackInfo ci) {
+    private void impl$callMoveEntityEvent(final CPlayerPacket packetIn, final CallbackInfo ci) {
 
         // If the movement is modified we pretend that the player has queuedEndExit = true
         // so that vanilla wont process that packet further
 
         final CPlayerPacketAccessor packetInAccessor = (CPlayerPacketAccessor) packetIn;
+
         // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
         // We don't fire an event to avoid confusing plugins.
         if (!packetInAccessor.accessor$getMoving() && !packetInAccessor.accessor$getRotating()) {
@@ -275,11 +276,11 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
         final boolean goodMovementPacket = this.movePacketCounter - this.lastMovePacketCounter <= 5;
         final boolean fireMoveEvent = goodMovementPacket && packetInAccessor.accessor$getMoving() && ShouldFire.MOVE_ENTITY_EVENT;
-
         final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$getRotating() && ShouldFire.ROTATE_ENTITY_EVENT;
 
         final ServerPlayer player = (ServerPlayer) this.player;
         final Vector3d fromRotation = player.getRotation();
+
         // Use the position of the last movement with an event or the current player position if never called
         // We need this because we ignore very small position changes as to not spam as many move events.
         final Vector3d fromPosition = player.getPosition();
@@ -289,11 +290,12 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
         final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
 
-        final Vector3d originalToPositon = toPosition;
+        final Vector3d originalToPosition = toPosition;
         boolean cancelled = false;
         // Call move & rotate event as needed...
         if (fireMoveEvent) {
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.SERVER.getCurrentCause(), player, fromPosition, toPosition, toPosition);
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (ServerPlayer) this.player, fromPosition,
+                    toPosition, toPosition);
             if (SpongeCommon.postEvent(event)) {
                 cancelled = true;
                 // We don't need to reset the player yaw and pitch because it'll be re-forced on confirm teleport
@@ -309,7 +311,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         }
 
         if (significantRotation && fireRotationEvent) {
-            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.SERVER.getCurrentCause(), player, fromRotation, toRotation);
+            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (ServerPlayer) this.player, fromRotation,
+                    toRotation);
             if (SpongeCommon.postEvent(event)) {
                 cancelled = true;
                 // Rest the rotation here
@@ -327,7 +330,7 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         }
 
         // Handle event results
-        if (!toPosition.equals(originalToPositon)) {
+        if (!toPosition.equals(originalToPosition)) {
             // Check if we have to say it's a "teleport" vs a standard move
             final double d4 = packetIn.getX(this.player.getPosX());
             final double d5 = packetIn.getY(this.player.getPosY());

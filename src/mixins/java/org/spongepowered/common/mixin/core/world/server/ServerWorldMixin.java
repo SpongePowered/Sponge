@@ -242,6 +242,7 @@ public abstract class ServerWorldMixin extends WorldMixin implements ServerWorld
         ServerChunkProvider serverchunkprovider = this$.getChunkProvider();
 
         if (!skipSave) {
+
             final SerializationBehavior behavior = ((WorldInfoBridge) this$.getWorldInfo()).bridge$getSerializationBehavior();
 
             if (progress != null) {

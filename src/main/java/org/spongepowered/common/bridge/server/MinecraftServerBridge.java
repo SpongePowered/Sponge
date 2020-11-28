@@ -43,8 +43,8 @@ public interface MinecraftServerBridge {
 
     void bridge$removeWorldTickTimes(DimensionType dimensionType);
 
-    void bridge$setSaveEnabled(boolean enabled);
-
     @Nullable
     ResourcePack bridge$getResourcePack();
+
+    boolean bridge$performAutosaveChecks();
 }

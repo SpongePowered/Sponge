@@ -45,16 +45,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.vanilla.VanillaServer;
 
 import java.io.File;
 import java.net.Proxy;
 
 @Mixin(IntegratedServer.class)
-public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer implements VanillaServer  {
+public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer implements MinecraftServerBridge, VanillaServer  {
 
     @Shadow @Final private Minecraft mc;
     @Shadow @Final private WorldSettings worldSettings;
+
+    @Shadow private boolean isGamePaused;
 
     public IntegratedServerMixin_Vanilla(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn,
         Commands p_i50590_4_, YggdrasilAuthenticationService p_i50590_5_,
@@ -84,5 +87,14 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServer impl
     @Override
     public void loadAllWorlds(String saveName, String worldNameIn, long seed, WorldType type, JsonElement generatorOptions) {
         this.getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions, true, this.worldSettings, this.mc.gameSettings.difficulty);
+    }
+
+    @Override
+    public boolean bridge$performAutosaveChecks() {
+        if (!this.isServerRunning()) {
+            return false;
+        }
+
+        return !this.isGamePaused;
     }
 }
