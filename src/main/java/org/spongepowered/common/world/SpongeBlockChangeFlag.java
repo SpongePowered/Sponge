@@ -114,19 +114,19 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     }
 
     @Override
-    public BlockChangeFlag withNotifyClients(final boolean notifyClients) {
+    public SpongeBlockChangeFlag withNotifyClients(final boolean notifyClients) {
         if (this.notifyClients == notifyClients) {
             return this;
         }
         final int maskedFlag =
                 (this.updateNeighbors ? Constants.BlockChangeFlags.NEIGHBOR_MASK : 0)
-                        | (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
+                        | (notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                         | (this.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
                         | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
                         | (this.notifyObservers ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)
                         | (this.neighborDrops ? Constants.BlockChangeFlags.NEIGHBOR_DROPS : 0)
                         | (this.blockMoving ? Constants.BlockChangeFlags.BLOCK_MOVING : 0)
-                        | (performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
+                        | (this.performBlockPhysics ? 0 : Constants.BlockChangeFlags.PHYSICS_MASK)
                         | (this.lighting ? 0 : Constants.BlockChangeFlags.LIGHTING_UPDATES)
                         | (this.pathfindingUpdates ? 0 : Constants.BlockChangeFlags.PATHFINDING_UPDATES);
         return BlockChangeFlagManager.fromNativeInt(maskedFlag);
