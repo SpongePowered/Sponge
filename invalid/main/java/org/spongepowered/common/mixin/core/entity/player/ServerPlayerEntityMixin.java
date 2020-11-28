@@ -150,8 +150,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Shadow public abstract ServerWorld shadow$func_71121_q();
 
     private final User impl$user = this.impl$getUserObjectOnConstruction();
-    private ImmutableSet<SkinPart> impl$skinParts = ImmutableSet.of();
-    private int impl$viewDistance;
     @Nullable private GameType impl$pendingGameType;
     @Nullable private ServerPlayerEntity impl$delegate;
     private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
@@ -211,40 +209,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Override
     public User bridge$getUser() {
         return this.impl$user;
-    }
-
-    // Post before the player values are updated
-    @SuppressWarnings({"ConstantConditions", "UnstableApiUsage"})
-    @Inject(method = "handleClientSettings", at = @At("HEAD"))
-    private void impl$throwClientSettingsEvent(final CClientSettingsPacket packet, final CallbackInfo ci) {
-        if (ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS_EVENT) {
-            final CauseStackManager csm = Sponge.getCauseStackManager();
-            csm.pushCause(this);
-            try {
-                final Cause cause = csm.getCurrentCause();
-                final ImmutableSet<SkinPart> skinParts = Sponge.getRegistry().getCatalogRegistry().getAllOf(SkinPart.class)
-                    .map(part -> (SpongeSkinPart) part)
-                    .filter(part -> part.test(packet.getModelPartFlags()))
-                    .collect(ImmutableSet.toImmutableSet());
-                final Locale locale = LocaleCache.getLocale(packet.getLang());
-                final ChatVisibility visibility = (ChatVisibility) (Object) packet.getChatVisibility();
-                final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(cause, visibility, skinParts,
-                    locale, (Player) this, packet.isColorsEnabled(), ((CClientSettingsPacketAccessor) packet).accessor$getView());
-                SpongeCommon.postEvent(event);
-            } finally {
-                csm.popCause();
-            }
-        }
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    @Inject(method = "handleClientSettings", at = @At("RETURN"))
-    private void impl$updateSkinFromPacket(final CClientSettingsPacket packet, final CallbackInfo ci) {
-        this.impl$skinParts = Sponge.getRegistry().getCatalogRegistry().getAllOf(SkinPart.class)
-            .map(part -> (SpongeSkinPart) part)
-            .filter(part -> part.test(packet.getModelPartFlags()))
-            .collect(ImmutableSet.toImmutableSet()); // Returned set is immutable
-        this.impl$viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$getView();
     }
 
     /**
@@ -342,11 +306,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     public void bridge$setImplVelocity(final Vector3d velocity) {
         super.bridge$setImplVelocity(velocity);
         this.impl$velocityOverride = null;
-    }
-
-    @Override
-    public Set<SkinPart> bridge$getSkinParts() {
-        return this.impl$skinParts;
     }
 
     @Override
@@ -736,10 +695,5 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
 
         final boolean teamPVP = super.shadow$canAttackPlayer(other);
         cir.setReturnValue(teamPVP);
-    }
-
-    @Override
-    public int bridge$getViewDistance() {
-        return this.impl$viewDistance;
     }
 }

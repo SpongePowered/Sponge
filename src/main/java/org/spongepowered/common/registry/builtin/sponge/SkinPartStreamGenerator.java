@@ -22,43 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import com.google.common.base.MoreObjects;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.data.type.SpongeSkinPart;
 
-public final class SpongeSkinPart extends SpongeCatalogType implements SkinPart {
+import java.util.stream.Stream;
 
-    private final int ordinal;
-    private final int mask;
-    private final Component component;
+// Our version of PlayerModelPart. We can't use that unfortunately, because it only exists in the client
+public final class SkinPartStreamGenerator {
 
-    public SpongeSkinPart(final ResourceKey key, final int ordinal, final Component label) {
-        super(key);
-        this.ordinal = ordinal;
-        this.component = label;
-        this.mask = 1 << this.ordinal;
+    private SkinPartStreamGenerator() {
     }
 
-    @Override
-    public Component asComponent() {
-        return this.component;
+    public static Stream<SkinPart> stream() {
+        return Stream.of(
+            SkinPartStreamGenerator.make("cape", 0),
+            SkinPartStreamGenerator.make("jacket", 1),
+            SkinPartStreamGenerator.make("left_sleeve", 2),
+            SkinPartStreamGenerator.make("right_sleeve", 3),
+            SkinPartStreamGenerator.make("left_pants_leg", 4),
+            SkinPartStreamGenerator.make("right_pants_leg", 5),
+            SkinPartStreamGenerator.make("hat", 6)
+        );
     }
 
-    public boolean test(final int flags) {
-        return (flags & this.mask) != 0;
+    private static SkinPart make(final String key, final int ordinal) {
+        return new SpongeSkinPart(ResourceKey.minecraft(key), ordinal, Component.translatable("options.modelPart." + key));
     }
 
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("ordinal", this.ordinal);
-    }
-
-    public int getMask() {
-        return this.mask;
-    }
 }

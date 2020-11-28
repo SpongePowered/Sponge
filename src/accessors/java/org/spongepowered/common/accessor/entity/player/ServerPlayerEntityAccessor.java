@@ -36,7 +36,11 @@ public interface ServerPlayerEntityAccessor {
 
     @Accessor("invulnerableDimensionChange") void accessor$setInvulnerableDimensionChange(boolean invulnerableDimensionChange);
 
+    @Accessor("language") String accessor$getLanguage();
+
     @Accessor("seenCredits") boolean accessor$getSeenCredits();
+
+    @Accessor("chatColours") boolean accessor$getChatColours();
 
     @Accessor("seenCredits") void accessor$setSeenCredits(boolean seenCredits);
 

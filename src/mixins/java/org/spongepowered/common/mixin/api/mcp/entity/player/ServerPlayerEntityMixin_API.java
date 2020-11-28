@@ -121,10 +121,7 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
 
     @Shadow @Final public MinecraftServer server;
     @Shadow @Final private PlayerAdvancements advancements;
-    @Shadow private net.minecraft.entity.player.ChatVisibility chatVisibility;
-    @Shadow private String language;
     @Shadow public ServerPlayNetHandler connection;
-    @Shadow private boolean chatColours;
 
     private PlayerChatRouter api$chatRouter;
     private final TabList api$tabList = new SpongeTabList((ServerPlayerEntity) (Object) this);
@@ -167,31 +164,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
     }
 
     @Override
-    public Locale getLocale() {
-        return LocaleCache.getLocale(this.language);
-    }
-
-    @Override
-    public int getViewDistance() {
-        return ((ServerPlayerEntityBridge) this).bridge$getViewDistance();
-    }
-
-    @Override
-    public ChatVisibility getChatVisibility() {
-        return (ChatVisibility) (Object) this.chatVisibility;
-    }
-
-    @Override
-    public boolean isChatColorsEnabled() {
-        return this.chatColours;
-    }
-
-    @Override
-    public Set<SkinPart> getDisplayedSkinParts() {
-        return ((ServerPlayerEntityBridge) this).bridge$getSkinParts();
-    }
-
-    @Override
     public void sendEnvironment(final DimensionType dimensionType) {
         ((ServerPlayerEntityBridge) this).bridge$sendViewerEnvironment((SpongeDimensionType) dimensionType);
     }
@@ -204,7 +176,6 @@ public abstract class ServerPlayerEntityMixin_API extends PlayerEntityMixin_API 
         }
         this.spawnParticles(particleEffect, position, Integer.MAX_VALUE);
     }
-
 
     @Override
     public ServerPlayerConnection getConnection() {

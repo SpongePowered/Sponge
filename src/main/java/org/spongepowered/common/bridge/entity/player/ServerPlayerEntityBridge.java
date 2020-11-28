@@ -112,6 +112,8 @@ public interface ServerPlayerEntityBridge {
 
     Set<SkinPart> bridge$getSkinParts();
 
+    void bridge$setSkinParts(final Set<SkinPart> skinParts);
+
     @Nullable
     User bridge$getUser();
 
@@ -130,5 +132,4 @@ public interface ServerPlayerEntityBridge {
     }
 
     boolean bridge$kick(final Component message);
-
 }

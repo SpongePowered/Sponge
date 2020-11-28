@@ -110,6 +110,7 @@ import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.type.SlabPortion;
 import org.spongepowered.api.data.type.SpellType;
 import org.spongepowered.api.data.type.StairShape;
@@ -222,6 +223,7 @@ import org.spongepowered.common.registry.builtin.sponge.QueryTypeStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.RabbitTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SelectorSortAlgorithmStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SelectorTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.SkinPartStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.TeleportHelperFilterStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.WeatherStreamGenerator;
@@ -622,6 +624,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(RailDirection.class, ResourceKey.minecraft("rail_direction"), Arrays.stream(RailShape.values()), true, false)
             .generateRegistry(SelectorSortAlgorithm.class, ResourceKey.minecraft("selector_sort_algorithm"), SelectorSortAlgorithmStreamGenerator.stream(), true, false)
             .generateRegistry(SelectorType.class, ResourceKey.minecraft("selector_type"), SelectorTypeStreamGenerator.stream(), true, false)
+            .generateRegistry(SkinPart.class, ResourceKey.minecraft("skin_part"), SkinPartStreamGenerator.stream(), true, false)
             .generateRegistry(SlabPortion.class, ResourceKey.minecraft("slab_portion"), Arrays.stream(SlabType.values()), true, false)
             .generateRegistry(SpawnType.class, ResourceKey.sponge("spawn_type"), SpawnTypeStreamGenerator.stream(), true, true)
             .generateRegistry(SpellType.class, ResourceKey.minecraft("spell_type"), Arrays.stream(SpellcastingIllagerEntity.SpellType.values()), true, false)

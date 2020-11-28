@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
+import com.google.common.collect.ImmutableSet;
 import io.netty.channel.Channel;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
@@ -60,7 +61,9 @@ import net.minecraft.world.server.TicketType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
+import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -71,10 +74,10 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
+import org.spongepowered.api.event.entity.living.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -86,6 +89,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.NetworkManagerAccessor;
+import org.spongepowered.common.accessor.network.play.client.CClientSettingsPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -95,6 +99,7 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.BossInfoBridge;
 import org.spongepowered.common.bridge.world.PlatformITeleporterBridge;
+import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.ShouldFire;
@@ -103,12 +108,14 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.user.SpongeUserManager;
+import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 // See also: SubjectMixin_API and SubjectMixin
 @Mixin(ServerPlayerEntity.class)
@@ -133,6 +140,9 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
     private ItemStack impl$packetItem = ItemStack.EMPTY;
+    private int impl$viewDistance;
+    private int impl$skinPartMask;
+    private Set<SkinPart> impl$skinParts = ImmutableSet.of();
 
     @Nullable
     @Override
@@ -284,7 +294,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
     }
 
     @Override
-    public void bridge$setScoreboardOnRespawn(Scoreboard scoreboard) {
+    public void bridge$setScoreboardOnRespawn(final Scoreboard scoreboard) {
         this.impl$scoreboard = scoreboard;
         ((ServerScoreboardBridge) ((ServerPlayer) this).getScoreboard()).bridge$addPlayer((ServerPlayerEntity) (Object) this, false);
     }
@@ -327,7 +337,39 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
             this.connection.sendPacket(new SSpawnPositionPacket(VecHelper.toBlockPos(position)));
         }
     }
-    
+
+    @Override
+    public int bridge$getViewDistance() {
+        return this.impl$viewDistance;
+    }
+
+    @Override
+    @SuppressWarnings("UnstableApiUsage")
+    public Set<SkinPart> bridge$getSkinParts() {
+        final int mask = this.shadow$getDataManager().get(PLAYER_MODEL_FLAG);
+        if (this.impl$skinPartMask != mask) {
+            this.impl$skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
+                    .map(part -> (SpongeSkinPart) part)
+                    .filter(part -> part.test(mask))
+                    .collect(ImmutableSet.toImmutableSet());
+            this.impl$skinPartMask = mask;
+        }
+
+        return this.impl$skinParts;
+    }
+
+    @Override
+    public void bridge$setSkinParts(final Set<SkinPart> skinParts) {
+        int mask = 0;
+        for (final SkinPart part : skinParts) {
+            mask |= ((SpongeSkinPart) part).getMask();
+        }
+
+        this.shadow$getDataManager().set(PLAYER_MODEL_FLAG, (byte) mask);
+        this.impl$skinParts = ImmutableSet.copyOf(skinParts);
+        this.impl$skinPartMask = mask;
+    }
+
         /*
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void impl$onPlayerActive(final CallbackInfo ci) {
@@ -588,12 +630,45 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         SpongeAdventure.forEachBossBar(bar -> ((BossInfoBridge) bar).bridge$replacePlayer(oldPlayer, (ServerPlayerEntity) (Object) this));
     }
 
+    @SuppressWarnings({"ConstantConditions", "UnstableApiUsage"})
     @Inject(method = "handleClientSettings", at = @At("HEAD"))
     private void impl$handleClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
-        final Locale newLocale = Locales.of(packet.getLang());
+        if (ShouldFire.PLAYER_CHANGE_CLIENT_SETTINGS_EVENT) {
+            final Locale newLocale = LocaleCache.getLocale(packet.getLang());
+            final ImmutableSet<SkinPart> skinParts = Sponge.getRegistry().getCatalogRegistry().streamAllOf(SkinPart.class)
+                    .map(part -> (SpongeSkinPart) part)
+                    .filter(part -> part.test(packet.getModelPartFlags()))
+                    .collect(ImmutableSet.toImmutableSet());
+            final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$getView();
+
+            // Post before the player values are updated
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                final ChatVisibility visibility = (ChatVisibility) (Object) packet.getChatVisibility();
+                final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(
+                        frame.getCurrentCause(),
+                        visibility,
+                        skinParts,
+                        newLocale,
+                        (ServerPlayer) this,
+                        packet.isColorsEnabled(),
+                        viewDistance);
+                SpongeCommon.postEvent(event);
+            }
+        }
+    }
+
+    @Inject(method = "handleClientSettings", at = @At("TAIL"))
+    private void impl$updateTrackedClientSettings(final CClientSettingsPacket packet, final CallbackInfo ci) {
+        final Locale newLocale = LocaleCache.getLocale(packet.getLang());
+        final int viewDistance = ((CClientSettingsPacketAccessor) packet).accessor$getView();
+
         // Update locale on Channel, used for sending localized messages
         final Channel channel = ((NetworkManagerAccessor) this.connection.netManager).accessor$getChannel();
         channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(newLocale);
         SpongeAdventure.forEachBossBar(bar -> this.connection.sendPacket(new SUpdateBossInfoPacket(SUpdateBossInfoPacket.Operation.UPDATE_NAME, bar)));
+
+        // Update the fields we track ourselves
+        this.impl$viewDistance = viewDistance;
+        // TODO(1.16): The locale field is gone, we'll have to track it ourselves too
     }
 }
