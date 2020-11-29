@@ -65,6 +65,8 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
     @Shadow private int fireworkAge;
     @Shadow private int lifetime;
 
+    @Shadow protected abstract void func_213893_k();
+
     private ProjectileSource impl$projectileSource = UnknownProjectileSource.UNKNOWN;
     private int impl$explosionRadius = Constants.Entity.Firework.DEFAULT_EXPLOSION_RADIUS;
 
@@ -117,6 +119,10 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
             target = "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V")
     )
     private void impl$useSpongeExplosion(final World world, final Entity self, final byte state) {
+        if (this.world.isRemote) {
+            world.setEntityState(self, state);
+            return;
+        }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             // Fireworks don't typically explode like other explosives, but we'll
             // post an event regardless and if the radius is zero the explosion
