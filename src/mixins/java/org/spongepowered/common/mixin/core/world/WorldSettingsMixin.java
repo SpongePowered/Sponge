@@ -64,8 +64,8 @@ public abstract class WorldSettingsMixin implements ResourceKeyBridge, WorldSett
     private DataContainer impl$generatorSettings = DataContainer.createNew();
     private boolean impl$isEnabled = true;
     private boolean impl$loadOnStartup = true;
-    private boolean impl$keepSpawnLoaded = false;
-    private boolean impl$generateSpawnOnLoad = false;
+    private boolean impl$keepSpawnLoaded = true;
+    private boolean impl$generateSpawnOnLoad = true;
     private boolean impl$pvpEnabled = true;
     private boolean impl$seedRandomized = false;
     private InheritableConfigHandle<WorldConfig> impl$configAdapter;

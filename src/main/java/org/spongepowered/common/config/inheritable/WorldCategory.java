@@ -62,18 +62,11 @@ public class WorldCategory {
 
     @Setting("keep-spawn-loaded")
     @Comment("If 'true', this worlds spawn will remain loaded with no players.")
-    private Boolean keepSpawnLoaded = true;
+    private Boolean keepSpawnLoaded = false;
 
     @Setting("pvp-enabled")
     @Comment("If 'true', this world will allow PVP combat.")
     private boolean pvpEnabled = true;
-
-    @Setting("deny-chunk-requests")
-    @Comment("If 'true', any request for a chunk not currently loaded will be denied (exceptions apply \n"
-            + "for things like world gen and player movement). \n"
-            + "Warning: As this is an experimental setting for performance gain, if you encounter any issues \n"
-            + "then we recommend disabling it.")
-    private boolean denyChunkRequests = false;
 
     @Setting("chunk-gc-tick-interval")
     @Comment("The tick interval used to cleanup all inactive chunks that have leaked in a world. \n"
@@ -127,16 +120,6 @@ public class WorldCategory {
              + "The value must be greater than or equal to 3 and less than or equal to 32 \n"
              + "The server-wide view distance will be used when the value is " + USE_SERVER_VIEW_DISTANCE + ".")
     private int viewDistance = USE_SERVER_VIEW_DISTANCE;
-
-    public WorldCategory() {
-        try {
-            // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
-            // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-            this.denyChunkRequests = SpongeConfigs.getPluginEnvironment().getBlackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
-        } catch (final Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public int getAutoSaveInterval() {
         return this.autoSaveInterval;
@@ -204,10 +187,6 @@ public class WorldCategory {
 
     public void setMobSpawnRange(final int range) {
         this.mobSpawnRange = range;
-    }
-
-    public boolean getDenyChunkRequests() {
-        return this.denyChunkRequests;
     }
 
     public int getTickInterval() {

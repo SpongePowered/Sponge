@@ -95,6 +95,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -115,6 +116,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     private final Map<DimensionType, WorldInfo> infoByType;
     private final Map<ResourceKey, WorldRegistration> pendingWorlds;
     private final Map<ResourceKey, WorldInfo> allInfos;
+
+    private static final TicketType<ResourceLocation> SPAWN_CHUNKS = TicketType.create("spawn_chunks", (i, o) -> i.compareTo(o));
 
     public VanillaWorldManager(final MinecraftServer server) {
         this.server = server;
@@ -381,25 +384,30 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                     world.getKey())));
         }
 
-        try (final ServerWorld mWorld = (ServerWorld) world) {
-            SpongeCommon.getLogger().info("Unloading World '{}' ({}/{})", world.getKey(), world.getDimensionType().getKey(), mWorld.dimension
-                    .getType().getId());
-            ((WorldInfoBridge) mWorld.getWorldInfo()).bridge$getConfigAdapter().save();
-            ((ServerWorldBridge) world).bridge$setManualSave(true);
+        final ServerWorld mWorld = (ServerWorld) world;
+        SpongeCommon.getLogger().info("Unloading World '{}' ({}/{})", world.getKey(), world.getDimensionType().getKey(), mWorld.dimension
+                .getType().getId());
+
+        mWorld.getChunkProvider().releaseTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(world.getProperties().getSpawnPosition().getX(),
+                world.getProperties().getSpawnPosition().getZ()), 11, (ResourceLocation) (Object) world.getKey());
+        ((WorldInfoBridge) mWorld.getWorldInfo()).bridge$getConfigAdapter().save();
+        ((ServerWorldBridge) world).bridge$setManualSave(true);
+
+        try {
             mWorld.save(null, true, mWorld.disableLevelSaving);
-
-
-            this.loadedWorldInfos.remove(world.getKey());
-            this.infoByType.remove(mWorld.dimension.getType());
-            this.worlds.remove(world.getKey());
-            this.worldsByType.remove(mWorld.dimension.getType());
-
-            SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), world));
-
-            return CompletableFuture.completedFuture(true);
-        } catch (final Exception e) {
-            return FutureUtil.completedWithException(e instanceof IOException ? e : new IOException(e));
+            mWorld.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
+
+        this.loadedWorldInfos.remove(world.getKey());
+        this.infoByType.remove(mWorld.dimension.getType());
+        this.worlds.remove(world.getKey());
+        this.worldsByType.remove(mWorld.dimension.getType());
+
+        SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), world));
+
+        return CompletableFuture.completedFuture(true);
     }
 
     @Override
@@ -730,7 +738,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final ServerChunkProvider chunkProvider = serverWorld.getChunkProvider();
         chunkProvider.getLightManager().func_215598_a(500);
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$setServerTime(Util.milliTime());
-        chunkProvider.registerTicket(TicketType.START, spawnChunkPos, 11, Unit.INSTANCE);
+        chunkProvider.registerTicket(VanillaWorldManager.SPAWN_CHUNKS, spawnChunkPos, 11, (ResourceLocation) (Object) apiWorld.getKey());
 
         while (chunkProvider.getLoadedChunksCount() != 441) {
             ((MinecraftServerAccessor_Vanilla) this.server).accessor$setServerTime(Util.milliTime() + 10L);
@@ -755,6 +763,11 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         ((MinecraftServerAccessor_Vanilla) this.server).accessor$runScheduledTasks();
         chunkStatusListener.stop();
         chunkProvider.getLightManager().func_215598_a(5);
+
+        // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
+        if (!((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesKeepSpawnLoaded()) {
+            chunkProvider.releaseTicket(VanillaWorldManager.SPAWN_CHUNKS, spawnChunkPos, 11, (ResourceLocation) (Object) apiWorld.getKey());
+        }
     }
 
     private DimensionType createDimensionType(final ResourceKey key, final SpongeDimensionType logicType, final String worldDirectory,
@@ -889,11 +902,17 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             ((ServerWorldBridge) serverWorld).bridge$getBossBarManager().read(serverWorld.getWorldInfo().getCustomBossEvents());
         }
 
+        final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) serverWorld;
         SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
-                (org.spongepowered.api.world.server.ServerWorld) serverWorld));
+                apiWorld));
 
-        if (isDefaultWorld || ((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad()) {
+        final boolean generateSpawnOnLoad = ((WorldInfoBridge) serverWorld.getWorldInfo()).bridge$doesGenerateSpawnOnLoad() || isDefaultWorld;
+
+        if (generateSpawnOnLoad) {
             this.loadSpawnChunks(serverWorld, listener);
+        } else {
+            serverWorld.getChunkProvider().registerTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(apiWorld.getProperties().getSpawnPosition()
+                            .getX(), apiWorld.getProperties().getSpawnPosition().getZ()), 11, (ResourceLocation) (Object) apiWorld.getKey());
         }
     }
 }
