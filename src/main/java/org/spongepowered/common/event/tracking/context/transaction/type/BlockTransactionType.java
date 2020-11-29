@@ -27,27 +27,46 @@ package org.spongepowered.common.event.tracking.context.transaction.type;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.util.math.BlockPos;
+import org.apache.logging.log4j.Marker;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 final class BlockTransactionType extends TransactionType<ChangeBlockEvent.All> {
 
     BlockTransactionType() {
-        super(true, "BLOCK", ((changeBlockEvents, marker) -> {
+        super(ResourceKey.sponge("block"), true, "BLOCK");
+    }
+
+    @Override
+    protected void consumeEventsAndMarker(final Collection<? extends ChangeBlockEvent.All> changeBlockEvents, final Marker marker) {
+
+        final Multimap<ResourceKey, ChangeBlockEvent> eventsByWorld = LinkedListMultimap.create();
+        changeBlockEvents.forEach(event -> eventsByWorld.put(event.getWorld().getKey(), event));
+
+        eventsByWorld.forEach((key, events) -> {
+            final Optional<ServerWorld> serverWorld = ((SpongeServer) SpongeCommon.getServer()).getWorldManager().getWorld(key);
+            if (!serverWorld.isPresent()) {
+                return;
+            }
             final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
             // Gather transactions that were valid
             changeBlockEvents.stream()
@@ -84,7 +103,7 @@ final class BlockTransactionType extends TransactionType<ChangeBlockEvent.All> {
 
             final Cause cause = PhaseTracker.getInstance().getCurrentCause();
 
-            SpongeCommon.postEvent(SpongeEventFactory.createChangeBlockEventPost(cause, transactions));
-        }));
+            SpongeCommon.postEvent(SpongeEventFactory.createChangeBlockEventPost(cause, transactions, serverWorld.get()));
+        });
     }
 }

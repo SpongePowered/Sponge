@@ -407,8 +407,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (batchDecider == null) {
                 batchDecider = pointer;
             }
-            // First - check if the side effects are empty
-            if (batchDecider.getTransactionType() != pointer.getTransactionType()) {
+            if (batchDecider.getTransactionType() != pointer.getTransactionType() || !batchDecider.worldKey.equals(pointer.worldKey)) {
                 final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
                 TransactionalCaptureSupplier.generateEventForTransaction(
@@ -474,13 +473,16 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 })
                 .orElse(null)
         ) {
-            final E event = pointer.generateEvent(context, parent, transactions, instance.getCurrentCause(), transactionPostEventBuilder);
-
-            final EventByTransaction<E> element = new EventByTransaction<>(event, transactions, parent, pointer);
+            final Optional<E> event = pointer.generateEvent(context, parent, transactions, instance.getCurrentCause(), transactionPostEventBuilder);
+            if (!event.isPresent()) {
+                transactions.forEach(GameTransaction::markCancelled);
+                return;
+            }
+            final EventByTransaction<E> element = new EventByTransaction<>(event.get(), transactions, parent, pointer);
             builder.add(element);
-            ((ImmutableMultimap.Builder) transactionPostEventBuilder).put(pointer.getTransactionType(), event);
+            ((ImmutableMultimap.Builder) transactionPostEventBuilder).put(pointer.getTransactionType(), event.get());
             if (frame != null) {
-                frame.pushCause(event);
+                frame.pushCause(event.get());
             }
             for (final GameTransaction<E> transaction : transactions) {
                 if (transaction.sideEffects == null) {

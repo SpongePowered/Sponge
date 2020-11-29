@@ -60,7 +60,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
         final Entity destroyingEntity, final CompoundNBT entityTag,
         final Supplier<Optional<DamageSource>> lastAttacker
     ) {
-        super(TransactionTypes.ENTITY_DEATH_DROPS.get());
+        super(TransactionTypes.ENTITY_DEATH_DROPS.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).getKey());
         this.worldSupplier = worldSupplier;
         this.destroyingEntity = destroyingEntity;
         this.entityTag = entityTag;
@@ -97,13 +97,13 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
     }
 
     @Override
-    public HarvestEntityEvent generateEvent(
+    public Optional<HarvestEntityEvent> generateEvent(
         final PhaseContext<@NonNull ?> context, @Nullable final GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<HarvestEntityEvent>> gameTransactions,
         final Cause currentCause,
         final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
-        return SpongeEventFactory.createHarvestEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) this.destroyingEntity);
+        return Optional.of(SpongeEventFactory.createHarvestEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) this.destroyingEntity));
     }
 
     @Override

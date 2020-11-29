@@ -28,13 +28,13 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.entity.HarvestEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.util.MemoizedSupplier;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.function.Supplier;
 
 public final class TransactionTypes {
-    public static final Supplier<TransactionType<ChangeBlockEvent.All>> BLOCK = MemoizedSupplier.memoize(BlockTransactionType::new);
-    public static final Supplier<TransactionType<NotifyNeighborBlockEvent>> NEIGHBOR_NOTIFICATION = MemoizedSupplier.memoize(() -> new NoOpTransactionType<>(false, "NEIGHBOR_NOTIFICATION"));
-    public static final Supplier<TransactionType<SpawnEntityEvent>> SPAWN_ENTITY = MemoizedSupplier.memoize(() -> new NoOpTransactionType<>(false, "SPAWN_ENTITY"));
-    public static final Supplier<TransactionType<HarvestEntityEvent>> ENTITY_DEATH_DROPS = MemoizedSupplier.memoize(() -> new NoOpTransactionType<>(false,"ENTITY_DROPS"));
+    public static final Supplier<TransactionType<ChangeBlockEvent.All>> BLOCK = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "block");
+    public static final Supplier<TransactionType<NotifyNeighborBlockEvent>> NEIGHBOR_NOTIFICATION = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "neighbor_notification");
+    public static final Supplier<TransactionType<SpawnEntityEvent>> SPAWN_ENTITY = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "spawn_entity");
+    public static final Supplier<TransactionType<HarvestEntityEvent>> ENTITY_DEATH_DROPS = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "entity_death_drops");
 }

@@ -76,7 +76,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     SpawnEntityTransaction(final Supplier<ServerWorld> worldSupplier, final Entity entityToSpawn,
         final Supplier<SpawnType> deducedSpawnType
     ) {
-        super(TransactionTypes.SPAWN_ENTITY.get());
+        super(TransactionTypes.SPAWN_ENTITY.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).getKey());
         this.worldSupplier = worldSupplier;
         this.entityToSpawn = entityToSpawn;
         this.entityTag = entityToSpawn.writeWithoutTypeId(new CompoundNBT());
@@ -104,10 +104,10 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public SpawnEntityEvent generateEvent(final PhaseContext<@NonNull ?> context,
+    public Optional<SpawnEntityEvent> generateEvent(final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause,
-        ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         final ImmutableList<Tuple<Entity, DummySnapshot>> collect = gameTransactions.stream()
             .map(transaction -> (SpawnEntityTransaction) transaction)
@@ -117,7 +117,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
                     new DummySnapshot(spawnRequest.originalPosition, spawnRequest.entityTag, spawnRequest.worldSupplier)
                 );
             }).collect(ImmutableList.toImmutableList());
-        return ((IPhaseState) context.state).createSpawnEvent(context, parent, collect, currentCause);
+        return Optional.of(((IPhaseState) context.state).createSpawnEvent(context, parent, collect, currentCause));
     }
 
     @Override

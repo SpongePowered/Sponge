@@ -45,7 +45,7 @@ public final class PrepareBlockDropsTransaction extends BlockEventBasedTransacti
     PrepareBlockDropsTransaction(
         final BlockPos affectedPosition, final BlockState originalState, final SpongeBlockSnapshot original
     ) {
-        super(affectedPosition, originalState);
+        super(affectedPosition, originalState, original.getWorld());
         this.originalState = original;
     }
 

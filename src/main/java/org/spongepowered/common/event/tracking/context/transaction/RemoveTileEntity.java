@@ -49,7 +49,7 @@ public final class RemoveTileEntity extends BlockEventBasedTransaction {
     final SpongeBlockSnapshot tileSnapshot;
 
     RemoveTileEntity(final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
-        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
+        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState(), attachedSnapshot.getWorld());
         this.removed = removed;
         this.tileSnapshot = attachedSnapshot;
     }

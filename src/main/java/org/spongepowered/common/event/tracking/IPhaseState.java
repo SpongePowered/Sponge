@@ -25,9 +25,7 @@
 package org.spongepowered.common.event.tracking;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -38,7 +36,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.loot.LootContext;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -49,7 +46,6 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -213,21 +209,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param phaseContext The context of the current state being unwound
      */
     void unwind(C phaseContext);
-
-    /**
-     * Used to create any extra specialized events for {@link ChangeBlockEvent.Post} as necessary.
-     * An example of this being used specially is for explosions needing to create a child classed
-     * post event.
-     *
-     * @param context
-     * @param transactions
-     * @param cause
-     * @return
-     */
-    default ChangeBlockEvent.Post createChangeBlockPostEvent(final C context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
-        final Cause cause) {
-        return SpongeEventFactory.createChangeBlockEventPost(cause, transactions);
-    }
 
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}

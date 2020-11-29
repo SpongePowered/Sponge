@@ -27,24 +27,25 @@ package org.spongepowered.common.event.tracking.context.transaction.type;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Event;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.function.BiConsumer;
 
-public abstract class TransactionType<E extends Event> {
+public abstract class TransactionType<E extends Event> implements CatalogType {
 
     private final boolean isPrimary;
     private final String name;
-    private final BiConsumer<Collection<? extends E>, Marker> postEventBatch;
     protected final Marker marker;
+    private final ResourceKey key;
 
-    TransactionType(final boolean isPrimary, final String name, final BiConsumer<Collection<? extends E>, Marker> postEventBatch) {
+    TransactionType(final ResourceKey key, final boolean isPrimary, final String name) {
         this.isPrimary = isPrimary;
         this.name = name;
-        this.postEventBatch = postEventBatch;
+        this.key = key;
         this.marker = MarkerManager.getMarker(this.name);
     }
 
@@ -88,6 +89,15 @@ public abstract class TransactionType<E extends Event> {
     }
 
     public void createAndProcessPostEvents(final Collection<? extends E> events) {
-        this.postEventBatch.accept(events, this.marker);
+        this.consumeEventsAndMarker(events, this.marker);
+    }
+
+    protected void consumeEventsAndMarker(final Collection<? extends E> events, final Marker marker) {
+
+    }
+
+    @Override
+    public ResourceKey getKey() {
+        return this.key;
     }
 }

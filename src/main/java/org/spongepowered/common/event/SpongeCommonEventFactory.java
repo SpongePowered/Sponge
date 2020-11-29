@@ -60,6 +60,8 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.Jukebox;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -341,7 +343,8 @@ public final class SpongeCommonEventFactory {
      * @param source The source of event
      * @return The event
      */
-    @SuppressWarnings("unchecked") private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (source == null) {
@@ -372,7 +375,9 @@ public final class SpongeCommonEventFactory {
             phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             final ChangeBlockEvent.Pre event =
-                SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations);
+                SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations,
+                    (org.spongepowered.api.world.server.ServerWorld) worldIn
+                );
             SpongeCommon.postEvent(event);
             return event;
         }
@@ -398,10 +403,9 @@ public final class SpongeCommonEventFactory {
             final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).getProperties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
-            final Transaction<BlockSnapshot> transaction = new Transaction<>(SpongeBlockSnapshotBuilder.unpooled().blockState(fromState).world((ServerWorld) worldIn).position(position).build(),
-                            SpongeBlockSnapshotBuilder.unpooled().blockState(toState).world((ServerWorld) worldIn).position(position).build());
-            final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventAll(frame.getCurrentCause(),
-                    Collections.singletonList(transaction));
+            final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldIn, position);
+            final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(),
+                    Collections.singletonList(location), ((org.spongepowered.api.world.server.ServerWorld) worldIn));
 
             SpongeCommon.postEvent(event);
             return event;
@@ -429,9 +433,9 @@ public final class SpongeCommonEventFactory {
 
             final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world((ServerWorld) worldIn).position(position).build();
             final SpongeBlockSnapshot to = SpongeBlockSnapshotBuilder.pooled().blockState(toState).world((ServerWorld) worldIn).position(position).build();
-            final Transaction<BlockSnapshot> transaction = new Transaction<>(from, to);
+            final BlockTransaction transaction = new BlockTransaction(from, to, Operations.LIQUID_SPREAD.get());
             final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventAll(frame.getCurrentCause(),
-                Collections.singletonList(transaction));
+                Collections.singletonList(transaction), ((org.spongepowered.api.world.server.ServerWorld) worldIn));
 
             SpongeCommon.postEvent(event);
             return event;

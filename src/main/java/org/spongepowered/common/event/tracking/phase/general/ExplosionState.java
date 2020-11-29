@@ -32,14 +32,11 @@ import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootParameters;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.accessor.world.ExplosionAccessor;
@@ -148,12 +145,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                     .collect(Collectors.toList()));
         }
         return super.createSpawnEvent(context, parent, collect, currentCause);
-    }
-
-    @Override
-    public ChangeBlockEvent.Post createChangeBlockPostEvent(final ExplosionContext context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
-        final Cause cause) {
-        return SpongeEventFactory.createExplosionEventPost(cause, context.getSpongeExplosion(), transactions);
     }
 
 }

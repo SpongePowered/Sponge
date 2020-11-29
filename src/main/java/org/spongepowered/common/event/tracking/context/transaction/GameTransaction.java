@@ -31,6 +31,7 @@ import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -48,7 +49,8 @@ import java.util.function.BiConsumer;
 @DefaultQualifier(NonNull.class)
 public abstract class GameTransaction<E extends Event & Cancellable> {
 
-    private final TransactionType transactionType;
+    private final TransactionType<? extends E> transactionType;
+    protected final ResourceKey worldKey;
     boolean cancelled = false;
 
     // Children Definitions
@@ -58,8 +60,9 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
     @Nullable GameTransaction<@NonNull ?> previous;
     @Nullable GameTransaction<@NonNull ?> next;
 
-    GameTransaction(final TransactionType transactionType) {
+    GameTransaction(final TransactionType<? extends E> transactionType, final ResourceKey worldKey) {
         this.transactionType = transactionType;
+        this.worldKey = worldKey;
     }
 
     @Override
@@ -68,7 +71,7 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
             .toString();
     }
 
-    public TransactionType getTransactionType() {
+    public TransactionType<? extends E> getTransactionType() {
         return this.transactionType;
     }
 
@@ -126,7 +129,7 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
         return false;
     }
 
-    public abstract E generateEvent(
+    public abstract Optional<E> generateEvent(
         PhaseContext<@NonNull ?> context,
         @Nullable GameTransaction<@NonNull ?> parent,
         ImmutableList<GameTransaction<E>> transactions,
