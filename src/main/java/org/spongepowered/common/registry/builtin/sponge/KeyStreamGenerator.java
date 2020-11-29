@@ -295,7 +295,7 @@ public final class KeyStreamGenerator {
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("locale"), TypeTokens.LOCALE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("lock_token"), TypeTokens.STRING_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("lore"), TypeTokens.LIST_COMPONENT_VALUE_TOKEN));
-        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("matter_state"), TypeTokens.MATTER_STATE_VALUE_TOKEN));
+        keys.add(KeyStreamGenerator.key(ResourceKey.sponge("matter_type"), TypeTokens.MATTER_TYPE_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_air"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_burn_time"), TypeTokens.INTEGER_VALUE_TOKEN));
         keys.add(KeyStreamGenerator.key(ResourceKey.sponge("max_cook_time"), TypeTokens.INTEGER_VALUE_TOKEN));

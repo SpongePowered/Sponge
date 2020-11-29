@@ -38,7 +38,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
-import org.spongepowered.api.data.type.MatterStates;
+import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.plugin.PluginManager;
@@ -100,14 +100,14 @@ public final class BlockData {
                         .get(h -> ((BlockBridge) h.getBlock()).bridge$isDummy())
                     .create(Keys.LIGHT_EMISSION)
                         .get(BlockState::getLightValue)
-                    .create(Keys.MATTER_STATE)
+                    .create(Keys.MATTER_TYPE)
                         .get(h -> {
                             if (h.getBlock() instanceof FlowingFluidBlock) {
-                                return MatterStates.LIQUID.get();
+                                return MatterTypes.LIQUID.get();
                             } else if (h.getMaterial() == Material.AIR) {
-                                return MatterStates.GAS.get();
+                                return MatterTypes.GAS.get();
                             } else {
-                                return MatterStates.SOLID.get();
+                                return MatterTypes.SOLID.get();
                             }
                         })
                     .create(Keys.REPRESENTED_INSTRUMENT)

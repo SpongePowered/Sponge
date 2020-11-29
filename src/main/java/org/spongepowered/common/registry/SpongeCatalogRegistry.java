@@ -98,6 +98,7 @@ import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.LlamaType;
+import org.spongepowered.api.data.type.MatterType;
 import org.spongepowered.api.data.type.MooshroomType;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.PandaGene;
@@ -210,6 +211,7 @@ import org.spongepowered.common.registry.builtin.sponge.HorseStyleStreamGenerato
 import org.spongepowered.common.registry.builtin.sponge.IAttributeTypeRegistrar;
 import org.spongepowered.common.registry.builtin.sponge.KeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.LlamaTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.MatterTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MovementTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.MusicDiscStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.NotePitchStreamGenerator;
@@ -606,6 +608,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(DoorHinge.class, ResourceKey.minecraft("door_hinge"), Arrays.stream(DoorHingeSide.values()), true, false)
             .generateRegistry(InstrumentType.class, ResourceKey.minecraft("instrument_type"), Arrays.stream(NoteBlockInstrument.values()), true, false)
             .generateRegistry(Key.class, ResourceKey.sponge("key"), KeyStreamGenerator.stream(), true, true)
+            .generateRegistry(MatterType.class, ResourceKey.sponge("matter_type"), MatterTypeStreamGenerator.stream(), true, false)
             .generateRegistry(MooshroomType.class, ResourceKey.minecraft("mooshroom_type"), Arrays.stream(MooshroomEntity.Type.values()), true, false)
             .generateRegistry(MovementType.class, ResourceKey.sponge("movement_type"), MovementTypeStreamGenerator.stream(), true, true)
             .generateRegistry(MusicDisc.class, ResourceKey.minecraft("music_disc"), MusicDiscStreamGenerator.stream(), true, false)

@@ -40,7 +40,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.MatterStates;
+import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -211,7 +211,7 @@ public final class ChangeBlockTest implements LoadableModule {
             if (ChangeBlockTest.this.waterProofRedstone) {
                 for (final BlockTransaction transaction : post.getTransactions()) {
                     final boolean wasRedstone = transaction.getOriginal().getState().getType() == BlockTypes.REDSTONE_WIRE.get();
-                    final boolean becomesLiquid = transaction.getFinal().getState().get(Keys.MATTER_STATE).get() == MatterStates.LIQUID.get();
+                    final boolean becomesLiquid = transaction.getFinal().getState().get(Keys.MATTER_TYPE).get() == MatterTypes.LIQUID.get();
                     if (wasRedstone && becomesLiquid) {
                         post.setCancelled(true);
                         return;
