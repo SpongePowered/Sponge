@@ -33,6 +33,7 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.LocationTargetingBridge;
 
 @Mixin(SetWorldSpawnCommand.class)
 public abstract class SetWorldSpawnCommandMixin {
@@ -40,6 +41,8 @@ public abstract class SetWorldSpawnCommandMixin {
     @Redirect(method = "setSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
     private static void impl$sendCompassPositionPerWorld(PlayerList playerList, IPacket<?> packetIn, CommandSource source, BlockPos pos) {
         for (final ServerPlayerEntity player : source.getWorld().getPlayers()) {
+            ((LocationTargetingBridge) player).bridge$setTargetedPosition(null);
+            
             player.connection.sendPacket(packetIn);
         }
     }

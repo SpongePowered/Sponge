@@ -74,6 +74,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.play.server.SRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
@@ -325,6 +326,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private ServerWorld impl$usePerWorldWorldBorder(final MinecraftServer minecraftServer, final DimensionType dimension, final ServerPlayerEntity playerIn,
             final ServerWorld worldIn) {
         return worldIn;
+    }
+
+    @Redirect(method = "sendWorldInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/server/ServerWorld;getSpawnPoint()Lnet/minecraft/util/math/BlockPos;"))
+    private BlockPos impl$resetTargetedLocationData(final ServerWorld serverWorld, ServerPlayerEntity playerIn) {
+        ((LocationTargetingBridge) playerIn).bridge$setTargetedPosition(null);
+        return serverWorld.getSpawnPoint();
     }
 
     private void impl$disconnectClient(final NetworkManager netManager, final Component disconnectMessage, final @Nullable GameProfile profile) {
