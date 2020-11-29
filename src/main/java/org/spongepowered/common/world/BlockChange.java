@@ -29,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
-import org.spongepowered.common.applaunch.config.inheritable.LoggingCategory;
+import org.spongepowered.common.config.inheritable.LoggingCategory;
 
 @DefaultQualifier(NonNull.class)
 public enum BlockChange {
