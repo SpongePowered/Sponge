@@ -119,6 +119,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::isOptimizedTileEntityTicking)
             .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.EnderChestTileEntityMixin_Optimization_TileEntity",
                     OptimizationCategory::isOptimizedTileEntityTicking)
+            .put("org.spongepowered.common.mixin.optimization.mcp.block.LeavesBlockMixin_DisablePersistentScheduledUpdate",
+                    OptimizationCategory::isDisableLeafBlockScheduledUpdatesForPersistedLeaves)
             .build();
 
 }

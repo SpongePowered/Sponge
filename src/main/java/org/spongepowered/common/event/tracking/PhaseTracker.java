@@ -89,7 +89,7 @@ public final class PhaseTracker implements CauseStackManager {
 
     public static final PhaseTracker CLIENT = new PhaseTracker();
     public static final PhaseTracker SERVER = new PhaseTracker();
-    public static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger(PhaseTracker.class);
     static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
     private static final Map<Thread, PhaseTracker> SPINOFF_TRACKERS = new MapMaker().weakKeys().concurrencyLevel(8).makeMap();
     private static final boolean DEBUG_CAUSE_FRAMES = Boolean.parseBoolean(System.getProperty("sponge.debugcauseframes", "false"));

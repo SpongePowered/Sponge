@@ -112,6 +112,14 @@ public class OptimizationCategory {
             "suppress the exceptions printing out in the log.")
     private boolean disableFailingAdvancementDeserialization = true;
 
+    @Setting("disable-scheduled-updates-for-persistent-leaf-blocks")
+    @Comment("Leaf blocks placed by players will normally schedule\n" +
+        "updates for themselves after placement, and on neighboring\n" +
+        "placement. This optimization is relatively small but effectively\n" +
+        "disables scheduling updates and reactive updates to leaves that\n" +
+        "are `persistent`. Does not drastically improve performance.")
+    private boolean disableLeafBlockScheduledUpdatesForPersistedLeaves = true;
+
     public OptimizationCategory() {
         // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
         // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
@@ -175,4 +183,7 @@ public class OptimizationCategory {
         return this.disableFailingAdvancementDeserialization;
     }
 
+    public boolean isDisableLeafBlockScheduledUpdatesForPersistedLeaves() {
+        return this.disableLeafBlockScheduledUpdatesForPersistedLeaves;
+    }
 }
