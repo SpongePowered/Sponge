@@ -235,6 +235,10 @@ public final class Constants {
                 public static final String HEALTH_SCALE = "HealthScale";
             }
 
+            public static final class Human {
+                public static final byte PLAYER_MODEL_FLAG_ALL = (byte) 0b01111111;
+            }
+
             public static final class DataRegistration {
                 public static final String INVENTORY = "inventory";
                 public static final String TILEENTITY = "tileentity";

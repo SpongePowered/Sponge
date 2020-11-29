@@ -1130,8 +1130,7 @@ public final class DataTest  {
         this.checkOfferData(slime, Keys.SIZE, 10);
 
         final Entity human = world.createEntity(EntityTypes.HUMAN.get(), position);
-        // TODO HumanEntity#getSkinProperty NPE / offer not working?
-        //        this.checkOfferData(human, Keys.SKIN_PROFILE_PROPERTY, player.get(Keys.SKIN_PROFILE_PROPERTY).get());
+        this.checkOfferData(human, Keys.SKIN_PROFILE_PROPERTY, player.get(Keys.SKIN_PROFILE_PROPERTY).get());
 
         this.checkOfferData(dolphin, Keys.SKIN_MOISTURE, 1);
 
