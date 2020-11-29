@@ -77,6 +77,6 @@ public final class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public VillagerRegistry getVillagerRegistry() {
-        throw new UnsupportedOperationException("implement me");
+        return SpongeVillagerRegistry.getInstance();
     }
 }
