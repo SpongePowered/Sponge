@@ -52,12 +52,8 @@ public final class FoxData {
                         .get(FoxEntity::isCrouching)
                         .set(FoxEntity::setCrouching)
                     .create(Keys.IS_DEFENDING)
-                        .get(h -> {
-                            throw new MissingImplementationException("FoxData", "IS_DEFENDING::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("FoxData", "IS_DEFENDING::setter");
-                        })
+                        .get(h -> ((FoxEntityAccessor) h).accessor$isFoxAggroed())
+                        .set((h, v) -> ((FoxEntityAccessor) h).accessor$setFoxAggroed(v))
                     .create(Keys.IS_FACEPLANTED)
                         .get(FoxEntity::isStuck)
                         .set((h, v) -> ((FoxEntityAccessor) h).accessor$setStuck(v))

@@ -723,8 +723,7 @@ public final class DataTest  {
 
         this.checkOfferData(sheep, Keys.IS_CUSTOM_NAME_VISIBLE, false);
 
-// TODO provider
-//        this.checkOfferData(fox, Keys.IS_DEFENDING, true);
+        this.checkOfferData(fox, Keys.IS_DEFENDING, true);
 
         final BlockState tripWireState = BlockTypes.TRIPWIRE.get().getDefaultState();
         this.checkWithData(tripWireState, Keys.IS_DISARMED, true);
@@ -794,7 +793,7 @@ public final class DataTest  {
         this.checkWithData(redstoneTorchState, Keys.IS_LIT, false);
         this.checkWithData(redstoneTorchState, Keys.IS_LIT, true);
 
-//        this.checkOfferData(cat, Keys.IS_LYING_DOWN, true);
+        this.checkOfferData(cat, Keys.IS_LYING_DOWN, true);
 
         final BlockState bedState = BlockTypes.BLACK_BED.get().getDefaultState();
         this.checkWithData(bedState, Keys.IS_OCCUPIED, true);
@@ -827,7 +826,7 @@ public final class DataTest  {
         this.checkGetData(tntEntity, Keys.IS_PRIMED, true);
 
         //        this.checkOfferData(cat, Keys.IS_PURRING, true);
-//        this.checkOfferData(cat, Keys.IS_RELAXED, true);
+        this.checkOfferData(cat, Keys.IS_RELAXED, true);
 
         this.checkGetData(waterBlockState, Keys.IS_REPLACEABLE, true);
         this.checkGetData(dirtState, Keys.IS_REPLACEABLE, false);
