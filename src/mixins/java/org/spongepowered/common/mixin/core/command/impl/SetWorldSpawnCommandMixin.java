@@ -22,24 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.entity;
+package org.spongepowered.common.mixin.core.command.impl;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.LocationTargetingBridge;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.impl.SetWorldSpawnCommand;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.IPacket;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-public final class LocationTargetingData {
+@Mixin(SetWorldSpawnCommand.class)
+public abstract class SetWorldSpawnCommandMixin {
 
-    private LocationTargetingData() {
+    @Redirect(method = "setSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/IPacket;)V"))
+    private static void impl$sendCompassPositionPerWorld(PlayerList playerList, IPacket<?> packetIn, CommandSource source, BlockPos pos) {
+        for (final ServerPlayerEntity player : source.getWorld().getPlayers()) {
+            player.connection.sendPacket(packetIn);
+        }
     }
-
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asMutable(LocationTargetingBridge.class)
-                    .create(Keys.TARGET_LOCATION)
-                        .get(LocationTargetingBridge::bridge$getTargetedPosition)
-                        .set(LocationTargetingBridge::bridge$setTargetedPosition);
-    }
-    // @formatter:on
 }

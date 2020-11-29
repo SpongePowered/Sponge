@@ -150,7 +150,8 @@
         "world.gen.feature.structure.LegacyStructureDataUtilMixin",
         "block.CarvedPumpkinBlockMixin",
         "world.server.ServerChunkProviderMixin",
-        "command.impl.GameRuleCommandMixin"
+        "command.impl.GameRuleCommandMixin",
+        "command.impl.SetWorldSpawnCommandMixin"
     ],
     "client": [
         "client.MinecraftMixin",

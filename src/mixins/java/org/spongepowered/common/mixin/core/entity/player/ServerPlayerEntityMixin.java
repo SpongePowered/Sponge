@@ -36,6 +36,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.ServerPlayNetHandler;
 import net.minecraft.network.play.client.CClientSettingsPacket;
 import net.minecraft.network.play.server.SCombatPacket;
+import net.minecraft.network.play.server.SSpawnPositionPacket;
 import net.minecraft.network.play.server.SUpdateBossInfoPacket;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreCriteria;
@@ -86,6 +87,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.NetworkManagerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
@@ -110,7 +112,7 @@ import java.util.Locale;
 
 // See also: SubjectMixin_API and SubjectMixin
 @Mixin(ServerPlayerEntity.class)
-public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, ServerPlayerEntityBridge {
+public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implements SubjectBridge, LocationTargetingBridge, ServerPlayerEntityBridge {
 
     // @formatter:off
     @Shadow public ServerPlayNetHandler connection;
@@ -317,6 +319,15 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
         return super.bridge$getExperiencePointsOnDeath(entity, attackingPlayer);
     }
 
+    @Override
+    public void bridge$setTargetedPosition(@org.checkerframework.checker.nullness.qual.Nullable final Vector3d position) {
+        this.impl$targetedPosition = position;
+
+        if (position != null) {
+            this.connection.sendPacket(new SSpawnPositionPacket(VecHelper.toBlockPos(position)));
+        }
+    }
+    
         /*
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void impl$onPlayerActive(final CallbackInfo ci) {
@@ -416,7 +427,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntityMixin implemen
      * @author zidane - November 21st, 2020 - Minecraft 1.15.2
      * @reason Call to EntityUtil to handle dimension changes
      */
-    @Nullable
+    @javax.annotation.Nullable
     @Overwrite
     public Entity changeDimension(DimensionType destination) {
         if (this.shadow$getEntityWorld().isRemote || this.removed) {

@@ -58,12 +58,12 @@ public abstract class EyeOfEnderEntityMixin extends EntityMixin implements Locat
     }
 
     @Override
-    public Vector3d bridge$getTargetedLocation() {
+    public Vector3d bridge$getTargetedPosition() {
         return new Vector3d(this.targetX, this.targetY, this.targetZ);
     }
 
     @Override
-    public void bridge$setTargetedLocation(Vector3d vec) {
+    public void bridge$setTargetedPosition(Vector3d vec) {
         this.targetX = vec.getX();
         this.targetY = vec.getY();
         this.targetZ = vec.getZ();

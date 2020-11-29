@@ -154,10 +154,11 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     // @formatter: on
 
     @Shadow public float prevCameraYaw;
+    @Shadow private BlockPos spawnPos;
     private boolean impl$affectsSpawning = true;
-    private Vector3d impl$targetedLocation = VecHelper.toVector3d(this.world.getSpawnPoint());
     private boolean impl$shouldRestoreInventory = false;
     protected final boolean impl$isFake = SpongeImplHooks.isFakePlayer((PlayerEntity) (Object) this);
+    protected Vector3d impl$targetedPosition;
 
     @Override
     public boolean bridge$affectsSpawning() {
@@ -167,20 +168,6 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     @Override
     public void bridge$setAffectsSpawning(final boolean affectsSpawning) {
         this.impl$affectsSpawning = affectsSpawning;
-    }
-
-    @Override
-    public Vector3d bridge$getTargetedLocation() {
-        return this.impl$targetedLocation;
-    }
-
-    @Override
-    public void bridge$setTargetedLocation(@Nullable final Vector3d vec) {
-        this.impl$targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.getSpawnPoint());
-        //noinspection ConstantConditions
-        if (!((PlayerEntity) (Object) this instanceof ServerPlayerEntity)) {
-            this.world.setSpawnPoint(VecHelper.toBlockPos(this.impl$targetedLocation));
-        }
     }
 
     @Override
@@ -207,6 +194,26 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     public void bridge$setExperienceSinceLevel(final int experience) {
         this.experienceTotal = ExperienceHolderUtil.xpAtLevel(this.experienceLevel) + experience;
         this.experience = (float) experience / this.shadow$xpBarCap();
+    }
+
+    @Override
+    public Vector3d bridge$getTargetedPosition() {
+        if (this.impl$targetedPosition == null) {
+            if (this.spawnPos == null) {
+                return new Vector3d(0, 0, 0);
+            } else {
+                return new Vector3d(this.spawnPos.getX(), this.spawnPos.getY(), this.spawnPos.getZ());
+            }
+        }
+
+        return this.impl$targetedPosition;
+    }
+
+    @Override
+    public void bridge$setTargetedPosition(@org.checkerframework.checker.nullness.qual.Nullable final Vector3d position) {
+        this.impl$targetedPosition = position;
+
+        this.spawnPos = position != null ? VecHelper.toBlockPos(position) : null;
     }
 
     /*
