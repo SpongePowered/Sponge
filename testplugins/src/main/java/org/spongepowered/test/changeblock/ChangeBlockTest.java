@@ -32,15 +32,14 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.MatterStates;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -197,7 +196,7 @@ public final class ChangeBlockTest implements LoadableModule {
                 post.setCancelled(true);
             }
             if (ChangeBlockTest.this.waterProofRedstone) {
-                for (final Transaction<@NonNull BlockSnapshot> transaction : post.getTransactions()) {
+                for (final BlockTransactionReceipt transaction : post.getReceipts()) {
                     final boolean wasRedstone = transaction.getOriginal().getState().getType() == BlockTypes.REDSTONE_WIRE.get();
                     final boolean becomesLiquid = transaction.getFinal().getState().get(Keys.MATTER_STATE).get() == MatterStates.LIQUID.get();
                     if (wasRedstone && becomesLiquid) {

@@ -73,7 +73,7 @@ public abstract class BoneMealItemMixin_Tracker {
     )
     private static void tracker$wrapGrowWithPhaseEntry(IGrowable iGrowable, ServerWorld worldIn, Random rand, BlockPos pos, BlockState state,
             ItemStack stack) {
-        if (((WorldBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_GROW) {
+        if (((WorldBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL) {
             iGrowable.grow(worldIn, rand, pos, state);
             return;
         }

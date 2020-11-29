@@ -107,7 +107,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -130,12 +129,13 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.hooks.SpongeHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.hooks.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
@@ -378,7 +378,7 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static ChangeBlockEvent.Modify callChangeBlockEventModifyLiquidMix(
+    public static ChangeBlockEvent callChangeBlockEventModifyLiquidMix(
         final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, @Nullable Object source) {
 
         final BlockState fromState = (BlockState) worldIn.getBlockState(pos);
@@ -400,7 +400,7 @@ public final class SpongeCommonEventFactory {
 
             final Transaction<BlockSnapshot> transaction = new Transaction<>(SpongeBlockSnapshotBuilder.unpooled().blockState(fromState).world((ServerWorld) worldIn).position(position).build(),
                             SpongeBlockSnapshotBuilder.unpooled().blockState(toState).world((ServerWorld) worldIn).position(position).build());
-            final ChangeBlockEvent.Modify event = SpongeEventFactory.createChangeBlockEventModify(frame.getCurrentCause(),
+            final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventAll(frame.getCurrentCause(),
                     Collections.singletonList(transaction));
 
             SpongeCommon.postEvent(event);
@@ -430,7 +430,7 @@ public final class SpongeCommonEventFactory {
             final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world((ServerWorld) worldIn).position(position).build();
             final SpongeBlockSnapshot to = SpongeBlockSnapshotBuilder.pooled().blockState(toState).world((ServerWorld) worldIn).position(position).build();
             final Transaction<BlockSnapshot> transaction = new Transaction<>(from, to);
-            final ChangeBlockEvent.Break event = SpongeEventFactory.createChangeBlockEventBreak(frame.getCurrentCause(),
+            final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventAll(frame.getCurrentCause(),
                 Collections.singletonList(transaction));
 
             SpongeCommon.postEvent(event);

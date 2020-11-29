@@ -50,13 +50,13 @@ import org.spongepowered.common.mixin.core.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
+
 import java.util.List;
 
 @Mixin(LightningBoltEntity.class)
 public abstract class LightningBoltEntityMixin extends EntityMixin {
 
     private final List<Entity> impl$struckEntities = Lists.newArrayList();
-    private final List<Transaction<BlockSnapshot>> impl$struckBlocks = Lists.newArrayList();
     private boolean impl$effect = false;
 
     @Redirect(method = "igniteBlocks",
@@ -86,9 +86,6 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
                     .world((ServerWorld) world)
                     .position(pos3i)
                     .build());
-            if (!this.impl$struckBlocks.contains(transaction)) {
-                this.impl$struckBlocks.add(transaction);
-            }
             return true;
         }
         return false;
@@ -111,17 +108,10 @@ public abstract class LightningBoltEntityMixin extends EntityMixin {
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this);
-            final LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(frame.getCurrentCause(), this.impl$struckEntities, this.impl$struckBlocks);
+            final LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(frame.getCurrentCause(), this.impl$struckEntities);
             Sponge.getEventManager().post(strike);
 
             if (!strike.isCancelled()) {
-                for (final Transaction<BlockSnapshot> bt : strike.getTransactions()) {
-                    if (bt.isValid()) {
-                        final BlockSnapshot bs = bt.getFinal();
-                        this.world.setBlockState(VecHelper.toBlockPos(bs.getLocation().get()), ((BlockState) bs.getState()));
-                    }
-                }
                 for (final Entity e : strike.getEntities()) {
                     ((net.minecraft.entity.Entity) e).onStruckByLightning((LightningBoltEntity) (Object) this);
                 }
