@@ -42,7 +42,7 @@ public abstract class SetWorldSpawnCommandMixin {
     private static void impl$sendCompassPositionPerWorld(PlayerList playerList, IPacket<?> packetIn, CommandSource source, BlockPos pos) {
         for (final ServerPlayerEntity player : source.getWorld().getPlayers()) {
             ((LocationTargetingBridge) player).bridge$setTargetedPosition(null);
-            
+
             player.connection.sendPacket(packetIn);
         }
     }
