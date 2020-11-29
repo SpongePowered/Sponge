@@ -56,6 +56,7 @@ import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.InstrumentTypes;
 import org.spongepowered.api.data.type.LlamaTypes;
+import org.spongepowered.api.data.type.MatterStates;
 import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
 import org.spongepowered.api.data.type.ParrotTypes;
@@ -951,10 +952,9 @@ public final class DataTest  {
 //        this.checkOfferData(jungleAxe, Keys.LOCK_TOKEN, "Key");
         this.checkOfferListData(jungleAxe, Keys.LORE, Arrays.asList(Component.text("Loreline1"), Component.text("Loreline2")));
 
-// TODO NPE?
-//        this.checkGetData(dirtState, Keys.MATTER_STATE, MatterStates.SOLID.get());
-//        this.checkGetData(waterBlockState, Keys.MATTER_STATE, MatterStates.LIQUID.get());
-//        this.checkGetData(BlockTypes.AIR.get().getDefaultState(), Keys.MATTER_STATE, MatterStates.GAS.get());
+        this.checkGetData(dirtState, Keys.MATTER_STATE, MatterStates.SOLID.get());
+        this.checkGetData(waterBlockState, Keys.MATTER_STATE, MatterStates.LIQUID.get());
+        this.checkGetData(BlockTypes.AIR.get().getDefaultState(), Keys.MATTER_STATE, MatterStates.GAS.get());
 
 //        this.checkOfferData(player, Keys.MAX_AIR, 20);
 
