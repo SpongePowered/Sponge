@@ -74,7 +74,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> SpongeDataStoreBuilder key(final Key<? extends Value<T>> key, final DataQuery dataQuery) {
+    public <T, V extends Value<T>> SpongeDataStoreBuilder key(final Key<V> key, final DataQuery dataQuery) {
         final BiFunction<DataView, DataQuery, Optional<T>> deserializer = this.getDeserializer(key.getElementType());
         return this.key(key, (view, value) -> view.set(dataQuery, value), v -> deserializer.apply(v, dataQuery));
     }
@@ -170,7 +170,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
 
     @Override
     @SuppressWarnings("rawtypes")
-    public <T> SpongeDataStoreBuilder key(Key<? extends Value<T>> key, BiConsumer<DataView, T> serializer, Function<DataView, Optional<T>> deserializer) {
+    public <T, V extends Value<T>> SpongeDataStoreBuilder key(final Key<V> key, final BiConsumer<DataView, T> serializer, final Function<DataView, Optional<T>> deserializer) {
         if (this.key != null) {
             this.serializers.put(key, (Tuple) Tuple.of(new CustomDataSerializer<>(serializer, this.key.toString()), new CustomDataDeserializer<>(deserializer, this.key.toString())));
         } else {
