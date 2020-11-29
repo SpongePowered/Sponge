@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -129,7 +130,8 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
         PhaseContext<@NonNull ?> context,
         @Nullable GameTransaction<@NonNull ?> parent,
         ImmutableList<GameTransaction<E>> transactions,
-        Cause currentCause
+        Cause currentCause,
+        ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     );
 
     public abstract void restore();

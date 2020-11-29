@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.server.ServerWorld;
@@ -33,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -104,7 +106,8 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     @Override
     public SpawnEntityEvent generateEvent(final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
-        final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause
+        final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause,
+        ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         final ImmutableList<Tuple<Entity, DummySnapshot>> collect = gameTransactions.stream()
             .map(transaction -> (SpawnEntityTransaction) transaction)

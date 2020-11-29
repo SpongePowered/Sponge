@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -351,8 +352,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if ((GameTransaction<@NonNull ?>) this.head == null) {
             return false;
         }
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> builder = ImmutableMultimap.builder();
         final ImmutableList<EventByTransaction<@NonNull ?>> batched = TransactionalCaptureSupplier.batchTransactions(
-            this.head, this.head, context
+            this.head, this.head, context, builder
         );
         boolean cancelledAny = false;
         for (final EventByTransaction<@NonNull ?> eventWithTransactions : batched) {
@@ -385,6 +387,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 }
             }
         }
+        builder.build().asMap()
+            .forEach(TransactionType::createAndProcessPostEvents);
         return !cancelledAny;
     }
 
@@ -392,7 +396,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     static ImmutableList<EventByTransaction<@NonNull ?>> batchTransactions(
         final GameTransaction head,
         final GameTransaction parent,
-        final PhaseContext<@NonNull ?> context
+        final PhaseContext<@NonNull ?> context,
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder = ImmutableList.builder();
         @Nullable GameTransaction pointer = head;
@@ -406,7 +411,14 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (batchDecider.getTransactionType() != pointer.getTransactionType()) {
                 final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
-                TransactionalCaptureSupplier.generateEventForTransaction(batchDecider, parent, context, builder, (ImmutableList) transactions);
+                TransactionalCaptureSupplier.generateEventForTransaction(
+                    batchDecider,
+                    parent,
+                    context,
+                    builder,
+                    (ImmutableList) transactions,
+                    transactionPostEventBuilder
+                );
                 accumilator.add(pointer);
                 batchDecider = pointer;
                 continue;
@@ -415,7 +427,14 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
                 batchDecider = pointer.next;
-                TransactionalCaptureSupplier.generateEventForTransaction(pointer, parent, context, builder, (ImmutableList) transactions);
+                TransactionalCaptureSupplier.generateEventForTransaction(
+                    pointer,
+                    parent,
+                    context,
+                    builder,
+                    (ImmutableList) transactions,
+                    transactionPostEventBuilder
+                );
             } else {
                 accumilator.add(pointer);
             }
@@ -428,18 +447,21 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 parent,
                 context,
                 builder,
-                (ImmutableList) remaining
+                (ImmutableList) remaining,
+                transactionPostEventBuilder
             );
         }
         return builder.build();
     }
 
+    @SuppressWarnings("unchecked")
     private static <E extends Event & Cancellable> void generateEventForTransaction(
         @NonNull final GameTransaction<E> pointer,
         @Nullable final GameTransaction<@NonNull ?> parent,
         final PhaseContext<@NonNull ?> context,
         final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder,
-        final ImmutableList<GameTransaction<E>> transactions
+        final ImmutableList<GameTransaction<E>> transactions,
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         final Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator(parent);
         final PhaseTracker instance = PhaseTracker.getInstance();
@@ -452,11 +474,11 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 })
                 .orElse(null)
         ) {
-            final E event = pointer.generateEvent(context, parent, transactions, instance.getCurrentCause());
+            final E event = pointer.generateEvent(context, parent, transactions, instance.getCurrentCause(), transactionPostEventBuilder);
 
             final EventByTransaction<E> element = new EventByTransaction<>(event, transactions, parent, pointer);
             builder.add(element);
-
+            ((ImmutableMultimap.Builder) transactionPostEventBuilder).put(pointer.getTransactionType(), event);
             if (frame != null) {
                 frame.pushCause(event);
             }
@@ -468,7 +490,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                     if (sideEffect.head == null) {
                         continue;
                     }
-                    builder.addAll(TransactionalCaptureSupplier.batchTransactions(sideEffect.head, pointer, context));
+                    builder.addAll(TransactionalCaptureSupplier.batchTransactions(sideEffect.head, pointer, context, transactionPostEventBuilder));
                 }
             }
         }

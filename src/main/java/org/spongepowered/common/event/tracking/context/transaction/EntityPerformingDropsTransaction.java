@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.nbt.CompoundNBT;
@@ -34,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.HarvestEntityEvent;
@@ -68,7 +70,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        @Nullable GameTransaction<@NonNull ?> parent
+        @Nullable final GameTransaction<@NonNull ?> parent
     ) {
         return Optional.of((context, stackFrame) -> {
             stackFrame.pushCause(this.destroyingEntity);
@@ -96,9 +98,10 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
 
     @Override
     public HarvestEntityEvent generateEvent(
-        final PhaseContext<@NonNull ?> context, @Nullable GameTransaction<@NonNull ?> parent,
+        final PhaseContext<@NonNull ?> context, @Nullable final GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<HarvestEntityEvent>> gameTransactions,
-        final Cause currentCause
+        final Cause currentCause,
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         return SpongeEventFactory.createHarvestEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) this.destroyingEntity);
     }

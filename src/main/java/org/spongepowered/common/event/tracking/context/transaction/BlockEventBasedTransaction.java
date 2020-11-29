@@ -25,24 +25,22 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKey;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
@@ -70,7 +68,8 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
     public final ChangeBlockEvent.All generateEvent(final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<ChangeBlockEvent.All>> transactions,
-        final Cause currentCause
+        final Cause currentCause,
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
         for (final GameTransaction<@NonNull ?> transaction : transactions) {
@@ -90,14 +89,10 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
         final ImmutableList<BlockTransaction> eventTransactions = positions.asMap().values()
             .stream()
             .map(spongeBlockSnapshots -> {
-                if (spongeBlockSnapshots.size() < 2) {
+                final List<SpongeBlockSnapshot> snapshots = new ArrayList<>(spongeBlockSnapshots);
+                if (snapshots.isEmpty() || snapshots.size() < 2) {
                     // Error case
                     return Optional.<BlockTransaction>empty();
-                }
-                final List<SpongeBlockSnapshot> snapshots = new ArrayList<>(spongeBlockSnapshots);
-                if (snapshots.isEmpty()) {
-                    // This is technically an error case, but
-                    return Optional.<Transaction<BlockSnapshot>>empty();
                 }
                 final SpongeBlockSnapshot original = snapshots.get(0);
                 final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
