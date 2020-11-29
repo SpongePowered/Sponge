@@ -44,6 +44,8 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -59,7 +61,7 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
     final BlockState originalState;
 
     BlockEventBasedTransaction(final BlockPos affectedPosition, final BlockState originalState) {
-        super(TransactionType.BLOCK);
+        super(TransactionTypes.BLOCK.get());
         this.affectedPosition = affectedPosition.toImmutable();
         this.originalState = originalState;
     }

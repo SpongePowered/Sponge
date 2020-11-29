@@ -39,6 +39,8 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -72,7 +74,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     SpawnEntityTransaction(final Supplier<ServerWorld> worldSupplier, final Entity entityToSpawn,
         final Supplier<SpawnType> deducedSpawnType
     ) {
-        super(TransactionType.SPAWN_ENTITY);
+        super(TransactionTypes.SPAWN_ENTITY.get());
         this.worldSupplier = worldSupplier;
         this.entityToSpawn = entityToSpawn;
         this.entityTag = entityToSpawn.writeWithoutTypeId(new CompoundNBT());

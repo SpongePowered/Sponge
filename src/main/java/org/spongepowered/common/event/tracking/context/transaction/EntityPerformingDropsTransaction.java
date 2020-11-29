@@ -38,6 +38,8 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.HarvestEntityEvent;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
@@ -56,7 +58,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
         final Entity destroyingEntity, final CompoundNBT entityTag,
         final Supplier<Optional<DamageSource>> lastAttacker
     ) {
-        super(TransactionType.ENTITY_DEATH_DROPS);
+        super(TransactionTypes.ENTITY_DEATH_DROPS.get());
         this.worldSupplier = worldSupplier;
         this.destroyingEntity = destroyingEntity;
         this.entityTag = entityTag;
