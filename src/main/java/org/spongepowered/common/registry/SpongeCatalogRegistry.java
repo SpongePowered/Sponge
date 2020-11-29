@@ -68,6 +68,7 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityType;
+import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
@@ -179,6 +180,7 @@ import org.spongepowered.common.data.persistence.NbtDataFormat;
 import org.spongepowered.common.event.lifecycle.RegisterCatalogEventImpl;
 import org.spongepowered.common.registry.builtin.sponge.AccountDeletionResultTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BanTypeStreamGenerator;
+import org.spongepowered.common.registry.builtin.sponge.BlockOperationStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.BodyPartStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CatalogedValueParameterStreamGenerator;
@@ -186,8 +188,8 @@ import org.spongepowered.common.registry.builtin.sponge.ClickTypeStreamGenerator
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionKeyStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.ClientCompletionTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CommandRegistrarStreamGenerator;
-import org.spongepowered.common.registry.builtin.sponge.CriterionStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.CriteriaTriggersRegistrar;
+import org.spongepowered.common.registry.builtin.sponge.CriterionStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DamageModifierTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
 import org.spongepowered.common.registry.builtin.sponge.DimensionTypeStreamGenerator;
@@ -634,6 +636,7 @@ public final class SpongeCatalogRegistry implements CatalogRegistry {
             .generateRegistry(StringDataFormat.class, ResourceKey.sponge("string_data_format"), Stream.of(new JsonDataFormat(ResourceKey.sponge("json")), new HoconDataFormat(ResourceKey.sponge("hocon"))), true, false)
             .generateRegistry(DataFormat.class, ResourceKey.sponge("data_format"), Stream.of(new NbtDataFormat(ResourceKey.sponge("nbt"))), true, false)
             .generateRegistry(TeleportHelperFilter.class, ResourceKey.sponge("teleport_helper_filter"), TeleportHelperFilterStreamGenerator.stream(), true, false)
+            .generateRegistry(Operation.class, ResourceKey.sponge("block_operation"), BlockOperationStreamGenerator.stream(), true, false);
         ;
 
         this
