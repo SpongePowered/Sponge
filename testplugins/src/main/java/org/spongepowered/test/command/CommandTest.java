@@ -27,21 +27,25 @@ package org.spongepowered.test.command;
 import com.google.common.collect.ImmutableList;
 import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.standard.CatalogedValueParameter;
+import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorTypes;
 import org.spongepowered.api.entity.Entity;
@@ -59,6 +63,7 @@ import org.spongepowered.plugin.jvm.Plugin;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -270,12 +275,44 @@ public final class CommandTest {
                         .build(),
                 "testnesting");
 
+        final Parameter.Value<SystemSubject> systemSubjectValue = Parameter.builder(SystemSubject.class)
+                .setKey("systemsubject")
+                .parser(VariableValueParameters.literalBuilder(SystemSubject.class).setLiteral(Collections.singleton("-"))
+                        .setReturnValue(Sponge::getSystemSubject).build())
+                .build();
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .parameter(Parameter.firstOf(
+                                systemSubjectValue,
+                                CommonParameters.PLAYER
+                        ))
+                        .parameter(Parameter.remainingJoinedStrings().setKey(stringKey).build())
+                        .setExecutor(context -> {
+                            final Audience audience;
+                            final String name;
+                            if (context.hasAny(systemSubjectValue)) {
+                                audience = context.requireOne(systemSubjectValue);
+                                name = "Console";
+                            } else {
+                                final ServerPlayer player = context.requireOne(CommonParameters.PLAYER);
+                                name = player.getName();
+                                audience = player;
+                            }
+                            final String message = context.requireOne(stringKey);
+                            context.sendMessage(Identity.nil(), Component.text("To " + name + "> " + message));
+                            final Object root = context.getCause().root();
+                            final Identity identity = root instanceof ServerPlayer ? ((ServerPlayer) root).identity() : Identity.nil();
+                            audience.sendMessage(identity, Component.text("From " + name + "> " + message));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                    "testmessage"
+                );
 
         final Command.Builder builder = Command.builder();
 
-        // TODO test Parameter.string().consumeAllRemaining()...
-
-        final ValueCompleter stringValueCompleter = (c, s) -> s.isEmpty() ? Arrays.asList("x") : Arrays.asList(s, s + "bar", "foo_" + s);
+        final ValueCompleter stringValueCompleter = (c, s) -> s.isEmpty() ? Collections.singletonList("x") : Arrays.asList(s, s + "bar", "foo_" + s);
 //        final ValueCompleter stringValueCompleter = null;
 
         final Parameter.Value<String> r_def = Parameter.remainingJoinedStrings().orDefault("r_defaulted").setKey("r_def").build();
@@ -380,9 +417,9 @@ public final class CommandTest {
         event.register(this.plugin, new RawCommandTest(), "rawcommandtest");
     }
 
-    private static CommandResult printParameters(CommandContext context, Parameter.Value<?>... params)
+    private static CommandResult printParameters(final CommandContext context, final Parameter.Value<?>... params)
     {
-        for (Parameter.Value<?> param : params) {
+        for (final Parameter.Value<?> param : params) {
             final Object paramValue = context.getOne(param).map(Object::toString).orElse("missing");
             final String paramUsage = param.getUsage(context.getCause());
             context.sendMessage(Identity.nil(), Component.text(paramUsage + ": " + paramValue));
