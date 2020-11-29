@@ -98,6 +98,10 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                     return Optional.<Transaction<BlockSnapshot>>empty();
                 }
                 final List<SpongeBlockSnapshot> snapshots = new ArrayList<>(spongeBlockSnapshots);
+                if (snapshots.isEmpty()) {
+                    // This is technically an error case, but
+                    return Optional.<Transaction<BlockSnapshot>>empty();
+                }
                 final SpongeBlockSnapshot original = snapshots.get(0);
                 final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
                 final ImmutableList<BlockSnapshot> intermediary;
