@@ -48,6 +48,7 @@ import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.registry.UnknownTypeException;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.state.StateMatcher;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.util.Ticks;
@@ -76,6 +77,7 @@ import org.spongepowered.common.registry.type.advancement.SpongeAdvancementCrite
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
+import org.spongepowered.common.util.SpongeAABB;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
@@ -120,6 +122,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
     public void registerDefaultFactories() {
         this
             .registerFactory(Audiences.Factory.class, new AudiencesFactory())
+            .registerFactory(AABB.Factory.class, new SpongeAABB.FactoryImpl())
             .registerFactory(AdvancementCriterion.Factory.class, new SpongeAdvancementCriterionFactory())
             .registerFactory(CommandCause.Factory.class, new SpongeCommandCauseFactory())
             .registerFactory(CommandTreeNode.NodeFactory.class, new SpongeCommandTreeBuilderFactory())
