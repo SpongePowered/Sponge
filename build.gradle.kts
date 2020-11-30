@@ -339,17 +339,17 @@ allprojects {
     val spongeReleaseRepo: String? by project
     tasks {
 
-//    withType<PublishToMavenRepository>().configureEach {
-//        onlyIf {
-//            (repository == publishing.repositories["GitHubPackages"] &&
-//                    !publication.version.endsWith("-SNAPSHOT")) ||
-//                    (!spongeSnapshotRepo.isNullOrBlank()
-//                            && !spongeReleaseRepo.isNullOrBlank()
-//                            && repository == publishing.repositories["spongeRepo"]
-//                            && publication == publishing.publications["sponge"])
-//
-//        }
-//    }
+        withType<PublishToMavenRepository>().configureEach {
+            onlyIf {
+                (repository == publishing.repositories["GitHubPackages"] &&
+                        !publication.version.endsWith("-SNAPSHOT")) ||
+                        (!spongeSnapshotRepo.isNullOrBlank()
+                                && !spongeReleaseRepo.isNullOrBlank()
+                                && repository == publishing.repositories["spongeRepo"]
+                                && publication == publishing.publications["sponge"])
+
+            }
+        }
     }
 
     publishing {
