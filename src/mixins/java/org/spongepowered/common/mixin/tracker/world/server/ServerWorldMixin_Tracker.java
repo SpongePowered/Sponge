@@ -282,6 +282,22 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Redirect(method = "tickEnvironment",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/fluid/IFluidState;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"
+        )
+    )
+    private void tracker$wrapFluidRandomTick(final IFluidState fluidState, final World worldIn, final BlockPos pos, final Random random) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
+        final IPhaseState phaseState = context.state;
+        if (phaseState.alreadyCapturingBlockTicks(context)) {
+            fluidState.randomTick(worldIn, pos, this.rand);
+        } else {
+            TrackingUtil.randomTickFluid(this, fluidState, pos, this.rand);
+        }
+    }
+
     @Redirect(method = "fireBlockEvent",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onBlockEventReceived(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;II)Z"))
     private boolean tracker$wrapBlockStateEventReceived(final BlockState recievingState, final World thisWorld, final BlockPos targetPos, final int eventId, final int flag, final BlockEventData data) {

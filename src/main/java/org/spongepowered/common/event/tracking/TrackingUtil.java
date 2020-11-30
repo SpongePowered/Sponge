@@ -43,6 +43,7 @@ import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -75,6 +76,7 @@ import org.spongepowered.common.event.tracking.phase.tick.BlockEventTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.DimensionContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.FluidTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -101,6 +103,7 @@ public final class TrackingUtil {
     public static final Marker TILE_ENTITY_TICK = MarkerManager.getMarker("TILE ENTITY TICK");
     public static final Marker PLAYER_TICK = MarkerManager.getMarker("PLAYER TICK");
     public static final Marker BLOCK_TICK = MarkerManager.getMarker("BLOCK TICK");
+    public static final Marker FLUID_TICK = MarkerManager.getMarker("FLUID TICK");
     public static final Marker NEIGHBOR_UPDATE = MarkerManager.getMarker("NEIGHBOR UPDATE");
 
 
@@ -271,7 +274,7 @@ public final class TrackingUtil {
              final Timing timing = ((TimingBridge) block.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
-            PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, "Wrapping Block Tick: " + block.toString());
+            PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, () -> "Wrapping Block Tick: " + block.toString());
             block.tick(world, pos, random);
         } catch (Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
@@ -296,11 +299,13 @@ public final class TrackingUtil {
         }
 
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(apiWorld).position(pos.getX(), pos.getY(), pos.getZ()).state((BlockState) blockState).build();
-        final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext(PhaseTracker.SERVER).source(locatable);
+        final FluidTickContext phaseContext = TickPhase.Tick.FLUID.createPhaseContext(PhaseTracker.SERVER)
+            .source(locatable)
+            .fluid(fluidState);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
-        final IPhaseState<?> currentState = currentContext.state;
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
+        final IPhaseState<@NonNull ?> currentState = currentContext.state;
         ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
         // Now actually switch to the new phase
 
@@ -308,7 +313,7 @@ public final class TrackingUtil {
             final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
             timing.startTiming();
             context.buildAndSwitch();
-            PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, "Wrapping Fluid Tick: " + fluidState.toString());
+            PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Fluid Tick: " + fluidState.toString());
             fluidState.tick(world, pos);
         } catch (Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
@@ -347,13 +352,49 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
         try (final PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
-            PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, "Wrapping Random Block Tick: " + state.toString());
+            PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, () -> "Wrapping Random Block Tick: " + state.toString());
             state.randomTick(world, pos, random);
         } catch (final Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
         }
     }
+    @SuppressWarnings("rawtypes")
+    public static void randomTickFluid(final TrackedWorldBridge mixinWorld,
+        final IFluidState state, final BlockPos pos, final Random random) {
+        final ServerWorld world = (ServerWorld) mixinWorld;
+        final org.spongepowered.api.world.server.ServerWorld apiWorld = (org.spongepowered.api.world.server.ServerWorld) world;
 
+        if (ShouldFire.TICK_BLOCK_EVENT) {
+            final BlockSnapshot currentTickBlock = mixinWorld.bridge$createSnapshot(state.getBlockState(), pos, BlockChangeFlags.NONE);
+            final TickBlockEvent
+                event =
+                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().getCurrentCause(), currentTickBlock);
+            SpongeCommon.postEvent(event);
+            if (event.isCancelled()) {
+                return;
+            }
+        }
+
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
+            .world(apiWorld)
+            .position(pos.getX(), pos.getY(), pos.getZ())
+            .state((BlockState) state.getBlockState())
+            .build();
+        final FluidTickContext phaseContext = TickPhase.Tick.RANDOM_FLUID.createPhaseContext(PhaseTracker.SERVER).source(locatable);
+
+        // We have to associate any notifiers in case of scheduled block updates from other sources
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
+        final IPhaseState<@NonNull ?> currentState = currentContext.state;
+        ((IPhaseState) currentState).appendNotifierPreBlockTick(world, pos, currentContext, phaseContext);
+        // Now actually switch to the new phase
+        try (final PhaseContext<?> context = phaseContext) {
+            context.buildAndSwitch();
+            PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Random Fluid Tick: " + state.toString());
+            state.randomTick(world, pos, random);
+        } catch (final Exception | NoClassDefFoundError e) {
+            PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
+        }
+    }
 
     public static void tickWorldProvider(final ServerWorldBridge worldServer) {
         final Dimension worldProvider = ((ServerWorld) worldServer).dimension;
