@@ -56,7 +56,7 @@ jobs:
       # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
       # the publishing section of your build.gradle
       - name: Publish to Sponge Maven & GitHub Packages
-        run: ./gradlew -s :publish :SpongeVanilla:publish :SpongeForge:publish
+        run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish :SpongeForge:publish
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
