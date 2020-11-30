@@ -390,8 +390,8 @@ allprojects {
                 val spongeUsername: String? by project
                 val spongePassword: String? by project
                 credentials {
-                    username = spongeUsername ?: System.getenv("ORG_GRADLE_PROJECT_spongeUsername")
-                    password = spongePassword ?: System.getenv("ORG_GRADLE_PROJECT_spongePassword")
+                    username = spongeUsername ?: ""
+                    password = spongePassword ?: ""
                 }
             }
         }
@@ -834,7 +834,7 @@ project("SpongeVanilla") {
                         "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
                         "Launch-Target" to "sponge_server_prod",
                         "Multi-Release" to true,
-                        "Specification-Title" to "SpongeCommon",
+                        "Specification-Title" to "SpongeVanilla",
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
