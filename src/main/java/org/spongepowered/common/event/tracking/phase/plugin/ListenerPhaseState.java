@@ -30,11 +30,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
 
 import javax.annotation.Nullable;
 
@@ -57,13 +54,6 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     @Override
     public boolean isEvent() {
         return true;
-    }
-
-
-    @Override
-    public void appendNotifierToBlockEvent(final L context, final PhaseContext<?> currentContext,
-                                           final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
-
     }
 
     @Override

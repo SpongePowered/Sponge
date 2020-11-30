@@ -64,7 +64,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
     ChangeBlock(final SpongeBlockSnapshot attachedSnapshot, final BlockState newState,
         final SpongeBlockChangeFlag blockChange
     ) {
-        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
+        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState(), attachedSnapshot.getWorld());
         this.original = attachedSnapshot;
         this.newState = newState;
         this.blockChangeFlag = blockChange;

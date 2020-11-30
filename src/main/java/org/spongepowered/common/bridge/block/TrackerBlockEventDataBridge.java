@@ -22,39 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.bridge.block;
 
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.tracking.EmptyContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.world.LocatableBlock;
 
-import java.util.function.BiConsumer;
+public interface TrackerBlockEventDataBridge {
 
-final class CompletePhase extends GeneralState<EmptyContext> {
+    @Nullable LocatableBlock bridge$getTickingLocatable();
 
-    public static final BiConsumer<CauseStackManager.StackFrame, EmptyContext>
-        EMPTY_MODIFIER =
-        (stackFrame, generalizedContext) -> {
-        };
+    @Nullable BlockEntity bridge$getTileEntity();
 
-    @Override
-    public EmptyContext createNewContext(final PhaseTracker tracker) {
-        throw new UnsupportedOperationException("Cannot create a new Complete Context!");
-    }
+    @Nullable User bridge$getSourceUser();
 
-    @Override
-    public void unwind(final EmptyContext context) {
-        throw new UnsupportedOperationException("Cannot unwind a new Complete Context!");
-    }
+    void bridge$setTickingLocatable(@Nullable LocatableBlock tickBlock);
 
-    @Override
-    public BiConsumer<CauseStackManager.StackFrame, EmptyContext> getFrameModifier() {
-        return CompletePhase.EMPTY_MODIFIER;
-    }
+    void bridge$setTileEntity(@Nullable BlockEntity blockEntity);
 
-    @Override
-    public boolean doesBlockEventTracking(final EmptyContext context) {
-        return false;
-    }
-
+    void bridge$setSourceUser(@Nullable User user);
 }

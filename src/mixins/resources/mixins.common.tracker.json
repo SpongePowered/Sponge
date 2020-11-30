@@ -9,6 +9,7 @@
     "mixins": [
         "CreatorTrackedMixin_Tracker",
         "TypedTrackerMixin",
+        "block.BlockEventDataMixin_Tracker",
         "block.BlockMixin_Tracker",
         "entity.EntityMixin_Tracker",
         "entity.EntityTypeMixin_Tracker",

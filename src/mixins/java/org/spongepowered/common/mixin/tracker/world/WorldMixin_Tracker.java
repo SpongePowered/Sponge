@@ -70,6 +70,7 @@ public abstract class WorldMixin_Tracker implements WorldBridge {
     @Shadow @Nullable public abstract TileEntity shadow$getTileEntity(BlockPos pos);
     @Shadow public void shadow$setTileEntity(final BlockPos pos, @Nullable final TileEntity tileEntity) { } // Shadowed
     @Shadow public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) { } // Shadowed
+    @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
     // @formatter:on
 
     /**

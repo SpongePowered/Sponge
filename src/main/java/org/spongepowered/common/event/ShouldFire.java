@@ -51,12 +51,9 @@ public final class ShouldFire {
     public static boolean SPAWN_ENTITY_EVENT_CUSTOM = false;
 
     public static boolean CHANGE_BLOCK_EVENT = false;
+    public static boolean CHANGE_BLOCK_EVENT_ALL = false;
     public static boolean CHANGE_BLOCK_EVENT_PRE = false;
-    public static boolean CHANGE_BLOCK_EVENT_MODIFY = false;
-    public static boolean CHANGE_BLOCK_EVENT_BREAK = false;
-    public static boolean CHANGE_BLOCK_EVENT_PLACE = false;
     public static boolean CHANGE_BLOCK_EVENT_POST = false;
-    public static boolean CHANGE_BLOCK_EVENT_GROW = false;
 
     public static boolean CLICK_CONTAINER_EVENT = false;
     public static boolean CLICK_CONTAINER_EVENT_DOUBLE = false;

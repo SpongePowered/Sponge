@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -33,16 +34,15 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
-import java.util.Collections;
-import java.util.EnumMap;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
@@ -63,7 +63,7 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
         final BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos
     ) {
-        super(TransactionType.NEIGHBOR_NOTIFICATION);
+        super(TransactionTypes.NEIGHBOR_NOTIFICATION.get(), ((org.spongepowered.api.world.server.ServerWorld) serverWorldSupplier.get()).getKey());
         this.affectedPosition = sourcePos;
         this.originalState = notifyState;
         this.serverWorld = serverWorldSupplier;
@@ -115,18 +115,15 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     }
 
     @Override
-    public NotifyNeighborBlockEvent generateEvent(final PhaseContext<@NonNull ?> context,
+    public Optional<NotifyNeighborBlockEvent> generateEvent(final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<NotifyNeighborBlockEvent>> transactions,
-        final Cause currentCause
+        final Cause currentCause,
+        ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         // TODO - for all neighbor notifications in the transactions find the direction of notification being used and pump into map.
-        final NotifyNeighborBlockEvent neighborBlockEvent = SpongeEventFactory.createNotifyNeighborBlockEvent(
-            currentCause,
-            new EnumMap<>(Direction.class),
-            Collections.emptyMap()
-        );
-        return neighborBlockEvent;
+
+        return Optional.empty();
     }
 
     @Override

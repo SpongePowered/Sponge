@@ -29,10 +29,9 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -93,7 +92,8 @@ public abstract class EndermanEntity_PlaceBlockGoalMixin extends Goal {
                 final List<ServerLocation> list = new ArrayList<>(1);
                 list.add(location);
                 final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
-                final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list);
+                final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list,
+                    ((ServerWorld) this.enderman.getEntityWorld()));
                 return !SpongeCommon.postEvent(event);
             }
             // Sponge end

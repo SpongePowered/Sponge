@@ -22,24 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.block;
+package org.spongepowered.common.event.tracking.context.transaction.type;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
+import org.spongepowered.api.event.entity.HarvestEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.common.SpongeCommon;
 
-public interface BlockEventDataBridge {
+import java.util.function.Supplier;
 
-    @Nullable LocatableBlock bridge$getTickingLocatable();
-
-    @Nullable BlockEntity bridge$getTileEntity();
-
-    @Nullable User bridge$getSourceUser();
-
-    void bridge$setTickingLocatable(@Nullable LocatableBlock tickBlock);
-
-    void bridge$setTileEntity(@Nullable BlockEntity blockEntity);
-
-    void bridge$setSourceUser(@Nullable User user);
+public final class TransactionTypes {
+    public static final Supplier<TransactionType<ChangeBlockEvent.All>> BLOCK = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "block");
+    public static final Supplier<TransactionType<NotifyNeighborBlockEvent>> NEIGHBOR_NOTIFICATION = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "neighbor_notification");
+    public static final Supplier<TransactionType<SpawnEntityEvent>> SPAWN_ENTITY = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "spawn_entity");
+    public static final Supplier<TransactionType<HarvestEntityEvent>> ENTITY_DEATH_DROPS = SpongeCommon.getRegistry().getCatalogRegistry().provideSupplier(TransactionType.class, "entity_death_drops");
 }

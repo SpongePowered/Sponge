@@ -24,77 +24,59 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-@DefaultQualifier(NonNull.class)
-public final class ReplaceTileEntity extends BlockEventBasedTransaction {
+public class AddBlockEventTransaction extends BlockEventBasedTransaction {
 
-    final TileEntity added;
-    final @Nullable TileEntity removed;
-    final SpongeBlockSnapshot removedSnapshot;
+    private final BlockEventData blockEvent;
+    private final SpongeBlockSnapshot original;
 
-    ReplaceTileEntity(final TileEntity added, final @Nullable TileEntity removed,
-        final SpongeBlockSnapshot attachedSnapshot
-    ) {
-        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState(), attachedSnapshot.getWorld());
-        this.added = added;
-        this.removed = removed;
-        this.removedSnapshot = attachedSnapshot;
+
+    AddBlockEventTransaction(final SpongeBlockSnapshot original, final TrackerBlockEventDataBridge blockEvent) {
+        super(original.getBlockPos(), (BlockState) original.getState(), original.getWorld());
+        this.blockEvent = (BlockEventData) blockEvent;
+        this.original = original;
     }
 
     @Override
-    public boolean acceptTileAddition(final TileEntity tileEntity) {
-        if (this.added == tileEntity) {
-            return true;
-        }
-        return super.acceptTileAddition(tileEntity);
+    protected SpongeBlockSnapshot getResultingSnapshot() {
+        return this.getOriginalSnapshot();
     }
 
     @Override
-    public void restore() {
-        this.removedSnapshot.restore(true, BlockChangeFlags.NONE);
+    protected SpongeBlockSnapshot getOriginalSnapshot() {
+        return this.original;
     }
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        @Nullable GameTransaction<@NonNull ?> parent
+        @Nullable final GameTransaction<@NonNull ?> parent
     ) {
         return Optional.empty();
     }
 
     @Override
     public void addToPrinter(final PrettyPrinter printer) {
-        printer.add("ReplaceTileEntity")
-            .add(" %s : %s", "Position", this.affectedPosition)
-            .add(" %s : %s", "Added", this.added)
-            .add(" %s : %s", "Removed", this.removed == null ? "null" : this.removed)
-        ;
+        printer.add("AddBlockEvent")
+            .add(" %s : %s", "Original Block", this.original)
+            .add(" %s : %s", "Original State", this.originalState)
+            .add(" %s : %s", "EventData", this.blockEvent);
     }
 
     @Override
-    protected SpongeBlockSnapshot getResultingSnapshot() {
-        return SpongeBlockSnapshotBuilder.pooled()
-            .from(this.removedSnapshot)
-            .tileEntity(this.added)
-            .build()
-            ;
-    }
-
-    @Override
-    protected SpongeBlockSnapshot getOriginalSnapshot() {
-        return this.removedSnapshot;
+    public void restore() {
+        this.original.getServerWorld().ifPresent(world -> ((ServerWorldAccessor) world).accessor$getBlockEventQueue().remove(this.blockEvent));
     }
 }

@@ -24,21 +24,22 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
-public final class ScheduledBlockChange {
+public class EmptyContext extends PhaseContext<EmptyContext> {
+    EmptyContext(final PhaseTracker tracker) {
+        super(GeneralPhase.State.COMPLETE, tracker);
+        this.isCompleted = true;
+    }
 
-    public final PhaseContext<?> context;
-    public final BlockPos pos;
-    public final BlockState state;
-    public final BlockChangeFlag flag;
+    @Override
+    public TransactionalCaptureSupplier getTransactor() {
+        throw new IllegalStateException("Should be within a PhaseState to record a transaction!");
+    }
 
-    public ScheduledBlockChange(final PhaseContext<?> context, final BlockPos pos, final BlockState state, final BlockChangeFlag flag) {
-        this.context = context;
-        this.pos = pos;
-        this.state = state;
-        this.flag = flag;
+    @Override
+    public boolean isEmpty() {
+        return true;
     }
 }

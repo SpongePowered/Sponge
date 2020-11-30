@@ -44,11 +44,10 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -99,8 +98,9 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
-    public void appendNotifierToBlockEvent(final BasicPacketContext context, final PhaseContext<?> currentContext,
-                                           final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
+    public void appendNotifierToBlockEvent(final BasicPacketContext context,
+        final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
+    ) {
         final Player player = PhaseTracker.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final BlockState state = ((ServerWorld) mixinWorldServer).getBlock(pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatable =

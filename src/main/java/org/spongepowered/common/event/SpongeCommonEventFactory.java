@@ -31,6 +31,8 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minecraft.block.Block;
+import net.minecraft.block.DirectionalBlock;
+import net.minecraft.block.PistonBlockStructureHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -60,6 +62,8 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.Jukebox;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -107,7 +111,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -130,12 +133,13 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.hooks.SpongeHooks;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.hooks.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
@@ -147,10 +151,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class SpongeCommonEventFactory {
 
@@ -322,6 +329,57 @@ public final class SpongeCommonEventFactory {
         }
     }
 
+    /**
+     * This simulates the blocks a piston moves and calls the event for saner
+     * debugging.
+     *
+     * @return if the event was cancelled
+     */
+    public static boolean handlePistonEvent(
+        final TrackedWorldBridge world, final BlockPos pos, final net.minecraft.block.BlockState blockstate, final int eventId
+    ) {
+        final boolean extending = (eventId == 0);
+        final net.minecraft.util.Direction direction = blockstate.get(DirectionalBlock.FACING);
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((org.spongepowered.api.world.server.ServerWorld) world).state((BlockState) blockstate).position(pos.getX(), pos.getY(), pos.getZ()).build();
+
+        // Sets toss out duplicate values (even though there shouldn't be any)
+        final HashSet<ServerLocation> locations = new HashSet<>();
+        locations.add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, pos.getX(), pos.getY(), pos.getZ()));
+
+        final PistonBlockStructureHelper movedBlocks = new PistonBlockStructureHelper((ServerWorld) world, pos, direction, extending);
+        movedBlocks.canMove(); // calculates blocks to be moved
+
+        Stream.concat(movedBlocks.getBlocksToMove().stream(), movedBlocks.getBlocksToDestroy().stream())
+            .map(block -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, block.getX(), block.getY(), block.getZ()))
+            .collect(Collectors.toCollection(() -> locations)); // SUPER
+        // efficient
+        // code!
+
+        // If the piston is extending and there are no blocks to destroy, add the offset location for protection purposes
+        if (extending && movedBlocks.getBlocksToDestroy().isEmpty()) {
+            final List<BlockPos> movedPositions = movedBlocks.getBlocksToMove();
+            final BlockPos offsetPos;
+            // If there are no blocks to move, add the offset of piston
+            if (movedPositions.isEmpty()) {
+                offsetPos = pos.offset(direction);
+            } else {
+                // Add the offset of last block set to move
+                offsetPos = movedPositions.get(movedPositions.size() - 1).offset(direction);
+            }
+            locations.add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
+        }
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+            if (extending) {
+                frame.addContext(EventContextKeys.PISTON_EXTEND, (org.spongepowered.api.world.server.ServerWorld) world);
+            } else {
+                frame.addContext(EventContextKeys.PISTON_RETRACT, (org.spongepowered.api.world.server.ServerWorld) world);
+            }
+            return SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, ImmutableList.copyOf(locations), locatable)
+                .isCancelled();
+        }
+    }
+
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos) {
 
         return callChangeBlockEventPre(worldIn, ImmutableList.of(
@@ -341,7 +399,8 @@ public final class SpongeCommonEventFactory {
      * @param source The source of event
      * @return The event
      */
-    @SuppressWarnings("unchecked") private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (source == null) {
@@ -357,10 +416,13 @@ public final class SpongeCommonEventFactory {
                     frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
                 }
             }
-
-            final User creator = phaseContext.getCreator().orElse(((ServerPlayerEntityBridge) player).bridge$getUser());
-            if (creator != null) {
-                frame.addContext(EventContextKeys.CREATOR, creator);
+            if (phaseContext.getCreator().isPresent()) {
+                phaseContext.getCreator().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
+            } else if (player instanceof ServerPlayerEntityBridge) {
+                final @Nullable User user = ((ServerPlayerEntityBridge) player).bridge$getUser();
+                if (user != null) {
+                    frame.addContext(EventContextKeys.CREATOR, user);
+                }
             }
 
             if (!((IPhaseState) phaseContext.state).shouldProvideModifiers(phaseContext)) {
@@ -372,13 +434,15 @@ public final class SpongeCommonEventFactory {
             phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             final ChangeBlockEvent.Pre event =
-                SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations);
+                SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(), locations,
+                    (org.spongepowered.api.world.server.ServerWorld) worldIn
+                );
             SpongeCommon.postEvent(event);
             return event;
         }
     }
 
-    public static ChangeBlockEvent.Modify callChangeBlockEventModifyLiquidMix(
+    public static ChangeBlockEvent callChangeBlockEventModifyLiquidMix(
         final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState state, @Nullable Object source) {
 
         final BlockState fromState = (BlockState) worldIn.getBlockState(pos);
@@ -398,22 +462,21 @@ public final class SpongeCommonEventFactory {
             final WorldProperties world = ((org.spongepowered.api.world.server.ServerWorld) worldIn).getProperties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
-            final Transaction<BlockSnapshot> transaction = new Transaction<>(SpongeBlockSnapshotBuilder.unpooled().blockState(fromState).world((ServerWorld) worldIn).position(position).build(),
-                            SpongeBlockSnapshotBuilder.unpooled().blockState(toState).world((ServerWorld) worldIn).position(position).build());
-            final ChangeBlockEvent.Modify event = SpongeEventFactory.createChangeBlockEventModify(frame.getCurrentCause(),
-                    Collections.singletonList(transaction));
+            final ServerLocation location = ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldIn, position);
+            final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventPre(frame.getCurrentCause(),
+                    Collections.singletonList(location), ((org.spongepowered.api.world.server.ServerWorld) worldIn));
 
             SpongeCommon.postEvent(event);
             return event;
         }
     }
 
-    public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(
+    public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
         final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState targetState) {
         return callChangeBlockEventModifyLiquidBreak(worldIn, pos, worldIn.getBlockState(pos), targetState);
     }
 
-    public static ChangeBlockEvent.Break callChangeBlockEventModifyLiquidBreak(
+    public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
         final net.minecraft.world.World worldIn, final BlockPos pos, final net.minecraft.block.BlockState fromState, final net.minecraft.block.BlockState toState) {
         final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
         Object source =context.getSource(LocatableBlock.class).orElse(null);
@@ -429,9 +492,9 @@ public final class SpongeCommonEventFactory {
 
             final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world((ServerWorld) worldIn).position(position).build();
             final SpongeBlockSnapshot to = SpongeBlockSnapshotBuilder.pooled().blockState(toState).world((ServerWorld) worldIn).position(position).build();
-            final Transaction<BlockSnapshot> transaction = new Transaction<>(from, to);
-            final ChangeBlockEvent.Break event = SpongeEventFactory.createChangeBlockEventBreak(frame.getCurrentCause(),
-                Collections.singletonList(transaction));
+            final BlockTransaction transaction = new BlockTransaction(from, to, Operations.LIQUID_SPREAD.get());
+            final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventAll(frame.getCurrentCause(),
+                Collections.singletonList(transaction), ((org.spongepowered.api.world.server.ServerWorld) worldIn));
 
             SpongeCommon.postEvent(event);
             return event;

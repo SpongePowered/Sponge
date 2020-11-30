@@ -25,9 +25,7 @@
 package org.spongepowered.common.event.tracking;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -42,12 +40,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -57,8 +55,9 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
@@ -67,7 +66,7 @@ import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTr
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.world.BlockChange;
 
@@ -211,21 +210,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param phaseContext The context of the current state being unwound
      */
     void unwind(C phaseContext);
-
-    /**
-     * Used to create any extra specialized events for {@link ChangeBlockEvent.Post} as necessary.
-     * An example of this being used specially is for explosions needing to create a child classed
-     * post event.
-     *
-     * @param context
-     * @param transactions
-     * @param cause
-     * @return
-     */
-    default ChangeBlockEvent.Post createChangeBlockPostEvent(final C context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
-        final Cause cause) {
-        return SpongeEventFactory.createChangeBlockEventPost(cause, transactions);
-    }
 
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
@@ -425,13 +409,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * Appends additional information from the block's position in the world to provide notifier/owner
      * information. Overridden in world generation states to reduce chunk lookup costs and since
      * world generation does not track owners/notifiers.
-     *
-     * @param world The world reference
+     *  @param world The world reference
      * @param pos The position being updated
      * @param context The context
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
+    default void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final LocationBasedTickContext<@NonNull ?> phaseContext) {
         final Chunk chunk = world.getChunkAt(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
@@ -442,14 +425,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Appends any additional information to the block tick context from this context.
-     *  @param context
-     * @param currentContext
-     * @param mixinWorldServer
-     * @param pos
-     * @param blockEvent
      */
-    default void appendNotifierToBlockEvent(final C context, final PhaseContext<?> currentContext,
-        final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
+    default void appendNotifierToBlockEvent(final C context,
+        final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
+    ) {
 
     }
 
@@ -483,11 +462,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default boolean isRegeneration() {
-        return false;
-    }
-
-    default boolean getShouldCancelAllTransactions(final C context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
         return false;
     }
 
@@ -593,5 +567,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default void populateLootContext(C phaseContext, LootContext.Builder lootBuilder) {
 
+    }
+
+    default Operation getBlockOperation(SpongeBlockSnapshot original, BlockChange blockChange) {
+        return blockChange.toOperation();
     }
 }

@@ -22,26 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.type;
 
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.Event;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public final class TransactionType {
-
-    public static final TransactionType BLOCK = new Builder().setIsPrimary(true).setName("BLOCK").build();
-    public static final TransactionType NEIGHBOR_NOTIFICATION = new Builder().setIsPrimary(false).setName("NEIGHBOR_NOTIFICATION").build();
-    public static final TransactionType SPAWN_ENTITY = new Builder().setIsPrimary(false).setName("SPAWN_ENTITY").build();
-    public static final TransactionType ENTITY_DEATH_DROPS = new Builder().setIsPrimary(false).setName("ENTITY_DROPS").build();
+public abstract class TransactionType<E extends Event> implements CatalogType {
 
     private final boolean isPrimary;
     private final String name;
+    protected final Marker marker;
+    private final ResourceKey key;
 
-    TransactionType(final Builder builder) {
-        this.isPrimary = builder.isPrimary;
-        this.name = builder.name;
+    TransactionType(final ResourceKey key, final boolean isPrimary, final String name) {
+        this.isPrimary = isPrimary;
+        this.name = name;
+        this.key = key;
+        this.marker = MarkerManager.getMarker(this.name);
     }
 
     public boolean isPrimary() {
@@ -64,8 +69,9 @@ public final class TransactionType {
             .toString();
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public boolean equals(final Object o) {
+    public boolean equals(final @Nullable Object o) {
         if (this == o) {
             return true;
         }
@@ -82,23 +88,16 @@ public final class TransactionType {
         return Objects.hash(this.isPrimary, this.name);
     }
 
-    public static final class Builder {
-        boolean isPrimary = true;
-        @MonotonicNonNull String name;
+    public void createAndProcessPostEvents(final Collection<? extends E> events) {
+        this.consumeEventsAndMarker(events, this.marker);
+    }
 
-        public Builder setIsPrimary(final boolean isPrimary) {
-            this.isPrimary = isPrimary;
-            return this;
-        }
+    protected void consumeEventsAndMarker(final Collection<? extends E> events, final Marker marker) {
 
-        public Builder setName(final String name) {
-            this.name = name;
-            return this;
-        }
+    }
 
-        public TransactionType build() {
-            Objects.requireNonNull(this.name, "Name cannot be null");
-            return new TransactionType(this);
-        }
+    @Override
+    public ResourceKey getKey() {
+        return this.key;
     }
 }

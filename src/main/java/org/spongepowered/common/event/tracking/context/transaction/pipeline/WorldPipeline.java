@@ -86,7 +86,7 @@ public final class WorldPipeline implements BlockPipeline {
         }
         final ServerWorld serverWorld = Objects.requireNonNull(this.serverWorld).get();
         // We have to get the "old state" from
-        final BlockState oldState = this.chunkPipeline.processChange(context, currentState, newProposedState, pos);
+        final @Nullable BlockState oldState = this.chunkPipeline.processChange(context, currentState, newProposedState, pos);
         if (oldState == null) {
             return false;
         }

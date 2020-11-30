@@ -22,39 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.registry.builtin.sponge;
 
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.tracking.EmptyContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.transaction.Operation;
+import org.spongepowered.common.block.transaction.BlockOperation;
 
-import java.util.function.BiConsumer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
-final class CompletePhase extends GeneralState<EmptyContext> {
+public final class BlockOperationStreamGenerator {
 
-    public static final BiConsumer<CauseStackManager.StackFrame, EmptyContext>
-        EMPTY_MODIFIER =
-        (stackFrame, generalizedContext) -> {
-        };
-
-    @Override
-    public EmptyContext createNewContext(final PhaseTracker tracker) {
-        throw new UnsupportedOperationException("Cannot create a new Complete Context!");
+    public static Stream<Operation> stream() {
+        final List<Operation> list = new ArrayList<>();
+        list.add(new BlockOperation(ResourceKey.sponge("place")));
+        list.add(new BlockOperation(ResourceKey.sponge("break")));
+        list.add(new BlockOperation(ResourceKey.sponge("modify")));
+        list.add(new BlockOperation(ResourceKey.sponge("growth")));
+        list.add(new BlockOperation(ResourceKey.sponge("decay")));
+        list.add(new BlockOperation(ResourceKey.sponge("liquid_spread")));
+        list.add(new BlockOperation(ResourceKey.sponge("liquid_decay")));
+        return list.stream();
     }
 
-    @Override
-    public void unwind(final EmptyContext context) {
-        throw new UnsupportedOperationException("Cannot unwind a new Complete Context!");
-    }
-
-    @Override
-    public BiConsumer<CauseStackManager.StackFrame, EmptyContext> getFrameModifier() {
-        return CompletePhase.EMPTY_MODIFIER;
-    }
-
-    @Override
-    public boolean doesBlockEventTracking(final EmptyContext context) {
-        return false;
-    }
-
+    private BlockOperationStreamGenerator() {}
 }

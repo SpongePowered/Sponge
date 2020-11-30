@@ -22,39 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.event.tracking.context.transaction.type;
 
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.tracking.EmptyContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
-final class CompletePhase extends GeneralState<EmptyContext> {
+public final class BlockTransactionTypeStreamGenerator {
 
-    public static final BiConsumer<CauseStackManager.StackFrame, EmptyContext>
-        EMPTY_MODIFIER =
-        (stackFrame, generalizedContext) -> {
-        };
-
-    @Override
-    public EmptyContext createNewContext(final PhaseTracker tracker) {
-        throw new UnsupportedOperationException("Cannot create a new Complete Context!");
+    public static Stream<TransactionType<@NonNull ?>> stream() {
+        return Stream.of(
+            new BlockTransactionType(),
+            new NoOpTransactionType<>(false, "NEIGHBOR_NOTIFICATION"),
+            new NoOpTransactionType<>(false, "SPAWN_ENTITY"),
+            new NoOpTransactionType<>(false,"ENTITY_DEATH_DROPS")
+        );
     }
 
-    @Override
-    public void unwind(final EmptyContext context) {
-        throw new UnsupportedOperationException("Cannot unwind a new Complete Context!");
-    }
-
-    @Override
-    public BiConsumer<CauseStackManager.StackFrame, EmptyContext> getFrameModifier() {
-        return CompletePhase.EMPTY_MODIFIER;
-    }
-
-    @Override
-    public boolean doesBlockEventTracking(final EmptyContext context) {
-        return false;
-    }
-
+    private BlockTransactionTypeStreamGenerator() {}
 }

@@ -28,10 +28,11 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -108,7 +109,7 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
     }
 
     @Override
-    public void appendNotifierPreBlockTick(ServerWorld mixinWorld, BlockPos pos, G context, BlockTickContext phaseContext) {
+    public void appendNotifierPreBlockTick(final ServerWorld mixinWorld, final BlockPos pos, final G context, final LocationBasedTickContext<@NonNull ?> phaseContext) {
     }
 
     @Override
