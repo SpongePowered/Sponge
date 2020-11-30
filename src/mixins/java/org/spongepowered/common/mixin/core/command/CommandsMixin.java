@@ -33,12 +33,10 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
-import net.minecraft.command.ICommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.SuggestionProviders;
 import net.minecraft.command.impl.AdvancementCommand;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -61,7 +59,7 @@ import org.spongepowered.common.launch.Launch;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -147,11 +145,10 @@ public abstract class CommandsMixin {
             final CommandNode<ISuggestionProvider> rootSuggestion,
             final CommandSource source,
             final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> commandNodeToSuggestionNode) {
-        // This may have been done in impl$createArgumentBuilder
         if (!map.containsKey(key)) {
             // done here because this check is applicable
             final ServerPlayerEntity e = (ServerPlayerEntity) source.getEntity();
-            final Map<CommandNode<CommandSource>,List<CommandNode<ISuggestionProvider>>> playerNodes = this.impl$playerNodeCache.get(e);
+            final Map<CommandNode<CommandSource>, List<CommandNode<ISuggestionProvider>>> playerNodes = this.impl$playerNodeCache.get(e);
             if (!playerNodes.containsKey(key)) {
                 final List<CommandNode<ISuggestionProvider>> children = new ArrayList<>();
                 children.add((CommandNode<ISuggestionProvider>) value);
@@ -278,8 +275,10 @@ public abstract class CommandsMixin {
             final Map<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> p_197052_4_,
             final ServerPlayerEntity playerEntity) {
         try {
-            this.impl$playerNodeCache.put(playerEntity, new HashMap<>());
-            this.shadow$commandSourceNodesToSuggestionNodes(p_197052_1_, p_197052_2_, p_197052_3_, p_197052_4_);
+            this.impl$playerNodeCache.put(playerEntity, new IdentityHashMap<>());
+            // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
+            final IdentityHashMap<CommandNode<CommandSource>, CommandNode<ISuggestionProvider>> idMap = new IdentityHashMap<>(p_197052_4_);
+            this.shadow$commandSourceNodesToSuggestionNodes(p_197052_1_, p_197052_2_, p_197052_3_, idMap);
         } finally {
             this.impl$playerNodeCache.remove(playerEntity);
         }

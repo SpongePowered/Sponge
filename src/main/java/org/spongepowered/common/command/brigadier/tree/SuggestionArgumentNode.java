@@ -52,7 +52,13 @@ public final class SuggestionArgumentNode<T> extends ArgumentCommandNode<ISugges
     @Override
     public boolean equals(final Object o) {
         if (o instanceof SuggestionArgumentNode && super.equals(o)) {
-            return Objects.equals(this.getCustomSuggestions(), ((SuggestionArgumentNode<?>) o).getCustomSuggestions());
+            final SuggestionArgumentNode<?> that = (SuggestionArgumentNode<?>) o;
+            // This is intentional - we can end up with a stack overflow if we don't do this.
+            // Same with hashCode, which is why we haven't put it in there.
+            // We need the redirect to be part of the equality contract however, so an
+            // identity is the best we have gotten here.
+            return this.getRedirect() == that.getRedirect() &&
+                    Objects.equals(this.getCustomSuggestions(), that.getCustomSuggestions());
         }
         return false;
     }

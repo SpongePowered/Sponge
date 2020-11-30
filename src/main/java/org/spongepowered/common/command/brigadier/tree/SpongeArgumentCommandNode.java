@@ -56,7 +56,6 @@ import org.spongepowered.common.util.Constants;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -279,6 +278,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         }
         final SpongeArgumentCommandNode<?> that = (SpongeArgumentCommandNode<?>) o;
         return this.isComplexSuggestions == that.isComplexSuggestions &&
+                this.getRedirect() == that.getRedirect() && // See SuggestionArgumentNode for an explanation
                 this.key.equals(that.key) &&
                 this.parser.equals(that.parser) &&
                 Objects.equals(this.usage, that.usage) &&
