@@ -356,7 +356,20 @@ allprojects {
             }
         }
     }
+    sourceSets.configureEach {
 
+        if (project.name == "SpongeAPI" && "main" == this.name) {
+            return@configureEach;
+        }
+        val sourceSet = this
+        val sourceJarName: String = if ("main".equals(this.name)) "sourceJar" else "${this.name}SourceJar"
+        tasks.register(sourceJarName, Jar::class.java) {
+            group = "build"
+            val classifier = if ("main".equals(sourceSet.name)) "sources" else "${sourceSet.name}sources"
+            archiveClassifier.set(classifier)
+            from(sourceSet.allJava)
+        }
+    }
     publishing {
         repositories {
             maven {
@@ -379,6 +392,77 @@ allprojects {
                 credentials {
                     username = spongeUsername ?: System.getenv("ORG_GRADLE_PROJECT_spongeUsername")
                     password = spongePassword ?: System.getenv("ORG_GRADLE_PROJECT_spongePassword")
+                }
+            }
+        }
+    }
+}
+tasks {
+    val jar by existing
+    val sourceJar by existing
+    val mixinsJar by existing
+    val accessorsJar by existing
+    val launchJar by existing
+    val applaunchJar by existing
+    shadowJar {
+        mergeServiceFiles()
+        val generateImplementationVersionString = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
+
+        archiveClassifier.set("dev")
+        manifest {
+            attributes(mapOf(
+                    "AT" to "common_at.cfg",
+                    "Multi-Release" to true,
+                    "Specification-Title" to "SpongeCommon",
+                    "Specification-Vendor" to "SpongePowered",
+                    "Specification-Version" to apiProject.version,
+                    "Implementation-Title" to project.name,
+                    "Implementation-Version" to generateImplementationVersionString,
+                    "Implementation-Vendor" to "SpongePowered"
+            ))
+        }
+        from(jar)
+        from(sourceJar)
+        from(mixinsJar)
+        from(accessorsJar)
+        from(launchJar)
+        from(applaunchJar)
+        dependencies {
+            include(project(":"))
+        }
+    }
+}
+publishing {
+    publications {
+        register("sponge", MavenPublication::class) {
+            from(components["java"])
+
+            artifact(tasks["shadowJar"])
+            artifact(tasks["sourceJar"])
+            artifact(tasks["mixinsJar"])
+            artifact(tasks["accessorsJar"])
+            artifact(tasks["launchJar"])
+            artifact(tasks["applaunchJar"])
+            artifact(tasks["applaunchSourceJar"])
+            artifact(tasks["launchSourceJar"])
+            artifact(tasks["mixinsSourceJar"])
+            artifact(tasks["accessorsSourceJar"])
+            pom {
+                artifactId = project.name.toLowerCase()
+                this.name.set(project.name)
+                this.description.set(project.description)
+                this.url.set(projectUrl)
+
+                licenses {
+                    license {
+                        this.name.set("MIT")
+                        this.url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/SpongePowered/SpongeCommon.git")
+                    developerConnection.set("scm:git:ssh://github.com/SpongePowered/SpongeCommon.git")
+                    this.url.set(projectUrl)
                 }
             }
         }
@@ -795,6 +879,49 @@ project("SpongeVanilla") {
 
         include("**/*.java")
         newLine = false
+    }
+
+    val shadowJar by tasks.existing
+    val vanillaInstallerJar by tasks.existing
+    val vanillaAppLaunchJar by tasks.existing
+    val vanillaLaunchJar by tasks.existing
+    val vanillaMixinsJar by tasks.existing
+    val vanillaAccessorsJar by tasks.existing
+
+    publishing {
+        publications {
+            register("sponge", MavenPublication::class) {
+
+                artifact(shadowJar.get())
+                artifact(vanillaInstallerJar.get())
+                artifact(vanillaAppLaunchJar.get())
+                artifact(vanillaLaunchJar.get())
+                artifact(vanillaMixinsJar.get())
+                artifact(vanillaAccessorsJar.get())
+                artifact(tasks["applaunchSourceJar"])
+                artifact(tasks["launchSourceJar"])
+                artifact(tasks["mixinsSourceJar"])
+                artifact(tasks["accessorsSourceJar"])
+                pom {
+                    artifactId = project.name.toLowerCase()
+                    this.name.set(project.name)
+                    this.description.set(project.description)
+                    this.url.set(projectUrl)
+
+                    licenses {
+                        license {
+                            this.name.set("MIT")
+                            this.url.set("https://opensource.org/licenses/MIT")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:git://github.com/SpongePowered/SpongeCommon.git")
+                        developerConnection.set("scm:git:ssh://github.com/SpongePowered/SpongeCommon.git")
+                        this.url.set(projectUrl)
+                    }
+                }
+            }
+        }
     }
 }
 
