@@ -785,7 +785,7 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
 
         final SpawnEntityEvent.Pre pre = SpongeEventFactory.createSpawnEntityEventPre(
             currentCause,
-            Collections.singletonList(entityIn)
+            Collections.singletonList((org.spongepowered.api.entity.Entity) entityIn)
         );
         Sponge.getEventManager().post(pre);
         if (pre.isCancelled()) {

@@ -42,10 +42,6 @@ minecraft {
 }
 
 tasks {
-    compileJava {
-        options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
-        options.encoding = "UTF-8"
-    }
     jar {
         manifest {
             attributes(mapOf(
@@ -316,11 +312,20 @@ allprojects {
     }
 
     tasks {
-        withType(JavaCompile::class) {
+        withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
+            options.compilerArgumentProviders += CommandLineArgumentProvider {
+                // Use the --release option when available to ensure we only use Java 8 classes
+                if (JavaVersion.current().isJava10Compatible) {
+                    listOf("--release", "8")
+                } else {
+                    listOf()
+                }
+            }
         }
     }
+
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

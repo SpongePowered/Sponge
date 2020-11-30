@@ -141,7 +141,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         if (parent instanceof ChangeBlock) {
             return SpongeEventFactory.createDropItemEventDestruct(currentCause,
                 collect.stream()
-                    .map(Tuple::getFirst)
+                    .map(t -> (org.spongepowered.api.entity.Entity) t.getFirst())
                     .collect(Collectors.toList()));
         }
         return super.createSpawnEvent(context, parent, collect, currentCause);

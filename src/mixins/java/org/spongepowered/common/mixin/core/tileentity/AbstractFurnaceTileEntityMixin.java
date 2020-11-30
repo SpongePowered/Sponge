@@ -178,7 +178,8 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
             final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.items.get(1));
             final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             final AbstractCookingRecipe recipe = this.impl$getCurrentRecipe();
-            final SmeltEvent.Interrupt event = SpongeEventFactory.createSmeltEventInterrupt(cause, fuel, (FurnaceBlockEntity) this, Optional.ofNullable(recipe));
+            final SmeltEvent.Interrupt event = SpongeEventFactory.createSmeltEventInterrupt(cause, fuel, (FurnaceBlockEntity) this,
+                                                                                            Optional.ofNullable((CookingRecipe) recipe));
             SpongeCommon.postEvent(event);
         }
     }
@@ -193,7 +194,7 @@ public abstract class AbstractFurnaceTileEntityMixin extends LockableTileEntityM
         final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.getRecipeOutput());
         final SmeltEvent.Finish event = SpongeEventFactory.createSmeltEventFinish(cause, fuel, (FurnaceBlockEntity) this,
-                Optional.ofNullable(recipe), Collections.singletonList(snapshot));
+                Optional.ofNullable((CookingRecipe) recipe), Collections.singletonList(snapshot));
         SpongeCommon.postEvent(event);
     }
 

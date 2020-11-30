@@ -556,7 +556,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     ) {
         return SpongeEventFactory.createSpawnEntityEvent(currentCause,
             collect.stream()
-                .map(Tuple::getFirst)
+                .map(t -> (org.spongepowered.api.entity.Entity) t.getFirst())
                 .collect(Collectors.toList())
         );
     }
