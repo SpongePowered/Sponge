@@ -22,39 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.event.tracking;
 
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.tracking.EmptyContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
-import java.util.function.BiConsumer;
-
-final class CompletePhase extends GeneralState<EmptyContext> {
-
-    public static final BiConsumer<CauseStackManager.StackFrame, EmptyContext>
-        EMPTY_MODIFIER =
-        (stackFrame, generalizedContext) -> {
-        };
-
-    @Override
-    public EmptyContext createNewContext(final PhaseTracker tracker) {
-        throw new UnsupportedOperationException("Cannot create a new Complete Context!");
+public class EmptyContext extends PhaseContext<EmptyContext> {
+    EmptyContext(final PhaseTracker tracker) {
+        super(GeneralPhase.State.COMPLETE, tracker);
+        this.isCompleted = true;
     }
 
     @Override
-    public void unwind(final EmptyContext context) {
-        throw new UnsupportedOperationException("Cannot unwind a new Complete Context!");
+    public TransactionalCaptureSupplier getTransactor() {
+        throw new IllegalStateException("Should be within a PhaseState to record a transaction!");
     }
 
     @Override
-    public BiConsumer<CauseStackManager.StackFrame, EmptyContext> getFrameModifier() {
-        return CompletePhase.EMPTY_MODIFIER;
+    public boolean isEmpty() {
+        return true;
     }
-
-    @Override
-    public boolean doesBlockEventTracking(final EmptyContext context) {
-        return false;
-    }
-
 }
