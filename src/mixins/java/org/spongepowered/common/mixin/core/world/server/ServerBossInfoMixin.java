@@ -48,7 +48,7 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
 
     private static final float EPSILON = 1e-2f;
 
-    private float impl$lastSentPercent = 0f;
+    private float impl$lastSentProgress = 0f;
 
     @Shadow protected abstract void sendUpdate(final SUpdateBossInfoPacket.Operation operation);
     @Shadow @Final private Set<ServerPlayerEntity> players;
@@ -110,9 +110,9 @@ public abstract class ServerBossInfoMixin extends BossInfoMixin implements BossB
     }
 
     @Override
-    public void bossBarPercentChanged(final BossBar bar, final float oldPercent, final float newPercent) {
-        if (Math.abs(newPercent - this.impl$lastSentPercent) > EPSILON) {
-            this.impl$lastSentPercent = newPercent;
+    public void bossBarProgressChanged(final BossBar bar, final float oldProgress, final float newProgress) {
+        if (Math.abs(newProgress - this.impl$lastSentProgress) > EPSILON) {
+            this.impl$lastSentProgress = newProgress;
             this.sendUpdate(SUpdateBossInfoPacket.Operation.UPDATE_PCT);
         }
     }
