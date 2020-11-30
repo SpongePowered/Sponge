@@ -35,7 +35,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
 
-    @Nullable private String namespace;
+    private String namespace;
     private String value;
 
     @Override
@@ -61,18 +61,11 @@ public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
 
     @Override
     public ResourceKey build() throws IllegalStateException {
+        checkState(this.namespace != null, "Namespace cannot be empty");
         checkState(this.value != null, "Value cannot be empty");
-        if (this.namespace != null) {
-            try {
-                final ResourceLocation resourceLocation = new ResourceLocation(this.namespace, this.value);
-                return (ResourceKey) (Object) resourceLocation;
-            } catch (ResourceLocationException e) {
-                throw new IllegalStateException(e);
-            }
-        }
 
         try {
-            final ResourceLocation resourceLocation = new ResourceLocation(this.value);
+            final ResourceLocation resourceLocation = new ResourceLocation(this.namespace, this.value);
             return (ResourceKey) (Object) resourceLocation;
         } catch (ResourceLocationException e) {
             throw new IllegalStateException(e);
