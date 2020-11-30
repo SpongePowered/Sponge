@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -74,6 +77,17 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
             TrackingUtil.processBlockCaptures(context);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
         }
+    }
+
+    @Override
+    public void appendNotifierToBlockEvent(final TileEntityTickContext context, final TrackedWorldBridge mixinWorldServer,
+        final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
+    ) {
+        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
+            .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
+
+        blockEvent.bridge$setTickingLocatable(tickingTile.getLocatableBlock());
+        blockEvent.bridge$setTileEntity(tickingTile);
     }
 
     @Override

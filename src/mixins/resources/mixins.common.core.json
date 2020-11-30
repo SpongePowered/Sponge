@@ -27,6 +27,7 @@
         "block.BlockStateMixin",
         "block.CarvedPumpkinBlockMixin",
         "block.DyeColorBlockPropertiesMixin",
+        "block.FireBlockMixin",
         "block.NoteBlockMixin",
         "command.CommandsMixin",
         "command.CommandSourceMixin",

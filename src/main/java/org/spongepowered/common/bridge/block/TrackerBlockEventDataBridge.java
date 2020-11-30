@@ -29,7 +29,7 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
 
-public interface BlockEventDataBridge {
+public interface TrackerBlockEventDataBridge {
 
     @Nullable LocatableBlock bridge$getTickingLocatable();
 

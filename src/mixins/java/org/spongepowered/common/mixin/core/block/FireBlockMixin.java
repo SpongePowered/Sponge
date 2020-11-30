@@ -50,9 +50,9 @@ public abstract class FireBlockMixin extends BlockMixin {
     @Redirect(method = "tick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z",
+            target = "Lnet/minecraft/world/server/ServerWorld;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z",
             ordinal = 1))
-    private boolean impl$onFireSpread(final World world, final BlockPos pos, final BlockState state, final int updateFlag) {
+    private boolean impl$onFireSpread(final net.minecraft.world.server.ServerWorld world, final BlockPos pos, final BlockState newState, final int flags) {
         if (!((WorldBridge) world).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.FIRE_SPREAD, (ServerWorld) world);
@@ -62,7 +62,7 @@ public abstract class FireBlockMixin extends BlockMixin {
             }
 
         }
-        return world.setBlockState(pos, state, updateFlag);
+        return world.setBlockState(pos, newState, flags);
     }
 
     @Inject(method = "catchOnFire",

@@ -27,15 +27,16 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.block.IGrowable;
-import net.minecraft.block.material.Material;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -97,6 +98,14 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
         context.applyNotifierIfAvailable(explosionContext::notifier);
         final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
         explosionContext.source(locatableBlock);
+    }
+
+    @Override
+    public void appendNotifierToBlockEvent(final BlockTickContext context, final TrackedWorldBridge mixinWorldServer, final BlockPos pos,
+        final TrackerBlockEventDataBridge blockEvent
+    ) {
+        final LocatableBlock source = this.getLocatableBlockSourceFromContext(context);
+        blockEvent.bridge$setTickingLocatable(source);
     }
 
     /**

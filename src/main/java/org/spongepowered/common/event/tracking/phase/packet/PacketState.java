@@ -38,8 +38,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -94,12 +92,6 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     public boolean matches(final int packetState) {
         return false;
-    }
-
-    @Override
-    public void appendNotifierToBlockEvent(final P context, final PhaseContext<?> currentContext,
-                                           final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
-
     }
 
     @Override

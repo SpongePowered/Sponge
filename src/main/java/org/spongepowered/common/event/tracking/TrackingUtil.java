@@ -60,7 +60,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -363,10 +363,11 @@ public final class TrackingUtil {
         }
     }
 
-    public static boolean fireMinecraftBlockEvent(final ServerWorld worldIn, final BlockEventData event) {
-        final net.minecraft.block.BlockState currentState = worldIn.getBlockState(event.getPosition());
-        final BlockEventDataBridge blockEvent = (BlockEventDataBridge) event;
-        final Object source = blockEvent.bridge$getTileEntity() != null ? blockEvent.bridge$getTileEntity() : blockEvent.bridge$getTickingLocatable();
+    public static boolean fireMinecraftBlockEvent(final ServerWorld worldIn, final BlockEventData event,
+        final net.minecraft.block.BlockState currentState
+    ) {
+        final TrackerBlockEventDataBridge blockEvent = (TrackerBlockEventDataBridge) event;
+        final @Nullable Object source = blockEvent.bridge$getTileEntity() != null ? blockEvent.bridge$getTileEntity() : blockEvent.bridge$getTickingLocatable();
         if (source == null) {
             // No source present which means we are ignoring the phase state
             return currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
@@ -374,7 +375,7 @@ public final class TrackingUtil {
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext(PhaseTracker.SERVER);
         phaseContext.source(source);
 
-        final User user = ((BlockEventDataBridge) event).bridge$getSourceUser();
+        final User user = ((TrackerBlockEventDataBridge) event).bridge$getSourceUser();
         if (user != null) {
             phaseContext.creator = user;
             phaseContext.notifier = user;

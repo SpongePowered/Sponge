@@ -31,6 +31,8 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minecraft.block.Block;
+import net.minecraft.block.DirectionalBlock;
+import net.minecraft.block.PistonBlockStructureHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -149,10 +151,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class SpongeCommonEventFactory {
 
@@ -324,6 +329,57 @@ public final class SpongeCommonEventFactory {
         }
     }
 
+    /**
+     * This simulates the blocks a piston moves and calls the event for saner
+     * debugging.
+     *
+     * @return if the event was cancelled
+     */
+    public static boolean handlePistonEvent(
+        final TrackedWorldBridge world, final BlockPos pos, final net.minecraft.block.BlockState blockstate, final int eventId
+    ) {
+        final boolean extending = (eventId == 0);
+        final net.minecraft.util.Direction direction = blockstate.get(DirectionalBlock.FACING);
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((org.spongepowered.api.world.server.ServerWorld) world).state((BlockState) blockstate).position(pos.getX(), pos.getY(), pos.getZ()).build();
+
+        // Sets toss out duplicate values (even though there shouldn't be any)
+        final HashSet<ServerLocation> locations = new HashSet<>();
+        locations.add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, pos.getX(), pos.getY(), pos.getZ()));
+
+        final PistonBlockStructureHelper movedBlocks = new PistonBlockStructureHelper((ServerWorld) world, pos, direction, extending);
+        movedBlocks.canMove(); // calculates blocks to be moved
+
+        Stream.concat(movedBlocks.getBlocksToMove().stream(), movedBlocks.getBlocksToDestroy().stream())
+            .map(block -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, block.getX(), block.getY(), block.getZ()))
+            .collect(Collectors.toCollection(() -> locations)); // SUPER
+        // efficient
+        // code!
+
+        // If the piston is extending and there are no blocks to destroy, add the offset location for protection purposes
+        if (extending && movedBlocks.getBlocksToDestroy().isEmpty()) {
+            final List<BlockPos> movedPositions = movedBlocks.getBlocksToMove();
+            final BlockPos offsetPos;
+            // If there are no blocks to move, add the offset of piston
+            if (movedPositions.isEmpty()) {
+                offsetPos = pos.offset(direction);
+            } else {
+                // Add the offset of last block set to move
+                offsetPos = movedPositions.get(movedPositions.size() - 1).offset(direction);
+            }
+            locations.add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
+        }
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getInstance().pushCauseFrame()) {
+            if (extending) {
+                frame.addContext(EventContextKeys.PISTON_EXTEND, (org.spongepowered.api.world.server.ServerWorld) world);
+            } else {
+                frame.addContext(EventContextKeys.PISTON_RETRACT, (org.spongepowered.api.world.server.ServerWorld) world);
+            }
+            return SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, ImmutableList.copyOf(locations), locatable)
+                .isCancelled();
+        }
+    }
+
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos) {
 
         return callChangeBlockEventPre(worldIn, ImmutableList.of(
@@ -360,10 +416,13 @@ public final class SpongeCommonEventFactory {
                     frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
                 }
             }
-
-            final User creator = phaseContext.getCreator().orElse(((ServerPlayerEntityBridge) player).bridge$getUser());
-            if (creator != null) {
-                frame.addContext(EventContextKeys.CREATOR, creator);
+            if (phaseContext.getCreator().isPresent()) {
+                phaseContext.getCreator().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
+            } else if (player instanceof ServerPlayerEntityBridge) {
+                final @Nullable User user = ((ServerPlayerEntityBridge) player).bridge$getUser();
+                if (user != null) {
+                    frame.addContext(EventContextKeys.CREATOR, user);
+                }
             }
 
             if (!((IPhaseState) phaseContext.state).shouldProvideModifiers(phaseContext)) {

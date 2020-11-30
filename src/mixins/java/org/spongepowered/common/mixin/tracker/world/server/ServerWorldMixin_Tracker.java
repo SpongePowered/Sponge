@@ -25,8 +25,11 @@
 package org.spongepowered.common.mixin.tracker.world.server;
 
 import co.aikar.timings.Timing;
+import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.PistonBlock;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
@@ -51,11 +54,13 @@ import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -66,17 +71,21 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.TrackedBlockBridge;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -106,10 +115,12 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Chun
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.mixin.tracker.world.WorldMixin_Tracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
@@ -269,6 +280,79 @@ public abstract class ServerWorldMixin_Tracker extends WorldMixin_Tracker implem
                 TrackingUtil.randomTickBlock(this, blockState, posIn, this.rand);
             }
         }
+    }
+
+    @Redirect(method = "fireBlockEvent",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onBlockEventReceived(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;II)Z"))
+    private boolean tracker$wrapBlockStateEventReceived(final BlockState recievingState, final World thisWorld, final BlockPos targetPos, final int eventId, final int flag, final BlockEventData data) {
+        return TrackingUtil.fireMinecraftBlockEvent((ServerWorld) (Object) this, data, recievingState);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Redirect(
+        method = "addBlockEvent",
+        at = @At(
+            value = "INVOKE",
+            target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;add(Ljava/lang/Object;)Z",
+            remap = false
+        )
+    )
+    private boolean tracker$associatePhaseContextDataWithBlockEvent(
+        final ObjectLinkedOpenHashSet<BlockEventData> list, final Object data,
+        final BlockPos pos, final Block blockIn, final int eventID, final int eventParam
+    ) {
+        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
+        final BlockEventData blockEventData = (BlockEventData) data;
+        final TrackerBlockEventDataBridge blockEvent = (TrackerBlockEventDataBridge) blockEventData;
+        final IPhaseState phaseState = currentContext.state;
+        // Short circuit phase states who do not track during block events
+        if (phaseState.ignoresBlockEvent()) {
+            return list.add(blockEventData);
+        }
+
+        final BlockState state = this.shadow$getBlockState(pos);
+        if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
+            blockEvent.bridge$setSourceUser(currentContext.getActiveUser());
+            if (SpongeImplHooks.hasBlockTileEntity(state)) {
+                blockEvent.bridge$setTileEntity((BlockEntity) this.shadow$getTileEntity(pos));
+            }
+            if (blockEvent.bridge$getTileEntity() == null) {
+                final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
+                    .world((org.spongepowered.api.world.server.ServerWorld) this)
+                    .position(pos.getX(), pos.getY(), pos.getZ())
+                    .state((org.spongepowered.api.block.BlockState) state)
+                    .build();
+                blockEvent.bridge$setTickingLocatable(locatable);
+            }
+        }
+
+        // Short circuit any additional handling. We've associated enough with the BlockEvent to
+        // allow tracking to take place for other/future phases
+        if (!((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
+            return list.add((BlockEventData) data);
+        }
+        // In pursuant with our block updates management, we chose to
+        // effectively allow the block event get added to the list, but
+        // we log the transaction so that we can call the change block event
+        // pre, and if needed, undo the add to the list.
+        phaseState.appendNotifierToBlockEvent(currentContext, this, pos, blockEvent);
+        // We fire a Pre event to make sure our captures do not get stuck in a loop.
+        // This is very common with pistons as they add block events while blocks are being notified.
+        if (ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+            if (blockIn instanceof PistonBlock) {
+                // We only fire pre events for pistons
+                if (SpongeCommonEventFactory.handlePistonEvent(this, pos, state, eventID)) {
+                    return false;
+                }
+            } else {
+                if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this, pos).isCancelled()) {
+                    return false;
+                }
+            }
+        }
+        currentContext.getTransactor().logBlockEvent(state, this, pos, blockEvent);
+
+        return list.add(blockEventData);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

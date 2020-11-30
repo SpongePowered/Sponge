@@ -55,8 +55,9 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
@@ -425,14 +426,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Appends any additional information to the block tick context from this context.
-     *  @param context
-     * @param currentContext
-     * @param mixinWorldServer
-     * @param pos
-     * @param blockEvent
      */
-    default void appendNotifierToBlockEvent(final C context, final PhaseContext<?> currentContext,
-        final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
+    default void appendNotifierToBlockEvent(final C context,
+        final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
+    ) {
 
     }
 

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block;
+package org.spongepowered.common.mixin.tracker.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
@@ -33,10 +33,10 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 
 @Mixin(BlockEventData.class)
-public abstract class BlockEventDataMixin implements BlockEventDataBridge {
+public abstract class BlockEventDataMixin_Tracker implements TrackerBlockEventDataBridge {
 
     @Nullable private LocatableBlock bridge$TickingBlock = null;
     @Nullable private BlockEntity bridge$TileEntity = null;

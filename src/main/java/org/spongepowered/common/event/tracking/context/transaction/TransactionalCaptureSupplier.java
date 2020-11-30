@@ -51,6 +51,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.accessor.util.CombatEntryAccessor;
 import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -248,6 +249,24 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
     }
 
+    public void logBlockEvent(final BlockState state, final TrackedWorldBridge serverWorld, final BlockPos pos,
+        final TrackerBlockEventDataBridge blockEvent
+    ) {
+        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) serverWorld);
+        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final @Nullable TileEntity tileEntity = ((ServerWorld) serverWorld).getTileEntity(pos);
+        final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
+            state,
+            pos,
+            BlockChangeFlags.NONE,
+            tileEntity,
+            worldSupplier,
+            Optional::empty, Optional::empty
+        );
+        original.blockChange = BlockChange.MODIFY;
+        final AddBlockEventTransaction transaction = new AddBlockEventTransaction(original, blockEvent);
+        this.logTransaction(transaction);
+    }
     @SuppressWarnings({"ConstantConditions"})
     @Nullable
     public EffectTransactor ensureEntityDropTransactionEffect(final Entity entity) {
