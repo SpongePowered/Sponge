@@ -24,49 +24,19 @@
  */
 package org.spongepowered.common.registry;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import org.spongepowered.api.ResourceKey;
 
-public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
-
-    private String namespace;
-    private String value;
+public final class SpongeResourceKeyFactory implements ResourceKey.Factory {
 
     @Override
-    public ResourceKey.Builder namespace(String namespace) {
-        checkNotNull(namespace, "Namespace cannot be null");
-        this.namespace = namespace;
-        return this;
-    }
-
-    @Override
-    public ResourceKey.Builder value(String value) {
-        checkNotNull(value, "Value cannot be null");
-        this.value = value;
-        return this;
-    }
-
-    @Override
-    public ResourceKey build() throws IllegalStateException {
-        checkState(this.namespace != null, "Namespace cannot be empty");
-        checkState(this.value != null, "Value cannot be empty");
-
+    public ResourceKey resolve(final String formatted) {
         try {
-            final ResourceLocation resourceLocation = new ResourceLocation(this.namespace, this.value);
+            final ResourceLocation resourceLocation = new ResourceLocation(formatted);
             return (ResourceKey) (Object) resourceLocation;
         } catch (ResourceLocationException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    @Override
-    public ResourceKey.Builder reset() {
-        this.namespace = null;
-        this.value = null;
-        return this;
     }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.registry;
 import co.aikar.timings.TimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
@@ -121,6 +122,7 @@ public final class SpongeFactoryRegistry implements FactoryRegistry {
 
     public void registerDefaultFactories() {
         this
+            .registerFactory(ResourceKey.Factory.class, new SpongeResourceKeyFactory())
             .registerFactory(Audiences.Factory.class, new AudiencesFactory())
             .registerFactory(AABB.Factory.class, new SpongeAABB.FactoryImpl())
             .registerFactory(AdvancementCriterion.Factory.class, new SpongeAdvancementCriterionFactory())
