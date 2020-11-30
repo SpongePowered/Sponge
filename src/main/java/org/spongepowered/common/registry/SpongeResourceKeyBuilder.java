@@ -46,13 +46,6 @@ public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
     }
 
     @Override
-    public ResourceKey.Builder namespace(PluginContainer container) {
-        checkNotNull(container, "PluginContainer cannot be null");
-        this.namespace = container.getMetadata().getId();
-        return this;
-    }
-
-    @Override
     public ResourceKey.Builder value(String value) {
         checkNotNull(value, "Value cannot be null");
         this.value = value;
