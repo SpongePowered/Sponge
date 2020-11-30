@@ -39,7 +39,10 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -87,14 +90,21 @@ public final class SpongeCatalogedElementValueParameter<T extends CatalogType> e
     @NonNull
     @Override
     public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+        final String lowerCase = currentInput.toLowerCase();
         return SpongeCommon.getRegistry().getCatalogRegistry().streamAllOf(this.catalogType)
-                .map(x -> x.getKey().toString())
-                .filter(x -> x.contains(currentInput.toLowerCase()))
-                .collect(Collectors.toList());
+                .map(CatalogType::getKey)
+                .map(x -> {
+                    if (x.asString().startsWith(lowerCase)) {
+                        return x.asString();
+                    } else if (this.prefixes.contains(x.getNamespace()) && x.getValue().startsWith(lowerCase)) {
+                        return x.getValue();
+                    }
+                    return null;
+                }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Override
     public List<ArgumentType<?>> getClientCompletionArgumentType() {
-        return ImmutableList.of(Constants.Command.RESOURCE_LOCATION_TYPE);
+        return Collections.singletonList(Constants.Command.RESOURCE_LOCATION_TYPE);
     }
 }
