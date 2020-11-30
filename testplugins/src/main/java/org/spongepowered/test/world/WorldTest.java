@@ -64,8 +64,8 @@ public final class WorldTest {
         final Parameter.Value<WorldProperties> optWorldParameter = Parameter.worldProperties().optional().setKey("world").build();
         final Parameter.Value<ServerLocation> locationParameter = Parameter.location().setKey("location").build();
         final Parameter.Value<Vector3d> optVector3Parameter = Parameter.vector3d().optional().setKey("position").build();
-        final Parameter.Value<PortalType> portalTypeParameter = Parameter.catalogedElement(PortalType.class).setKey("portal_type").build();
-        final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElement(DimensionType.class).setKey("dimension_type").build();
+        final Parameter.Value<PortalType> portalTypeParameter = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(PortalType.class).setKey("portal_type").build();
+        final Parameter.Value<DimensionType> dimensionTypeParameter = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(DimensionType.class).setKey("dimension_type").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().setKey("world").build();
         final Parameter.Value<ResourceKey> unloadedWorldKeyParameter = Parameter.resourceKey()
                 .setSuggestions((context, currentInput) -> Sponge.getServer().getWorldManager()

@@ -56,7 +56,7 @@ public final class ParticleTest {
 
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<ParticleType> particleType = Parameter.catalogedElement(ParticleType.class).setKey("particletype").build();
+        final Parameter.Value<ParticleType> particleType = Parameter.catalogedElementWithMinecraftAndSpongeDefaults(ParticleType.class).setKey("particletype").build();
         final Command.Parameterized myCommand = Command.builder()
                 .parameter(particleType)
                 .setExecutor(context -> {

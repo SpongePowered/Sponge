@@ -75,7 +75,7 @@ public class ProjectileTest implements LoadableModule {
     @Listener
     public void registerCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         @SuppressWarnings("rawtypes") final Parameter.Value<EntityType> entityTypeParameter =
-                Parameter.catalogedElement(EntityType.class)
+                Parameter.catalogedElementWithMinecraftAndSpongeDefaults(EntityType.class)
                         .setKey("type")
                         .build();
         final Parameter.Value<Boolean> targetParameter = Parameter.bool().setKey("target").orDefault(false).build();

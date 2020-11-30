@@ -36,7 +36,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.adventure.SpongeComponents;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -55,7 +54,6 @@ import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
@@ -197,7 +195,7 @@ public final class CommandTest {
                 Command.builder()
                         .parameter(serverLocationParmeter)
                         .parameter(
-                                Parameter.catalogedElement((Class<CatalogedValueParameter<?>>) (Class) CatalogedValueParameter.class)
+                                Parameter.catalogedElementWithMinecraftAndSpongeDefaults((Class<CatalogedValueParameter<?>>) (Class) CatalogedValueParameter.class)
                                         .setKey(commandParameterKey)
                                         .build())
                         .setExecutor(x -> {
