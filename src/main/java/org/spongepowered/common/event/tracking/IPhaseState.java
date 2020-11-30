@@ -66,7 +66,7 @@ import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTr
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.world.BlockChange;
 
@@ -409,13 +409,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * Appends additional information from the block's position in the world to provide notifier/owner
      * information. Overridden in world generation states to reduce chunk lookup costs and since
      * world generation does not track owners/notifiers.
-     *
-     * @param world The world reference
+     *  @param world The world reference
      * @param pos The position being updated
      * @param context The context
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
+    default void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final LocationBasedTickContext<@NonNull ?> phaseContext) {
         final Chunk chunk = world.getChunkAt(pos);
         final ChunkBridge mixinChunk = (ChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
