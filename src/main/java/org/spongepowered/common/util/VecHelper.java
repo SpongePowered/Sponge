@@ -193,9 +193,11 @@ public final class VecHelper {
         if (box == null) {
             return null;
         }
+        final Vector3d min = box.getMin();
+        final Vector3d max = box.getMax();
         return new AxisAlignedBB(
-            box.getMin().getX(), box.getMin().getY(), box.getMin().getZ(),
-            box.getMax().getX(), box.getMax().getY(), box.getMax().getZ()
+            min.getX(), min.getY(), min.getZ(),
+            max.getX(), max.getY(), max.getZ()
         );
     }
 
@@ -203,7 +205,7 @@ public final class VecHelper {
         if (box == null) {
             return null;
         }
-        return new AABB(
+        return new AABBImpl(
             new Vector3d(box.minX, box.minY, box.minZ),
             new Vector3d(box.maxX, box.maxY, box.maxZ)
         );
