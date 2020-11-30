@@ -51,6 +51,8 @@ public interface ServerWorldAccessor {
 
     @Accessor("entitiesToAdd") Queue<Entity> accessor$getEntitiesToAdd();
 
+    @Invoker("removeFromChunk") void accessor$removeFromChunk(Entity entityIn);
+
     @Accessor("blockEventQueue") ObjectLinkedOpenHashSet<BlockEventData> accessor$getBlockEventQueue();
 
     @Invoker("onEntityAdded") void accessor$onEntityAdded(Entity entityIn);

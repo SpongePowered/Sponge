@@ -39,6 +39,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
@@ -122,7 +123,15 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
 
     @Override
     public void restore() {
-        this.worldSupplier.get().removeEntity(this.entityToSpawn);
+        final ServerWorld serverWorld = this.worldSupplier.get();
+        if (((ServerWorldAccessor) serverWorld).accessor$isTickingEntities()) {
+            // More than likely we could also be needing to remove the entity from both the entities to add
+            // and the chunk.
+            ((ServerWorldAccessor) serverWorld).accessor$getEntitiesToAdd().remove(this.entityToSpawn);
+            ((ServerWorldAccessor) serverWorld).accessor$removeFromChunk(this.entityToSpawn);
+        } else {
+            serverWorld.removeEntity(this.entityToSpawn);
+        }
     }
 
     @Override
