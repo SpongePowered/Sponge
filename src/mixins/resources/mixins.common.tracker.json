@@ -26,6 +26,7 @@
         "world.WorldMixin_Tracker",
         "world.chunk.ChunkMixin_Tracker",
         "world.server.ChunkManagerMixin_Tracker",
+        "world.server.ServerChunkProviderMixin_Tracker",
         "world.server.ServerWorldMixin_Tracker"
     ],
     "injectors": {
