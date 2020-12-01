@@ -281,11 +281,24 @@ fun applyNamedDependencyOnOutput(originProject: Project, sourceAdding: SourceSet
 }
 
 fun generateImplementationVersionString(apiVersion: String, minecraftVersion: String, implRecommendedVersion: String, addedVersionInfo: String? = null): String {
-    val isRelease = implRecommendedVersion.endsWith("-SNAPSHOT")
     val apiSplit = apiVersion.replace("-SNAPSHOT", "").split(".")
     val minor = if (apiSplit.size > 1) apiSplit[1] else (if (apiSplit.size > 0) apiSplit.last() else "-1")
     val apiReleaseVersion = "${apiSplit[0]}.$minor"
     return listOfNotNull(minecraftVersion, addedVersionInfo, "$apiReleaseVersion.$implRecommendedVersion").joinToString("-")
+}
+fun generatePlatformBuildVersionString(apiVersion: String, minecraftVersion: String, implRecommendedVersion: String, addedVersionInfo: String? = null): String {
+    val isRelease = !implRecommendedVersion.endsWith("-SNAPSHOT")
+    println("Detected Implementation Version $implRecommendedVersion as ${if (isRelease) "Release" else "Snapshot"}")
+    val apiSplit = apiVersion.replace("-SNAPSHOT", "").split(".")
+    val minor = if (apiSplit.size > 1) apiSplit[1] else (if (apiSplit.size > 0) apiSplit.last() else "-1")
+    val apiReleaseVersion = "${apiSplit[0]}.$minor"
+    val buildNumber = Integer.parseInt(System.getenv("BUILD_NUMBER") ?: "0")
+    val implVersionAsReleaseCandidateOrRecommended: String = if (isRelease) {
+        "$apiReleaseVersion.$implRecommendedVersion"
+    } else {
+        "$apiReleaseVersion.${implRecommendedVersion.replace("-SNAPSHOT", "")}-RC$buildNumber"
+    }
+    return listOfNotNull(minecraftVersion, addedVersionInfo, implVersionAsReleaseCandidateOrRecommended).joinToString("-")
 }
 
 val organization: String by project
@@ -521,7 +534,8 @@ project("SpongeVanilla") {
     }
 
     description = "The SpongeAPI implementation for Vanilla Minecraft"
-    version = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
+    version = generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
+    println("SpongeVanilla Version $version")
 
     val vanillaMinecraftConfig by configurations.named("minecraft")
     val vanillaAppLaunchConfig by configurations.register("applaunch") {
@@ -732,7 +746,7 @@ project("SpongeVanilla") {
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
-                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Version" to generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
                         "Implementation-Vendor" to "SpongePowered"
                 ))
             }
@@ -745,7 +759,7 @@ project("SpongeVanilla") {
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
-                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Version" to generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
                         "Implementation-Vendor" to "SpongePowered"
                 ))
             }
@@ -759,7 +773,7 @@ project("SpongeVanilla") {
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
-                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Version" to generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
                         "Implementation-Vendor" to "SpongePowered"
                 ))
             }
@@ -773,7 +787,7 @@ project("SpongeVanilla") {
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
-                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Version" to generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
                         "Implementation-Vendor" to "SpongePowered"
                 ))
             }
@@ -787,7 +801,7 @@ project("SpongeVanilla") {
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
-                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Version" to generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
                         "Implementation-Vendor" to "SpongePowered"
                 ))
             }
@@ -801,7 +815,7 @@ project("SpongeVanilla") {
                         "Specification-Vendor" to "SpongePowered",
                         "Specification-Version" to apiProject.version,
                         "Implementation-Title" to project.name,
-                        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+                        "Implementation-Version" to generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
                         "Implementation-Vendor" to "SpongePowered"
                 ))
             }
@@ -827,7 +841,7 @@ project("SpongeVanilla") {
 
         shadowJar {
             mergeServiceFiles()
-            val generateImplementationVersionString = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
+            val generateImplementationVersionString = generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
 
             archiveClassifier.set("universal")
             manifest {
@@ -1039,7 +1053,7 @@ if (spongeForge != null) {
         val forgeVersion: String by project
 
         description = "The SpongeAPI implementation for MinecraftForge"
-        version = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion, forgeVersion)
+        version = generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion, forgeVersion)
 
         val forgeMinecraftConfig by configurations.named("minecraft")
         val forgeLaunchConfig by configurations.register("launcher") {
@@ -1170,7 +1184,7 @@ if (spongeForge != null) {
                             "Specification-Vendor" to "SpongePowered",
                             "Specification-Version" to apiProject.version,
                             "Implementation-Title" to project.name,
-                            "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion, forgeVersion),
+                            "Implementation-Version" to generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion, forgeVersion),
                             "Implementation-Vendor" to "SpongePowered"
                     ))
                 }
