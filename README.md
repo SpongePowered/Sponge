@@ -1,4 +1,4 @@
-Sponge
+Sponge ![Java CI with Gradle](https://github.com/SpongePowered/Sponge/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=api-8&event=push)
 =============
 
 The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms. It is licensed under the [MIT License].
@@ -8,6 +8,17 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 * [Issues]
 * [Documentation]
 * [Discord]: [#sponge ]
+
+## Latest Builds
+
+### Sponge
+
+**1.15.2**: ![Snapshots](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Sponge&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+
+### SpongeVanilla
+
+**1.15.2**: ![Snapshots](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=SpongeVanilla&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+
 
 ## Prerequisites
 * [Java] 8
