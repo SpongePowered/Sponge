@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -152,7 +153,7 @@ public final class SpongeConfigs {
 
         return HoconConfigurationLoader.builder()
             .source(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
-            .sink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
+            .sink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.SYNC))
             .defaultOptions(options)
             .build();
     }
