@@ -34,14 +34,14 @@ import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 
 @Mixin(ThreadTaskExecutor.class)
-public abstract class ThreadTaskExecutorMixin_Tracker<R extends Runnable> {
+public abstract class ThreadTaskExecutorMixin_Tracker {
 
     @Redirect(method = "execute",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/lang/Runnable;run()V",
                     remap = false))
-    private void tracker$callOnMainThreadWithPhaseState(Runnable runnable) {
+    private void tracker$callOnMainThreadWithPhaseState(final Runnable runnable) {
         // This method can be called async while server is stopping
         if (this.tracker$isServerAndIsServerStopped() && !SpongeImplHooks.onServerThread()) {
             runnable.run();

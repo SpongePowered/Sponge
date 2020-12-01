@@ -25,21 +25,39 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.server.MinecraftServer;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.lang.ref.WeakReference;
+import java.util.function.BiConsumer;
 
-final class ServerTickState extends TickPhaseState<ServerTickState.ServerTickContext> {
+public final class ServerTickState extends TickPhaseState<ServerTickState.ServerTickContext> {
+
+    private final BiConsumer<CauseStackManager.StackFrame, ServerTickState.ServerTickContext> WORLD_MODIFIER = super.getFrameModifier()
+        .andThen((frame, context) -> {
+            context.getSource(Object.class).ifPresent(frame::pushCause);
+            final @Nullable MinecraftServer server = context.server.get();
+            if (server != null) {
+                frame.pushCause(server);
+            }
+        });
 
     @Override
     protected ServerTickContext createNewContext(final PhaseTracker tracker) {
         return new ServerTickContext(this, tracker);
     }
 
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, ServerTickState.ServerTickContext> getFrameModifier() {
+        return this.WORLD_MODIFIER;
+    }
+
     public static class ServerTickContext extends TickContext<ServerTickContext> {
 
-        WeakReference<MinecraftServer> server;
+        @MonotonicNonNull WeakReference<MinecraftServer> server;
 
         public ServerTickContext server(final MinecraftServer server) {
             this.server = new WeakReference<>(server);

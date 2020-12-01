@@ -26,33 +26,75 @@ package org.spongepowered.common.mixin.tracker.server;
 
 import net.minecraft.crash.CrashReport;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.concurrent.TickDelayedTask;
+import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.util.concurrent.ThreadTaskExecutorMixin_Tracker;
 
 import java.util.function.BooleanSupplier;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMixin_Tracker<TickDelayedTask> {
+public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMixin_Tracker {
 
     @Shadow public abstract boolean shadow$isServerStopped();
 
+    @Shadow protected abstract void shadow$updateTimeLightAndEntities(BooleanSupplier hasTimeLeft);
+
     @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
-    private void tracker$addPhaseTrackerToCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
+    private void tracker$addPhaseTrackerToCrashReport(final CrashReport report, final CallbackInfoReturnable<CrashReport> cir) {
         report.makeCategory("Sponge PhaseTracker").addDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
     }
 
     @Inject(method = "tick", at = @At("RETURN"))
-    private void tracker$ensurePhaseTrackerEmpty(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
+    private void tracker$ensurePhaseTrackerEmpty(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
         PhaseTracker.SERVER.ensureEmpty();
+    }
+
+    @Redirect(
+        method = "tick",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/MinecraftServer;updateTimeLightAndEntities(Ljava/util/function/BooleanSupplier;)V"
+        )
+    )
+    private void tracker$wrapUpdateTimeLightAndEntities(final MinecraftServer minecraftServer, final BooleanSupplier hasTimeLeft) {
+        try (
+            final PhaseContext<@NonNull ?> context = TickPhase.Tick.SERVER_TICK
+                .createPhaseContext(PhaseTracker.SERVER)
+                .server(minecraftServer)
+        ) {
+            context.buildAndSwitch();
+            this.shadow$updateTimeLightAndEntities(hasTimeLeft);
+        }
+    }
+
+    @Redirect(
+        method = "updateTimeLightAndEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/server/ServerWorld;tick(Ljava/util/function/BooleanSupplier;)V"
+        )
+    )
+    private void tracker$wrapWorldTick(final ServerWorld serverWorld, final BooleanSupplier hasTimeLeft) {
+        try (
+            final PhaseContext<@NonNull ?> context = TickPhase.Tick.WORLD_TICK
+                .createPhaseContext(PhaseTracker.SERVER)
+                .world(serverWorld)
+        ) {
+            context.buildAndSwitch();
+            serverWorld.tick(hasTimeLeft);
+        }
     }
 
     @Override
