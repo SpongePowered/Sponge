@@ -29,9 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.plugin.PluginContainer;
 
 public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
 
