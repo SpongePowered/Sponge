@@ -165,7 +165,7 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
 
     @Override
     public boolean bridge$getSlowWhenEmpty() {
-        return impl$slowWhenEmpty;
+        return this.impl$slowWhenEmpty;
     }
 
     @Override
@@ -175,7 +175,7 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
 
     @Override
     public Vector3d bridge$getAirborneMod() {
-        return impl$airborneMod;
+        return this.impl$airborneMod;
     }
 
     @Override
@@ -185,7 +185,7 @@ public abstract class AbstractMinecartEntityMixin extends EntityMixin implements
 
     @Override
     public Vector3d bridge$getDerailedMod() {
-        return impl$derailedMod;
+        return this.impl$derailedMod;
     }
     
     @Override

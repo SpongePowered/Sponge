@@ -72,7 +72,7 @@ public final class DataStoreRegistry {
             throw new IllegalStateException("Multiple data-stores registered for the same key (" + lookupKey.key.getKey() + ") and data-holder " + lookupKey.holderType.toString());
         }
         if (dataStores.isEmpty()) {
-            dataStores.add(NO_OP_DATASTORE);
+            dataStores.add(this.NO_OP_DATASTORE);
         }
         return dataStores.get(0);
     }

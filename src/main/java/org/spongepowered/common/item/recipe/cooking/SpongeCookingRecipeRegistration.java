@@ -71,9 +71,9 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
     public void serializeResult(JsonObject json) {
         json.addProperty(Constants.Recipe.RESULT, Registry.ITEM.getKey(this.result).toString());
         // Sponge Recipe
-        if (spongeResult != null) {
-            spongeResult.setCount(1);
-            json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(spongeResult));
+        if (this.spongeResult != null) {
+            this.spongeResult.setCount(1);
+            json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
             json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getID(), this.resultFunction));

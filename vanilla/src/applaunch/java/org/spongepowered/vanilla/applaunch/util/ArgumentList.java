@@ -84,7 +84,7 @@ public class ArgumentList {
         final String prefix = raw.substring(0, idx);
         final String key = raw.substring(idx);
         final EntryValue entry = new EntryValue(split, prefix, key, value);
-        if (values.containsKey(key)) {
+        if (this.values.containsKey(key)) {
             LOGGER.info("Duplicate entries for " + key + " Unindexable");
         } else {
             this.values.put(key, entry);

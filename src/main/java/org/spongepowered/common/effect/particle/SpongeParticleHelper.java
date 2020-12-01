@@ -220,9 +220,9 @@ public class SpongeParticleHelper {
             final float posY = (float) position.getY();
             final float posZ = (float) position.getZ();
 
-            final float offX = offset.getX();
-            final float offY = offset.getY();
-            final float offZ = offset.getZ();
+            final float offX = this.offset.getX();
+            final float offY = this.offset.getY();
+            final float offZ = this.offset.getZ();
 
             if (this.velocity.equals(Vector3f.ZERO)) {
                 final SSpawnParticlePacket packet = new SSpawnParticlePacket(
@@ -236,9 +236,9 @@ public class SpongeParticleHelper {
 
                 output.add(packet);
             } else {
-                final float velocityX = velocity.getX();
-                final float velocityY = velocity.getY();
-                final float velocityZ = velocity.getZ();
+                final float velocityX = this.velocity.getX();
+                final float velocityY = this.velocity.getY();
+                final float velocityZ = this.velocity.getZ();
                 final Random random = new Random();
                 for (int i = 0; i < this.quantity; i++) {
                     final float px0 = posX + (random.nextFloat() * 2f - 1f) * offX;

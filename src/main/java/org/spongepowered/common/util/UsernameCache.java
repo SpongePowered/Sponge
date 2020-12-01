@@ -24,6 +24,16 @@
  */
 package org.spongepowered.common.util;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import io.leangen.geantyref.TypeToken;
+import org.spongepowered.api.Server;
+import org.spongepowered.common.SpongeCommon;
+
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -34,17 +44,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Nullable;
-
-import com.google.common.base.Preconditions;
-import org.spongepowered.api.Server;
-import org.spongepowered.common.SpongeCommon;
-import com.google.common.base.Charsets;
-import io.leangen.geantyref.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 
 public final class UsernameCache {
 
@@ -117,7 +116,7 @@ public final class UsernameCache {
     public void load() {
         this.usernameByUniqueId.clear();
 
-        if (Files.notExists(cacheFile)) {
+        if (Files.notExists(this.cacheFile)) {
             return;
         }
 

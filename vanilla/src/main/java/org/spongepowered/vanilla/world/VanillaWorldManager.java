@@ -33,7 +33,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Unit;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -54,7 +53,6 @@ import net.minecraft.world.server.TicketType;
 import net.minecraft.world.storage.CommandStorage;
 import net.minecraft.world.storage.SaveFormat;
 import net.minecraft.world.storage.SaveHandler;
-import net.minecraft.world.storage.SessionLockException;
 import net.minecraft.world.storage.WorldInfo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -66,15 +64,15 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
+import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.WorldSettingsBridge;
 import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.accessor.util.registry.SimpleRegistryAccessor;
-import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.lifecycle.RegisterWorldEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -84,8 +82,8 @@ import org.spongepowered.common.util.FutureUtil;
 import org.spongepowered.common.world.dimension.SpongeDimensionType;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.server.WorldRegistration;
-import org.spongepowered.vanilla.accessor.world.storage.SaveFormatAccessor_Vanilla;
 import org.spongepowered.vanilla.accessor.server.MinecraftServerAccessor_Vanilla;
+import org.spongepowered.vanilla.accessor.world.storage.SaveFormatAccessor_Vanilla;
 import org.spongepowered.vanilla.bridge.util.registry.SimpleRegistryBridge;
 
 import java.io.FileInputStream;
@@ -95,7 +93,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -188,7 +185,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     public CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld(final ResourceKey key) {
         Objects.requireNonNull(key);
 
-        ServerWorld world = worlds.get(key);
+        ServerWorld world = this.worlds.get(key);
         if (world != null) {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
         }

@@ -46,13 +46,13 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeTypes;
+import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
-import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -99,7 +99,7 @@ public final class RecipeTest implements LoadableModule {
     @SuppressWarnings("unchecked")
     public void onRecipeRegistry(RegisterCatalogEvent<RecipeRegistration> event) {
 
-        if (!enabled) {
+        if (!this.enabled) {
             return;
         }
         // Standard recipes and ItemStack(with nbt) ingredient and results
@@ -113,7 +113,7 @@ public final class RecipeTest implements LoadableModule {
                 .row(whiteRock, whiteBed, whiteRock)
                 .row(whiteRock, whiteRock, whiteRock)
                 .result(bedrock.copy())
-                .key(ResourceKey.of(plugin, "white_bedrock"))
+                .key(ResourceKey.of(this.plugin, "white_bedrock"))
                 .build();
 
         event.register(whiteBedrockRecipe);
@@ -128,7 +128,7 @@ public final class RecipeTest implements LoadableModule {
                 .where('g', redRock)
                 .where('b', redBed)
                 .result(redBedRock)
-                .key(ResourceKey.of(plugin, "red_bedrock"))
+                .key(ResourceKey.of(this.plugin, "red_bedrock"))
                 .build();
 
         event.register(redBedrockRecipe);
@@ -140,7 +140,7 @@ public final class RecipeTest implements LoadableModule {
                 .where('g', redRock)
                 .where('b', Ingredient.of(bedrock.copy()))
                 .result(moreBedrock)
-                .key(ResourceKey.of(plugin, "more_red_bedrock"))
+                .key(ResourceKey.of(this.plugin, "more_red_bedrock"))
                 .build();
 
         event.register(moreBedrockRecipe);
@@ -148,7 +148,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration cheapGoldenAppleRecipe = CraftingRecipe.shapelessBuilder()
                 .addIngredients(ItemTypes.YELLOW_WOOL, ItemTypes.APPLE)
                 .result(ItemStack.of(ItemTypes.GOLDEN_APPLE))
-                .key(ResourceKey.of(plugin, "cheap_golden_apple"))
+                .key(ResourceKey.of(this.plugin, "cheap_golden_apple"))
                 .build();
 
         event.register(cheapGoldenAppleRecipe);
@@ -156,7 +156,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration expensiveGoldenAppleRecipe = CraftingRecipe.shapelessBuilder()
                 .addIngredients(ItemTypes.YELLOW_WOOL, ItemTypes.ENCHANTED_GOLDEN_APPLE)
                 .result(ItemStack.of(ItemTypes.GOLDEN_APPLE))
-                .key(ResourceKey.of(plugin, "expensive_golden_apple"))
+                .key(ResourceKey.of(this.plugin, "expensive_golden_apple"))
                 .build();
 
         event.register(expensiveGoldenAppleRecipe);
@@ -165,7 +165,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration bedrocksToGranite = CraftingRecipe.shapelessBuilder()
                 .addIngredients(bedrocks, bedrocks)
                 .result(ItemStack.of(ItemTypes.GRANITE, 13))
-                .key(ResourceKey.of(plugin, "bedrocks_to_granite"))
+                .key(ResourceKey.of(this.plugin, "bedrocks_to_granite"))
                 .build();
 
         event.register(bedrocksToGranite);
@@ -174,7 +174,7 @@ public final class RecipeTest implements LoadableModule {
                 .ingredient(Ingredient.of(ItemTypes.DIAMOND))
                 .result(ItemTypes.COAL)
                 .experience(0)
-                .key(ResourceKey.of(plugin, "diamond_to_coal"))
+                .key(ResourceKey.of(this.plugin, "diamond_to_coal"))
                 .build();
 
         event.register(diamondToCoalRecipe);
@@ -184,7 +184,7 @@ public final class RecipeTest implements LoadableModule {
                 .result(ItemTypes.GUNPOWDER)
                 .experience(1)
                 .cookingTime(1)
-                .key(ResourceKey.of(plugin, "burn_paper_and_sticks"))
+                .key(ResourceKey.of(this.plugin, "burn_paper_and_sticks"))
                 .build();
 
         event.register(burnPaperAndSticksRecipe);
@@ -192,7 +192,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration charcoalToCoalRecipe = CookingRecipe.builder().type(RecipeTypes.BLASTING)
                 .ingredient(Ingredient.of(ItemTypes.CHARCOAL))
                 .result(ItemTypes.COAL)
-                .key(ResourceKey.of(plugin, "charcoal_to_coal"))
+                .key(ResourceKey.of(this.plugin, "charcoal_to_coal"))
                 .build();
 
         event.register(charcoalToCoalRecipe);
@@ -205,7 +205,7 @@ public final class RecipeTest implements LoadableModule {
                 .result(redderBedrock)
                 .cookingTime(20)
                 .experience(100)
-                .key(ResourceKey.of(plugin, "redder_bedrock"))
+                .key(ResourceKey.of(this.plugin, "redder_bedrock"))
                 .build();
 
         event.register(removeRedOnBedrock);
@@ -213,7 +213,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration overcookedPorkchopRecipe = CookingRecipe.builder().type(RecipeTypes.SMOKING)
                 .ingredient(Ingredient.of(ItemTypes.COOKED_PORKCHOP))
                 .result(ItemTypes.COAL)
-                .key(ResourceKey.of(plugin, "overcooked_porkchop"))
+                .key(ResourceKey.of(this.plugin, "overcooked_porkchop"))
                 .build();
 
         event.register(overcookedPorkchopRecipe);
@@ -222,7 +222,7 @@ public final class RecipeTest implements LoadableModule {
                 .ingredient(Ingredient.of(ItemTypes.STICK))
                 .result(ItemTypes.TORCH)
                 .cookingTime(20)
-                .key(ResourceKey.of(plugin, "stick_to_torch"))
+                .key(ResourceKey.of(this.plugin, "stick_to_torch"))
                 .build();
 
         event.register(sticksToTorches);
@@ -230,19 +230,19 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration stonecutter1 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
                 .result(ItemStack.of(ItemTypes.BLACK_CONCRETE, 64))
-                .key(ResourceKey.of(plugin, "cut_bedrock_to_concrete"))
+                .key(ResourceKey.of(this.plugin, "cut_bedrock_to_concrete"))
                 .build();
 
         final RecipeRegistration stonecutter2 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
                 .result(ItemStack.of(ItemTypes.BLACK_GLAZED_TERRACOTTA, 64))
-                .key(ResourceKey.of(plugin, "cut_bedrock_to_terracotta"))
+                .key(ResourceKey.of(this.plugin, "cut_bedrock_to_terracotta"))
                 .build();
 
         final RecipeRegistration stonecutter3 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
                 .result(ItemStack.of(ItemTypes.BLACK_WOOL, 64))
-                .key(ResourceKey.of(plugin, "cut_bedrock_wool"))
+                .key(ResourceKey.of(this.plugin, "cut_bedrock_wool"))
                 .build();
 
         event.register(stonecutter1);

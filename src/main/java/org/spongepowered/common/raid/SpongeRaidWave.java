@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.raid;
 
-import java.util.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.entity.monster.AbstractRaiderEntity;
@@ -33,7 +33,7 @@ import org.spongepowered.api.raid.Raid;
 import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.common.accessor.world.raid.RaidAccessor;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Optional;
 
 public final class SpongeRaidWave implements RaidWave {
 
@@ -110,8 +110,8 @@ public final class SpongeRaidWave implements RaidWave {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("raid", raid)
-            .add("wave", waveId)
+            .add("raid", this.raid)
+            .add("wave", this.waveId)
         .toString();
     }
 }

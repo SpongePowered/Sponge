@@ -41,10 +41,10 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.configurate.util.Types;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -62,8 +62,6 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Builder.HolderStep, DataStore.Builder.SerializersStep,
         DataStore.Builder.EndStep {
@@ -239,7 +237,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         public void accept(DataView view, T v) {
 
             final DataContainer internalData = DataContainer.createNew();
-            serializer.accept(internalData, v);
+            this.serializer.accept(internalData, v);
 
             if (internalData.isEmpty()) {
                 return;
@@ -293,7 +291,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
                             .map(id -> id.equals(this.key.toString())).orElse(false))
                             .findFirst()
                             .map(v -> v.getView(Constants.Sponge.MANIPULATOR_DATA).orElse(DataContainer.createNew()))
-                            .flatMap(deserializer));
+                            .flatMap(this.deserializer));
         }
     }
 }

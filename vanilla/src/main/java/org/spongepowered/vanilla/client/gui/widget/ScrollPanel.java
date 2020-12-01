@@ -66,7 +66,7 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
         this.left = left;
         this.bottom = height + this.top;
         this.right = width + this.left;
-        this.barLeft = this.left + this.width - barWidth;
+        this.barLeft = this.left + this.width - this.barWidth;
     }
 
     protected abstract int getContentHeight();
@@ -128,13 +128,13 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
             return true;
         }
 
-        this.scrolling = button == 0 && mouseX >= barLeft && mouseX < barLeft + barWidth;
+        this.scrolling = button == 0 && mouseX >= this.barLeft && mouseX < this.barLeft + this.barWidth;
         if (this.scrolling) {
             return true;
         }
-        final int mouseListY = ((int) mouseY) - this.top - this.getContentHeight() + (int) this.scrollDistance - border;
-        if (mouseX >= left && mouseX <= right && mouseListY < 0) {
-            return this.clickPanel(mouseX - left, mouseY - this.top + (int) this.scrollDistance - border, button);
+        final int mouseListY = ((int) mouseY) - this.top - this.getContentHeight() + (int) this.scrollDistance - this.border;
+        if (mouseX >= this.left && mouseX <= this.right && mouseListY < 0) {
+            return this.clickPanel(mouseX - this.left, mouseY - this.top + (int) this.scrollDistance - this.border, button);
         }
         return false;
     }
@@ -150,14 +150,14 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
     }
 
     private int getBarHeight() {
-        int barHeight = (height * height) / this.getContentHeight();
+        int barHeight = (this.height * this.height) / this.getContentHeight();
 
         if (barHeight < 32) {
             barHeight = 32;
         }
 
-        if (barHeight > height - border * 2) {
-            barHeight = height - border * 2;
+        if (barHeight > this.height - this.border * 2) {
+            barHeight = this.height - this.border * 2;
         }
 
         return barHeight;
@@ -166,7 +166,7 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
     @Override
     public boolean mouseDragged(final double mouseX, final double mouseY, final int button, final double deltaX, final double deltaY) {
         if (this.scrolling) {
-            final int maxScroll = height - getBarHeight();
+            final int maxScroll = this.height - getBarHeight();
             final double moved = deltaY / maxScroll;
             this.scrollDistance += getMaxScroll() * moved;
             applyScrollLimits();
@@ -182,10 +182,10 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
         final Tessellator tess = Tessellator.getInstance();
         final BufferBuilder worldr = tess.getBuffer();
 
-        final double scale = client.getMainWindow().getGuiScaleFactor();
+        final double scale = this.client.getMainWindow().getGuiScaleFactor();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor((int) (left * scale), (int) (client.getMainWindow().getFramebufferHeight() - (bottom * scale)), (int) (width * scale),
-            (int) (height * scale));
+        GL11.glScissor((int) (this.left * scale), (int) (this.client.getMainWindow().getFramebufferHeight() - (this.bottom * scale)), (int) (this.width * scale),
+            (int) (this.height * scale));
 
         GlStateManager.disableLighting();
         GlStateManager.disableFog();
@@ -203,38 +203,38 @@ public abstract class ScrollPanel extends FocusableGui implements IRenderable {
             .color(0x20, 0x20, 0x20, 0xFF).endVertex();
         tess.draw();
 
-        final int baseY = this.top + border - (int) this.scrollDistance;
-        this.drawPanel(right, baseY, tess, mouseX, mouseY);
+        final int baseY = this.top + this.border - (int) this.scrollDistance;
+        this.drawPanel(this.right, baseY, tess, mouseX, mouseY);
 
         GlStateManager.disableDepthTest();
 
-        final int extraHeight = (this.getContentHeight() + border) - height;
+        final int extraHeight = (this.getContentHeight() + this.border) - this.height;
         if (extraHeight > 0) {
             final int barHeight = getBarHeight();
 
-            int barTop = (int) this.scrollDistance * (height - barHeight) / extraHeight + this.top;
+            int barTop = (int) this.scrollDistance * (this.height - barHeight) / extraHeight + this.top;
             if (barTop < this.top) {
                 barTop = this.top;
             }
 
             GlStateManager.disableTexture();
             worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(barLeft, this.bottom, 0.0f).tex(0.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            worldr.pos(barLeft + barWidth, this.bottom, 0.0f).tex(1.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            worldr.pos(barLeft + barWidth, this.top, 0.0f).tex(1.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            worldr.pos(barLeft, this.top, 0.0f).tex(0.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.pos(this.barLeft, this.bottom, 0.0f).tex(0.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.pos(this.barLeft + this.barWidth, this.bottom, 0.0f).tex(1.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.pos(this.barLeft + this.barWidth, this.top, 0.0f).tex(1.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.pos(this.barLeft, this.top, 0.0f).tex(0.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
             tess.draw();
             worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(barLeft, barTop + barHeight, 0.0f).tex(0.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.pos(barLeft + barWidth, barTop + barHeight, 0.0f).tex(1.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.pos(barLeft + barWidth, barTop, 0.0f).tex(1.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.pos(barLeft, barTop, 0.0f).tex(0.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.pos(this.barLeft, barTop + barHeight, 0.0f).tex(0.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.pos(this.barLeft + this.barWidth, barTop + barHeight, 0.0f).tex(1.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.pos(this.barLeft + this.barWidth, barTop, 0.0f).tex(1.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.pos(this.barLeft, barTop, 0.0f).tex(0.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             tess.draw();
             worldr.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-            worldr.pos(barLeft, barTop + barHeight - 1, 0.0f).tex(0.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            worldr.pos(barLeft + barWidth - 1, barTop + barHeight - 1, 0.0f).tex(1.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            worldr.pos(barLeft + barWidth - 1, barTop, 0.0f).tex(1.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            worldr.pos(barLeft, barTop, 0.0f).tex(0.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.pos(this.barLeft, barTop + barHeight - 1, 0.0f).tex(0.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.pos(this.barLeft + this.barWidth - 1, barTop + barHeight - 1, 0.0f).tex(1.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.pos(this.barLeft + this.barWidth - 1, barTop, 0.0f).tex(1.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.pos(this.barLeft, barTop, 0.0f).tex(0.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
             tess.draw();
         }
 

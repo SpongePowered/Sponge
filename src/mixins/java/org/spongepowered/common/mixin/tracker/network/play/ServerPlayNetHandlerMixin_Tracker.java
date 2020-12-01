@@ -42,7 +42,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -51,6 +50,7 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.hooks.SpongeImplHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(ServerPlayNetHandler.class)
@@ -94,8 +94,8 @@ public abstract class ServerPlayNetHandlerMixin_Tracker {
             // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
             // cancelling item usage (e.g. eating food) that occurs while targeting a block
             final boolean isInteractionCancelled = ((PlayerInteractionManagerBridge) this.player.interactionManager).bridge$isInteractBlockRightClickCancelled();
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && isInteractionCancelled) {
-                PacketPhaseUtil.handlePlayerSlotRestore(player, itemStack, hand);
+            if (!ItemStack.areItemStacksEqual(itemStack, this.player.getHeldItem(hand)) && isInteractionCancelled) {
+                PacketPhaseUtil.handlePlayerSlotRestore(this.player, itemStack, hand);
             }
         }
         context.interactItemChanged(false);

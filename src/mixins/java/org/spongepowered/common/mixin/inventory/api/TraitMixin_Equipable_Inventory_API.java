@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.inventory.api;
 
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,7 +45,7 @@ public abstract class TraitMixin_Equipable_Inventory_API implements Equipable {
             final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
             this.impl$equipmentInventory = (EquipmentInventory) lens.getAdapter(inv.inventoryAdapter$getFabric(), null);
         }
-        return impl$equipmentInventory;
+        return this.impl$equipmentInventory;
     }
 
 }

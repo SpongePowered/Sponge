@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.block;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.item.Item;
@@ -104,12 +103,12 @@ public abstract class BlockMixin_API implements BlockType {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<StateProperty<?>> getStateProperties() {
-        return (Collection<StateProperty<?>>) (Object) stateContainer.getProperties();
+        return (Collection<StateProperty<?>>) (Object) this.stateContainer.getProperties();
     }
 
     @Override
     public Optional<StateProperty<?>> getStatePropertyByName(String name) {
-        return Optional.ofNullable((StateProperty<?>) stateContainer.getProperty(name));
+        return Optional.ofNullable((StateProperty<?>) this.stateContainer.getProperty(name));
     }
 
     @Override

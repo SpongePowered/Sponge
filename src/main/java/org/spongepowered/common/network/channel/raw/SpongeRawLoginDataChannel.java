@@ -111,9 +111,9 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
                 this.checkCompleted();
                 final ChannelBuf payload;
                 try {
-                    payload = parent.encodePayload(response);
+                    payload = SpongeRawLoginDataChannel.this.parent.encodePayload(response);
                 } catch (final Throwable t) {
-                    parent.handleException(connection, new ChannelException("Failed to encode login data response", t), null);
+                    SpongeRawLoginDataChannel.this.parent.handleException(connection, new ChannelException("Failed to encode login data response", t), null);
                     PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(null, transactionId));
                     return;
                 }
@@ -126,7 +126,7 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
                 handler.handleRequest(payload, connection, response);
                 success = true;
             } catch (final Throwable t) {
-                parent.handleException(connection, new ChannelException("Failed to handle login data request", t), null);
+                this.parent.handleException(connection, new ChannelException("Failed to handle login data request", t), null);
             }
         }
         if (!success) {

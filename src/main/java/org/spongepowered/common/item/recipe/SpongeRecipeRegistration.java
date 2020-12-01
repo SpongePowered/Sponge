@@ -138,7 +138,7 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, IF
 
     @Override
     public JsonObject getAdvancementJson() {
-        return advancementBuilder.serialize();
+        return this.advancementBuilder.serialize();
     }
 
     @Override

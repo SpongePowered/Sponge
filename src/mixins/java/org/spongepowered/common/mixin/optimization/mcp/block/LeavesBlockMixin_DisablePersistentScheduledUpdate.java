@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.core.block.LeavesBlockMixin;
 
 import java.util.Random;
 
@@ -58,7 +57,8 @@ public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
 
     /**
      * @author gabizou - November 29th, 2020 - Minecraft 1.15.2
-     * We prevent the updatePlacement logic from scheduling a tick for a leaf block
+     *
+     * @reason We prevent the updatePlacement logic from scheduling a tick for a leaf block
      * that is persistent. It'd be expensive to schedule several leaf updates that
      * are placed by players instead of providing the updated block. So, we short
      * circuit the placement

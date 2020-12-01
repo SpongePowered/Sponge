@@ -106,7 +106,7 @@ public final class SpongeDataRegistration implements DataRegistration {
     }
 
     public Collection<DataStore> getDataStores() {
-        return dataStoreMap.values();
+        return this.dataStoreMap.values();
     }
 
     public Collection<DataProvider> getDataProviders() {

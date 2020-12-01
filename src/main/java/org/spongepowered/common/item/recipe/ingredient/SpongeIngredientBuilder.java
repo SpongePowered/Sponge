@@ -29,7 +29,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -107,7 +106,7 @@ public class SpongeIngredientBuilder implements Ingredient.Builder {
             return IngredientUtil.of(this.types);
         }
         if (this.stacks != null) {
-            if (predicate != null) {
+            if (this.predicate != null) {
                 return IngredientUtil.of(this.key, this.predicate, this.stacks);
             }
             return IngredientUtil.of(this.stacks);

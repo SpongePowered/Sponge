@@ -45,6 +45,7 @@ import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeCatalogBuilder;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,8 +55,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilder<RecipeRegistration, ShapedCraftingRecipe.Builder> implements
         ShapedCraftingRecipe.Builder, ShapedCraftingRecipe.Builder.AisleStep.ResultStep,
@@ -117,7 +116,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
             row.append(" ");
         }
 
-        int key = 'A' + (columns * aisle.size());
+        int key = 'A' + (columns * this.aisle.size());
         for (final Ingredient ingredient : ingredients) {
             Character usedKey = this.reverseIngredientMap.get(ingredient);
             if (usedKey == null) {

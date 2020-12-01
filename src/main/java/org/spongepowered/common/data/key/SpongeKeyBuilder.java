@@ -61,7 +61,7 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
         this.valueType = token.getType();
         final Type valueTypeAsSuper = GenericTypeReflector.getExactSuperType(this.valueType, Value.class);
         if (!(valueTypeAsSuper instanceof ParameterizedType)) {
-            throw new IllegalArgumentException("Raw type " + this.valueType + " provided when registering Key " + key);
+            throw new IllegalArgumentException("Raw type " + this.valueType + " provided when registering Key " + this.key);
         }
         this.elementType = ((ParameterizedType) valueTypeAsSuper).getActualTypeArguments()[0];
         return (SpongeKeyBuilder<T, B>) this;

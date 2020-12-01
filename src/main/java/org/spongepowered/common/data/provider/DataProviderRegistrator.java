@@ -49,6 +49,7 @@ import org.spongepowered.common.data.copy.CopyHelper;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
 import org.spongepowered.common.util.TypeTokenUtil;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -56,8 +57,6 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 public class DataProviderRegistrator {
 
@@ -182,7 +181,7 @@ public class DataProviderRegistrator {
 
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         protected <K, V extends Value<K>> MutableRegistrator<T> register(final MutableRegistration<T, K> registration) {
-            final DataProvider<?, ?> provider = registration.build(target);
+            final DataProvider<?, ?> provider = registration.build(this.target);
             this.registrationBuilder.dataKey(provider.getKey()).provider(provider);
             return this;
         }

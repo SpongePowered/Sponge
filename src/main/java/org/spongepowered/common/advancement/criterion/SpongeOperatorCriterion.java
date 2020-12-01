@@ -29,12 +29,11 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdvancementCriterion {
 
@@ -115,16 +114,16 @@ public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdva
 
         SpongeOperatorCriterion that = (SpongeOperatorCriterion) o;
 
-        if (!Objects.equals(name, that.name)) {
+        if (!Objects.equals(this.name, that.name)) {
             return false;
         }
-        return Objects.equals(criteria, that.criteria);
+        return Objects.equals(this.criteria, that.criteria);
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (criteria != null ? criteria.hashCode() : 0);
+        int result = this.name != null ? this.name.hashCode() : 0;
+        result = 31 * result + (this.criteria != null ? this.criteria.hashCode() : 0);
         return result;
     }
 }

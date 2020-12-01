@@ -48,14 +48,13 @@ import org.spongepowered.common.mixin.tracker.util.concurrent.ThreadTaskExecutor
 
 import java.util.function.BooleanSupplier;
 
+@SuppressWarnings("rawtypes")
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMixin_Tracker {
 
     @Shadow public abstract boolean shadow$isServerStopped();
 
     @Shadow protected abstract void shadow$updateTimeLightAndEntities(BooleanSupplier hasTimeLeft);
-
-    @Shadow public abstract void run();
 
     @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
     private void tracker$addPhaseTrackerToCrashReport(final CrashReport report, final CallbackInfoReturnable<CrashReport> cir) {

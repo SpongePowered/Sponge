@@ -58,7 +58,7 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
         this.resultFunction = resultFunction;
 
         this.recipe = new SpongeSpecialRecipe(key, this.biPredicate, this.remainingItemsFunction, this.resultFunction);
-        this.serializer = SpongeRecipeRegistration.register(key, new SpecialRecipeSerializer<>(rl -> recipe));
+        this.serializer = SpongeRecipeRegistration.register(key, new SpecialRecipeSerializer<>(rl -> this.recipe));
     }
 
     @Override

@@ -69,8 +69,8 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
         json.addProperty(Constants.Recipe.RESULT, Registry.ITEM.getKey(this.result).toString());
         json.addProperty(Constants.Recipe.COUNT, this.count);
 
-        if (spongeResult != null) {
-            json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(spongeResult));
+        if (this.spongeResult != null) {
+            json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
             json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getID(), this.resultFunction));

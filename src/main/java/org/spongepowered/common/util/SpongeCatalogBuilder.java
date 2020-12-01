@@ -27,8 +27,8 @@ package org.spongepowered.common.util;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.CatalogBuilder;
 import org.spongepowered.api.util.ResettableBuilder;
 
@@ -56,7 +56,7 @@ public abstract class SpongeCatalogBuilder<C extends CatalogType, B extends Rese
 
     @Override
     public C build() {
-        Objects.requireNonNull(key);
+        Objects.requireNonNull(this.key);
         return this.build(this.key);
     }
 
