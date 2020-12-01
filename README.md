@@ -69,5 +69,5 @@ Are you a talented programmer looking to contribute some code? We'd love the hel
 [Java]: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 [Source]: https://github.com/SpongePowered/Sponge/
 [MIT License]: http://www.tldrlegal.com/license/mit-license
-[Discord]: discord.gg/sponge
+[Discord]: https://discord.gg/sponge
 [Jenkins]: https://jenkins-ci.org/
