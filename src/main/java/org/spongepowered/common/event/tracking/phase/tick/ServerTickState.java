@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.function.BiConsumer;
@@ -53,6 +54,11 @@ public final class ServerTickState extends TickPhaseState<ServerTickState.Server
     @Override
     public BiConsumer<CauseStackManager.StackFrame, ServerTickState.ServerTickContext> getFrameModifier() {
         return this.WORLD_MODIFIER;
+    }
+
+    @Override
+    public void unwind(final ServerTickContext phaseContext) {
+        TrackingUtil.processBlockCaptures(phaseContext);
     }
 
     public static class ServerTickContext extends TickContext<ServerTickContext> {

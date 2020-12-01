@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 
 import java.lang.ref.WeakReference;
@@ -54,6 +55,11 @@ final class WorldTickState extends TickPhaseState<WorldTickState.WorldTickContex
     @Override
     public BiConsumer<CauseStackManager.StackFrame, WorldTickContext> getFrameModifier() {
         return this.WORLD_MODIFIER;
+    }
+
+    @Override
+    public void unwind(final WorldTickContext phaseContext) {
+        TrackingUtil.processBlockCaptures(phaseContext);
     }
 
     public static class WorldTickContext extends TickContext<WorldTickContext> {
