@@ -31,7 +31,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
 
 import java.lang.ref.WeakReference;
 import java.util.function.BiConsumer;

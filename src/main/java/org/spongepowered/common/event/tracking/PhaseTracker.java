@@ -337,7 +337,7 @@ public final class PhaseTracker implements CauseStackManager {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        if (SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
+        if (this == PhaseTracker.SERVER && SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
             if (this.stack.size() > 6) {
                 if (this.stack.checkForRunaways(state, phaseContext)) {
                     PhasePrinter.printRunawayPhase(this.stack, state, phaseContext);
