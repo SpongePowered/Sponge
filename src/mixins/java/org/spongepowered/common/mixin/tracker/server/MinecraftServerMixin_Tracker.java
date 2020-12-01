@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.tracker.server;
 
 import net.minecraft.crash.CrashReport;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.concurrent.RecursiveEventLoop;
+import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,9 +37,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.util.concurrent.ThreadTaskExecutorMixin_Tracker;
 
@@ -49,6 +54,8 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
     @Shadow public abstract boolean shadow$isServerStopped();
 
     @Shadow protected abstract void shadow$updateTimeLightAndEntities(BooleanSupplier hasTimeLeft);
+
+    @Shadow public abstract void run();
 
     @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
     private void tracker$addPhaseTrackerToCrashReport(final CrashReport report, final CallbackInfoReturnable<CrashReport> cir) {
@@ -94,6 +101,37 @@ public abstract class MinecraftServerMixin_Tracker extends ThreadTaskExecutorMix
         ) {
             context.buildAndSwitch();
             serverWorld.tick(hasTimeLeft);
+        }
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Inject(method = "wrapTask", at = @At("RETURN"))
+    private void tracker$associatePhaseContextWithWrappedTask(final Runnable runnable, final CallbackInfoReturnable<TickDelayedTask> cir) {
+        final TickDelayedTask returnValue = cir.getReturnValue();
+        if (!PhaseTracker.SERVER.onSidedThread()) {
+            final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
+            if (phaseContext.isEmpty()) {
+                return;
+            }
+            ((IPhaseState) phaseContext.state).foldContextForThread(phaseContext, ((TrackedTickDelayedTaskBridge) returnValue));
+        }
+    }
+
+    @Redirect(
+        method = "run(Lnet/minecraft/util/concurrent/TickDelayedTask;)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/concurrent/RecursiveEventLoop;run(Ljava/lang/Runnable;)V"
+        )
+    )
+    @SuppressWarnings("unchecked")
+    private void tracker$wrapAndPerformContextSwitch(final RecursiveEventLoop<?> thisServer, final Runnable runnable) {
+        try (final PhaseContext<@NonNull ?> context = PluginPhase.State.DELAYED_TASK.createPhaseContext(PhaseTracker.SERVER)
+            .source(runnable)
+            .setDelayedContextPopulator(((TrackedTickDelayedTaskBridge) runnable).bridge$getFrameModifier().orElse(null))
+        ) {
+            context.buildAndSwitch();
+            super.shadow$run(runnable);
         }
     }
 

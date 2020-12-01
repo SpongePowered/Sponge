@@ -56,6 +56,7 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
@@ -561,15 +562,18 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         );
     }
 
-    default boolean recordsEntitySpawns(C context) {
+    default boolean recordsEntitySpawns(final C context) {
         return true;
     }
 
-    default void populateLootContext(C phaseContext, LootContext.Builder lootBuilder) {
+    default void populateLootContext(final C phaseContext, final LootContext.Builder lootBuilder) {
 
     }
 
-    default Operation getBlockOperation(SpongeBlockSnapshot original, BlockChange blockChange) {
+    default Operation getBlockOperation(final SpongeBlockSnapshot original, final BlockChange blockChange) {
         return blockChange.toOperation();
+    }
+
+    default void foldContextForThread(final C context, final TrackedTickDelayedTaskBridge returnValue) {
     }
 }

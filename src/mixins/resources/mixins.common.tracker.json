@@ -21,16 +21,18 @@
         "network.PacketThreadUtilMixin_Tracker",
         "network.play.ServerPlayNetHandlerMixin_Tracker",
         "server.MinecraftServerMixin_Tracker",
+        "server.dedicated.DedicatedServerMixin_Tracker",
         "server.management.PlayerInteractionManagerMixin_Tracker",
         "tileentity.TileEntityMixin_Tracker",
         "util.concurrent.ThreadTaskExecutorMixin_Tracker",
+        "util.concurrent.TickDelayedTaskMixin_Tracker",
         "world.ExplosionMixin_Tracker",
         "world.WorldMixin_Tracker",
         "world.chunk.ChunkMixin_Tracker",
+        "world.end.DragonFightManagerMixin_Tracker",
         "world.server.ChunkManagerMixin_Tracker",
         "world.server.ServerChunkProviderMixin_Tracker",
-        "world.server.ServerWorldMixin_Tracker",
-        "world.end.DragonFightManagerMixin_Tracker"
+        "world.server.ServerWorldMixin_Tracker"
     ],
     "injectors": {
         "defaultRequire": 1,

@@ -22,37 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.plugin;
+package org.spongepowered.common.mixin.tracker.util.concurrent;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.util.concurrent.TickDelayedTask;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
-import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 
-/**
- * Used for tasks scheduled with both the Sponge scheduler, and the built-in 'scheduled task' system in MinecraftServer
- */
-public class ScheduledTaskPhaseState extends BasicPluginState {
+@Mixin(TickDelayedTask.class)
+public class TickDelayedTaskMixin_Tracker implements TrackedTickDelayedTaskBridge {
+
+    private @MonotonicNonNull BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame> impl$stackFramePopulator;
 
     @Override
-    public void unwind(final BasicPluginContext phaseContext) {
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(phaseContext);
+    public void bridge$contextShift(
+        final BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame> context
+    ) {
+        this.impl$stackFramePopulator = context;
     }
 
     @Override
-    public void foldContextForThread(
-        final BasicPluginContext context,
-        final TrackedTickDelayedTaskBridge returnValue
-    ) {
-        returnValue.bridge$contextShift(((context1, stackFrame) -> {
-            @Nullable final Object source = context.getSource();
-            if (source != null) {
-                stackFrame.pushCause(source);
-            }
-            stackFrame.pushCause(Objects.requireNonNull(context.container, "Scheduled Task has a null PluginContainer"));
-        }));
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> bridge$getFrameModifier() {
+        return Optional.ofNullable(this.impl$stackFramePopulator);
     }
 }
