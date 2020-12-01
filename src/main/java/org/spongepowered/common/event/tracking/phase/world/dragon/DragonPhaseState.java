@@ -25,26 +25,12 @@
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
-public class GeneralDragonPhaseState implements IPhaseState<GeneralizedContext> {
-
-    @Override
-    public GeneralizedContext createPhaseContext(PhaseTracker server) {
-        return new GeneralizedContext(this, server).addCaptures();
-    }
+public abstract class DragonPhaseState<D extends DragonContext<D>> implements IPhaseState<D> {
 
     @Override
-    public void unwind(GeneralizedContext phaseContext) {
+    public void unwind(final D phaseContext) {
         TrackingUtil.processBlockCaptures(phaseContext);
-    }
-
-    private final String desc = TrackingUtil.phaseStateToString("Dragon", this);
-
-    @Override
-    public String toString() {
-        return this.desc;
     }
 }

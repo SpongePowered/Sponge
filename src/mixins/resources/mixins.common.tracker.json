@@ -27,7 +27,8 @@
         "world.chunk.ChunkMixin_Tracker",
         "world.server.ChunkManagerMixin_Tracker",
         "world.server.ServerChunkProviderMixin_Tracker",
-        "world.server.ServerWorldMixin_Tracker"
+        "world.server.ServerWorldMixin_Tracker",
+        "world.end.DragonFightManagerMixin_Tracker"
     ],
     "injectors": {
         "defaultRequire": 1,

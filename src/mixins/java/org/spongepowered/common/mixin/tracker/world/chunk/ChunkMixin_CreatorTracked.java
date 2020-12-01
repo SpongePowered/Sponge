@@ -30,6 +30,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
@@ -385,7 +386,7 @@ public abstract class ChunkMixin_CreatorTracked implements ChunkBridge {
         }
         GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)
             .source(this)
-            .world(this.shadow$getWorld())
+            .world((ServerWorld) this.shadow$getWorld())
             .chunk((net.minecraft.world.chunk.Chunk) (Object) this)
             .buildAndSwitch();
     }

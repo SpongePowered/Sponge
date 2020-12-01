@@ -24,40 +24,78 @@
  */
 package org.spongepowered.common.mixin.tracker.world.end;
 
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.end.DragonFightManager;
 import net.minecraft.world.end.DragonSpawnState;
+import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.GenerationSettings;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
+import org.spongepowered.common.event.tracking.phase.generation.FeaturePhaseContext;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.world.dragon.DragonPhase;
+import org.spongepowered.common.event.tracking.phase.world.dragon.SpawnDragonContext;
 
 import java.util.List;
+import java.util.Random;
 
 @Mixin(DragonFightManager.class)
 public abstract class DragonFightManagerMixin_Tracker {
 
-    /**
-     * @author i509vcb - February 6th 2020
-     * @reason Add sponge necessary phase state switches
-     *
-     * @param dragonSpawnState The dragon spawn state.
-     * @param worldIn The world this respawnState is occuring in.
-     * @param manager The current DragonFightManager.
-     * @param crystals List of all currently present end crystals.
-     * @param respawnStateTicks The amount of this this respawn state has been running for.
-     * @param exitPortalLocation The position of the exit portal.
-     */
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/end/DragonSpawnState;process(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/world/end/DragonFightManager;Ljava/util/List;ILnet/minecraft/util/math/BlockPos;)V"))
-    private void tracker$wrapSpawnStateWithPhaseEntry(DragonSpawnState dragonSpawnState, ServerWorld worldIn, DragonFightManager manager, List<EnderCrystalEntity> crystals, int respawnStateTicks, BlockPos exitPortalLocation) {
-        try (final GeneralizedContext context = DragonPhase.State.RESPAWN_DRAGON.createPhaseContext(PhaseTracker.SERVER)) {
+    // @formatter:off
+    @Shadow protected abstract EnderDragonEntity shadow$createNewDragon();
+    // @formatter:on
+
+    @Redirect(method = "generatePortal", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/feature/ConfiguredFeature;place(Lnet/"
+            + "minecraft/world/IWorld;Lnet/minecraft/world/gen/ChunkGenerator;Ljava/util/Random;Lnet/minecraft/util/math/BlockPos;)Z"))
+    private boolean tracker$switchToFeatureState(final ConfiguredFeature configuredFeature, final IWorld worldIn,
+            final ChunkGenerator<? extends GenerationSettings> generator, final Random rand, final BlockPos pos) {
+
+        try (final FeaturePhaseContext context = GenerationPhase.State.FEATURE_PLACEMENT.createPhaseContext(PhaseTracker.SERVER)) {
+            context
+                    .world((ServerWorld) worldIn)
+                    .generator(generator)
+                    .feature(configuredFeature.feature)
+                    .origin(pos)
+            ;
             context.buildAndSwitch();
+
+            return configuredFeature.place(worldIn, generator, rand, pos);
+        }
+    }
+
+    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/end/DragonSpawnState;process(Lnet/minecraft/world/server/ServerWorld;Lnet/minecraft/world/end/DragonFightManager;Ljava/util/List;ILnet/minecraft/util/math/BlockPos;)V"))
+    private void tracker$switchToSpawnDragonState(final DragonSpawnState dragonSpawnState, final ServerWorld worldIn,
+            final DragonFightManager manager, final List<EnderCrystalEntity> crystals, int respawnStateTicks, final BlockPos exitPortalLocation) {
+        try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.SERVER)) {
+            context
+                    .manager(manager)
+                    .setIsRespawn(true)
+                    .buildAndSwitch()
+            ;
             ++respawnStateTicks;
             dragonSpawnState.process(worldIn, manager, crystals, respawnStateTicks, exitPortalLocation);
+        }
+    }
+
+    @Redirect(method = "findOrCreateDragon", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/end/DragonFightManager;createNewDragon()Lnet/minecraft/entity/boss/dragon/EnderDragonEntity;"))
+    private EnderDragonEntity tracker$switchToSpawnDragonState(final DragonFightManager manager) {
+        try (final SpawnDragonContext context = DragonPhase.State.SPAWN_DRAGON.createPhaseContext(PhaseTracker.SERVER)) {
+            context
+                    .manager(manager)
+                    .setIsRespawn(false)
+                    .buildAndSwitch()
+            ;
+
+            return this.shadow$createNewDragon();
         }
     }
 }

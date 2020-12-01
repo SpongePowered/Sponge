@@ -35,6 +35,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.world.ServerLocation;
 import org.spongepowered.api.world.WorldArchetype;
@@ -236,5 +237,10 @@ public final class WorldTest {
                         .build()
                 , "wai", "whereami"
         );
+    }
+
+    @Listener
+    public void onRespawnPlayer(final RespawnPlayerEvent event) {
+        this.plugin.getLogger().error(event);
     }
 }

@@ -132,8 +132,6 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
 
     @Nullable private Entity impl$targetedEntity = null;
 
-    private boolean impl$justTeleported = false;
-
     @Override
     public NetworkManager bridge$getNetworkManager() {
         return this.netManager;
@@ -438,14 +436,12 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
         method = "processClientStatus",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;recreatePlayerEntity(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/minecraft/world/dimension/DimensionType;Z)Lnet/minecraft/entity/player/ServerPlayerEntity;",
-            ordinal = 1
+            target = "Lnet/minecraft/server/management/PlayerList;recreatePlayerEntity(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/"
+                    + "minecraft/world/dimension/DimensionType;Z)Lnet/minecraft/entity/player/ServerPlayerEntity;"
         )
     )
     private ServerPlayerEntity impl$usePlayerDimensionForRespawn(final PlayerList playerList, final ServerPlayerEntity entity,
-        final DimensionType dimensionType,
-        final boolean conqueredEnd
-    ) {
+            final DimensionType dimensionType, final boolean conqueredEnd) {
         // A few changes to Vanilla logic here that, by default, still preserve game mechanics:
         // - If we have conquered The End then keep the dimension type we're headed to (which is Overworld as of 1.15)
         // - Otherwise, check the platform hooks for which dimension to respawn to. In Sponge, this is the Player's dimension they
@@ -459,14 +455,8 @@ public abstract class ServerPlayNetHandlerMixin implements NetworkManagerHolderB
                         (org.spongepowered.api.world.server.ServerWorld) this.server.getWorld(DimensionType.OVERWORLD),
                         (ServerPlayer) entity);
         SpongeCommon.postEvent(event);
+        ((PlayerListBridge) playerList).bridge$setOriginalDestinationDimensionForRespawn(dimensionType);
         return playerList.recreatePlayerEntity(entity, ((ServerWorld) event.getDestinationWorld()).getDimension().getType(), conqueredEnd);
-    }
-
-    @Redirect(method = "processClientStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;recreatePlayerEntity(Lnet/minecraft/entity/player/ServerPlayerEntity;Lnet/minecraft/world/dimension/DimensionType;Z)Lnet/minecraft/entity/player/ServerPlayerEntity;"))
-    private ServerPlayerEntity impl$setOriginalDestinationRef(
-        final PlayerList playerList, final ServerPlayerEntity playerIn, final DimensionType dimension, final boolean conqueredEnd) {
-        ((PlayerListBridge) playerList).bridge$setOriginalDestinationDimensionForRespawn(dimension);
-        return playerList.recreatePlayerEntity(playerIn, dimension, conqueredEnd);
     }
 
     @Redirect(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CUpdateSignPacket;getLines()[Ljava/lang/String;"))

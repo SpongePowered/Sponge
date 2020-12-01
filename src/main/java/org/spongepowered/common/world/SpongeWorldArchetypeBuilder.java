@@ -65,8 +65,8 @@ public final class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder
     private boolean hardcore;
     private boolean enabled;
     private boolean loadOnStartup;
-    private boolean keepSpawnLoaded;
-    private boolean generateSpawnOnLoad;
+    private boolean keepSpawnLoaded = false;
+    private boolean generateSpawnOnLoad = false;
     private boolean pvpEnabled;
     private boolean commandsEnabled;
     private boolean generateBonusChest = false;

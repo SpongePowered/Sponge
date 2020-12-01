@@ -56,7 +56,7 @@ public final class ChunkUtil {
     public static Optional<Chunk> regenerateChunk(org.spongepowered.api.world.server.ServerWorld world, int cx, int cy, int cz, ChunkRegenerateFlag flag) {
         Chunk spongeChunk;
         try (final PhaseContext<?> context = GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING.createPhaseContext(PhaseTracker.SERVER)
-                .world((World)(Object) world)) {
+                .world((ServerWorld) world)) {
             context.buildAndSwitch();
             spongeChunk = world.loadChunk(cx, cy, cz, false).orElse(null);
         }

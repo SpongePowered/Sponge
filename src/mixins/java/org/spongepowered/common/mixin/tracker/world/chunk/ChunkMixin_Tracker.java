@@ -200,7 +200,7 @@ public abstract class ChunkMixin_Tracker implements TrackedChunkBridge {
         }
         this.tracker$postProcessContext = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)
             .chunk((Chunk) (Object) this)
-            .world(this.world)
+            .world((ServerWorld) this.world)
             .buildAndSwitch();
     }
 

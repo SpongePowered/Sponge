@@ -24,36 +24,39 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.gen.ChunkGenerator;
-import org.spongepowered.common.util.PrettyPrinter;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.gen.feature.Feature;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import java.util.Objects;
+
 import javax.annotation.Nullable;
 
-public final class GenerationCompatibileContext extends GenerationContext<GenerationCompatibileContext> {
+public final class FeaturePhaseContext extends GenerationContext<FeaturePhaseContext> {
 
-    @Nullable AbstractChunkProvider provider;
-    @Nullable ChunkGenerator<?> generator;
+    @Nullable private Feature<?> feature;
+    @Nullable private BlockPos origin;
 
-    GenerationCompatibileContext(final IPhaseState<? extends GenerationCompatibileContext> state, final PhaseTracker tracker) {
+    FeaturePhaseContext(final IPhaseState<? extends FeaturePhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
-    @Override
-    protected void reset() {
-        super.reset();
-        this.provider = null;
-        this.generator = null;
+    public FeaturePhaseContext feature(final Feature<?> feature) {
+        this.feature = Objects.requireNonNull(feature);
+        return this;
     }
 
-    @Override
-    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
-        final String s = String.format("%1$" + indent + "s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "ChunkProvider", this.provider)
-            .add(s + "- %s: %s", "Mod Provided Chunk Generator", this.generator);
+    public Feature<?> getFeature() {
+        return Objects.requireNonNull(this.feature);
+    }
 
+    public FeaturePhaseContext origin(final BlockPos origin) {
+        this.origin = Objects.requireNonNull(origin);
+        return this;
+    }
+
+    public BlockPos getOrigin() {
+        return Objects.requireNonNull(this.origin);
     }
 }

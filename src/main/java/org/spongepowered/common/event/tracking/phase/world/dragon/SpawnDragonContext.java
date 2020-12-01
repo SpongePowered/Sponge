@@ -22,38 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.generation;
+package org.spongepowered.common.event.tracking.phase.world.dragon;
 
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.gen.ChunkGenerator;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import javax.annotation.Nullable;
+public final class SpawnDragonContext extends DragonContext<SpawnDragonContext> {
 
-public final class GenerationCompatibileContext extends GenerationContext<GenerationCompatibileContext> {
+    private boolean isRespawn = false;
 
-    @Nullable AbstractChunkProvider provider;
-    @Nullable ChunkGenerator<?> generator;
-
-    GenerationCompatibileContext(final IPhaseState<? extends GenerationCompatibileContext> state, final PhaseTracker tracker) {
+    public SpawnDragonContext(final IPhaseState<SpawnDragonContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
-    @Override
-    protected void reset() {
-        super.reset();
-        this.provider = null;
-        this.generator = null;
+    public SpawnDragonContext setIsRespawn(final boolean isRespawn) {
+        this.isRespawn = isRespawn;
+        return this;
     }
 
-    @Override
-    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
-        final String s = String.format("%1$" + indent + "s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "ChunkProvider", this.provider)
-            .add(s + "- %s: %s", "Mod Provided Chunk Generator", this.generator);
-
+    public boolean isRespawn() {
+        return this.isRespawn;
     }
 }

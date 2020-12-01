@@ -39,19 +39,25 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.mixin.core.block.LeavesBlockMixin;
 
 import java.util.Random;
 
 @Mixin(LeavesBlock.class)
 public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
 
-    @Shadow protected abstract int shadow$getDistance(BlockState neighbor);
+    // @formatter:off
+    @Shadow
+    private static int shadow$getDistance(BlockState neighbor) {
+        return 0;
+    }
 
     @Shadow @Final public static IntegerProperty DISTANCE;
-
     @Shadow @Final public static BooleanProperty PERSISTENT;
+    // @formatter:on
 
     /**
+     * @author gabizou - November 29th, 2020 - Minecraft 1.15.2
      * We prevent the updatePlacement logic from scheduling a tick for a leaf block
      * that is persistent. It'd be expensive to schedule several leaf updates that
      * are placed by players instead of providing the updated block. So, we short
@@ -59,7 +65,7 @@ public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
      */
     @Overwrite
     public BlockState updatePostPlacement(final BlockState stateIn, final Direction facing, final BlockState facingState, final IWorld worldIn, final BlockPos currentPos, final BlockPos facingPos) {
-        final int i = this.shadow$getDistance(facingState) + 1;
+        final int i = shadow$getDistance(facingState) + 1;
 
         if (i != 1 || stateIn.get(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE) != i) {
             // Sponge Start - Directly provide the updated distance instead of scheduling an update

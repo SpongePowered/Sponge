@@ -94,7 +94,7 @@ public abstract class ChunkManagerMixin_Tracker {
             }
             GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
                 .source(chunk)
-                .world(chunk.getWorld())
+                .world((ServerWorld) chunk.getWorld())
                 .chunk(chunk)
                 .buildAndSwitch();
         } finally {

@@ -37,6 +37,4 @@ final class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState<Po
         return new PopulatorPhaseContext(this, tracker)
             .addEntityCaptures();
     }
-
-
 }

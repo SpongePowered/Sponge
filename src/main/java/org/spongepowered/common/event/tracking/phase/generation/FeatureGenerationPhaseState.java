@@ -24,36 +24,34 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.gen.ChunkGenerator;
-import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import javax.annotation.Nullable;
+import java.util.function.BiConsumer;
 
-public final class GenerationCompatibileContext extends GenerationContext<GenerationCompatibileContext> {
+public final class FeatureGenerationPhaseState extends GeneralGenerationPhaseState<FeaturePhaseContext> {
 
-    @Nullable AbstractChunkProvider provider;
-    @Nullable ChunkGenerator<?> generator;
+    private final BiConsumer<CauseStackManager.StackFrame, FeaturePhaseContext> featureFrameModifier;
 
-    GenerationCompatibileContext(final IPhaseState<? extends GenerationCompatibileContext> state, final PhaseTracker tracker) {
-        super(state, tracker);
+    FeatureGenerationPhaseState(final String id) {
+        super(id);
+
+        this.featureFrameModifier = super.getFrameModifier().andThen((frame, context) -> {
+            frame.pushCause(context.getGenerator());
+            frame.pushCause(context.getFeature());
+        });
     }
 
     @Override
-    protected void reset() {
-        super.reset();
-        this.provider = null;
-        this.generator = null;
+    public FeaturePhaseContext createNewContext(final PhaseTracker tracker) {
+        return new FeaturePhaseContext(this, tracker)
+                .addBlockCaptures()
+                .addEntityCaptures()
+            ;
     }
 
     @Override
-    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
-        final String s = String.format("%1$" + indent + "s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "ChunkProvider", this.provider)
-            .add(s + "- %s: %s", "Mod Provided Chunk Generator", this.generator);
-
+    public BiConsumer<CauseStackManager.StackFrame, FeaturePhaseContext> getFrameModifier() {
+        return this.featureFrameModifier;
     }
 }

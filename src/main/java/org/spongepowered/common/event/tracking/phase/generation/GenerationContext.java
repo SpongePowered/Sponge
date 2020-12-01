@@ -24,19 +24,23 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.spongepowered.api.world.World;
+import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.GenerationSettings;
+import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import java.util.Objects;
+
 import javax.annotation.Nullable;
 
-public class GenerationContext<G extends GenerationContext<G>> extends PhaseContext<G> {
+@SuppressWarnings("unchecked")
+public abstract class GenerationContext<G extends GenerationContext<G>> extends PhaseContext<G> {
 
-    @Nullable private World world;
+    @Nullable private ServerWorld world;
+    @Nullable private ChunkGenerator<? extends GenerationSettings> generator;
 
     GenerationContext(final IPhaseState<? extends G> state, final PhaseTracker tracker) {
         super(state, tracker);
@@ -46,22 +50,32 @@ public class GenerationContext<G extends GenerationContext<G>> extends PhaseCont
     protected void reset() {
         super.reset();
         this.world = null;
+        this.generator = null;
     }
 
-    @SuppressWarnings("unchecked")
-    public G world(final net.minecraft.world.World world) {
-        this.world = (World) world;
+    public final G world(final ServerWorld world) {
+        this.world = Objects.requireNonNull(world);
         return (G) this;
     }
 
-    public final World getWorld() {
-        return checkNotNull(this.world);
+    public final ServerWorld getWorld() {
+        return Objects.requireNonNull(this.world);
+    }
+
+    public final G generator(final ChunkGenerator<? extends GenerationSettings> generator) {
+        this.generator = Objects.requireNonNull(generator);
+        return (G) this;
+    }
+
+    public final ChunkGenerator<? extends GenerationSettings> getGenerator() {
+        return Objects.requireNonNull(this.generator);
     }
 
     @Override
     public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
         final String s = String.format("%1$" + indent + "s", "");
         return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "World", this.world);
+            .add(s + "- %s: %s", "World", this.world)
+            .add(s + "- %s: %s", "Generator", this.generator);
     }
 }

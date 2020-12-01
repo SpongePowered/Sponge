@@ -25,23 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 
 public final class PopulatorPhaseContext extends GenerationContext<PopulatorPhaseContext> {
 
-    PopulatorPhaseContext(final IPhaseState<? extends PopulatorPhaseContext> state, PhaseTracker tracker) {
+    PopulatorPhaseContext(final IPhaseState<? extends PopulatorPhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
-    }
-
-    @Override
-    protected void reset() {
-        super.reset();
-    }
-
-    @Override
-    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
-        final String s = String.format("%1$" + indent + "s", "");
-        return super.printCustom(printer, indent);
     }
 }
